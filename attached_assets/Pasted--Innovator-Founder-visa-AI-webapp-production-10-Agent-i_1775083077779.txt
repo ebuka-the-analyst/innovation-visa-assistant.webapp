@@ -1,0 +1,191 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+10
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+ad8a91a8
+Active
+
+Apr 1, 2026, 11:27 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+Connected successfully
+Found 273 SQL statements to execute
+Migration complete: 0 executed, 273 skipped (already exist)
+chart_data column added or already exists
+theme_id column added or already exists
+no longer support Node.js v18.20.5 in January 2026.
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+[Blog] Image route configured (local + unique + S3 fallback)
+10:29:36 PM [express] [MIGRATION] Checking for required schema updates...
+[DB] Auto-migration: logo_element column ensured
+10:29:36 PM [express] [MIGRATION] Schema check complete
+[Auth] Google OAuth configured successfully
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+To continue receiving updates to AWS services, bug fixes, and security
+updates please upgrade to a supported Node.js LTS version.
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+10:29:36 PM [express] serving on port 8080
+10:29:36 PM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+[DB] Auto-migration: 35 blog_posts column(s) ensured
+[DB] Auto-migration: blog_generation_queue table ensured
+[DB] Auto-migration: blog_generation_queue columns ensured
+[DB] Auto-migration: blog image URLs updated to object storage
+[DB] Auto-migration: Assigned unique images to 10 blog posts
+[2026-04-01T22:32:03.891Z] GET /api/partner/status
+[2026-04-01T22:32:01.106Z] POST /api/activity/session
+[2026-04-01T22:32:03.720Z] GET /api/admin/blog/queue
+10:32:03 PM [express] GET /api/partner/status 200 in 30ms :: {"isPartner":false,"promoCodeCount":0}
+[2026-04-01T22:32:03.721Z] GET /api/admin/blog/stats
+[2026-04-01T22:32:01.120Z] GET /api/auth/user
+[2026-04-01T22:32:03.874Z] GET /api/admin/blog/posts/all/
+[2026-04-01T22:32:03.722Z] GET /api/admin/blog/review-queue
+10:32:03 PM [express] GET /api/admin/blog/posts/all/ 200 in 9ms
+10:32:03 PM [express] GET /api/admin/blog/queue 200 in 17ms :: []
+[2026-04-01T22:32:03.206Z] POST /api/activity/session/end
+10:32:03 PM [express] POST /api/activity/session 200 in 14ms :: {"sessionId":"9c2bdbe0-31d3-4204-aeda…
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:32:03 PM [express] POST /api/activity/session 200 in 19ms :: {"sessionId":"e04f693a-f419-4074-981a…
+10:32:01 PM [express] POST /api/activity/session 200 in 225ms :: {"sessionId":"6bcf5991-2944-466d-9b6…
+10:32:03 PM [express] POST /api/activity/session/end 200 in 13ms :: {"success":true}
+[2026-04-01T22:32:03.486Z] GET /api/auth/user
+[2026-04-01T22:32:03.872Z] POST /api/activity/session
+10:32:01 PM [express] GET /api/auth/user 200 in 216ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+[2026-04-01T22:32:01.522Z] POST /api/activity/page-view
+10:32:03 PM [express] GET /api/admin/blog/review-queue 200 in 202ms :: []
+[2026-04-01T22:32:03.271Z] GET /attached_assets/official_logo.webp
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:32:01 PM [express] POST /api/activity/page-view 200 in 22ms :: {"pageViewId":"706a966d-b2fc-42f5-8…
+10:32:03 PM [express] GET /api/admin/blog/stats 200 in 235ms :: {"total":25,"published":25,"scheduled…
+10:32:03 PM [express] GET /api/auth/user 200 in 10ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-01T22:32:04.037Z] POST /api/activity/page-view
+[2026-04-01T22:32:03.052Z] GET /admin/blog
+[2026-04-01T22:32:03.719Z] POST /api/activity/session
+10:32:04 PM [express] POST /api/activity/page-view 200 in 16ms :: {"pageViewId":"e143080f-16f1-4b7a-b…
+[2026-04-01T22:32:34.079Z] POST /api/activity/session
+10:32:34 PM [express] POST /api/activity/session 200 in 203ms :: {"sessionId":"9c2bdbe0-31d3-4204-aed…
+[2026-04-01T22:32:38.097Z] POST /api/admin/blog/generate-next
+[Blog Generator] Generation attempt 1/1
+[2026-04-01T22:33:04.080Z] POST /api/activity/session
+10:33:04 PM [express] POST /api/activity/session 200 in 200ms :: {"sessionId":"9c2bdbe0-31d3-4204-aed…
+3. [WARNING] seo
+[Blog Generator] Validation Report:
+   Meta title too long: 72 chars (max 65)
+============================================================
+   Fix: Shorten meta title to under 65 characters
+BLOG CONTENT VALIDATION REPORT
+============================================================
+Overall Score: 45/100
+Status: FAILED - REQUIRES CORRECTION
+Critical Issues: 2
+Warnings: 1
+Suggestions: 0
+ISSUES FOUND:
+----------------------------------------
+1. [CRITICAL] invalid_endorsing_body
+   Unknown endorsing body mentioned: "similar ideas". Only 4 approved bodies exist.
+   Location: "Endorsing bodies receive many applications with similar ideas."
+   Fix: Only reference: Envestors, Innovator International, UK Endorsing Services (UKES), or Global Entrepreneurs Programme (GEP - invitation only)
+2. [CRITICAL] illegal_guarantee
+   Content makes guarantees about visa outcomes - this is prohibited
+   Fix: Remove all guarantee language. No one can guarantee visa approval.
+10:33:35 PM [express] POST /api/admin/blog/generate-next 200 in 57880ms :: {"success":true,"post":{"t…
+[2026-04-01T22:33:36.202Z] GET /api/admin/blog/posts/all/
+10:33:36 PM [express] GET /api/admin/blog/posts/all/ 200 in 8ms
+============================================================
+[Blog Generator] 2 issues remain after auto-correction. Proceeding with corrected content.
+[Blog Generator] Content published with 2 warnings after max retries. Sending to triple-AI verification.
+[Blog Generator] Running triple-AI verification (Gemini + OpenAI)...
+[MultiVerifier] Starting triple-AI verification for: Innovation, Viability, Scalability: The Three Endorsement Cr
+[2026-04-01T22:33:34.067Z] POST /api/activity/session/end
+10:33:34 PM [express] POST /api/activity/session/end 200 in 198ms :: {"success":true}
+[MultiVerifier] OpenAI quota/rate-limit — marking as unavailable (not score 0): 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+[MultiVerifier] Result: FLAGGED | Gemini: 100 | OpenAI: unavailable | Composite: 100
+[Blog Generator] ✗ Verification FAILED — Composite: 100/100. Sending to human review queue.
+[Blog Generator] Reason: OpenAI unavailable (quota exceeded) — Gemini only: 100/100. Routing to human review for single-verifier result.
+[2026-04-01T22:33:36.357Z] GET /api/admin/blog/stats
+[2026-04-01T22:33:36.359Z] GET /api/admin/blog/queue
+10:33:36 PM [express] GET /api/admin/blog/stats 200 in 24ms :: {"total":25,"published":25,"scheduled"…
+10:33:36 PM [express] GET /api/admin/blog/queue 200 in 182ms :: [{"id":1,"targetDate":"2026-04-02T06:…
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:37:19 PM [express] GET /api/auth/user 200 in 209ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+10:37:19 PM [express] POST /api/activity/session 200 in 210ms :: {"sessionId":"81b48f3e-9d21-4cb5-915…
+[2026-04-01T22:37:19.504Z] POST /api/activity/page-view
+10:37:19 PM [express] POST /api/activity/page-view 200 in 18ms :: {"pageViewId":"fba7e2d6-77f3-48a1-b…
+[2026-04-01T22:37:19.098Z] GET /api/auth/user
+[2026-04-01T22:37:19.103Z] POST /api/activity/session
+[2026-04-01T22:37:24.089Z] GET /api/admin/activity-log
+[2026-04-01T22:37:24.090Z] GET /api/admin/analytics/overview
+[2026-04-01T22:37:24.106Z] GET /api/auth/user
+[2026-04-01T22:37:24.108Z] POST /api/activity/session/end
+[2026-04-01T22:37:24.111Z] POST /api/activity/session
+10:37:24 PM [express] GET /api/admin/activity-log 200 in 35ms :: [{"id":"plan-52fefd3d-a1aa-4904-8649…
+[Stripe] Using LIVE mode credentials - payments are real
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:37:24 PM [express] GET /api/auth/user 200 in 373ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+10:37:24 PM [express] POST /api/activity/session/end 200 in 372ms :: {"success":true}
+10:37:24 PM [express] POST /api/activity/session 200 in 380ms :: {"sessionId":"b22013f6-ab15-44ce-bcb…
+[2026-04-01T22:37:24.724Z] POST /api/activity/page-view
+10:37:24 PM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"f37785fa-5394-4444-b…
+10:37:24 PM [express] GET /api/admin/analytics/overview 200 in 694ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-01T22:37:29.391Z] POST /api/activity/session/end
+10:37:29 PM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+
+
