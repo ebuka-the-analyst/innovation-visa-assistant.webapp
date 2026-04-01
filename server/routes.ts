@@ -1357,12 +1357,24 @@ Respond ONLY with valid JSON in this exact format:
         return res.status(400).json({ error: "Invalid tier in session metadata" });
       }
 
-      // Upgrade user's tier directly (no business plan created yet)
-      await storage.updateUser(user.id, { 
-        subscriptionTier: tier,
-        subscriptionStatus: 'active'
-      });
-      console.log(`[DIRECT SUBSCRIBE] User ${user.id} upgraded to ${tier} tier after payment`);
+      // Determine credits for this tier
+      const creditsToAdd = getTierCredits(tier);
+      
+      // Idempotency: only grant credits if this is a fresh upgrade
+      const currentUser = await storage.getUser(user.id);
+      const alreadyUpgraded = currentUser?.subscriptionTier === tier && (currentUser?.planCredits || 0) > 0;
+      
+      if (!alreadyUpgraded) {
+        // Upgrade user's tier AND grant plan credits
+        await storage.updateUser(user.id, { 
+          subscriptionTier: tier,
+          subscriptionStatus: 'active',
+          planCredits: creditsToAdd,
+        });
+        console.log(`[DIRECT SUBSCRIBE] User ${user.id} upgraded to ${tier} tier with ${creditsToAdd} credits`);
+      } else {
+        console.log(`[DIRECT SUBSCRIBE] User ${user.id} already on ${tier} with credits - skipping duplicate grant`);
+      }
 
       const pricing = PRICING[tier as keyof typeof PRICING];
       const purchaseAmount = pricing?.amount || 0;
@@ -1406,10 +1418,12 @@ Respond ONLY with valid JSON in this exact format:
         console.error("Failed to track promo code usage:", promoError);
       }
 
+      const creditsForTier = getTierCredits(tier);
       res.json({ 
         success: true, 
         tier,
-        message: `Successfully upgraded to ${tier} tier. You can now start your business plan questionnaire.`
+        credits: creditsForTier,
+        message: `Successfully upgraded to ${tier} tier. ${creditsForTier} plan credits granted.`
       });
     } catch (error: any) {
       console.error("Subscription verification error:", error);
@@ -1449,17 +1463,30 @@ Respond ONLY with valid JSON in this exact format:
         return res.status(400).json({ error: "Invalid tier in session metadata" });
       }
 
-      // Upgrade user's tier directly
-      await storage.updateUser(user.id, { 
-        subscriptionTier: tier,
-        subscriptionStatus: 'active'
-      });
-      console.log(`[CONFIRM SUBSCRIPTION] User ${user.id} upgraded to ${tier} tier after payment`);
+      // Determine credits for this tier
+      const creditsToAdd = getTierCredits(tier);
+      
+      // Idempotency: only grant credits if this is a fresh upgrade (user doesn't already have this tier with credits)
+      const currentUser = await storage.getUser(user.id);
+      const alreadyUpgraded = currentUser?.subscriptionTier === tier && (currentUser?.planCredits || 0) > 0;
+      
+      if (alreadyUpgraded) {
+        console.log(`[CONFIRM SUBSCRIPTION] User ${user.id} already on ${tier} with credits - skipping duplicate grant`);
+      } else {
+        // Upgrade user's tier AND grant plan credits
+        await storage.updateUser(user.id, { 
+          subscriptionTier: tier,
+          subscriptionStatus: 'active',
+          planCredits: creditsToAdd,
+        });
+        console.log(`[CONFIRM SUBSCRIPTION] User ${user.id} upgraded to ${tier} tier with ${creditsToAdd} credits`);
+      }
 
       res.json({ 
         success: true, 
         tier,
-        message: `Successfully upgraded to ${tier} tier.`
+        credits: creditsToAdd,
+        message: `Successfully upgraded to ${tier} tier. ${creditsToAdd} plan credits granted.`
       });
     } catch (error: any) {
       console.error("Subscription confirmation error:", error);
@@ -11478,12 +11505,9 @@ Return a JSON object with:
         return res.status(404).json({ error: "User not found" });
       }
 
-      const tierCredits: Record<string, number> = { 
-        free: 0, basic: 50, premium: 200, enterprise: 500, ultimate: 1000 
-      };
-
       const updateData: any = {
         subscriptionTier: tier,
+        subscriptionStatus: 'active',
         previousTier: targetUser.subscriptionTier,
         tierUpgradedAt: new Date(),
         tierOverrideBy: admin.id,
@@ -11493,7 +11517,8 @@ Return a JSON object with:
       };
 
       if (addCredits) {
-        updateData.bonusCredits = (targetUser.bonusCredits || 0) + (tierCredits[tier] || 0);
+        const creditsForTier = getTierCredits(tier);
+        updateData.planCredits = creditsForTier;
       }
 
       await db.update(users).set(updateData).where(eq(users.id, userId));
@@ -11559,6 +11584,55 @@ Return a JSON object with:
     } catch (error) {
       console.error("Credits management error:", error);
       res.status(500).json({ error: "Failed to manage credits" });
+    }
+  });
+
+  // Admin: Restore subscription for affected paying customers (fixes broken payment flow)
+  app.post("/api/admin/restore-subscription", requireAdmin, async (req, res) => {
+    try {
+      const { email, tier, reason = 'Manual restoration by admin' } = req.body;
+      const admin = req.user as any;
+
+      if (!email || !tier) {
+        return res.status(400).json({ error: "Email and tier are required" });
+      }
+
+      if (!['basic', 'premium', 'enterprise', 'ultimate'].includes(tier)) {
+        return res.status(400).json({ error: "Invalid tier" });
+      }
+
+      const [targetUser] = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim()));
+      if (!targetUser) {
+        return res.status(404).json({ error: `No user found with email: ${email}` });
+      }
+
+      const creditsToGrant = getTierCredits(tier);
+      
+      await db.update(users).set({
+        subscriptionTier: tier,
+        subscriptionStatus: 'active',
+        planCredits: creditsToGrant,
+        tierUpgradedAt: new Date(),
+        tierOverrideBy: admin.id,
+        tierOverrideReason: `Admin restore: ${reason}`,
+        updatedAt: new Date()
+      }).where(eq(users.id, targetUser.id));
+
+      console.log(`[ADMIN RESTORE] Admin ${admin.email} restored ${email} → ${tier} tier with ${creditsToGrant} credits`);
+
+      res.json({ 
+        success: true,
+        userId: targetUser.id,
+        email: targetUser.email,
+        name: `${targetUser.firstName || ''} ${targetUser.lastName || ''}`.trim(),
+        previousTier: targetUser.subscriptionTier,
+        newTier: tier,
+        creditsGranted: creditsToGrant,
+        message: `Successfully restored ${email} to ${tier} tier with ${creditsToGrant} plan credits.`
+      });
+    } catch (error) {
+      console.error("Restore subscription error:", error);
+      res.status(500).json({ error: "Failed to restore subscription" });
     }
   });
 
