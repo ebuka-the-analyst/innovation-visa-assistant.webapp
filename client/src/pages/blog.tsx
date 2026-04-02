@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Calendar, Clock, Search, Eye, ArrowRight, Tag, Newspaper
+  Calendar, Clock, Search, ArrowRight, Tag, Newspaper
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import type { BlogPost } from "@shared/schema";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
@@ -92,7 +92,6 @@ function HeroCard({ post }: { post: BlogPost }) {
           <div className="flex items-center gap-3 text-xs text-white/60">
             <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{fmtDate(post.publishedAt)}</span>
             <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{post.readingTime} min read</span>
-            {post.views > 0 && <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{post.views.toLocaleString()}</span>}
           </div>
         </div>
       </div>
@@ -194,7 +193,6 @@ export default function BlogPage() {
   const allPosts = posts || [];
   const featured = allPosts.find(p => p.isFeatured) || allPosts[0];
   const remaining = allPosts.filter(p => p !== featured);
-  const totalViews = useMemo(() => allPosts.reduce((s, p) => s + (p.views || 0), 0), [allPosts]);
 
   return (
     <>
@@ -214,7 +212,6 @@ export default function BlogPage() {
             <div className="flex items-center gap-3 border-b border-background/10 py-1.5 text-xs text-background/60">
               <span className="font-bold text-background/80 shrink-0">UK VISA INSIGHTS</span>
               <span className="flex items-center gap-1"><Newspaper className="w-3 h-3" />{allPosts.length} articles published</span>
-              <span className="flex items-center gap-1 ml-auto"><Eye className="w-3 h-3" />{totalViews.toLocaleString()} total reads</span>
             </div>
             {/* Masthead title */}
             <div className="py-4 border-b border-background/10 flex flex-wrap items-end justify-between gap-4">

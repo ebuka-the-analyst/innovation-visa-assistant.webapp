@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Calendar, Clock, User, ArrowLeft, Share2, BookOpen,
-  Eye, ArrowRight, Tag
+  ArrowRight, Tag
 } from "lucide-react";
 import { useEffect } from "react";
 import type { BlogPost } from "@shared/schema";
@@ -211,12 +211,6 @@ export default function BlogPostPage() {
                 <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3" />{fmtDate(post.publishedAt)}</span>
                 <span className="text-white/30">·</span>
                 <span className="flex items-center gap-1.5"><Clock className="w-3 h-3" />{post.readingTime} min read</span>
-                {post.views > 0 && (
-                  <>
-                    <span className="text-white/30">·</span>
-                    <span className="flex items-center gap-1.5"><Eye className="w-3 h-3" />{post.views.toLocaleString()} views</span>
-                  </>
-                )}
                 <button onClick={handleShare} className="flex items-center gap-1.5 text-white/65 hover:text-white ml-auto transition-colors" data-testid="button-share">
                   <Share2 className="w-3 h-3" />Share
                 </button>
