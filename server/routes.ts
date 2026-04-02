@@ -5228,7 +5228,7 @@ EXAMPLES OF GOOD RESPONSES:
   app.get("/api/admin/plans", requireAdmin, async (req, res) => {
     try {
       // Accept both 'limit' and 'pageSize' parameter names
-      const { page = '1', limit, pageSize, status = '', statusFilters, tier = '', tierFilters } = req.query;
+      const { page = '1', limit, pageSize, status = '', statusFilters, tier = '', tierFilters, search = '' } = req.query;
       
       const pageNum = parseInt(page as string);
       const limitNum = parseInt((pageSize || limit || '25') as string);
@@ -5237,6 +5237,7 @@ EXAMPLES OF GOOD RESPONSES:
       // Get status filter - accept both 'status' string and 'statusFilters' array
       const statusFilter = statusFilters ? (Array.isArray(statusFilters) ? statusFilters[0] : statusFilters) : status;
       const tierFilter = tierFilters ? (Array.isArray(tierFilters) ? tierFilters[0] : tierFilters) : tier;
+      const searchTerm = (search as string).trim().toLowerCase();
       
       let allPlans = await storage.getAllBusinessPlans();
       
@@ -5249,30 +5250,34 @@ EXAMPLES OF GOOD RESPONSES:
       if (tierFilter) {
         allPlans = allPlans.filter(p => p.tier === tierFilter);
       }
-      
-      const total = allPlans.length;
-      const paginatedPlans = allPlans.slice(offset, offset + limitNum);
-      
-      // Fetch user emails for each plan
-      const plansWithOwner = await Promise.all(
-        paginatedPlans.map(async (plan) => {
+
+      // Fetch user emails for all plans (needed for search by email)
+      const allPlansWithOwner = await Promise.all(
+        allPlans.map(async (plan) => {
           let userEmail = null;
           if (plan.userId) {
             const user = await storage.getUser(plan.userId);
-            if (user) {
-              userEmail = user.email;
-            }
+            if (user) userEmail = user.email;
           }
-          return {
-            ...plan,
-            userEmail,
-          };
+          return { ...plan, userEmail };
         })
       );
+
+      // Filter by search term (business name or owner email)
+      const filteredPlans = searchTerm
+        ? allPlansWithOwner.filter(p =>
+            (p.businessName || '').toLowerCase().includes(searchTerm) ||
+            (p.userEmail || '').toLowerCase().includes(searchTerm) ||
+            (p.industry || '').toLowerCase().includes(searchTerm)
+          )
+        : allPlansWithOwner;
+      
+      const total = filteredPlans.length;
+      const paginatedPlans = filteredPlans.slice(offset, offset + limitNum);
       
       // Return response in format frontend expects
       res.json({
-        plans: plansWithOwner,
+        plans: paginatedPlans,
         total,
         page: pageNum,
         pageSize: limitNum,

@@ -615,6 +615,7 @@ export default function AdminDashboard() {
   const [plansPage, setPlansPage] = useState(1);
   const [plansPageSize, setPlansPageSize] = useState(25);
   const [planFilters, setPlanFilters] = useState<FilterState>({});
+  const [plansSearch, setPlansSearch] = useState("");
 
   // UI states
   const [dataDensity, setDataDensity] = useState<typeof DATA_DENSITY_OPTIONS[number]>('comfortable');
@@ -629,6 +630,7 @@ export default function AdminDashboard() {
   const [editUserTier, setEditUserTier] = useState("");
   const [editUserIsAdmin, setEditUserIsAdmin] = useState(false);
   const [deletingPlan, setDeletingPlan] = useState<Plan | null>(null);
+  const [viewingPlan, setViewingPlan] = useState<Plan | null>(null);
   const [viewingUserDetails, setViewingUserDetails] = useState<User | null>(null);
   const [dateRangeOpen, setDateRangeOpen] = useState(false);
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
@@ -968,7 +970,7 @@ export default function AdminDashboard() {
 
   // Plans data
   const { data: plansData, isLoading: plansLoading } = useQuery<{ plans: Plan[]; total: number; page: number; pageSize: number }>({
-    queryKey: ['/api/admin/plans', { page: plansPage, pageSize: plansPageSize, ...planFilters }],
+    queryKey: ['/api/admin/plans', { page: plansPage, pageSize: plansPageSize, search: plansSearch, ...planFilters }],
     enabled: !!user?.isAdmin && activeSection.startsWith('plans'),
   });
 
@@ -4559,6 +4561,18 @@ export default function AdminDashboard() {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-1.5">
+                        {/* Search */}
+                        <div className="relative">
+                          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                          <Input
+                            placeholder="Search plans…"
+                            value={plansSearch}
+                            onChange={(e) => { setPlansSearch(e.target.value); setPlansPage(1); }}
+                            className="pl-7 w-44 h-8 text-xs"
+                            data-testid="input-plans-search"
+                          />
+                        </div>
+
                         {/* Filter Controls */}
                         <Select
                           value={planFilters.tierFilters?.[0] || 'all'}
@@ -4570,8 +4584,8 @@ export default function AdminDashboard() {
                             setPlansPage(1);
                           }}
                         >
-                          <SelectTrigger className="w-40" data-testid="select-plans-tier">
-                            <SelectValue placeholder="Filter by tier" />
+                          <SelectTrigger className="w-36 h-8 text-xs" data-testid="select-plans-tier">
+                            <SelectValue placeholder="All Tiers" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">All Tiers</SelectItem>
@@ -4579,6 +4593,7 @@ export default function AdminDashboard() {
                             <SelectItem value="basic">Basic</SelectItem>
                             <SelectItem value="premium">Premium</SelectItem>
                             <SelectItem value="enterprise">Enterprise</SelectItem>
+                            <SelectItem value="ultimate">Ultimate</SelectItem>
                           </SelectContent>
                         </Select>
 
@@ -4592,8 +4607,8 @@ export default function AdminDashboard() {
                             setPlansPage(1);
                           }}
                         >
-                          <SelectTrigger className="w-40" data-testid="select-plans-status">
-                            <SelectValue placeholder="Filter by status" />
+                          <SelectTrigger className="w-36 h-8 text-xs" data-testid="select-plans-status">
+                            <SelectValue placeholder="All Status" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">All Status</SelectItem>
@@ -4694,18 +4709,29 @@ export default function AdminDashboard() {
                                   </TableCell>
                                   <TableCell>{plan.industry}</TableCell>
                                   <TableCell>
-                                    <Badge variant="outline" className="capitalize">
+                                    <Badge
+                                      className="capitalize text-white border-0"
+                                      style={{
+                                        backgroundColor:
+                                          plan.tier === 'ultimate' ? '#8b5cf6' :
+                                          plan.tier === 'enterprise' ? '#f59e0b' :
+                                          plan.tier === 'premium' ? '#3b82f6' :
+                                          plan.tier === 'basic' ? '#22c55e' : '#94a3b8'
+                                      }}
+                                    >
                                       {plan.tier}
                                     </Badge>
                                   </TableCell>
                                   <TableCell>
                                     <Badge
-                                      variant={
-                                        plan.status === 'completed' ? 'default' :
-                                        plan.status === 'processing' ? 'secondary' :
-                                        plan.status === 'failed' ? 'destructive' : 'outline'
-                                      }
-                                      className="capitalize"
+                                      className="capitalize border-0 text-white"
+                                      style={{
+                                        backgroundColor:
+                                          plan.status === 'completed' ? '#16a34a' :
+                                          plan.status === 'processing' ? '#2563eb' :
+                                          plan.status === 'failed' ? '#dc2626' :
+                                          plan.status === 'pending' ? '#d97706' : '#6b7280'
+                                      }}
                                     >
                                       {plan.status}
                                     </Badge>
@@ -4724,7 +4750,7 @@ export default function AdminDashboard() {
                                         </Button>
                                       </DropdownMenuTrigger>
                                       <DropdownMenuContent align="end">
-                                        <DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setViewingPlan(plan)}>
                                           <Eye className="h-3 w-3 mr-2" />
                                           View Details
                                         </DropdownMenuItem>
@@ -13557,6 +13583,106 @@ export default function AdminDashboard() {
                 {updateUserMutation.isPending ? 'Saving...' : 'Save Changes'}
               </Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Plan Detail Dialog */}
+        <Dialog open={!!viewingPlan} onOpenChange={(open) => !open && setViewingPlan(null)}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" />
+                {viewingPlan?.businessName || 'Business Plan'}
+              </DialogTitle>
+              <DialogDescription>Full plan details for admin review</DialogDescription>
+            </DialogHeader>
+            {viewingPlan && (
+              <div className="space-y-3 text-sm">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Business Name</p>
+                    <p className="font-medium">{viewingPlan.businessName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Industry</p>
+                    <p className="font-medium">{viewingPlan.industry || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Tier</p>
+                    <Badge
+                      className="capitalize text-white border-0"
+                      style={{
+                        backgroundColor:
+                          viewingPlan.tier === 'ultimate' ? '#8b5cf6' :
+                          viewingPlan.tier === 'enterprise' ? '#f59e0b' :
+                          viewingPlan.tier === 'premium' ? '#3b82f6' :
+                          viewingPlan.tier === 'basic' ? '#22c55e' : '#94a3b8'
+                      }}
+                    >
+                      {viewingPlan.tier}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Status</p>
+                    <Badge
+                      className="capitalize border-0 text-white"
+                      style={{
+                        backgroundColor:
+                          viewingPlan.status === 'completed' ? '#16a34a' :
+                          viewingPlan.status === 'processing' ? '#2563eb' :
+                          viewingPlan.status === 'failed' ? '#dc2626' :
+                          viewingPlan.status === 'pending' ? '#d97706' : '#6b7280'
+                      }}
+                    >
+                      {viewingPlan.status}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Owner</p>
+                    <p className="font-medium text-xs">{viewingPlan.userEmail || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Demo Plan</p>
+                    <Badge variant={viewingPlan.isDemoData ? 'secondary' : 'outline'} className="text-xs">
+                      {viewingPlan.isDemoData ? 'Yes' : 'No'}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Created</p>
+                    <p className="font-medium text-xs">{format(new Date(viewingPlan.createdAt), 'dd MMM yyyy, HH:mm')}</p>
+                  </div>
+                  {viewingPlan.completedAt && (
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Completed</p>
+                      <p className="font-medium text-xs">{format(new Date(viewingPlan.completedAt), 'dd MMM yyyy, HH:mm')}</p>
+                    </div>
+                  )}
+                </div>
+                <Separator />
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(`/api/admin/plans/${viewingPlan.id}/download`, '_blank')}
+                  >
+                    <Download className="h-3 w-3 mr-1" />
+                    Download PDF
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setViewingPlan(null);
+                      setDeletingPlan(viewingPlan);
+                    }}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-3 w-3 mr-1" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
 
