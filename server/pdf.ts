@@ -585,6 +585,11 @@ export function generatePDFContent(plan: BusinessPlan): string {
   const secondaryColor = plan.themeSecondaryColor || '#1e3a5f';
   const themeFont = plan.themeFont || 'Inter';
   const fontFamily = FONT_FAMILIES[themeFont] || FONT_FAMILIES['Inter'];
+
+  // Effective visual style (0-9) — pinned override or stable hash
+  const effectiveStyle = (plan.tocStyle !== null && plan.tocStyle !== undefined)
+    ? Math.max(0, Math.min(9, plan.tocStyle))
+    : pickTOCStyle(plan.id || '');
   
   let chartData: ChartDataPayload | null = null;
   if (plan.chartData) {
@@ -917,6 +922,8 @@ export function generatePDFContent(plan: BusinessPlan): string {
       margin: 20px auto;
       page-break-inside: avoid;
     }
+    /* ── Per-plan visual style override (style ${effectiveStyle}) ── */
+    ${getBodyStyleCSS(effectiveStyle, primaryColor, secondaryColor)}
   </style>
 </head>
 <body>
@@ -1088,6 +1095,258 @@ function generateCoverPageHTML(plan: BusinessPlan & { backgroundImage?: string |
     </div>
   </div>
   `;
+}
+
+// ─── Per-Style Body CSS ─────────────────────────────────────────────────────
+// Each of the 10 styles overrides h2, tables, charts, typography so no two
+// plans ever look the same end-to-end.
+
+function getBodyStyleCSS(style: number, pc: string, sc: string): string {
+  // Derive a dark tint and light tint of the primary color for variety
+  const pcAlpha = (a: number) => `${pc}${Math.round(a * 255).toString(16).padStart(2, '0')}`;
+
+  switch (style) {
+
+    // ── 0: Classic left-border ───────────────────────────────────────────────
+    case 0: return `
+      h2 {
+        font-size: 18pt; font-weight: 700; color: #1a1a2e;
+        border-left: 5px solid ${pc}; padding-left: 14px;
+        margin-top: 44px; margin-bottom: 14px; text-transform: uppercase;
+        letter-spacing: 1.5px;
+      }
+      h3 { color: ${pc}; font-size: 14pt; border-left: 2px solid ${sc}; padding-left: 10px; }
+      th { background: #1a1a2e !important; color: #fff !important; font-size: 9.5pt; }
+      tr:nth-child(even) td { background: #f4f6fb; }
+      .chart-container { border-top: none !important; border-left: 5px solid ${pc}; border-radius: 4px; background: #f8f9fc; }
+      strong { color: #1a1a2e; }
+      .section-break { border-top-color: #1a1a2e; }
+    `;
+
+    // ── 1: 2-col corporate ───────────────────────────────────────────────────
+    case 1: return `
+      @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
+      h2 {
+        font-family: 'Roboto Condensed', sans-serif;
+        font-size: 22pt; font-weight: 700; color: ${pc};
+        text-transform: uppercase; letter-spacing: 3px;
+        border-top: 3px solid ${pc}; border-bottom: 1px solid #dde3ed;
+        padding: 10px 0 6px; margin-top: 48px; margin-bottom: 18px;
+      }
+      h3 { font-family: 'Roboto Condensed', sans-serif; font-size: 13pt; text-transform: uppercase; letter-spacing: 1px; color: ${sc}; }
+      th { background: ${sc} !important; color: #fff !important; font-weight: 700; font-size: 9.5pt; text-transform: uppercase; letter-spacing: 0.5px; }
+      tr:nth-child(odd) td { background: #eef1f8; }
+      tr:nth-child(even) td { background: #ffffff; }
+      .chart-container { border-top: 4px solid ${sc} !important; background: #f7f8fc; border-radius: 2px; }
+      strong { color: ${sc}; }
+    `;
+
+    // ── 2: Dark navy executive ────────────────────────────────────────────────
+    case 2: return `
+      h2 {
+        font-size: 17pt; font-weight: 800; letter-spacing: 2px;
+        background: #0d1b3e; color: #ffffff !important;
+        padding: 12px 20px; margin-top: 48px; margin-bottom: 16px;
+        text-transform: uppercase; border-radius: 2px;
+      }
+      h3 { color: #c9a84c; font-size: 13pt; font-weight: 700; border-bottom: 1px solid #e0c97a; padding-bottom: 4px; }
+      th { background: #0d1b3e !important; color: #c9a84c !important; font-size: 9.5pt; text-transform: uppercase; letter-spacing: 0.5px; }
+      tr:nth-child(even) td { background: #f0f4ff; }
+      td { border-color: #c8d0e7 !important; }
+      .chart-container { background: #0d1b3e0d; border: 1px solid #0d1b3e33; border-top: 4px solid #c9a84c !important; border-radius: 2px; }
+      strong { color: #c9a84c; }
+      .section-break { border-top-color: #0d1b3e; }
+    `;
+
+    // ── 3: Vertical timeline ──────────────────────────────────────────────────
+    case 3: return `
+      body { counter-reset: section-counter; }
+      h2 {
+        font-size: 19pt; font-weight: 700; color: ${pc};
+        display: flex; align-items: center; gap: 16px;
+        margin-top: 50px; margin-bottom: 16px;
+        padding-bottom: 10px; border-bottom: 2px dashed ${pc}44;
+      }
+      h2::before {
+        content: counter(section-counter, decimal-leading-zero);
+        counter-increment: section-counter;
+        background: ${pc}; color: #fff;
+        font-size: 12pt; font-weight: 800; min-width: 40px; height: 40px;
+        display: inline-flex; align-items: center; justify-content: center;
+        border-radius: 50%; flex-shrink: 0;
+      }
+      h3 { color: ${sc}; font-size: 13pt; padding-left: 56px; }
+      th { background: ${pc} !important; color: #fff !important; }
+      td { border-color: #e0e7f0 !important; }
+      tr:nth-child(even) td { background: #f5f8ff; }
+      .chart-container { border-left: 4px solid ${pc} !important; border-top: none !important; border-radius: 0 8px 8px 0; background: #fafcff; }
+      strong { color: ${pc}; }
+    `;
+
+    // ── 4: Minimal circles ────────────────────────────────────────────────────
+    case 4: return `
+      body { counter-reset: h2-counter; }
+      h2 {
+        font-size: 18pt; font-weight: 600; color: #2d3748;
+        display: flex; align-items: center; gap: 14px;
+        margin-top: 52px; margin-bottom: 14px;
+      }
+      h2::before {
+        content: counter(h2-counter);
+        counter-increment: h2-counter;
+        width: 36px; height: 36px; border-radius: 50%;
+        border: 2.5px solid ${pc}; color: ${pc};
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 11pt; font-weight: 700; flex-shrink: 0;
+      }
+      h3 { color: ${pc}; font-size: 13pt; }
+      th { background: ${pc}11 !important; color: #1a1a2e !important; border-bottom: 2px solid ${pc} !important; }
+      td { border-color: #e8ecf4 !important; }
+      tr:nth-child(even) td { background: #f9fbff; }
+      table { border-radius: 8px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.07); }
+      .chart-container { border-top: none !important; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); background: #fff; border: 1px solid #e4eaf5; }
+      strong { color: ${sc}; }
+    `;
+
+    // ── 5: Ghost chapter numbers ──────────────────────────────────────────────
+    case 5: return `
+      body { counter-reset: ghost-counter; }
+      h2 {
+        position: relative; overflow: visible;
+        font-size: 19pt; font-weight: 800; color: #1a1a2e;
+        margin-top: 56px; margin-bottom: 10px;
+        padding-top: 4px; border-bottom: 3px solid ${pc};
+        padding-bottom: 6px;
+      }
+      h2::before {
+        content: counter(ghost-counter, decimal-leading-zero);
+        counter-increment: ghost-counter;
+        position: absolute; top: -18px; left: -6px;
+        font-size: 72pt; font-weight: 900; color: ${pc}14;
+        line-height: 1; z-index: 0; pointer-events: none;
+        font-style: italic;
+      }
+      h3 { color: ${sc}; font-size: 13pt; letter-spacing: 0.5px; }
+      table { border-collapse: separate; border-spacing: 0; }
+      th { background: transparent !important; color: ${pc} !important; border-bottom: 2px solid ${pc} !important; border-top: none !important; border-left: none !important; border-right: none !important; font-size: 9.5pt; text-transform: uppercase; letter-spacing: 0.5px; }
+      td { border-top: none !important; border-left: none !important; border-right: none !important; border-bottom: 1px solid #e8ecf0 !important; }
+      tr:nth-child(even) td { background: #f8fafc; }
+      .chart-container { border: none !important; background: transparent; padding: 10px 0; border-bottom: 2px solid ${pc}22 !important; border-radius: 0 !important; }
+      strong { color: ${pc}; font-style: italic; }
+    `;
+
+    // ── 6: Newspaper editorial ────────────────────────────────────────────────
+    case 6: return `
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&display=swap');
+      h2 {
+        font-family: 'Playfair Display', Georgia, serif !important;
+        font-size: 24pt; font-weight: 800; color: #111;
+        border-top: 4px double #111; border-bottom: 1px solid #111;
+        padding: 8px 0 6px; margin-top: 52px; margin-bottom: 16px;
+        text-transform: none; letter-spacing: 0;
+      }
+      h3 { font-family: 'Playfair Display', Georgia, serif; color: ${sc}; font-size: 14pt; font-style: italic; }
+      th { background: #111 !important; color: #fff !important; font-size: 9.5pt; }
+      td { border-color: #aaa !important; }
+      tr:nth-child(even) td { background: #f5f5f0; }
+      .chart-container { border: 2px solid #111 !important; border-top: none !important; border-radius: 0 !important; background: #fffef8; }
+      .chart-container::before { content: ''; display: block; height: 6px; background: repeating-linear-gradient(90deg, #111 0, #111 6px, transparent 6px, transparent 12px); margin-bottom: 16px; }
+      strong { color: #111; font-weight: 700; font-style: italic; }
+      body { color: #222; }
+    `;
+
+    // ── 7: Mini section cards ─────────────────────────────────────────────────
+    case 7: return `
+      body { counter-reset: card-counter; background: #f4f6fb; }
+      .content { background: #f4f6fb; }
+      h2 {
+        counter-increment: card-counter;
+        font-size: 13pt; font-weight: 700; color: #fff;
+        background: linear-gradient(90deg, ${pc}, ${sc});
+        display: inline-flex; align-items: center; gap: 10px;
+        padding: 8px 20px 8px 14px; border-radius: 100px;
+        margin-top: 44px; margin-bottom: 14px; text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      h2::before {
+        content: counter(card-counter);
+        background: rgba(255,255,255,0.3); width: 26px; height: 26px;
+        border-radius: 50%; display: inline-flex; align-items: center;
+        justify-content: center; font-size: 10pt; font-weight: 800; flex-shrink: 0;
+      }
+      h3 { color: ${pc}; font-size: 13pt; font-weight: 700; }
+      table { border-radius: 10px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.1); background: #fff; }
+      th { background: linear-gradient(90deg, ${pc}, ${sc}) !important; color: #fff !important; font-size: 9.5pt; border: none !important; }
+      td { border-color: #e4eaf5 !important; background: #fff; }
+      tr:nth-child(even) td { background: #f0f4ff; }
+      .chart-container { background: #fff !important; border-radius: 12px !important; border: none !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1); border-top: none !important; }
+      strong { color: ${sc}; }
+    `;
+
+    // ── 8: Elegant serif ──────────────────────────────────────────────────────
+    case 8: return `
+      @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;0,700;1,400&display=swap');
+      h2 {
+        font-family: 'EB Garamond', Georgia, serif !important;
+        font-size: 22pt; font-weight: 500; color: ${sc};
+        text-align: center; letter-spacing: 3px; text-transform: uppercase;
+        margin-top: 54px; margin-bottom: 8px; padding-bottom: 0;
+      }
+      h2::after {
+        content: '';
+        display: block; width: 60px; height: 2px;
+        background: linear-gradient(90deg, transparent, ${pc}, transparent);
+        margin: 10px auto 14px;
+      }
+      h3 { font-family: 'EB Garamond', Georgia, serif; color: ${pc}; font-size: 15pt; font-style: italic; font-weight: 500; }
+      p { font-size: 11.5pt; line-height: 1.9; }
+      th { background: ${sc} !important; color: #f5efe0 !important; font-family: 'EB Garamond', serif; font-size: 11pt; font-style: italic; letter-spacing: 0.5px; border: none !important; }
+      td { border-color: #d4c9a8 !important; font-family: 'EB Garamond', serif; font-size: 11pt; }
+      tr:nth-child(even) td { background: #fdf9f2; }
+      .chart-container { border: 1px solid #d4c9a8 !important; border-top: 2px solid ${pc} !important; background: #fefcf8 !important; border-radius: 4px; }
+      strong { color: ${pc}; font-style: italic; font-weight: 700; }
+      body { color: #2d2416; }
+    `;
+
+    // ── 9: Pill badge sidebar ─────────────────────────────────────────────────
+    case 9: return `
+      body { counter-reset: pill-counter; }
+      h2 {
+        counter-increment: pill-counter;
+        font-size: 18pt; font-weight: 700; color: #1a1a2e;
+        display: flex; align-items: center; gap: 14px;
+        margin-top: 52px; margin-bottom: 16px;
+        padding-bottom: 12px; border-bottom: 1px solid #e4eaf5;
+      }
+      h2::before {
+        content: counter(pill-counter);
+        background: ${pc}; color: #fff;
+        font-size: 10pt; font-weight: 800;
+        padding: 4px 14px; border-radius: 100px; flex-shrink: 0;
+        min-width: 32px; text-align: center;
+      }
+      h3 { color: ${pc}; font-size: 13pt; font-weight: 600;
+        background: ${pc}11; border-radius: 4px; padding: 4px 10px; display: inline-block;
+      }
+      th {
+        background: ${pc} !important; color: #fff !important;
+        font-size: 9.5pt; border-radius: 0;
+      }
+      td { border-color: #dde5f0 !important; }
+      tr:nth-child(odd) td { background: #f8faff; }
+      tr:nth-child(even) td { background: #ffffff; }
+      td:first-child { font-weight: 600; color: ${sc}; }
+      .chart-container {
+        border-top: none !important;
+        border-left: 6px solid ${pc} !important;
+        border-radius: 0 10px 10px 0 !important;
+        background: #f8faff !important;
+      }
+      strong { color: ${pc}; font-weight: 700; }
+    `;
+
+    default: return '';
+  }
 }
 
 // ─── TOC Template System ────────────────────────────────────────────────────
