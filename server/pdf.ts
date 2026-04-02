@@ -903,7 +903,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
   ${generateCoverPageHTML(plan, primaryColor, secondaryColor)}
   
   <div class="content">
-    ${formatContentWithCharts(content, chartData, primaryColor, plan.useFullCoverImage || false)}
+    ${formatContentWithCharts(content, chartData, primaryColor, plan.useFullCoverImage || false, plan.id || '', secondaryColor)}
   </div>
 </body>
 </html>
@@ -1070,7 +1070,178 @@ function generateCoverPageHTML(plan: BusinessPlan & { backgroundImage?: string |
   `;
 }
 
-function formatContentWithCharts(markdown: string, chartData: ChartDataPayload | null, primaryColor: string, skipTitle: boolean = false): string {
+// ─── TOC Template System ────────────────────────────────────────────────────
+
+interface TOCItem { text: string; href: string; num: number; }
+
+function pickTOCStyle(planId: string): number {
+  // Stable hash so the same plan always gets the same style
+  let h = 0;
+  for (let i = 0; i < planId.length; i++) {
+    h = ((h << 5) - h + planId.charCodeAt(i)) >>> 0;
+  }
+  return h % 10;
+}
+
+function generateTOCHTML(items: TOCItem[], planId: string, pc: string, sc: string): string {
+  if (!items.length) return '';
+  const style = pickTOCStyle(planId);
+  const yr = new Date().getFullYear();
+
+  switch (style) {
+
+    case 0: { // Classic: left-border, dotted separators
+      const rows = items.map(it =>
+        `<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px dotted #ddd;">
+          <span style="color:${pc};font-weight:700;min-width:30px;font-size:10pt;">${it.num}.</span>
+          <a href="#${it.href}" style="color:#1a1a1a;text-decoration:none;font-size:10.5pt;">${it.text}</a>
+        </div>`).join('');
+      return `<div style="background:#f8fafc;border-left:5px solid ${pc};padding:28px 34px;border-radius:6px;margin:20px 0;page-break-after:always;">
+        <h2 style="color:${pc};font-size:15pt;font-weight:700;border-bottom:2px solid ${pc};padding-bottom:10px;margin-bottom:18px;letter-spacing:1px;">TABLE OF CONTENTS</h2>
+        ${rows}</div>`;
+    }
+
+    case 1: { // Corporate 2-column with dark header
+      const half = Math.ceil(items.length / 2);
+      const renderHalf = (slice: TOCItem[]) => slice.map(it =>
+        `<div style="padding:7px 0;border-bottom:1px solid #e2e8f0;">
+          <span style="color:${pc};font-weight:700;font-size:9pt;">${it.num}.</span>&nbsp;
+          <a href="#${it.href}" style="color:#1a1a1a;text-decoration:none;font-size:10pt;">${it.text}</a>
+        </div>`).join('');
+      return `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin:20px 0;page-break-after:always;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+        <div style="background:${pc};padding:18px 26px;">
+          <h2 style="color:#fff;font-size:15pt;font-weight:700;margin:0;letter-spacing:1.5px;">TABLE OF CONTENTS</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;padding:20px 26px;">
+          <div style="padding-right:18px;border-right:1px solid #e2e8f0;">${renderHalf(items.slice(0, half))}</div>
+          <div style="padding-left:18px;">${renderHalf(items.slice(half))}</div>
+        </div></div>`;
+    }
+
+    case 2: { // Dark executive card — navy bg, numbered circle badges
+      const rows = items.map(it =>
+        `<div style="display:flex;align-items:center;gap:14px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.1);">
+          <span style="background:${pc};color:#fff;font-weight:700;font-size:9pt;min-width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${it.num}</span>
+          <a href="#${it.href}" style="color:#e2e8f0;text-decoration:none;font-size:10.5pt;">${it.text}</a>
+        </div>`).join('');
+      return `<div style="background:#1e293b;padding:32px;border-radius:10px;margin:20px 0;page-break-after:always;">
+        <h2 style="color:#fff;font-size:16pt;font-weight:700;letter-spacing:2px;border-bottom:2px solid ${pc};padding-bottom:12px;margin-bottom:20px;">TABLE OF CONTENTS</h2>
+        ${rows}</div>`;
+    }
+
+    case 3: { // Vertical timeline with connecting line
+      const rows = items.map((it, idx) =>
+        `<div style="display:flex;gap:0;align-items:flex-start;min-height:44px;">
+          <div style="display:flex;flex-direction:column;align-items:center;min-width:36px;">
+            <div style="background:${pc};color:#fff;font-weight:700;font-size:9pt;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:1;flex-shrink:0;">${it.num}</div>
+            ${idx < items.length - 1 ? `<div style="width:2px;flex:1;min-height:16px;background:#e2e8f0;"></div>` : ''}
+          </div>
+          <div style="padding:4px 0 12px 14px;">
+            <a href="#${it.href}" style="color:#1a1a1a;text-decoration:none;font-size:10.5pt;">${it.text}</a>
+          </div>
+        </div>`).join('');
+      return `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:28px 32px;margin:20px 0;page-break-after:always;">
+        <h2 style="color:${pc};font-size:15pt;font-weight:700;margin-bottom:24px;letter-spacing:1px;">TABLE OF CONTENTS</h2>
+        ${rows}</div>`;
+    }
+
+    case 4: { // Minimal: circle-outline numbers, hairline separators
+      const rows = items.map(it =>
+        `<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;">
+          <div style="width:30px;height:30px;border-radius:50%;border:2px solid ${pc};display:inline-flex;align-items:center;justify-content:center;margin-right:14px;flex-shrink:0;">
+            <span style="color:${pc};font-weight:700;font-size:9pt;">${it.num}</span>
+          </div>
+          <a href="#${it.href}" style="color:#374151;text-decoration:none;font-size:10.5pt;">${it.text}</a>
+        </div>`).join('');
+      return `<div style="padding:28px 0;margin:20px 0;page-break-after:always;border-top:3px solid ${pc};">
+        <h2 style="color:#1a1a1a;font-size:13pt;font-weight:600;letter-spacing:3px;margin-bottom:24px;text-transform:uppercase;">Table of Contents</h2>
+        ${rows}</div>`;
+    }
+
+    case 5: { // Ghost oversized numbers behind text
+      const rows = items.map(it =>
+        `<div style="position:relative;padding:6px 0 6px 60px;min-height:36px;border-bottom:1px dotted #e2e8f0;">
+          <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);font-size:28pt;font-weight:900;color:${pc};opacity:.12;line-height:1;pointer-events:none;">${String(it.num).padStart(2,'0')}</span>
+          <span style="position:absolute;left:0;top:50%;transform:translateY(-50%);font-size:9.5pt;font-weight:700;color:${pc};width:50px;text-align:center;">${it.num}.</span>
+          <a href="#${it.href}" style="color:#1a1a1a;text-decoration:none;font-size:10.5pt;font-weight:500;">${it.text}</a>
+        </div>`).join('');
+      return `<div style="background:#fafbff;border-radius:8px;padding:28px 32px;margin:20px 0;page-break-after:always;border-bottom:3px solid ${pc};">
+        <h2 style="color:${pc};font-size:15pt;font-weight:800;letter-spacing:2px;margin-bottom:22px;text-transform:uppercase;">Table of Contents</h2>
+        ${rows}</div>`;
+    }
+
+    case 6: { // Newspaper 3-column
+      const t = Math.ceil(items.length / 3);
+      const renderCol = (slice: TOCItem[]) => slice.map(it =>
+        `<div style="padding:5px 0;font-size:9.5pt;">
+          <span style="color:${pc};font-weight:700;">${it.num}.</span>
+          <a href="#${it.href}" style="color:#374151;text-decoration:none;"> ${it.text}</a>
+        </div>`).join('');
+      return `<div style="background:#fff;border:1px solid #e5e7eb;padding:24px 28px;margin:20px 0;page-break-after:always;">
+        <h2 style="color:${pc};font-size:13pt;font-weight:700;letter-spacing:2px;border-bottom:2px solid ${pc};padding-bottom:8px;margin-bottom:18px;text-transform:uppercase;">Contents</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 20px;">
+          <div style="border-right:1px solid #e5e7eb;padding-right:14px;">${renderCol(items.slice(0, t))}</div>
+          <div style="border-right:1px solid #e5e7eb;padding:0 14px;">${renderCol(items.slice(t, t*2))}</div>
+          <div style="padding-left:14px;">${renderCol(items.slice(t*2))}</div>
+        </div></div>`;
+    }
+
+    case 7: { // Mini section cards in a 3-col grid
+      const cards = items.map(it =>
+        `<a href="#${it.href}" style="display:block;background:#f8fafc;border:1px solid #e2e8f0;border-top:3px solid ${pc};border-radius:6px;padding:12px 14px;text-decoration:none;break-inside:avoid;">
+          <div style="color:${pc};font-weight:700;font-size:7.5pt;margin-bottom:4px;letter-spacing:.5px;">SECTION ${it.num}</div>
+          <div style="color:#1a1a1a;font-size:9.5pt;font-weight:500;line-height:1.3;">${it.text}</div>
+        </a>`).join('');
+      return `<div style="background:#fff;padding:24px;border-radius:10px;border:1px solid #e2e8f0;margin:20px 0;page-break-after:always;">
+        <h2 style="color:${pc};font-size:15pt;font-weight:700;margin-bottom:20px;letter-spacing:1px;">TABLE OF CONTENTS</h2>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">${cards}</div>
+      </div>`;
+    }
+
+    case 8: { // Elegant serif centred header with em-dashes
+      const rows = items.map(it =>
+        `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #e8e8e8;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="color:${pc};font-family:Georgia,serif;font-style:italic;font-size:11pt;min-width:22px;">${it.num}.</span>
+            <a href="#${it.href}" style="color:#2d2d2d;text-decoration:none;font-family:Georgia,serif;font-size:10.5pt;">${it.text}</a>
+          </div>
+          <span style="color:#cbd5e1;font-size:8pt;font-family:Georgia,serif;white-space:nowrap;padding-left:10px;">— — —</span>
+        </div>`).join('');
+      return `<div style="background:#fefefe;border:1px solid #ddd;border-radius:4px;padding:36px 44px;margin:20px 0;page-break-after:always;">
+        <div style="text-align:center;margin-bottom:28px;">
+          <div style="color:${pc};font-size:8pt;letter-spacing:4px;text-transform:uppercase;margin-bottom:8px;font-family:Georgia,serif;">— ${yr} —</div>
+          <h2 style="color:#1a1a1a;font-family:Georgia,serif;font-size:18pt;font-weight:normal;letter-spacing:2px;margin:0;">Table of Contents</h2>
+          <div style="width:60px;height:2px;background:${pc};margin:12px auto 0;"></div>
+        </div>
+        ${rows}</div>`;
+    }
+
+    case 9: { // Left accent bar with pill-badge numbers
+      const rows = items.map(it =>
+        `<div style="display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid #f1f5f9;">
+          <span style="background:${pc};color:#fff;font-weight:700;font-size:8.5pt;padding:3px 10px;border-radius:12px;white-space:nowrap;flex-shrink:0;">${it.num}</span>
+          <a href="#${it.href}" style="color:#1a1a1a;text-decoration:none;font-size:10.5pt;">${it.text}</a>
+        </div>`).join('');
+      return `<div style="background:#fff;border-radius:8px;overflow:hidden;margin:20px 0;page-break-after:always;border:1px solid #e2e8f0;">
+        <div style="display:flex;">
+          <div style="background:${pc};width:8px;flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div style="padding:18px 20px;border-bottom:2px solid #f1f5f9;">
+              <h2 style="color:${pc};font-size:15pt;font-weight:700;margin:0;letter-spacing:1px;">TABLE OF CONTENTS</h2>
+            </div>
+            ${rows}
+          </div>
+        </div></div>`;
+    }
+
+    default:
+      return '';
+  }
+}
+
+// ─── Main content renderer ───────────────────────────────────────────────────
+
+function formatContentWithCharts(markdown: string, chartData: ChartDataPayload | null, primaryColor: string, skipTitle: boolean = false, planId: string = '', secondaryColor: string = '#1e3a5f'): string {
   const lines = markdown.split('\n');
   let html = '';
   let currentSection = '';
@@ -1078,6 +1249,7 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
   const usedCharts = new Set<ChartType>();
   
   let inToc = false;
+  let tocItems: TOCItem[] = [];
   let skippedTitle = false; // Track if we've already skipped the first title block
   
   for (let i = 0; i < lines.length; i++) {
@@ -1095,11 +1267,12 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
       // Handle TABLE OF CONTENTS section specially
       if (sectionTitle.toUpperCase() === 'TABLE OF CONTENTS') {
         inToc = true;
-        html += `<div class="toc"><h2>${sectionTitle}</h2><ol>\n`;
+        tocItems = [];
         continue;
       } else if (inToc) {
-        // Close TOC section when we hit the next section
-        html += `</ol></div>\n`;
+        // Close TOC section — render with the chosen template
+        html += generateTOCHTML(tocItems, planId, primaryColor, secondaryColor) + '\n';
+        tocItems = [];
         inToc = false;
       }
       
@@ -1156,14 +1329,15 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
     } else if (/^\d+\.\s/.test(line)) {
       const match = line.match(/^\d+\.\s(.+)$/);
       if (match) {
-        // If we're in the Table of Contents, format as TOC item with link
+        // If we're in the Table of Contents, collect as a TOC item
         if (inToc) {
-          // Extract link text from markdown link format [text](#anchor)
           const linkMatch = match[1].match(/\[([^\]]+)\]\(#([^)]+)\)/);
           if (linkMatch) {
-            html += `<li><a href="#${linkMatch[2]}">${linkMatch[1]}</a></li>\n`;
+            tocItems.push({ text: linkMatch[1], href: linkMatch[2], num: tocItems.length + 1 });
           } else {
-            html += `<li>${formatInline(match[1])}</li>\n`;
+            const text = match[1].replace(/\*\*/g, '').trim();
+            const href = text.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            tocItems.push({ text, href, num: tocItems.length + 1 });
           }
         } else {
           if (!html.endsWith('</ol>\n') && (!html.includes('<ol>') || html.lastIndexOf('</ol>') > html.lastIndexOf('<ol>'))) {
@@ -1179,7 +1353,8 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
     } else if (line === '---') {
       // Close TOC if we hit a separator while still in TOC
       if (inToc) {
-        html += `</ol></div>\n`;
+        html += generateTOCHTML(tocItems, planId, primaryColor, secondaryColor) + '\n';
+        tocItems = [];
         inToc = false;
       }
       html += '<hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">\n';
@@ -1190,7 +1365,8 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
   
   // Close TOC if we're still in it at the end of content
   if (inToc) {
-    html += `</ol></div>\n`;
+    html += generateTOCHTML(tocItems, planId, primaryColor, secondaryColor) + '\n';
+    tocItems = [];
   }
   
   if (chartData) {
