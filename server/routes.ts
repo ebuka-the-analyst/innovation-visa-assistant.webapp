@@ -5036,12 +5036,26 @@ EXAMPLES OF GOOD RESPONSES:
           lastActivityMap.set(row.user_id, new Date(row.last_activity_at));
         }
       }
+
+      // Get plan counts per user in one query
+      const planCountQuery = await db.execute(sql`
+        SELECT user_id, COUNT(*) as plan_count
+        FROM business_plans
+        GROUP BY user_id
+      `);
+      const planCountMap = new Map<string, number>();
+      for (const row of planCountQuery.rows as any[]) {
+        if (row.user_id) {
+          planCountMap.set(row.user_id, parseInt(row.plan_count) || 0);
+        }
+      }
       
       // Remove passwords and map isEmailVerified to isVerified for frontend compatibility
       const safeUsers = users.map(({ password, ...user }) => ({
         ...user,
         isVerified: user.isEmailVerified ?? false,
         lastActivityAt: lastActivityMap.get(user.id) || null,
+        totalPlans: planCountMap.get(user.id) || 0,
       }));
       
       res.json({
