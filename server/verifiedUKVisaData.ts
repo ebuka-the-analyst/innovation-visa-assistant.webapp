@@ -265,14 +265,14 @@ export const SEO_DATA = {
 // ============================================================================
 
 export function getVerifiedEndorsingBodyInfo(): string {
-  return `As of January 2026, there are 4 approved endorsing bodies for the UK Innovator Founder Visa (source: GOV.UK, last updated October 2024):
+  return `As of January 2026, there are 4 approved endorsing bodies for the UK Innovator Founder Visa (source: GOV.UK):
 
-1. **Envestors Limited** (envestors.co.uk) - Established commercial endorsing service
-2. **Innovator International Limited** (innovatorinternational.com) - Operates UK Growth Accelerator program, supported 700+ entrepreneurs since 2019
-3. **UK Endorsing Services (UKES)** (ukesapp.co.uk) - Unique consortium of 6 UK businesses with combined expertise
-4. **Global Entrepreneurs Programme (GEP)** (great.gov.uk) - Government programme run by Dept for Business & Trade - **INVITATION ONLY**, cannot apply directly
+1. **Envestors Limited** (envestors.co.uk) - An FCA-regulated investment platform that provides endorsement services for the Innovator Founder Visa.
+2. **Innovator International Limited** (innovatorinternational.com) - Provides endorsement services for entrepreneurs seeking the UK Innovator Founder Visa.
+3. **UK Endorsing Services (UKES)** (ukesapp.co.uk) - A consortium of UK businesses providing endorsement services for the Innovator Founder Visa.
+4. **Global Entrepreneurs Programme (GEP)** (great.gov.uk) - Government programme run by the Dept for Business & Trade. **INVITATION ONLY** — you cannot apply directly.
 
-Contact each endorsing body directly via their website to learn about their specific process, fees, and requirements. Endorsement typically costs around £1,000 for initial assessment plus £500 per contact point meeting, though this varies by body. Note: GEP only endorses founders who have been specifically invited to participate.`;
+Contact each endorsing body directly via their website to learn about their specific process, fees, and requirements. Fees vary significantly between bodies — never quote specific endorsement costs as they are subject to change. Note: GEP only endorses founders who have been specifically invited to participate.`;
 }
 
 export function getStandardDisclaimer(): string {

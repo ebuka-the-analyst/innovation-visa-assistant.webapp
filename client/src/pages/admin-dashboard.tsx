@@ -9608,20 +9608,25 @@ export default function AdminDashboard() {
                         </>
                       )}
 
-                      {/* SEO Analytics Placeholder */}
+                      {/* SEO Strategy Engine */}
                       {activeSection === 'content-seo' && (
                         <Card>
                           <CardHeader className="p-2 pb-1">
                             <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                               <TrendingUp className="h-3 w-3 text-[#005EB8]" />
-                              SEO Analytics
+                              PhD-Level SEO Strategy Engine
                             </CardTitle>
-                            <CardDescription className="text-[9px]">Search engine optimization metrics</CardDescription>
+                            <CardDescription className="text-[9px]">Quad-AI: Gemini + GPT-4o + Claude + Qwen in parallel</CardDescription>
                           </CardHeader>
-                          <CardContent className="py-1 text-center text-muted-foreground">
-                            <TrendingUp className="h-12 w-12 mx-auto mb-1 opacity-50" />
-                            <p>SEO Analytics coming soon</p>
-                            <p className="text-[9px] mt-0.5">Track keyword rankings, organic traffic, and search visibility</p>
+                          <CardContent className="py-2 space-y-2">
+                            <p className="text-[9px] text-muted-foreground">Generate a comprehensive SEO strategy using all 4 AI models covering: GBP optimisation, technical SEO, keyword gaps, content calendar, entity building, and authority acquisition.</p>
+                            <button
+                              className="w-full text-[9px] bg-[#005EB8] text-white rounded py-1.5 px-2 hover:bg-[#004a93] transition-colors font-medium"
+                              onClick={() => window.open('/admin/seo-strategy', '_blank')}
+                              data-testid="button-open-seo-strategy"
+                            >
+                              Open SEO Strategy Engine
+                            </button>
                           </CardContent>
                         </Card>
                       )}

@@ -15691,6 +15691,23 @@ Return a JSON object with:
     }
   });
 
+  // ── PhD-Level Multi-Model SEO Strategy Engine ────────────────────────────
+  app.post("/api/seo/strategy", requireAdmin, async (req, res) => {
+    try {
+      const { generateSEOStrategy } = await import("./seoStrategyEngine");
+      const ctx = req.body;
+      if (!ctx.businessName || !ctx.primaryService) {
+        return res.status(400).json({ error: "businessName and primaryService are required" });
+      }
+      const result = await generateSEOStrategy(ctx);
+      res.json(result);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error("[SEO Strategy] Error:", msg);
+      res.status(500).json({ error: `SEO strategy generation failed: ${msg}` });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
