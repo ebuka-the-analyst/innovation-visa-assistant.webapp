@@ -12,11 +12,11 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_2 || "");
+const gemini = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_2 || "" });
 
 export interface SEOBusinessContext {
   businessName: string;
@@ -361,16 +361,16 @@ export async function generateSEOStrategy(ctx: SEOBusinessContext): Promise<SEOS
   const [geminiResult, openaiResult, claudeResult, qwenResult] = await Promise.allSettled([
     // Gemini: Local SEO + GBP
     (async () => {
-      const model = gemini.getGenerativeModel({
+      const result = await gemini.models.generateContent({
         model: "gemini-1.5-pro",
-        generationConfig: {
+        contents: buildGeminiPrompt(ctx),
+        config: {
           temperature: 0.3,
           maxOutputTokens: 8192,
           responseMimeType: "application/json"
         }
       });
-      const result = await model.generateContent(buildGeminiPrompt(ctx));
-      return safeParseJSON(result.response.text());
+      return safeParseJSON(result.text ?? "{}");
     })(),
 
     // OpenAI: Technical SEO + Keywords
