@@ -151,10 +151,14 @@ async function runGeminiVerification(title: string, content: string): Promise<{
       .map((m: any) => (m.name || "").replace("models/", ""))
       .filter((n: string) => n.startsWith("gemini"));
     console.log(`[MultiVerifier] Available Gemini models for this key: ${all.join(", ")}`);
-    // Prefer flash models (faster/cheaper), then pro
-    const flash = all.filter(n => n.includes("flash"));
-    const pro = all.filter(n => n.includes("pro"));
-    GEMINI_MODELS = [...flash, ...pro].slice(0, 3);
+    // Build a prioritised trial list: prefer gemini-2.5-flash, then gemini-2.5-pro, then anything else
+    // Avoid known-deprecated model names (gemini-2.0-flash, gemini-2.0-flash-001) to save time
+    const DEPRECATED = ["gemini-2.0-flash", "gemini-2.0-flash-001", "gemini-2.0-flash-lite"];
+    const usable = all.filter(n => !DEPRECATED.includes(n));
+    const flash25 = usable.filter(n => n.startsWith("gemini-2.5") && n.includes("flash"));
+    const pro25  = usable.filter(n => n.startsWith("gemini-2.5") && n.includes("pro") && !n.includes("tts") && !n.includes("image"));
+    const rest   = usable.filter(n => !flash25.includes(n) && !pro25.includes(n));
+    GEMINI_MODELS = [...flash25.slice(0, 1), ...pro25.slice(0, 1), ...rest.slice(0, 1)];
   } catch (e) {
     console.warn("[MultiVerifier] Could not list Gemini models, falling back to defaults");
     GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash-lite"];
@@ -179,12 +183,19 @@ async function runGeminiVerification(title: string, content: string): Promise<{
           generationConfig: {
             temperature: 0.1,
             maxOutputTokens: 2048,
-            responseMimeType: "application/json",
+            // Note: responseMimeType omitted — not supported by all models (e.g. gemini-2.5-flash)
           },
         }),
       });
 
-      const data = await response.json() as any;
+      const rawText = await response.text();
+      let data: any;
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        console.warn(`[MultiVerifier] Gemini REST ${modelName} JSON parse error (response may be truncated or streamed)`);
+        continue;
+      }
 
       if (!response.ok) {
         const status = response.status;
@@ -304,7 +315,7 @@ async function runClaudeVerification(title: string, content: string): Promise<{
   try {
     const prompt = buildMarkerPrompt(title, content);
     const response = await claudeClient.messages.create({
-      model: "claude-3-5-haiku-20241022",
+      model: "claude-haiku-4-5",
       max_tokens: 2048,
       messages: [{ role: "user", content: prompt }],
     });
@@ -323,7 +334,10 @@ async function runClaudeVerification(title: string, content: string): Promise<{
     };
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
-    if (errMsg.includes("429") || errMsg.includes("overloaded") || errMsg.includes("quota")) {
+    // Treat billing/quota/overload issues as unavailable (not a zero score)
+    if (errMsg.includes("429") || errMsg.includes("overloaded") || errMsg.includes("quota")
+      || errMsg.includes("credit balance") || errMsg.includes("too low") || errMsg.includes("billing")) {
+      console.warn("[MultiVerifier] Claude unavailable (billing/quota):", errMsg.substring(0, 120));
       const r: any = { score: -1, passed: false, flags: [], details: { error: errMsg }, error: errMsg, unavailable: true };
       return r;
     }

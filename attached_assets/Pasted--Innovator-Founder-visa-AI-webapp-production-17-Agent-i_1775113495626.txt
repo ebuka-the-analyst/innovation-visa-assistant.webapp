@@ -1,0 +1,184 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+17
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+ee724b04
+Active
+
+Apr 2, 2026, 7:58 AM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[2026-04-02T07:02:13.689Z] GET /assets/timer-Br_6uBY4.js
+[2026-04-02T07:02:13.691Z] GET /assets/log-in-IJ4owdnK.js
+[2026-04-02T07:02:13.696Z] GET /assets/user-plus-CZ8_gGtv.js
+[2026-04-02T07:02:13.698Z] GET /assets/square-CWRCQFbn.js
+[2026-04-02T07:02:13.699Z] GET /assets/qr-code-5MjQnBPv.js
+[2026-04-02T07:02:13.706Z] GET /assets/textarea-B-8dB7_r.js
+[2026-04-02T07:02:13.706Z] GET /assets/volume-2-DWjhH6Rw.js
+[2026-04-02T07:02:13.707Z] GET /assets/menu-DMNHmXK4.js
+[2026-04-02T07:02:13.712Z] GET /assets/lock-open-BdAL4zL6.js
+[2026-04-02T07:02:13.718Z] GET /assets/lock-C18XNqWS.js
+[2026-04-02T07:02:13.725Z] GET /assets/file-pen-line-BzX4wAFx.js
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+[2026-04-02T07:02:13.730Z] GET /assets/wheat-DgUdcWnm.js
+[2026-04-02T07:02:13.735Z] GET /assets/quote-BGecGc6r.js
+7:02:13 AM [express] GET /api/auth/user 200 in 60ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-02T07:02:13.740Z] GET /assets/shield-alert-DTBPRGNo.js
+[2026-04-02T07:02:13.743Z] GET /assets/scan-1oSDOBxp.js
+[2026-04-02T07:02:13.745Z] GET /assets/message-square-9xZXtPqX.js
+[2026-04-02T07:02:13.748Z] GET /assets/message-square-warning-DRsoFJDf.js
+[2026-04-02T07:02:13.751Z] GET /assets/phone-CJhcpCzn.js
+[2026-04-02T07:02:13.755Z] GET /assets/mic-off-Br54Q_Tj.js
+[2026-04-02T07:02:13.759Z] GET /assets/rotate-ccw-CiZKf1pv.js
+[2026-04-02T07:02:13.762Z] GET /assets/layers-B4hSMGHn.js
+[2026-04-02T07:02:13.765Z] GET /assets/plane-C6bb6UAf.js
+[2026-04-02T07:02:13.767Z] GET /assets/monitor-Da3vcCxz.js
+[2026-04-02T07:02:13.772Z] GET /assets/shopping-cart-BnPBQzD_.js
+[2026-04-02T07:02:13.776Z] GET /assets/save-CubnZUoK.js
+[2026-04-02T07:02:13.781Z] GET /assets/trash-2-CA4EcaAx.js
+[2026-04-02T07:02:13.784Z] GET /assets/user-BHdva7rw.js
+[2026-04-02T07:02:13.960Z] GET /assets/BlogDashboard-CbN9EIXW.js
+[2026-04-02T07:02:13.963Z] GET /assets/badge-Dl-ISqEO.js
+[2026-04-02T07:02:13.965Z] GET /assets/index-1W0FAwaf.js
+[2026-04-02T07:02:13.966Z] GET /assets/select-CiIlrTOr.js
+[2026-04-02T07:02:13.967Z] GET /assets/tabs-Bqpf34Xj.js
+[2026-04-02T07:02:13.967Z] GET /assets/index-CMlQ7Vpa.js
+[2026-04-02T07:02:13.968Z] GET /assets/switch-Y7xqg21y.js
+[2026-04-02T07:02:13.969Z] GET /assets/index-DlJOmmZh.js
+[2026-04-02T07:02:13.972Z] GET /assets/progress-63cddgC5.js
+[2026-04-02T07:02:13.974Z] POST /api/activity/session
+[2026-04-02T07:02:13.975Z] POST /api/activity/session
+[2026-04-02T07:02:13.976Z] GET /api/partner/status
+7:02:14 AM [express] GET /api/partner/status 200 in 25ms :: {"isPartner":false,"promoCodeCount":0}
+7:02:14 AM [express] POST /api/activity/session 200 in 38ms :: {"sessionId":"7c266b64-ccdd-4966-9f0f…
+7:02:14 AM [express] POST /api/activity/session 200 in 40ms :: {"sessionId":"adff2314-1e1d-44db-b510…
+[2026-04-02T07:02:14.233Z] GET /api/admin/blog/stats
+[2026-04-02T07:02:14.234Z] GET /api/admin/blog/posts/all/
+[2026-04-02T07:02:14.235Z] GET /api/admin/blog/review-queue
+[2026-04-02T07:02:14.236Z] GET /api/admin/blog/queue
+[2026-04-02T07:02:14.236Z] POST /api/activity/page-view
+7:02:14 AM [express] GET /api/admin/blog/posts/all/ 200 in 18ms
+7:02:14 AM [express] GET /api/admin/blog/queue 200 in 24ms :: [{"id":1,"targetDate":"2026-04-02T06:0…
+7:02:14 AM [express] GET /api/admin/blog/review-queue 200 in 36ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+7:02:14 AM [express] POST /api/activity/page-view 200 in 37ms :: {"pageViewId":"9b5f3adb-bb83-4e97-a…
+7:02:14 AM [express] GET /api/admin/blog/stats 200 in 65ms :: {"total":31,"published":25,"scheduled"…
+[2026-04-02T07:02:43.729Z] POST /api/admin/blog/posts/f9ce7137-31b9-4059-95c8-b7659d202b97/reverify
+[MultiVerifier] Starting quad-AI verification for: How to Prepare for Your Innovator Founder Visa Interview
+The model 'claude-3-5-haiku-20241022' is deprecated and will reach end-of-life on February 19th, 2026
+Please migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.
+[MultiVerifier] Available Gemini models for this key: gemini-2.5-flash, gemini-2.5-pro, gemini-2.0-flash, gemini-2.0-flash-001, gemini-2.0-flash-lite-001, gemini-2.0-flash-lite, gemini-2.5-flash-preview-tts, gemini-2.5-pro-preview-tts, gemini-flash-latest, gemini-flash-lite-latest, gemini-pro-latest, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-3-pro-preview, gemini-3-flash-preview, gemini-3.1-pro-preview, gemini-3.1-pro-preview-customtools, gemini-3.1-flash-lite-preview, gemini-3-pro-image-preview, gemini-3.1-flash-image-preview, gemini-robotics-er-1.5-preview, gemini-2.5-computer-use-preview-10-2025
+[MultiVerifier] Claude error: 400 {"type":"error","error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits."},"request_id":"req_011CZeWuAsqS6mXSG3tR6Ccr"}
+[2026-04-02T07:02:44.409Z] POST /api/activity/session
+7:02:44 AM [express] POST /api/activity/session 200 in 33ms :: {"sessionId":"adff2314-1e1d-44db-b510…
+[MultiVerifier] Qwen success
+[MultiVerifier] Gemini REST gemini-2.5-flash fetch error: Unexpected end of JSON input
+[MultiVerifier] Gemini REST gemini-2.0-flash HTTP 404: This model models/gemini-2.0-flash is no longer available to new users. Please update your code to use a newer model for the latest features and improvements.
+[MultiVerifier] Gemini REST gemini-2.0-flash-001 HTTP 404: This model models/gemini-2.0-flash-001 is no longer available to new users. Please update your code to use a newer model for the latest features and improvements.
+[MultiVerifier] All Gemini REST models failed — marking as unavailable
+[MultiVerifier] Result: FLAGGED | Gemini: N/A | OpenAI: 100 | Claude: 0 | Qwen: 95 | Composite: 65
+7:02:55 AM [express] POST /api/admin/blog/posts/f9ce7137-31b9-4059-95c8-b7659d202b97/reverify 200 in…
+[2026-04-02T07:02:55.480Z] GET /api/admin/blog/review-queue
+[2026-04-02T07:02:55.486Z] GET /api/admin/blog/posts/all/
+7:02:55 AM [express] GET /api/admin/blog/review-queue 200 in 41ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+7:02:55 AM [express] GET /api/admin/blog/posts/all/ 200 in 42ms
+[2026-04-02T07:03:14.418Z] POST /api/activity/session
+7:03:14 AM [express] POST /api/activity/session 200 in 245ms :: {"sessionId":"adff2314-1e1d-44db-b51…
+The model 'claude-3-5-haiku-20241022' is deprecated and will reach end-of-life on February 19th, 2026
+Please migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.
+[MultiVerifier] Available Gemini models for this key: gemini-2.5-flash, gemini-2.5-pro, gemini-2.0-flash, gemini-2.0-flash-001, gemini-2.0-flash-lite-001, gemini-2.0-flash-lite, gemini-2.5-flash-preview-tts, gemini-2.5-pro-preview-tts, gemini-flash-latest, gemini-flash-lite-latest, gemini-pro-latest, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-3-pro-preview, gemini-3-flash-preview, gemini-3.1-pro-preview, gemini-3.1-pro-preview-customtools, gemini-3.1-flash-lite-preview, gemini-3-pro-image-preview, gemini-3.1-flash-image-preview, gemini-robotics-er-1.5-preview, gemini-2.5-computer-use-preview-10-2025
+[MultiVerifier] Claude error: 400 {"type":"error","error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits."},"request_id":"req_011CZeWybCgNT1bx1ETD6tMv"}
+[2026-04-02T07:03:38.480Z] GET /api/admin/blog/review-queue
+7:03:38 AM [express] GET /api/admin/blog/review-queue 200 in 233ms :: [{"id":"f9ce7137-31b9-4059-95c…
+[2026-04-02T07:03:44.406Z] POST /api/activity/session
+7:03:44 AM [express] POST /api/activity/session 200 in 28ms :: {"sessionId":"adff2314-1e1d-44db-b510…
+[2026-04-02T07:03:43.914Z] POST /api/admin/blog/posts/f9ce7137-31b9-4059-95c8-b7659d202b97/reverify
+[MultiVerifier] Starting quad-AI verification for: How to Prepare for Your Innovator Founder Visa Interview
+[MultiVerifier] Qwen success
+[MultiVerifier] Gemini REST gemini-2.5-flash fetch error: Unexpected end of JSON input
+[MultiVerifier] Gemini REST gemini-2.0-flash HTTP 404: This model models/gemini-2.0-flash is no longer available to new users. Please update your code to use a newer model for the latest features and improvements.
+[MultiVerifier] Gemini REST gemini-2.0-flash-001 HTTP 404: This model models/gemini-2.0-flash-001 is no longer available to new users. Please update your code to use a newer model for the latest features and improvements.
+[MultiVerifier] All Gemini REST models failed — marking as unavailable
+[MultiVerifier] Result: FLAGGED | Gemini: N/A | OpenAI: 100 | Claude: 0 | Qwen: 95 | Composite: 65
+7:03:56 AM [express] POST /api/admin/blog/posts/f9ce7137-31b9-4059-95c8-b7659d202b97/reverify 200 in…
+[2026-04-02T07:03:56.230Z] GET /api/admin/blog/posts/all/
+7:03:56 AM [express] GET /api/admin/blog/posts/all/ 200 in 15ms
+[2026-04-02T07:03:56.395Z] GET /api/admin/blog/review-queue
+7:03:56 AM [express] GET /api/admin/blog/review-queue 200 in 33ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+[2026-04-02T07:03:59.292Z] POST /api/admin/blog/posts/23d9abaa-5fae-4c32-99ab-c5a9441b6109/reverify
+[MultiVerifier] Starting quad-AI verification for: How to Prepare for Your Innovator Founder Visa Interview
+The model 'claude-3-5-haiku-20241022' is deprecated and will reach end-of-life on February 19th, 2026
+Please migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.
+[MultiVerifier] Available Gemini models for this key: gemini-2.5-flash, gemini-2.5-pro, gemini-2.0-flash, gemini-2.0-flash-001, gemini-2.0-flash-lite-001, gemini-2.0-flash-lite, gemini-2.5-flash-preview-tts, gemini-2.5-pro-preview-tts, gemini-flash-latest, gemini-flash-lite-latest, gemini-pro-latest, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-3-pro-preview, gemini-3-flash-preview, gemini-3.1-pro-preview, gemini-3.1-pro-preview-customtools, gemini-3.1-flash-lite-preview, gemini-3-pro-image-preview, gemini-3.1-flash-image-preview, gemini-robotics-er-1.5-preview, gemini-2.5-computer-use-preview-10-2025
+[MultiVerifier] Claude error: 400 {"type":"error","error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits."},"request_id":"req_011CZeWzixXpdiwXn1qfLKDt"}
+[MultiVerifier] Gemini REST gemini-2.5-flash fetch error: Unexpected end of JSON input
+[MultiVerifier] Gemini REST gemini-2.0-flash HTTP 404: This model models/gemini-2.0-flash is no longer available to new users. Please update your code to use a newer model for the latest features and improvements.
+[MultiVerifier] Gemini REST gemini-2.0-flash-001 HTTP 404: This model models/gemini-2.0-flash-001 is no longer available to new users. Please update your code to use a newer model for the latest features and improvements.
+[MultiVerifier] All Gemini REST models failed — marking as unavailable
+[MultiVerifier] Qwen success
+[MultiVerifier] Result: FLAGGED | Gemini: N/A | OpenAI: 100 | Claude: 0 | Qwen: 95 | Composite: 65
+7:04:13 AM [express] POST /api/admin/blog/posts/23d9abaa-5fae-4c32-99ab-c5a9441b6109/reverify 200 in…
+[2026-04-02T07:04:13.912Z] GET /api/admin/blog/review-queue
+[2026-04-02T07:04:13.915Z] GET /api/admin/blog/posts/all/
+7:04:13 AM [express] GET /api/admin/blog/review-queue 200 in 36ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+7:04:13 AM [express] GET /api/admin/blog/posts/all/ 200 in 37ms
+[2026-04-02T07:04:14.233Z] POST /api/activity/session
+7:04:14 AM [express] POST /api/activity/session 200 in 37ms :: {"sessionId":"adff2314-1e1d-44db-b510…
+[2026-04-02T07:04:17.552Z] POST /api/activity/session/end
+7:04:17 AM [express] POST /api/activity/session/end 200 in 22ms :: {"success":true}
+
+
