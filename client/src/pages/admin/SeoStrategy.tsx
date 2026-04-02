@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useCallback, type ReactNode } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
@@ -13,7 +12,8 @@ import {
   Search, Zap, TrendingUp, Globe, BookOpen, Building2, Star,
   Target, AlertTriangle, CheckCircle2, Clock, BarChart3, Link2,
   FileText, Calendar, Cpu, ChevronRight, Download, RefreshCw,
-  Award, MapPin, MessageSquare, Camera
+  Award, MapPin, MessageSquare, Camera, Circle, PlayCircle, ExternalLink,
+  PenLine, ListChecks
 } from "lucide-react";
 
 interface SEOAction {
@@ -109,31 +109,90 @@ function ScoreRing({ score, label, color }: { score: number; label: string; colo
   );
 }
 
-function ActionCard({ action }: { action: SEOAction }) {
+type TaskStatus = "todo" | "in-progress" | "done";
+
+function useTaskTracker(storageKey: string) {
+  const load = (): Record<string, TaskStatus> => {
+    try { return JSON.parse(localStorage.getItem(storageKey) || "{}"); } catch { return {}; }
+  };
+  const [statuses, setStatuses] = useState<Record<string, TaskStatus>>(load);
+  const cycle = useCallback((id: string) => {
+    setStatuses(prev => {
+      const next = { ...prev };
+      const cur = next[id] || "todo";
+      next[id] = cur === "todo" ? "in-progress" : cur === "in-progress" ? "done" : "todo";
+      localStorage.setItem(storageKey, JSON.stringify(next));
+      return next;
+    });
+  }, [storageKey]);
+  return { statuses, cycle };
+}
+
+const STATUS_CONFIG: Record<TaskStatus, { icon: ReactNode; label: string; cls: string }> = {
+  "todo":        { icon: <Circle className="w-4 h-4" />,       label: "To Do",       cls: "text-muted-foreground" },
+  "in-progress": { icon: <PlayCircle className="w-4 h-4" />,   label: "In Progress", cls: "text-yellow-500" },
+  "done":        { icon: <CheckCircle2 className="w-4 h-4" />, label: "Done",        cls: "text-green-500" },
+};
+
+function ActionCard({ action, taskId, status, onCycle }: {
+  action: SEOAction;
+  taskId: string;
+  status: TaskStatus;
+  onCycle: (id: string) => void;
+}) {
+  const st = STATUS_CONFIG[status];
   return (
-    <div className="flex gap-3 p-4 border rounded-md bg-card">
-      <div className="flex-shrink-0 mt-0.5">
-        {action.priority === "critical" ? <AlertTriangle className="w-4 h-4 text-red-500" /> :
-         action.priority === "high" ? <Zap className="w-4 h-4 text-orange-500" /> :
-         <CheckCircle2 className="w-4 h-4 text-blue-500" />}
-      </div>
+    <div className={`flex gap-3 p-3 border rounded-md bg-card transition-opacity ${status === "done" ? "opacity-60" : ""}`}>
+      <button
+        onClick={() => onCycle(taskId)}
+        className={`flex-shrink-0 mt-0.5 ${st.cls} hover:opacity-70 transition-opacity`}
+        title={`Status: ${st.label} — click to advance`}
+      >
+        {st.icon}
+      </button>
       <div className="flex-1 min-w-0">
-        <div className="flex flex-wrap items-center gap-2 mb-1">
-          <Badge className={PRIORITY_COLORS[action.priority]}>{action.priority.toUpperCase()}</Badge>
-          <Badge variant="outline" className="text-xs">{action.category}</Badge>
-          <Badge variant="outline" className="text-xs">
-            <Clock className="w-3 h-3 mr-1" />{EFFORT_LABELS[action.effort]}
+        <div className="flex flex-wrap items-center gap-1.5 mb-1">
+          <Badge className={PRIORITY_COLORS[action.priority]} style={{fontSize:"10px"}}>{action.priority.toUpperCase()}</Badge>
+          <Badge variant="outline" style={{fontSize:"10px"}}>{action.category}</Badge>
+          <Badge variant="outline" style={{fontSize:"10px"}}>
+            <Clock className="w-2.5 h-2.5 mr-1" />{EFFORT_LABELS[action.effort]}
+          </Badge>
+          <Badge
+            variant="outline"
+            style={{fontSize:"10px"}}
+            className={`${st.cls} cursor-pointer`}
+            onClick={() => onCycle(taskId)}
+          >
+            {st.label}
           </Badge>
         </div>
-        <p className="text-sm font-medium mb-1">{action.action}</p>
+        <p className={`text-sm font-medium mb-0.5 ${status === "done" ? "line-through" : ""}`}>{action.action}</p>
         <p className="text-xs text-muted-foreground">{action.impact}</p>
-        {action.metric && <p className="text-xs text-muted-foreground mt-1"><strong>Measure:</strong> {action.metric}</p>}
+        {action.metric && <p className="text-xs text-muted-foreground mt-0.5"><strong>Measure:</strong> {action.metric}</p>}
       </div>
     </div>
   );
 }
 
-function KeywordCard({ kw }: { kw: KeywordOpportunity }) {
+function TaskProgressBar({ statuses, total }: { statuses: Record<string, TaskStatus>; total: number }) {
+  const done = Object.values(statuses).filter(s => s === "done").length;
+  const inProgress = Object.values(statuses).filter(s => s === "in-progress").length;
+  if (total === 0) return null;
+  return (
+    <div className="flex items-center gap-3 p-2 bg-muted/50 rounded-md">
+      <ListChecks className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+      <div className="flex-1">
+        <div className="flex justify-between text-xs text-muted-foreground mb-1">
+          <span>{done} done · {inProgress} in progress · {total - done - inProgress} to do</span>
+          <span>{Math.round((done / total) * 100)}% complete</span>
+        </div>
+        <Progress value={(done / total) * 100} className="h-1.5" />
+      </div>
+    </div>
+  );
+}
+
+function KeywordCard({ kw, onGenerateBlog }: { kw: KeywordOpportunity; onGenerateBlog: (keyword: string) => void }) {
   return (
     <div className="flex items-start gap-3 p-3 border rounded-md bg-card">
       <div className="flex-1 min-w-0">
@@ -141,9 +200,14 @@ function KeywordCard({ kw }: { kw: KeywordOpportunity }) {
         <p className="text-xs text-muted-foreground mt-0.5 truncate">{kw.pageRecommendation}</p>
       </div>
       <div className="flex flex-col gap-1 items-end flex-shrink-0">
-        <Badge className={INTENT_COLORS[kw.intent]}>{kw.intent.replace("-", " ")}</Badge>
-        <Badge variant="outline" className="text-xs">{kw.difficulty} difficulty</Badge>
-        <Badge variant="outline" className="text-xs">{kw.action === "create-new" ? "New Page" : "Optimise"}</Badge>
+        <Badge className={INTENT_COLORS[kw.intent]} style={{fontSize:"10px"}}>{kw.intent.replace("-", " ")}</Badge>
+        <Badge variant="outline" style={{fontSize:"10px"}}>{kw.difficulty} difficulty</Badge>
+        <Badge variant="outline" style={{fontSize:"10px"}}>{kw.action === "create-new" ? "New Page" : "Optimise"}</Badge>
+        {kw.action === "create-new" && (
+          <Button size="sm" variant="outline" className="h-6 text-xs px-2 mt-0.5" onClick={() => onGenerateBlog(kw.keyword)}>
+            <PenLine className="w-3 h-3 mr-1" />Blog
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -153,6 +217,16 @@ export default function SeoStrategy() {
   const { toast } = useToast();
   const [result, setResult] = useState<SEOStrategyResult | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const { statuses, cycle } = useTaskTracker("seo-strategy-tasks");
+
+  const handleGenerateBlog = (keyword: string) => {
+    const url = `/admin/blog?prefill=${encodeURIComponent(keyword)}`;
+    window.open(url, "_blank");
+    toast({ title: "Opening Blog Creator", description: `Pre-filling blog post for: "${keyword}"` });
+  };
+
+  const makeTaskId = (prefix: string, i: number, action: string) =>
+    `${prefix}-${i}-${action.slice(0, 30).replace(/\s/g, "-")}`;
 
   const [form, setForm] = useState({
     businessName: "UK Innovator Founder Visa Assistant",
@@ -441,9 +515,10 @@ export default function SeoStrategy() {
                   <CardContent className="space-y-2">
                     {result.criticalActions.length === 0 ? (
                       <p className="text-sm text-muted-foreground">No critical actions — great baseline!</p>
-                    ) : result.criticalActions.slice(0, 5).map((action, i) => (
-                      <ActionCard key={i} action={action} />
-                    ))}
+                    ) : result.criticalActions.slice(0, 5).map((action, i) => {
+                      const id = makeTaskId("critical", i, action.action);
+                      return <ActionCard key={i} action={action} taskId={id} status={statuses[id] || "todo"} onCycle={cycle} />;
+                    })}
                   </CardContent>
                 </Card>
 
@@ -529,11 +604,19 @@ export default function SeoStrategy() {
                   <CardDescription>High-impact actions that can be completed within days</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
+                  <TaskProgressBar
+                    statuses={Object.fromEntries(result.quickWins.map((a, i) => {
+                      const id = makeTaskId("qw", i, a.action);
+                      return [id, statuses[id] || "todo"];
+                    }))}
+                    total={result.quickWins.length}
+                  />
                   {result.quickWins.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No page-2 quick wins identified — your baseline ranking data may be needed for this section.</p>
-                  ) : result.quickWins.map((action, i) => (
-                    <ActionCard key={i} action={action} />
-                  ))}
+                    <p className="text-sm text-muted-foreground">No page-2 quick wins identified — baseline ranking data needed for this section.</p>
+                  ) : result.quickWins.map((action, i) => {
+                    const id = makeTaskId("qw", i, action.action);
+                    return <ActionCard key={i} action={action} taskId={id} status={statuses[id] || "todo"} onCycle={cycle} />;
+                  })}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -548,9 +631,19 @@ export default function SeoStrategy() {
                   <CardDescription>Week-by-week technical and content priorities</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {result.thirtyDayPlan.map((action, i) => (
-                    <ActionCard key={i} action={action} />
-                  ))}
+                  <TaskProgressBar
+                    statuses={Object.fromEntries(result.thirtyDayPlan.map((a, i) => {
+                      const id = makeTaskId("30d", i, a.action);
+                      return [id, statuses[id] || "todo"];
+                    }))}
+                    total={result.thirtyDayPlan.length}
+                  />
+                  {result.thirtyDayPlan.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">30-day plan not yet generated — regenerate to populate this section.</p>
+                  ) : result.thirtyDayPlan.map((action, i) => {
+                    const id = makeTaskId("30d", i, action.action);
+                    return <ActionCard key={i} action={action} taskId={id} status={statuses[id] || "todo"} onCycle={cycle} />;
+                  })}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -562,12 +655,22 @@ export default function SeoStrategy() {
                   <CardTitle className="text-base flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-purple-500" />90-Day Authority Building Plan
                   </CardTitle>
-                  <CardDescription>Entity optimisation and authority building for long-term compounding growth</CardDescription>
+                  <CardDescription>Content publishing, entity building, link acquisition, and PR — for long-term compounding growth</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {result.ninetyDayPlan.map((action, i) => (
-                    <ActionCard key={i} action={action} />
-                  ))}
+                  <TaskProgressBar
+                    statuses={Object.fromEntries(result.ninetyDayPlan.map((a, i) => {
+                      const id = makeTaskId("90d", i, a.action);
+                      return [id, statuses[id] || "todo"];
+                    }))}
+                    total={result.ninetyDayPlan.length}
+                  />
+                  {result.ninetyDayPlan.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">90-day plan will populate after Gemini and Claude complete successfully. Regenerate to refresh.</p>
+                  ) : result.ninetyDayPlan.map((action, i) => {
+                    const id = makeTaskId("90d", i, action.action);
+                    return <ActionCard key={i} action={action} taskId={id} status={statuses[id] || "todo"} onCycle={cycle} />;
+                  })}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -576,19 +679,26 @@ export default function SeoStrategy() {
             <TabsContent value="keywords" className="space-y-4 mt-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Target className="w-4 h-4 text-green-500" />Keyword Opportunities
-                  </CardTitle>
-                  <CardDescription>
-                    <span className="inline-flex items-center gap-1 mr-3"><Badge className={INTENT_COLORS["ready-to-hire"]}>ready-to-hire</Badge> = highest conversion</span>
-                    <span className="inline-flex items-center gap-1 mr-3"><Badge className={INTENT_COLORS["solution-aware"]}>solution-aware</Badge> = evaluation stage</span>
-                    <span className="inline-flex items-center gap-1"><Badge className={INTENT_COLORS["problem-aware"]}>problem-aware</Badge> = awareness stage</span>
-                  </CardDescription>
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Target className="w-4 h-4 text-green-500" />Keyword Opportunities
+                      </CardTitle>
+                      <CardDescription className="text-xs mt-1">
+                        <span className="inline-flex items-center gap-1 mr-3"><Badge className={INTENT_COLORS["ready-to-hire"]} style={{fontSize:"10px"}}>ready-to-hire</Badge> = highest conversion</span>
+                        <span className="inline-flex items-center gap-1 mr-3"><Badge className={INTENT_COLORS["solution-aware"]} style={{fontSize:"10px"}}>solution-aware</Badge> = evaluation stage</span>
+                        <span className="inline-flex items-center gap-1"><Badge className={INTENT_COLORS["problem-aware"]} style={{fontSize:"10px"}}>problem-aware</Badge> = awareness stage</span>
+                      </CardDescription>
+                    </div>
+                    <p className="text-xs text-muted-foreground pt-1">Click Blog button to create post</p>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {result.keywordOpportunities.map((kw, i) => (
-                      <KeywordCard key={i} kw={kw} />
+                    {result.keywordOpportunities.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No keyword opportunities yet — regenerate for full results.</p>
+                    ) : result.keywordOpportunities.map((kw, i) => (
+                      <KeywordCard key={i} kw={kw} onGenerateBlog={handleGenerateBlog} />
                     ))}
                   </div>
                 </CardContent>
@@ -602,16 +712,26 @@ export default function SeoStrategy() {
                   <CardTitle className="text-base flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-blue-500" />Content Calendar
                   </CardTitle>
-                  <CardDescription>Prioritised content production plan from Qwen + Claude</CardDescription>
+                  <CardDescription>Prioritised content production plan from Qwen + Claude — click "Generate" to create each post</CardDescription>
                 </CardHeader>
                 <CardContent>
+                  {result.contentCalendar.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Content calendar will populate after Claude and Qwen complete. Regenerate to refresh.</p>
+                  ) : (
                   <div className="space-y-3">
                     {result.contentCalendar.map((piece, i) => (
-                      <div key={i} className="p-4 border rounded-md bg-card space-y-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          {piece.weekNumber && <Badge variant="outline" className="text-xs">Week {piece.weekNumber}</Badge>}
-                          <Badge variant="outline" className="text-xs capitalize">{piece.type.replace("-", " ")}</Badge>
-                          <Badge variant="outline" className="text-xs">{piece.wordCount} words</Badge>
+                      <div key={i} className="p-3 border rounded-md bg-card space-y-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {piece.weekNumber && <Badge variant="outline" style={{fontSize:"10px"}}>Week {piece.weekNumber}</Badge>}
+                            <Badge variant="outline" style={{fontSize:"10px"}} className="capitalize">{piece.type.replace("-", " ")}</Badge>
+                            <Badge variant="outline" style={{fontSize:"10px"}}>{piece.wordCount} words</Badge>
+                          </div>
+                          {(piece.type === "blog" || piece.type === "faq") && (
+                            <Button size="sm" variant="outline" className="h-6 text-xs px-2" onClick={() => handleGenerateBlog(piece.targetKeyword)}>
+                              <PenLine className="w-3 h-3 mr-1" />Generate
+                            </Button>
+                          )}
                         </div>
                         <p className="text-sm font-medium">{piece.title}</p>
                         <p className="text-xs text-muted-foreground"><strong>Target keyword:</strong> {piece.targetKeyword}</p>
@@ -628,6 +748,7 @@ export default function SeoStrategy() {
                       </div>
                     ))}
                   </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -642,7 +763,9 @@ export default function SeoStrategy() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    {result.gbpStrategy.categoryRecommendations.map((cat, i) => (
+                    {result.gbpStrategy.categoryRecommendations.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">Requires Gemini — will populate after next regeneration.</p>
+                    ) : result.gbpStrategy.categoryRecommendations.map((cat, i) => (
                       <div key={i} className="flex items-center gap-2 p-2 bg-muted/50 rounded text-sm">
                         <CheckCircle2 className="w-3 h-3 flex-shrink-0 text-green-500" />
                         <span>{cat}</span>
@@ -658,7 +781,9 @@ export default function SeoStrategy() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    {result.gbpStrategy.attributesToAdd.map((attr, i) => (
+                    {result.gbpStrategy.attributesToAdd.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">Requires Gemini — will populate after next regeneration.</p>
+                    ) : result.gbpStrategy.attributesToAdd.map((attr, i) => (
                       <div key={i} className="flex items-center gap-2 p-2 bg-muted/50 rounded text-sm">
                         <CheckCircle2 className="w-3 h-3 flex-shrink-0 text-green-500" />
                         <span>{attr}</span>
@@ -676,7 +801,9 @@ export default function SeoStrategy() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {result.gbpStrategy.descriptionVersions.map((desc, i) => (
+                  {result.gbpStrategy.descriptionVersions.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">Gemini writes these — will populate after next regeneration with the fixed model.</p>
+                  ) : result.gbpStrategy.descriptionVersions.map((desc, i) => (
                     <div key={i} className="p-3 border rounded-md bg-card">
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="outline">Version {i + 1}</Badge>

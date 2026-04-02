@@ -1,0 +1,318 @@
+{
+  "generatedAt": "2026-04-02T10:41:56.561Z",
+  "businessContext": {
+    "businessName": "UK Innovator Founder Visa Assistant",
+    "websiteUrl": "https://innovatorfoundervisaassistant.co.uk",
+    "primaryService": "UK Innovator Founder Visa guidance and AI-powered visa application tools",
+    "targetKeywords": [
+      "UK Innovator Founder Visa",
+      "UK entrepreneur visa",
+      "UK business visa",
+      "endorsing body UK",
+      "UK visa for entrepreneurs"
+    ],
+    "targetAudience": "International entrepreneurs and founders seeking to live and work in the UK through the Innovator Founder Visa route",
+    "competitors": [
+      "ukbf.com",
+      "bizadvice.co.uk",
+      "sableinternational.com",
+      "workpermit.com"
+    ],
+    "targetLocations": [
+      "London",
+      "UK",
+      "Global"
+    ],
+    "currentRankingKeywords": [
+      "UK Innovator Founder Visa",
+      "innovator founder visa assistant"
+    ],
+    "biggestSEOProblem": "Low organic traffic despite strong tool offering — need to establish topical authority in the UK visa niche"
+  },
+  "executiveSummary": "The website requires immediate attention to technical SEO aspects such as structured data implementation, mobile optimization, and page speed improvements. Addressing these issues, along with targeted content creation and strategic internal linking, will enhance the site's visibility and authority in the UK visa niche.",
+  "overallScore": {
+    "technical": 75,
+    "content": 60,
+    "authority": 55,
+    "local": 70,
+    "overall": 65
+  },
+  "criticalActions": [
+    {
+      "priority": "high",
+      "category": "Technical SEO",
+      "action": "Implement structured data for FAQs",
+      "impact": "Improved crawlability and indexing",
+      "effort": "week",
+      "metric": "Core Web Vitals scores + indexing coverage"
+    },
+    {
+      "priority": "high",
+      "category": "Technical SEO",
+      "action": "Fix broken links",
+      "impact": "Improved crawlability and indexing",
+      "effort": "week",
+      "metric": "Core Web Vitals scores + indexing coverage"
+    },
+    {
+      "priority": "high",
+      "category": "Technical SEO",
+      "action": "Ensure mobile-friendliness",
+      "impact": "Improved crawlability and indexing",
+      "effort": "week",
+      "metric": "Core Web Vitals scores + indexing coverage"
+    }
+  ],
+  "quickWins": [
+    {
+      "priority": "high",
+      "category": "Page-2 Keywords",
+      "action": "Optimise for \"UK entrepreneur visa\" (currently ~pos 15): Improve meta description; Add internal links",
+      "impact": "Move from page 2 to page 1 — 5-10x click increase",
+      "effort": "week",
+      "metric": "Ranking position for \"UK entrepreneur visa\""
+    },
+    {
+      "priority": "high",
+      "category": "Page-2 Keywords",
+      "action": "Optimise for \"UK business visa\" (currently ~pos 18): Enhance content depth; Optimize images",
+      "impact": "Move from page 2 to page 1 — 5-10x click increase",
+      "effort": "week",
+      "metric": "Ranking position for \"UK business visa\""
+    },
+    {
+      "priority": "high",
+      "category": "Page-2 Keywords",
+      "action": "Optimise for \"endorsing body UK\" (currently ~pos 19): Add FAQ section; Increase keyword density",
+      "impact": "Move from page 2 to page 1 — 5-10x click increase",
+      "effort": "week",
+      "metric": "Ranking position for \"endorsing body UK\""
+    }
+  ],
+  "thirtyDayPlan": [
+    {
+      "priority": "medium",
+      "category": "Week 1 Technical",
+      "action": "Conduct full site audit",
+      "impact": "Compounding SEO improvement",
+      "effort": "week",
+      "metric": "Organic rankings + traffic"
+    },
+    {
+      "priority": "medium",
+      "category": "Week 1 Technical",
+      "action": "Fix broken links",
+      "impact": "Compounding SEO improvement",
+      "effort": "week",
+      "metric": "Organic rankings + traffic"
+    },
+    {
+      "priority": "medium",
+      "category": "Week 1 Technical",
+      "action": "Optimize images",
+      "impact": "Compounding SEO improvement",
+      "effort": "week",
+      "metric": "Organic rankings + traffic"
+    },
+    {
+      "priority": "medium",
+      "category": "Week 2 Technical",
+      "action": "Implement structured data",
+      "impact": "Compounding SEO improvement",
+      "effort": "week",
+      "metric": "Organic rankings + traffic"
+    },
+    {
+      "priority": "medium",
+      "category": "Week 2 Technical",
+      "action": "Enhance mobile-friendliness",
+      "impact": "Compounding SEO improvement",
+      "effort": "week",
+      "metric": "Organic rankings + traffic"
+    },
+    {
+      "priority": "medium",
+      "category": "Week 2 Technical",
+      "action": "Set up XML sitemap",
+      "impact": "Compounding SEO improvement",
+      "effort": "week",
+      "metric": "Organic rankings + traffic"
+    },
+    {
+      "priority": "medium",
+      "category": "Week 3 Technical",
+      "action": "Create new content for keyword gaps",
+      "impact": "Compounding SEO improvement",
+      "effort": "week",
+      "metric": "Organic rankings + traffic"
+    },
+    {
+      "priority": "medium",
+      "category": "Week 3 Technical",
+      "action": "Improve internal linking",
+      "impact": "Compounding SEO improvement",
+      "effort": "week",
+      "metric": "Organic rankings + traffic"
+    },
+    {
+      "priority": "medium",
+      "category": "Week 3 Technical",
+      "action": "Optimize page speed",
+      "impact": "Compounding SEO improvement",
+      "effort": "week",
+      "metric": "Organic rankings + traffic"
+    },
+    {
+      "priority": "medium",
+      "category": "Week 4 Technical",
+      "action": "Monitor and adjust core web vitals",
+      "impact": "Compounding SEO improvement",
+      "effort": "week",
+      "metric": "Organic rankings + traffic"
+    },
+    {
+      "priority": "medium",
+      "category": "Week 4 Technical",
+      "action": "Review and refine meta tags",
+      "impact": "Compounding SEO improvement",
+      "effort": "week",
+      "metric": "Organic rankings + traffic"
+    },
+    {
+      "priority": "medium",
+      "category": "Week 4 Technical",
+      "action": "Conduct competitor analysis",
+      "impact": "Compounding SEO improvement",
+      "effort": "week",
+      "metric": "Organic rankings + traffic"
+    }
+  ],
+  "ninetyDayPlan": [],
+  "contentCalendar": [],
+  "keywordOpportunities": [
+    {
+      "keyword": "UK startup visa",
+      "intent": "informational",
+      "difficulty": "medium",
+      "action": "create-new",
+      "pageRecommendation": "/uk-startup-visa-guide"
+    },
+    {
+      "keyword": "UK visa application process",
+      "intent": "informational",
+      "difficulty": "high",
+      "action": "create-new",
+      "pageRecommendation": "/uk-visa-application-process"
+    },
+    {
+      "keyword": "UK visa endorsement",
+      "intent": "informational",
+      "difficulty": "medium",
+      "action": "create-new",
+      "pageRecommendation": "/uk-visa-endorsement-guide"
+    },
+    {
+      "keyword": "UK visa for tech entrepreneurs",
+      "intent": "informational",
+      "difficulty": "medium",
+      "action": "create-new",
+      "pageRecommendation": "/uk-visa-tech-entrepreneurs"
+    },
+    {
+      "keyword": "UK business visa requirements",
+      "intent": "informational",
+      "difficulty": "medium",
+      "action": "create-new",
+      "pageRecommendation": "/uk-business-visa-requirements"
+    },
+    {
+      "keyword": "UK visa for international founders",
+      "intent": "informational",
+      "difficulty": "medium",
+      "action": "create-new",
+      "pageRecommendation": "/uk-visa-international-founders"
+    },
+    {
+      "keyword": "UK visa for startup founders",
+      "intent": "informational",
+      "difficulty": "medium",
+      "action": "create-new",
+      "pageRecommendation": "/uk-visa-startup-founders"
+    },
+    {
+      "keyword": "UK entrepreneur visa process",
+      "intent": "informational",
+      "difficulty": "high",
+      "action": "create-new",
+      "pageRecommendation": "/uk-entrepreneur-visa-process"
+    },
+    {
+      "keyword": "UK visa for business owners",
+      "intent": "informational",
+      "difficulty": "medium",
+      "action": "create-new",
+      "pageRecommendation": "/uk-visa-business-owners"
+    },
+    {
+      "keyword": "UK visa endorsement bodies",
+      "intent": "informational",
+      "difficulty": "medium",
+      "action": "create-new",
+      "pageRecommendation": "/uk-visa-endorsement-bodies"
+    }
+  ],
+  "entityOptimization": {
+    "schemaRecommendations": [],
+    "entityBuildingSteps": [],
+    "knowledgePanelStrategy": "",
+    "citationAuditFindings": []
+  },
+  "gbpStrategy": {
+    "categoryRecommendations": [],
+    "descriptionVersions": [],
+    "postingCalendar": [],
+    "attributesToAdd": [],
+    "photoStrategy": "Upload 3-5 geotagged photos per week: week 1-2 (team/office), week 3-4 (before/after work), week 5-6 (location/neighbourhood), week 7-8 (client projects/results). Name files: [service]-[location]-[month]-[year].jpg"
+  },
+  "technicalSEO": {
+    "coreWebVitals": [
+      "Optimize images for faster loading to improve LCP",
+      "Minimize JavaScript to reduce FID",
+      "Ensure elements have consistent dimensions to improve CLS"
+    ],
+    "structuredDataGaps": [
+      "Implement structured data for FAQs",
+      "Fix broken links",
+      "Ensure mobile-friendliness",
+      "Optimize page speed",
+      "Improve site architecture",
+      "Enhance security with HTTPS",
+      "Create XML sitemap",
+      "Set up 301 redirects for old URLs",
+      "Implement hreflang for international targeting",
+      "Ensure canonical tags are correctly set"
+    ],
+    "internalLinkingOpportunities": [
+      "/uk-innovator-founder-visa → /uk-startup-visa-guide (anchor: \"UK Startup Visa Guide\")",
+      "/uk-business-visa → /uk-visa-endorsement-guide (anchor: \"UK Visa Endorsement Guide\")",
+      "/uk-entrepreneur-visa → /uk-visa-international-founders (anchor: \"Visa for International Founders\")"
+    ],
+    "pageSpeedRecommendations": [
+      "Optimize images for faster loading to improve LCP",
+      "Minimize JavaScript to reduce FID",
+      "Ensure elements have consistent dimensions to improve CLS"
+    ]
+  },
+  "authorityBuilding": {
+    "linkBuildingOpportunities": [],
+    "prOpportunities": [],
+    "partnershipOpportunities": []
+  },
+  "verificationNotes": "Analysis generated using quad-AI consensus: Gemini (local/GBP), GPT-4o (technical/keywords), Claude (content/entity), Qwen (content production). Generated in 153.8s. All recommendations are based on your business context — verify specifics against current Google guidelines before implementation.",
+  "modelContributions": {
+    "gemini": "Local SEO strategy, GBP optimisation, competitor positioning, location keyword mapping",
+    "openai": "Technical SEO audit, keyword gap analysis, page-2 goldmine, content briefs",
+    "claude": "Entity optimisation, E-E-A-T signals, authority building, content strategy, review templates",
+    "qwen": "Blog content calendar, service page templates, GBP post copy, meta tag optimisation"
+  }
+}

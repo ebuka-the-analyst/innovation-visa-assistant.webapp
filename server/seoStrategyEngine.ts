@@ -395,7 +395,7 @@ export async function generateSEOStrategy(ctx: SEOBusinessContext): Promise<SEOS
     (async () => {
       const response = await anthropic.messages.create({
         model: "claude-opus-4-5",
-        max_tokens: 8000,
+        max_tokens: 16000,
         temperature: 0.3 as number,
         system: "You are a PhD-level SEO content strategist and entity optimisation specialist. Respond with valid JSON only — no markdown, no explanations outside the JSON structure.",
         messages: [{ role: "user", content: buildClaudePrompt(ctx) }]
@@ -478,15 +478,50 @@ export async function generateSEOStrategy(ctx: SEOBusinessContext): Promise<SEOS
     }))
   );
 
-  // 90-day plan from Claude
-  const ninetyDayPlan: SEOAction[] = (((claudeData as Record<string, unknown>)?.entityBuildingSteps as string[]) || []).slice(0, 8).map((step: string) => ({
-    priority: "medium" as const,
-    category: "Entity & Authority",
-    action: step,
-    impact: "Long-term authority and knowledge panel acquisition",
-    effort: "quarter" as const,
-    metric: "Domain authority + branded searches"
-  }));
+  // 90-day plan from Claude's editorial calendar (weeks 7-12) + entity building steps + link building
+  const claudeEditorial = ((claudeData as Record<string, unknown>)?.twelveWeekEditorial as Array<{week: number; title: string; type: string; targetKeyword: string}>) || [];
+  const claudeEntitySteps = ((claudeData as Record<string, unknown>)?.entityBuildingSteps as string[]) || [];
+  const claudeLinkBuilding = ((claudeData as Record<string, unknown>)?.linkBuildingOpportunities as Array<{source: string; type: string; strategy: string}>) || [];
+  const claudePR = ((claudeData as Record<string, unknown>)?.prOpportunities as string[]) || [];
+
+  const ninetyDayPlan: SEOAction[] = [
+    // Weeks 7-12 from editorial calendar
+    ...claudeEditorial.filter(i => i.week >= 7).slice(0, 4).map((item) => ({
+      priority: "medium" as const,
+      category: `Week ${item.week} Content`,
+      action: `Publish: "${item.title}" (${item.type}) — targeting "${item.targetKeyword}"`,
+      impact: "Topical authority and organic traffic compound growth",
+      effort: "month" as const,
+      metric: `Ranking + organic traffic for "${item.targetKeyword}"`
+    })),
+    // Entity building steps
+    ...claudeEntitySteps.slice(0, 4).map((step: string) => ({
+      priority: "medium" as const,
+      category: "Entity & Authority",
+      action: step,
+      impact: "Knowledge panel acquisition and branded search growth",
+      effort: "quarter" as const,
+      metric: "Domain authority + branded searches"
+    })),
+    // Link building
+    ...claudeLinkBuilding.slice(0, 4).map((l) => ({
+      priority: "medium" as const,
+      category: "Link Building",
+      action: `${l.type}: ${l.source} — ${l.strategy}`,
+      impact: "Domain authority improvement",
+      effort: "month" as const,
+      metric: "Referring domains + DA score"
+    })),
+    // PR opportunities
+    ...claudePR.slice(0, 3).map((pr: string) => ({
+      priority: "low" as const,
+      category: "PR & Media",
+      action: pr,
+      impact: "High-authority backlinks + brand awareness",
+      effort: "quarter" as const,
+      metric: "Press mentions + editorial links"
+    })),
+  ];
 
   // Content calendar from Qwen (blog) + Claude (12-week editorial)
   const contentCalendar: ContentPiece[] = [
@@ -565,12 +600,18 @@ export async function generateSEOStrategy(ctx: SEOBusinessContext): Promise<SEOS
     gbpStrategy: {
       categoryRecommendations: ((geminiData as Record<string, unknown>)?.categoryRecommendations as string[]) || [],
       descriptionVersions: ((geminiData as Record<string, unknown>)?.descriptionVersions as string[]) || [],
-      postingCalendar: (((geminiData as Record<string, unknown>)?.postingCalendar as Array<{week: number; topic: string; type: string; copy: string}>) || []).map(p => ({
-        week: p.week || 1,
-        topic: p.topic || "",
-        type: p.type || "update",
-        copy: p.copy || "",
-      })),
+      postingCalendar: (() => {
+        // Gemini returns {week, post, type, topic, copy}; Qwen returns {week, postNumber, type, topic, copy}
+        const geminiPosts = ((geminiData as Record<string, unknown>)?.postingCalendar as Array<Record<string, unknown>>) || [];
+        const qwenPosts = ((qwenData as Record<string, unknown>)?.gbpPosts as Array<Record<string, unknown>>) || [];
+        const source = geminiPosts.length > 0 ? geminiPosts : qwenPosts;
+        return source.map(p => ({
+          week: Number(p.week) || 1,
+          topic: (p.topic as string) || (p.type as string) || "GBP Update",
+          type: (p.type as string) || "update",
+          copy: (p.copy as string) || "",
+        }));
+      })(),
       attributesToAdd: ((geminiData as Record<string, unknown>)?.attributesToAdd as string[]) || [],
       photoStrategy: "Upload 3-5 geotagged photos per week: week 1-2 (team/office), week 3-4 (before/after work), week 5-6 (location/neighbourhood), week 7-8 (client projects/results). Name files: [service]-[location]-[month]-[year].jpg",
     },
