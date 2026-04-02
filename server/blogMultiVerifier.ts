@@ -138,7 +138,14 @@ async function runGeminiVerification(title: string, content: string): Promise<{
   }
 
   // Direct REST API — bypasses SDK routing entirely, always hits Google AI Studio endpoint
-  const GEMINI_MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+  // gemini-2.0-flash and gemini-1.5-* are unavailable on newer API projects
+  // Use the current generation models instead
+  const GEMINI_MODELS = [
+    "gemini-2.0-flash-lite",
+    "gemini-2.0-flash-001",
+    "gemini-2.5-pro-exp-03-25",
+    "gemini-2.5-flash-preview-04-17",
+  ];
   const prompt = buildMarkerPrompt(title, content);
 
   for (const modelName of GEMINI_MODELS) {
