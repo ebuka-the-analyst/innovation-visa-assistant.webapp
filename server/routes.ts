@@ -2531,10 +2531,12 @@ ${generatedSections.join('\n\n---\n\n')}`;
         return res.status(500).json({ error: "Business plan content is missing" });
       }
 
-      // Load saved cover design from database to apply theme (with fallback if table doesn't exist)
+      // Load saved cover design from database to apply theme.
+      // When admin views another user's plan, use the PLAN OWNER's cover design, not the admin's.
       let savedCoverDesign = null;
       try {
-        savedCoverDesign = await storage.getLatestCoverDesign(user.id);
+        const coverDesignUserId = businessPlan.userId || user.id;
+        savedCoverDesign = await storage.getLatestCoverDesign(coverDesignUserId);
       } catch (coverError: any) {
         // Gracefully handle if cover_designs table doesn't exist in production
         console.log("Cover design fetch failed (may not exist in production):", coverError?.message);
