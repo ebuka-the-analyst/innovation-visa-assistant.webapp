@@ -15562,6 +15562,66 @@ Return a JSON object with:
     }
   });
 
+  // Auto-fix flagged content and re-verify
+  app.post("/api/admin/blog/posts/:postId/auto-fix", requireAdmin, async (req, res) => {
+    try {
+      const { postId } = req.params;
+      const { autoFixBlogPost } = await import("./blogAutoFixer.js");
+      const { computeContentHash } = await import("./blogMultiVerifier.js");
+
+      const [post] = await db.select().from(blogPosts).where(eq(blogPosts.id, postId)).limit(1);
+      if (!post) return res.status(404).json({ error: "Post not found" });
+
+      // Gather all flags from the last verification (stored in verificationDetails.allFlags)
+      const lastDetails = (post.verificationDetails as any) || {};
+      const allFlags: Array<{ marker: string; claim: string; issue: string; severity: string }> =
+        lastDetails.allFlags || [];
+
+      const { fixedContent, flagsAddressed, verificationResult, autoPublished } =
+        await autoFixBlogPost(post.title, post.content, allFlags);
+
+      const now = new Date();
+      const expiresAt = new Date(now);
+      expiresAt.setDate(expiresAt.getDate() + 90);
+
+      await db.update(blogPosts).set({
+        content: fixedContent,
+        aiVerificationScore: verificationResult.compositeScore,
+        geminiScore: verificationResult.geminiScore,
+        openaiScore: verificationResult.openaiScore,
+        qwenScore: verificationResult.qwenScore,
+        claudeScore: verificationResult.claudeScore,
+        verificationStatus: verificationResult.passed ? "passed" : "human_review",
+        verificationDetails: verificationResult.details as any,
+        verifiedAt: verificationResult.verifiedAt,
+        verificationExpiresAt: verificationResult.verificationExpiresAt,
+        humanReviewRequired: verificationResult.requiresHumanReview,
+        contradictionFlags: verificationResult.contradictionFlags,
+        sourcesCited: verificationResult.sourcesCited,
+        contentHash: computeContentHash(fixedContent),
+        // Auto-publish if it now passes
+        ...(autoPublished ? {
+          isPublished: true,
+          postStatus: "published",
+          publishedAt: now,
+        } : {}),
+        updatedAt: now,
+      }).where(eq(blogPosts.id, postId));
+
+      res.json({
+        success: true,
+        flagsAddressed,
+        autoPublished,
+        compositeScore: verificationResult.compositeScore,
+        passed: verificationResult.passed,
+        result: verificationResult,
+      });
+    } catch (error) {
+      console.error("Auto-fix error:", error);
+      res.status(500).json({ error: "Auto-fix failed" });
+    }
+  });
+
   // Approve a human-review post and publish it
   app.post("/api/admin/blog/posts/:postId/approve", requireAdmin, async (req, res) => {
     try {

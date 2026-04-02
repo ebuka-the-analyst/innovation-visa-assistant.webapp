@@ -19,7 +19,7 @@ import {
   Sparkles, Send, Archive, Play, Pause, Settings, ChevronDown,
   PenTool, Image, Share2, ThumbsUp, MessageSquare, Target,
   Zap, Timer, BookOpen, Award, ShieldCheck, ShieldAlert,
-  Fingerprint, Cpu, Check, X
+  Fingerprint, Cpu, Check, X, Wand2
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { BlogPost } from "@shared/schema";
@@ -176,6 +176,60 @@ export default function BlogDashboard() {
     },
     onError: (error: any) => {
       toast({ title: "Approval Failed", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Auto-fix a single post (Qwen corrects flags → re-verifies → auto-publishes if passes)
+  const [fixingPostId, setFixingPostId] = useState<string | null>(null);
+  const autoFixMutation = useMutation({
+    mutationFn: async (id: string) => {
+      setFixingPostId(id);
+      return apiRequest("POST", `/api/admin/blog/posts/${id}/auto-fix`);
+    },
+    onSuccess: (data: any) => {
+      setFixingPostId(null);
+      if (data?.autoPublished) {
+        toast({
+          title: "Fixed & Auto-Published",
+          description: `All ${data.flagsAddressed} flag(s) corrected. Composite score: ${data.compositeScore}/100. Post is now live.`,
+        });
+      } else {
+        toast({
+          title: "Fixed — Still In Review",
+          description: `${data?.flagsAddressed ?? 0} flag(s) addressed. New composite: ${data?.compositeScore ?? "?"}/100. Some issues remain — check the updated scores.`,
+          variant: "default",
+        });
+      }
+      refetchReview();
+      refetchPosts();
+      refetchStats();
+    },
+    onError: (error: any) => {
+      setFixingPostId(null);
+      toast({ title: "Auto-Fix Failed", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Fix ALL queued posts sequentially
+  const [fixAllProgress, setFixAllProgress] = useState<{ done: number; total: number } | null>(null);
+  const autoFixAllMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      setFixAllProgress({ done: 0, total: ids.length });
+      for (let i = 0; i < ids.length; i++) {
+        await apiRequest("POST", `/api/admin/blog/posts/${ids[i]}/auto-fix`);
+        setFixAllProgress({ done: i + 1, total: ids.length });
+      }
+    },
+    onSuccess: () => {
+      setFixAllProgress(null);
+      toast({ title: "Fix All Complete", description: "All queued posts have been corrected and re-verified." });
+      refetchReview();
+      refetchPosts();
+      refetchStats();
+    },
+    onError: (error: any) => {
+      setFixAllProgress(null);
+      toast({ title: "Fix All Failed", description: error.message, variant: "destructive" });
     },
   });
 
@@ -972,7 +1026,7 @@ export default function BlogDashboard() {
                 <Button
                   size="sm"
                   variant="default"
-                  disabled={reverifyAllMutation.isPending || !reviewQueue?.length}
+                  disabled={reverifyAllMutation.isPending || autoFixAllMutation.isPending || !reviewQueue?.length}
                   onClick={() => reviewQueue && reverifyAllMutation.mutate(reviewQueue.map((p: any) => p.id))}
                   data-testid="button-reverify-all"
                 >
@@ -987,6 +1041,28 @@ export default function BlogDashboard() {
                     <>
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Reverify All ({reviewQueue?.length ?? 0})
+                    </>
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-amber-600 hover:bg-amber-700 text-white"
+                  disabled={autoFixAllMutation.isPending || reverifyAllMutation.isPending || !reviewQueue?.length}
+                  onClick={() => reviewQueue && autoFixAllMutation.mutate(reviewQueue.map((p: any) => p.id))}
+                  data-testid="button-fix-all"
+                  title="Qwen corrects all flagged content then re-verifies. Posts that pass are auto-published."
+                >
+                  {autoFixAllMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {fixAllProgress
+                        ? `Fixing ${fixAllProgress.done}/${fixAllProgress.total}…`
+                        : "Starting…"}
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="h-4 w-4 mr-2" />
+                      Fix All & Re-verify
                     </>
                   )}
                 </Button>
@@ -1047,7 +1123,7 @@ export default function BlogDashboard() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => reverifyMutation.mutate(post.id)}
-                                disabled={reverifyMutation.isPending}
+                                disabled={reverifyMutation.isPending || autoFixMutation.isPending}
                                 data-testid={`button-reverify-${post.id}`}
                               >
                                 {reverifyMutation.isPending ? (
@@ -1056,6 +1132,21 @@ export default function BlogDashboard() {
                                   <Cpu className="h-3 w-3 mr-1" />
                                 )}
                                 Re-verify
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="bg-amber-600 hover:bg-amber-700 text-white"
+                                onClick={() => autoFixMutation.mutate(post.id)}
+                                disabled={autoFixMutation.isPending || reverifyMutation.isPending}
+                                data-testid={`button-autofix-${post.id}`}
+                                title="Qwen reads all flags and surgically corrects the content, then re-verifies automatically"
+                              >
+                                {fixingPostId === post.id ? (
+                                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                ) : (
+                                  <Wand2 className="h-3 w-3 mr-1" />
+                                )}
+                                {fixingPostId === post.id ? "Fixing…" : "Fix & Re-verify"}
                               </Button>
                               <Button
                                 size="sm"
