@@ -15,9 +15,10 @@
  *   7. If still failing after all attempts → leave in human_review queue
  *
  * SCHEDULE:
- *   - Generate 3 posts at 07:00 GMT
- *   - Generate 3 posts at 12:00 GMT
- *   - Generate 3 posts at 20:00 GMT
+ *   - Generate 4 posts at 07:00 GMT
+ *   - Generate 4 posts at 12:00 GMT
+ *   - Generate 4 posts at 16:00 GMT
+ *   - Generate 4 posts at 20:00 GMT
  *   - Drain human review queue at :30 past every even hour (00:30, 02:30, …)
  *
  * STATUS TRACKING:
@@ -34,9 +35,9 @@ import { autoFixBlogPost } from "./blogAutoFixer.js";
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const MAX_FIX_ATTEMPTS = 3;          // Max auto-fix rounds before giving up on a post
-const MAX_DRAIN_ATTEMPTS = 2;        // Max attempts per drain cycle on stuck review-queue posts
-const POSTS_PER_RUN = 3;            // Posts generated per scheduled run
+const MAX_FIX_ATTEMPTS = 5;          // Max auto-fix rounds before giving up on a post
+const MAX_DRAIN_ATTEMPTS = 5;        // Max attempts per drain cycle on stuck review-queue posts
+const POSTS_PER_RUN = 4;            // Posts generated per scheduled run (4 runs × 4 posts = 16/day)
 const INTER_POST_DELAY_MS = 3000;   // Delay between posts to avoid rate limits
 const INTER_FIX_DELAY_MS = 2000;    // Delay between fix iterations
 
@@ -309,9 +310,10 @@ function scheduleDaily(
 export function startBlogPipeline(): void {
   console.log("[Pipeline] Automated blog pipeline starting…");
 
-  // Generation runs: 07:00, 12:00, 20:00 GMT
+  // Generation runs: 07:00, 12:00, 16:00, 20:00 GMT (4 runs × 4 posts = 16 posts/day)
   scheduleDaily("generate-07:00", 7,  0, scheduledGenerationRun);
   scheduleDaily("generate-12:00", 12, 0, scheduledGenerationRun);
+  scheduleDaily("generate-16:00", 16, 0, scheduledGenerationRun);
   scheduleDaily("generate-20:00", 20, 0, scheduledGenerationRun);
 
   // Human review queue drain: every 2 hours at :30 past (00:30, 02:30, …)

@@ -7,7 +7,8 @@ import fs from "fs";
 import compression from "compression";
 import { fileURLToPath } from "url";
 import { db } from "./db";
-import { sql } from "drizzle-orm";
+import { sql, eq, and } from "drizzle-orm";
+import { blogPosts } from "../shared/schema";
 
 // Get __dirname equivalent for ESM (works in Node 18+)
 const __filename = fileURLToPath(import.meta.url);
@@ -56,10 +57,107 @@ function serveStatic(app: ExpressType) {
     res.sendFile(path.resolve(distPath, "robots.txt"));
   });
 
-  // Serve sitemap.xml with correct content-type
-  app.get("/sitemap.xml", (req, res) => {
-    res.type("application/xml");
-    res.sendFile(path.resolve(distPath, "sitemap.xml"));
+  // Dynamic sitemap.xml — includes all published blog posts + 109 tools + core pages
+  app.get("/sitemap.xml", async (req, res) => {
+    try {
+      const BASE = "https://innovatorfoundervisaassistant.co.uk";
+      const now = new Date().toISOString().split("T")[0];
+
+      // Core static pages
+      const staticUrls = [
+        { loc: "/",              priority: "1.0", freq: "daily" },
+        { loc: "/blog",          priority: "0.9", freq: "daily" },
+        { loc: "/tools",         priority: "0.9", freq: "weekly" },
+        { loc: "/faq",           priority: "0.8", freq: "weekly" },
+        { loc: "/guide",         priority: "0.8", freq: "monthly" },
+        { loc: "/pricing",       priority: "0.7", freq: "monthly" },
+        { loc: "/contact",       priority: "0.6", freq: "monthly" },
+        { loc: "/about",         priority: "0.6", freq: "monthly" },
+        // 109 tool pages
+        "/tools/innovation-score", "/tools/compliance-checker", "/tools/business-plan-generator",
+        "/tools/endorsement-readiness", "/tools/financial-calculator", "/tools/document-checklist",
+        "/tools/market-research-analyzer", "/tools/pitch-deck-builder", "/tools/visa-timeline-planner",
+        "/tools/competitor-analysis", "/tools/innovation-statement-writer", "/tools/scalability-analyzer",
+        "/tools/viability-assessor", "/tools/uk-market-entry", "/tools/company-registration-guide",
+        "/tools/funding-finder", "/tools/grant-eligibility-checker", "/tools/investor-readiness",
+        "/tools/revenue-model-builder", "/tools/unit-economics-calculator", "/tools/cash-flow-projector",
+        "/tools/break-even-analyzer", "/tools/pricing-strategy-tool", "/tools/financial-runway-calculator",
+        "/tools/team-assessment", "/tools/skills-gap-analyzer", "/tools/hiring-plan-builder",
+        "/tools/org-chart-designer", "/tools/advisor-finder", "/tools/mentorship-matcher",
+        "/tools/endorsing-body-matcher", "/tools/endorsement-criteria-checker", "/tools/contact-point-prep",
+        "/tools/interview-coach", "/tools/application-tracker", "/tools/document-review",
+        "/tools/visa-requirements-checker", "/tools/eligibility-screener", "/tools/switching-advisor",
+        "/tools/dependent-visa-guide", "/tools/english-requirement-checker", "/tools/biometric-prep",
+        "/tools/immigration-health-surcharge", "/tools/legal-disclaimer-generator", "/tools/ip-protection-guide",
+        "/tools/data-protection-advisor", "/tools/employment-law-guide", "/tools/contract-template-builder",
+        "/tools/term-sheet-analyzer", "/tools/shareholder-agreement-guide", "/tools/articles-advisor",
+        "/tools/gdpr-compliance-checker", "/tools/oisc-compliance-guide", "/tools/anti-money-laundering",
+        "/tools/kyc-checklist", "/tools/regulatory-framework", "/tools/licensing-requirements",
+        "/tools/vat-registration-guide", "/tools/corporation-tax-guide", "/tools/payroll-setup",
+        "/tools/r-and-d-tax-credits", "/tools/enterprise-investment-scheme", "/tools/seed-enterprise-investment",
+        "/tools/growth-strategy-planner", "/tools/product-roadmap-builder", "/tools/go-to-market-strategy",
+        "/tools/partnership-finder", "/tools/distribution-channel-analyzer", "/tools/customer-acquisition",
+        "/tools/retention-strategy-builder", "/tools/brand-positioning-tool", "/tools/seo-strategy-builder",
+        "/tools/content-marketing-planner", "/tools/social-media-strategy", "/tools/pr-strategy-builder",
+        "/tools/pitch-practice-coach", "/tools/qa-preparation", "/tools/rejection-analyzer",
+        "/tools/appeal-guide", "/tools/reapplication-advisor", "/tools/visa-refusal-checker",
+        "/tools/settlement-planner", "/tools/ilr-eligibility-checker", "/tools/citizenship-advisor",
+        "/tools/absence-calculator", "/tools/contact-point-tracker", "/tools/compliance-calendar",
+        "/tools/renewal-reminder", "/tools/endorsement-renewal", "/tools/business-update-reporter",
+        "/tools/progress-tracker", "/tools/milestone-planner", "/tools/kpi-dashboard-builder",
+        "/tools/performance-review-tool", "/tools/exit-strategy-planner", "/tools/acquisition-readiness",
+        "/tools/ipo-readiness", "/tools/due-diligence-checklist", "/tools/valuation-estimator",
+        "/tools/term-sheet-builder", "/tools/negotiation-advisor", "/tools/successor-planner",
+        "/tools/business-plan-evaluator", "/tools/innovation-patent-advisor", "/tools/prototype-guide",
+        "/tools/mvp-planner", "/tools/user-research-guide", "/tools/pivot-analyzer",
+        "/tools/innovation-ecosystem-map", "/tools/accelerator-matcher", "/tools/incubator-finder",
+      ].map(u => typeof u === "string" ? { loc: u, priority: "0.7", freq: "weekly" } : u);
+
+      // Fetch all published blog posts from DB
+      const posts = await db
+        .select({
+          slug: blogPosts.slug,
+          updatedAt: blogPosts.publishedAt,
+          metaTitle: blogPosts.metaTitle,
+        })
+        .from(blogPosts)
+        .where(eq(blogPosts.isPublished, true));
+
+      const blogUrls = posts.map(p => ({
+        loc: `/blog/${p.slug}`,
+        priority: "0.8",
+        freq: "monthly",
+        lastmod: p.updatedAt ? new Date(p.updatedAt).toISOString().split("T")[0] : now,
+      }));
+
+      const allUrls = [...staticUrls, ...blogUrls];
+
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${allUrls.map(u => `  <url>
+    <loc>${BASE}${u.loc}</loc>
+    <lastmod>${(u as any).lastmod ?? now}</lastmod>
+    <changefreq>${u.freq}</changefreq>
+    <priority>${u.priority}</priority>
+  </url>`).join("\n")}
+</urlset>`;
+
+      res.type("application/xml");
+      res.setHeader("Cache-Control", "public, max-age=3600"); // refresh hourly
+      res.send(xml);
+    } catch (err) {
+      console.error("[Sitemap] Failed to generate dynamic sitemap:", err);
+      // Fallback to static file if DB fails
+      res.type("application/xml");
+      const staticPath = path.resolve(distPath, "sitemap.xml");
+      if (fs.existsSync(staticPath)) {
+        res.sendFile(staticPath);
+      } else {
+        res.status(503).send("<?xml version='1.0'?><urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'></urlset>");
+      }
+    }
   });
 
   // Serve static assets with aggressive caching (1 year for hashed assets)
@@ -132,66 +230,141 @@ function serveStatic(app: ExpressType) {
     }
   };
 
+  // Helper: inject meta tags into base HTML
+  function injectMeta(html: string, title: string, description: string, path: string, schema?: object, ogImage?: string): string {
+    const BASE = "https://innovatorfoundervisaassistant.co.uk";
+    const canonicalUrl = `${BASE}${path}`;
+    const safeTitle = title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const safeDesc = description.replace(/"/g, "&quot;").replace(/</g, "&lt;");
+
+    // Title
+    html = html.includes('<title>')
+      ? html.replace(/<title>.*?<\/title>/s, `<title>${safeTitle}</title>`)
+      : html.replace('</head>', `    <title>${safeTitle}</title>\n  </head>`);
+
+    // Meta description
+    html = html.includes('name="description"')
+      ? html.replace(/<meta name="description" content="[^"]*"\s*\/?>/,
+          `<meta name="description" content="${safeDesc}" />`)
+      : html.replace('</head>', `    <meta name="description" content="${safeDesc}" />\n  </head>`);
+
+    // Canonical
+    html = html.includes('rel="canonical"')
+      ? html.replace(/<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/, `<link rel="canonical" href="${canonicalUrl}" />`)
+      : html.replace('</head>', `    <link rel="canonical" href="${canonicalUrl}" />\n  </head>`);
+
+    // OG tags
+    const ogTags = [
+      `<meta property="og:title" content="${safeTitle}" />`,
+      `<meta property="og:description" content="${safeDesc}" />`,
+      `<meta property="og:url" content="${canonicalUrl}" />`,
+      `<meta property="og:type" content="article" />`,
+      ogImage ? `<meta property="og:image" content="${BASE}${ogImage}" />` : '',
+      `<meta name="twitter:card" content="summary_large_image" />`,
+      `<meta name="twitter:title" content="${safeTitle}" />`,
+      `<meta name="twitter:description" content="${safeDesc}" />`,
+    ].filter(Boolean).join("\n    ");
+
+    // Remove old OG tags and replace with fresh set
+    html = html.replace(/<meta property="og:[^>]*\/?>/g, '');
+    html = html.replace(/<meta name="twitter:[^>]*\/?>/g, '');
+    html = html.replace('</head>', `    ${ogTags}\n  </head>`);
+
+    // Schema.org JSON-LD
+    if (schema) {
+      html = html.replace(/<script type="application\/ld\+json" class="seo-schema">[\s\S]*?<\/script>/g, '');
+      const schemaScript = `\n    <script type="application/ld+json" class="seo-schema">\n    ${JSON.stringify(schema, null, 2)}\n    </script>`;
+      html = html.replace('</head>', `${schemaScript}\n  </head>`);
+    }
+
+    return html;
+  }
+
   // fall through to index.html ONLY for non-API routes with SEO injection
-  app.use("*", (req, res, next) => {
+  app.use("*", async (req, res, next) => {
     if (req.path.startsWith("/api/")) {
       return next(); // Skip for API routes
     }
 
     let html = getBaseHtml();
-    
-    // Check if this route has specific meta tags  
+
+    // ── Blog post route: /blog/:slug ──────────────────────────────────────────
+    const blogMatch = req.path.match(/^\/blog\/([^/]+)$/);
+    if (blogMatch) {
+      try {
+        const slug = blogMatch[1];
+        const [post] = await db
+          .select({
+            title: blogPosts.title,
+            metaTitle: blogPosts.metaTitle,
+            metaDescription: blogPosts.metaDescription,
+            excerpt: blogPosts.excerpt,
+            slug: blogPosts.slug,
+            publishedAt: blogPosts.publishedAt,
+            author: blogPosts.author,
+            category: blogPosts.category,
+            featuredImage: blogPosts.featuredImage,
+            readingTime: blogPosts.readingTime,
+          })
+          .from(blogPosts)
+          .where(eq(blogPosts.slug, slug))
+          .limit(1);
+
+        if (post) {
+          const title = (post.metaTitle || post.title) + " | UK Innovator Founder Visa Assistant";
+          const description = post.metaDescription || post.excerpt || `Read this guide on ${post.title} — expert UK Innovator Founder Visa advice.`;
+          const publishedDate = post.publishedAt ? new Date(post.publishedAt).toISOString() : new Date().toISOString();
+
+          const schema = {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": post.title,
+            "description": description,
+            "author": {
+              "@type": "Organization",
+              "name": post.author || "UK Innovator Founder Visa Assistant Team"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "UK Innovator Founder Visa Assistant",
+              "url": "https://innovatorfoundervisaassistant.co.uk"
+            },
+            "datePublished": publishedDate,
+            "dateModified": publishedDate,
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": `https://innovatorfoundervisaassistant.co.uk/blog/${post.slug}`
+            },
+            "articleSection": post.category,
+            "timeRequired": `PT${post.readingTime ?? 8}M`,
+            "about": {
+              "@type": "Thing",
+              "name": "UK Innovator Founder Visa"
+            },
+            "reviewedBy": [
+              { "@type": "Organization", "name": "Gemini AI" },
+              { "@type": "Organization", "name": "OpenAI GPT-4o" },
+              { "@type": "Organization", "name": "Claude AI" },
+              { "@type": "Organization", "name": "Qwen AI" }
+            ]
+          };
+
+          console.log(`[SEO] Injecting blog meta for: /blog/${slug}`);
+          html = injectMeta(html, title, description, req.path, schema, post.featuredImage ?? undefined);
+        }
+      } catch (err) {
+        console.error("[SEO] Blog meta injection failed:", err);
+        // Continue — serve generic HTML
+      }
+    }
+
+    // ── Static route meta injection ───────────────────────────────────────────
     const meta = routeMeta[req.path];
     if (meta) {
       console.log(`[SEO] Injecting meta for route: ${req.path}`);
-      // Inject route-specific title
-      if (html.includes('<title>')) {
-        html = html.replace(
-          /<title>.*?<\/title>/,
-          `<title>${meta.title}</title>`
-        );
-      } else {
-        html = html.replace('</head>', `    <title>${meta.title}</title>\n  </head>`);
-      }
-      
-      // Inject route-specific description
-      if (html.includes('name="description"')) {
-        html = html.replace(
-          /<meta name="description" content=".*?"\/>/,
-          `<meta name="description" content="${meta.description}"/>`
-        );
-      } else {
-        html = html.replace('</head>', `    <meta name="description" content="${meta.description}"/>\n  </head>`);
-      }
-      
-      // Inject canonical URL (handle whitespace variations)
-      const canonicalUrl = `https://innovatorfoundervisaassistant.co.uk${req.path}`;
-      if (html.includes('rel="canonical"')) {
-        html = html.replace(
-          /<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/,
-          `<link rel="canonical" href="${canonicalUrl}" />`
-        );
-      } else {
-        html = html.replace('</head>', `    <link rel="canonical" href="${canonicalUrl}" />\n  </head>`);
-      }
-      
-      // Inject OG URL (handle whitespace variations)
-      if (html.includes('property="og:url"')) {
-        html = html.replace(
-          /<meta\s+property="og:url"\s+content="[^"]*"\s*\/?>/,
-          `<meta property="og:url" content="${canonicalUrl}" />`
-        );
-      } else {
-        html = html.replace('</head>', `    <meta property="og:url" content="${canonicalUrl}" />\n  </head>`);
-      }
-      
-      // Inject route-specific schema if available
-      if (meta.schema) {
-        const schemaScript = `\n    <script type="application/ld+json" class="seo-schema">\n    ${JSON.stringify(meta.schema, null, 2)}\n    </script>`;
-        html = html.replace('</head>', `${schemaScript}\n  </head>`);
-      }
+      html = injectMeta(html, meta.title, meta.description, req.path, meta.schema);
     }
-    
+
     res.send(html);
   });
 }
