@@ -1015,7 +1015,7 @@ export default function BlogDashboard() {
                   Human Review Queue
                 </h2>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  Posts flagged by the triple-AI consensus gate — both Gemini and OpenAI must score ≥95 for auto-publish
+                  Posts held for review — composite score must be ≥95 and no individual verifier may score below 80
                 </p>
               </div>
               <div className="flex items-center gap-2">

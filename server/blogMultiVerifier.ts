@@ -547,30 +547,45 @@ export async function verifyBlogPost(title: string, content: string): Promise<Ve
 
   const hasCriticalFlags = allFlags.some(f => f.severity === "critical" && !f.claim.startsWith("SYSTEM"));
 
-  // CONSENSUS GATE: need ≥2 verifiers all scoring ≥95 to auto-publish
+  // CONSENSUS GATE:
+  //   Primary:  composite score ≥95 (average of all active verifiers)
+  //   Floor:    no individual active verifier may score below 80
+  //   Flags:    no critical flags raised
+  // Rationale: individual verifiers have different calibrations (Gemini tends strict,
+  // Qwen tends lenient). Using the composite prevents one calibration from blocking
+  // genuinely high-quality content; the 80-floor still catches truly bad results.
   let passed = false;
   let consensusReason = "";
 
   const activeScores = available;
-  const allAboveThreshold = activeScores.length >= 2 && activeScores.every(s => s >= 95);
+  const minScore = activeScores.length >= 2 ? Math.min(...activeScores) : 0;
   const maxDiff = activeScores.length >= 2
     ? Math.max(...activeScores) - Math.min(...activeScores)
     : 0;
+
+  const compositePassesThreshold = compositeScore >= 95;
+  const noFloorViolation = activeScores.every(s => s >= 80);
 
   if (activeScores.length === 0) {
     consensusReason = "All verifiers unavailable — routing to human review.";
   } else if (activeScores.length === 1) {
     consensusReason = `Only 1 verifier available (score: ${activeScores[0]}/100). Routing to human review for safety.`;
-  } else if (!allAboveThreshold) {
+  } else if (!compositePassesThreshold) {
     const labels = [
       !geminiUnavailable ? `Gemini:${geminiResult.score}` : null,
       !openaiUnavailable ? `OpenAI:${openaiResult.score}` : null,
       !claudeUnavailable ? `Claude:${claudeResult.score}` : null,
       !qwenUnavailable ? `Qwen:${qwenResult.score}` : null,
     ].filter(Boolean).join(", ");
-    consensusReason = `Score threshold not met — ${labels}. All active verifiers need ≥95.`;
-  } else if (maxDiff > 15) {
-    consensusReason = `Score divergence too large (${maxDiff} pts) — routing to human review.`;
+    consensusReason = `Composite score ${compositeScore}/100 below 95 threshold — ${labels}.`;
+  } else if (!noFloorViolation) {
+    const lowScorer = [
+      !geminiUnavailable && geminiResult.score < 80 ? `Gemini:${geminiResult.score}` : null,
+      !openaiUnavailable && openaiResult.score < 80 ? `OpenAI:${openaiResult.score}` : null,
+      !claudeUnavailable && claudeResult.score < 80 ? `Claude:${claudeResult.score}` : null,
+      !qwenUnavailable && qwenResult.score < 80 ? `Qwen:${qwenResult.score}` : null,
+    ].filter(Boolean).join(", ");
+    consensusReason = `Individual score floor violated (minimum 80 required) — ${lowScorer}. Routing to human review.`;
   } else if (hasCriticalFlags) {
     const critCount = allFlags.filter(f => f.severity === "critical" && !f.claim.startsWith("SYSTEM")).length;
     consensusReason = `${critCount} critical flag(s) raised — routing to human review.`;
@@ -582,7 +597,7 @@ export async function verifyBlogPost(title: string, content: string): Promise<Ve
       !claudeUnavailable ? `Claude:${claudeResult.score}` : null,
       !qwenUnavailable ? `Qwen:${qwenResult.score}` : null,
     ].filter(Boolean).join(", ");
-    consensusReason = `All active verifiers agree — ${labels}. No critical flags. Auto-publishing approved.`;
+    consensusReason = `Composite ${compositeScore}/100 ≥95, all active verifiers ≥80 — ${labels}. No critical flags. Auto-publishing approved.`;
   }
 
   const requiresHumanReview = !passed;
