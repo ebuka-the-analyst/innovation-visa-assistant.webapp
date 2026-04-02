@@ -18,14 +18,7 @@ import crypto from "crypto";
 import { GoogleGenAI } from "@google/genai";
 import OpenAI from "openai";
 
-// All available Gemini API keys — rotated on failure
-const GEMINI_API_KEYS = [
-  process.env.GEMINI_API_KEY,
-  process.env.GEMINI_API_KEY_2,
-  process.env.GEMINI_API_KEY_3,
-  process.env.GEMINI_API_KEY_4,
-].filter(Boolean) as string[];
-
+const geminiClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
 
 // ============================================================================
@@ -139,76 +132,60 @@ async function runGeminiVerification(title: string, content: string): Promise<{
   details: Record<string, unknown>;
   error?: string;
 }> {
+  // Try models in order — newest stable first, then fallbacks
   const GEMINI_MODELS = ["gemini-2.0-flash-001", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
-
-  if (GEMINI_API_KEYS.length === 0) {
-    console.error("[MultiVerifier] No Gemini API keys configured");
-    const r: any = { score: -1, passed: false, flags: [], details: { error: "No Gemini API keys" }, error: "No API keys", unavailable: true };
-    return r;
-  }
-
   const prompt = buildMarkerPrompt(title, content);
 
-  // Try every key × every model combination until one works
-  for (const apiKey of GEMINI_API_KEYS) {
-    const client = new GoogleGenAI({ apiKey });
-    for (const modelName of GEMINI_MODELS) {
-      try {
-        const result = await client.models.generateContent({
-          model: modelName,
-          contents: prompt,
-          config: {
-            temperature: 0.1,
-            maxOutputTokens: 2048,
-            responseMimeType: "application/json",
-          },
-        });
+  for (const modelName of GEMINI_MODELS) {
+    try {
+      const result = await geminiClient.models.generateContent({
+        model: modelName,
+        contents: prompt,
+        config: {
+          temperature: 0.1,
+          maxOutputTokens: 2048,
+          responseMimeType: "application/json",
+        },
+      });
 
-        const text = result.text || "";
-        let jsonText = text.trim();
-        if (jsonText.startsWith("```")) {
-          jsonText = jsonText.replace(/^```json?\n?/, "").replace(/\n?```$/, "");
-        }
+      const text = result.text || "";
+      let jsonText = text.trim();
+      if (jsonText.startsWith("```")) {
+        jsonText = jsonText.replace(/^```json?\n?/, "").replace(/\n?```$/, "");
+      }
 
-        const parsed = JSON.parse(jsonText);
-        console.log(`[MultiVerifier] Gemini success with key[${GEMINI_API_KEYS.indexOf(apiKey) + 1}] model=${modelName}`);
-        return {
-          score: Math.min(100, Math.max(0, parsed.totalScore || 0)),
-          passed: parsed.passed === true,
-          flags: parsed.flags || [],
-          details: parsed,
-        };
-      } catch (err: unknown) {
-        const errMsg = err instanceof Error ? err.message : String(err);
-        const errStr = String(err);
-        const combined = errMsg + errStr;
+      const parsed = JSON.parse(jsonText);
+      console.log(`[MultiVerifier] Gemini success with model=${modelName}`);
+      return {
+        score: Math.min(100, Math.max(0, parsed.totalScore || 0)),
+        passed: parsed.passed === true,
+        flags: parsed.flags || [],
+        details: parsed,
+      };
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const combined = errMsg + String(err);
 
-        // Quota / rate-limit on this key → skip remaining models, try next key
-        if (combined.includes("429") || combined.includes("quota") || combined.includes("RESOURCE_EXHAUSTED")) {
-          console.warn(`[MultiVerifier] Gemini key[${GEMINI_API_KEYS.indexOf(apiKey) + 1}] quota exceeded, trying next key...`);
-          break; // break inner loop → try next key
-        }
-        // Model deprecated / not found → try next model with same key
-        if (combined.includes("no longer available") || combined.includes("NOT_FOUND") || combined.includes("404") || combined.includes("deprecated")) {
-          console.warn(`[MultiVerifier] Gemini key[${GEMINI_API_KEYS.indexOf(apiKey) + 1}] model ${modelName} unavailable, trying next model...`);
-          continue; // continue inner loop → try next model
-        }
-        // Permission / key invalid → try next key
-        if (combined.includes("403") || combined.includes("PERMISSION_DENIED") || combined.includes("invalid") || combined.includes("API_KEY")) {
-          console.warn(`[MultiVerifier] Gemini key[${GEMINI_API_KEYS.indexOf(apiKey) + 1}] auth error, trying next key...`);
-          break; // break inner loop → try next key
-        }
-        // Other error → log full details and try next model
-        const errFull = JSON.stringify(err, Object.getOwnPropertyNames(err)).substring(0, 400);
-        console.error(`[MultiVerifier] Gemini key[${GEMINI_API_KEYS.indexOf(apiKey) + 1}] model ${modelName} unclassified error: ${errMsg} | full: ${errFull}`);
+      // Quota / rate-limit → mark unavailable immediately (no point trying other models)
+      if (combined.includes("429") || combined.includes("RESOURCE_EXHAUSTED")) {
+        console.warn("[MultiVerifier] Gemini quota/rate-limit — marking as unavailable");
+        const r: any = { score: -1, passed: false, flags: [], details: { error: errMsg }, error: errMsg, unavailable: true };
+        return r;
+      }
+      // Model deprecated / not found → try next model
+      if (combined.includes("no longer available") || combined.includes("NOT_FOUND") || combined.includes("404") || combined.includes("deprecated")) {
+        console.warn(`[MultiVerifier] Gemini model ${modelName} unavailable, trying next...`);
         continue;
       }
+      // Any other error → log and try next model
+      console.error(`[MultiVerifier] Gemini model ${modelName} error: ${errMsg}`);
+      continue;
     }
   }
 
-  // All keys × all models exhausted
-  console.error(`[MultiVerifier] All ${GEMINI_API_KEYS.length} Gemini keys × ${GEMINI_MODELS.length} models failed — marking as unavailable`);
-  const unavailableResult: any = { score: -1, passed: false, flags: [], details: { error: "All Gemini keys/models unavailable" }, error: "All keys exhausted", unavailable: true };
+  // All models exhausted
+  console.error("[MultiVerifier] All Gemini models failed — marking as unavailable");
+  const unavailableResult: any = { score: -1, passed: false, flags: [], details: { error: "All Gemini models unavailable" }, error: "All models failed", unavailable: true };
   return unavailableResult;
 }
 
