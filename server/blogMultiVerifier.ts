@@ -15,10 +15,8 @@
  */
 
 import crypto from "crypto";
-import { GoogleGenAI } from "@google/genai";
 import OpenAI from "openai";
 
-const geminiClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
 
 // ============================================================================
@@ -132,30 +130,56 @@ async function runGeminiVerification(title: string, content: string): Promise<{
   details: Record<string, unknown>;
   error?: string;
 }> {
-  // Try models in order — newest stable first, then fallbacks
-  const GEMINI_MODELS = ["gemini-2.0-flash-001", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+  const apiKey = process.env.GEMINI_API_KEY || "";
+  if (!apiKey) {
+    console.error("[MultiVerifier] GEMINI_API_KEY not set");
+    const r: any = { score: -1, passed: false, flags: [], details: { error: "No API key" }, error: "No API key", unavailable: true };
+    return r;
+  }
+
+  // Direct REST API — bypasses SDK routing entirely, always hits Google AI Studio endpoint
+  const GEMINI_MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
   const prompt = buildMarkerPrompt(title, content);
 
   for (const modelName of GEMINI_MODELS) {
     try {
-      const result = await geminiClient.models.generateContent({
-        model: modelName,
-        contents: prompt,
-        config: {
-          temperature: 0.1,
-          maxOutputTokens: 2048,
-          responseMimeType: "application/json",
-        },
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 2048,
+            responseMimeType: "application/json",
+          },
+        }),
       });
 
-      const text = result.text || "";
+      const data = await response.json() as any;
+
+      if (!response.ok) {
+        const status = response.status;
+        const errMsg = data?.error?.message || JSON.stringify(data);
+        console.warn(`[MultiVerifier] Gemini REST ${modelName} HTTP ${status}: ${errMsg}`);
+
+        if (status === 429) {
+          const r: any = { score: -1, passed: false, flags: [], details: { error: errMsg }, error: errMsg, unavailable: true };
+          return r;
+        }
+        // 404 / model not found / deprecated → try next model
+        continue;
+      }
+
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
       let jsonText = text.trim();
       if (jsonText.startsWith("```")) {
         jsonText = jsonText.replace(/^```json?\n?/, "").replace(/\n?```$/, "");
       }
 
       const parsed = JSON.parse(jsonText);
-      console.log(`[MultiVerifier] Gemini success with model=${modelName}`);
+      console.log(`[MultiVerifier] Gemini REST success with model=${modelName}`);
       return {
         score: Math.min(100, Math.max(0, parsed.totalScore || 0)),
         passed: parsed.passed === true,
@@ -164,28 +188,13 @@ async function runGeminiVerification(title: string, content: string): Promise<{
       };
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : String(err);
-      const combined = errMsg + String(err);
-
-      // Quota / rate-limit → mark unavailable immediately (no point trying other models)
-      if (combined.includes("429") || combined.includes("RESOURCE_EXHAUSTED")) {
-        console.warn("[MultiVerifier] Gemini quota/rate-limit — marking as unavailable");
-        const r: any = { score: -1, passed: false, flags: [], details: { error: errMsg }, error: errMsg, unavailable: true };
-        return r;
-      }
-      // Model deprecated / not found → try next model
-      if (combined.includes("no longer available") || combined.includes("NOT_FOUND") || combined.includes("404") || combined.includes("deprecated")) {
-        console.warn(`[MultiVerifier] Gemini model ${modelName} unavailable, trying next...`);
-        continue;
-      }
-      // Any other error → log and try next model
-      console.error(`[MultiVerifier] Gemini model ${modelName} error: ${errMsg}`);
+      console.error(`[MultiVerifier] Gemini REST ${modelName} fetch error: ${errMsg}`);
       continue;
     }
   }
 
-  // All models exhausted
-  console.error("[MultiVerifier] All Gemini models failed — marking as unavailable");
-  const unavailableResult: any = { score: -1, passed: false, flags: [], details: { error: "All Gemini models unavailable" }, error: "All models failed", unavailable: true };
+  console.error("[MultiVerifier] All Gemini REST models failed — marking as unavailable");
+  const unavailableResult: any = { score: -1, passed: false, flags: [], details: { error: "All Gemini models failed" }, error: "All models failed", unavailable: true };
   return unavailableResult;
 }
 

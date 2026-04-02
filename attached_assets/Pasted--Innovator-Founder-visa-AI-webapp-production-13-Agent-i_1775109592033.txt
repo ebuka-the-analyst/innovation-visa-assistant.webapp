@@ -1,0 +1,161 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+13
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+a9fa542f
+Active
+
+Apr 2, 2026, 6:56 AM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+You reached the start of the range
+Apr 2, 2026, 6:56 AM
+theme_primary_color column added or already exists
+Connecting to database...
+Connected successfully
+Found 273 SQL statements to execute
+Migration complete: 0 executed, 273 skipped (already exist)
+chart_data column added or already exists
+theme_id column added or already exists
+theme_secondary_color column added or already exists
+theme_font column added or already exists
+theme_applied_at column added or already exists
+background_image column added or already exists
+use_full_cover_image column added or already exists
+text_elements column added or already exists
+cover_designs table created or already exists
+cover_designs indexes created or already exist
+premium_cover_purchases table created or already exists
+premium_cover_purchases indexes created or already exist
+blog_posts table created or already exists
+blog_posts indexes created or already exist
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+Starting Container
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+[Blog] Image route configured (local + unique + S3 fallback)
+5:58:51 AM [express] [MIGRATION] Checking for required schema updates...
+[DB] Auto-migration: blog image URLs updated to object storage
+updates please upgrade to a supported Node.js LTS version.
+[DB] Auto-migration: Assigned unique images to 15 blog posts
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+5:58:51 AM [express] serving on port 8080
+5:58:51 AM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+[DB] Auto-migration: 35 blog_posts column(s) ensured
+[DB] Auto-migration: blog_generation_queue table ensured
+[DB] Auto-migration: blog_generation_queue columns ensured
+[Auth] Google OAuth configured successfully
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+[DB] Auto-migration: logo_element column ensured
+To continue receiving updates to AWS services, bug fixes, and security
+5:58:51 AM [express] [MIGRATION] Schema check complete
+[2026-04-02T05:59:00.476Z] POST /api/activity/session
+5:59:00 AM [express] POST /api/activity/session 200 in 216ms :: {"sessionId":"bf5b2988-22ba-499b-93d…
+[2026-04-02T05:59:00.879Z] POST /api/activity/page-view
+5:59:00 AM [express] POST /api/activity/page-view 200 in 23ms :: {"pageViewId":"b5cde7ed-386b-436f-b…
+[2026-04-02T05:59:01.846Z] POST /api/activity/session/end
+5:59:01 AM [express] POST /api/activity/session/end 200 in 15ms :: {"success":true}
+[2026-04-02T05:59:02.001Z] POST /api/activity/session
+[2026-04-02T05:59:02.004Z] GET /api/auth/user
+5:59:02 AM [express] POST /api/activity/session 200 in 20ms :: {"sessionId":"1d1f1252-ec28-4cf3-b8cf…
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+5:59:02 AM [express] GET /api/auth/user 200 in 30ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-02T05:59:02.224Z] POST /api/activity/page-view
+5:59:02 AM [express] POST /api/activity/page-view 200 in 14ms :: {"pageViewId":"682d78a6-46a3-4e12-8…
+[2026-04-02T05:59:03.495Z] GET /admin/blog
+[2026-04-02T05:59:03.496Z] POST /api/activity/session/end
+5:59:03 AM [express] POST /api/activity/session/end 200 in 189ms :: {"success":true}
+[2026-04-02T05:59:03.712Z] GET /attached_assets/official_logo.webp
+[2026-04-02T05:59:03.927Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+5:59:03 AM [express] GET /api/auth/user 200 in 14ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-02T05:59:04.133Z] POST /api/activity/session
+[2026-04-02T05:59:04.134Z] GET /api/partner/status
+[2026-04-02T05:59:04.137Z] POST /api/activity/session
+[2026-04-02T05:59:04.152Z] GET /api/admin/blog/stats
+5:59:04 AM [express] GET /api/partner/status 200 in 18ms :: {"isPartner":false,"promoCodeCount":0}
+5:59:04 AM [express] POST /api/activity/session 200 in 24ms :: {"sessionId":"6b26d433-3522-4975-845b…
+5:59:04 AM [express] POST /api/activity/session 200 in 49ms :: {"sessionId":"27a387e5-50af-497e-95d9…
+5:59:04 AM [express] GET /api/admin/blog/stats 200 in 37ms :: {"total":31,"published":25,"scheduled"…
+[2026-04-02T05:59:04.321Z] GET /api/admin/blog/queue
+[2026-04-02T05:59:04.322Z] GET /api/admin/blog/review-queue
+[2026-04-02T05:59:04.325Z] GET /api/admin/blog/posts/all/
+5:59:04 AM [express] GET /api/admin/blog/queue 200 in 12ms :: [{"id":1,"targetDate":"2026-04-02T06:0…
+[2026-04-02T05:59:04.334Z] POST /api/activity/page-view
+5:59:04 AM [express] GET /api/admin/blog/review-queue 200 in 22ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+5:59:04 AM [express] POST /api/activity/page-view 200 in 31ms :: {"pageViewId":"ad39f803-a5cd-40ea-b…
+5:59:04 AM [express] GET /api/admin/blog/posts/all/ 200 in 61ms
+[2026-04-02T05:59:18.355Z] GET /api/admin/blog/posts/all/
+[MultiVerifier] Starting triple-AI verification for: How to Prepare for Your Innovator Founder Visa Interview
+[2026-04-02T05:59:24.238Z] POST /api/activity/session/end
+[MultiVerifier] Gemini model gemini-2.0-flash-001 unavailable, trying next...
+[MultiVerifier] Gemini model gemini-2.0-flash unavailable, trying next...
+[MultiVerifier] Gemini model gemini-1.5-pro unavailable, trying next...
+5:59:18 AM [express] POST /api/admin/blog/posts/f9ce7137-31b9-4059-95c8-b7659d202b97/reverify 200 in…
+[2026-04-02T05:59:15.186Z] POST /api/admin/blog/posts/f9ce7137-31b9-4059-95c8-b7659d202b97/reverify
+5:59:18 AM [express] GET /api/admin/blog/review-queue 200 in 26ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+[MultiVerifier] All Gemini models failed — marking as unavailable
+[MultiVerifier] Result: FLAGGED | Gemini: unavailable | OpenAI: 100 | Composite: 100
+
+
