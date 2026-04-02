@@ -261,79 +261,79 @@ export default function SeoStrategy() {
       {!result ? (
         /* Input Form */
         <Card>
-          <CardHeader>
-            <CardTitle>Business Context</CardTitle>
-            <CardDescription>
-              The more context you provide, the more specific and actionable your strategy will be.
-              Pre-filled with platform defaults — adjust as needed.
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Business Context</CardTitle>
+            <CardDescription className="text-xs">
+              Pre-filled with platform defaults — adjust as needed. More context = more actionable strategy.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Business Name</label>
-                <Input value={form.businessName} onChange={e => setForm(f => ({ ...f, businessName: e.target.value }))} data-testid="input-business-name" />
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Business Name</label>
+                <Input className="h-8 text-sm" value={form.businessName} onChange={e => setForm(f => ({ ...f, businessName: e.target.value }))} data-testid="input-business-name" />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Website URL</label>
-                <Input value={form.websiteUrl} onChange={e => setForm(f => ({ ...f, websiteUrl: e.target.value }))} data-testid="input-website-url" />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Primary Service / Value Proposition</label>
-              <Textarea value={form.primaryService} onChange={e => setForm(f => ({ ...f, primaryService: e.target.value }))} rows={2} data-testid="input-primary-service" />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Target Keywords (comma-separated)</label>
-              <Textarea value={form.targetKeywords} onChange={e => setForm(f => ({ ...f, targetKeywords: e.target.value }))} rows={2} data-testid="input-target-keywords" />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Target Audience</label>
-              <Input value={form.targetAudience} onChange={e => setForm(f => ({ ...f, targetAudience: e.target.value }))} data-testid="input-target-audience" />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Competitors (comma-separated, domains or names)</label>
-                <Input value={form.competitors} onChange={e => setForm(f => ({ ...f, competitors: e.target.value }))} data-testid="input-competitors" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Target Locations (comma-separated)</label>
-                <Input value={form.targetLocations} onChange={e => setForm(f => ({ ...f, targetLocations: e.target.value }))} data-testid="input-locations" />
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Website URL</label>
+                <Input className="h-8 text-sm" value={form.websiteUrl} onChange={e => setForm(f => ({ ...f, websiteUrl: e.target.value }))} data-testid="input-website-url" />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Monthly Traffic (approx.)</label>
-                <Input type="number" placeholder="e.g. 5000" value={form.currentMonthlyTraffic} onChange={e => setForm(f => ({ ...f, currentMonthlyTraffic: e.target.value }))} data-testid="input-monthly-traffic" />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Primary Service</label>
+                <Input className="h-8 text-sm" value={form.primaryService} onChange={e => setForm(f => ({ ...f, primaryService: e.target.value }))} data-testid="input-primary-service" />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Google Review Count</label>
-                <Input type="number" placeholder="e.g. 24" value={form.googleReviewCount} onChange={e => setForm(f => ({ ...f, googleReviewCount: e.target.value }))} data-testid="input-review-count" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Average Rating (1-5)</label>
-                <Input type="number" step="0.1" min="1" max="5" placeholder="e.g. 4.8" value={form.averageRating} onChange={e => setForm(f => ({ ...f, averageRating: e.target.value }))} data-testid="input-avg-rating" />
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Target Audience</label>
+                <Input className="h-8 text-sm" value={form.targetAudience} onChange={e => setForm(f => ({ ...f, targetAudience: e.target.value }))} data-testid="input-target-audience" />
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Keywords You Currently Rank For (comma-separated)</label>
-              <Input value={form.currentRankingKeywords} onChange={e => setForm(f => ({ ...f, currentRankingKeywords: e.target.value }))} data-testid="input-current-rankings" />
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground">Target Keywords (comma-separated)</label>
+              <Input className="h-8 text-sm" value={form.targetKeywords} onChange={e => setForm(f => ({ ...f, targetKeywords: e.target.value }))} data-testid="input-target-keywords" />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Biggest SEO Problem Right Now (be honest)</label>
-              <Textarea value={form.biggestSEOProblem} onChange={e => setForm(f => ({ ...f, biggestSEOProblem: e.target.value }))} rows={2} data-testid="input-seo-problem" />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Competitors (comma-separated)</label>
+                <Input className="h-8 text-sm" value={form.competitors} onChange={e => setForm(f => ({ ...f, competitors: e.target.value }))} data-testid="input-competitors" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Target Locations (comma-separated)</label>
+                <Input className="h-8 text-sm" value={form.targetLocations} onChange={e => setForm(f => ({ ...f, targetLocations: e.target.value }))} data-testid="input-locations" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">Ranking Keywords (comma-separated)</label>
+                <Input className="h-8 text-sm" value={form.currentRankingKeywords} onChange={e => setForm(f => ({ ...f, currentRankingKeywords: e.target.value }))} data-testid="input-current-rankings" />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Monthly Traffic</label>
+                  <Input className="h-8 text-sm" type="number" placeholder="5000" value={form.currentMonthlyTraffic} onChange={e => setForm(f => ({ ...f, currentMonthlyTraffic: e.target.value }))} data-testid="input-monthly-traffic" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Review Count</label>
+                  <Input className="h-8 text-sm" type="number" placeholder="24" value={form.googleReviewCount} onChange={e => setForm(f => ({ ...f, googleReviewCount: e.target.value }))} data-testid="input-review-count" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Avg Rating</label>
+                  <Input className="h-8 text-sm" type="number" step="0.1" min="1" max="5" placeholder="4.8" value={form.averageRating} onChange={e => setForm(f => ({ ...f, averageRating: e.target.value }))} data-testid="input-avg-rating" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground">Biggest SEO Problem Right Now</label>
+              <Input className="h-8 text-sm" value={form.biggestSEOProblem} onChange={e => setForm(f => ({ ...f, biggestSEOProblem: e.target.value }))} data-testid="input-seo-problem" />
             </div>
 
             <Button
               className="w-full"
-              size="lg"
               onClick={() => mutation.mutate()}
               disabled={mutation.isPending}
               data-testid="button-generate-strategy"
@@ -341,7 +341,7 @@ export default function SeoStrategy() {
               {mutation.isPending ? (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Running Quad-AI Analysis (60-90 seconds)...
+                  Running Quad-AI Analysis (60–90 seconds)…
                 </>
               ) : (
                 <>
@@ -352,22 +352,18 @@ export default function SeoStrategy() {
             </Button>
 
             {mutation.isPending && (
-              <div className="space-y-3 p-4 bg-muted/50 rounded-md">
-                <p className="text-sm font-medium text-center">Running all 4 AI models in parallel...</p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {[
-                    { label: "Gemini", role: "Local SEO + GBP", color: "text-blue-600" },
-                    { label: "GPT-4o", role: "Technical + Keywords", color: "text-green-600" },
-                    { label: "Claude", role: "Content + Entity", color: "text-purple-600" },
-                    { label: "Qwen", role: "Content Production", color: "text-orange-600" },
-                  ].map(m => (
-                    <div key={m.label} className="text-center p-2 bg-card rounded border">
-                      <Cpu className={`w-5 h-5 mx-auto mb-1 animate-pulse ${m.color}`} />
-                      <p className={`text-xs font-bold ${m.color}`}>{m.label}</p>
-                      <p className="text-xs text-muted-foreground">{m.role}</p>
-                    </div>
-                  ))}
-                </div>
+              <div className="flex items-center justify-center gap-6 p-3 bg-muted/50 rounded-md">
+                {[
+                  { label: "Gemini", color: "text-blue-600" },
+                  { label: "GPT-4o", color: "text-green-600" },
+                  { label: "Claude", color: "text-purple-600" },
+                  { label: "Qwen", color: "text-orange-600" },
+                ].map(m => (
+                  <div key={m.label} className="flex items-center gap-1.5">
+                    <Cpu className={`w-3.5 h-3.5 animate-pulse ${m.color}`} />
+                    <span className={`text-xs font-semibold ${m.color}`}>{m.label}</span>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
