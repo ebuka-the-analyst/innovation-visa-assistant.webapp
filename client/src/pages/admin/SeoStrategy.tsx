@@ -1,5 +1,5 @@
 import { useState, useCallback, type ReactNode } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import {
   Target, AlertTriangle, CheckCircle2, Clock, BarChart3, Link2,
   FileText, Calendar, Cpu, ChevronRight, Download, RefreshCw,
   Award, MapPin, MessageSquare, Camera, Circle, PlayCircle, ExternalLink,
-  PenLine, ListChecks
+  PenLine, ListChecks, Bot, Pause, Play, Rocket, CalendarDays
 } from "lucide-react";
 
 interface SEOAction {
@@ -213,11 +213,61 @@ function KeywordCard({ kw, onGenerateBlog }: { kw: KeywordOpportunity; onGenerat
   );
 }
 
+interface AutomationPlan {
+  id: string;
+  businessName: string;
+  status: "active" | "paused" | "completed";
+  totalContentItems: number;
+  queuedItems: number;
+  completedItems: number;
+  weekNumber: number;
+  startDate: string;
+  nextQueueDate: string | null;
+  progressPct: number;
+}
+
 export default function SeoStrategy() {
   const { toast } = useToast();
   const [result, setResult] = useState<SEOStrategyResult | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
   const { statuses, cycle } = useTaskTracker("seo-strategy-tasks");
+
+  // Automation status polling
+  const { data: automationData, refetch: refetchAutomation } = useQuery<{
+    active: boolean; plan?: AutomationPlan;
+  }>({
+    queryKey: ["/api/seo/automation-status"],
+    refetchInterval: 15000,
+  });
+
+  const activateMutation = useMutation({
+    mutationFn: async () => {
+      if (!result) throw new Error("No strategy to activate");
+      const res = await apiRequest("POST", "/api/seo/activate-automation", result);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "90-Day Automation Activated",
+        description: `${data.queuedNow} posts queued immediately. ${data.totalItems} total planned across 13 weeks.`,
+      });
+      refetchAutomation();
+    },
+    onError: (err: Error) => {
+      toast({ title: "Activation Failed", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: async ({ planId, action }: { planId: string; action: "pause" | "resume" }) => {
+      const res = await apiRequest("POST", "/api/seo/automation-toggle", { planId, action });
+      return res.json();
+    },
+    onSuccess: () => {
+      refetchAutomation();
+      toast({ title: "Automation updated" });
+    },
+  });
 
   const handleGenerateBlog = (keyword: string) => {
     const url = `/admin/blog?prefill=${encodeURIComponent(keyword)}`;
@@ -486,6 +536,104 @@ export default function SeoStrategy() {
 
               <div className="p-3 bg-muted/50 rounded-md">
                 <p className="text-sm">{result.executiveSummary}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 90-Day Automation Panel */}
+          <Card className="border-primary/20">
+            <CardContent className="p-4">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-md bg-primary/10">
+                    <Bot className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-sm">90-Day Content Automation</span>
+                      {automationData?.plan && (
+                        <Badge variant="outline" className={
+                          automationData.plan.status === "active" ? "border-green-500 text-green-600" :
+                          automationData.plan.status === "paused" ? "border-yellow-500 text-yellow-600" :
+                          "border-muted-foreground text-muted-foreground"
+                        }>
+                          {automationData.plan.status === "active" ? "Active" :
+                           automationData.plan.status === "paused" ? "Paused" : "Completed"}
+                        </Badge>
+                      )}
+                    </div>
+                    {automationData?.plan ? (
+                      <div className="mt-1 space-y-1">
+                        <p className="text-xs text-muted-foreground">
+                          Week {automationData.plan.weekNumber} of 13 — {automationData.plan.queuedItems} of {automationData.plan.totalContentItems} posts queued
+                          {automationData.plan.nextQueueDate && automationData.plan.status === "active" && (
+                            <> — next batch {new Date(automationData.plan.nextQueueDate).toLocaleDateString()}</>
+                          )}
+                        </p>
+                        <Progress value={automationData.plan.progressPct} className="h-1.5 w-64" />
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Auto-queue content calendar into the blog pipeline — 2-3 posts per week for 13 weeks
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {automationData?.plan && automationData.plan.status !== "completed" ? (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => toggleMutation.mutate({
+                          planId: automationData.plan!.id,
+                          action: automationData.plan!.status === "active" ? "pause" : "resume",
+                        })}
+                        disabled={toggleMutation.isPending}
+                        data-testid="button-automation-toggle"
+                      >
+                        {automationData.plan.status === "active" ? (
+                          <><Pause className="w-3.5 h-3.5 mr-1.5" />Pause</>
+                        ) : (
+                          <><Play className="w-3.5 h-3.5 mr-1.5" />Resume</>
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => activateMutation.mutate()}
+                        disabled={activateMutation.isPending}
+                        data-testid="button-reactivate-automation"
+                        title="Replace with new strategy"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${activateMutation.isPending ? "animate-spin" : ""}`} />
+                        Replace Plan
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      size="sm"
+                      onClick={() => activateMutation.mutate()}
+                      disabled={activateMutation.isPending}
+                      data-testid="button-activate-automation"
+                    >
+                      {activateMutation.isPending ? (
+                        <><RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" />Activating…</>
+                      ) : (
+                        <><Rocket className="w-3.5 h-3.5 mr-1.5" />Activate 90-Day Automation</>
+                      )}
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open("/admin/blog-pipeline", "_blank")}
+                    data-testid="button-view-pipeline"
+                  >
+                    <CalendarDays className="w-3.5 h-3.5 mr-1.5" />
+                    View Pipeline
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -3079,6 +3079,32 @@ export type BlogGenerationQueue = typeof blogGenerationQueue.$inferSelect;
 export type InsertBlogGenerationQueue = z.infer<typeof insertBlogGenerationQueueSchema>;
 
 // ============================================
+// SEO AUTOMATION PLANS (90-Day Automated Execution)
+// ============================================
+
+export const seoAutomationPlans = pgTable("seo_automation_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  strategyData: jsonb("strategy_data").notNull(),
+  businessName: varchar("business_name", { length: 200 }),
+  status: varchar("status", { length: 20 }).notNull().default("active"), // active | paused | completed
+  totalContentItems: integer("total_content_items").notNull().default(0),
+  queuedItems: integer("queued_items").notNull().default(0),
+  completedItems: integer("completed_items").notNull().default(0),
+  weekNumber: integer("week_number").notNull().default(1), // current week (1-13)
+  startDate: timestamp("start_date").notNull().defaultNow(),
+  nextQueueDate: timestamp("next_queue_date"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertSeoAutomationPlanSchema = createInsertSchema(seoAutomationPlans).omit({
+  id: true, createdAt: true, updatedAt: true,
+});
+
+export type SeoAutomationPlan = typeof seoAutomationPlans.$inferSelect;
+export type InsertSeoAutomationPlan = z.infer<typeof insertSeoAutomationPlanSchema>;
+
+// ============================================
 // ENTERPRISE ANALYTICS SYSTEM (PhD-Level Comprehensive Tracking)
 // ============================================
 

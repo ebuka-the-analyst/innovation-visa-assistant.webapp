@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions, blogPosts, blogGenerationQueue, TIER_CREDITS as SCHEMA_TIER_CREDITS, getTierCredits, eventLog, apiLatencyLog } from "@shared/schema";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions, blogPosts, blogGenerationQueue, seoAutomationPlans, TIER_CREDITS as SCHEMA_TIER_CREDITS, getTierCredits, eventLog, apiLatencyLog } from "@shared/schema";
 import { generateBlogPost, generateMultiplePosts, generateBackdatedPosts } from "./blogGenerator";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
@@ -15705,6 +15705,78 @@ Return a JSON object with:
       const msg = error instanceof Error ? error.message : String(error);
       console.error("[SEO Strategy] Error:", msg);
       res.status(500).json({ error: `SEO strategy generation failed: ${msg}` });
+    }
+  });
+
+  // Activate 90-day automation plan
+  app.post("/api/seo/activate-automation", requireAdmin, async (req, res) => {
+    try {
+      const { activateAutomationPlan } = await import("./seoAutomation.js");
+      const strategy = req.body;
+      if (!strategy || !strategy.businessContext) {
+        return res.status(400).json({ error: "Full strategy result is required" });
+      }
+      const result = await activateAutomationPlan(strategy);
+      res.json({ success: true, ...result });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error("[SEO Automation] Activation error:", msg);
+      res.status(500).json({ error: `Automation activation failed: ${msg}` });
+    }
+  });
+
+  // Get current automation plan status
+  app.get("/api/seo/automation-status", requireAdmin, async (req, res) => {
+    try {
+      const plans = await db
+        .select()
+        .from(seoAutomationPlans)
+        .orderBy(desc(seoAutomationPlans.createdAt))
+        .limit(1);
+
+      if (plans.length === 0) {
+        return res.json({ active: false });
+      }
+
+      const plan = plans[0];
+      const progressPct = plan.totalContentItems > 0
+        ? Math.round((plan.queuedItems / plan.totalContentItems) * 100)
+        : 0;
+
+      res.json({
+        active: plan.status === "active",
+        plan: {
+          id: plan.id,
+          businessName: plan.businessName,
+          status: plan.status,
+          totalContentItems: plan.totalContentItems,
+          queuedItems: plan.queuedItems,
+          completedItems: plan.completedItems,
+          weekNumber: plan.weekNumber,
+          startDate: plan.startDate,
+          nextQueueDate: plan.nextQueueDate,
+          progressPct,
+        },
+      });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      res.status(500).json({ error: msg });
+    }
+  });
+
+  // Pause / resume automation
+  app.post("/api/seo/automation-toggle", requireAdmin, async (req, res) => {
+    try {
+      const { planId, action } = req.body as { planId: string; action: "pause" | "resume" };
+      const newStatus = action === "pause" ? "paused" : "active";
+      await db
+        .update(seoAutomationPlans)
+        .set({ status: newStatus, updatedAt: new Date() })
+        .where(eq(seoAutomationPlans.id, planId));
+      res.json({ success: true, status: newStatus });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      res.status(500).json({ error: msg });
     }
   });
 

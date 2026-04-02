@@ -973,6 +973,31 @@ async function runAutoMigrations() {
         console.error("Initial notification processing error:", error);
       }
     }, 10000); // 10 second delay after startup
+
+    // Weekly SEO automation cron: every Monday at 8am GMT
+    const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+    const msUntilNextMonday8am = (() => {
+      const now = new Date();
+      const next = new Date(now);
+      const dayOfWeek = now.getUTCDay(); // 0=Sun, 1=Mon
+      const daysUntilMonday = dayOfWeek === 1 ? 7 : (8 - dayOfWeek) % 7;
+      next.setUTCDate(next.getUTCDate() + daysUntilMonday);
+      next.setUTCHours(8, 0, 0, 0);
+      return Math.max(next.getTime() - now.getTime(), 60000);
+    })();
+
+    setTimeout(async () => {
+      const runSeoWeeklyCron = async () => {
+        try {
+          const { runWeeklyAutomationCron } = await import("./seoAutomation.js");
+          await runWeeklyAutomationCron();
+        } catch (err) {
+          console.error("[SEO Automation] Weekly cron error:", err);
+        }
+      };
+      await runSeoWeeklyCron();
+      setInterval(runSeoWeeklyCron, ONE_WEEK_MS);
+    }, msUntilNextMonday8am);
     
   });
 })();
