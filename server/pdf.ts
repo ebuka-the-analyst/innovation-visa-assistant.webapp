@@ -1102,12 +1102,10 @@ function generateCoverPageHTML(plan: BusinessPlan & { backgroundImage?: string |
 // plans ever look the same end-to-end.
 
 function getBodyStyleCSS(style: number, pc: string, sc: string): string {
-  // Derive a dark tint and light tint of the primary color for variety
-  const pcAlpha = (a: number) => `${pc}${Math.round(a * 255).toString(16).padStart(2, '0')}`;
 
   switch (style) {
 
-    // ── 0: Classic left-border ───────────────────────────────────────────────
+    // ── 0: Classic left-border (dark navy, square bullets, stepped callouts) ──
     case 0: return `
       h2 {
         font-size: 18pt; font-weight: 700; color: #1a1a2e;
@@ -1121,9 +1119,29 @@ function getBodyStyleCSS(style: number, pc: string, sc: string): string {
       .chart-container { border-top: none !important; border-left: 5px solid ${pc}; border-radius: 4px; background: #f8f9fc; }
       strong { color: #1a1a2e; }
       .section-break { border-top-color: #1a1a2e; }
+      ul { list-style: none; padding-left: 20px; }
+      ul li { position: relative; padding-left: 18px; margin-bottom: 7px; }
+      ul li::before { content: '■'; position: absolute; left: 0; color: ${pc}; font-size: 8pt; top: 2px; }
+      ol { list-style: none; counter-reset: step0; padding-left: 20px; }
+      ol li { counter-increment: step0; position: relative; padding-left: 32px; margin-bottom: 10px; }
+      ol li::before {
+        content: counter(step0);
+        position: absolute; left: 0; top: 0;
+        width: 22px; height: 22px;
+        background: ${pc}; color: #fff;
+        font-size: 9pt; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 3px;
+      }
+      blockquote {
+        border-left: 5px solid ${pc}; margin: 18px 0;
+        background: #f0f4ff; padding: 14px 18px;
+        border-radius: 0 6px 6px 0; color: #1a1a2e;
+        font-style: normal;
+      }
     `;
 
-    // ── 1: 2-col corporate ───────────────────────────────────────────────────
+    // ── 1: 2-col corporate (Roboto Condensed, dash bullets, card callouts) ────
     case 1: return `
       @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
       h2 {
@@ -1139,9 +1157,26 @@ function getBodyStyleCSS(style: number, pc: string, sc: string): string {
       tr:nth-child(even) td { background: #ffffff; }
       .chart-container { border-top: 4px solid ${sc} !important; background: #f7f8fc; border-radius: 2px; }
       strong { color: ${sc}; }
+      ul { list-style: none; padding-left: 16px; }
+      ul li { padding-left: 22px; position: relative; margin-bottom: 6px; font-family: 'Roboto Condensed', sans-serif; }
+      ul li::before { content: '—'; position: absolute; left: 0; color: ${sc}; font-weight: 700; }
+      ol { list-style: none; counter-reset: corp1; padding-left: 16px; }
+      ol li { counter-increment: corp1; padding-left: 36px; position: relative; margin-bottom: 9px; }
+      ol li::before {
+        content: counter(corp1, decimal-leading-zero);
+        position: absolute; left: 0; top: 0;
+        color: ${pc}; font-family: 'Roboto Condensed', sans-serif;
+        font-size: 11pt; font-weight: 700; line-height: 1.4;
+      }
+      blockquote {
+        border: 1px solid #dde3ed; border-top: 4px solid ${sc};
+        margin: 18px 0; padding: 14px 18px;
+        background: #f7f8fc; border-radius: 0 0 4px 4px;
+        font-family: 'Roboto Condensed', sans-serif; font-style: normal;
+      }
     `;
 
-    // ── 2: Dark navy executive ────────────────────────────────────────────────
+    // ── 2: Dark navy executive (navy bg headers, gold accents, diamond bullets) ─
     case 2: return `
       h2 {
         font-size: 17pt; font-weight: 800; letter-spacing: 2px;
@@ -1156,9 +1191,28 @@ function getBodyStyleCSS(style: number, pc: string, sc: string): string {
       .chart-container { background: #0d1b3e0d; border: 1px solid #0d1b3e33; border-top: 4px solid #c9a84c !important; border-radius: 2px; }
       strong { color: #c9a84c; }
       .section-break { border-top-color: #0d1b3e; }
+      ul { list-style: none; padding-left: 18px; }
+      ul li { padding-left: 20px; position: relative; margin-bottom: 7px; }
+      ul li::before { content: '◆'; position: absolute; left: 0; color: #c9a84c; font-size: 8pt; top: 2px; }
+      ol { list-style: none; counter-reset: exec2; padding-left: 16px; }
+      ol li { counter-increment: exec2; padding-left: 40px; position: relative; margin-bottom: 12px; }
+      ol li::before {
+        content: counter(exec2);
+        position: absolute; left: 0; top: -1px;
+        width: 28px; height: 28px; border-radius: 50%;
+        background: #0d1b3e; color: #c9a84c;
+        font-size: 10pt; font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+        border: 2px solid #c9a84c;
+      }
+      blockquote {
+        background: #0d1b3e; color: #c9a84c;
+        border: none; margin: 18px 0; padding: 16px 20px;
+        border-radius: 2px; font-style: normal; font-weight: 600;
+      }
     `;
 
-    // ── 3: Vertical timeline ──────────────────────────────────────────────────
+    // ── 3: Vertical timeline (filled circles, connecting dots, arc callouts) ───
     case 3: return `
       body { counter-reset: section-counter; }
       h2 {
@@ -1181,9 +1235,40 @@ function getBodyStyleCSS(style: number, pc: string, sc: string): string {
       tr:nth-child(even) td { background: #f5f8ff; }
       .chart-container { border-left: 4px solid ${pc} !important; border-top: none !important; border-radius: 0 8px 8px 0; background: #fafcff; }
       strong { color: ${pc}; }
+      ul { list-style: none; padding-left: 16px; }
+      ul li { padding-left: 22px; position: relative; margin-bottom: 8px; }
+      ul li::before {
+        content: '';
+        position: absolute; left: 2px; top: 6px;
+        width: 10px; height: 10px; border-radius: 50%;
+        background: ${pc};
+      }
+      ol { list-style: none; counter-reset: tl3; padding-left: 16px; }
+      ol li { counter-increment: tl3; padding-left: 44px; position: relative; margin-bottom: 14px; }
+      ol li::before {
+        content: counter(tl3);
+        position: absolute; left: 0; top: 0;
+        width: 30px; height: 30px; border-radius: 50%;
+        background: ${pc}; color: #fff;
+        font-size: 11pt; font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+      }
+      ol li::after {
+        content: '';
+        position: absolute; left: 14px; top: 30px;
+        width: 2px; height: calc(100% + 4px);
+        background: ${pc}33;
+      }
+      ol li:last-child::after { display: none; }
+      blockquote {
+        border: 2px dashed ${pc}55; margin: 18px 0; padding: 14px 18px;
+        background: ${pc}08; border-radius: 8px; font-style: normal;
+        position: relative;
+      }
+      blockquote::before { content: '💡'; position: absolute; top: -10px; left: 14px; background: white; padding: 0 4px; font-size: 12pt; }
     `;
 
-    // ── 4: Minimal circles ────────────────────────────────────────────────────
+    // ── 4: Minimal circles (outline badges, outline bullets, light callouts) ───
     case 4: return `
       body { counter-reset: h2-counter; }
       h2 {
@@ -1206,9 +1291,33 @@ function getBodyStyleCSS(style: number, pc: string, sc: string): string {
       table { border-radius: 8px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.07); }
       .chart-container { border-top: none !important; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); background: #fff; border: 1px solid #e4eaf5; }
       strong { color: ${sc}; }
+      ul { list-style: none; padding-left: 18px; }
+      ul li { padding-left: 22px; position: relative; margin-bottom: 7px; }
+      ul li::before {
+        content: '';
+        position: absolute; left: 2px; top: 5px;
+        width: 11px; height: 11px; border-radius: 50%;
+        border: 2px solid ${pc};
+      }
+      ol { list-style: none; counter-reset: min4; padding-left: 16px; }
+      ol li { counter-increment: min4; padding-left: 40px; position: relative; margin-bottom: 10px; }
+      ol li::before {
+        content: counter(min4);
+        position: absolute; left: 0; top: 0;
+        width: 28px; height: 28px; border-radius: 50%;
+        border: 2px solid ${pc}; color: ${pc};
+        font-size: 10pt; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+      }
+      blockquote {
+        border: 1px solid ${pc}44; border-radius: 8px;
+        margin: 18px 0; padding: 14px 18px;
+        background: #fafcff; font-style: normal;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      }
     `;
 
-    // ── 5: Ghost chapter numbers ──────────────────────────────────────────────
+    // ── 5: Ghost chapter numbers (watermark nums, arrow bullets, ghost callout) ─
     case 5: return `
       body { counter-reset: ghost-counter; }
       h2 {
@@ -1233,9 +1342,25 @@ function getBodyStyleCSS(style: number, pc: string, sc: string): string {
       tr:nth-child(even) td { background: #f8fafc; }
       .chart-container { border: none !important; background: transparent; padding: 10px 0; border-bottom: 2px solid ${pc}22 !important; border-radius: 0 !important; }
       strong { color: ${pc}; font-style: italic; }
+      ul { list-style: none; padding-left: 20px; }
+      ul li { padding-left: 22px; position: relative; margin-bottom: 7px; }
+      ul li::before { content: '→'; position: absolute; left: 0; color: ${pc}; font-weight: 700; }
+      ol { list-style: none; counter-reset: ghost5; padding-left: 16px; }
+      ol li { counter-increment: ghost5; padding-left: 36px; position: relative; margin-bottom: 9px; }
+      ol li::before {
+        content: counter(ghost5);
+        position: absolute; left: 0; top: -4px;
+        font-size: 28pt; font-weight: 900; color: ${pc}22;
+        line-height: 1; font-style: italic;
+      }
+      blockquote {
+        border: 1px dashed ${pc}44; margin: 20px 0; padding: 14px 18px;
+        background: transparent; border-radius: 4px; font-style: italic;
+        color: #555;
+      }
     `;
 
-    // ── 6: Newspaper editorial ────────────────────────────────────────────────
+    // ── 6: Newspaper editorial (Playfair, em-dash, editorial callouts) ─────────
     case 6: return `
       @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&display=swap');
       h2 {
@@ -1253,9 +1378,27 @@ function getBodyStyleCSS(style: number, pc: string, sc: string): string {
       .chart-container::before { content: ''; display: block; height: 6px; background: repeating-linear-gradient(90deg, #111 0, #111 6px, transparent 6px, transparent 12px); margin-bottom: 16px; }
       strong { color: #111; font-weight: 700; font-style: italic; }
       body { color: #222; }
+      ul { list-style: none; padding-left: 18px; }
+      ul li { padding-left: 24px; position: relative; margin-bottom: 7px; font-style: normal; }
+      ul li::before { content: '—'; position: absolute; left: 0; color: ${sc}; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; }
+      ol { list-style: none; counter-reset: news6; padding-left: 16px; }
+      ol li { counter-increment: news6; padding-left: 30px; position: relative; margin-bottom: 9px; }
+      ol li::before {
+        content: counter(news6) '.';
+        position: absolute; left: 0;
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 11pt; font-weight: 700; color: #111;
+      }
+      blockquote {
+        border-top: 4px double #111; border-bottom: 4px double #111;
+        margin: 20px 0; padding: 14px 24px;
+        background: #fffef8; font-family: 'Playfair Display', Georgia, serif;
+        font-style: italic; font-size: 12pt; color: #333;
+        text-align: center;
+      }
     `;
 
-    // ── 7: Mini section cards ─────────────────────────────────────────────────
+    // ── 7: Mini section cards (gradient pills, gradient dots, gradient callouts) ─
     case 7: return `
       body { counter-reset: card-counter; background: #f4f6fb; }
       .content { background: #f4f6fb; }
@@ -1281,9 +1424,33 @@ function getBodyStyleCSS(style: number, pc: string, sc: string): string {
       tr:nth-child(even) td { background: #f0f4ff; }
       .chart-container { background: #fff !important; border-radius: 12px !important; border: none !important; box-shadow: 0 4px 16px rgba(0,0,0,0.1); border-top: none !important; }
       strong { color: ${sc}; }
+      ul { list-style: none; padding-left: 18px; }
+      ul li { padding-left: 20px; position: relative; margin-bottom: 7px; }
+      ul li::before {
+        content: '';
+        position: absolute; left: 0; top: 6px;
+        width: 10px; height: 10px; border-radius: 50%;
+        background: linear-gradient(135deg, ${pc}, ${sc});
+      }
+      ol { list-style: none; counter-reset: card7; padding-left: 16px; }
+      ol li { counter-increment: card7; padding-left: 44px; position: relative; margin-bottom: 10px; }
+      ol li::before {
+        content: counter(card7);
+        position: absolute; left: 0; top: 0;
+        background: linear-gradient(135deg, ${pc}, ${sc}); color: #fff;
+        font-size: 9pt; font-weight: 800;
+        padding: 3px 10px; border-radius: 100px; min-width: 24px; text-align: center;
+      }
+      blockquote {
+        background: linear-gradient(135deg, ${pc}11, ${sc}11);
+        border: none; border-radius: 10px;
+        margin: 18px 0; padding: 16px 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        font-style: normal;
+      }
     `;
 
-    // ── 8: Elegant serif ──────────────────────────────────────────────────────
+    // ── 8: Elegant serif (EB Garamond, ornamental bullets, centred callouts) ───
     case 8: return `
       @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;0,700;1,400&display=swap');
       h2 {
@@ -1306,9 +1473,27 @@ function getBodyStyleCSS(style: number, pc: string, sc: string): string {
       .chart-container { border: 1px solid #d4c9a8 !important; border-top: 2px solid ${pc} !important; background: #fefcf8 !important; border-radius: 4px; }
       strong { color: ${pc}; font-style: italic; font-weight: 700; }
       body { color: #2d2416; }
+      ul { list-style: none; padding-left: 18px; }
+      ul li { padding-left: 22px; position: relative; margin-bottom: 8px; font-family: 'EB Garamond', serif; font-size: 11.5pt; }
+      ul li::before { content: '✦'; position: absolute; left: 0; color: ${pc}; font-size: 9pt; top: 2px; }
+      ol { list-style: none; counter-reset: ser8; padding-left: 16px; }
+      ol li { counter-increment: ser8; padding-left: 32px; position: relative; margin-bottom: 9px; font-family: 'EB Garamond', serif; font-size: 11.5pt; }
+      ol li::before {
+        content: counter(ser8, lower-roman) '.';
+        position: absolute; left: 0;
+        font-family: 'EB Garamond', Georgia, serif;
+        font-size: 11pt; font-style: italic; color: ${sc};
+      }
+      blockquote {
+        border-top: 1px solid ${pc}; border-bottom: 1px solid ${pc};
+        margin: 22px auto; padding: 18px 28px;
+        background: #fefcf8; max-width: 90%; text-align: center;
+        font-family: 'EB Garamond', Georgia, serif;
+        font-size: 13pt; font-style: italic; color: ${sc};
+      }
     `;
 
-    // ── 9: Pill badge sidebar ─────────────────────────────────────────────────
+    // ── 9: Pill badge sidebar (pill bullets, pill numbers, sidebar callout) ────
     case 9: return `
       body { counter-reset: pill-counter; }
       h2 {
@@ -1343,6 +1528,32 @@ function getBodyStyleCSS(style: number, pc: string, sc: string): string {
         background: #f8faff !important;
       }
       strong { color: ${pc}; font-weight: 700; }
+      ul { list-style: none; padding-left: 18px; }
+      ul li { padding-left: 22px; position: relative; margin-bottom: 7px; }
+      ul li::before {
+        content: '●';
+        position: absolute; left: 0; color: ${pc};
+        background: ${pc}22; border-radius: 100px;
+        width: 14px; height: 14px; text-align: center;
+        font-size: 7pt; line-height: 14px;
+        top: 2px;
+      }
+      ol { list-style: none; counter-reset: pill9; padding-left: 16px; }
+      ol li { counter-increment: pill9; padding-left: 44px; position: relative; margin-bottom: 10px; }
+      ol li::before {
+        content: counter(pill9);
+        position: absolute; left: 0; top: 0;
+        background: ${pc}; color: #fff;
+        font-size: 9pt; font-weight: 800;
+        padding: 3px 11px; border-radius: 100px;
+        min-width: 24px; text-align: center;
+      }
+      blockquote {
+        border-left: 6px solid ${pc}; margin: 18px 0;
+        background: #f8faff; padding: 14px 18px;
+        border-radius: 0 8px 8px 0; font-style: normal;
+        border-right: 1px solid #dde5f0; border-top: 1px solid #dde5f0; border-bottom: 1px solid #dde5f0;
+      }
     `;
 
     default: return '';

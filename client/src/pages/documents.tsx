@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -17,9 +19,116 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
   FileText, Upload, FolderOpen, Trash2, Download, Eye, 
   CheckCircle2, Clock, AlertTriangle, Plus, Search,
-  FileImage, File, FileSpreadsheet, Shield, Sparkles, Send, Share2
+  FileImage, File, FileSpreadsheet, Shield, Sparkles, Send, Share2,
+  Palette, Lock, ChevronDown, ChevronUp
 } from "lucide-react";
 import type { UserDocument, BusinessPlan } from "@shared/schema";
+
+// ─── Visual Style System ────────────────────────────────────────────────────
+
+const STYLE_NAMES: Record<number, string> = {
+  0: 'Classic left-border',
+  1: '2-col corporate',
+  2: 'Dark navy executive',
+  3: 'Vertical timeline',
+  4: 'Minimal circles',
+  5: 'Ghost chapter numbers',
+  6: 'Newspaper editorial',
+  7: 'Mini section cards',
+  8: 'Elegant serif',
+  9: 'Pill badge sidebar',
+};
+
+const STYLE_COLORS: Record<number, { bg: string; text: string; border: string }> = {
+  0: { bg: '#1a1a2e', text: '#ffffff', border: '#1a1a2e' },
+  1: { bg: '#005EB8', text: '#ffffff', border: '#005EB8' },
+  2: { bg: '#0d1b3e', text: '#c9a84c', border: '#0d1b3e' },
+  3: { bg: '#059669', text: '#ffffff', border: '#059669' },
+  4: { bg: '#f0f4ff', text: '#3b5bdb', border: '#3b5bdb' },
+  5: { bg: '#f8fafc', text: '#374151', border: '#9ca3af' },
+  6: { bg: '#111111', text: '#ffffff', border: '#111111' },
+  7: { bg: 'linear-gradient(90deg,#e052a0,#f15c41)', text: '#ffffff', border: '#e052a0' },
+  8: { bg: '#fefcf8', text: '#7c3aed', border: '#d4c9a8' },
+  9: { bg: '#005EB8', text: '#ffffff', border: '#005EB8' },
+};
+
+function pickAutoStyle(planId: string): number {
+  let h = 0;
+  for (let i = 0; i < planId.length; i++) {
+    h = ((h << 5) - h + planId.charCodeAt(i)) >>> 0;
+  }
+  return h % 10;
+}
+
+// ─── Plan Style Picker Component ──────────────────────────────────────────────
+
+function PlanStylePicker({ plan, onStyleChange }: { plan: BusinessPlan & { tocStyle?: number | null }; onStyleChange: (planId: string, style: number | null) => void }) {
+  const [open, setOpen] = useState(false);
+  const autoStyle = pickAutoStyle(plan.id);
+  const activeStyle = (plan as any).tocStyle ?? null;
+  const effectiveStyle = activeStyle ?? autoStyle;
+
+  return (
+    <div className="mt-3">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-7 text-[11px] text-muted-foreground gap-1.5 px-2"
+        onClick={() => setOpen(v => !v)}
+        data-testid={`button-style-picker-toggle-${plan.id}`}
+      >
+        <Palette className="h-3 w-3" />
+        Visual Style: <span className="font-semibold text-foreground">{STYLE_NAMES[effectiveStyle]}</span>
+        {activeStyle !== null && <Badge variant="secondary" className="text-[9px] h-4 px-1">pinned</Badge>}
+        {open ? <ChevronUp className="h-3 w-3 ml-1" /> : <ChevronDown className="h-3 w-3 ml-1" />}
+      </Button>
+
+      {open && (
+        <div className="mt-2 p-3 border rounded-lg bg-muted/30">
+          <p className="text-[10px] text-muted-foreground mb-2">
+            Choose how your plan looks when exported. Click the active style to revert to auto (style {autoStyle}).
+          </p>
+          <div className="grid grid-cols-2 gap-1.5">
+            {Object.entries(STYLE_NAMES).map(([idStr, name]) => {
+              const id = Number(idStr);
+              const isActive = effectiveStyle === id;
+              const isPinned = activeStyle === id;
+              const col = STYLE_COLORS[id];
+              return (
+                <Tooltip key={id}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => onStyleChange(plan.id, isPinned ? null : id)}
+                      data-testid={`button-style-${id}-plan-${plan.id}`}
+                      className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[10px] font-medium text-left transition-all border"
+                      style={{
+                        background: isActive ? (col.bg.startsWith('linear') ? col.bg : col.bg) : 'transparent',
+                        color: isActive ? col.text : undefined,
+                        borderColor: isActive ? col.border : undefined,
+                        boxShadow: isActive ? '0 1px 4px rgba(0,0,0,0.15)' : undefined,
+                      }}
+                    >
+                      <span
+                        className="w-3 h-3 rounded-sm flex-shrink-0 inline-block"
+                        style={{ background: col.bg.startsWith('linear') ? col.bg : col.bg, border: `1px solid ${col.border}` }}
+                      />
+                      <span className={isActive ? '' : 'text-foreground'}>{id} {name}</span>
+                      {isPinned && <span className="ml-auto text-[8px] opacity-70">active</span>}
+                      {!isPinned && id === autoStyle && <span className="ml-auto text-[8px] opacity-50">auto</span>}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="text-xs">
+                    {isPinned ? 'Click to revert to auto' : `Pin to Style ${id}: ${name}`}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const DOCUMENT_CATEGORIES = [
   { value: "passport", label: "Passport & ID", icon: Shield, description: "Identity documents" },
@@ -82,6 +191,23 @@ export default function DocumentsPage() {
 
   // Filter completed plans with PDF URLs
   const completedPlans = businessPlans.filter(plan => plan.status === 'completed' && plan.pdfUrl);
+
+  const isUltimate = (user as any)?.subscriptionTier === 'ultimate';
+
+  // Mutation to update plan visual style (Ultimate tier)
+  const updateStyleMutation = useMutation({
+    mutationFn: async ({ planId, style }: { planId: string; style: number | null }) => {
+      const res = await apiRequest('PATCH', `/api/business-plans/${planId}/style`, { tocStyle: style });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/plans'] });
+      toast({ title: 'Visual style updated — re-export your plan to see the new look' });
+    },
+    onError: (err: Error) => {
+      toast({ title: 'Could not update style', description: err.message, variant: 'destructive' });
+    },
+  });
 
   const uploadMutation = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -489,83 +615,103 @@ export default function DocumentsPage() {
                   return (
                     <div
                       key={plan.id}
-                      className="flex items-center gap-4 p-4 rounded-lg border bg-gradient-to-r from-primary/5 to-transparent hover:from-primary/10 transition-colors"
+                      className="rounded-lg border bg-gradient-to-r from-primary/5 to-transparent p-4"
                       data-testid={`plan-${plan.id}`}
                     >
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <FileText className="w-6 h-6 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <FileText className="w-6 h-6 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-semibold truncate">{plan.businessName}</h4>
+                            <Badge variant="outline" className="capitalize">{plan.tier}</Badge>
+                            <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                              <CheckCircle2 className="w-3 h-3 mr-1" />Ready
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                            <span>{plan.industry}</span>
+                            <span>•</span>
+                            <span>{new Date(plan.createdAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-semibold truncate">{plan.businessName}</h4>
-                          <Badge variant="outline" className="capitalize">{plan.tier}</Badge>
-                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                            <CheckCircle2 className="w-3 h-3 mr-1" />Ready
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                          <span>{plan.industry}</span>
-                          <span>•</span>
-                          <span>{new Date(plan.createdAt).toLocaleDateString()}</span>
+                          <Button 
+                            variant="outline"
+                            size="icon"
+                            onClick={() => window.open(fullPdfUrl, '_blank')}
+                            data-testid={`button-view-plan-${plan.id}`}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            onClick={() => window.open(fullPdfUrl, '_blank')}
+                            data-testid={`button-download-plan-${plan.id}`}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Download
+                          </Button>
+                          <Button 
+                            variant="outline"
+                            onClick={() => {
+                              const subject = `${plan.businessName} - Business Plan`;
+                              const body = `Here is my business plan for ${plan.businessName}.\n\nView: ${fullPdfUrl}`;
+                              window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+                            }}
+                            data-testid={`button-share-plan-${plan.id}`}
+                          >
+                            <Send className="w-4 h-4 mr-2" />
+                            Email
+                          </Button>
+                          <Button 
+                            variant="ghost"
+                            size="icon"
+                            onClick={async () => {
+                              try {
+                                await navigator.clipboard.writeText(fullPdfUrl);
+                                toast({ title: "Link copied to clipboard" });
+                              } catch {
+                                toast({ title: "Failed to copy link", variant: "destructive" });
+                              }
+                            }}
+                            data-testid={`button-copy-link-${plan.id}`}
+                          >
+                            <Share2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              if (confirm(`Are you sure you want to delete "${plan.businessName}"? This cannot be undone.`)) {
+                                deletePlanMutation.mutate(plan.id);
+                              }
+                            }}
+                            disabled={deletePlanMutation.isPending}
+                            data-testid={`button-delete-plan-${plan.id}`}
+                          >
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Button 
-                          variant="outline"
-                          size="icon"
-                          onClick={() => window.open(fullPdfUrl, '_blank')}
-                          data-testid={`button-view-plan-${plan.id}`}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          onClick={() => window.open(fullPdfUrl, '_blank')}
-                          data-testid={`button-download-plan-${plan.id}`}
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          Download
-                        </Button>
-                        <Button 
-                          variant="outline"
-                          onClick={() => {
-                            const subject = `${plan.businessName} - Business Plan`;
-                            const body = `Here is my business plan for ${plan.businessName}.\n\nView: ${fullPdfUrl}`;
-                            window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
-                          }}
-                          data-testid={`button-share-plan-${plan.id}`}
-                        >
-                          <Send className="w-4 h-4 mr-2" />
-                          Email
-                        </Button>
-                        <Button 
-                          variant="ghost"
-                          size="icon"
-                          onClick={async () => {
-                            try {
-                              await navigator.clipboard.writeText(fullPdfUrl);
-                              toast({ title: "Link copied to clipboard" });
-                            } catch {
-                              toast({ title: "Failed to copy link", variant: "destructive" });
+
+                      {/* Visual Style Picker — Ultimate tier only */}
+                      {isUltimate ? (
+                        <>
+                          <Separator className="mt-3 mb-1" />
+                          <PlanStylePicker
+                            plan={plan as any}
+                            onStyleChange={(planId, style) =>
+                              updateStyleMutation.mutate({ planId, style })
                             }
-                          }}
-                          data-testid={`button-copy-link-${plan.id}`}
-                        >
-                          <Share2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            if (confirm(`Are you sure you want to delete "${plan.businessName}"? This cannot be undone.`)) {
-                              deletePlanMutation.mutate(plan.id);
-                            }
-                          }}
-                          disabled={deletePlanMutation.isPending}
-                          data-testid={`button-delete-plan-${plan.id}`}
-                        >
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
-                      </div>
+                          />
+                        </>
+                      ) : (
+                        <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                          <Lock className="h-3 w-3" />
+                          <span>Visual style customisation available on Ultimate plan</span>
+                        </div>
+                      )}
                     </div>
                   );
                 })}

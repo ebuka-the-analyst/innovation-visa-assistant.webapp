@@ -335,6 +335,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User: update plan visual style (Ultimate tier only)
+  app.patch("/api/business-plans/:id/style", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const planId = req.params.id;
+      const { tocStyle } = req.body;
+
+      if (user.subscriptionTier !== 'ultimate') {
+        return res.status(403).json({ error: "Visual style customisation requires Ultimate tier" });
+      }
+
+      const plan = await storage.getBusinessPlan(planId as any);
+      if (!plan) return res.status(404).json({ error: "Business plan not found" });
+      if (plan.userId !== user.id) return res.status(403).json({ error: "You can only edit your own business plans" });
+
+      // null means revert to auto (hash-based)
+      const styleValue = (tocStyle === null || tocStyle === undefined) ? null : Number(tocStyle);
+      if (styleValue !== null && (styleValue < 0 || styleValue > 9 || !Number.isInteger(styleValue))) {
+        return res.status(400).json({ error: "Style must be 0–9 or null" });
+      }
+
+      await db.execute(sql`UPDATE business_plans SET toc_style = ${styleValue} WHERE id = ${planId}`);
+      res.json({ success: true, tocStyle: styleValue });
+    } catch (error) {
+      console.error("Update plan style error:", error);
+      res.status(500).json({ error: "Failed to update plan style" });
+    }
+  });
+
   app.delete("/api/business-plans/:id", isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
