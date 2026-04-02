@@ -1,0 +1,183 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+11
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+7cb799f8
+Active
+
+Apr 2, 2026, 6:09 AM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+      at ClientRequest.emit (node:events:517:28)
+      at Socket.socketErrorListener (node:_http_client:501:9)
+  },
+  code: 'ECONNREFUSED',
+      timeOfFirstRequest: 1775107953687,
+  [Symbol(gaxios-gaxios-error)]: '6.7.1'
+    at async IdentityPoolClient._BaseExternalAccountClient_internalRefreshAccessTokenAsync (/app/node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/auth/baseexternalclient.js:408:26) {
+}
+      totalTimeout: 9007199254740991,
+Error serving object: GaxiosError: request to http://127.0.0.1:1106/credential failed, reason: connect ECONNREFUSED 127.0.0.1:1106
+  config: {
+      maxRetryDelay: 9007199254740991,
+    at Gaxios._request (/app/node_modules/@google-cloud/storage/node_modules/gaxios/build/src/gaxios.js:149:19)
+    retry: true,
+      statusCodesToRetry: [Array]
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    retryConfig: {
+    at async UrlSubjectTokenSupplier.getSubjectToken (/app/node_modules/@google-cloud/storage/node_modules/google-auth-library/build/src/auth/urlsubjecttokensupplier.js:54:30)
+      httpMethodsToRetry: [Array],
+      currentRetryAttempt: 2,
+      retry: 3,
+      noResponseRetries: 2,
+      retryDelayMultiplier: 2,
+      at ClientRequest.emit (node:events:517:28)
+      at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+    },
+      at Socket.socketErrorListener (node:_http_client:501:9)
+      at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+    paramsSerializer: [Function: paramsSerializer],
+      at Socket.emit (node:events:517:28)
+    url: 'http://127.0.0.1:1106/credential',
+    type: 'system',
+    validateStatus: [Function: validateStatus],
+      at emitErrorNT (node:internal/streams/destroy:151:8)
+    errorRedactor: [Function: defaultErrorRedactor]
+    method: 'GET',
+    headers: {
+  },
+      'User-Agent': 'google-api-nodejs-client/9.15.1',
+  response: undefined,
+      'x-goog-api-client': 'gl-node/18.20.5',
+  error: FetchError: request to http://127.0.0.1:1106/credential failed, reason: connect ECONNREFUSED 127.0.0.1:1106
+      Accept: 'application/json'
+      at ClientRequest.<anonymous> (/app/node_modules/@google-cloud/storage/node_modules/node-fetch/lib/index.js:1501:11)
+    },
+    responseType: 'json',
+    errno: 'ECONNREFUSED',
+    code: 'ECONNREFUSED'
+  },
+  code: 'ECONNREFUSED',
+  [Symbol(gaxios-gaxios-error)]: '6.7.1'
+}
+[2026-04-02T05:32:36.630Z] POST /api/activity/session
+5:32:36 AM [express] POST /api/activity/session 200 in 26ms :: {"sessionId":"0dc98a1a-bc2b-4738-bde0…
+[2026-04-02T05:32:48.660Z] POST /api/activity/session/end
+[2026-04-02T05:32:48.665Z] GET /api/auth/user
+[2026-04-02T05:32:48.666Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+5:32:48 AM [express] GET /api/auth/user 200 in 211ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+5:32:48 AM [express] POST /api/activity/session/end 200 in 219ms :: {"success":true}
+5:32:48 AM [express] POST /api/activity/session 200 in 220ms :: {"sessionId":"0b8bac25-e9a0-4553-a59…
+[2026-04-02T05:32:49.076Z] POST /api/activity/page-view
+5:32:49 AM [express] POST /api/activity/page-view 200 in 26ms :: {"pageViewId":"f2f7c035-ab7c-4584-8…
+[2026-04-02T05:32:51.136Z] GET /admin/blog
+[2026-04-02T05:32:51.137Z] POST /api/activity/session/end
+5:32:51 AM [express] POST /api/activity/session/end 200 in 18ms :: {"success":true}
+[2026-04-02T05:32:51.363Z] GET /attached_assets/official_logo.webp
+[2026-04-02T05:32:51.579Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+5:32:51 AM [express] GET /api/auth/user 200 in 17ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-02T05:32:51.800Z] POST /api/activity/session
+[2026-04-02T05:32:51.802Z] GET /api/partner/status
+[2026-04-02T05:32:51.815Z] GET /api/admin/blog/posts/all/
+[2026-04-02T05:32:51.817Z] GET /api/admin/blog/stats
+5:32:51 AM [express] GET /api/partner/status 200 in 18ms :: {"isPartner":false,"promoCodeCount":0}
+5:32:51 AM [express] GET /api/admin/blog/posts/all/ 200 in 12ms
+5:32:51 AM [express] POST /api/activity/session 200 in 29ms :: {"sessionId":"db4021ae-e22a-4bb1-8997…
+[2026-04-02T05:32:51.974Z] POST /api/activity/session
+[2026-04-02T05:32:51.983Z] GET /api/admin/blog/queue
+[2026-04-02T05:32:51.989Z] GET /api/admin/blog/review-queue
+5:32:52 AM [express] POST /api/activity/session 200 in 26ms :: {"sessionId":"6136f9ac-be11-4838-9ad4…
+5:32:52 AM [express] GET /api/admin/blog/queue 200 in 18ms :: [{"id":1,"targetDate":"2026-04-02T06:0…
+5:32:52 AM [express] GET /api/admin/blog/review-queue 200 in 29ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+[2026-04-02T05:32:52.026Z] POST /api/activity/page-view
+5:32:52 AM [express] GET /api/admin/blog/stats 200 in 228ms :: {"total":31,"published":25,"scheduled…
+5:32:52 AM [express] POST /api/activity/page-view 200 in 26ms :: {"pageViewId":"bbc0dadb-42ba-46fc-9…
+[2026-04-02T05:33:22.208Z] POST /api/activity/session
+5:33:22 AM [express] POST /api/activity/session 200 in 222ms :: {"sessionId":"6136f9ac-be11-4838-9ad…
+[2026-04-02T05:33:24.564Z] POST /api/admin/blog/posts/f9ce7137-31b9-4059-95c8-b7659d202b97/reverify
+[MultiVerifier] Starting triple-AI verification for: How to Prepare for Your Innovator Founder Visa Interview
+[MultiVerifier] Gemini model gemini-2.0-flash-001 unavailable, trying next...
+[MultiVerifier] Gemini model gemini-1.5-flash unavailable, trying next...
+[MultiVerifier] Gemini model gemini-1.5-pro unavailable, trying next...
+[MultiVerifier] All Gemini models failed — marking as unavailable
+[MultiVerifier] Result: FLAGGED | Gemini: unavailable | OpenAI: 100 | Composite: 100
+5:33:28 AM [express] POST /api/admin/blog/posts/f9ce7137-31b9-4059-95c8-b7659d202b97/reverify 200 in…
+[2026-04-02T05:33:28.221Z] GET /api/admin/blog/review-queue
+5:33:28 AM [express] GET /api/admin/blog/review-queue 200 in 49ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+[2026-04-02T05:33:28.570Z] GET /api/admin/blog/posts/all/
+5:33:28 AM [express] GET /api/admin/blog/posts/all/ 200 in 12ms
+5:33:53 AM [express] GET /api/admin/blog/posts/all/ 200 in 189ms
+[2026-04-02T05:33:50.419Z] POST /api/admin/blog/posts/f9ce7137-31b9-4059-95c8-b7659d202b97/reverify
+[MultiVerifier] Starting triple-AI verification for: How to Prepare for Your Innovator Founder Visa Interview
+[MultiVerifier] Gemini model gemini-2.0-flash-001 unavailable, trying next...
+[MultiVerifier] Gemini model gemini-1.5-flash unavailable, trying next...
+[MultiVerifier] Gemini model gemini-1.5-pro unavailable, trying next...
+[MultiVerifier] All Gemini models failed — marking as unavailable
+[2026-04-02T05:33:52.198Z] POST /api/activity/session
+5:33:52 AM [express] POST /api/activity/session 200 in 27ms :: {"sessionId":"6136f9ac-be11-4838-9ad4…
+[MultiVerifier] Result: FLAGGED | Gemini: unavailable | OpenAI: 100 | Composite: 100
+5:33:53 AM [express] POST /api/admin/blog/posts/f9ce7137-31b9-4059-95c8-b7659d202b97/reverify 200 in…
+[2026-04-02T05:33:53.665Z] GET /api/admin/blog/review-queue
+[2026-04-02T05:33:53.671Z] GET /api/admin/blog/posts/all/
+5:33:53 AM [express] GET /api/admin/blog/review-queue 200 in 33ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+[2026-04-02T05:34:08.572Z] POST /api/activity/session/end
+5:34:08 AM [express] POST /api/activity/session/end 200 in 215ms :: {"success":true}
+
+
