@@ -138,14 +138,31 @@ async function runGeminiVerification(title: string, content: string): Promise<{
   }
 
   // Direct REST API — bypasses SDK routing entirely, always hits Google AI Studio endpoint
-  // gemini-2.0-flash and gemini-1.5-* are unavailable on newer API projects
-  // Use the current generation models instead
-  const GEMINI_MODELS = [
-    "gemini-2.0-flash-lite",
-    "gemini-2.0-flash-001",
-    "gemini-2.5-pro-exp-03-25",
-    "gemini-2.5-flash-preview-04-17",
-  ];
+  // Discover available models dynamically so we always use what this API key supports
+  let GEMINI_MODELS: string[] = [];
+  try {
+    const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}&pageSize=50`);
+    const listData = await listRes.json() as any;
+    const all: string[] = (listData.models || [])
+      .filter((m: any) => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes("generateContent"))
+      .map((m: any) => (m.name || "").replace("models/", ""))
+      .filter((n: string) => n.startsWith("gemini"));
+    console.log(`[MultiVerifier] Available Gemini models for this key: ${all.join(", ")}`);
+    // Prefer flash models (faster/cheaper), then pro
+    const flash = all.filter(n => n.includes("flash"));
+    const pro = all.filter(n => n.includes("pro"));
+    GEMINI_MODELS = [...flash, ...pro].slice(0, 3);
+  } catch (e) {
+    console.warn("[MultiVerifier] Could not list Gemini models, falling back to defaults");
+    GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash-lite"];
+  }
+
+  if (GEMINI_MODELS.length === 0) {
+    console.error("[MultiVerifier] No usable Gemini models found for this API key");
+    const r: any = { score: -1, passed: false, flags: [], details: { error: "No available models" }, error: "No available models", unavailable: true };
+    return r;
+  }
+
   const prompt = buildMarkerPrompt(title, content);
 
   for (const modelName of GEMINI_MODELS) {
