@@ -970,6 +970,8 @@ export default function BlogDashboard() {
                   const composite = p.aiVerificationScore;
                   const gemini = p.geminiScore;
                   const openai = p.openaiScore;
+                  const qwen = p.qwenScore;
+                  const claude = p.claudeScore;
                   const isStale = p.verificationExpiresAt && new Date(p.verificationExpiresAt) < new Date();
                   return (
                     <Card key={post.id} className="border-amber-200 dark:border-amber-800 bg-amber-50/30 dark:bg-amber-950/10">
@@ -1037,36 +1039,26 @@ export default function BlogDashboard() {
                           </div>
 
                           {/* Score Bars */}
-                          <div className="grid grid-cols-3 gap-4 bg-background rounded-lg p-3 border text-xs">
-                            <div>
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="flex items-center gap-1 text-muted-foreground">
-                                  <Cpu className="h-3 w-3" />Composite
-                                </span>
-                                <span className={`font-bold ${composite >= 95 ? 'text-emerald-600' : composite >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
-                                  {composite ?? '—'}{composite != null && '/100'}
-                                </span>
+                          <div className="grid grid-cols-5 gap-3 bg-background rounded-lg p-3 border text-xs">
+                            {[
+                              { label: "Composite", value: composite, icon: true },
+                              { label: "Gemini", value: gemini, icon: false },
+                              { label: "OpenAI", value: openai, icon: false },
+                              { label: "Claude", value: claude, icon: false },
+                              { label: "Qwen", value: qwen, icon: false },
+                            ].map(({ label, value, icon }) => (
+                              <div key={label}>
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="flex items-center gap-1 text-muted-foreground">
+                                    {icon && <Cpu className="h-3 w-3" />}{label}
+                                  </span>
+                                  <span className={`font-bold ${(value ?? 0) >= 95 ? 'text-emerald-600' : (value ?? 0) >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
+                                    {value != null ? `${value}/100` : '—'}
+                                  </span>
+                                </div>
+                                <Progress value={value ?? 0} className="h-1" />
                               </div>
-                              <Progress value={composite ?? 0} className="h-1" />
-                            </div>
-                            <div>
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-muted-foreground">Gemini</span>
-                                <span className={`font-bold ${(gemini ?? 0) >= 95 ? 'text-emerald-600' : (gemini ?? 0) >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
-                                  {gemini ?? '—'}{gemini != null && '/100'}
-                                </span>
-                              </div>
-                              <Progress value={gemini ?? 0} className="h-1" />
-                            </div>
-                            <div>
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-muted-foreground">OpenAI</span>
-                                <span className={`font-bold ${(openai ?? 0) >= 95 ? 'text-emerald-600' : (openai ?? 0) >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
-                                  {openai ?? '—'}{openai != null && '/100'}
-                                </span>
-                              </div>
-                              <Progress value={openai ?? 0} className="h-1" />
-                            </div>
+                            ))}
                           </div>
 
                           {p.contentHash && (

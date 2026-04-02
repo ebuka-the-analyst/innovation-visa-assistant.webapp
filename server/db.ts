@@ -55,6 +55,8 @@ async function runAutoMigrations() {
     { col: 'ai_verification_score',   ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS ai_verification_score INTEGER` },
     { col: 'gemini_score',            ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS gemini_score INTEGER` },
     { col: 'openai_score',            ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS openai_score INTEGER` },
+    { col: 'qwen_score',              ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS qwen_score INTEGER` },
+    { col: 'claude_score',            ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS claude_score INTEGER` },
     { col: 'verification_status',     ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS verification_status VARCHAR(20) NOT NULL DEFAULT 'pending'` },
     { col: 'verification_details',    ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS verification_details JSONB` },
     { col: 'verified_at',             ddl: `ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS verified_at TIMESTAMP` },

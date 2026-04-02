@@ -3006,9 +3006,11 @@ export const blogPosts = pgTable("blog_posts", {
   seoScore: integer("seo_score"), // 0-100 SEO optimization score
 
   // Triple-AI Verification System (Gemini + OpenAI marking layer)
-  aiVerificationScore: integer("ai_verification_score"), // Composite 0-100 (avg gemini + openai)
+  aiVerificationScore: integer("ai_verification_score"), // Composite 0-100 (avg of all verifiers)
   geminiScore: integer("gemini_score"),  // Gemini fact-check score 0-100
   openaiScore: integer("openai_score"),  // OpenAI fact-check score 0-100
+  qwenScore: integer("qwen_score"),      // Qwen self-verification score 0-100
+  claudeScore: integer("claude_score"),  // Claude fact-check score 0-100
   verificationStatus: varchar("verification_status", { length: 20 }).notNull().default('pending'), // pending, passed, flagged, human_review, expired
   verificationDetails: jsonb("verification_details"), // Full JSON report from both AIs
   verifiedAt: timestamp("verified_at"),  // When last verified

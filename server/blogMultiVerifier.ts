@@ -16,8 +16,11 @@
 
 import crypto from "crypto";
 import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
+import { qwen, QWEN_MODELS } from "./qwenClient.js";
 
 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
+const claudeClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || "" });
 
 // ============================================================================
 // VERIFIED FACTS - Used by both markers as the ground truth reference
@@ -284,6 +287,100 @@ async function runOpenAIVerification(title: string, content: string): Promise<{
 }
 
 // ============================================================================
+// CLAUDE VERIFIER (Marker 3 — Anthropic)
+// ============================================================================
+
+async function runClaudeVerification(title: string, content: string): Promise<{
+  score: number;
+  passed: boolean;
+  flags: Array<{ claim: string; issue: string; severity: string }>;
+  details: Record<string, unknown>;
+  error?: string;
+}> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    const r: any = { score: -1, passed: false, flags: [], details: { error: "No Claude API key" }, error: "No API key", unavailable: true };
+    return r;
+  }
+  try {
+    const prompt = buildMarkerPrompt(title, content);
+    const response = await claudeClient.messages.create({
+      model: "claude-3-5-haiku-20241022",
+      max_tokens: 2048,
+      messages: [{ role: "user", content: prompt }],
+    });
+    const text = response.content[0]?.type === "text" ? response.content[0].text : "";
+    let jsonText = text.trim();
+    if (jsonText.startsWith("```")) {
+      jsonText = jsonText.replace(/^```json?\n?/, "").replace(/\n?```$/, "");
+    }
+    const parsed = JSON.parse(jsonText);
+    console.log(`[MultiVerifier] Claude success`);
+    return {
+      score: Math.min(100, Math.max(0, parsed.totalScore || 0)),
+      passed: parsed.passed === true,
+      flags: parsed.flags || [],
+      details: parsed,
+    };
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    if (errMsg.includes("429") || errMsg.includes("overloaded") || errMsg.includes("quota")) {
+      const r: any = { score: -1, passed: false, flags: [], details: { error: errMsg }, error: errMsg, unavailable: true };
+      return r;
+    }
+    console.error("[MultiVerifier] Claude error:", errMsg);
+    return { score: 0, passed: false, flags: [], details: { error: errMsg }, error: errMsg };
+  }
+}
+
+// ============================================================================
+// QWEN SELF-VERIFIER (Writer quality confidence — Marker 4)
+// ============================================================================
+
+async function runQwenVerification(title: string, content: string): Promise<{
+  score: number;
+  passed: boolean;
+  flags: Array<{ claim: string; issue: string; severity: string }>;
+  details: Record<string, unknown>;
+  error?: string;
+}> {
+  if (!process.env.QWEN_API_KEY) {
+    const r: any = { score: -1, passed: false, flags: [], details: { error: "No Qwen API key" }, error: "No API key", unavailable: true };
+    return r;
+  }
+  try {
+    const prompt = buildMarkerPrompt(title, content);
+    const response = await qwen.chat.completions.create({
+      model: QWEN_MODELS.plus,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.1,
+      max_tokens: 2048,
+      response_format: { type: "json_object" },
+    });
+    const text = response.choices[0]?.message?.content || "";
+    let jsonText = text.trim();
+    if (jsonText.startsWith("```")) {
+      jsonText = jsonText.replace(/^```json?\n?/, "").replace(/\n?```$/, "");
+    }
+    const parsed = JSON.parse(jsonText);
+    console.log(`[MultiVerifier] Qwen success`);
+    return {
+      score: Math.min(100, Math.max(0, parsed.totalScore || 0)),
+      passed: parsed.passed === true,
+      flags: parsed.flags || [],
+      details: parsed,
+    };
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    if (errMsg.includes("429") || errMsg.includes("quota") || errMsg.includes("rate")) {
+      const r: any = { score: -1, passed: false, flags: [], details: { error: errMsg }, error: errMsg, unavailable: true };
+      return r;
+    }
+    console.error("[MultiVerifier] Qwen verification error:", errMsg);
+    return { score: 0, passed: false, flags: [], details: { error: errMsg }, error: errMsg };
+  }
+}
+
+// ============================================================================
 // CONTRADICTION DETECTOR
 // ============================================================================
 
@@ -324,6 +421,8 @@ export interface VerificationResult {
   compositeScore: number;
   geminiScore: number;
   openaiScore: number;
+  qwenScore: number;
+  claudeScore: number;
   contradictionFlags: number;
   sourcesCited: number;
   contentHash: string;
@@ -332,94 +431,110 @@ export interface VerificationResult {
   details: {
     gemini: Record<string, unknown>;
     openai: Record<string, unknown>;
+    qwen: Record<string, unknown>;
+    claude: Record<string, unknown>;
     consensusReason: string;
     allFlags: Array<{ marker: string; claim: string; issue: string; severity: string }>;
   };
 }
 
 export async function verifyBlogPost(title: string, content: string): Promise<VerificationResult> {
-  console.log("[MultiVerifier] Starting triple-AI verification for:", title.substring(0, 60));
+  console.log("[MultiVerifier] Starting quad-AI verification for:", title.substring(0, 60));
 
-  // Run both verifiers in parallel for speed
-  const [geminiResult, openaiResult] = await Promise.all([
+  // Run all 4 verifiers in parallel for speed
+  const [geminiResult, openaiResult, claudeResult, qwenResult] = await Promise.all([
     runGeminiVerification(title, content),
     runOpenAIVerification(title, content),
+    runClaudeVerification(title, content),
+    runQwenVerification(title, content),
   ]);
 
   // Detect service unavailability — score=-1 is the sentinel value
-  const openaiUnavailable = (openaiResult as any).unavailable === true || openaiResult.score === -1;
-  const geminiUnavailable = (geminiResult as any).unavailable === true || geminiResult.score === -1;
-  const bothUnavailable = openaiUnavailable && geminiUnavailable;
+  const isUnavail = (r: any) => r.unavailable === true || r.score === -1;
+  const geminiUnavailable = isUnavail(geminiResult);
+  const openaiUnavailable = isUnavail(openaiResult);
+  const claudeUnavailable = isUnavail(claudeResult);
+  const qwenUnavailable = isUnavail(qwenResult);
 
-  // Composite: if one is unavailable use the other alone; if both unavailable score=0
-  let compositeScore: number;
-  if (bothUnavailable) {
-    compositeScore = 0;
-  } else if (geminiUnavailable) {
-    compositeScore = openaiResult.score;
-  } else if (openaiUnavailable) {
-    compositeScore = geminiResult.score;
-  } else {
-    compositeScore = Math.round((geminiResult.score + openaiResult.score) / 2);
-  }
+  // Composite: average of all available verifiers
+  const available = [
+    geminiUnavailable ? null : geminiResult.score,
+    openaiUnavailable ? null : openaiResult.score,
+    claudeUnavailable ? null : claudeResult.score,
+    qwenUnavailable ? null : qwenResult.score,
+  ].filter((s): s is number => s !== null);
+
+  const compositeScore = available.length > 0
+    ? Math.round(available.reduce((a, b) => a + b, 0) / available.length)
+    : 0;
 
   const contradictions = detectContradictions(geminiResult.flags, openaiResult.flags);
   const sources = countSourcesCited(content);
   const hash = computeContentHash(content);
   const now = new Date();
   const expiresAt = new Date(now);
-  expiresAt.setDate(expiresAt.getDate() + 90); // 90-day freshness window
+  expiresAt.setDate(expiresAt.getDate() + 90);
 
-  // Combine flags (skip system flags from unavailable services)
+  // Combine flags from all available verifiers
   const allFlags = [
     ...(geminiUnavailable ? [] : geminiResult.flags.map(f => ({ marker: "gemini", ...f }))),
     ...(openaiUnavailable ? [] : openaiResult.flags.map(f => ({ marker: "openai", ...f }))),
+    ...(claudeUnavailable ? [] : claudeResult.flags.map(f => ({ marker: "claude", ...f }))),
+    ...(qwenUnavailable ? [] : qwenResult.flags.map(f => ({ marker: "qwen", ...f }))),
   ];
 
-  // CONSENSUS GATE LOGIC:
-  // Full pass: BOTH AIs ≥95 AND diff ≤10 AND no critical flags
-  // Single verifier: always route to human review (safety policy)
-  // Both unavailable: always route to human review
   const hasCriticalFlags = allFlags.some(f => f.severity === "critical" && !f.claim.startsWith("SYSTEM"));
 
+  // CONSENSUS GATE: need ≥2 verifiers all scoring ≥95 to auto-publish
   let passed = false;
   let consensusReason = "";
 
-  if (bothUnavailable) {
-    consensusReason = "Both Gemini and OpenAI unavailable — routing to human review.";
-  } else if (geminiUnavailable) {
-    consensusReason = `Gemini unavailable (model deprecated/quota) — OpenAI only: ${openaiResult.score}/100. Routing to human review for single-verifier result.`;
-  } else if (openaiUnavailable) {
-    consensusReason = `OpenAI unavailable (quota exceeded) — Gemini only: ${geminiResult.score}/100. Routing to human review for single-verifier result.`;
-  } else {
-    const scoreDifference = Math.abs(geminiResult.score - openaiResult.score);
-    const bothAboveThreshold = geminiResult.score >= 95 && openaiResult.score >= 95;
-    const scoresAgree = scoreDifference <= 10;
-    passed = bothAboveThreshold && scoresAgree && !hasCriticalFlags;
+  const activeScores = available;
+  const allAboveThreshold = activeScores.length >= 2 && activeScores.every(s => s >= 95);
+  const maxDiff = activeScores.length >= 2
+    ? Math.max(...activeScores) - Math.min(...activeScores)
+    : 0;
 
-    if (passed) {
-      consensusReason = `Both AIs agree: Gemini ${geminiResult.score}/100, OpenAI ${openaiResult.score}/100. No critical flags. Auto-publishing approved.`;
-    } else {
-      const reasons: string[] = [];
-      if (!bothAboveThreshold) reasons.push(`Score threshold not met (Gemini: ${geminiResult.score}, OpenAI: ${openaiResult.score}, both need ≥95)`);
-      if (!scoresAgree) reasons.push(`Score divergence too large: ${scoreDifference} points`);
-      if (hasCriticalFlags) reasons.push(`${allFlags.filter(f => f.severity === "critical" && !f.claim.startsWith("SYSTEM")).length} critical flag(s) raised`);
-      consensusReason = "Human review required: " + reasons.join("; ");
-    }
+  if (activeScores.length === 0) {
+    consensusReason = "All verifiers unavailable — routing to human review.";
+  } else if (activeScores.length === 1) {
+    consensusReason = `Only 1 verifier available (score: ${activeScores[0]}/100). Routing to human review for safety.`;
+  } else if (!allAboveThreshold) {
+    const labels = [
+      !geminiUnavailable ? `Gemini:${geminiResult.score}` : null,
+      !openaiUnavailable ? `OpenAI:${openaiResult.score}` : null,
+      !claudeUnavailable ? `Claude:${claudeResult.score}` : null,
+      !qwenUnavailable ? `Qwen:${qwenResult.score}` : null,
+    ].filter(Boolean).join(", ");
+    consensusReason = `Score threshold not met — ${labels}. All active verifiers need ≥95.`;
+  } else if (maxDiff > 15) {
+    consensusReason = `Score divergence too large (${maxDiff} pts) — routing to human review.`;
+  } else if (hasCriticalFlags) {
+    const critCount = allFlags.filter(f => f.severity === "critical" && !f.claim.startsWith("SYSTEM")).length;
+    consensusReason = `${critCount} critical flag(s) raised — routing to human review.`;
+  } else {
+    passed = true;
+    const labels = [
+      !geminiUnavailable ? `Gemini:${geminiResult.score}` : null,
+      !openaiUnavailable ? `OpenAI:${openaiResult.score}` : null,
+      !claudeUnavailable ? `Claude:${claudeResult.score}` : null,
+      !qwenUnavailable ? `Qwen:${qwenResult.score}` : null,
+    ].filter(Boolean).join(", ");
+    consensusReason = `All active verifiers agree — ${labels}. No critical flags. Auto-publishing approved.`;
   }
 
   const requiresHumanReview = !passed;
 
-  const geminiDisplayScore = geminiUnavailable ? 0 : geminiResult.score;
-  const openaiDisplayScore = openaiUnavailable ? 0 : openaiResult.score;
-  console.log(`[MultiVerifier] Result: ${passed ? "PASSED" : "FLAGGED"} | Gemini: ${geminiUnavailable ? "unavailable" : geminiResult.score} | OpenAI: ${openaiUnavailable ? "unavailable" : openaiResult.score} | Composite: ${compositeScore}`);
+  console.log(`[MultiVerifier] Result: ${passed ? "PASSED" : "FLAGGED"} | Gemini: ${geminiUnavailable ? "N/A" : geminiResult.score} | OpenAI: ${openaiUnavailable ? "N/A" : openaiResult.score} | Claude: ${claudeUnavailable ? "N/A" : claudeResult.score} | Qwen: ${qwenUnavailable ? "N/A" : qwenResult.score} | Composite: ${compositeScore}`);
 
   return {
     passed,
     requiresHumanReview,
     compositeScore,
-    geminiScore: geminiDisplayScore,
-    openaiScore: openaiDisplayScore,
+    geminiScore: geminiUnavailable ? 0 : geminiResult.score,
+    openaiScore: openaiUnavailable ? 0 : openaiResult.score,
+    qwenScore: qwenUnavailable ? 0 : qwenResult.score,
+    claudeScore: claudeUnavailable ? 0 : claudeResult.score,
     contradictionFlags: contradictions,
     sourcesCited: sources,
     contentHash: hash,
@@ -428,6 +543,8 @@ export async function verifyBlogPost(title: string, content: string): Promise<Ve
     details: {
       gemini: geminiResult.details,
       openai: openaiResult.details,
+      qwen: qwenResult.details,
+      claude: claudeResult.details,
       consensusReason,
       allFlags,
     },
