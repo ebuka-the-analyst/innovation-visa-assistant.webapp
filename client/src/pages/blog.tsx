@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Calendar, Clock, Search, Eye, ShieldCheck, ArrowRight, Tag, Newspaper
+  Calendar, Clock, Search, Eye, ArrowRight, Tag, Newspaper
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import type { BlogPost } from "@shared/schema";
@@ -53,11 +53,6 @@ function fmtDate(d: string | Date) {
   return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function isVerified(post: BlogPost) {
-  const p = post as any;
-  return p.verificationStatus === "passed" && p.aiVerificationScore >= 95;
-}
-
 function CatLabel({ cat }: { cat: string }) {
   return (
     <span className={`inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${catBadgeClass(cat)}`}>
@@ -71,7 +66,6 @@ function HeroCard({ post }: { post: BlogPost }) {
   const p = post as any;
   const img = p.featuredImage || null;
   const gradient = cardGradient(post.category);
-  const verified = isVerified(post);
 
   return (
     <Link href={`/blog/${post.slug}`} data-testid={`link-hero-${post.slug}`}>
@@ -85,11 +79,6 @@ function HeroCard({ post }: { post: BlogPost }) {
         <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-7">
           <div className="flex items-center gap-2 mb-2">
             <CatLabel cat={post.category} />
-            {verified && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-300 bg-emerald-900/60 px-2 py-0.5 rounded">
-                <ShieldCheck className="w-3 h-3" />Verified
-              </span>
-            )}
             {post.isFeatured && (
               <span className="text-[10px] font-bold uppercase tracking-widest text-yellow-300 border border-yellow-400/50 px-2 py-0.5 rounded">
                 Featured
@@ -116,7 +105,6 @@ function PostCard({ post }: { post: BlogPost }) {
   const p = post as any;
   const img = p.featuredImage || null;
   const gradient = cardGradient(post.category);
-  const verified = isVerified(post);
 
   return (
     <Link href={`/blog/${post.slug}`} data-testid={`link-card-${post.slug}`}>
@@ -130,13 +118,6 @@ function PostCard({ post }: { post: BlogPost }) {
           <div className="absolute top-2 left-2">
             <CatLabel cat={post.category} />
           </div>
-          {verified && (
-            <div className="absolute top-2 right-2">
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-300 bg-black/60 px-1.5 py-0.5 rounded">
-                <ShieldCheck className="w-3 h-3" />AI Verified
-              </span>
-            </div>
-          )}
         </div>
         <div className="flex flex-col flex-1 p-3">
           <h3 className="font-bold text-sm leading-snug line-clamp-3 mb-1.5 group-hover:text-primary transition-colors" data-testid={`text-card-title-${post.id}`}>
@@ -242,12 +223,8 @@ export default function BlogPage() {
                   UK Visa Insights
                 </h1>
                 <p className="text-sm text-background/60 mt-1 font-medium">
-                  Expert analysis · Quad-AI verified · GOV.UK accurate
+                  Expert guidance on the UK Innovator Founder Visa
                 </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs text-background/70">Every article fact-checked by 4 AI models</span>
               </div>
             </div>
             {/* Category nav bar */}
@@ -409,16 +386,6 @@ export default function BlogPage() {
                   </Link>
                 </div>
 
-                {/* Verification trust note */}
-                <div className="rounded-md border bg-emerald-50 dark:bg-emerald-950/20 p-3">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">Quad-AI Verified Content</p>
-                  </div>
-                  <p className="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed">
-                    Every article is cross-verified by Gemini, GPT-4, Claude, and Qwen against GOV.UK official guidance before publishing.
-                  </p>
-                </div>
 
               </aside>
             </div>

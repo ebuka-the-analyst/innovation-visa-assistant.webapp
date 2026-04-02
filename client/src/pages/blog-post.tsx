@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Calendar, Clock, User, ArrowLeft, Share2, BookOpen,
-  ShieldCheck, AlertCircle, CheckCircle2, Eye, ExternalLink, Cpu, ArrowRight, Tag
+  Eye, ArrowRight, Tag
 } from "lucide-react";
 import { useEffect } from "react";
 import type { BlogPost } from "@shared/schema";
@@ -47,57 +47,6 @@ function CatLabel({ cat, size = "sm" }: { cat: string; size?: "sm" | "lg" }) {
     } ${base}`}>
       {cat.replace(/-/g, " ")}
     </span>
-  );
-}
-
-function VerificationBar({ post }: { post: BlogPost }) {
-  const p = post as any;
-  const status = p.verificationStatus ?? "pending";
-  const composite = p.aiVerificationScore;
-  const verifiedAt = p.verifiedAt ? new Date(p.verifiedAt) : null;
-  const sources = p.sourcesCited ?? 0;
-  const isPassed = status === "passed";
-  const isReview = status === "human_review";
-  if (!composite && status === "pending") return null;
-  return (
-    <div
-      className={`flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-2.5 text-xs border-y ${
-        isPassed
-          ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/50"
-          : isReview
-          ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/50"
-          : "bg-muted border-border"
-      }`}
-      data-testid="bar-verification"
-    >
-      <span className="flex items-center gap-1.5 font-semibold">
-        {isPassed ? <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-          : isReview ? <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-          : <Cpu className="w-3.5 h-3.5 text-muted-foreground" />}
-        <span className={isPassed ? "text-emerald-700 dark:text-emerald-300" : isReview ? "text-amber-700 dark:text-amber-300" : "text-muted-foreground"}>
-          {isPassed ? "Quad-AI Verified" : isReview ? "Under Review" : "Verifying…"}
-        </span>
-      </span>
-      {composite !== null && composite !== undefined && (
-        <span className={`font-bold ${composite >= 95 ? "text-emerald-600 dark:text-emerald-400" : composite >= 80 ? "text-amber-600 dark:text-amber-400" : "text-red-600"}`}>
-          Score: {composite}/100
-        </span>
-      )}
-      {verifiedAt && (
-        <span className="flex items-center gap-1 text-muted-foreground">
-          <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-          Verified {verifiedAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-        </span>
-      )}
-      {sources > 0 && <span className="text-muted-foreground">{sources} official source{sources !== 1 ? "s" : ""} cited</span>}
-      {isPassed && (
-        <span className="ml-auto">
-          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded">
-            <ShieldCheck className="w-3 h-3" />GOV.UK Verified
-          </span>
-        </span>
-      )}
-    </div>
   );
 }
 
@@ -252,11 +201,6 @@ export default function BlogPostPage() {
                     Featured
                   </span>
                 )}
-                {isTripleVerified && (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-300 bg-emerald-900/60 px-2.5 py-0.5 rounded">
-                    <ShieldCheck className="w-3.5 h-3.5" />Quad-AI Verified
-                  </span>
-                )}
               </div>
               <h1 className="text-xl md:text-3xl lg:text-4xl font-black text-white leading-tight mb-3" data-testid="heading-blog-title">
                 {post.title}
@@ -281,8 +225,6 @@ export default function BlogPostPage() {
           </div>
         </div>
 
-        {/* ── Verification bar ── */}
-        <VerificationBar post={post} />
 
         {/* ── Body: article + sidebar ── */}
         <div className="responsive-container py-8 max-w-6xl">
@@ -316,32 +258,6 @@ export default function BlogPostPage() {
                 </div>
               )}
 
-              {/* Trust footer */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 border rounded-md p-3 bg-muted/30 mb-6">
-                <div className="flex flex-col items-center text-center p-2">
-                  <ShieldCheck className="w-5 h-5 text-emerald-500 mb-1" />
-                  <span className="text-[10px] font-semibold text-muted-foreground">GOV.UK Verified</span>
-                </div>
-                <div className="flex flex-col items-center text-center p-2">
-                  <Cpu className="w-5 h-5 text-blue-500 mb-1" />
-                  <span className="text-[10px] font-semibold text-muted-foreground">Quad-AI Checked</span>
-                </div>
-                <div className="flex flex-col items-center text-center p-2">
-                  <CheckCircle2 className="w-5 h-5 text-purple-500 mb-1" />
-                  <span className="text-[10px] font-semibold text-muted-foreground">Re-verified 90 Days</span>
-                </div>
-                <div className="flex flex-col items-center text-center p-2">
-                  <a
-                    href="https://www.gov.uk/innovator-founder-visa"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex flex-col items-center text-center hover:opacity-70 transition-opacity"
-                  >
-                    <ExternalLink className="w-5 h-5 text-primary mb-1" />
-                    <span className="text-[10px] font-semibold text-primary">GOV.UK Source</span>
-                  </a>
-                </div>
-              </div>
 
               {/* CTA */}
               <div className="border-2 border-primary rounded-md p-5 bg-primary/5">
@@ -393,22 +309,6 @@ export default function BlogPostPage() {
                 </Button>
               </div>
 
-              {/* Verification detail */}
-              {isTripleVerified && (
-                <div className="border rounded-md border-emerald-200 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-950/20 p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">Fact-Checked by 4 AI Models</p>
-                  </div>
-                  <div className="space-y-1 text-xs text-emerald-700 dark:text-emerald-400">
-                    {["Gemini (Google)", "GPT-4o (OpenAI)", "Claude (Anthropic)", "Qwen (Alibaba)"].map(m => (
-                      <div key={m} className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3 h-3 shrink-0" />{m}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* About */}
               <div className="border rounded-md p-4 bg-card">
