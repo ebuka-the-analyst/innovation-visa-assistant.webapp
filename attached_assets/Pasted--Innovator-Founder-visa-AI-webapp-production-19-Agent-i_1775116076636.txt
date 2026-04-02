@@ -1,0 +1,173 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+19
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+c45cb047
+Active
+
+Apr 2, 2026, 8:32 AM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+7:37:57 AM [express] POST /api/activity/session 200 in 233ms :: {"sessionId":"0a812d48-6db1-47a8-ba9…
+[2026-04-02T07:37:57.446Z] POST /api/activity/page-view
+7:37:57 AM [express] POST /api/activity/page-view 200 in 24ms :: {"pageViewId":"fc122ab7-e404-488d-8…
+[2026-04-02T07:38:15.209Z] POST /api/admin/blog/posts/23d9abaa-5fae-4c32-99ab-c5a9441b6109/reverify
+[MultiVerifier] Starting quad-AI verification for: How to Prepare for Your Innovator Founder Visa Interview
+[MultiVerifier] Available Gemini models for this key: gemini-2.5-flash, gemini-2.5-pro, gemini-2.0-flash, gemini-2.0-flash-001, gemini-2.0-flash-lite-001, gemini-2.0-flash-lite, gemini-2.5-flash-preview-tts, gemini-2.5-pro-preview-tts, gemini-flash-latest, gemini-flash-lite-latest, gemini-pro-latest, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-3-pro-preview, gemini-3-flash-preview, gemini-3.1-pro-preview, gemini-3.1-pro-preview-customtools, gemini-3.1-flash-lite-preview, gemini-3-pro-image-preview, gemini-3.1-flash-image-preview, gemini-robotics-er-1.5-preview, gemini-2.5-computer-use-preview-10-2025
+[MultiVerifier] Claude success
+[MultiVerifier] Gemini REST gemini-2.5-flash fetch error: No JSON object found in model response
+[2026-04-02T07:38:27.615Z] POST /api/activity/session
+7:38:27 AM [express] POST /api/activity/session 200 in 220ms :: {"sessionId":"0a812d48-6db1-47a8-ba9…
+[MultiVerifier] Qwen success
+[MultiVerifier] Gemini REST gemini-2.5-pro fetch error: Unexpected end of JSON input
+[MultiVerifier] Gemini REST gemini-2.5-pro-preview-tts HTTP 400: The requested combination of response modalities (TEXT) is not supported by the model. models/gemini-2.5-pro-preview-tts accepts the following combination of response modalities:
+* AUDIO
+[MultiVerifier] All Gemini REST models failed — marking as unavailable
+[MultiVerifier] Result: FLAGGED | Gemini: N/A | OpenAI: 100 | Claude: 95 | Qwen: 80 | Composite: 92
+7:38:44 AM [express] POST /api/admin/blog/posts/23d9abaa-5fae-4c32-99ab-c5a9441b6109/reverify 200 in…
+[2026-04-02T07:38:44.404Z] GET /api/admin/blog/review-queue
+7:38:44 AM [express] GET /api/admin/blog/review-queue 200 in 28ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+[2026-04-02T07:38:44.569Z] GET /api/admin/blog/posts/all/
+7:38:44 AM [express] GET /api/admin/blog/posts/all/ 200 in 11ms
+[2026-04-02T07:38:53.803Z] POST /api/admin/blog/posts/c2b3e86d-9f87-40c4-95b6-3eccab9eb590/reverify
+[MultiVerifier] Starting quad-AI verification for: English Language Requirements for UK Innovator Founder Visa
+[MultiVerifier] Available Gemini models for this key: gemini-2.5-flash, gemini-2.5-pro, gemini-2.0-flash, gemini-2.0-flash-001, gemini-2.0-flash-lite-001, gemini-2.0-flash-lite, gemini-2.5-flash-preview-tts, gemini-2.5-pro-preview-tts, gemini-flash-latest, gemini-flash-lite-latest, gemini-pro-latest, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-3-pro-preview, gemini-3-flash-preview, gemini-3.1-pro-preview, gemini-3.1-pro-preview-customtools, gemini-3.1-flash-lite-preview, gemini-3-pro-image-preview, gemini-3.1-flash-image-preview, gemini-robotics-er-1.5-preview, gemini-2.5-computer-use-preview-10-2025
+[2026-04-02T07:38:57.622Z] POST /api/activity/session
+7:38:57 AM [express] POST /api/activity/session 200 in 25ms :: {"sessionId":"0a812d48-6db1-47a8-ba99…
+[MultiVerifier] Claude success
+[2026-04-02T07:39:03.871Z] POST /api/activity/session/end
+7:39:03 AM [express] POST /api/activity/session/end 200 in 17ms :: {"success":true}
+[MultiVerifier] Gemini REST gemini-2.5-flash fetch error: No JSON object found in model response
+[MultiVerifier] Qwen success
+[MultiVerifier] Gemini REST gemini-2.5-pro fetch error: Unexpected end of JSON input
+[MultiVerifier] Gemini REST gemini-2.5-pro-preview-tts HTTP 400: The requested combination of response modalities (TEXT) is not supported by the model. models/gemini-2.5-pro-preview-tts accepts the following combination of response modalities:
+* AUDIO
+[MultiVerifier] All Gemini REST models failed — marking as unavailable
+[MultiVerifier] Result: FLAGGED | Gemini: N/A | OpenAI: 100 | Claude: 99 | Qwen: 80 | Composite: 93
+7:39:22 AM [express] POST /api/admin/blog/posts/c2b3e86d-9f87-40c4-95b6-3eccab9eb590/reverify 200 in…
+[2026-04-02T07:39:22.562Z] GET /api/admin/blog/review-queue
+7:39:22 AM [express] GET /api/admin/blog/review-queue 200 in 28ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+[2026-04-02T07:39:22.734Z] GET /api/admin/blog/posts/all/
+7:39:22 AM [express] GET /api/admin/blog/posts/all/ 200 in 12ms
+7:43:53 AM [express] POST /api/activity/session/end 200 in 16ms :: {"success":true}
+[2026-04-02T07:43:51.696Z] GET /api/auth/user
+[2026-04-02T07:43:51.697Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+7:43:51 AM [express] GET /api/auth/user 200 in 213ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+7:43:51 AM [express] POST /api/activity/session 200 in 219ms :: {"sessionId":"149c0942-ed5d-4863-9fb…
+[2026-04-02T07:43:52.282Z] POST /api/activity/page-view
+7:43:52 AM [express] POST /api/activity/page-view 200 in 25ms :: {"pageViewId":"388a7ff5-7d1e-47c1-b…
+[2026-04-02T07:43:53.552Z] POST /api/activity/session/end
+[2026-04-02T07:45:42.353Z] GET /guide
+[2026-04-02T07:45:44.069Z] GET /attached_assets/official_logo.webp
+[2026-04-02T07:46:10.855Z] GET /api/auth/user
+[2026-04-02T07:46:10.856Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+7:46:11 AM [express] GET /api/auth/user 200 in 213ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+7:46:11 AM [express] POST /api/activity/session 200 in 222ms :: {"sessionId":"dd30ad05-140a-45c3-a08…
+[2026-04-02T07:46:11.445Z] POST /api/activity/page-view
+7:46:11 AM [express] POST /api/activity/page-view 200 in 25ms :: {"pageViewId":"c6855f60-6cb3-4837-8…
+[2026-04-02T07:46:13.435Z] POST /api/activity/session/end
+[2026-04-02T07:46:13.439Z] GET /admin/blog
+7:46:13 AM [express] POST /api/activity/session/end 200 in 20ms :: {"success":true}
+[2026-04-02T07:46:13.840Z] GET /attached_assets/official_logo.webp
+[2026-04-02T07:46:13.889Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+7:46:13 AM [express] GET /api/auth/user 200 in 15ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-02T07:46:14.122Z] GET /api/partner/status
+7:46:14 AM [express] GET /api/partner/status 200 in 22ms :: {"isPartner":false,"promoCodeCount":0}
+[2026-04-02T07:46:14.147Z] GET /api/admin/blog/posts/all/
+7:46:14 AM [express] GET /api/admin/blog/posts/all/ 200 in 10ms
+[2026-04-02T07:46:14.292Z] POST /api/activity/session
+[2026-04-02T07:46:14.296Z] POST /api/activity/session
+[2026-04-02T07:46:14.308Z] GET /api/admin/blog/stats
+[2026-04-02T07:46:14.316Z] GET /api/admin/blog/queue
+7:46:14 AM [express] POST /api/activity/session 200 in 24ms :: {"sessionId":"7b11cbd5-76a7-4adc-99e4…
+7:46:14 AM [express] POST /api/activity/session 200 in 24ms :: {"sessionId":"104449dd-37ec-40b0-aa8c…
+7:46:14 AM [express] GET /api/admin/blog/queue 200 in 17ms :: [{"id":1,"targetDate":"2026-04-02T06:0…
+[2026-04-02T07:46:14.333Z] GET /api/admin/blog/review-queue
+7:46:14 AM [express] GET /api/admin/blog/review-queue 200 in 28ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+7:46:14 AM [express] GET /api/admin/blog/stats 200 in 229ms :: {"total":31,"published":25,"scheduled…
+[2026-04-02T07:46:14.679Z] POST /api/activity/page-view
+7:46:14 AM [express] POST /api/activity/page-view 200 in 30ms :: {"pageViewId":"d9171c46-6ac0-44a6-8…
+[2026-04-02T07:46:24.063Z] GET /api/admin/blog/review-queue
+7:46:24 AM [express] GET /api/admin/blog/review-queue 200 in 33ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+[2026-04-02T07:46:39.426Z] POST /api/admin/blog/posts/2795ac4d-16fa-4720-9ca7-4b6e34b902d5/reverify
+[MultiVerifier] Starting quad-AI verification for: From Innovator Founder Visa to ILR: Your Settlement Path
+[MultiVerifier] Available Gemini models for this key: gemini-2.5-flash, gemini-2.5-pro, gemini-2.0-flash, gemini-2.0-flash-001, gemini-2.0-flash-lite-001, gemini-2.0-flash-lite, gemini-2.5-flash-preview-tts, gemini-2.5-pro-preview-tts, gemini-flash-latest, gemini-flash-lite-latest, gemini-pro-latest, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-3-pro-preview, gemini-3-flash-preview, gemini-3.1-pro-preview, gemini-3.1-pro-preview-customtools, gemini-3.1-flash-lite-preview, gemini-3-pro-image-preview, gemini-3.1-flash-image-preview, gemini-robotics-er-1.5-preview, gemini-2.5-computer-use-preview-10-2025
+[2026-04-02T07:46:44.701Z] POST /api/activity/session
+7:46:44 AM [express] POST /api/activity/session 200 in 24ms :: {"sessionId":"104449dd-37ec-40b0-aa8c…
+[MultiVerifier] Gemini REST gemini-2.5-flash fetch error: No JSON object found in model response
+[MultiVerifier] Claude success
+[MultiVerifier] Qwen success
+[MultiVerifier] Gemini REST gemini-2.5-pro returned empty text (finishReason=MAX_TOKENS)
+[MultiVerifier] Gemini REST gemini-2.5-pro-preview-tts HTTP 400: The requested combination of response modalities (TEXT) is not supported by the model. models/gemini-2.5-pro-preview-tts accepts the following combination of response modalities:
+* AUDIO
+[MultiVerifier] All Gemini REST models failed — marking as unavailable
+[MultiVerifier] Result: FLAGGED | Gemini: N/A | OpenAI: 95 | Claude: 74 | Qwen: 72 | Composite: 80
+7:47:06 AM [express] POST /api/admin/blog/posts/2795ac4d-16fa-4720-9ca7-4b6e34b902d5/reverify 200 in…
+[2026-04-02T07:47:06.574Z] GET /api/admin/blog/review-queue
+[2026-04-02T07:47:06.576Z] GET /api/admin/blog/posts/all/
+7:47:06 AM [express] GET /api/admin/blog/review-queue 200 in 39ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+7:47:06 AM [express] GET /api/admin/blog/posts/all/ 200 in 58ms
+[2026-04-02T07:47:14.682Z] POST /api/activity/session
+7:47:14 AM [express] POST /api/activity/session 200 in 23ms :: {"sessionId":"104449dd-37ec-40b0-aa8c…
+[2026-04-02T07:47:21.994Z] POST /api/activity/session/end
+7:47:22 AM [express] POST /api/activity/session/end 200 in 21ms :: {"success":true}
+
+

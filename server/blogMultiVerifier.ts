@@ -189,11 +189,18 @@ async function runGeminiVerification(title: string, content: string): Promise<{
       "gemini-2.0-flash", "gemini-2.0-flash-001",
       "gemini-2.0-flash-lite", "gemini-2.0-flash-lite-001",
     ];
-    const usable = all.filter(n => !DEPRECATED.includes(n));
+    // Strip deprecated AND non-text models (tts = audio-only, image = vision output)
+    const BAD_SUFFIXES = ["tts", "image", "audio"];
+    const usable = all.filter(n =>
+      !DEPRECATED.includes(n) &&
+      !BAD_SUFFIXES.some(s => n.includes(s))
+    );
     const flash25 = usable.filter(n => n.startsWith("gemini-2.5") && n.includes("flash"));
-    const pro25  = usable.filter(n => n.startsWith("gemini-2.5") && n.includes("pro") && !n.includes("tts") && !n.includes("image"));
-    const rest   = usable.filter(n => !flash25.includes(n) && !pro25.includes(n));
-    GEMINI_MODELS = [...flash25.slice(0, 1), ...pro25.slice(0, 1), ...rest.slice(0, 1)];
+    const pro25   = usable.filter(n => n.startsWith("gemini-2.5") && n.includes("pro"));
+    const rest    = usable.filter(n => !flash25.includes(n) && !pro25.includes(n));
+    // Take up to 2 flash models (flash + flash-lite) then 1 pro as final fallback
+    GEMINI_MODELS = [...flash25.slice(0, 2), ...pro25.slice(0, 1), ...rest.slice(0, 1)];
+    console.log(`[MultiVerifier] Gemini trial order: ${GEMINI_MODELS.join(", ")}`);
   } catch (e) {
     console.warn("[MultiVerifier] Could not list Gemini models, falling back to defaults");
     GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash-lite"];
@@ -217,8 +224,7 @@ async function runGeminiVerification(title: string, content: string): Promise<{
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
             temperature: 0.1,
-            maxOutputTokens: 2048,
-            // Note: responseMimeType omitted — not supported by all models (e.g. gemini-2.5-flash)
+            maxOutputTokens: 8192, // High enough that JSON output never gets cut off (was 2048 → hit MAX_TOKENS)
           },
         }),
       });
@@ -245,13 +251,24 @@ async function runGeminiVerification(title: string, content: string): Promise<{
         continue;
       }
 
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      const candidate = data?.candidates?.[0];
+      const finishReason = candidate?.finishReason;
+      const text = candidate?.content?.parts?.[0]?.text || "";
+
       if (!text) {
-        const finishReason = data?.candidates?.[0]?.finishReason;
-        console.warn(`[MultiVerifier] Gemini REST ${modelName} returned empty text (finishReason=${finishReason})`);
+        console.warn(`[MultiVerifier] Gemini REST ${modelName} empty text (finishReason=${finishReason})`);
         continue;
       }
-      const parsed = JSON.parse(extractJsonObject(text));
+
+      let parsed: any;
+      try {
+        parsed = JSON.parse(extractJsonObject(text));
+      } catch (jsonErr) {
+        // Log first 400 chars so we can see what Gemini actually returned
+        console.warn(`[MultiVerifier] Gemini REST ${modelName} no JSON in response (finishReason=${finishReason}). First 400 chars: ${text.substring(0, 400)}`);
+        continue;
+      }
+
       console.log(`[MultiVerifier] Gemini REST success with model=${modelName}`);
       return {
         score: Math.min(100, Math.max(0, parsed.totalScore || 0)),
