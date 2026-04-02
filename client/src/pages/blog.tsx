@@ -2,20 +2,19 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { SEOHead } from "@/components/SEOHead";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
 import {
-  Calendar, Clock, Search, Newspaper, Eye,
-  ArrowRight, ShieldCheck, BookOpen, Tag
+  Calendar, Clock, Search, Eye, ShieldCheck, ArrowRight, Tag, Newspaper
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import type { BlogPost } from "@shared/schema";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 
-const categories = [
-  { id: "all", label: "All" },
+const CATEGORIES = [
+  { id: "all", label: "All Topics" },
   { id: "visa-updates", label: "Visa Updates" },
   { id: "business-planning", label: "Business Planning" },
   { id: "endorsement", label: "Endorsement" },
@@ -24,106 +23,180 @@ const categories = [
   { id: "guides", label: "Guides" },
 ];
 
-function PostRow({ post }: { post: BlogPost }) {
-  const formattedDate = new Date(post.publishedAt).toLocaleDateString("en-GB", {
-    day: "numeric", month: "short", year: "numeric",
-  });
-  const isVerified = (post as any).verificationStatus === "passed" && (post as any).aiVerificationScore >= 95;
+const CAT_COLORS: Record<string, string> = {
+  "visa-updates":     "bg-red-600 text-white",
+  "business-planning":"bg-[#005EB8] text-white",
+  "endorsement":      "bg-purple-600 text-white",
+  "success-stories":  "bg-emerald-600 text-white",
+  "uk-immigration":   "bg-orange-600 text-white",
+  "guides":           "bg-teal-600 text-white",
+};
+
+const CAT_GRADIENT: Record<string, string> = {
+  "visa-updates":     "from-red-900 to-red-700",
+  "business-planning":"from-[#003f7a] to-[#005EB8]",
+  "endorsement":      "from-purple-900 to-purple-700",
+  "success-stories":  "from-emerald-900 to-emerald-700",
+  "uk-immigration":   "from-orange-900 to-orange-700",
+  "guides":           "from-teal-900 to-teal-700",
+};
+
+function catBadgeClass(cat: string) {
+  return CAT_COLORS[cat] ?? "bg-[#005EB8] text-white";
+}
+
+function cardGradient(cat: string) {
+  return CAT_GRADIENT[cat] ?? "from-slate-800 to-slate-700";
+}
+
+function fmtDate(d: string | Date) {
+  return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function isVerified(post: BlogPost) {
+  const p = post as any;
+  return p.verificationStatus === "passed" && p.aiVerificationScore >= 95;
+}
+
+function CatLabel({ cat }: { cat: string }) {
+  return (
+    <span className={`inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${catBadgeClass(cat)}`}>
+      {cat.replace(/-/g, " ")}
+    </span>
+  );
+}
+
+/* ─── Hero card (featured / first post) ─── */
+function HeroCard({ post }: { post: BlogPost }) {
+  const p = post as any;
+  const img = p.featuredImage || null;
+  const gradient = cardGradient(post.category);
+  const verified = isVerified(post);
 
   return (
-    <Link href={`/blog/${post.slug}`} data-testid={`link-post-${post.slug}`}>
-      <div className="group flex items-start gap-4 py-4 border-b last:border-b-0 hover-elevate rounded-md px-2 -mx-2 cursor-pointer">
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-1.5 mb-1">
-            <Badge variant="secondary" className="text-xs px-2 py-0" data-testid={`badge-cat-${post.id}`}>
-              {post.category.replace(/-/g, " ")}
-            </Badge>
-            {isVerified && (
-              <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border-0 text-xs px-2 py-0 gap-1" data-testid={`badge-verified-${post.id}`}>
-                <ShieldCheck className="w-3 h-3" />
-                Verified
-              </Badge>
+    <Link href={`/blog/${post.slug}`} data-testid={`link-hero-${post.slug}`}>
+      <div className="group relative overflow-hidden rounded-md cursor-pointer h-[340px] md:h-[420px]">
+        {img ? (
+          <img src={img} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+          <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+        <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-7">
+          <div className="flex items-center gap-2 mb-2">
+            <CatLabel cat={post.category} />
+            {verified && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-300 bg-emerald-900/60 px-2 py-0.5 rounded">
+                <ShieldCheck className="w-3 h-3" />Verified
+              </span>
             )}
             {post.isFeatured && (
-              <Badge variant="outline" className="text-xs px-2 py-0">Featured</Badge>
-            )}
-          </div>
-          <h2 className="text-sm font-semibold leading-snug line-clamp-2 mb-1 group-hover:text-primary transition-colors" data-testid={`text-title-${post.id}`}>
-            {post.title}
-          </h2>
-          <p className="text-xs text-muted-foreground line-clamp-1" data-testid={`text-excerpt-${post.id}`}>
-            {post.excerpt}
-          </p>
-          <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1" data-testid={`text-date-${post.id}`}>
-              <Calendar className="w-3 h-3" />{formattedDate}
-            </span>
-            <span className="flex items-center gap-1" data-testid={`text-readtime-${post.id}`}>
-              <Clock className="w-3 h-3" />{post.readingTime} min
-            </span>
-            {post.views > 0 && (
-              <span className="flex items-center gap-1" data-testid={`text-views-${post.id}`}>
-                <Eye className="w-3 h-3" />{post.views.toLocaleString()}
+              <span className="text-[10px] font-bold uppercase tracking-widest text-yellow-300 border border-yellow-400/50 px-2 py-0.5 rounded">
+                Featured
               </span>
             )}
           </div>
+          <h2 className="text-xl md:text-3xl font-bold text-white leading-snug mb-2 group-hover:underline decoration-white/60 underline-offset-2" data-testid={`text-hero-title-${post.id}`}>
+            {post.title}
+          </h2>
+          <p className="text-sm text-white/80 line-clamp-2 mb-3 hidden md:block">{post.excerpt}</p>
+          <div className="flex items-center gap-3 text-xs text-white/60">
+            <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{fmtDate(post.publishedAt)}</span>
+            <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{post.readingTime} min read</span>
+            {post.views > 0 && <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{post.views.toLocaleString()}</span>}
+          </div>
         </div>
-        <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 mt-1" />
       </div>
     </Link>
   );
 }
 
+/* ─── Standard post card ─── */
 function PostCard({ post }: { post: BlogPost }) {
-  const formattedDate = new Date(post.publishedAt).toLocaleDateString("en-GB", {
-    day: "numeric", month: "short", year: "numeric",
-  });
-  const isVerified = (post as any).verificationStatus === "passed" && (post as any).aiVerificationScore >= 95;
+  const p = post as any;
+  const img = p.featuredImage || null;
+  const gradient = cardGradient(post.category);
+  const verified = isVerified(post);
 
   return (
     <Link href={`/blog/${post.slug}`} data-testid={`link-card-${post.slug}`}>
-      <div className="group flex flex-col h-full border rounded-lg bg-card hover-elevate cursor-pointer overflow-hidden">
-        <div className="flex-1 p-4">
-          <div className="flex flex-wrap items-center gap-1.5 mb-2">
-            <Badge variant="secondary" className="text-xs px-2 py-0">
-              {post.category.replace(/-/g, " ")}
-            </Badge>
-            {isVerified && (
-              <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border-0 text-xs px-2 py-0 gap-1">
-                <ShieldCheck className="w-3 h-3" />Verified
-              </Badge>
-            )}
+      <article className="group flex flex-col h-full bg-card border rounded-md overflow-hidden cursor-pointer hover-elevate">
+        <div className="relative h-36 overflow-hidden flex-shrink-0">
+          {img ? (
+            <img src={img} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          ) : (
+            <div className={`w-full h-full bg-gradient-to-br ${gradient}`} />
+          )}
+          <div className="absolute top-2 left-2">
+            <CatLabel cat={post.category} />
           </div>
-          <h2 className="text-sm font-semibold leading-snug line-clamp-3 mb-2 group-hover:text-primary transition-colors">
-            {post.title}
-          </h2>
-          <p className="text-xs text-muted-foreground line-clamp-2">{post.excerpt}</p>
+          {verified && (
+            <div className="absolute top-2 right-2">
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-300 bg-black/60 px-1.5 py-0.5 rounded">
+                <ShieldCheck className="w-3 h-3" />AI Verified
+              </span>
+            </div>
+          )}
         </div>
-        <div className="px-4 pb-3 flex items-center justify-between text-xs text-muted-foreground border-t pt-3">
-          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{formattedDate}</span>
-          <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{post.readingTime} min</span>
-          <span className="flex items-center gap-1 text-primary font-medium">Read <ArrowRight className="w-3 h-3" /></span>
+        <div className="flex flex-col flex-1 p-3">
+          <h3 className="font-bold text-sm leading-snug line-clamp-3 mb-1.5 group-hover:text-primary transition-colors" data-testid={`text-card-title-${post.id}`}>
+            {post.title}
+          </h3>
+          <p className="text-xs text-muted-foreground line-clamp-2 mb-auto">{post.excerpt}</p>
+          <div className="flex items-center justify-between mt-2 pt-2 border-t text-xs text-muted-foreground">
+            <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{fmtDate(post.publishedAt)}</span>
+            <span className="flex items-center gap-1 text-primary font-medium">Read <ArrowRight className="w-3 h-3" /></span>
+          </div>
+        </div>
+      </article>
+    </Link>
+  );
+}
+
+/* ─── Sidebar compact list row ─── */
+function SidebarRow({ post }: { post: BlogPost }) {
+  const p = post as any;
+  const img = p.featuredImage || null;
+  const gradient = cardGradient(post.category);
+
+  return (
+    <Link href={`/blog/${post.slug}`} data-testid={`link-sidebar-${post.slug}`}>
+      <div className="group flex gap-2.5 py-2.5 border-b last:border-b-0 cursor-pointer">
+        <div className={`w-14 h-14 rounded flex-shrink-0 overflow-hidden ${!img ? `bg-gradient-to-br ${gradient}` : ""}`}>
+          {img && <img src={img} alt="" className="w-full h-full object-cover" />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <CatLabel cat={post.category} />
+          <p className="text-xs font-semibold leading-snug mt-0.5 line-clamp-2 group-hover:text-primary transition-colors">{post.title}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">{fmtDate(post.publishedAt)}</p>
         </div>
       </div>
     </Link>
   );
 }
 
-function RowSkeleton() {
+/* ─── Skeletons ─── */
+function HeroSkeleton() {
+  return <Skeleton className="w-full h-[340px] md:h-[420px] rounded-md" />;
+}
+function CardSkeleton() {
   return (
-    <div className="py-4 border-b">
-      <div className="flex gap-2 mb-2"><Skeleton className="h-4 w-16" /><Skeleton className="h-4 w-12" /></div>
-      <Skeleton className="h-4 w-full mb-1" />
-      <Skeleton className="h-3 w-3/4 mb-2" />
-      <div className="flex gap-3"><Skeleton className="h-3 w-20" /><Skeleton className="h-3 w-16" /></div>
+    <div className="border rounded-md overflow-hidden">
+      <Skeleton className="w-full h-36" />
+      <div className="p-3 space-y-2">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-4/5" />
+        <Skeleton className="h-3 w-3/4" />
+        <Skeleton className="h-3 w-24" />
+      </div>
     </div>
   );
 }
 
+/* ─── Page ─── */
 export default function BlogPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   const { data: posts, isLoading } = useQuery<BlogPost[]>({
     queryKey: ["/api/blog", selectedCategory, searchQuery],
@@ -138,6 +211,8 @@ export default function BlogPage() {
   });
 
   const allPosts = posts || [];
+  const featured = allPosts.find(p => p.isFeatured) || allPosts[0];
+  const remaining = allPosts.filter(p => p !== featured);
   const totalViews = useMemo(() => allPosts.reduce((s, p) => s + (p.views || 0), 0), [allPosts]);
 
   return (
@@ -150,125 +225,202 @@ export default function BlogPage() {
       <Header />
 
       <div className="min-h-screen bg-background">
-        {/* Compact page header */}
-        <div className="border-b bg-muted/30">
-          <div className="responsive-container py-4">
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-primary" />
-                <div>
-                  <h1 className="text-base font-bold text-primary leading-none" data-testid="heading-blog">UK Visa Insights</h1>
-                  <p className="text-xs text-muted-foreground mt-0.5">Expert guidance, quad-AI verified</p>
-                </div>
+
+        {/* ── Newspaper masthead ── */}
+        <div className="bg-foreground text-background">
+          <div className="responsive-container py-0">
+            {/* Top ticker */}
+            <div className="flex items-center gap-3 border-b border-background/10 py-1.5 text-xs text-background/60">
+              <span className="font-bold text-background/80 shrink-0">UK VISA INSIGHTS</span>
+              <span className="flex items-center gap-1"><Newspaper className="w-3 h-3" />{allPosts.length} articles published</span>
+              <span className="flex items-center gap-1 ml-auto"><Eye className="w-3 h-3" />{totalViews.toLocaleString()} total reads</span>
+            </div>
+            {/* Masthead title */}
+            <div className="py-4 border-b border-background/10 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <h1 className="text-3xl md:text-5xl font-black tracking-tight text-background leading-none" data-testid="heading-blog">
+                  UK Visa Insights
+                </h1>
+                <p className="text-sm text-background/60 mt-1 font-medium">
+                  Expert analysis · Quad-AI verified · GOV.UK accurate
+                </p>
               </div>
-              {!isLoading && allPosts.length > 0 && (
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1"><Newspaper className="w-3 h-3" />{allPosts.length} articles</span>
-                  <span className="flex items-center gap-1"><Tag className="w-3 h-3" />{new Set(allPosts.map(p => p.category)).size} categories</span>
-                  <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{totalViews.toLocaleString()} views</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs text-background/70">Every article fact-checked by 4 AI models</span>
+              </div>
+            </div>
+            {/* Category nav bar */}
+            <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-2">
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`shrink-0 text-xs font-semibold px-3 py-1 rounded transition-colors ${
+                    selectedCategory === cat.id
+                      ? "bg-background text-foreground"
+                      : "text-background/70 hover:text-background hover:bg-background/10"
+                  }`}
+                  data-testid={`button-cat-${cat.id}`}
+                >
+                  {cat.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="responsive-container py-4">
-          {/* Search + view toggle */}
-          <div className="flex gap-2 mb-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search articles..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-9 text-sm"
-                data-testid="input-blog-search"
-              />
-            </div>
-            <Button
-              variant={viewMode === "list" ? "default" : "outline"}
-              size="sm"
-              className="px-3"
-              onClick={() => setViewMode("list")}
-              data-testid="button-view-list"
-            >List</Button>
-            <Button
-              variant={viewMode === "grid" ? "default" : "outline"}
-              size="sm"
-              className="px-3"
-              onClick={() => setViewMode("grid")}
-              data-testid="button-view-grid"
-            >Grid</Button>
+        {/* ── Main content ── */}
+        <div className="responsive-container py-6">
+          {/* Search bar */}
+          <div className="relative mb-6 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search articles…"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="pl-9 h-9 text-sm"
+              data-testid="input-blog-search"
+            />
           </div>
 
-          {/* Category chips */}
-          <div className="flex flex-wrap gap-1.5 mb-5">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`text-xs px-3 py-1 rounded-full border transition-colors ${
-                  selectedCategory === cat.id
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
-                }`}
-                data-testid={`button-cat-${cat.id}`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Post count */}
-          {!isLoading && allPosts.length > 0 && (
-            <p className="text-xs text-muted-foreground mb-3" data-testid="text-results-count">
-              {allPosts.length} article{allPosts.length !== 1 ? "s" : ""}
-              {selectedCategory !== "all" && ` in ${categories.find(c => c.id === selectedCategory)?.label}`}
-              {searchQuery && ` matching "${searchQuery}"`}
-            </p>
-          )}
-
-          {/* Posts */}
           {isLoading ? (
-            <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" : ""}>
-              {Array.from({ length: 6 }).map((_, i) =>
-                viewMode === "list" ? <RowSkeleton key={i} /> : (
-                  <div key={i} className="border rounded-lg p-4 space-y-2">
-                    <Skeleton className="h-3 w-16" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-3 w-full" />
-                    <Skeleton className="h-3 w-24" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-6">
+                <HeroSkeleton />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {Array.from({ length: 4 }).map((_, i) => <CardSkeleton key={i} />)}
+                </div>
+              </div>
+              <div className="space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex gap-2.5 py-2.5 border-b">
+                    <Skeleton className="w-14 h-14 rounded shrink-0" />
+                    <div className="flex-1 space-y-1">
+                      <Skeleton className="h-3 w-14" />
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-3 w-3/4" />
+                    </div>
                   </div>
-                )
-              )}
+                ))}
+              </div>
             </div>
           ) : allPosts.length === 0 ? (
-            <div className="py-16 text-center" data-testid="text-no-posts">
-              <Newspaper className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-              <p className="text-sm font-medium">No articles found</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {searchQuery ? "Try a different search term" : "Check back soon — new articles are published daily"}
+            <div className="py-20 text-center" data-testid="text-no-posts">
+              <Newspaper className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+              <p className="text-base font-semibold mb-1">No articles found</p>
+              <p className="text-sm text-muted-foreground mb-4">
+                {searchQuery ? "Try a different search term" : "New articles are published daily — check back soon"}
               </p>
               {(searchQuery || selectedCategory !== "all") && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-4"
-                  onClick={() => { setSearchQuery(""); setSelectedCategory("all"); }}
-                  data-testid="button-clear-filters"
-                >
+                <Button variant="outline" size="sm" onClick={() => { setSearchQuery(""); setSelectedCategory("all"); }} data-testid="button-clear-filters">
                   Clear filters
                 </Button>
               )}
             </div>
-          ) : viewMode === "list" ? (
-            <div data-testid="posts-list">
-              {allPosts.map((post) => <PostRow key={post.id} post={post} />)}
-            </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" data-testid="posts-grid">
-              {allPosts.map((post) => <PostCard key={post.id} post={post} />)}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+              {/* ─── Main column ─── */}
+              <div className="lg:col-span-2 space-y-6">
+
+                {/* Hero */}
+                {featured && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-primary">Top Story</span>
+                      <div className="flex-1 h-px bg-border" />
+                    </div>
+                    <HeroCard post={featured} />
+                  </div>
+                )}
+
+                {/* Post grid */}
+                {remaining.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-primary">
+                        Latest Articles
+                        {selectedCategory !== "all" && ` · ${CATEGORIES.find(c => c.id === selectedCategory)?.label}`}
+                      </span>
+                      <div className="flex-1 h-px bg-border" />
+                      <span className="text-xs text-muted-foreground shrink-0" data-testid="text-results-count">{remaining.length} articles</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" data-testid="posts-grid">
+                      {remaining.map(post => <PostCard key={post.id} post={post} />)}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* ─── Sidebar ─── */}
+              <aside className="space-y-6">
+
+                {/* Categories */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Tag className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-primary">Topics</span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+                  <div className="space-y-1">
+                    {CATEGORIES.filter(c => c.id !== "all").map(cat => {
+                      const count = allPosts.filter(p => p.category === cat.id).length;
+                      if (count === 0) return null;
+                      return (
+                        <button
+                          key={cat.id}
+                          onClick={() => setSelectedCategory(cat.id)}
+                          className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm transition-colors ${
+                            selectedCategory === cat.id
+                              ? "bg-primary text-primary-foreground"
+                              : "hover:bg-muted text-foreground"
+                          }`}
+                          data-testid={`button-sidebar-cat-${cat.id}`}
+                        >
+                          <span className="font-medium">{cat.label}</span>
+                          <span className="text-xs opacity-70">{count}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Latest posts sidebar */}
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-primary">Latest</span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+                  <div data-testid="sidebar-latest">
+                    {allPosts.slice(0, 6).map(post => <SidebarRow key={post.id} post={post} />)}
+                  </div>
+                </div>
+
+                {/* CTA box */}
+                <div className="border-2 border-primary rounded-md p-4 bg-primary/5">
+                  <p className="text-xs font-black uppercase tracking-widest text-primary mb-1">Free Tools</p>
+                  <p className="font-bold text-sm mb-1.5 leading-snug">109 AI tools for your Innovator Founder Visa</p>
+                  <p className="text-xs text-muted-foreground mb-3">Business plans, compliance checklists, financial models — all built for GOV.UK requirements.</p>
+                  <Link href="/tools">
+                    <Button size="sm" className="w-full" data-testid="button-sidebar-tools">
+                      Explore Tools <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* Verification trust note */}
+                <div className="rounded-md border bg-emerald-50 dark:bg-emerald-950/20 p-3">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">Quad-AI Verified Content</p>
+                  </div>
+                  <p className="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed">
+                    Every article is cross-verified by Gemini, GPT-4, Claude, and Qwen against GOV.UK official guidance before publishing.
+                  </p>
+                </div>
+
+              </aside>
             </div>
           )}
         </div>

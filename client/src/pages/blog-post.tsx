@@ -6,11 +6,49 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Calendar, Clock, User, ArrowLeft, Share2, BookOpen,
-  ShieldCheck, AlertCircle, CheckCircle2, Eye, ExternalLink, Cpu
+  ShieldCheck, AlertCircle, CheckCircle2, Eye, ExternalLink, Cpu, ArrowRight, Tag
 } from "lucide-react";
 import { useEffect } from "react";
 import type { BlogPost } from "@shared/schema";
 import Footer from "@/components/Footer";
+
+const CAT_COLORS: Record<string, string> = {
+  "visa-updates":     "bg-red-600 text-white",
+  "business-planning":"bg-[#005EB8] text-white",
+  "endorsement":      "bg-purple-600 text-white",
+  "success-stories":  "bg-emerald-600 text-white",
+  "uk-immigration":   "bg-orange-600 text-white",
+  "guides":           "bg-teal-600 text-white",
+};
+
+const CAT_GRADIENT: Record<string, string> = {
+  "visa-updates":     "from-red-900 to-red-700",
+  "business-planning":"from-[#003f7a] to-[#005EB8]",
+  "endorsement":      "from-purple-900 to-purple-700",
+  "success-stories":  "from-emerald-900 to-emerald-700",
+  "uk-immigration":   "from-orange-900 to-orange-700",
+  "guides":           "from-teal-900 to-teal-700",
+};
+
+function catBadgeClass(cat: string) { return CAT_COLORS[cat] ?? "bg-[#005EB8] text-white"; }
+function cardGradient(cat: string) { return CAT_GRADIENT[cat] ?? "from-slate-800 to-slate-700"; }
+function fmtDate(d: string | Date) {
+  return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
+function fmtDateShort(d: string | Date) {
+  return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function CatLabel({ cat, size = "sm" }: { cat: string; size?: "sm" | "lg" }) {
+  const base = catBadgeClass(cat);
+  return (
+    <span className={`inline-block font-bold uppercase tracking-widest rounded ${
+      size === "lg" ? "text-xs px-3 py-1" : "text-[10px] px-2 py-0.5"
+    } ${base}`}>
+      {cat.replace(/-/g, " ")}
+    </span>
+  );
+}
 
 function VerificationBar({ post }: { post: BlogPost }) {
   const p = post as any;
@@ -18,69 +56,68 @@ function VerificationBar({ post }: { post: BlogPost }) {
   const composite = p.aiVerificationScore;
   const verifiedAt = p.verifiedAt ? new Date(p.verifiedAt) : null;
   const sources = p.sourcesCited ?? 0;
-
   const isPassed = status === "passed";
   const isReview = status === "human_review";
-
   if (!composite && status === "pending") return null;
-
   return (
     <div
-      className={`flex flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2 rounded-md text-xs mb-5 ${
+      className={`flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-2.5 text-xs border-y ${
         isPassed
-          ? "bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50"
+          ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/50"
           : isReview
-          ? "bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50"
-          : "bg-muted border border-border"
+          ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/50"
+          : "bg-muted border-border"
       }`}
       data-testid="bar-verification"
     >
-      {/* Status icon + label */}
-      <span className="flex items-center gap-1.5 font-medium">
-        {isPassed ? (
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-        ) : isReview ? (
-          <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-        ) : (
-          <Cpu className="w-3.5 h-3.5 text-muted-foreground" />
-        )}
+      <span className="flex items-center gap-1.5 font-semibold">
+        {isPassed ? <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          : isReview ? <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+          : <Cpu className="w-3.5 h-3.5 text-muted-foreground" />}
         <span className={isPassed ? "text-emerald-700 dark:text-emerald-300" : isReview ? "text-amber-700 dark:text-amber-300" : "text-muted-foreground"}>
           {isPassed ? "Quad-AI Verified" : isReview ? "Under Review" : "Verifying…"}
         </span>
       </span>
-
-      {/* Composite score */}
       {composite !== null && composite !== undefined && (
-        <span className={`font-semibold ${composite >= 95 ? "text-emerald-600 dark:text-emerald-400" : composite >= 80 ? "text-amber-600 dark:text-amber-400" : "text-red-600"}`}>
-          {composite}/100
+        <span className={`font-bold ${composite >= 95 ? "text-emerald-600 dark:text-emerald-400" : composite >= 80 ? "text-amber-600 dark:text-amber-400" : "text-red-600"}`}>
+          Score: {composite}/100
         </span>
       )}
-
-      {/* Divider */}
-      <span className="text-border select-none hidden sm:inline">·</span>
-
-      {/* Meta */}
       {verifiedAt && (
         <span className="flex items-center gap-1 text-muted-foreground">
           <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-          {verifiedAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+          Verified {verifiedAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
         </span>
       )}
-      {sources > 0 && (
-        <span className="text-muted-foreground">
-          {sources} official source{sources !== 1 ? "s" : ""}
-        </span>
-      )}
-
-      {/* GOV.UK badge on the right */}
+      {sources > 0 && <span className="text-muted-foreground">{sources} official source{sources !== 1 ? "s" : ""} cited</span>}
       {isPassed && (
-        <span className="ml-auto flex-shrink-0">
-          <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border-0 text-xs px-2 py-0">
-            GOV.UK Verified
-          </Badge>
+        <span className="ml-auto">
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded">
+            <ShieldCheck className="w-3 h-3" />GOV.UK Verified
+          </span>
         </span>
       )}
     </div>
+  );
+}
+
+function SidebarPostRow({ post }: { post: BlogPost }) {
+  const p = post as any;
+  const img = p.featuredImage || null;
+  const gradient = cardGradient(post.category);
+  return (
+    <Link href={`/blog/${post.slug}`}>
+      <div className="group flex gap-2.5 py-2.5 border-b last:border-b-0 cursor-pointer">
+        <div className={`w-14 h-14 rounded flex-shrink-0 overflow-hidden ${!img ? `bg-gradient-to-br ${gradient}` : ""}`}>
+          {img && <img src={img} alt="" className="w-full h-full object-cover" />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <CatLabel cat={post.category} />
+          <p className="text-xs font-semibold leading-snug mt-0.5 line-clamp-2 group-hover:text-primary transition-colors">{post.title}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">{fmtDateShort(post.publishedAt)}</p>
+        </div>
+      </div>
+    </Link>
   );
 }
 
@@ -98,29 +135,35 @@ export default function BlogPostPage() {
     enabled: !!slug,
   });
 
-  const viewMutation = useMutation({
-    mutationFn: async () => {
-      await fetch(`/api/blog/${slug}/view`, { method: "POST" });
+  const { data: recentPosts } = useQuery<BlogPost[]>({
+    queryKey: ["/api/blog"],
+    queryFn: async () => {
+      const res = await fetch("/api/blog?limit=6");
+      if (!res.ok) return [];
+      return res.json();
     },
   });
 
-  useEffect(() => {
-    if (slug) viewMutation.mutate();
-  }, [slug]);
+  const viewMutation = useMutation({
+    mutationFn: async () => { await fetch(`/api/blog/${slug}/view`, { method: "POST" }); },
+  });
+
+  useEffect(() => { if (slug) viewMutation.mutate(); }, [slug]);
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="responsive-container py-8 max-w-3xl">
-          <Skeleton className="h-7 w-24 mb-6" />
-          <Skeleton className="h-3 w-16 mb-3" />
-          <Skeleton className="h-8 w-full mb-2" />
-          <Skeleton className="h-8 w-4/5 mb-4" />
-          <Skeleton className="h-3 w-48 mb-8" />
-          <div className="space-y-3">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className={`h-3 ${i % 4 === 3 ? "w-3/4" : "w-full"}`} />
-            ))}
+        <Skeleton className="w-full h-[260px] md:h-[380px]" />
+        <div className="responsive-container py-6 max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-3">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <Skeleton key={i} className={`h-3 ${i % 4 === 3 ? "w-3/4" : "w-full"}`} />
+              ))}
+            </div>
+            <div className="space-y-4">
+              {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
+            </div>
           </div>
         </div>
       </div>
@@ -129,65 +172,45 @@ export default function BlogPostPage() {
 
   if (error || !post) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="responsive-container py-16 text-center max-w-lg">
-          <BookOpen className="w-10 h-10 mx-auto text-muted-foreground mb-4" />
-          <h1 className="text-xl font-bold mb-2">Article Not Found</h1>
-          <p className="text-sm text-muted-foreground mb-6">
-            This article doesn't exist or has been removed.
-          </p>
-          <Link href="/blog">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />Back to Blog
-            </Button>
-          </Link>
-        </div>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 py-20" data-testid="error-post-not-found">
+        <BookOpen className="w-10 h-10 text-muted-foreground" />
+        <h1 className="text-xl font-bold">Article Not Found</h1>
+        <p className="text-sm text-muted-foreground">This article doesn't exist or has been removed.</p>
+        <Link href="/blog">
+          <Button variant="outline" size="sm"><ArrowLeft className="w-4 h-4 mr-2" />Back to Blog</Button>
+        </Link>
       </div>
     );
   }
 
-  const formattedDate = new Date(post.publishedAt).toLocaleDateString("en-GB", {
-    day: "numeric", month: "long", year: "numeric",
-  });
-
   const p = post as any;
+  const img = p.featuredImage || null;
+  const gradient = cardGradient(post.category);
   const isTripleVerified = p.verificationStatus === "passed" && p.aiVerificationScore >= 95;
 
   const handleShare = async () => {
     if (navigator.share) {
       await navigator.share({ title: post.title, text: post.excerpt, url: window.location.href });
     } else {
-      navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(window.location.href);
     }
   };
+
+  const related = (recentPosts || []).filter(rp => rp.slug !== post.slug && rp.category === post.category).slice(0, 5);
+  const moreRecent = (recentPosts || []).filter(rp => rp.slug !== post.slug && rp.category !== post.category).slice(0, 5 - related.length);
+  const sidebarPosts = [...related, ...moreRecent].slice(0, 5);
 
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
     description: post.excerpt,
-    author: {
-      "@type": "Organization",
-      name: post.author,
-      url: "https://innovatorfoundervisaassistant.co.uk",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "UK Innovator Founder Visa Assistant",
-      url: "https://innovatorfoundervisaassistant.co.uk",
-    },
+    author: { "@type": "Organization", name: post.author, url: "https://innovatorfoundervisaassistant.co.uk" },
+    publisher: { "@type": "Organization", name: "UK Innovator Founder Visa Assistant", url: "https://innovatorfoundervisaassistant.co.uk" },
     datePublished: post.publishedAt,
     dateModified: post.updatedAt || post.publishedAt,
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `https://innovatorfoundervisaassistant.co.uk/blog/${post.slug}`,
-    },
-    ...(isTripleVerified && {
-      reviewedBy: {
-        "@type": "Organization",
-        name: "Quad-AI Fact Verification (Qwen + Gemini + OpenAI + Claude)",
-      },
-    }),
+    mainEntityOfPage: { "@type": "WebPage", "@id": `https://innovatorfoundervisaassistant.co.uk/blog/${post.slug}` },
+    ...(isTripleVerified && { reviewedBy: { "@type": "Organization", name: "Quad-AI Fact Verification (Qwen + Gemini + OpenAI + Claude)" } }),
   };
 
   return (
@@ -197,106 +220,207 @@ export default function BlogPostPage() {
         description={post.metaDescription || post.excerpt}
         canonical={`https://innovatorfoundervisaassistant.co.uk/blog/${post.slug}`}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
 
       <div className="min-h-screen bg-background">
-        <article className="responsive-container py-6 max-w-3xl">
 
-          {/* Back */}
-          <Link href="/blog">
-            <Button variant="ghost" size="sm" className="mb-5 -ml-2" data-testid="button-back-blog">
-              <ArrowLeft className="w-4 h-4 mr-1.5" />Blog
-            </Button>
-          </Link>
-
-          {/* Slim meta bar */}
-          <div className="flex flex-wrap items-center gap-2 mb-3 text-xs text-muted-foreground">
-            <Badge variant="secondary" className="text-xs">{post.category.replace(/-/g, " ")}</Badge>
-            {post.isFeatured && <Badge variant="outline" className="text-xs">Featured</Badge>}
-            {isTripleVerified && (
-              <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border-0 text-xs gap-1" data-testid="badge-triple-verified">
-                <ShieldCheck className="w-3 h-3" />Verified
-              </Badge>
-            )}
-            <span className="flex items-center gap-1 ml-auto">
-              <User className="w-3 h-3" />{post.author}
-            </span>
-            <span className="flex items-center gap-1">
-              <Calendar className="w-3 h-3" />{formattedDate}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />{post.readingTime} min
-            </span>
-            {post.views > 0 && (
-              <span className="flex items-center gap-1">
-                <Eye className="w-3 h-3" />{post.views.toLocaleString()}
-              </span>
-            )}
-            <Button variant="ghost" size="sm" onClick={handleShare} className="h-6 px-2" data-testid="button-share">
-              <Share2 className="w-3 h-3 mr-1" />Share
-            </Button>
-          </div>
-
-          {/* Title */}
-          <h1 className="text-2xl md:text-3xl font-bold leading-tight mb-3" data-testid="heading-blog-title">
-            {post.title}
-          </h1>
-
-          {/* Excerpt */}
-          <p className="text-muted-foreground mb-5 leading-relaxed">
-            {post.excerpt}
-          </p>
-
-          {/* Compact verification bar */}
-          <VerificationBar post={post} />
-
-          {/* Content */}
-          <div
-            className="prose prose-sm md:prose dark:prose-invert max-w-none mb-8"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
-
-          {/* Tags */}
-          {post.tags && post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 pt-5 border-t mb-6">
-              {post.tags.map((tag) => (
-                <Badge key={tag} variant="outline" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
+        {/* ── Hero banner ── */}
+        <div className="relative w-full h-[240px] md:h-[360px] overflow-hidden">
+          {img ? (
+            <img src={img} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
+          ) : (
+            <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
           )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/20" />
 
-          {/* Trust footer row */}
-          <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-muted-foreground border rounded-md px-3 py-2.5 bg-muted/30 mb-5">
-            <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3 text-emerald-500" />Verified against GOV.UK</span>
-            <span className="flex items-center gap-1"><Cpu className="w-3 h-3 text-blue-500" />Quad-AI fact-checked</span>
-            <span className="flex items-center gap-1">Re-verified every 90 days</span>
-            <a
-              href="https://www.gov.uk/innovator-founder-visa"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-primary hover:underline"
-            >
-              <ExternalLink className="w-3 h-3" />GOV.UK
-            </a>
-          </div>
-
-          {/* CTA */}
-          <div className="border rounded-lg p-4 bg-primary/5 border-primary/20">
-            <p className="text-sm font-semibold mb-1">Need help with your visa application?</p>
-            <p className="text-xs text-muted-foreground mb-3">
-              Access 109 AI-powered tools to build your business plan and prepare your Innovator Founder Visa application.
-            </p>
-            <Link href="/questionnaire">
-              <Button size="sm" data-testid="button-start-plan">Start Your Business Plan</Button>
+          {/* Back button */}
+          <div className="absolute top-4 left-4">
+            <Link href="/blog">
+              <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10 h-8 px-3 text-xs" data-testid="button-back-blog">
+                <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />Blog
+              </Button>
             </Link>
           </div>
 
-        </article>
+          {/* Title overlay */}
+          <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <CatLabel cat={post.category} size="lg" />
+                {post.isFeatured && (
+                  <span className="text-xs font-bold uppercase tracking-widest text-yellow-300 border border-yellow-400/50 px-2.5 py-0.5 rounded">
+                    Featured
+                  </span>
+                )}
+                {isTripleVerified && (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-300 bg-emerald-900/60 px-2.5 py-0.5 rounded">
+                    <ShieldCheck className="w-3.5 h-3.5" />Quad-AI Verified
+                  </span>
+                )}
+              </div>
+              <h1 className="text-xl md:text-3xl lg:text-4xl font-black text-white leading-tight mb-3" data-testid="heading-blog-title">
+                {post.title}
+              </h1>
+              <div className="flex flex-wrap items-center gap-3 text-xs text-white/65">
+                <span className="flex items-center gap-1.5"><User className="w-3 h-3" />{post.author}</span>
+                <span className="text-white/30">·</span>
+                <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3" />{fmtDate(post.publishedAt)}</span>
+                <span className="text-white/30">·</span>
+                <span className="flex items-center gap-1.5"><Clock className="w-3 h-3" />{post.readingTime} min read</span>
+                {post.views > 0 && (
+                  <>
+                    <span className="text-white/30">·</span>
+                    <span className="flex items-center gap-1.5"><Eye className="w-3 h-3" />{post.views.toLocaleString()} views</span>
+                  </>
+                )}
+                <button onClick={handleShare} className="flex items-center gap-1.5 text-white/65 hover:text-white ml-auto transition-colors" data-testid="button-share">
+                  <Share2 className="w-3 h-3" />Share
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Verification bar ── */}
+        <VerificationBar post={post} />
+
+        {/* ── Body: article + sidebar ── */}
+        <div className="responsive-container py-8 max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+
+            {/* Article */}
+            <article className="lg:col-span-2">
+              {/* Excerpt standfirst */}
+              <p className="text-base md:text-lg text-muted-foreground leading-relaxed border-l-4 border-primary pl-4 mb-6 italic">
+                {post.excerpt}
+              </p>
+
+              {/* Content */}
+              <div
+                className="prose prose-sm md:prose dark:prose-invert max-w-none mb-8
+                  prose-headings:font-black prose-headings:tracking-tight
+                  prose-h2:text-xl prose-h2:border-b prose-h2:border-border prose-h2:pb-2 prose-h2:mb-4
+                  prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+                  prose-blockquote:border-l-primary prose-blockquote:bg-muted/40 prose-blockquote:rounded-r-md prose-blockquote:py-1
+                  prose-strong:text-foreground"
+                dangerouslySetInnerHTML={{ __html: post.content }}
+              />
+
+              {/* Tags */}
+              {post.tags && post.tags.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 pt-5 border-t mb-6">
+                  <Tag className="w-3.5 h-3.5 text-muted-foreground" />
+                  {post.tags.map(tag => (
+                    <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                  ))}
+                </div>
+              )}
+
+              {/* Trust footer */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 border rounded-md p-3 bg-muted/30 mb-6">
+                <div className="flex flex-col items-center text-center p-2">
+                  <ShieldCheck className="w-5 h-5 text-emerald-500 mb-1" />
+                  <span className="text-[10px] font-semibold text-muted-foreground">GOV.UK Verified</span>
+                </div>
+                <div className="flex flex-col items-center text-center p-2">
+                  <Cpu className="w-5 h-5 text-blue-500 mb-1" />
+                  <span className="text-[10px] font-semibold text-muted-foreground">Quad-AI Checked</span>
+                </div>
+                <div className="flex flex-col items-center text-center p-2">
+                  <CheckCircle2 className="w-5 h-5 text-purple-500 mb-1" />
+                  <span className="text-[10px] font-semibold text-muted-foreground">Re-verified 90 Days</span>
+                </div>
+                <div className="flex flex-col items-center text-center p-2">
+                  <a
+                    href="https://www.gov.uk/innovator-founder-visa"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-col items-center text-center hover:opacity-70 transition-opacity"
+                  >
+                    <ExternalLink className="w-5 h-5 text-primary mb-1" />
+                    <span className="text-[10px] font-semibold text-primary">GOV.UK Source</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* CTA */}
+              <div className="border-2 border-primary rounded-md p-5 bg-primary/5">
+                <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Ready to Apply?</p>
+                <p className="font-bold text-base mb-1.5 leading-snug">109 AI-powered tools for your Innovator Founder Visa</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Build your business plan, pass your endorsement interview, and submit a flawless visa application — all in one platform.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/questionnaire">
+                    <Button size="sm" data-testid="button-start-plan">
+                      Start Your Business Plan <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                    </Button>
+                  </Link>
+                  <Link href="/tools">
+                    <Button size="sm" variant="outline" data-testid="button-view-tools">Explore All Tools</Button>
+                  </Link>
+                </div>
+              </div>
+            </article>
+
+            {/* Sidebar */}
+            <aside className="space-y-6">
+
+              {/* Related / latest */}
+              {sidebarPosts.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-primary">
+                      {related.length > 0 ? "Related Articles" : "Latest Articles"}
+                    </span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+                  {sidebarPosts.map(rp => <SidebarPostRow key={rp.id} post={rp} />)}
+                  <Link href="/blog">
+                    <Button variant="outline" size="sm" className="w-full mt-3 text-xs" data-testid="button-all-posts">
+                      All Articles <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+              )}
+
+              {/* Share */}
+              <div className="border rounded-md p-4 bg-card">
+                <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-2">Share This Article</p>
+                <p className="text-xs text-muted-foreground mb-3">Help other founders discover this guide.</p>
+                <Button size="sm" variant="outline" className="w-full" onClick={handleShare} data-testid="button-share-sidebar">
+                  <Share2 className="w-3.5 h-3.5 mr-2" />Share Article
+                </Button>
+              </div>
+
+              {/* Verification detail */}
+              {isTripleVerified && (
+                <div className="border rounded-md border-emerald-200 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-950/20 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">Fact-Checked by 4 AI Models</p>
+                  </div>
+                  <div className="space-y-1 text-xs text-emerald-700 dark:text-emerald-400">
+                    {["Gemini (Google)", "GPT-4o (OpenAI)", "Claude (Anthropic)", "Qwen (Alibaba)"].map(m => (
+                      <div key={m} className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3 h-3 shrink-0" />{m}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* About */}
+              <div className="border rounded-md p-4 bg-card">
+                <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-2">About This Blog</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Written by specialist immigration analysts and cross-verified by 4 independent AI models against GOV.UK official guidance. Updated every 90 days.
+                </p>
+              </div>
+
+            </aside>
+          </div>
+        </div>
       </div>
 
       <Footer />
