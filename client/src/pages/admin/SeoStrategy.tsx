@@ -52,10 +52,18 @@ interface SEOStrategyResult {
   ninetyDayPlan: SEOAction[];
   contentCalendar: ContentPiece[];
   keywordOpportunities: KeywordOpportunity[];
-  entityOptimization: { schemaRecommendations: string[]; entityBuildingSteps: string[]; knowledgePanelStrategy: string; citationAuditFindings: string[] };
+  entityOptimization: { schemaRecommendations: string[]; entityBuildingSteps: string[]; knowledgePanelStrategy: string; citationAuditFindings: string[]; eeaatSignals: string[] };
+  competitorGap: { topicGaps: { topic: string; competitorRanking: string; yourAction: string }[]; contentGaps: string[]; keywordGaps: string[]; differentiationAngles: string[] };
+  featuredSnippets: { opportunities: { query: string; snippetType: string; contentFormat: string; answer: string }[]; voiceSearchQuestions: string[]; peopleAlsoAsk: string[] };
+  internationalSEO: { countryStrategy: { country: string; language: string; priority: string; keyActions: string[] }[]; hreflangRecommendations: string[]; currencyAndLocalisation: string[] };
+  cro: { landingPageRecommendations: { page: string; issue: string; fix: string; expectedImpact: string }[]; ctaOptimisation: string[]; trustSignals: string[]; funnelImprovements: string[] };
+  faqLibrary: { question: string; answer: string }[];
+  contentPillars: { pillar: string; supportingTopics: string[] }[];
+  homepageCopy: { headline: string; subheadline: string; ctaText: string; valueProp: string; servicesOverview: string; socialProof: string };
+  metaTags: { page: string; titleTag: string; metaDescription: string }[];
+  authorityBuilding: { linkBuildingOpportunities: { source: string; type: string; strategy: string }[]; prOpportunities: string[]; partnershipOpportunities: string[]; reviewRequestScript: string; reviewResponseTemplates: { fiveStar: string; fourStar: string; threeStar: string; oneTwo: string } };
+  technicalSEO: { coreWebVitals: string[]; structuredDataGaps: string[]; internalLinkingOpportunities: string[]; pageSpeedRecommendations: string[]; technicalAuditChecklist: string[]; newPagesNeeded: { urlSlug: string; titleTag: string; h1: string; metaDescription: string; contentOutline: string[] }[] };
   gbpStrategy: { categoryRecommendations: string[]; descriptionVersions: string[]; postingCalendar: { week: number; topic: string; type: string; copy: string }[]; attributesToAdd: string[]; photoStrategy: string };
-  technicalSEO: { coreWebVitals: string[]; structuredDataGaps: string[]; internalLinkingOpportunities: string[]; pageSpeedRecommendations: string[] };
-  authorityBuilding: { linkBuildingOpportunities: { source: string; type: string; strategy: string }[]; prOpportunities: string[]; partnershipOpportunities: string[] };
   verificationNotes: string;
   modelContributions: { gemini: string; openai: string; claude: string; qwen: string };
 }
@@ -286,11 +294,22 @@ export default function SeoStrategy() {
     targetAudience: "International entrepreneurs and founders seeking to live and work in the UK through the Innovator Founder Visa route",
     competitors: "ukbf.com, bizadvice.co.uk, sableinternational.com, workpermit.com",
     targetLocations: "London, UK, Global",
-    currentMonthlyTraffic: "",
-    googleReviewCount: "",
-    averageRating: "",
+    currentMonthlyTraffic: "5000",
+    googleReviewCount: "24",
+    averageRating: "4.8",
     currentRankingKeywords: "UK Innovator Founder Visa, innovator founder visa assistant",
     biggestSEOProblem: "Low organic traffic despite strong tool offering — need to establish topical authority in the UK visa niche",
+    // Extended fields
+    domainAuthority: "",
+    estimatedBacklinks: "",
+    topPerformingPages: "/tools/compliance-checker, /blog/uk-innovator-visa-guide, /business-plan-generator",
+    publishingFrequency: "weekly",
+    uniqueSellingProposition: "109 AI-powered tools, quad-AI verification, 100% UK visa compliance accuracy",
+    businessStage: "growing",
+    socialMediaChannels: "LinkedIn, Twitter/X, YouTube",
+    knownTechnicalIssues: "",
+    targetCountries: "UK, India, Nigeria, UAE, USA",
+    conversionGoal: "Free trial sign-up leading to premium subscription",
   });
 
   const mutation = useMutation({
@@ -308,6 +327,16 @@ export default function SeoStrategy() {
         averageRating: form.averageRating ? Number(form.averageRating) : undefined,
         currentRankingKeywords: form.currentRankingKeywords.split(",").map(s => s.trim()).filter(Boolean),
         biggestSEOProblem: form.biggestSEOProblem,
+        domainAuthority: form.domainAuthority ? Number(form.domainAuthority) : undefined,
+        estimatedBacklinks: form.estimatedBacklinks ? Number(form.estimatedBacklinks) : undefined,
+        topPerformingPages: form.topPerformingPages.split(",").map(s => s.trim()).filter(Boolean),
+        publishingFrequency: form.publishingFrequency,
+        uniqueSellingProposition: form.uniqueSellingProposition,
+        businessStage: form.businessStage,
+        socialMediaChannels: form.socialMediaChannels.split(",").map(s => s.trim()).filter(Boolean),
+        knownTechnicalIssues: form.knownTechnicalIssues.split(",").map(s => s.trim()).filter(Boolean),
+        targetCountries: form.targetCountries.split(",").map(s => s.trim()).filter(Boolean),
+        conversionGoal: form.conversionGoal,
       };
       const res = await apiRequest("POST", "/api/seo/strategy", ctx);
       const data = await res.json();
@@ -454,6 +483,80 @@ export default function SeoStrategy() {
             <div className="space-y-1">
               <label className="text-xs font-medium text-muted-foreground">Biggest SEO Problem Right Now</label>
               <Input className="h-8 text-sm" value={form.biggestSEOProblem} onChange={e => setForm(f => ({ ...f, biggestSEOProblem: e.target.value }))} data-testid="input-seo-problem" />
+            </div>
+
+            {/* Extended context fields */}
+            <div className="pt-1 border-t">
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Extended Context (for richer report)</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Unique Selling Proposition</label>
+                  <Input className="h-8 text-sm" value={form.uniqueSellingProposition} onChange={e => setForm(f => ({ ...f, uniqueSellingProposition: e.target.value }))} data-testid="input-usp" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Conversion Goal</label>
+                  <Input className="h-8 text-sm" placeholder="e.g. Free trial → paid subscription" value={form.conversionGoal} onChange={e => setForm(f => ({ ...f, conversionGoal: e.target.value }))} data-testid="input-conversion-goal" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Target Countries (comma-sep)</label>
+                  <Input className="h-8 text-sm" placeholder="UK, India, Nigeria, UAE" value={form.targetCountries} onChange={e => setForm(f => ({ ...f, targetCountries: e.target.value }))} data-testid="input-target-countries" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Social Media Channels</label>
+                  <Input className="h-8 text-sm" placeholder="LinkedIn, Twitter/X, YouTube" value={form.socialMediaChannels} onChange={e => setForm(f => ({ ...f, socialMediaChannels: e.target.value }))} data-testid="input-social-channels" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Top Performing Pages</label>
+                  <Input className="h-8 text-sm" placeholder="/blog/guide, /tools/checker" value={form.topPerformingPages} onChange={e => setForm(f => ({ ...f, topPerformingPages: e.target.value }))} data-testid="input-top-pages" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Known Technical Issues</label>
+                  <Input className="h-8 text-sm" placeholder="slow mobile, no schema, missing alt tags" value={form.knownTechnicalIssues} onChange={e => setForm(f => ({ ...f, knownTechnicalIssues: e.target.value }))} data-testid="input-tech-issues" />
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-2 mt-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Domain Authority</label>
+                  <Input className="h-8 text-sm" type="number" min="0" max="100" placeholder="25" value={form.domainAuthority} onChange={e => setForm(f => ({ ...f, domainAuthority: e.target.value }))} data-testid="input-da" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Backlinks</label>
+                  <Input className="h-8 text-sm" type="number" placeholder="500" value={form.estimatedBacklinks} onChange={e => setForm(f => ({ ...f, estimatedBacklinks: e.target.value }))} data-testid="input-backlinks" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Publishing Freq.</label>
+                  <select
+                    className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+                    value={form.publishingFrequency}
+                    onChange={e => setForm(f => ({ ...f, publishingFrequency: e.target.value }))}
+                    data-testid="select-publish-freq"
+                  >
+                    <option value="daily">Daily</option>
+                    <option value="2x-week">2x / week</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="2x-month">2x / month</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="rarely">Rarely</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Business Stage</label>
+                  <select
+                    className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+                    value={form.businessStage}
+                    onChange={e => setForm(f => ({ ...f, businessStage: e.target.value }))}
+                    data-testid="select-business-stage"
+                  >
+                    <option value="startup">Startup</option>
+                    <option value="growing">Growing</option>
+                    <option value="established">Established</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
             <Button
@@ -640,15 +743,21 @@ export default function SeoStrategy() {
 
           {/* Main Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-4 md:grid-cols-8 gap-1 h-auto p-1">
+            <TabsList className="flex flex-wrap gap-1 h-auto p-1">
               <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
               <TabsTrigger value="quickwins" className="text-xs">Quick Wins</TabsTrigger>
-              <TabsTrigger value="30day" className="text-xs">30-Day Plan</TabsTrigger>
-              <TabsTrigger value="90day" className="text-xs">90-Day Plan</TabsTrigger>
+              <TabsTrigger value="30day" className="text-xs">30-Day</TabsTrigger>
+              <TabsTrigger value="90day" className="text-xs">90-Day</TabsTrigger>
               <TabsTrigger value="keywords" className="text-xs">Keywords</TabsTrigger>
               <TabsTrigger value="content" className="text-xs">Content</TabsTrigger>
               <TabsTrigger value="gbp" className="text-xs">GBP</TabsTrigger>
               <TabsTrigger value="entity" className="text-xs">Entity</TabsTrigger>
+              <TabsTrigger value="competitor" className="text-xs">Competitor Gap</TabsTrigger>
+              <TabsTrigger value="snippets" className="text-xs">Snippets</TabsTrigger>
+              <TabsTrigger value="international" className="text-xs">International</TabsTrigger>
+              <TabsTrigger value="cro" className="text-xs">CRO</TabsTrigger>
+              <TabsTrigger value="faq" className="text-xs">FAQ Library</TabsTrigger>
+              <TabsTrigger value="copy" className="text-xs">Copy</TabsTrigger>
             </TabsList>
 
             {/* Overview Tab */}
@@ -1066,6 +1175,373 @@ export default function SeoStrategy() {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            {/* Competitor Gap Tab */}
+            <TabsContent value="competitor" className="space-y-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Target className="w-4 h-4 text-red-500" />Content Gaps vs Competitors
+                    </CardTitle>
+                    <CardDescription>Topics competitors rank for that you should create immediately</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {(result.competitorGap?.topicGaps || []).length === 0 ? (
+                      <p className="text-sm text-muted-foreground">Regenerate to populate competitor gap analysis.</p>
+                    ) : (result.competitorGap?.topicGaps || []).map((gap, i) => (
+                      <div key={i} className="p-2 border rounded-md space-y-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-sm font-medium">{gap.topic}</span>
+                          <Badge variant="outline" className="text-xs shrink-0">{gap.competitorRanking}</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{gap.yourAction}</p>
+                        <Button size="sm" variant="outline" className="h-6 text-xs px-2" onClick={() => handleGenerateBlog(gap.topic)} data-testid={`button-blog-gap-${i}`}>
+                          <PenLine className="w-3 h-3 mr-1" />Write This
+                        </Button>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+                <div className="space-y-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Star className="w-4 h-4 text-yellow-500" />Differentiation Angles
+                      </CardTitle>
+                      <CardDescription>Unique positions your competitors don't own</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {(result.competitorGap?.differentiationAngles || []).map((angle, i) => (
+                        <div key={i} className="flex items-start gap-2 p-2 bg-muted/50 rounded text-sm">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
+                          <span>{angle}</span>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Keyword Gaps</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-wrap gap-1.5">
+                      {(result.competitorGap?.keywordGaps || []).map((kw, i) => (
+                        <Badge key={i} variant="outline" className="text-xs cursor-pointer" onClick={() => handleGenerateBlog(kw)} data-testid={`badge-kw-gap-${i}`}>{kw}</Badge>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Featured Snippets Tab */}
+            <TabsContent value="snippets" className="space-y-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-yellow-500" />Position Zero Opportunities
+                    </CardTitle>
+                    <CardDescription>Specific queries to target for featured snippet capture</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {(result.featuredSnippets?.opportunities || []).length === 0 ? (
+                      <p className="text-sm text-muted-foreground">Regenerate to populate featured snippet opportunities.</p>
+                    ) : (result.featuredSnippets?.opportunities || []).map((opp, i) => (
+                      <div key={i} className="p-2 border rounded-md space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">{opp.snippetType}</Badge>
+                          <span className="text-sm font-medium">{opp.query}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{opp.contentFormat}</p>
+                        {opp.answer && <p className="text-xs p-1.5 bg-muted/50 rounded italic">"{opp.answer}"</p>}
+                        <Button size="sm" variant="outline" className="h-6 text-xs px-2" onClick={() => handleGenerateBlog(opp.query)} data-testid={`button-snippet-${i}`}>
+                          <PenLine className="w-3 h-3 mr-1" />Create Content
+                        </Button>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+                <div className="space-y-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4 text-blue-500" />Voice & AI Search Questions
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-1.5">
+                      {(result.featuredSnippets?.voiceSearchQuestions || []).map((q, i) => (
+                        <div key={i} className="flex items-center gap-2 p-1.5 bg-muted/50 rounded text-sm">
+                          <span className="text-muted-foreground shrink-0">Q:</span>
+                          <span className="flex-1">{q}</span>
+                          <Button size="sm" variant="ghost" className="h-6 text-xs px-1.5 shrink-0" onClick={() => handleGenerateBlog(q)} data-testid={`button-voice-${i}`}>
+                            <PenLine className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">People Also Ask</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-1.5">
+                      {(result.featuredSnippets?.peopleAlsoAsk || []).map((q, i) => (
+                        <div key={i} className="flex items-center gap-2 p-1.5 border rounded text-sm">
+                          <ChevronRight className="w-3.5 h-3.5 text-primary shrink-0" />
+                          <span className="flex-1">{q}</span>
+                          <Button size="sm" variant="ghost" className="h-6 text-xs px-1.5 shrink-0" onClick={() => handleGenerateBlog(q)} data-testid={`button-paa-${i}`}>
+                            <PenLine className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* International SEO Tab */}
+            <TabsContent value="international" className="space-y-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-blue-500" />Country Strategy
+                    </CardTitle>
+                    <CardDescription>Priority markets and localisation actions per country</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {(result.internationalSEO?.countryStrategy || []).length === 0 ? (
+                      <p className="text-sm text-muted-foreground">Populate Target Countries in the form and regenerate.</p>
+                    ) : (result.internationalSEO?.countryStrategy || []).map((cs, i) => (
+                      <div key={i} className="p-2 border rounded-md">
+                        <div className="flex items-center gap-2 mb-1">
+                          <MapPin className="w-3.5 h-3.5 text-primary" />
+                          <span className="font-semibold text-sm">{cs.country}</span>
+                          <Badge variant="outline" className="text-xs">{cs.language}</Badge>
+                          <Badge className={`text-xs ${cs.priority === "high" ? "bg-red-100 text-red-700" : cs.priority === "medium" ? "bg-yellow-100 text-yellow-700" : "bg-muted text-muted-foreground"}`}>{cs.priority}</Badge>
+                        </div>
+                        <ul className="space-y-0.5">
+                          {(cs.keyActions || []).map((action, j) => (
+                            <li key={j} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                              <CheckCircle2 className="w-3 h-3 text-green-500 mt-0.5 shrink-0" />
+                              {action}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Hreflang Implementation</CardTitle>
+                    <CardDescription>Technical setup for international targeting</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {(result.internationalSEO?.hreflangRecommendations || []).map((rec, i) => (
+                      <div key={i} className="p-2 bg-muted/50 rounded text-xs font-mono">{rec}</div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* CRO Tab */}
+            <TabsContent value="cro" className="space-y-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-green-500" />Landing Page CRO
+                    </CardTitle>
+                    <CardDescription>Specific conversion improvements per page</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {(result.cro?.landingPageRecommendations || []).length === 0 ? (
+                      <p className="text-sm text-muted-foreground">Add Top Performing Pages to the form and regenerate.</p>
+                    ) : (result.cro?.landingPageRecommendations || []).map((rec, i) => (
+                      <div key={i} className="p-2 border rounded-md space-y-1">
+                        <span className="text-xs font-medium text-primary">{rec.page}</span>
+                        <p className="text-xs text-red-600"><strong>Issue:</strong> {rec.issue}</p>
+                        <p className="text-xs text-green-700"><strong>Fix:</strong> {rec.fix}</p>
+                        <p className="text-xs text-muted-foreground"><strong>Impact:</strong> {rec.expectedImpact}</p>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+                <div className="space-y-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">CTA Optimisation</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-1.5">
+                      {(result.cro?.ctaOptimisation || []).map((cta, i) => (
+                        <div key={i} className="flex items-start gap-2 p-1.5 bg-muted/50 rounded text-sm">
+                          <Zap className="w-3.5 h-3.5 text-yellow-500 mt-0.5 shrink-0" />
+                          <span>{cta}</span>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Trust Signals to Add</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-1.5">
+                      {(result.cro?.trustSignals || []).map((ts, i) => (
+                        <div key={i} className="flex items-start gap-2 p-1.5 bg-muted/50 rounded text-sm">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
+                          <span>{ts}</span>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Funnel Improvements</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-1.5">
+                      {(result.cro?.funnelImprovements || []).map((fi, i) => (
+                        <div key={i} className="flex items-start gap-2 p-1.5 border rounded text-sm">
+                          <ChevronRight className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                          <span>{fi}</span>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* FAQ Library Tab */}
+            <TabsContent value="faq" className="space-y-4 mt-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-blue-500" />FAQ Library ({(result.faqLibrary || []).length} questions)
+                    </CardTitle>
+                    <Badge variant="outline" className="text-xs">Schema-ready answers</Badge>
+                  </div>
+                  <CardDescription>Production-ready Q&As — copy into your FAQ pages with JSON-LD schema markup</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {(result.faqLibrary || []).length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Regenerate to populate the FAQ library from Claude.</p>
+                  ) : (result.faqLibrary || []).map((faq, i) => (
+                    <div key={i} className="p-2 border rounded-md">
+                      <p className="text-sm font-medium text-primary mb-1">Q: {faq.question}</p>
+                      <p className="text-sm text-muted-foreground">A: {faq.answer}</p>
+                      <Button size="sm" variant="outline" className="mt-1.5 h-6 text-xs px-2" onClick={() => handleGenerateBlog(faq.question)} data-testid={`button-faq-blog-${i}`}>
+                        <PenLine className="w-3 h-3 mr-1" />Expand into post
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Copy Tab (Homepage + Meta Tags) */}
+            <TabsContent value="copy" className="space-y-4 mt-4">
+              {result.homepageCopy?.headline && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-purple-500" />Homepage Copy (Rewrite)
+                    </CardTitle>
+                    <CardDescription>Production-ready copy generated by Qwen — paste directly into your site</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-2 bg-muted/50 rounded">
+                        <p className="text-xs font-semibold text-muted-foreground mb-1">Headline</p>
+                        <p className="text-sm font-bold">{result.homepageCopy.headline}</p>
+                      </div>
+                      <div className="p-2 bg-muted/50 rounded">
+                        <p className="text-xs font-semibold text-muted-foreground mb-1">Subheadline</p>
+                        <p className="text-sm">{result.homepageCopy.subheadline}</p>
+                      </div>
+                    </div>
+                    <div className="p-2 border rounded">
+                      <p className="text-xs font-semibold text-muted-foreground mb-1">CTA Text</p>
+                      <p className="text-sm font-medium text-primary">{result.homepageCopy.ctaText}</p>
+                    </div>
+                    <div className="p-2 bg-muted/50 rounded">
+                      <p className="text-xs font-semibold text-muted-foreground mb-1">Value Proposition</p>
+                      <p className="text-sm">{result.homepageCopy.valueProp}</p>
+                    </div>
+                    <div className="p-2 bg-muted/50 rounded">
+                      <p className="text-xs font-semibold text-muted-foreground mb-1">Services Overview</p>
+                      <p className="text-sm">{result.homepageCopy.servicesOverview}</p>
+                    </div>
+                    <div className="p-2 bg-muted/50 rounded">
+                      <p className="text-xs font-semibold text-muted-foreground mb-1">Social Proof</p>
+                      <p className="text-sm">{result.homepageCopy.socialProof}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {(result.metaTags || []).length > 0 && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Search className="w-4 h-4 text-blue-500" />Optimised Meta Tags ({result.metaTags.length} pages)
+                    </CardTitle>
+                    <CardDescription>Ready-to-deploy title tags and meta descriptions for your top pages</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {result.metaTags.map((mt, i) => (
+                      <div key={i} className="p-2 border rounded-md space-y-1">
+                        <span className="text-xs font-medium text-muted-foreground">{mt.page}</span>
+                        <p className="text-sm font-medium">{mt.titleTag}</p>
+                        <p className="text-xs text-muted-foreground">{mt.metaDescription}</p>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {result.authorityBuilding?.reviewRequestScript && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Star className="w-4 h-4 text-yellow-500" />Review Request Script
+                    </CardTitle>
+                    <CardDescription>Send this to clients after service delivery to build keyword-rich reviews</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="p-3 bg-muted/50 rounded text-sm whitespace-pre-wrap">{result.authorityBuilding.reviewRequestScript}</div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {result.authorityBuilding?.reviewResponseTemplates?.fiveStar && (
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Star className="w-4 h-4 text-yellow-500" />Review Response Templates
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {[
+                      { label: "5-Star Response", text: result.authorityBuilding.reviewResponseTemplates.fiveStar, color: "text-green-600" },
+                      { label: "4-Star Response", text: result.authorityBuilding.reviewResponseTemplates.fourStar, color: "text-blue-600" },
+                      { label: "3-Star Response", text: result.authorityBuilding.reviewResponseTemplates.threeStar, color: "text-yellow-600" },
+                      { label: "1-2 Star Response", text: result.authorityBuilding.reviewResponseTemplates.oneTwo, color: "text-red-600" },
+                    ].map(({ label, text, color }) => text ? (
+                      <div key={label}>
+                        <p className={`text-xs font-semibold ${color} mb-1`}>{label}</p>
+                        <div className="p-2 bg-muted/50 rounded text-sm">{text}</div>
+                      </div>
+                    ) : null)}
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
           </Tabs>
         </div>
       )}

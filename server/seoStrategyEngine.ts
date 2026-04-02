@@ -31,6 +31,17 @@ export interface SEOBusinessContext {
   averageRating?: number;
   currentRankingKeywords?: string[];
   biggestSEOProblem?: string;
+  // Extended context
+  domainAuthority?: number;
+  estimatedBacklinks?: number;
+  topPerformingPages?: string[];
+  publishingFrequency?: string;
+  uniqueSellingProposition?: string;
+  businessStage?: string;
+  socialMediaChannels?: string[];
+  knownTechnicalIssues?: string[];
+  targetCountries?: string[];
+  conversionGoal?: string;
 }
 
 export interface SEOAction {
@@ -81,6 +92,7 @@ export interface SEOStrategyResult {
     entityBuildingSteps: string[];
     knowledgePanelStrategy: string;
     citationAuditFindings: string[];
+    eeaatSignals: string[];
   };
   gbpStrategy: {
     categoryRecommendations: string[];
@@ -94,12 +106,42 @@ export interface SEOStrategyResult {
     structuredDataGaps: string[];
     internalLinkingOpportunities: string[];
     pageSpeedRecommendations: string[];
+    technicalAuditChecklist: string[];
+    newPagesNeeded: { urlSlug: string; titleTag: string; h1: string; metaDescription: string; contentOutline: string[] }[];
   };
   authorityBuilding: {
     linkBuildingOpportunities: { source: string; type: string; strategy: string }[];
     prOpportunities: string[];
     partnershipOpportunities: string[];
+    reviewRequestScript: string;
+    reviewResponseTemplates: { fiveStar: string; fourStar: string; threeStar: string; oneTwo: string };
   };
+  competitorGap: {
+    topicGaps: { topic: string; competitorRanking: string; yourAction: string }[];
+    contentGaps: string[];
+    keywordGaps: string[];
+    differentiationAngles: string[];
+  };
+  featuredSnippets: {
+    opportunities: { query: string; snippetType: string; contentFormat: string; answer: string }[];
+    voiceSearchQuestions: string[];
+    peopleAlsoAsk: string[];
+  };
+  internationalSEO: {
+    countryStrategy: { country: string; language: string; priority: string; keyActions: string[] }[];
+    hreflangRecommendations: string[];
+    currencyAndLocalisation: string[];
+  };
+  cro: {
+    landingPageRecommendations: { page: string; issue: string; fix: string; expectedImpact: string }[];
+    ctaOptimisation: string[];
+    trustSignals: string[];
+    funnelImprovements: string[];
+  };
+  faqLibrary: { question: string; answer: string }[];
+  contentPillars: { pillar: string; supportingTopics: string[] }[];
+  homepageCopy: { headline: string; subheadline: string; ctaText: string; valueProp: string; servicesOverview: string; socialProof: string };
+  metaTags: { page: string; titleTag: string; metaDescription: string }[];
   verificationNotes: string;
   modelContributions: {
     gemini: string;
@@ -116,40 +158,52 @@ BUSINESS CONTEXT:
 - Business: ${ctx.businessName}
 - Website: ${ctx.websiteUrl}
 - Primary Service: ${ctx.primaryService}
+- USP: ${ctx.uniqueSellingProposition || "Not provided"}
 - Target Keywords: ${ctx.targetKeywords.join(", ")}
 - Target Audience: ${ctx.targetAudience}
 - Target Locations: ${ctx.targetLocations.join(", ")}
+- Target Countries: ${ctx.targetCountries?.join(", ") || "UK"}
 - Competitors: ${ctx.competitors.join(", ")}
-- Current Traffic: ${ctx.currentMonthlyTraffic || "Unknown"}
+- Current Traffic: ${ctx.currentMonthlyTraffic || "Unknown"} monthly visits
+- Domain Authority: ${ctx.domainAuthority || "Unknown"}/100
+- Estimated Backlinks: ${ctx.estimatedBacklinks || "Unknown"}
+- Business Stage: ${ctx.businessStage || "Not specified"}
 - Current Problem: ${ctx.biggestSEOProblem || "Not specified"}
+- Conversion Goal: ${ctx.conversionGoal || "Not specified"}
 
-Analyse and produce a comprehensive LOCAL SEO + GBP strategy covering:
+Analyse and produce a comprehensive LOCAL SEO + GBP + COMPETITOR GAP strategy:
 
-1. GBP CATEGORY AUDIT: Which primary + secondary GBP categories should this business use? List 5+ categories.
+1. GBP CATEGORY AUDIT: Primary + secondary GBP categories (5+).
 
-2. GBP DESCRIPTION: Write 3 versions (keyword-focused, conversion-focused, trust-focused), each under 750 characters.
+2. GBP DESCRIPTION: 3 versions (keyword-focused, conversion-focused, trust-focused), each under 750 characters.
 
-3. GBP POSTING CALENDAR: 8-week calendar with 2 posts per week. Each post: type, topic, full copy (100-150 words), CTA.
+3. GBP POSTING CALENDAR: 8-week calendar, 2 posts per week. Full copy (100-150 words) + CTA per post.
 
-4. GBP ATTRIBUTES: List all attributes that should be enabled.
+4. GBP ATTRIBUTES: All attributes that should be enabled.
 
-5. COMPETITOR POSITIONING: Based on the competitor list, identify differentiation opportunities.
+5. COMPETITOR POSITIONING: Identify 5 specific content/keyword gaps vs each competitor. What topics do they rank for that you don't?
 
-6. LOCAL KEYWORD MAP: Map the top 20 keywords by buyer intent stage (ready-to-hire → problem-aware).
+6. LOCAL KEYWORD MAP: Top 20 keywords by buyer intent (ready-to-hire → problem-aware).
 
-7. LOCATION PAGES: Recommend service+location page combinations for the target locations.
+7. LOCATION PAGES: Service+location page combinations for target locations/countries.
 
-8. SCORING: Rate this business's current local SEO on: Technical (0-100), Content (0-100), Authority (0-100), Local (0-100).
+8. COMPETITOR CONTENT GAP: Specific blog/page topics competitors rank for that this business should create immediately. For each gap: topic, which competitor ranks for it, recommended page title, target keyword.
 
-Return your analysis as a structured JSON object with these exact keys:
+9. DIFFERENTIATION ANGLES: 5 unique angles this business can own that competitors don't cover.
+
+10. SCORING: Rate: Technical (0-100), Content (0-100), Authority (0-100), Local (0-100).
+
+Return as structured JSON:
 {
-  "categoryRecommendations": ["Primary: X", "Secondary: Y", ...],
+  "categoryRecommendations": ["Primary: X", "Secondary: Y"],
   "descriptionVersions": ["version1", "version2", "version3"],
   "postingCalendar": [{"week": 1, "post": 1, "type": "update", "topic": "...", "copy": "..."}],
   "attributesToAdd": ["...", "..."],
   "competitorGaps": ["...", "..."],
   "keywordMap": [{"keyword": "...", "intent": "ready-to-hire|solution-aware|problem-aware|research", "action": "optimize-existing|create-new", "page": "..."}],
   "locationPages": [{"location": "...", "service": "...", "urlSlug": "..."}],
+  "competitorTopicGaps": [{"topic": "...", "competitorRanking": "...", "yourAction": "...", "suggestedTitle": "...", "targetKeyword": "..."}],
+  "differentiationAngles": ["...", "..."],
   "localSEOScore": {"technical": 85, "content": 70, "authority": 60, "local": 75},
   "gbpQuickWins": ["...", "..."],
   "executiveSummaryLocal": "..."
@@ -157,35 +211,52 @@ Return your analysis as a structured JSON object with these exact keys:
 }
 
 function buildOpenAIPrompt(ctx: SEOBusinessContext): string {
-  return `You are a PhD-level technical SEO specialist and keyword strategist. Your analysis must be surgical, specific, and based on proven SEO principles.
+  return `You are a PhD-level technical SEO specialist, keyword strategist, and CRO expert. Your analysis must be surgical, specific, and based on proven SEO principles.
 
 BUSINESS CONTEXT:
 - Business: ${ctx.businessName}
 - Website: ${ctx.websiteUrl}
 - Primary Service: ${ctx.primaryService}
+- USP: ${ctx.uniqueSellingProposition || "Not provided"}
 - Target Keywords: ${ctx.targetKeywords.join(", ")}
 - Target Audience: ${ctx.targetAudience}
 - Current Rankings: ${ctx.currentRankingKeywords?.join(", ") || "Not provided"}
+- Top Performing Pages: ${ctx.topPerformingPages?.join(", ") || "Not provided"}
 - Competitors: ${ctx.competitors.join(", ")}
+- Domain Authority: ${ctx.domainAuthority || "Unknown"}/100
+- Estimated Backlinks: ${ctx.estimatedBacklinks || "Unknown"}
+- Known Technical Issues: ${ctx.knownTechnicalIssues?.join(", ") || "Not specified"}
+- Publishing Frequency: ${ctx.publishingFrequency || "Not specified"}
+- Conversion Goal: ${ctx.conversionGoal || "Not specified"}
 - Biggest Problem: ${ctx.biggestSEOProblem || "Not specified"}
 
-Produce a comprehensive TECHNICAL SEO + KEYWORD strategy:
+Produce a comprehensive TECHNICAL SEO + KEYWORD + FEATURED SNIPPETS + CRO strategy:
 
-1. KEYWORD GAP ANALYSIS: Identify 20 keywords this business should rank for but likely doesn't. Categorise by intent and difficulty.
+1. KEYWORD GAP ANALYSIS: 20 keywords this business should rank for but likely doesn't. Categorise by intent and difficulty.
 
-2. PAGE-2 GOLDMINE: Identify likely ranking opportunities (position 11-20) and exact on-page fixes needed.
+2. PAGE-2 GOLDMINE: Ranking opportunities (position 11-20) with exact on-page fixes needed.
 
-3. MONEY PAGE AUDIT: Which pages should be created immediately? Provide: URL slug, title tag, H1, meta description, 5-bullet content outline.
+3. MONEY PAGES NEEDED: URL slug, title tag, H1, meta description, 5-bullet outline for each.
 
-4. CORE WEB VITALS: Specific recommendations for improving LCP, FID, CLS for this type of site.
+4. CORE WEB VITALS: LCP, FID, CLS improvements for this type of site.
 
 5. INTERNAL LINKING MAP: Key pages and internal linking opportunities.
 
-6. TECHNICAL AUDIT CHECKLIST: 10 most critical technical SEO fixes for this type of business.
+6. TECHNICAL AUDIT CHECKLIST: 12 most critical technical SEO fixes, prioritised.
 
-7. 30-DAY SPRINT: Week-by-week technical action plan (4 weeks).
+7. 30-DAY SPRINT: Week-by-week technical action plan.
 
-8. CONTENT BRIEFS: Write 5 detailed content briefs for the highest-priority pages (each with title, H1, meta, outline, word count, target keyword, secondary keywords).
+8. FEATURED SNIPPET OPPORTUNITIES: Identify 10 specific queries where this business can win position zero. For each: exact query, snippet type (paragraph/list/table), ideal content format, a draft 50-word answer.
+
+9. VOICE SEARCH & AI SEARCH OPTIMISATION: 10 conversational questions people ask voice assistants or AI chatbots about this service. Recommend content format for each.
+
+10. PEOPLE ALSO ASK: 10 PAA questions this business should create dedicated content for.
+
+11. CRO RECOMMENDATIONS: For the top 5 landing pages, identify: main conversion barrier, specific fix, expected impact on conversion rate.
+
+12. CTA OPTIMISATION: 5 specific CTA improvements backed by conversion psychology.
+
+13. TRUST SIGNALS: 8 specific trust signals this website should add to improve conversion.
 
 Return as structured JSON:
 {
@@ -196,55 +267,69 @@ Return as structured JSON:
   "internalLinking": [{"from": "...", "to": "...", "anchorText": "..."}],
   "technicalFixes": ["...", "..."],
   "thirtyDaySprint": [{"week": 1, "actions": ["...", "..."]}],
-  "contentBriefs": [{"title": "...", "targetKeyword": "...", "wordCount": 1500, "outline": ["...", "..."]}],
+  "featuredSnippetOpportunities": [{"query": "...", "snippetType": "paragraph|list|table", "contentFormat": "...", "answer": "..."}],
+  "voiceSearchQuestions": ["...", "..."],
+  "peopleAlsoAsk": ["...", "..."],
+  "croRecommendations": [{"page": "...", "issue": "...", "fix": "...", "expectedImpact": "..."}],
+  "ctaOptimisation": ["...", "..."],
+  "trustSignals": ["...", "..."],
+  "funnelImprovements": ["...", "..."],
   "technicalScore": 75,
   "executiveSummaryTechnical": "..."
 }`;
 }
 
 function buildClaudePrompt(ctx: SEOBusinessContext): string {
-  return `You are a PhD-level SEO strategist specialising in content strategy, entity optimisation, and authority building. You combine E-E-A-T principles with advanced schema markup and knowledge graph optimisation.
+  return `You are a PhD-level SEO strategist specialising in content strategy, entity optimisation, authority building, and international SEO. You combine E-E-A-T principles with advanced schema markup, knowledge graph optimisation, and global content localisation.
 
 BUSINESS CONTEXT:
 - Business: ${ctx.businessName}
 - Website: ${ctx.websiteUrl}
 - Primary Service: ${ctx.primaryService}
+- USP: ${ctx.uniqueSellingProposition || "Not provided"}
 - Target Keywords: ${ctx.targetKeywords.join(", ")}
 - Target Audience: ${ctx.targetAudience}
+- Social Media: ${ctx.socialMediaChannels?.join(", ") || "Not specified"}
 - Competitors: ${ctx.competitors.join(", ")}
 - Locations: ${ctx.targetLocations.join(", ")}
+- Target Countries: ${ctx.targetCountries?.join(", ") || "UK"}
+- Business Stage: ${ctx.businessStage || "Not specified"}
 - Biggest Problem: ${ctx.biggestSEOProblem || "Not specified"}
+- Conversion Goal: ${ctx.conversionGoal || "Not specified"}
 
-Produce a comprehensive CONTENT STRATEGY + ENTITY OPTIMISATION + AUTHORITY BUILDING report:
+Produce a comprehensive CONTENT STRATEGY + ENTITY OPTIMISATION + AUTHORITY BUILDING + INTERNATIONAL SEO report:
 
-1. ENTITY OPTIMISATION: 
-   - What schema markup is most critical for this business type?
-   - Knowledge panel strategy
-   - Entity signals to build (Wikidata, Crunchbase, LinkedIn, industry directories)
+1. ENTITY OPTIMISATION:
+   - Critical schema markup types for this business
+   - Knowledge panel acquisition strategy
+   - Entity signals: Wikidata, Crunchbase, LinkedIn, industry directories
    - NAP consistency checklist
 
-2. E-E-A-T SIGNALS: Specific ways to demonstrate Experience, Expertise, Authoritativeness, Trustworthiness for this niche.
+2. E-E-A-T SIGNALS: 10 specific ways to demonstrate Experience, Expertise, Authoritativeness, Trustworthiness for this niche. Include author bio recommendations, credentials to display, and trust page structure.
 
-3. CONTENT STRATEGY:
-   - Content pillar structure for this business
-   - Topic clusters with supporting content
-   - Content gap opportunities
-   - Editorial calendar for 12 weeks (one post type per week)
+3. CONTENT PILLARS + TOPIC CLUSTERS: 5 content pillars each with 6-8 supporting topics. Include internal linking map.
 
-4. AUTHORITY BUILDING:
-   - Top 10 backlink opportunities specific to this niche (not generic directories)
-   - PR opportunities (what stories would journalists cover?)
-   - Partnership/co-marketing opportunities
-   - Guest post opportunities
+4. EDITORIAL CALENDAR (12 weeks): One content piece per week with full brief (title, type, keyword, word count, outline).
 
-5. REVIEW STRATEGY:
-   - Review request script (optimised for keyword-rich responses)
-   - Review response templates (5-star, 4-star, 3-star, 1-2 star)
-   - Sentiment analysis framework
+5. AUTHORITY BUILDING:
+   - 12 specific backlink opportunities (not generic — name actual publications, directories, or sites)
+   - 5 PR story angles journalists would cover
+   - Partnership opportunities
 
-6. FAQ STRATEGY:
-   - Top 20 FAQs this business should answer (with markup-ready answers)
-   - People Also Ask opportunities
+6. REVIEW STRATEGY:
+   - Review request email/SMS script (keyword-optimised)
+   - Response templates for all star ratings
+   - Review velocity strategy
+
+7. FAQ LIBRARY (25 questions): Production-ready Q&As with schema-ready answers. Cover all common questions about this service.
+
+8. INTERNATIONAL SEO STRATEGY:
+   - For each target country: language, key cultural adaptations, top 3 local competitors, hreflang setup
+   - Country-specific keyword variations
+   - Localisation recommendations (currency, date format, trust signals)
+   - Recommended subdirectory structure (e.g., /in/ for India, /ng/ for Nigeria)
+
+9. SOCIAL MEDIA SEO INTEGRATION: How to use each social channel to support SEO. LinkedIn, X, YouTube strategies.
 
 Return as structured JSON:
 {
@@ -257,9 +342,13 @@ Return as structured JSON:
   "twelveWeekEditorial": [{"week": 1, "title": "...", "type": "blog|faq|guide", "targetKeyword": "...", "wordCount": 1500, "outline": ["...", "..."]}],
   "linkBuildingOpportunities": [{"source": "...", "type": "directory|press|guest|partnership", "strategy": "..."}],
   "prOpportunities": ["...", "..."],
+  "partnershipOpportunities": ["...", "..."],
   "reviewRequestScript": "...",
   "reviewResponseTemplates": {"fiveStar": "...", "fourStar": "...", "threeStar": "...", "oneTwo": "..."},
   "faqPairs": [{"question": "...", "answer": "..."}],
+  "internationalStrategy": [{"country": "...", "language": "...", "priority": "high|medium|low", "localCompetitors": ["..."], "keyActions": ["...", "..."], "hreflang": "...", "localisation": ["..."]}],
+  "hreflangRecommendations": ["...", "..."],
+  "socialMediaSEO": [{"platform": "...", "strategy": "...", "seoImpact": "..."}],
   "authorityScore": 65,
   "executiveSummaryAuthority": "..."
 }`;
@@ -272,10 +361,15 @@ BUSINESS CONTEXT:
 - Business: ${ctx.businessName}
 - Website: ${ctx.websiteUrl}
 - Primary Service: ${ctx.primaryService}
+- USP: ${ctx.uniqueSellingProposition || "Not provided"}
 - Target Keywords: ${ctx.targetKeywords.join(", ")}
 - Target Audience: ${ctx.targetAudience}
 - Target Locations: ${ctx.targetLocations.join(", ")}
+- Target Countries: ${ctx.targetCountries?.join(", ") || "UK"}
 - Competitors: ${ctx.competitors.join(", ")}
+- Publishing Frequency: ${ctx.publishingFrequency || "Not specified"}
+- Social Channels: ${ctx.socialMediaChannels?.join(", ") || "Not specified"}
+- Conversion Goal: ${ctx.conversionGoal || "Not specified"}
 
 Produce PRODUCTION-READY content + strategy:
 
@@ -596,12 +690,12 @@ export async function generateSEOStrategy(ctx: SEOBusinessContext): Promise<SEOS
       entityBuildingSteps: ((claudeData as Record<string, unknown>)?.entityBuildingSteps as string[]) || [],
       knowledgePanelStrategy: ((claudeData as Record<string, unknown>)?.knowledgePanelStrategy as string) || "",
       citationAuditFindings: ((claudeData as Record<string, unknown>)?.citationAuditFindings as string[]) || [],
+      eeaatSignals: ((claudeData as Record<string, unknown>)?.eeaatSignals as string[]) || [],
     },
     gbpStrategy: {
       categoryRecommendations: ((geminiData as Record<string, unknown>)?.categoryRecommendations as string[]) || [],
       descriptionVersions: ((geminiData as Record<string, unknown>)?.descriptionVersions as string[]) || [],
       postingCalendar: (() => {
-        // Gemini returns {week, post, type, topic, copy}; Qwen returns {week, postNumber, type, topic, copy}
         const geminiPosts = ((geminiData as Record<string, unknown>)?.postingCalendar as Array<Record<string, unknown>>) || [];
         const qwenPosts = ((qwenData as Record<string, unknown>)?.gbpPosts as Array<Record<string, unknown>>) || [];
         const source = geminiPosts.length > 0 ? geminiPosts : qwenPosts;
@@ -620,6 +714,8 @@ export async function generateSEOStrategy(ctx: SEOBusinessContext): Promise<SEOS
       structuredDataGaps: ((openaiData as Record<string, unknown>)?.technicalFixes as string[]) || [],
       internalLinkingOpportunities: (((openaiData as Record<string, unknown>)?.internalLinking as Array<{from: string; to: string; anchorText: string}>) || []).map(l => `${l.from} → ${l.to} (anchor: "${l.anchorText}")`),
       pageSpeedRecommendations: ((openaiData as Record<string, unknown>)?.coreWebVitals as string[]) || [],
+      technicalAuditChecklist: ((openaiData as Record<string, unknown>)?.technicalFixes as string[]) || [],
+      newPagesNeeded: ((openaiData as Record<string, unknown>)?.newPagesNeeded as { urlSlug: string; titleTag: string; h1: string; metaDescription: string; contentOutline: string[] }[]) || [],
     },
     authorityBuilding: {
       linkBuildingOpportunities: (((claudeData as Record<string, unknown>)?.linkBuildingOpportunities as Array<{source: string; type: string; strategy: string}>) || []).map(l => ({
@@ -628,14 +724,51 @@ export async function generateSEOStrategy(ctx: SEOBusinessContext): Promise<SEOS
         strategy: l.strategy || "",
       })),
       prOpportunities: ((claudeData as Record<string, unknown>)?.prOpportunities as string[]) || [],
-      partnershipOpportunities: ((claudeData as Record<string, unknown>)?.eeaatSignals as string[]) || [],
+      partnershipOpportunities: ((claudeData as Record<string, unknown>)?.partnershipOpportunities as string[]) || [],
+      reviewRequestScript: ((claudeData as Record<string, unknown>)?.reviewRequestScript as string) || "",
+      reviewResponseTemplates: ((claudeData as Record<string, unknown>)?.reviewResponseTemplates as { fiveStar: string; fourStar: string; threeStar: string; oneTwo: string }) || { fiveStar: "", fourStar: "", threeStar: "", oneTwo: "" },
     },
-    verificationNotes: `Analysis generated using quad-AI consensus: Gemini (local/GBP), GPT-4o (technical/keywords), Claude (content/entity), Qwen (content production). Generated in ${elapsed}s. All recommendations are based on your business context — verify specifics against current Google guidelines before implementation.`,
+    competitorGap: {
+      topicGaps: (((geminiData as Record<string, unknown>)?.competitorTopicGaps as Array<{topic: string; competitorRanking: string; yourAction: string}>) || []).map(g => ({
+        topic: g.topic || "",
+        competitorRanking: g.competitorRanking || "",
+        yourAction: g.yourAction || "",
+      })),
+      contentGaps: ((geminiData as Record<string, unknown>)?.competitorGaps as string[]) || [],
+      keywordGaps: (((openaiData as Record<string, unknown>)?.keywordGaps as Array<{keyword: string}>) || []).slice(0, 10).map(k => k.keyword),
+      differentiationAngles: ((geminiData as Record<string, unknown>)?.differentiationAngles as string[]) || [],
+    },
+    featuredSnippets: {
+      opportunities: ((openaiData as Record<string, unknown>)?.featuredSnippetOpportunities as { query: string; snippetType: string; contentFormat: string; answer: string }[]) || [],
+      voiceSearchQuestions: ((openaiData as Record<string, unknown>)?.voiceSearchQuestions as string[]) || [],
+      peopleAlsoAsk: ((openaiData as Record<string, unknown>)?.peopleAlsoAsk as string[]) || [],
+    },
+    internationalSEO: {
+      countryStrategy: (((claudeData as Record<string, unknown>)?.internationalStrategy as Array<{country: string; language: string; priority: string; keyActions: string[]}>) || []).map(c => ({
+        country: c.country || "",
+        language: c.language || "",
+        priority: c.priority || "medium",
+        keyActions: c.keyActions || [],
+      })),
+      hreflangRecommendations: ((claudeData as Record<string, unknown>)?.hreflangRecommendations as string[]) || [],
+      currencyAndLocalisation: [],
+    },
+    cro: {
+      landingPageRecommendations: ((openaiData as Record<string, unknown>)?.croRecommendations as { page: string; issue: string; fix: string; expectedImpact: string }[]) || [],
+      ctaOptimisation: ((openaiData as Record<string, unknown>)?.ctaOptimisation as string[]) || [],
+      trustSignals: ((openaiData as Record<string, unknown>)?.trustSignals as string[]) || [],
+      funnelImprovements: ((openaiData as Record<string, unknown>)?.funnelImprovements as string[]) || [],
+    },
+    faqLibrary: ((claudeData as Record<string, unknown>)?.faqPairs as { question: string; answer: string }[]) || [],
+    contentPillars: ((claudeData as Record<string, unknown>)?.contentPillars as { pillar: string; supportingTopics: string[] }[]) || [],
+    homepageCopy: ((qwenData as Record<string, unknown>)?.homepageCopy as { headline: string; subheadline: string; ctaText: string; valueProp: string; servicesOverview: string; socialProof: string }) || { headline: "", subheadline: "", ctaText: "", valueProp: "", servicesOverview: "", socialProof: "" },
+    metaTags: ((qwenData as Record<string, unknown>)?.metaTags as { page: string; titleTag: string; metaDescription: string }[]) || [],
+    verificationNotes: `Analysis generated using quad-AI consensus: Gemini (local/GBP + competitor gap), GPT-4o (technical + featured snippets + CRO), Claude (content + entity + international SEO), Qwen (content production + homepage copy). Generated in ${elapsed}s. All recommendations are based on your business context — verify specifics against current Google guidelines before implementation.`,
     modelContributions: {
-      gemini: "Local SEO strategy, GBP optimisation, competitor positioning, location keyword mapping",
-      openai: "Technical SEO audit, keyword gap analysis, page-2 goldmine, content briefs",
-      claude: "Entity optimisation, E-E-A-T signals, authority building, content strategy, review templates",
-      qwen: "Blog content calendar, service page templates, GBP post copy, meta tag optimisation",
+      gemini: "Local SEO, GBP optimisation, competitor gap analysis, differentiation angles, location keyword mapping",
+      openai: "Technical SEO, keyword gaps, featured snippets, voice search, CRO recommendations, trust signals",
+      claude: "Entity optimisation, E-E-A-T signals, content pillars, authority building, international SEO, FAQ library, review templates",
+      qwen: "Blog calendar, service page templates, GBP posts, meta tags, homepage copy",
     },
   };
 }
