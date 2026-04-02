@@ -631,6 +631,16 @@ async function runAutoMigrations() {
       log(`[STRIPE WARNING] STRIPE_SECRET_KEY not configured!`);
     }
     
+    // Start fully automated blog pipeline (generate → fix → publish, no human needed)
+    setTimeout(async () => {
+      try {
+        const { startBlogPipeline } = await import("./blogPipeline.js");
+        startBlogPipeline();
+      } catch (err) {
+        console.error("[Pipeline] Failed to start blog pipeline:", err);
+      }
+    }, 15000); // 15s delay to let server fully boot first
+
     // Start notification processing interval (every 5 minutes)
     const NOTIFICATION_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
     setInterval(async () => {
