@@ -5338,6 +5338,7 @@ EXAMPLES OF GOOD RESPONSES:
         'isDemoData',
         'tier',
         'currentGenerationStage',
+        'tocStyle',
       ];
       
       const filteredUpdates: any = {};

@@ -143,6 +143,7 @@ export const businessPlans = pgTable("business_plans", {
   useFullCoverImage: boolean("use_full_cover_image").default(false), // Use full custom cover instead of SVG theme
   textElements: text("text_elements"), // JSON string of text elements for custom cover overlay
   
+  tocStyle: integer("toc_style"), // 0–9 override; null = auto-assigned from plan ID hash
   generatedContent: text("generated_content"),
   chartData: text("chart_data"), // JSON string containing structured chart data for visualizations
   pdfUrl: text("pdf_url"),

@@ -923,7 +923,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
   ${generateCoverPageHTML(plan, primaryColor, secondaryColor)}
   
   <div class="content">
-    ${formatContentWithCharts(content, chartData, primaryColor, plan.useFullCoverImage || false, plan.id || '', secondaryColor)}
+    ${formatContentWithCharts(content, chartData, primaryColor, plan.useFullCoverImage || false, plan.id || '', secondaryColor, plan.tocStyle)}
   </div>
 </body>
 </html>
@@ -1103,9 +1103,11 @@ function pickTOCStyle(planId: string): number {
   return h % 10;
 }
 
-function generateTOCHTML(items: TOCItem[], planId: string, pc: string, sc: string): string {
+function generateTOCHTML(items: TOCItem[], planId: string, pc: string, sc: string, styleOverride?: number | null): string {
   if (!items.length) return '';
-  const style = pickTOCStyle(planId);
+  const style = (styleOverride !== null && styleOverride !== undefined)
+    ? Math.max(0, Math.min(9, styleOverride))
+    : pickTOCStyle(planId);
   const yr = new Date().getFullYear();
 
   switch (style) {
@@ -1261,7 +1263,7 @@ function generateTOCHTML(items: TOCItem[], planId: string, pc: string, sc: strin
 
 // ─── Main content renderer ───────────────────────────────────────────────────
 
-function formatContentWithCharts(markdown: string, chartData: ChartDataPayload | null, primaryColor: string, skipTitle: boolean = false, planId: string = '', secondaryColor: string = '#1e3a5f'): string {
+function formatContentWithCharts(markdown: string, chartData: ChartDataPayload | null, primaryColor: string, skipTitle: boolean = false, planId: string = '', secondaryColor: string = '#1e3a5f', tocStyleOverride?: number | null): string {
   const lines = markdown.split('\n');
   let html = '';
   let currentSection = '';
@@ -1291,7 +1293,7 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
         continue;
       } else if (inToc) {
         // Close TOC section — render with the chosen template
-        html += generateTOCHTML(tocItems, planId, primaryColor, secondaryColor) + '\n';
+        html += generateTOCHTML(tocItems, planId, primaryColor, secondaryColor, tocStyleOverride) + '\n';
         tocItems = [];
         inToc = false;
       }
@@ -1373,7 +1375,7 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
     } else if (line === '---') {
       // Close TOC if we hit a separator while still in TOC
       if (inToc) {
-        html += generateTOCHTML(tocItems, planId, primaryColor, secondaryColor) + '\n';
+        html += generateTOCHTML(tocItems, planId, primaryColor, secondaryColor, tocStyleOverride) + '\n';
         tocItems = [];
         inToc = false;
       }
@@ -1464,7 +1466,7 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
   
   // Close TOC if we're still in it at the end of content
   if (inToc) {
-    html += generateTOCHTML(tocItems, planId, primaryColor, secondaryColor) + '\n';
+    html += generateTOCHTML(tocItems, planId, primaryColor, secondaryColor, tocStyleOverride) + '\n';
     tocItems = [];
   }
   

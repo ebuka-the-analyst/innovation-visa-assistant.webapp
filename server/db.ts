@@ -121,6 +121,12 @@ async function runAutoMigrations() {
   }
   console.log('[DB] Auto-migration: blog_generation_queue columns ensured');
   
+  // business_plans: toc_style override column (added Apr 2026)
+  try {
+    await db.execute(sql.raw(`ALTER TABLE business_plans ADD COLUMN IF NOT EXISTS toc_style INTEGER`));
+    console.log('[DB] Auto-migration: business_plans.toc_style column ensured');
+  } catch { /* already exists */ }
+
   // Update blog post image URLs to use object storage
   try {
     await db.execute(sql`

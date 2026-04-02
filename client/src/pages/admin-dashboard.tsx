@@ -1841,6 +1841,21 @@ export default function AdminDashboard() {
     },
   });
 
+  // TOC style override mutation
+  const setTocStyleMutation = useMutation({
+    mutationFn: async ({ planId, tocStyle }: { planId: string; tocStyle: number | null }) => {
+      const res = await apiRequest('PATCH', `/api/admin/plans/${planId}`, { tocStyle });
+      return res.json();
+    },
+    onSuccess: (_data, { planId }) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/plans'] });
+      toast({ title: 'TOC template saved — refresh the plan view to see it' });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Failed to save template', description: error.message, variant: 'destructive' });
+    },
+  });
+
   // Delete plan mutation
   const deletePlanMutation = useMutation({
     mutationFn: async (planId: string) => {
@@ -13716,6 +13731,54 @@ export default function AdminDashboard() {
                     Full exports are only available for completed plans.
                   </p>
                 )}
+                <Separator />
+                {/* TOC Template Override */}
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground">Table of Contents Template</p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {[
+                      { id: 0, label: 'Classic left-border' },
+                      { id: 1, label: '2-col corporate' },
+                      { id: 2, label: 'Dark navy executive' },
+                      { id: 3, label: 'Vertical timeline' },
+                      { id: 4, label: 'Minimal circles' },
+                      { id: 5, label: 'Ghost chapter numbers' },
+                      { id: 6, label: 'Newspaper 3-col' },
+                      { id: 7, label: 'Mini section cards' },
+                      { id: 8, label: 'Elegant serif' },
+                      { id: 9, label: 'Pill badge sidebar' },
+                    ].map(({ id, label }) => {
+                      const isActive = (viewingPlan as any).tocStyle === id;
+                      return (
+                        <Button
+                          key={id}
+                          size="sm"
+                          variant={isActive ? 'default' : 'outline'}
+                          className="text-xs h-7 justify-start gap-1.5"
+                          disabled={setTocStyleMutation.isPending}
+                          onClick={() => {
+                            const newStyle = isActive ? null : id;
+                            setTocStyleMutation.mutate(
+                              { planId: viewingPlan!.id, tocStyle: newStyle },
+                              {
+                                onSuccess: () => {
+                                  setViewingPlan({ ...viewingPlan!, tocStyle: newStyle } as any);
+                                }
+                              }
+                            );
+                          }}
+                        >
+                          <span className="font-mono text-[10px] opacity-60">{id}</span>
+                          {label}
+                          {isActive && <span className="ml-auto text-[10px] opacity-70">active</span>}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">
+                    Click a template to pin it. Click the active one to revert to auto (hash-based). Auto for this plan: style {(() => { let h = 0; const id = viewingPlan?.id || ''; for (let i = 0; i < id.length; i++) h = ((h << 5) - h + id.charCodeAt(i)) >>> 0; return h % 10; })()}.
+                  </p>
+                </div>
                 <Separator />
                 <div className="flex gap-2 justify-end">
                   <Button
