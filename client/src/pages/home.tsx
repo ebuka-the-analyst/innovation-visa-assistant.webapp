@@ -15,7 +15,7 @@ import FAQSection from "@/components/FAQSection";
 import Disclaimer from "@/components/Disclaimer";
 import Footer from "@/components/Footer";
 import { SEOHead } from "@/components/SEOHead";
-import { organizationSchema, softwareApplicationSchema, visaFAQSchema } from "@/lib/seo-schemas";
+import { organizationSchema, softwareApplicationSchema, visaFAQSchema, websiteSchema } from "@/lib/seo-schemas";
 import { GlobalNavButton } from "@/components/global-nav-button";
 import { CountryLoading } from "@/components/country-loading";
 
@@ -43,6 +43,7 @@ export default function Home() {
     "@graph": [
       organizationSchema,
       softwareApplicationSchema,
+      websiteSchema,
       visaFAQSchema
     ]
   };

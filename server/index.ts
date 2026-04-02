@@ -189,11 +189,64 @@ ${allUrls.map(u => `  <url>
     return baseHtmlTemplate;
   }
 
+  const BASE_URL = "https://innovatorfoundervisaassistant.co.uk";
+
+  const orgSchema = {
+    "@type": "Organization",
+    "name": "UK Innovator Founder Visa Assistant",
+    "url": BASE_URL,
+    "logo": { "@type": "ImageObject", "url": `${BASE_URL}/og-image.webp` }
+  };
+
+  const websiteSchema = {
+    "@type": "WebSite",
+    "name": "UK Innovator Founder Visa Assistant",
+    "url": BASE_URL,
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": { "@type": "EntryPoint", "urlTemplate": `${BASE_URL}/tools?q={search_term_string}` },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
   // Route-specific meta tags for SEO (server-side injection)
-  const routeMeta: Record<string, { title: string; description: string; schema?: any }> = {
+  const routeMeta: Record<string, { title: string; description: string; keywords?: string; schema?: any }> = {
+    '/': {
+      title: 'UK Innovator Founder Visa Assistant | 100+ Professional AI Tools',
+      description: 'Get approved with our AI-powered UK Innovator Founder Visa platform. 100+ professional tools covering compliance, business plans, endorsement prep, and financial modelling. Expert-level guidance — start free today.',
+      keywords: 'UK Innovator Founder Visa, innovator founder visa tools, UK visa for entrepreneurs, endorsement preparation, business plan for visa',
+      schema: { "@context": "https://schema.org", "@graph": [orgSchema, websiteSchema] }
+    },
+    '/blog': {
+      title: 'UK Innovator Founder Visa Blog | Expert Guides & News',
+      description: 'In-depth guides, news, and analysis on the UK Innovator Founder Visa. Every article is quad-AI verified against official GOV.UK sources for 100% accuracy.',
+      keywords: 'UK Innovator Founder Visa blog, visa news, endorsement guides, ILR settlement UK',
+      schema: {
+        "@context": "https://schema.org",
+        "@type": "Blog",
+        "name": "UK Innovator Founder Visa Assistant Blog",
+        "url": `${BASE_URL}/blog`,
+        "description": "Expert guides and analysis on the UK Innovator Founder Visa, verified by four independent AI models.",
+        "publisher": orgSchema
+      }
+    },
+    '/tools': {
+      title: 'UK Innovator Founder Visa Tools | 100+ Expert AI Tools',
+      description: 'Access 100+ professional-grade AI tools for your UK Innovator Founder Visa application. Innovation scoring, compliance checking, business plan generation, endorsement readiness, and more.',
+      keywords: 'UK visa tools, innovation score calculator, compliance checker, endorsement readiness, business plan generator visa',
+      schema: {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "UK Innovator Founder Visa Tools",
+        "url": `${BASE_URL}/tools`,
+        "description": "100+ professional AI-powered tools for the UK Innovator Founder Visa application",
+        "provider": orgSchema
+      }
+    },
     '/faq': {
-      title: 'UK Innovator Founder Visa FAQ | Common Questions Answered',
-      description: 'Get answers to 25+ frequently asked questions about the UK Innovator Founder Visa. Expert guidance on endorsement, requirements, costs, timeline, and settlement.',
+      title: 'UK Innovator Founder Visa FAQ 2026 | 25+ Expert Answers',
+      description: 'Answers to 25+ frequently asked questions about the UK Innovator Founder Visa. Expert guidance on endorsement, requirements (£1,191 fee, £1,270 savings), timeline, and ILR settlement.',
+      keywords: 'UK innovator founder visa FAQ, visa questions answers, endorsement body, visa cost, ILR settlement',
       schema: {
         "@context": "https://schema.org",
         "@type": "FAQPage",
@@ -201,37 +254,64 @@ ${allUrls.map(u => `  <url>
           {
             "@type": "Question",
             "name": "What is the UK Innovator Founder Visa?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "The UK Innovator Founder Visa is a visa route for experienced businesspeople seeking to establish an innovative, viable and scalable business in the UK."
-            }
+            "acceptedAnswer": { "@type": "Answer", "text": "The UK Innovator Founder Visa is for entrepreneurs seeking to establish an innovative, viable, and scalable business in the UK. It requires endorsement from one of four Home Office-approved bodies: Envestors, Innovator International, UKES, or the Global Entrepreneurs Programme (invitation only)." }
+          },
+          {
+            "@type": "Question",
+            "name": "How much does the Innovator Founder Visa cost?",
+            "acceptedAnswer": { "@type": "Answer", "text": "The visa fee is £1,191. You must also show £1,270 in personal savings held for 28 consecutive days. There is no minimum business investment requirement. A priority service costs £500 where available." }
+          },
+          {
+            "@type": "Question",
+            "name": "How long is the visa valid?",
+            "acceptedAnswer": { "@type": "Answer", "text": "The visa is initially granted for 3 years. It can be extended for a further 3 years. After 3 years you may apply for Indefinite Leave to Remain (ILR/settlement) at a fee of £2,885." }
           }
         ]
       }
     },
     '/guide': {
-      title: 'UK Innovator Founder Visa Complete Guide 2025 | Requirements, Process & Timeline',
-      description: 'Comprehensive PhD-level guide to the UK Innovator Founder Visa. Learn requirements, endorsement process, innovation criteria, financial planning, and path to settlement.',
+      title: 'UK Innovator Founder Visa Complete Guide 2026 | Requirements, Process & Timeline',
+      description: 'Comprehensive expert guide to the UK Innovator Founder Visa. Covers requirements, all four endorsing bodies, innovation/viability/scalability criteria, financial planning, and the path to ILR settlement.',
+      keywords: 'UK innovator founder visa guide, how to apply, endorsement criteria, innovation viability scalability, settlement ILR',
       schema: {
         "@context": "https://schema.org",
         "@type": "Article",
-        "headline": "UK Innovator Founder Visa Complete Guide 2025",
-        "description": "Comprehensive guide covering all aspects of the UK Innovator Founder Visa application process",
-        "author": {
-          "@type": "Organization",
-          "name": "UK Innovator Founder Visa Assistant Team"
-        },
-        "publisher": {
-          "@type": "Organization",
-          "name": "UK Innovator Founder Visa Assistant"
-        },
-        "datePublished": "2025-01-01"
+        "headline": "UK Innovator Founder Visa Complete Guide 2026",
+        "description": "Comprehensive expert guide covering all aspects of the UK Innovator Founder Visa application process, requirements, and path to settlement.",
+        "author": orgSchema,
+        "publisher": orgSchema,
+        "datePublished": "2026-01-01",
+        "about": { "@type": "Thing", "name": "UK Innovator Founder Visa" }
       }
+    },
+    '/pricing': {
+      title: 'UK Innovator Founder Visa Assistant Pricing | Free to Ultimate Plans',
+      description: 'Flexible pricing plans for the UK Innovator Founder Visa Assistant platform. Start free, upgrade as you grow. Access 100+ professional tools from £29/month.',
+      keywords: 'UK visa assistant pricing, visa tools subscription, innovator visa platform cost'
+    },
+    '/about': {
+      title: 'About UK Innovator Founder Visa Assistant | AI-Powered Visa Guidance',
+      description: 'Learn about the UK Innovator Founder Visa Assistant — the UK\'s leading AI platform for Innovator Founder Visa applicants, with 100+ expert tools and quad-AI verified content.',
+      keywords: 'about innovator visa assistant, UK visa AI platform, visa guidance platform'
+    },
+    '/contact': {
+      title: 'Contact UK Innovator Founder Visa Assistant | Get Support',
+      description: 'Get in touch with the UK Innovator Founder Visa Assistant team. We provide expert support for your visa application journey.',
+      keywords: 'contact innovator visa assistant, visa application support'
+    },
+    '/register': {
+      title: 'Sign Up Free | UK Innovator Founder Visa Assistant',
+      description: 'Create your free account on the UK Innovator Founder Visa Assistant platform. Access innovation scoring, compliance checking, and business plan generation tools instantly.',
+      keywords: 'sign up visa assistant, free visa tools account'
+    },
+    '/login': {
+      title: 'Sign In | UK Innovator Founder Visa Assistant',
+      description: 'Sign in to your UK Innovator Founder Visa Assistant account to access your tools, saved progress, and personalised visa guidance.'
     }
   };
 
   // Helper: inject meta tags into base HTML
-  function injectMeta(html: string, title: string, description: string, path: string, schema?: object, ogImage?: string): string {
+  function injectMeta(html: string, title: string, description: string, path: string, schema?: object, ogImage?: string, keywords?: string): string {
     const BASE = "https://innovatorfoundervisaassistant.co.uk";
     const canonicalUrl = `${BASE}${path}`;
     const safeTitle = title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -253,24 +333,46 @@ ${allUrls.map(u => `  <url>
       ? html.replace(/<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/, `<link rel="canonical" href="${canonicalUrl}" />`)
       : html.replace('</head>', `    <link rel="canonical" href="${canonicalUrl}" />\n  </head>`);
 
+    // Keywords
+    if (keywords) {
+      html = html.includes('name="keywords"')
+        ? html.replace(/<meta name="keywords" content="[^"]*"\s*\/?>/, `<meta name="keywords" content="${keywords.replace(/"/g, "&quot;")}" />`)
+        : html.replace('</head>', `    <meta name="keywords" content="${keywords.replace(/"/g, "&quot;")}" />\n  </head>`);
+    }
+
+    // Robots directive
+    html = html.includes('name="robots"')
+      ? html.replace(/<meta name="robots" content="[^"]*"\s*\/?>/, `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />`)
+      : html.replace('</head>', `    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />\n  </head>`);
+
+    // Resolve OG image to absolute URL
+    const absoluteOgImage = ogImage
+      ? (ogImage.startsWith("http") ? ogImage : `${BASE}${ogImage}`)
+      : `${BASE}/og-image.webp`;
+
     // OG tags
     const ogTags = [
       `<meta property="og:title" content="${safeTitle}" />`,
       `<meta property="og:description" content="${safeDesc}" />`,
       `<meta property="og:url" content="${canonicalUrl}" />`,
       `<meta property="og:type" content="article" />`,
-      ogImage ? `<meta property="og:image" content="${BASE}${ogImage}" />` : '',
+      `<meta property="og:image" content="${absoluteOgImage}" />`,
+      `<meta property="og:image:width" content="1200" />`,
+      `<meta property="og:image:height" content="630" />`,
+      `<meta property="og:site_name" content="UK Innovator Founder Visa Assistant" />`,
+      `<meta property="og:locale" content="en_GB" />`,
       `<meta name="twitter:card" content="summary_large_image" />`,
       `<meta name="twitter:title" content="${safeTitle}" />`,
       `<meta name="twitter:description" content="${safeDesc}" />`,
-    ].filter(Boolean).join("\n    ");
+      `<meta name="twitter:image" content="${absoluteOgImage}" />`,
+    ].join("\n    ");
 
-    // Remove old OG tags and replace with fresh set
+    // Remove stale OG/Twitter tags and inject fresh set
     html = html.replace(/<meta property="og:[^>]*\/?>/g, '');
     html = html.replace(/<meta name="twitter:[^>]*\/?>/g, '');
     html = html.replace('</head>', `    ${ogTags}\n  </head>`);
 
-    // Schema.org JSON-LD
+    // Schema.org JSON-LD — replace any existing seo-schema blocks
     if (schema) {
       html = html.replace(/<script type="application\/ld\+json" class="seo-schema">[\s\S]*?<\/script>/g, '');
       const schemaScript = `\n    <script type="application/ld+json" class="seo-schema">\n    ${JSON.stringify(schema, null, 2)}\n    </script>`;
@@ -287,6 +389,8 @@ ${allUrls.map(u => `  <url>
     }
 
     let html = getBaseHtml();
+
+    const BASE_DOMAIN = "https://innovatorfoundervisaassistant.co.uk";
 
     // ── Blog post route: /blog/:slug ──────────────────────────────────────────
     const blogMatch = req.path.match(/^\/blog\/([^/]+)$/);
@@ -305,6 +409,7 @@ ${allUrls.map(u => `  <url>
             category: blogPosts.category,
             featuredImage: blogPosts.featuredImage,
             readingTime: blogPosts.readingTime,
+            tags: blogPosts.tags,
           })
           .from(blogPosts)
           .where(eq(blogPosts.slug, slug))
@@ -312,35 +417,39 @@ ${allUrls.map(u => `  <url>
 
         if (post) {
           const title = (post.metaTitle || post.title) + " | UK Innovator Founder Visa Assistant";
-          const description = post.metaDescription || post.excerpt || `Read this guide on ${post.title} — expert UK Innovator Founder Visa advice.`;
+          const description = post.metaDescription || post.excerpt || `Expert guide on ${post.title} — quad-AI verified UK Innovator Founder Visa advice.`;
           const publishedDate = post.publishedAt ? new Date(post.publishedAt).toISOString() : new Date().toISOString();
+          const postUrl = `${BASE_DOMAIN}/blog/${post.slug}`;
+          const imageUrl = post.featuredImage
+            ? (post.featuredImage.startsWith("http") ? post.featuredImage : `${BASE_DOMAIN}${post.featuredImage}`)
+            : `${BASE_DOMAIN}/og-image.webp`;
+          const keywords = (post.tags ?? []).join(", ") || "UK Innovator Founder Visa";
 
-          const schema = {
+          // BlogPosting schema (more specific than Article — Google prefers this for blogs)
+          const blogPostingSchema = {
             "@context": "https://schema.org",
-            "@type": "Article",
+            "@type": "BlogPosting",
             "headline": post.title,
             "description": description,
+            "image": { "@type": "ImageObject", "url": imageUrl, "width": 1200, "height": 630 },
             "author": {
               "@type": "Organization",
-              "name": post.author || "UK Innovator Founder Visa Assistant Team"
+              "name": "UK Innovator Founder Visa Assistant Team",
+              "url": BASE_DOMAIN
             },
             "publisher": {
               "@type": "Organization",
               "name": "UK Innovator Founder Visa Assistant",
-              "url": "https://innovatorfoundervisaassistant.co.uk"
+              "url": BASE_DOMAIN,
+              "logo": { "@type": "ImageObject", "url": `${BASE_DOMAIN}/og-image.webp`, "width": 1200, "height": 630 }
             },
             "datePublished": publishedDate,
             "dateModified": publishedDate,
-            "mainEntityOfPage": {
-              "@type": "WebPage",
-              "@id": `https://innovatorfoundervisaassistant.co.uk/blog/${post.slug}`
-            },
+            "mainEntityOfPage": { "@type": "WebPage", "@id": postUrl },
             "articleSection": post.category,
+            "keywords": keywords,
             "timeRequired": `PT${post.readingTime ?? 8}M`,
-            "about": {
-              "@type": "Thing",
-              "name": "UK Innovator Founder Visa"
-            },
+            "about": { "@type": "Thing", "name": "UK Innovator Founder Visa" },
             "reviewedBy": [
               { "@type": "Organization", "name": "Gemini AI" },
               { "@type": "Organization", "name": "OpenAI GPT-4o" },
@@ -349,12 +458,24 @@ ${allUrls.map(u => `  <url>
             ]
           };
 
-          console.log(`[SEO] Injecting blog meta for: /blog/${slug}`);
-          html = injectMeta(html, title, description, req.path, schema, post.featuredImage ?? undefined);
+          // BreadcrumbList for blog post
+          const breadcrumbSchema = {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": BASE_DOMAIN },
+              { "@type": "ListItem", "position": 2, "name": "Blog", "item": `${BASE_DOMAIN}/blog` },
+              { "@type": "ListItem", "position": 3, "name": post.title, "item": postUrl }
+            ]
+          };
+
+          const combinedSchema = { "@context": "https://schema.org", "@graph": [blogPostingSchema, breadcrumbSchema] };
+
+          console.log(`[SEO] Injecting BlogPosting meta for: /blog/${slug}`);
+          html = injectMeta(html, title, description, req.path, combinedSchema, imageUrl, keywords);
         }
       } catch (err) {
         console.error("[SEO] Blog meta injection failed:", err);
-        // Continue — serve generic HTML
       }
     }
 
@@ -362,7 +483,19 @@ ${allUrls.map(u => `  <url>
     const meta = routeMeta[req.path];
     if (meta) {
       console.log(`[SEO] Injecting meta for route: ${req.path}`);
-      html = injectMeta(html, meta.title, meta.description, req.path, meta.schema);
+      html = injectMeta(html, meta.title, meta.description, req.path, meta.schema, undefined, meta.keywords);
+    }
+
+    // ── Universal fallback: ensure ALL pages get a canonical + robots tag ─────
+    // (even routes not in routeMeta and not blog posts)
+    if (!blogMatch && !meta) {
+      const canonicalUrl = `${BASE_DOMAIN}${req.path}`;
+      if (!html.includes('rel="canonical"')) {
+        html = html.replace('</head>', `    <link rel="canonical" href="${canonicalUrl}" />\n  </head>`);
+      }
+      if (!html.includes('name="robots"')) {
+        html = html.replace('</head>', `    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />\n  </head>`);
+      }
     }
 
     res.send(html);

@@ -1,30 +1,41 @@
-// Organization Schema for all pages
+const BASE = "https://innovatorfoundervisaassistant.co.uk";
+
 export const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "UK Innovator Founder Visa Assistant",
-  "url": "https://innovatorfoundervisaassistant.co.uk",
-  "logo": "https://innovatorfoundervisaassistant.co.uk/logo.webp",
-  "description": "AI-powered platform providing 100+ expert tools for UK Innovator Founder Visa applications. Professional-level guidance covering compliance, business planning, financial modeling, and endorsement preparation.",
+  "alternateName": "IFVA",
+  "url": BASE,
+  "logo": {
+    "@type": "ImageObject",
+    "url": `${BASE}/og-image.webp`,
+    "width": 1200,
+    "height": 630
+  },
+  "description": "AI-powered platform providing 100+ professional-level tools for UK Innovator Founder Visa applications. Covers compliance, business planning, financial modelling, and endorsement preparation.",
+  "foundingDate": "2025",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "GB"
+  },
   "contactPoint": {
     "@type": "ContactPoint",
-    "contactType": "Customer Support",
-    "email": "support@innovatorfoundervisaassistant.co.uk",
+    "contactType": "customer support",
     "availableLanguage": ["English"]
   },
-  "founder": {
-    "@type": "Organization",
-    "name": "UK Innovator Founder Visa Assistant Team"
-  }
+  "sameAs": [
+    "https://twitter.com/innovatorvisa",
+    "https://linkedin.com/company/innovator-visa-assistant"
+  ]
 };
 
-// SoftwareApplication Schema for main app
 export const softwareApplicationSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "UK Innovator Founder Visa Assistant",
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Web Browser",
+  "url": BASE,
   "offers": {
     "@type": "AggregateOffer",
     "lowPrice": "0",
@@ -42,7 +53,22 @@ export const softwareApplicationSchema = {
   "description": "Comprehensive UK Innovator Founder Visa application toolkit with 100+ professional-level tools for compliance, business planning, and endorsement success."
 };
 
-// FAQ Schema for common questions
+export const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "UK Innovator Founder Visa Assistant",
+  "url": BASE,
+  "description": "The UK's leading AI-powered platform for Innovator Founder Visa applications.",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": `${BASE}/tools?q={search_term_string}`
+    },
+    "query-input": "required name=search_term_string"
+  }
+};
+
 export const visaFAQSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -52,7 +78,7 @@ export const visaFAQSchema = {
       "name": "What is the UK Innovator Founder Visa?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The UK Innovator Founder Visa is for entrepreneurs who want to establish an innovative, viable, and scalable business in the UK. It requires endorsement from an approved body and a minimum £50,000 investment in your business."
+        "text": "The UK Innovator Founder Visa is for entrepreneurs who want to establish an innovative, viable, and scalable business in the UK. It requires endorsement from one of four Home Office-approved endorsing bodies: Envestors, Innovator International, UK Endorsing Services (UKES), or the Global Entrepreneurs Programme (invitation only)."
       }
     },
     {
@@ -60,7 +86,7 @@ export const visaFAQSchema = {
       "name": "How much does the UK Innovator Founder Visa cost?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The visa application fee is £1,191 if applying from outside the UK, or £1,486 if applying from within the UK. You also need £1,270 in savings for 28 consecutive days and a minimum £50,000 investment in your business."
+        "text": "The visa application fee is £1,191 whether applying from inside or outside the UK. You also need to show £1,270 in personal savings held for at least 28 consecutive days. There is no minimum business investment requirement for this visa route."
       }
     },
     {
@@ -68,7 +94,7 @@ export const visaFAQSchema = {
       "name": "What are the Innovation, Viability, and Scalability criteria?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Innovation: Your business must be genuinely innovative and different from existing UK market solutions. Viability: You must demonstrate that your business model is realistic and sustainable. Scalability: Your business must have potential for significant growth in the UK market and job creation."
+        "text": "Innovation: Your business must be genuinely new or significantly different from existing UK market solutions. Viability: You must demonstrate the skills, knowledge, and experience to successfully run the business. Scalability: Your business must have clear potential for growth and job creation in the UK."
       }
     },
     {
@@ -76,21 +102,28 @@ export const visaFAQSchema = {
       "name": "How long does the UK Innovator Founder Visa process take?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Standard processing takes 3-8 weeks from outside the UK. Priority service (£500-£800) reduces this to 5 working days, while Super Priority (£800-£1,000) offers next-day decisions. Endorsement from an approved body typically takes 4-12 weeks."
+        "text": "Standard processing typically takes 3–8 weeks from submission. A priority service costing £500 is available where processing is faster. Endorsement from an approved body typically takes 4–12 weeks depending on the body chosen."
       }
     },
     {
       "@type": "Question",
-      "name": "Which endorsing bodies approve Innovator Founder Visas?",
+      "name": "Which bodies endorse Innovator Founder Visa applications?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Approved endorsing bodies include Innovator International, The Global Entrepreneurs Programme, Envestors Limited, and several UK universities. Each has different application processes, fees, and approval criteria."
+        "text": "There are four Home Office-approved endorsing bodies as of October 2024: Envestors Limited (envestors.co.uk), Innovator International Limited (innovatorinternational.com), UK Endorsing Services / UKES (ukesapp.co.uk), and the Global Entrepreneurs Programme (invitation only — cannot be applied to directly)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long is the Innovator Founder Visa valid?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The visa is initially granted for 3 years. It can be extended for a further 3 years if you continue to meet the requirements. After 3 years on the visa, you may be eligible to apply for Indefinite Leave to Remain (ILR/settlement), which costs £2,885."
       }
     }
   ]
 };
 
-// Breadcrumb Schema
 export const createBreadcrumbSchema = (items: Array<{ name: string; url: string }>) => ({
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -102,53 +135,86 @@ export const createBreadcrumbSchema = (items: Array<{ name: string; url: string 
   }))
 });
 
-// Product/Service Schema for pricing tiers
-export const createPricingSchema = (tierName: string, price: string, features: string[]) => ({
+export const createBlogPostingSchema = (
+  title: string,
+  description: string,
+  datePublished: string,
+  slug: string,
+  image?: string,
+  readingTime?: number,
+  tags?: string[]
+) => ({
   "@context": "https://schema.org",
-  "@type": "Product",
-  "name": `${tierName} - UK Innovator Founder Visa Assistant`,
-  "description": `${tierName} plan for UK Innovator Founder Visa application assistance`,
-  "brand": {
-    "@type": "Brand",
-    "name": "UK Innovator Founder Visa Assistant"
+  "@type": "BlogPosting",
+  "headline": title,
+  "description": description,
+  "image": image ? (image.startsWith("http") ? image : `${BASE}${image}`) : `${BASE}/og-image.webp`,
+  "author": {
+    "@type": "Organization",
+    "name": "UK Innovator Founder Visa Assistant Team",
+    "url": BASE
   },
-  "offers": {
-    "@type": "Offer",
-    "price": price === "Free" ? "0" : price.replace("£", ""),
-    "priceCurrency": "GBP",
-    "availability": "https://schema.org/InStock",
-    "url": "https://innovatorfoundervisaassistant.co.uk/pricing"
+  "publisher": {
+    "@type": "Organization",
+    "name": "UK Innovator Founder Visa Assistant",
+    "url": BASE,
+    "logo": {
+      "@type": "ImageObject",
+      "url": `${BASE}/og-image.webp`,
+      "width": 1200,
+      "height": 630
+    }
   },
-  "additionalProperty": features.map(feature => ({
-    "@type": "PropertyValue",
-    "name": "Feature",
-    "value": feature
-  }))
+  "datePublished": datePublished,
+  "dateModified": datePublished,
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": `${BASE}/blog/${slug}`
+  },
+  "timeRequired": `PT${readingTime ?? 8}M`,
+  "keywords": tags?.join(", "),
+  "about": {
+    "@type": "Thing",
+    "name": "UK Innovator Founder Visa"
+  },
+  "reviewedBy": [
+    { "@type": "Organization", "name": "Gemini AI" },
+    { "@type": "Organization", "name": "OpenAI GPT-4o" },
+    { "@type": "Organization", "name": "Claude AI" },
+    { "@type": "Organization", "name": "Qwen AI" }
+  ]
 });
 
-// Article Schema for blog/guide content
-export const createArticleSchema = (title: string, description: string, datePublished: string, author: string = "UK Innovator Founder Visa Assistant Team") => ({
+export const createArticleSchema = (
+  title: string,
+  description: string,
+  datePublished: string,
+  author = "UK Innovator Founder Visa Assistant Team"
+) => ({
   "@context": "https://schema.org",
   "@type": "Article",
   "headline": title,
   "description": description,
   "author": {
     "@type": "Organization",
-    "name": author
+    "name": author,
+    "url": BASE
   },
   "publisher": {
     "@type": "Organization",
     "name": "UK Innovator Founder Visa Assistant",
+    "url": BASE,
     "logo": {
       "@type": "ImageObject",
-      "url": "https://innovatorfoundervisaassistant.co.uk/logo.webp"
+      "url": `${BASE}/og-image.webp`,
+      "width": 1200,
+      "height": 630
     }
   },
   "datePublished": datePublished,
-  "dateModified": new Date().toISOString().split('T')[0]
+  "dateModified": new Date().toISOString().split("T")[0]
 });
 
-// FAQ Schema generator for dynamic FAQ pages
 export const createFAQSchema = (faqs: Array<{ question: string; answer: string }>) => ({
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -159,5 +225,48 @@ export const createFAQSchema = (faqs: Array<{ question: string; answer: string }
       "@type": "Answer",
       "text": faq.answer
     }
+  }))
+});
+
+export const createToolSchema = (name: string, description: string, url: string) => ({
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": `${name} | UK Innovator Founder Visa Assistant`,
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web Browser",
+  "url": `${BASE}${url}`,
+  "description": description,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "GBP"
+  },
+  "provider": {
+    "@type": "Organization",
+    "name": "UK Innovator Founder Visa Assistant",
+    "url": BASE
+  }
+});
+
+export const createPricingSchema = (tierName: string, price: string, features: string[]) => ({
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": `${tierName} — UK Innovator Founder Visa Assistant`,
+  "description": `${tierName} plan for UK Innovator Founder Visa application assistance`,
+  "brand": {
+    "@type": "Brand",
+    "name": "UK Innovator Founder Visa Assistant"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": price === "Free" ? "0" : price.replace("£", ""),
+    "priceCurrency": "GBP",
+    "availability": "https://schema.org/InStock",
+    "url": `${BASE}/pricing`
+  },
+  "additionalProperty": features.map(feature => ({
+    "@type": "PropertyValue",
+    "name": "Feature",
+    "value": feature
   }))
 });
