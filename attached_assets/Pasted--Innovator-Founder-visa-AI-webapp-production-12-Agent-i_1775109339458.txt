@@ -1,0 +1,180 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+12
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+a19cf7ee
+Active
+
+Apr 2, 2026, 6:50 AM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+[Blog] Image route configured (local + unique + S3 fallback)
+5:52:40 AM [express] [MIGRATION] Checking for required schema updates...
+[DB] Auto-migration: logo_element column ensured
+5:52:40 AM [express] [MIGRATION] Schema check complete
+[Auth] Google OAuth configured successfully
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+To continue receiving updates to AWS services, bug fixes, and security
+updates please upgrade to a supported Node.js LTS version.
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+5:52:40 AM [express] serving on port 8080
+5:52:40 AM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+[DB] Auto-migration: 35 blog_posts column(s) ensured
+[DB] Auto-migration: blog_generation_queue table ensured
+[DB] Auto-migration: blog_generation_queue columns ensured
+[DB] Auto-migration: blog image URLs updated to object storage
+[DB] Auto-migration: Assigned unique images to 15 blog posts
+5:52:54 AM [express] GET /api/admin/blog/stats 200 in 55ms :: {"total":31,"published":25,"scheduled"…
+[2026-04-02T05:52:54.790Z] GET /api/admin/analytics/overview
+[2026-04-02T05:52:54.813Z] GET /api/admin/blog/posts
+[Stripe] Using LIVE mode credentials - payments are real
+5:52:55 AM [express] GET /api/admin/blog/posts 200 in 216ms :: [{"id":"f9ce7137-31b9-4059-95c8-b7659…
+[2026-04-02T05:52:55.202Z] POST /api/activity/session/end
+5:52:55 AM [express] GET /api/admin/analytics/overview 200 in 418ms :: {"kpiMetrics":[{"label":"Tota…
+5:52:55 AM [express] POST /api/activity/session/end 200 in 16ms :: {"success":true}
+[2026-04-02T05:52:54.273Z] POST /api/activity/session
+[2026-04-02T05:52:54.427Z] GET /api/admin/activity-log
+5:52:54 AM [express] GET /api/admin/activity-log 200 in 92ms :: [{"id":"plan-52fefd3d-a1aa-4904-8649…
+5:52:54 AM [express] POST /api/activity/session 200 in 240ms :: {"sessionId":"fdea69eb-b0bc-4450-a13…
+[2026-04-02T05:52:54.639Z] GET /api/admin/blog/stats
+[2026-04-02T05:53:59.985Z] GET /api/auth/user
+[2026-04-02T05:53:59.988Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+5:54:00 AM [express] GET /api/auth/user 200 in 225ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+5:54:00 AM [express] POST /api/activity/session 200 in 232ms :: {"sessionId":"d34db603-d1fe-442a-969…
+[2026-04-02T05:54:00.753Z] POST /api/activity/page-view
+5:54:00 AM [express] POST /api/activity/page-view 200 in 23ms :: {"pageViewId":"d501f580-9f7a-471a-b…
+[2026-04-02T05:54:14.258Z] POST /api/activity/session/end
+5:54:14 AM [express] POST /api/activity/session/end 200 in 219ms :: {"success":true}
+[2026-04-02T05:54:25.659Z] POST /api/activity/session
+[2026-04-02T05:54:25.660Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+5:54:25 AM [express] GET /api/auth/user 200 in 228ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+5:54:25 AM [express] POST /api/activity/session 200 in 238ms :: {"sessionId":"b7df1a7c-8ff9-4615-931…
+[2026-04-02T05:54:26.092Z] POST /api/activity/page-view
+5:54:26 AM [express] POST /api/activity/page-view 200 in 30ms :: {"pageViewId":"822aa050-0608-4650-9…
+[2026-04-02T05:54:26.438Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+5:54:26 AM [express] GET /api/auth/user 200 in 18ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-02T05:54:26.604Z] POST /api/activity/session/end
+[2026-04-02T05:54:26.617Z] POST /api/activity/session
+5:54:26 AM [express] POST /api/activity/session/end 200 in 18ms :: {"success":true}
+5:54:26 AM [express] POST /api/activity/session 200 in 26ms :: {"sessionId":"621ab7f8-0ff9-4b32-a030…
+[2026-04-02T05:54:26.838Z] POST /api/activity/page-view
+5:54:26 AM [express] POST /api/activity/page-view 200 in 30ms :: {"pageViewId":"224924fd-20ac-40a4-8…
+[2026-04-02T05:54:27.329Z] POST /api/activity/session
+5:54:27 AM [express] POST /api/activity/session 200 in 26ms :: {"sessionId":"cfddbd24-a1a7-4e09-89a4…
+[2026-04-02T05:54:27.502Z] POST /api/activity/session/end
+5:54:27 AM [express] POST /api/activity/session/end 200 in 16ms :: {"success":true}
+[2026-04-02T05:54:27.550Z] POST /api/activity/page-view
+5:54:27 AM [express] POST /api/activity/page-view 200 in 28ms :: {"pageViewId":"c806e67c-1ac4-46a1-b…
+[2026-04-02T05:54:29.178Z] POST /api/activity/session/end
+[2026-04-02T05:54:29.179Z] POST /api/activity/session
+5:54:29 AM [express] POST /api/activity/session/end 200 in 22ms :: {"success":true}
+5:54:29 AM [express] POST /api/activity/session 200 in 28ms :: {"sessionId":"2df43139-5025-40df-963d…
+[2026-04-02T05:54:29.401Z] POST /api/activity/page-view
+5:54:29 AM [express] POST /api/activity/page-view 200 in 24ms :: {"pageViewId":"73ec6dd6-3f1c-44c4-b…
+[2026-04-02T05:54:30.931Z] POST /api/activity/session/end
+5:54:30 AM [express] POST /api/activity/session/end 200 in 18ms :: {"success":true}
+[2026-04-02T05:54:31.103Z] GET /admin/blog
+[2026-04-02T05:54:31.348Z] GET /attached_assets/official_logo.webp
+[2026-04-02T05:54:31.387Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+5:54:31 AM [express] GET /api/auth/user 200 in 17ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-02T05:54:31.610Z] GET /api/partner/status
+[2026-04-02T05:54:31.613Z] POST /api/activity/session
+[2026-04-02T05:54:31.623Z] GET /api/admin/blog/review-queue
+[2026-04-02T05:54:31.624Z] GET /api/admin/blog/posts/all/
+5:54:31 AM [express] POST /api/activity/session 200 in 23ms :: {"sessionId":"fb224378-4ba6-4841-95e2…
+5:54:31 AM [express] GET /api/admin/blog/review-queue 200 in 27ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+5:54:31 AM [express] GET /api/partner/status 200 in 195ms :: {"isPartner":false,"promoCodeCount":0}
+5:54:31 AM [express] GET /api/admin/blog/posts/all/ 200 in 187ms
+[2026-04-02T05:54:31.942Z] POST /api/activity/session
+5:54:31 AM [express] POST /api/activity/session 200 in 25ms :: {"sessionId":"0a9be035-be26-47ec-b944…
+[2026-04-02T05:54:31.971Z] GET /api/admin/blog/stats
+[2026-04-02T05:54:31.971Z] GET /api/admin/blog/queue
+5:54:31 AM [express] GET /api/admin/blog/queue 200 in 20ms :: [{"id":1,"targetDate":"2026-04-02T06:0…
+[2026-04-02T05:54:32.011Z] POST /api/activity/page-view
+5:54:32 AM [express] GET /api/admin/blog/stats 200 in 43ms :: {"total":31,"published":25,"scheduled"…
+5:54:32 AM [express] POST /api/activity/page-view 200 in 27ms :: {"pageViewId":"8ca499ab-c8cd-4b47-9…
+[2026-04-02T05:54:40.921Z] POST /api/admin/blog/posts/f9ce7137-31b9-4059-95c8-b7659d202b97/reverify
+[MultiVerifier] Starting triple-AI verification for: How to Prepare for Your Innovator Founder Visa Interview
+[MultiVerifier] Gemini model gemini-2.0-flash-001 unavailable, trying next...
+[MultiVerifier] Gemini model gemini-2.0-flash unavailable, trying next...
+[MultiVerifier] Gemini model gemini-1.5-flash unavailable, trying next...
+[MultiVerifier] Gemini model gemini-1.5-pro unavailable, trying next...
+[MultiVerifier] All Gemini models failed — marking as unavailable
+[MultiVerifier] Result: FLAGGED | Gemini: unavailable | OpenAI: 100 | Composite: 100
+5:54:44 AM [express] POST /api/admin/blog/posts/f9ce7137-31b9-4059-95c8-b7659d202b97/reverify 200 in…
+[2026-04-02T05:54:44.340Z] GET /api/admin/blog/posts/all/
+5:54:44 AM [express] GET /api/admin/blog/posts/all/ 200 in 13ms
+[2026-04-02T05:54:44.506Z] GET /api/admin/blog/review-queue
+5:54:44 AM [express] GET /api/admin/blog/review-queue 200 in 29ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+[2026-04-02T05:55:02.022Z] POST /api/activity/session
+5:55:02 AM [express] POST /api/activity/session 200 in 229ms :: {"sessionId":"0a9be035-be26-47ec-b94…
+[2026-04-02T05:55:04.511Z] POST /api/activity/session/end
+5:55:04 AM [express] POST /api/activity/session/end 200 in 19ms :: {"success":true}
+
+
