@@ -37,6 +37,7 @@ import {
   CoinsUsageView 
 } from "@/components/admin/AdvancedAnalytics";
 import { useToast } from "@/hooks/use-toast";
+import { useVisualPdfExport } from "@/hooks/useVisualPdfExport";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { format, formatDistance, subDays, subHours, startOfDay, endOfDay, differenceInSeconds } from "date-fns";
 import {
@@ -583,6 +584,8 @@ TrendIndicator.displayName = 'TrendIndicator';
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { exportVisualPdf, isExporting: isPdfExporting } = useVisualPdfExport();
+  const [pdfExportProgress, setPdfExportProgress] = useState<string | null>(null);
 
   // Section state — persisted in URL hash so refresh restores position
   const getInitialSection = () => {
@@ -4754,14 +4757,18 @@ export default function AdminDashboard() {
                                           <Eye className="h-3 w-3 mr-2" />
                                           View Details
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={() => {
-                                            window.open(`/api/admin/plans/${plan.id}/download`, '_blank');
-                                          }}
-                                        >
-                                          <Download className="h-3 w-3 mr-2" />
-                                          Download PDF
-                                        </DropdownMenuItem>
+                                        {plan.status === 'completed' && (
+                                          <>
+                                            <DropdownMenuItem onClick={() => window.open(`/api/view/html/${plan.id}`, '_blank')}>
+                                              <Eye className="h-3 w-3 mr-2" />
+                                              View Full Plan
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => window.open(`/api/download/word/${plan.id}`, '_blank')}>
+                                              <Download className="h-3 w-3 mr-2" />
+                                              Word (with Charts)
+                                            </DropdownMenuItem>
+                                          </>
+                                        )}
                                         <DropdownMenuItem onClick={() => toggleDemoMutation.mutate(plan.id)}>
                                           <Sparkles className="h-3 w-3 mr-2" />
                                           Toggle Demo
@@ -13659,15 +13666,58 @@ export default function AdminDashboard() {
                   )}
                 </div>
                 <Separator />
+                {/* Export actions */}
+                {viewingPlan.status === 'completed' ? (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground">Export Options</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(`/api/view/html/${viewingPlan.id}`, '_blank')}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        View Full Plan
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={isPdfExporting}
+                        onClick={async () => {
+                          setPdfExportProgress('Starting…');
+                          const ok = await exportVisualPdf({
+                            planId: viewingPlan.id,
+                            businessName: viewingPlan.businessName,
+                            onProgress: setPdfExportProgress,
+                          });
+                          setPdfExportProgress(null);
+                          if (ok) toast({ title: 'PDF exported successfully' });
+                          else toast({ title: 'PDF export failed', variant: 'destructive' });
+                        }}
+                      >
+                        <FileText className="h-3 w-3 mr-1" />
+                        {isPdfExporting ? (pdfExportProgress ?? 'Exporting…') : 'PDF (with Charts)'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(`/api/download/word/${viewingPlan.id}`, '_blank')}
+                      >
+                        <Download className="h-3 w-3 mr-1" />
+                        Word (with Charts)
+                      </Button>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">
+                      "View Full Plan" opens the interactive HTML version with all charts. "PDF" captures it as a multi-page PDF. "Word" downloads a .docx with embedded charts.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">
+                    Full exports are only available for completed plans.
+                  </p>
+                )}
+                <Separator />
                 <div className="flex gap-2 justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open(`/api/admin/plans/${viewingPlan.id}/download`, '_blank')}
-                  >
-                    <Download className="h-3 w-3 mr-1" />
-                    Download PDF
-                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -13675,10 +13725,10 @@ export default function AdminDashboard() {
                       setViewingPlan(null);
                       setDeletingPlan(viewingPlan);
                     }}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-red-600"
                   >
                     <Trash2 className="h-3 w-3 mr-1" />
-                    Delete
+                    Delete Plan
                   </Button>
                 </div>
               </div>

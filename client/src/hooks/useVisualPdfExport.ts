@@ -6,6 +6,8 @@ interface VisualPdfExportOptions {
   planId: string;
   businessName: string;
   onProgress?: (stage: string) => void;
+  /** Override the HTML source URL. Defaults to /api/view/html/:planId */
+  fetchUrl?: string;
 }
 
 // Wrap any promise in a race-timeout so a hanging toPng() never blocks forever
@@ -41,15 +43,16 @@ export function useVisualPdfExport() {
   const [exportError, setExportError] = useState<string | null>(null);
 
   const exportVisualPdf = useCallback(async (options: VisualPdfExportOptions) => {
-    const { planId, businessName, onProgress } = options;
+    const { planId, businessName, onProgress, fetchUrl } = options;
     setIsExporting(true);
     setExportError(null);
 
     try {
       onProgress?.('Fetching business plan with charts...');
 
+      const url = fetchUrl ?? `/api/view/html/${planId}`;
       const response = await withTimeout(
-        fetch(`/api/view/html/${planId}`, { credentials: 'include' }),
+        fetch(url, { credentials: 'include' }),
         30000,
         'fetch'
       );

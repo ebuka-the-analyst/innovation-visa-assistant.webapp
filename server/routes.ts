@@ -2519,7 +2519,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
       const user = req.user as any;
       
       const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan || businessPlan.userId !== user.id) {
+      if (!businessPlan || (businessPlan.userId !== user.id && !user.isAdmin)) {
         return res.status(404).json({ error: "Business plan not found" });
       }
 
@@ -2800,7 +2800,7 @@ ${generatedSections.join('\n\n---\n\n')}`;
       const user = req.user as any;
       
       const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan || businessPlan.userId !== user.id) {
+      if (!businessPlan || (businessPlan.userId !== user.id && !user.isAdmin)) {
         return res.status(404).json({ error: "Business plan not found" });
       }
 
