@@ -126,7 +126,7 @@ export default function BlogDashboard() {
     queryKey: ["/api/admin/blog/review-queue"],
   });
 
-  // Re-verify post mutation
+  // Re-verify single post mutation
   const reverifyMutation = useMutation({
     mutationFn: async (id: string) => {
       return apiRequest("POST", `/api/admin/blog/posts/${id}/reverify`);
@@ -138,6 +138,28 @@ export default function BlogDashboard() {
     },
     onError: (error: any) => {
       toast({ title: "Verification Failed", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Re-verify ALL queued posts sequentially (avoids hammering rate limits)
+  const [reverifyAllProgress, setReverifyAllProgress] = useState<{ done: number; total: number } | null>(null);
+  const reverifyAllMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      setReverifyAllProgress({ done: 0, total: ids.length });
+      for (let i = 0; i < ids.length; i++) {
+        await apiRequest("POST", `/api/admin/blog/posts/${ids[i]}/reverify`);
+        setReverifyAllProgress({ done: i + 1, total: ids.length });
+      }
+    },
+    onSuccess: () => {
+      setReverifyAllProgress(null);
+      toast({ title: "All Re-verified", description: "All queued posts have been re-verified by the AI panel." });
+      refetchReview();
+      refetchPosts();
+    },
+    onError: (error: any) => {
+      setReverifyAllProgress(null);
+      toast({ title: "Reverify All Failed", description: error.message, variant: "destructive" });
     },
   });
 
@@ -942,10 +964,33 @@ export default function BlogDashboard() {
                   Posts flagged by the triple-AI consensus gate — both Gemini and OpenAI must score ≥95 for auto-publish
                 </p>
               </div>
-              <Button variant="outline" size="sm" onClick={() => refetchReview()} data-testid="button-refresh-review">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => refetchReview()} data-testid="button-refresh-review">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh
+                </Button>
+                <Button
+                  size="sm"
+                  variant="default"
+                  disabled={reverifyAllMutation.isPending || !reviewQueue?.length}
+                  onClick={() => reviewQueue && reverifyAllMutation.mutate(reviewQueue.map((p: any) => p.id))}
+                  data-testid="button-reverify-all"
+                >
+                  {reverifyAllMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {reverifyAllProgress
+                        ? `${reverifyAllProgress.done}/${reverifyAllProgress.total} done…`
+                        : "Starting…"}
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Reverify All ({reviewQueue?.length ?? 0})
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
 
             {reviewLoading ? (
