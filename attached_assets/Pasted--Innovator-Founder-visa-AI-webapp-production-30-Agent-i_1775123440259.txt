@@ -1,0 +1,132 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+30
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+85f9b33c
+Active
+
+Apr 2, 2026, 10:47 AM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+You reached the start of the range
+Apr 2, 2026, 10:47 AM
+Starting Container
+theme_id column added or already exists
+theme_primary_color column added or already exists
+theme_secondary_color column added or already exists
+blog_posts table created or already exists
+text_elements column added or already exists
+theme_font column added or already exists
+blog_posts indexes created or already exist
+theme_applied_at column added or already exists
+cover_designs table created or already exists
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+background_image column added or already exists
+cover_designs indexes created or already exist
+use_full_cover_image column added or already exists
+> NODE_ENV=production node dist/index.js
+premium_cover_purchases table created or already exists
+Connecting to database...
+premium_cover_purchases indexes created or already exist
+Connected successfully
+Found 273 SQL statements to execute
+Migration complete: 0 executed, 273 skipped (already exist)
+chart_data column added or already exists
+[DB] Auto-migration: 37 blog_posts column(s) ensured
+9:49:34 AM [express] [MIGRATION] Schema check complete
+[DB] Auto-migration: blog_generation_queue table ensured
+[Auth] Google OAuth configured successfully
+To continue receiving updates to AWS services, bug fixes, and security
+[DB] Auto-migration: blog_generation_queue columns ensured
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+More information can be found at: https://a.co/c895JFp
+updates please upgrade to a supported Node.js LTS version.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+9:49:34 AM [express] serving on port 8080
+[Blog] Image route configured (local + unique + S3 fallback)
+9:49:34 AM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+9:49:34 AM [express] [MIGRATION] Checking for required schema updates...
+[DB] Auto-migration: logo_element column ensured
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+[DB] Auto-migration: blog image URLs updated to object storage
+[DB] Auto-migration: Assigned unique images to 15 blog posts
+[Pipeline] Automated blog pipeline starting…
+[Pipeline] "generate-07:00" next run in 1270 min (Fri, 03 Apr 2026 07:00:00 GMT)
+[Pipeline] "generate-12:00" next run in 130 min (Thu, 02 Apr 2026 12:00:00 GMT)
+[Pipeline] "generate-16:00" next run in 370 min (Thu, 02 Apr 2026 16:00:00 GMT)
+[Pipeline] "generate-20:00" next run in 610 min (Thu, 02 Apr 2026 20:00:00 GMT)
+[Pipeline] "drain-00:30" next run in 880 min (Fri, 03 Apr 2026 00:30:00 GMT)
+[Pipeline] "drain-02:30" next run in 1000 min (Fri, 03 Apr 2026 02:30:00 GMT)
+[Pipeline] "drain-04:30" next run in 1120 min (Fri, 03 Apr 2026 04:30:00 GMT)
+[Pipeline] "drain-06:30" next run in 1240 min (Fri, 03 Apr 2026 06:30:00 GMT)
+[Pipeline] "drain-08:30" next run in 1360 min (Fri, 03 Apr 2026 08:30:00 GMT)
+[Pipeline] "drain-10:30" next run in 40 min (Thu, 02 Apr 2026 10:30:00 GMT)
+[Pipeline] "drain-12:30" next run in 160 min (Thu, 02 Apr 2026 12:30:00 GMT)
+[Pipeline] "drain-14:30" next run in 280 min (Thu, 02 Apr 2026 14:30:00 GMT)
+[Pipeline] "drain-16:30" next run in 400 min (Thu, 02 Apr 2026 16:30:00 GMT)
+[Pipeline] "drain-18:30" next run in 520 min (Thu, 02 Apr 2026 18:30:00 GMT)
+[Pipeline] "drain-20:30" next run in 640 min (Thu, 02 Apr 2026 20:30:00 GMT)
+[Pipeline] "drain-22:30" next run in 760 min (Thu, 02 Apr 2026 22:30:00 GMT)
+[Pipeline] Schedules set: generate at 07:00, 12:00, 20:00 GMT | drain queue every 2 hours.
+
+
