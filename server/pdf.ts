@@ -648,8 +648,9 @@ export function generatePDFContent(plan: BusinessPlan): string {
     }
     p {
       font-size: 11pt;
-      text-align: justify;
+      text-align: left;
       margin-bottom: 12px;
+      line-height: 1.7;
     }
     .cover-page {
       position: relative;
@@ -797,15 +798,20 @@ export function generatePDFContent(plan: BusinessPlan): string {
       border-collapse: collapse;
       margin: 20px 0;
       font-size: 10pt;
+      table-layout: fixed;
+      word-break: break-word;
     }
     th, td {
       border: 1px solid #ddd;
-      padding: 10px;
+      padding: 10px 14px;
       text-align: left;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      vertical-align: top;
     }
     th {
       background-color: ${primaryColor};
-      font-weight: bold;
+      font-weight: 600;
       color: white;
     }
     .financial-table th {
@@ -817,6 +823,20 @@ export function generatePDFContent(plan: BusinessPlan): string {
     }
     .financial-table tr:nth-child(even) {
       background-color: #f8fafc;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+      max-width: 100%;
+      margin: 20px 0;
+    }
+    .table-wrapper table {
+      min-width: 0;
+      width: 100%;
+      margin: 0;
+    }
+    .content {
+      max-width: 100%;
+      overflow-x: hidden;
     }
     .toc {
       background: #f8fafc;
@@ -1358,6 +1378,85 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
         inToc = false;
       }
       html += '<hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">\n';
+    } else if (line.startsWith('|') && line.includes('|', 1)) {
+      // ── Markdown table parser ──────────────────────────────────────────────
+      // Collect all consecutive pipe-delimited rows (including separator)
+      const tableLines: string[] = [line];
+      while (i + 1 < lines.length) {
+        const next = lines[i + 1].trim();
+        if (next.startsWith('|') && next.includes('|', 1)) {
+          tableLines.push(next);
+          i++;
+        } else {
+          break;
+        }
+      }
+
+      // Locate separator row: only dashes, colons, pipes and spaces
+      let sepIdx = -1;
+      for (let j = 0; j < tableLines.length; j++) {
+        if (/^\|[\s:|-]+\|$/.test(tableLines[j]) &&
+            tableLines[j].replace(/[|:\s-]/g, '').length === 0) {
+          sepIdx = j;
+          break;
+        }
+      }
+
+      // Split a row into cell strings
+      const parseCells = (row: string): string[] =>
+        row.split('|')
+           .filter((_, idx, arr) => idx > 0 && idx < arr.length - 1)
+           .map(c => c.trim());
+
+      let headerCells: string[] = [];
+      let bodyRows: string[][] = [];
+
+      if (sepIdx === 1) {
+        headerCells = parseCells(tableLines[0]);
+        bodyRows = tableLines.slice(2).map(parseCells);
+      } else if (sepIdx > 1) {
+        headerCells = parseCells(tableLines[0]);
+        bodyRows = tableLines.slice(sepIdx + 1).map(parseCells);
+      } else {
+        bodyRows = tableLines.filter((_, j) => j !== sepIdx).map(parseCells);
+      }
+
+      const colCount = headerCells.length || bodyRows[0]?.length || 0;
+
+      if (colCount === 0) {
+        // Cannot parse — render as plain paragraphs
+        for (const tl of tableLines) {
+          html += `<p>${formatInline(tl)}</p>\n`;
+        }
+      } else {
+        // Render as a proper HTML table
+        let t = `<div class="table-wrapper"><table style="width:100%;border-collapse:collapse;font-size:10.5pt;">`;
+
+        if (headerCells.length > 0) {
+          t += `<thead><tr>`;
+          for (const cell of headerCells) {
+            t += `<th style="background:${primaryColor};color:#fff;padding:10px 14px;border:1px solid ${primaryColor};font-weight:600;word-break:break-word;white-space:normal;">${formatInline(cell)}</th>`;
+          }
+          t += `</tr></thead>`;
+        }
+
+        if (bodyRows.length > 0) {
+          t += `<tbody>`;
+          bodyRows.forEach((row, ri) => {
+            if (row.length === 0) return;
+            const bg = ri % 2 === 0 ? '#ffffff' : '#f8fafc';
+            t += `<tr style="background:${bg};">`;
+            for (let ci = 0; ci < colCount; ci++) {
+              t += `<td style="padding:10px 14px;border:1px solid #e2e8f0;word-break:break-word;white-space:normal;">${formatInline(row[ci] || '')}</td>`;
+            }
+            t += `</tr>`;
+          });
+          t += `</tbody>`;
+        }
+
+        t += `</table></div>\n`;
+        html += t;
+      }
     } else if (line.length > 0) {
       html += `<p>${formatInline(line)}</p>\n`;
     }
@@ -1397,6 +1496,16 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
     }
   }
   
+  // Post-process: wrap any bare HTML <table> elements that the AI may have
+  // embedded directly in the content. Markdown tables are already wrapped.
+  // We detect bare tables by finding <table that is NOT immediately preceded by
+  // the table-wrapper marker we set on markdown tables.
+  html = html
+    .replace(/(?<!table-wrapper">)(<table(?:\s[^>]*)?>)/g,
+      '<div class="table-wrapper">$1')
+    .replace(/<\/table>(?!\s*<\/div>)/g,
+      '</table></div>');
+
   return html;
 }
 
