@@ -1,0 +1,197 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+31
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+85f9b33c
+Active
+
+Apr 2, 2026, 10:47 AM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[2026-04-02T09:51:16.949Z] GET /assets/SiteFeedbackPopup-Co-Arlvh.js
+[2026-04-02T09:51:17.025Z] GET /assets/monitor-lkIpze1r.js
+[2026-04-02T09:51:16.950Z] GET /assets/CookieConsent-DBGsv7uT.js
+[2026-04-02T09:51:16.950Z] GET /assets/timer-lSvyjjAG.js
+[2026-04-02T09:51:16.951Z] GET /assets/file-image-B_H0r-iT.js
+[2026-04-02T09:51:17.034Z] GET /assets/filter-BxpT-qq0.js
+[2026-04-02T09:51:17.042Z] GET /assets/map-DPN-rwfP.js
+[2026-04-02T09:51:17.048Z] GET /assets/package-DFDtvC9y.js
+[2026-04-02T09:51:17.058Z] GET /assets/database-C2Ex2LdW.js
+9:51:17 AM [express] POST /api/activity/session 200 in 72ms :: {"sessionId":"78fc7407-abad-436a-8563…
+[2026-04-02T09:51:17.094Z] GET /assets/mail-H3i-EZP7.js
+9:51:17 AM [express] POST /api/activity/session 200 in 71ms :: {"sessionId":"244e95af-e593-4003-ad4e…
+[2026-04-02T09:51:17.064Z] GET /assets/lock-open-BEf9A1Fm.js
+[2026-04-02T09:51:17.097Z] GET /assets/shield-alert-DF1BUEu0.js
+[2026-04-02T09:51:17.069Z] GET /assets/save-B3p9fOGN.js
+[2026-04-02T09:51:17.076Z] GET /assets/file-type-2-BXoGdBqi.js
+[2026-04-02T09:51:17.101Z] GET /assets/circle-check-big-HWhnmJxf.js
+[2026-04-02T09:51:17.081Z] GET /assets/file-question-B0sO60FW.js
+[2026-04-02T09:51:17.103Z] GET /assets/zoom-out-CE60xnYI.js
+[2026-04-02T09:51:17.107Z] GET /assets/external-link-CBGAmqWO.js
+[2026-04-02T09:51:17.109Z] GET /assets/heart-D9B1yobU.js
+[2026-04-02T09:51:17.112Z] GET /assets/cpu-BnuUVusR.js
+[2026-04-02T09:51:17.084Z] GET /assets/phone-DjCwnF8D.js
+[2026-04-02T09:51:17.116Z] GET /assets/message-square-warning-uTI6a0WS.js
+[2026-04-02T09:51:17.091Z] GET /assets/layers-DbYoqlVe.js
+[2026-04-02T09:51:17.119Z] GET /assets/play-DZqKL5hu.js
+[2026-04-02T09:51:17.121Z] GET /assets/presentation-D6I7EpX4.js
+[2026-04-02T09:51:17.125Z] GET /assets/scale-BRG8Snfd.js
+[2026-04-02T09:51:17.130Z] GET /assets/volume-2-DE8STZoK.js
+[2026-04-02T09:51:17.133Z] GET /assets/FloatingFeedback-CJDoPnl8.js
+[2026-04-02T09:51:17.247Z] POST /api/activity/page-view
+9:51:17 AM [express] POST /api/activity/page-view 200 in 20ms :: {"pageViewId":"40fd22e8-1b11-4df0-8…
+[2026-04-02T09:51:17.317Z] POST /api/blog/how-to-prepare-for-your-innovator-founder-visa-interview-2026-04-02-b6kc/view
+[2026-04-02T09:51:17.318Z] GET /api/blog/how-to-prepare-for-your-innovator-founder-visa-interview-2026-04-02-b6kc
+9:51:17 AM [express] POST /api/blog/how-to-prepare-for-your-innovator-founder-visa-interview-2026-04…
+9:51:17 AM [express] GET /api/blog/how-to-prepare-for-your-innovator-founder-visa-interview-2026-04-…
+[2026-04-02T09:51:47.416Z] POST /api/activity/session
+9:51:47 AM [express] POST /api/activity/session 200 in 204ms :: {"sessionId":"244e95af-e593-4003-ad4…
+[2026-04-02T09:51:49.042Z] GET /
+[2026-04-02T09:51:49.420Z] GET /attached_assets/official_logo.webp
+[SEO] Injecting meta for route: /
+[2026-04-02T09:51:49.709Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+9:51:49 AM [express] GET /api/auth/user 200 in 16ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-02T09:51:49.929Z] POST /api/activity/session
+[2026-04-02T09:51:49.930Z] POST /api/activity/session
+9:51:49 AM [express] POST /api/activity/session 200 in 19ms :: {"sessionId":"8b813885-7be8-4b93-9f3d…
+[2026-04-02T09:51:50.246Z] GET /assets/Header-CAB-JYdt.js
+[2026-04-02T09:51:50.318Z] GET /assets/dropdown-menu-BPdny4rq.js
+[2026-04-02T09:51:50.136Z] POST /api/activity/page-view
+9:51:50 AM [express] POST /api/activity/page-view 200 in 15ms :: {"pageViewId":"e218eed0-713a-4995-a…
+[2026-04-02T09:51:50.197Z] GET /assets/home-DsJbcPHE.js
+[2026-04-02T09:51:50.092Z] GET /assets/LanguageSelector-DaMWRq18.js
+9:51:50 AM [express] POST /api/activity/session 200 in 190ms :: {"sessionId":"291705a8-a9b9-4c53-93d…
+[2026-04-02T09:51:50.437Z] GET /assets/index-BTckiRMY.js
+[2026-04-02T09:51:50.510Z] GET /assets/index-6e8DK1ag.js
+[2026-04-02T09:51:50.636Z] GET /assets/proxy-DCBmLE6r.js
+[2026-04-02T09:51:50.713Z] GET /assets/tabs-3y1kZYNb.js
+[2026-04-02T09:51:50.858Z] GET /assets/accordion-CNrPUyFC.js
+[2026-04-02T09:51:50.915Z] GET /assets/seo-schemas-BrJlEvur.js
+[2026-04-02T09:51:51.614Z] GET /api/news
+9:51:51 AM [express] GET /api/news 200 in 7ms :: [{"id":"official-1","title":"Students can now switc…
+[2026-04-02T09:51:56.729Z] GET /admin/seo-strategy
+[2026-04-02T09:51:56.736Z] POST /api/activity/session/end
+[SEO] Injecting meta for route: /
+9:51:56 AM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+[2026-04-02T09:51:56.926Z] POST /api/activity/session/end
+9:51:56 AM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+[2026-04-02T09:51:57.111Z] GET /attached_assets/official_logo.webp
+[SEO] Injecting meta for route: /
+[2026-04-02T09:51:57.120Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+9:51:57 AM [express] GET /api/auth/user 200 in 16ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-02T09:51:57.333Z] GET /assets/SeoStrategy-47p0TDMd.js
+[2026-04-02T09:51:57.334Z] GET /assets/progress-BgIKeCuP.js
+[2026-04-02T09:51:57.343Z] GET /api/partner/status
+[2026-04-02T09:51:57.345Z] POST /api/activity/session
+9:51:57 AM [express] GET /api/partner/status 200 in 15ms :: {"isPartner":false,"promoCodeCount":0}
+[2026-04-02T09:51:57.501Z] POST /api/activity/session
+9:51:57 AM [express] POST /api/activity/session 200 in 17ms :: {"sessionId":"f4177095-877d-49c5-8afb…
+9:51:57 AM [express] POST /api/activity/session 200 in 183ms :: {"sessionId":"5d8daefb-97b0-4b93-b28…
+[2026-04-02T09:51:57.717Z] POST /api/activity/page-view
+9:51:57 AM [express] POST /api/activity/page-view 200 in 14ms :: {"pageViewId":"fe743b4b-8657-4854-b…
+[2026-04-02T09:52:27.869Z] POST /api/activity/session
+9:52:28 AM [express] POST /api/activity/session 200 in 203ms :: {"sessionId":"5d8daefb-97b0-4b93-b28…
+[2026-04-02T09:52:45.291Z] POST /api/seo/strategy
+[SEO Engine] Starting quad-model SEO analysis for: UK Innovator Founder Visa Assistant
+[2026-04-02T09:52:57.862Z] POST /api/activity/session
+9:52:58 AM [express] POST /api/activity/session 200 in 216ms :: {"sessionId":"5d8daefb-97b0-4b93-b28…
+[2026-04-02T09:53:27.877Z] POST /api/activity/session
+9:53:28 AM [express] POST /api/activity/session 200 in 210ms :: {"sessionId":"5d8daefb-97b0-4b93-b28…
+[2026-04-02T09:53:57.867Z] POST /api/activity/session
+9:53:58 AM [express] POST /api/activity/session 200 in 202ms :: {"sessionId":"5d8daefb-97b0-4b93-b28…
+[2026-04-02T09:54:27.861Z] POST /api/activity/session
+9:54:28 AM [express] POST /api/activity/session 200 in 212ms :: {"sessionId":"5d8daefb-97b0-4b93-b28…
+[2026-04-02T09:54:57.886Z] POST /api/activity/session
+9:54:58 AM [express] POST /api/activity/session 200 in 207ms :: {"sessionId":"5d8daefb-97b0-4b93-b28…
+[SEO Engine] Gemini failed: ApiError: {"error":{"code":404,"message":"models/gemini-1.5-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.","status":"NOT_FOUND"}}
+    at throwErrorIfNotOK (file:///app/node_modules/@google/genai/dist/node/index.mjs:11716:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/@google/genai/dist/node/index.mjs:11454:13
+    at async Models.generateContent (file:///app/node_modules/@google/genai/dist/node/index.mjs:12766:24)
+    at async file:///app/dist/index.js:13147:22
+    at async Promise.allSettled (index 0)
+    at async generateSEOStrategy (file:///app/dist/index.js:13144:66)
+    at async file:///app/dist/index.js:29388:22 {
+  status: 404
+}
+[SEO Engine] All models completed in 158.6s
+9:55:24 AM [express] POST /api/seo/strategy 200 in 158943ms :: {"generatedAt":"2026-04-02T09:55:24.0…
+[2026-04-02T09:55:24.597Z] POST /api/errors/log
+9:55:24 AM [express] POST /api/errors/log 200 in 20ms :: {"success":true}
+[2026-04-02T09:55:27.868Z] POST /api/activity/session
+9:55:27 AM [express] POST /api/activity/session 200 in 17ms :: {"sessionId":"5d8daefb-97b0-4b93-b281…
+[2026-04-02T09:55:57.920Z] POST /api/activity/session
+9:55:58 AM [express] POST /api/activity/session 200 in 217ms :: {"sessionId":"5d8daefb-97b0-4b93-b28…
+[2026-04-02T09:56:27.874Z] POST /api/activity/session
+9:56:28 AM [express] POST /api/activity/session 200 in 205ms :: {"sessionId":"5d8daefb-97b0-4b93-b28…
+[2026-04-02T09:56:57.873Z] POST /api/activity/session
+9:56:58 AM [express] POST /api/activity/session 200 in 209ms :: {"sessionId":"5d8daefb-97b0-4b93-b28…
+[2026-04-02T09:57:27.862Z] POST /api/activity/session
+9:57:28 AM [express] POST /api/activity/session 200 in 206ms :: {"sessionId":"5d8daefb-97b0-4b93-b28…
+[2026-04-02T09:57:49.807Z] POST /api/activity/session/end
+9:57:50 AM [express] POST /api/activity/session/end 200 in 205ms :: {"success":true}
+[2026-04-02T10:03:28.778Z] POST /api/activity/session
+10:03:28 AM [express] POST /api/activity/session 200 in 207ms :: {"sessionId":"06dbb91f-9014-41d9-a30…
+[2026-04-02T10:03:29.168Z] POST /api/activity/page-view
+10:03:29 AM [express] POST /api/activity/page-view 200 in 14ms :: {"pageViewId":"56d3d2c8-0e5e-4273-8…
+[2026-04-02T10:03:36.622Z] POST /api/activity/session/end
+10:03:36 AM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+
+

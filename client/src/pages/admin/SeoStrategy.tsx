@@ -185,7 +185,8 @@ export default function SeoStrategy() {
         currentRankingKeywords: form.currentRankingKeywords.split(",").map(s => s.trim()).filter(Boolean),
         biggestSEOProblem: form.biggestSEOProblem,
       };
-      const data = await apiRequest("POST", "/api/seo/strategy", ctx);
+      const res = await apiRequest("POST", "/api/seo/strategy", ctx);
+      const data = await res.json();
       return data as SEOStrategyResult;
     },
     onSuccess: (data) => {

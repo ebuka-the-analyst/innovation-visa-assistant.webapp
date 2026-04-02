@@ -362,7 +362,7 @@ export async function generateSEOStrategy(ctx: SEOBusinessContext): Promise<SEOS
     // Gemini: Local SEO + GBP
     (async () => {
       const result = await gemini.models.generateContent({
-        model: "gemini-1.5-pro",
+        model: "gemini-2.0-flash",
         contents: buildGeminiPrompt(ctx),
         config: {
           temperature: 0.3,
