@@ -1,0 +1,179 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+33
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+d2c18c90
+Active
+
+Apr 2, 2026, 11:20 AM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[2026-04-02T10:27:51.544Z] GET /assets/scale-taTKvfne.js
+[2026-04-02T10:27:51.547Z] GET /assets/map-pin-BmAEDTf1.js
+[2026-04-02T10:27:51.550Z] GET /assets/palette-BBP6ym-X.js
+[2026-04-02T10:27:51.554Z] GET /assets/quote-DQyXFU2y.js
+[2026-04-02T10:27:51.558Z] GET /assets/star-BOCcJUvB.js
+[2026-04-02T10:27:51.563Z] GET /assets/info-CWC2VZ0-.js
+[2026-04-02T10:27:51.566Z] GET /assets/credit-card-CkfbSxs9.js
+[2026-04-02T10:27:51.569Z] GET /assets/log-in-FE2hJHFC.js
+[2026-04-02T10:27:51.572Z] GET /assets/presentation-ALQXjNeF.js
+[2026-04-02T10:27:51.575Z] GET /assets/share-2-RAWm1t47.js
+[2026-04-02T10:27:51.580Z] GET /assets/shield-alert-CVuPpByd.js
+[2026-04-02T10:27:51.584Z] GET /assets/monitor-Cj8lAvJV.js
+[2026-04-02T10:27:51.588Z] GET /assets/package-DstqsH3F.js
+[2026-04-02T10:27:51.590Z] GET /assets/layers-DTcbjGXQ.js
+[2026-04-02T10:27:51.593Z] GET /assets/twitter-6I_BcYXA.js
+[2026-04-02T10:27:51.596Z] GET /assets/calculator-aGHz30HU.js
+[2026-04-02T10:27:51.598Z] GET /assets/chart-line-BomEubOu.js
+[2026-04-02T10:27:51.602Z] GET /assets/git-branch-Cl6OU3hx.js
+[2026-04-02T10:27:51.604Z] GET /assets/shopping-cart-enebbAQY.js
+[2026-04-02T10:27:51.607Z] GET /assets/search-LWK634xN.js
+[2026-04-02T10:27:51.713Z] GET /assets/index-D5X5g744.js
+[2026-04-02T10:27:51.713Z] GET /assets/SeoStrategy-BdRmgw0j.js
+[2026-04-02T10:27:51.714Z] GET /assets/progress-PWpQlw5C.js
+[2026-04-02T10:27:51.715Z] GET /assets/badge-D_fCflIS.js
+[2026-04-02T10:27:51.716Z] GET /assets/tabs-DO5MiTOD.js
+[2026-04-02T10:27:51.729Z] GET /api/partner/status
+[2026-04-02T10:27:51.730Z] POST /api/activity/session
+[2026-04-02T10:27:51.731Z] POST /api/activity/session
+10:27:51 AM [express] GET /api/partner/status 200 in 18ms :: {"isPartner":false,"promoCodeCount":0}
+10:27:51 AM [express] POST /api/activity/session 200 in 25ms :: {"sessionId":"25996548-1328-49fc-b460…
+10:27:51 AM [express] POST /api/activity/session 200 in 25ms :: {"sessionId":"2ec20ea5-836a-4c56-beee…
+[2026-04-02T10:27:51.940Z] POST /api/activity/page-view
+[2026-04-02T10:27:51.618Z] GET /assets/tram-front-vlcbPiXQ.js
+10:27:51 AM [express] POST /api/activity/page-view 200 in 15ms :: {"pageViewId":"fa639f63-ec70-4d36-b…
+[2026-04-02T10:27:51.621Z] GET /assets/trash-2-BOBMpg16.js
+[2026-04-02T10:27:51.625Z] GET /assets/dialog-XmuFGre1.js
+[2026-04-02T10:27:51.712Z] GET /assets/index-CNRxvQss.js
+[2026-04-02T10:27:51.611Z] GET /assets/scan-BIiqqqLi.js
+[2026-04-02T10:27:51.614Z] GET /assets/server-BIOzbQTd.js
+[2026-04-02T10:28:10.833Z] POST /api/seo/strategy
+[SEO Engine] Starting quad-model SEO analysis for: UK Innovator Founder Visa Assistant
+[2026-04-02T10:28:22.111Z] POST /api/activity/session
+10:28:22 AM [express] POST /api/activity/session 200 in 207ms :: {"sessionId":"2ec20ea5-836a-4c56-bee…
+[2026-04-02T10:28:34.186Z] POST /api/activity/session/end
+10:28:34 AM [express] POST /api/activity/session/end 200 in 202ms :: {"success":true}
+[2026-04-02T10:29:11.867Z] POST /api/activity/session
+[2026-04-02T10:29:11.872Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:29:12 AM [express] GET /api/auth/user 200 in 196ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+10:29:12 AM [express] POST /api/activity/session 200 in 209ms :: {"sessionId":"ce043d0c-4a10-4051-b53…
+[2026-04-02T10:29:12.255Z] POST /api/activity/page-view
+10:29:12 AM [express] POST /api/activity/page-view 200 in 18ms :: {"pageViewId":"823aeaa8-1cc4-4993-a…
+[2026-04-02T10:29:31.639Z] POST /api/activity/session/end
+10:29:31 AM [express] POST /api/activity/session/end 200 in 220ms :: {"success":true}
+[2026-04-02T10:29:38.869Z] GET /api/auth/user
+[2026-04-02T10:29:38.870Z] GET /api/admin/blog/stats
+[2026-04-02T10:29:38.871Z] POST /api/activity/session
+[2026-04-02T10:29:38.873Z] GET /api/admin/activity-log
+[2026-04-02T10:29:38.875Z] GET /api/admin/analytics/overview
+[2026-04-02T10:29:38.876Z] GET /api/admin/blog/posts
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:29:38 AM [express] GET /api/auth/user 200 in 18ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[Stripe] Using LIVE mode credentials - payments are real
+10:29:39 AM [express] GET /api/admin/blog/stats 200 in 328ms :: {"total":31,"published":31,"scheduled…
+10:29:39 AM [express] POST /api/activity/session 200 in 339ms :: {"sessionId":"4c4a6eaf-852c-4466-97a…
+10:29:39 AM [express] GET /api/admin/activity-log 200 in 368ms :: [{"id":"plan-52fefd3d-a1aa-4904-864…
+10:29:39 AM [express] GET /api/admin/blog/posts 200 in 487ms :: [{"id":"f9ce7137-31b9-4059-95c8-b7659…
+[2026-04-02T10:29:39.393Z] POST /api/activity/page-view
+10:29:39 AM [express] POST /api/activity/page-view 200 in 20ms :: {"pageViewId":"52f121f1-27e0-4c92-8…
+10:29:39 AM [express] GET /api/admin/analytics/overview 200 in 663ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-02T10:29:39.646Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:29:39 AM [express] GET /api/auth/user 200 in 13ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-02T10:29:39.801Z] POST /api/activity/session/end
+[2026-04-02T10:29:39.802Z] POST /api/activity/session
+10:29:39 AM [express] POST /api/activity/session/end 200 in 13ms :: {"success":true}
+10:29:39 AM [express] POST /api/activity/session 200 in 20ms :: {"sessionId":"5cb60bdd-9deb-401c-ae10…
+[2026-04-02T10:29:40.013Z] POST /api/activity/page-view
+10:29:40 AM [express] POST /api/activity/page-view 200 in 17ms :: {"pageViewId":"d0a2e29d-ff1b-417d-9…
+[2026-04-02T10:29:40.923Z] POST /api/activity/session/end
+[2026-04-02T10:29:40.924Z] POST /api/activity/session
+10:29:40 AM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+10:29:40 AM [express] POST /api/activity/session 200 in 14ms :: {"sessionId":"f6afce6e-7639-4dc8-87c8…
+[2026-04-02T10:29:41.121Z] POST /api/activity/page-view
+10:29:41 AM [express] POST /api/activity/page-view 200 in 16ms :: {"pageViewId":"0f92fc42-b532-4b10-9…
+[2026-04-02T10:29:52.741Z] POST /api/activity/session/end
+10:29:52 AM [express] POST /api/activity/session/end 200 in 213ms :: {"success":true}
+[Pipeline] Draining human review queue…
+[Pipeline] Human review queue is empty — nothing to drain.
+[Pipeline] "drain-10:30" next run in 1440 min (Fri, 03 Apr 2026 10:30:00 GMT)
+10:30:31 AM [express] GET /api/auth/user 200 in 211ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+10:30:31 AM [express] POST /api/activity/session 200 in 221ms :: {"sessionId":"bff57b13-4c1a-4292-81b…
+[2026-04-02T10:30:30.874Z] POST /api/activity/session
+[2026-04-02T10:30:31.440Z] POST /api/activity/page-view
+10:30:31 AM [express] POST /api/activity/page-view 200 in 23ms :: {"pageViewId":"1c40d10d-fc58-4c75-8…
+[2026-04-02T10:30:30.877Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+[2026-04-02T10:30:37.673Z] POST /api/activity/session/end
+10:30:37 AM [express] POST /api/activity/session/end 200 in 20ms :: {"success":true}
+[SEO Engine] All models completed in 152.4s
+[SEO Engine] Gemini failed: ApiError: {"error":{"code":404,"message":"This model models/gemini-2.0-flash is no longer available to new users. Please update your code to use a newer model for the latest features and improvements.","status":"NOT_FOUND"}}
+    at throwErrorIfNotOK (file:///app/node_modules/@google/genai/dist/node/index.mjs:11716:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/node_modules/@google/genai/dist/node/index.mjs:11454:13
+    at async Models.generateContent (file:///app/node_modules/@google/genai/dist/node/index.mjs:12766:24)
+    at async file:///app/dist/index.js:13147:22
+    at async Promise.allSettled (index 0)
+    at async generateSEOStrategy (file:///app/dist/index.js:13144:66)
+    at async file:///app/dist/index.js:29388:22 {
+  status: 404
+}
+10:30:43 AM [express] POST /api/seo/strategy 200 in 152641ms :: {"generatedAt":"2026-04-02T10:30:43.4…
+
+
