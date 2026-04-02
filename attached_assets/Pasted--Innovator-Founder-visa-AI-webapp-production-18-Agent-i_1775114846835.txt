@@ -1,0 +1,174 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+18
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+015537b3
+Active
+
+Apr 2, 2026, 8:14 AM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+blog_posts indexes created or already exist
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+[DB] Auto-migration: blog_generation_queue columns ensured
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[Email Service] Using Resend HTTP API (recommended)
+More information can be found at: https://a.co/c895JFp
+[Blog] Image route configured (local + unique + S3 fallback)
+To continue receiving updates to AWS services, bug fixes, and security
+(Use `node --trace-warnings ...` to show where the warning was created)
+7:17:06 AM [express] serving on port 8080
+7:17:06 AM [express] [MIGRATION] Checking for required schema updates...
+updates please upgrade to a supported Node.js LTS version.
+[Auth] Google OAuth configured successfully
+7:17:06 AM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+[DB] Auto-migration: logo_element column ensured
+[DB] Auto-migration: 37 blog_posts column(s) ensured
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+7:17:06 AM [express] [MIGRATION] Schema check complete
+[DB] Auto-migration: blog_generation_queue table ensured
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+[DB] Auto-migration: blog image URLs updated to object storage
+[DB] Auto-migration: Assigned unique images to 15 blog posts
+[2026-04-02T07:19:53.865Z] GET /admin/blog
+[2026-04-02T07:19:54.037Z] POST /api/activity/session/end
+7:19:54 AM [express] POST /api/activity/session/end 200 in 19ms :: {"success":true}
+[2026-04-02T07:19:54.109Z] GET /attached_assets/official_logo.webp
+[2026-04-02T07:19:54.181Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+7:19:54 AM [express] GET /api/auth/user 200 in 17ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-02T07:19:54.428Z] POST /api/activity/session
+[2026-04-02T07:19:54.447Z] GET /api/admin/blog/stats
+[2026-04-02T07:19:54.453Z] GET /api/admin/blog/posts/all/
+7:19:54 AM [express] POST /api/activity/session 200 in 28ms :: {"sessionId":"6628d436-b874-478b-87c9…
+[2026-04-02T07:19:51.943Z] GET /api/auth/user
+[2026-04-02T07:19:51.947Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+7:19:52 AM [express] GET /api/auth/user 200 in 233ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+7:19:52 AM [express] POST /api/activity/session 200 in 231ms :: {"sessionId":"cd12d61a-f892-4b6e-b47…
+[2026-04-02T07:19:52.556Z] POST /api/activity/page-view
+7:19:52 AM [express] POST /api/activity/page-view 200 in 34ms :: {"pageViewId":"9b44adc0-8b6c-45a7-8…
+[2026-04-02T07:19:55.434Z] POST /api/activity/session
+7:19:55 AM [express] POST /api/activity/session/end 200 in 16ms :: {"success":true}
+7:19:54 AM [express] POST /api/activity/session 200 in 25ms :: {"sessionId":"ade9d6b7-9b60-47fb-828a…
+7:19:55 AM [express] POST /api/activity/session 200 in 21ms :: {"sessionId":"9d47c44a-fc77-4169-b79d…
+[2026-04-02T07:19:54.623Z] GET /api/admin/blog/review-queue
+[2026-04-02T07:19:54.644Z] GET /api/admin/blog/queue
+[2026-04-02T07:19:55.673Z] POST /api/activity/page-view
+7:19:54 AM [express] GET /api/admin/blog/review-queue 200 in 33ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+7:19:54 AM [express] GET /api/admin/blog/queue 200 in 20ms :: [{"id":1,"targetDate":"2026-04-02T06:0…
+7:19:54 AM [express] GET /api/admin/blog/posts/all/ 200 in 16ms
+[2026-04-02T07:19:54.670Z] POST /api/activity/page-view
+7:19:54 AM [express] POST /api/activity/page-view 200 in 27ms :: {"pageViewId":"6d2ab597-db5f-44a9-9…
+7:19:54 AM [express] GET /api/admin/blog/stats 200 in 54ms :: {"total":31,"published":25,"scheduled"…
+[2026-04-02T07:19:55.432Z] POST /api/activity/session/end
+[2026-04-02T07:19:54.589Z] GET /api/partner/status
+[2026-04-02T07:19:54.593Z] POST /api/activity/session
+7:19:54 AM [express] GET /api/partner/status 200 in 20ms :: {"isPartner":false,"promoCodeCount":0}
+7:19:55 AM [express] POST /api/activity/page-view 200 in 30ms :: {"pageViewId":"4caa5261-d7c5-42b6-9…
+[2026-04-02T07:19:57.589Z] POST /api/activity/session/end
+7:19:57 AM [express] POST /api/activity/session/end 200 in 19ms :: {"success":true}
+[2026-04-02T07:20:01.158Z] POST /api/activity/session
+7:20:01 AM [express] POST /api/activity/session 200 in 26ms :: {"sessionId":"2d72b1dc-669f-4c06-90d9…
+[2026-04-02T07:20:01.551Z] POST /api/activity/page-view
+7:20:01 AM [express] POST /api/activity/page-view 200 in 24ms :: {"pageViewId":"b3cb9ed2-fb0d-4666-9…
+[2026-04-02T07:20:06.210Z] POST /api/admin/blog/posts/f9ce7137-31b9-4059-95c8-b7659d202b97/reverify
+[MultiVerifier] Starting quad-AI verification for: How to Prepare for Your Innovator Founder Visa Interview
+[MultiVerifier] Available Gemini models for this key: gemini-2.5-flash, gemini-2.5-pro, gemini-2.0-flash, gemini-2.0-flash-001, gemini-2.0-flash-lite-001, gemini-2.0-flash-lite, gemini-2.5-flash-preview-tts, gemini-2.5-pro-preview-tts, gemini-flash-latest, gemini-flash-lite-latest, gemini-pro-latest, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-3-pro-preview, gemini-3-flash-preview, gemini-3.1-pro-preview, gemini-3.1-pro-preview-customtools, gemini-3.1-flash-lite-preview, gemini-3-pro-image-preview, gemini-3.1-flash-image-preview, gemini-robotics-er-1.5-preview, gemini-2.5-computer-use-preview-10-2025
+[MultiVerifier] Qwen success
+[MultiVerifier] Gemini REST gemini-2.5-flash fetch error: Unexpected end of JSON input
+[MultiVerifier] Claude success
+[2026-04-02T07:20:31.560Z] POST /api/activity/session
+7:20:31 AM [express] POST /api/activity/session 200 in 228ms :: {"sessionId":"2d72b1dc-669f-4c06-90d…
+[MultiVerifier] Gemini REST gemini-2.5-pro fetch error: Unexpected end of JSON input
+[MultiVerifier] Gemini REST gemini-2.0-flash-lite-001 HTTP 404: This model models/gemini-2.0-flash-lite-001 is no longer available to new users. Please update your code to use a newer model for the latest features and improvements.
+[MultiVerifier] All Gemini REST models failed — marking as unavailable
+[MultiVerifier] Result: FLAGGED | Gemini: N/A | OpenAI: 100 | Claude: 83 | Qwen: 95 | Composite: 93
+7:20:35 AM [express] POST /api/admin/blog/posts/f9ce7137-31b9-4059-95c8-b7659d202b97/reverify 200 in…
+[2026-04-02T07:20:35.452Z] GET /api/admin/blog/posts/all/
+7:20:35 AM [express] GET /api/admin/blog/posts/all/ 200 in 14ms
+[2026-04-02T07:20:35.623Z] GET /api/admin/blog/review-queue
+7:20:35 AM [express] GET /api/admin/blog/review-queue 200 in 34ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+[2026-04-02T07:20:57.212Z] GET /api/admin/blog/review-queue
+7:20:57 AM [express] GET /api/admin/blog/review-queue 200 in 229ms :: [{"id":"f9ce7137-31b9-4059-95c…
+[2026-04-02T07:21:01.267Z] POST /api/admin/blog/posts/23d9abaa-5fae-4c32-99ab-c5a9441b6109/reverify
+[MultiVerifier] Starting quad-AI verification for: How to Prepare for Your Innovator Founder Visa Interview
+[MultiVerifier] Available Gemini models for this key: gemini-2.5-flash, gemini-2.5-pro, gemini-2.0-flash, gemini-2.0-flash-001, gemini-2.0-flash-lite-001, gemini-2.0-flash-lite, gemini-2.5-flash-preview-tts, gemini-2.5-pro-preview-tts, gemini-flash-latest, gemini-flash-lite-latest, gemini-pro-latest, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-3-pro-preview, gemini-3-flash-preview, gemini-3.1-pro-preview, gemini-3.1-pro-preview-customtools, gemini-3.1-flash-lite-preview, gemini-3-pro-image-preview, gemini-3.1-flash-image-preview, gemini-robotics-er-1.5-preview, gemini-2.5-computer-use-preview-10-2025
+[2026-04-02T07:21:01.551Z] POST /api/activity/session
+7:21:01 AM [express] POST /api/activity/session 200 in 29ms :: {"sessionId":"2d72b1dc-669f-4c06-90d9…
+[MultiVerifier] Qwen success
+[MultiVerifier] Gemini REST gemini-2.5-flash fetch error: Unexpected end of JSON input
+[MultiVerifier] Claude error: Unexpected token ` in JSON at position 1431
+[2026-04-02T07:21:21.240Z] POST /api/activity/session/end
+7:21:21 AM [express] POST /api/activity/session/end 200 in 219ms :: {"success":true}
+[MultiVerifier] Gemini REST gemini-2.5-pro fetch error: Unexpected end of JSON input
+[MultiVerifier] Gemini REST gemini-2.0-flash-lite-001 HTTP 404: This model models/gemini-2.0-flash-lite-001 is no longer available to new users. Please update your code to use a newer model for the latest features and improvements.
+[MultiVerifier] All Gemini REST models failed — marking as unavailable
+[MultiVerifier] Result: FLAGGED | Gemini: N/A | OpenAI: 100 | Claude: 0 | Qwen: 95 | Composite: 65
+7:21:30 AM [express] POST /api/admin/blog/posts/23d9abaa-5fae-4c32-99ab-c5a9441b6109/reverify 200 in…
+[2026-04-02T07:21:30.491Z] GET /api/admin/blog/posts/all/
+7:21:30 AM [express] GET /api/admin/blog/posts/all/ 200 in 14ms
+[2026-04-02T07:21:30.665Z] GET /api/admin/blog/review-queue
+7:21:30 AM [express] GET /api/admin/blog/review-queue 200 in 34ms :: [{"id":"f9ce7137-31b9-4059-95c8…
+[2026-04-02T07:26:02.668Z] GET /robots.txt
+Error: ENOENT: no such file or directory, stat '/app/dist/public/robots.txt'
+
+

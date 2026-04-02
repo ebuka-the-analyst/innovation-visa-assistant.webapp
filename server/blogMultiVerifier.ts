@@ -77,7 +77,39 @@ WHAT YOU MUST NOT CLAIM:
 // MARKER PROMPT - Used identically by both Gemini and OpenAI
 // ============================================================================
 
+/** Strip HTML tags and collapse whitespace for cleaner verification prompts */
+function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Robustly extract the first JSON object from a model response string.
+ * Handles markdown code fences, backticks, and extra surrounding text.
+ */
+function extractJsonObject(text: string): string {
+  // Strip markdown code fences
+  let cleaned = text.replace(/^```json?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+  // Find first { and last } to grab the outermost object
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  if (start === -1 || end === -1 || end < start) {
+    throw new Error("No JSON object found in model response");
+  }
+  return cleaned.slice(start, end + 1);
+}
+
 function buildMarkerPrompt(articleTitle: string, articleContent: string): string {
+  // Strip HTML and limit to 4000 plain-text chars to avoid token overrun
+  const plainContent = stripHtml(articleContent).substring(0, 4000);
+
   return `You are a UK immigration law fact-checker and PhD-level academic examiner.
 
 Your job is to independently verify the factual accuracy of the following blog article about the UK Innovator Founder Visa. Use ONLY the verified reference facts provided below. Do not use your general training knowledge to fill gaps — if you cannot verify a claim against the reference, FLAG it.
@@ -87,8 +119,8 @@ ${FACT_REFERENCE}
 ---
 ARTICLE TITLE: ${articleTitle}
 
-ARTICLE CONTENT (HTML):
-${articleContent.substring(0, 8000)}
+ARTICLE CONTENT (plain text, truncated to 4000 chars):
+${plainContent}
 ---
 
 MARKING CRITERIA (score each 0-20, total = 0-100):
@@ -153,7 +185,10 @@ async function runGeminiVerification(title: string, content: string): Promise<{
     console.log(`[MultiVerifier] Available Gemini models for this key: ${all.join(", ")}`);
     // Build a prioritised trial list: prefer gemini-2.5-flash, then gemini-2.5-pro, then anything else
     // Avoid known-deprecated model names (gemini-2.0-flash, gemini-2.0-flash-001) to save time
-    const DEPRECATED = ["gemini-2.0-flash", "gemini-2.0-flash-001", "gemini-2.0-flash-lite"];
+    const DEPRECATED = [
+      "gemini-2.0-flash", "gemini-2.0-flash-001",
+      "gemini-2.0-flash-lite", "gemini-2.0-flash-lite-001",
+    ];
     const usable = all.filter(n => !DEPRECATED.includes(n));
     const flash25 = usable.filter(n => n.startsWith("gemini-2.5") && n.includes("flash"));
     const pro25  = usable.filter(n => n.startsWith("gemini-2.5") && n.includes("pro") && !n.includes("tts") && !n.includes("image"));
@@ -211,12 +246,12 @@ async function runGeminiVerification(title: string, content: string): Promise<{
       }
 
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      let jsonText = text.trim();
-      if (jsonText.startsWith("```")) {
-        jsonText = jsonText.replace(/^```json?\n?/, "").replace(/\n?```$/, "");
+      if (!text) {
+        const finishReason = data?.candidates?.[0]?.finishReason;
+        console.warn(`[MultiVerifier] Gemini REST ${modelName} returned empty text (finishReason=${finishReason})`);
+        continue;
       }
-
-      const parsed = JSON.parse(jsonText);
+      const parsed = JSON.parse(extractJsonObject(text));
       console.log(`[MultiVerifier] Gemini REST success with model=${modelName}`);
       return {
         score: Math.min(100, Math.max(0, parsed.totalScore || 0)),
@@ -320,11 +355,7 @@ async function runClaudeVerification(title: string, content: string): Promise<{
       messages: [{ role: "user", content: prompt }],
     });
     const text = response.content[0]?.type === "text" ? response.content[0].text : "";
-    let jsonText = text.trim();
-    if (jsonText.startsWith("```")) {
-      jsonText = jsonText.replace(/^```json?\n?/, "").replace(/\n?```$/, "");
-    }
-    const parsed = JSON.parse(jsonText);
+    const parsed = JSON.parse(extractJsonObject(text));
     console.log(`[MultiVerifier] Claude success`);
     return {
       score: Math.min(100, Math.max(0, parsed.totalScore || 0)),
