@@ -11751,19 +11751,40 @@ Return a JSON object with:
   app.post("/api/admin/users/:userId/notes", requireAdmin, async (req, res) => {
     try {
       const { userId } = req.params;
-      const { notes } = req.body;
+      const { notes, category, risk, append } = req.body;
+      const admin = req.user as any;
 
       const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
       if (!targetUser) {
         return res.status(404).json({ error: "User not found" });
       }
 
+      let finalNotes: string;
+
+      if (append && notes) {
+        // Structured mode: append a new note entry to the JSON array
+        let existing: any[] = [];
+        try { existing = JSON.parse(targetUser.adminNotes || '[]'); } catch { existing = []; }
+        if (!Array.isArray(existing)) existing = [];
+        existing.push({
+          text: notes,
+          category: category || 'general',
+          risk: risk || 'none',
+          addedBy: admin.email || 'admin',
+          addedAt: new Date().toISOString(),
+        });
+        finalNotes = JSON.stringify(existing);
+      } else {
+        // Legacy plain text mode
+        finalNotes = notes;
+      }
+
       await db.update(users).set({ 
-        adminNotes: notes,
+        adminNotes: finalNotes,
         updatedAt: new Date()
       }).where(eq(users.id, userId));
 
-      res.json({ success: true, message: "Notes updated" });
+      res.json({ success: true, message: "Note saved", adminNotes: finalNotes });
     } catch (error) {
       console.error("Update notes error:", error);
       res.status(500).json({ error: "Failed to update notes" });
@@ -11817,12 +11838,43 @@ Return a JSON object with:
         .orderBy(desc(businessPlans.createdAt))
         .limit(10);
 
+      // Tool usage summary
+      const toolUsageRaw = await db.execute(sql`
+        SELECT tool_id, tool_category, COUNT(*) as uses, MAX(created_at) as last_used
+        FROM user_activity_logs
+        WHERE user_id = ${userId}
+        GROUP BY tool_id, tool_category
+        ORDER BY uses DESC
+        LIMIT 15
+      `);
+
+      // Recent sessions
+      const sessionsRaw = await db.execute(sql`
+        SELECT session_id, device_type, browser, os, started_at, last_seen_at
+        FROM user_sessions
+        WHERE user_id = ${userId}
+        ORDER BY started_at DESC
+        LIMIT 5
+      `);
+
+      // Recent page views
+      const pageViewsRaw = await db.execute(sql`
+        SELECT path, title, created_at
+        FROM page_views
+        WHERE user_id = ${userId}
+        ORDER BY created_at DESC
+        LIMIT 10
+      `);
+
       const { password, verificationToken, resetToken, ...safeUser } = user;
 
       res.json({
         user: safeUser,
         businessPlans: userBusinessPlans,
-        impersonationNote: "This is a read-only view of user data for support purposes"
+        toolUsage: toolUsageRaw.rows || [],
+        sessions: sessionsRaw.rows || [],
+        recentPages: pageViewsRaw.rows || [],
+        impersonationNote: "Read-only support view — no actions performed on behalf of user"
       });
     } catch (error) {
       console.error("Impersonate user error:", error);
@@ -12222,6 +12274,98 @@ Return a JSON object with:
   });
 
   // Admin: Comprehensive User Analysis (PhD-level deep analysis)
+  // Admin: PhD-level activity details for a user — powers the View Activity modal
+  app.get("/api/admin/users/:userId/activity-details", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+
+      // Tool usage from user_activity_logs
+      const toolUsageRaw = await db.execute(sql`
+        SELECT tool_id, tool_category, activity_type, activity_data, ip_address, created_at
+        FROM user_activity_logs
+        WHERE user_id = ${userId}
+        ORDER BY created_at DESC
+        LIMIT 100
+      `);
+
+      // Top tools grouped
+      const topToolsRaw = await db.execute(sql`
+        SELECT tool_id, tool_category, COUNT(*) as uses, MAX(created_at) as last_used
+        FROM user_activity_logs
+        WHERE user_id = ${userId}
+        GROUP BY tool_id, tool_category
+        ORDER BY uses DESC
+        LIMIT 20
+      `);
+
+      // Page views
+      const pageViewsRaw = await db.execute(sql`
+        SELECT path, title, referrer, time_on_page, created_at
+        FROM page_views
+        WHERE user_id = ${userId}
+        ORDER BY created_at DESC
+        LIMIT 50
+      `);
+
+      // Sessions
+      const sessionsRaw = await db.execute(sql`
+        SELECT session_id, device_type, browser, os, started_at, last_seen_at,
+          EXTRACT(EPOCH FROM (last_seen_at - started_at)) as duration_seconds
+        FROM user_sessions
+        WHERE user_id = ${userId}
+        ORDER BY started_at DESC
+        LIMIT 20
+      `);
+
+      // Hour-of-day heatmap (last 30 days)
+      const heatmapRaw = await db.execute(sql`
+        SELECT
+          EXTRACT(DOW FROM created_at AT TIME ZONE 'UTC') as dow,
+          EXTRACT(HOUR FROM created_at AT TIME ZONE 'UTC') as hour,
+          COUNT(*) as count
+        FROM user_activity_logs
+        WHERE user_id = ${userId}
+          AND created_at > NOW() - INTERVAL '30 days'
+        GROUP BY dow, hour
+        ORDER BY dow, hour
+      `);
+
+      // Daily activity for past 14 days
+      const dailyRaw = await db.execute(sql`
+        SELECT
+          DATE(created_at AT TIME ZONE 'UTC') as day,
+          COUNT(*) as events
+        FROM user_activity_logs
+        WHERE user_id = ${userId}
+          AND created_at > NOW() - INTERVAL '14 days'
+        GROUP BY day
+        ORDER BY day
+      `);
+
+      // Activity events (micro interactions)
+      const eventsRaw = await db.execute(sql`
+        SELECT event_type, event_data, page_path, created_at
+        FROM activity_events
+        WHERE user_id = ${userId}
+        ORDER BY created_at DESC
+        LIMIT 50
+      `);
+
+      res.json({
+        toolUsage: toolUsageRaw.rows || [],
+        topTools: topToolsRaw.rows || [],
+        pageViews: pageViewsRaw.rows || [],
+        sessions: sessionsRaw.rows || [],
+        heatmap: heatmapRaw.rows || [],
+        daily: dailyRaw.rows || [],
+        events: eventsRaw.rows || [],
+      });
+    } catch (error) {
+      console.error("Activity details error:", error);
+      res.status(500).json({ error: "Failed to fetch activity details" });
+    }
+  });
+
   app.get("/api/admin/users/:userId/analysis", requireAdmin, async (req, res) => {
     try {
       const { userId } = req.params;

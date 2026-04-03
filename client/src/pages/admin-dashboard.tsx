@@ -685,6 +685,17 @@ export default function AdminDashboard() {
   const [viewingUserActivity, setViewingUserActivity] = useState<User | null>(null);
   const [exportingUser, setExportingUser] = useState<User | null>(null);
   const [analyzingUser, setAnalyzingUser] = useState<User | null>(null);
+  // Enhanced state for upgraded modals
+  const [resetPasswordLink, setResetPasswordLink] = useState<{ url: string; expiresAt: string; email: string } | null>(null);
+  const [notesCategory, setNotesCategory] = useState<string>("general");
+  const [notesRisk, setNotesRisk] = useState<string>("none");
+  const [notesNewText, setNotesNewText] = useState("");
+  const [impersonatingTab, setImpersonatingTab] = useState("overview");
+  const [activityTab, setActivityTab] = useState("timeline");
+  const [editUserFirstName, setEditUserFirstName] = useState("");
+  const [editUserLastName, setEditUserLastName] = useState("");
+  const [editUserEmailField, setEditUserEmailField] = useState("");
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv'>('json');
   
   // Error logging states
   const [selectedError, setSelectedError] = useState<any>(null);
@@ -835,6 +846,18 @@ export default function AdminDashboard() {
       return res.json();
     },
     enabled: !!viewingUserDetails?.id && !!user?.isAdmin,
+  });
+
+  // Activity details query — powers the rebuilt View Activity modal
+  const { data: activityDetails, isLoading: activityDetailsLoading } = useQuery<any>({
+    queryKey: ['/api/admin/users', viewingUserActivity?.id, 'activity-details'],
+    queryFn: async () => {
+      if (!viewingUserActivity?.id) return null;
+      const res = await fetch(`/api/admin/users/${viewingUserActivity.id}/activity-details`, { credentials: 'include' });
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: !!viewingUserActivity?.id && !!user?.isAdmin,
   });
 
   // User analysis query (comprehensive analysis)
@@ -2181,16 +2204,22 @@ export default function AdminDashboard() {
 
   // Update admin notes
   const notesMutation = useMutation({
-    mutationFn: async ({ userId, notes }: { userId: string; notes: string }) => {
-      await apiRequest('POST', `/api/admin/users/${userId}/notes`, { notes });
+    mutationFn: async ({ userId, notes, category, risk }: { userId: string; notes: string; category?: string; risk?: string }) => {
+      const res = await apiRequest('POST', `/api/admin/users/${userId}/notes`, { notes, category, risk, append: true });
+      return res.json();
     },
-    onSuccess: () => {
-      setNotesUser(null);
-      setAdminNotes("");
-      toast({ title: 'Admin notes saved' });
+    onSuccess: (data) => {
+      setNotesNewText("");
+      setNotesCategory("general");
+      setNotesRisk("none");
+      // Update the notesUser with new notes so history shows immediately
+      if (notesUser && data.adminNotes) {
+        setNotesUser({ ...notesUser, adminNotes: data.adminNotes } as any);
+      }
+      toast({ title: 'Note added to history' });
     },
     onError: (error: Error) => {
-      toast({ title: "Failed to save notes", description: error.message, variant: "destructive" });
+      toast({ title: "Failed to save note", description: error.message, variant: "destructive" });
     },
   });
 
@@ -2210,15 +2239,14 @@ export default function AdminDashboard() {
 
   // Reset password
   const resetPasswordMutation = useMutation({
-    mutationFn: async (userId: string) => {
+    mutationFn: async ({ userId, email }: { userId: string; email: string }) => {
       const res = await apiRequest('POST', `/api/admin/users/${userId}/reset-password`, {});
-      return res.json();
+      const data = await res.json();
+      return { ...data, email };
     },
     onSuccess: (data) => {
-      toast({ 
-        title: 'Password reset initiated', 
-        description: `Reset link generated. Expires at ${new Date(data.expiresAt).toLocaleString()}` 
-      });
+      // Show the reset link in a copyable dialog instead of hiding it in a toast
+      setResetPasswordLink({ url: data.resetUrl, expiresAt: data.expiresAt, email: data.email });
     },
     onError: (error: Error) => {
       toast({ title: "Failed to reset password", description: error.message, variant: "destructive" });
@@ -2262,23 +2290,41 @@ export default function AdminDashboard() {
   });
 
   // Export user data (GDPR compliance)
-  const exportUserData = async (userId: string) => {
+  const exportUserData = async (userId: string, format: 'json' | 'csv' = 'json') => {
     try {
       const res = await apiRequest('GET', `/api/admin/users/${userId}/export`);
       const data = await res.json();
-      
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const date = new Date().toISOString().split('T')[0];
+
+      let blob: Blob;
+      let filename: string;
+
+      if (format === 'csv') {
+        // Convert flat user data to CSV
+        const u = data.user || {};
+        const plans = data.businessPlans || [];
+        // Build CSV rows
+        const userRow = Object.entries(u).map(([k, v]) => `"${k}","${String(v).replace(/"/g, '""')}"`).join('\n');
+        const plansHeader = plans.length > 0 ? Object.keys(plans[0]).join(',') : '';
+        const plansRows = plans.map((p: any) => Object.values(p).map((v: any) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const csv = `=== USER ACCOUNT DATA ===\nField,Value\n${userRow}\n\n=== BUSINESS PLANS ===\n${plansHeader}\n${plansRows}`;
+        blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        filename = `user-data-${userId}-${date}.csv`;
+      } else {
+        blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        filename = `user-data-${userId}-${date}.json`;
+      }
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `user-data-${userId}-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
-      setExportingUser(null);
-      toast({ title: 'User data exported', description: 'Download started.' });
+
+      toast({ title: `User data exported as ${format.toUpperCase()}`, description: 'Download started.' });
     } catch (error: any) {
       toast({ title: "Failed to export user data", description: error.message, variant: "destructive" });
     }
@@ -4323,6 +4369,9 @@ export default function AdminDashboard() {
                                           setEditingUser(user);
                                           setEditUserTier(user.subscriptionTier);
                                           setEditUserIsAdmin(user.isAdmin);
+                                          setEditUserFirstName((user as any).firstName || "");
+                                          setEditUserLastName((user as any).lastName || "");
+                                          setEditUserEmailField(user.email || "");
                                         }}>
                                           <Edit className="h-3 w-3 mr-2" />
                                           Edit User
@@ -4358,12 +4407,14 @@ export default function AdminDashboard() {
                                         
                                         <DropdownMenuItem onClick={() => {
                                           setNotesUser(user);
-                                          setAdminNotes((user as any).adminNotes || "");
+                                          setNotesNewText("");
+                                          setNotesCategory("general");
+                                          setNotesRisk("none");
                                         }}>
                                           <FileText className="h-3 w-3 mr-2" />
                                           Admin Notes
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => resetPasswordMutation.mutate(user.id)}>
+                                        <DropdownMenuItem onClick={() => resetPasswordMutation.mutate({ userId: user.id, email: user.email })}>
                                           <LockKeyhole className="h-3 w-3 mr-2" />
                                           Reset Password
                                         </DropdownMenuItem>
@@ -4383,9 +4434,13 @@ export default function AdminDashboard() {
                                         <DropdownMenuSeparator />
                                         <DropdownMenuLabel className="text-xs text-muted-foreground">Data & Sessions</DropdownMenuLabel>
                                         
-                                        <DropdownMenuItem onClick={() => exportUserData(user.id)}>
+                                        <DropdownMenuItem onClick={() => exportUserData(user.id, 'json')}>
                                           <Download className="h-3 w-3 mr-2 text-blue-500" />
-                                          Export User Data
+                                          Export as JSON
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => exportUserData(user.id, 'csv')}>
+                                          <Download className="h-3 w-3 mr-2 text-green-500" />
+                                          Export as CSV
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => setViewingUserActivity(user)}>
                                           <Activity className="h-3 w-3 mr-2 text-green-500" />
@@ -13560,22 +13615,63 @@ export default function AdminDashboard() {
           </SidebarInset>
         </div>
 
-        {/* Edit User Dialog */}
+        {/* Edit User Dialog — full profile editor */}
         <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
-          <DialogContent>
+          <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Edit User</DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="h-3 w-3 text-primary" />
+                Edit User Profile
+              </DialogTitle>
               <DialogDescription>
-                Update user subscription tier and admin status
+                Full account edit for {editingUser?.email}. Changes take effect immediately.
               </DialogDescription>
             </DialogHeader>
 
             {editingUser && (
-              <div className="space-y-1.5">
-                <div className="space-y-0.5">
+              <div className="space-y-4 py-1">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="edit-first-name">First Name</Label>
+                    <Input
+                      id="edit-first-name"
+                      value={editUserFirstName}
+                      onChange={(e) => setEditUserFirstName(e.target.value)}
+                      placeholder="First name"
+                      data-testid="input-edit-first-name"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="edit-last-name">Last Name</Label>
+                    <Input
+                      id="edit-last-name"
+                      value={editUserLastName}
+                      onChange={(e) => setEditUserLastName(e.target.value)}
+                      placeholder="Last name"
+                      data-testid="input-edit-last-name"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="edit-email">Email Address</Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    value={editUserEmailField}
+                    onChange={(e) => setEditUserEmailField(e.target.value)}
+                    placeholder="user@example.com"
+                    data-testid="input-edit-email"
+                  />
+                  <p className="text-[10px] text-muted-foreground">Changing email will require re-verification.</p>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-1">
                   <Label htmlFor="edit-tier">Subscription Tier</Label>
                   <Select value={editUserTier} onValueChange={setEditUserTier}>
-                    <SelectTrigger id="edit-tier">
+                    <SelectTrigger id="edit-tier" data-testid="select-edit-tier">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -13583,17 +13679,33 @@ export default function AdminDashboard() {
                       <SelectItem value="basic">Basic</SelectItem>
                       <SelectItem value="premium">Premium</SelectItem>
                       <SelectItem value="enterprise">Enterprise</SelectItem>
+                      <SelectItem value="ultimate">Ultimate</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="edit-admin"
-                    checked={editUserIsAdmin}
-                    onCheckedChange={setEditUserIsAdmin}
-                  />
-                  <Label htmlFor="edit-admin">Admin Access</Label>
+                <Separator />
+
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground text-xs uppercase tracking-wide">Account Permissions</Label>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between rounded-md border p-3">
+                      <div>
+                        <p className="text-sm font-medium">Admin Access</p>
+                        <p className="text-[10px] text-muted-foreground">Full admin dashboard access</p>
+                      </div>
+                      <Switch
+                        id="edit-admin"
+                        checked={editUserIsAdmin}
+                        onCheckedChange={setEditUserIsAdmin}
+                        data-testid="switch-edit-admin"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-3 text-[10px] text-amber-700 dark:text-amber-300">
+                  All changes are logged to the admin audit trail. Email changes trigger re-verification.
                 </div>
               </div>
             )}
@@ -13608,11 +13720,15 @@ export default function AdminDashboard() {
                     updateUserMutation.mutate({
                       userId: editingUser.id,
                       tier: editUserTier,
-                      isAdmin: editUserIsAdmin
+                      isAdmin: editUserIsAdmin,
+                      firstName: editUserFirstName,
+                      lastName: editUserLastName,
+                      email: editUserEmailField !== editingUser.email ? editUserEmailField : undefined,
                     });
                   }
                 }}
                 disabled={updateUserMutation.isPending}
+                data-testid="button-save-user-edit"
               >
                 {updateUserMutation.isPending ? 'Saving...' : 'Save Changes'}
               </Button>
@@ -14380,75 +14496,247 @@ export default function AdminDashboard() {
         </AlertDialog>
 
         {/* View User Activity Modal */}
-        <Dialog open={!!viewingUserActivity} onOpenChange={(open) => !open && setViewingUserActivity(null)}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        {/* View Activity — PhD-level rebuild with real data */}
+        <Dialog open={!!viewingUserActivity} onOpenChange={(open) => { if (!open) { setViewingUserActivity(null); setActivityTab("timeline"); } }}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Activity className="h-3 w-3 text-green-500" />
-                User Activity
+                User Activity Intelligence
               </DialogTitle>
               <DialogDescription>
-                Recent activity for {viewingUserActivity?.email}
+                Full behavioural analysis for {viewingUserActivity?.email} — sessions, tool usage, page navigation, and engagement heatmap
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-1">
-              <div className="grid grid-cols-2 gap-1.5">
-                <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-[9px] text-muted-foreground">Account Created</p>
-                  <p className="font-medium">
-                    {viewingUserActivity?.createdAt 
-                      ? format(new Date(viewingUserActivity.createdAt), 'PPp')
-                      : 'Unknown'}
-                  </p>
-                </div>
-                <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-[9px] text-muted-foreground">Last Login</p>
-                  <p className="font-medium">
-                    {viewingUserActivity?.lastLogin 
-                      ? formatDistance(new Date(viewingUserActivity.lastLogin), new Date(), { addSuffix: true })
-                      : 'Never'}
-                  </p>
-                </div>
-                <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-[9px] text-muted-foreground">Current Tier</p>
-                  <Badge variant="outline" className="capitalize mt-1">
-                    {viewingUserActivity?.subscriptionTier || 'free'}
-                  </Badge>
-                </div>
-                <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-[9px] text-muted-foreground">Credits Remaining</p>
-                  <p className="font-medium">
-                    {((viewingUserActivity as any)?.planCredits || 0) + ((viewingUserActivity as any)?.bonusCredits || 0)}
-                  </p>
-                </div>
+
+            {/* Summary strip */}
+            {viewingUserActivity && (
+              <div className="grid grid-cols-4 gap-2 shrink-0">
+                {[
+                  { label: "Joined", value: viewingUserActivity.createdAt ? format(new Date(viewingUserActivity.createdAt), 'dd MMM yyyy') : '—' },
+                  { label: "Last Login", value: viewingUserActivity.lastLogin ? formatDistance(new Date(viewingUserActivity.lastLogin), new Date(), { addSuffix: true }) : 'Never' },
+                  { label: "Tier", value: (viewingUserActivity.subscriptionTier || 'free').toUpperCase() },
+                  { label: "Credits Left", value: String(((viewingUserActivity as any).planCredits || 0) + ((viewingUserActivity as any).bonusCredits || 0)) },
+                ].map(({ label, value }) => (
+                  <div key={label} className="rounded-md border bg-muted/30 p-2.5 text-center">
+                    <p className="text-[9px] text-muted-foreground mb-0.5">{label}</p>
+                    <p className="text-xs font-semibold">{value}</p>
+                  </div>
+                ))}
               </div>
-              
-              <Separator />
-              
-              <div>
-                <h4 className="font-medium mb-0.5">Account Status</h4>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant={(viewingUserActivity as any)?.isVerified ? "default" : "secondary"}>
-                    {(viewingUserActivity as any)?.isVerified ? "Email Verified" : "Email Not Verified"}
-                  </Badge>
-                  {viewingUserActivity?.isAdmin && (
-                    <Badge variant="default" className="bg-purple-600">Admin</Badge>
-                  )}
-                  {(viewingUserActivity as any)?.isBanned && (
-                    <Badge variant="destructive">Banned</Badge>
-                  )}
-                  {(viewingUserActivity as any)?.suspendedUntil && new Date((viewingUserActivity as any).suspendedUntil) > new Date() && (
-                    <Badge variant="secondary" className="bg-orange-500 text-white">
-                      Suspended until {format(new Date((viewingUserActivity as any).suspendedUntil), 'PP')}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setViewingUserActivity(null)}>
+            )}
+
+            <Tabs value={activityTab} onValueChange={setActivityTab} className="flex-1 overflow-hidden flex flex-col min-h-0">
+              <TabsList className="shrink-0 w-full justify-start">
+                <TabsTrigger value="timeline" className="text-xs">Event Timeline</TabsTrigger>
+                <TabsTrigger value="tools" className="text-xs">Tool Usage</TabsTrigger>
+                <TabsTrigger value="pages" className="text-xs">Page Views</TabsTrigger>
+                <TabsTrigger value="sessions" className="text-xs">Sessions</TabsTrigger>
+                <TabsTrigger value="heatmap" className="text-xs">Heatmap</TabsTrigger>
+              </TabsList>
+
+              <ScrollArea className="flex-1 mt-2">
+                {activityDetailsLoading ? (
+                  <div className="space-y-2 p-2">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                ) : (
+                  <>
+                    <TabsContent value="timeline" className="mt-0">
+                      {activityDetails?.toolUsage?.length > 0 ? (
+                        <div className="space-y-1">
+                          {activityDetails.toolUsage.map((ev: any, i: number) => (
+                            <div key={i} className="flex items-start gap-3 p-2 rounded-md hover-elevate">
+                              <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-xs font-medium truncate">{ev.tool_id || ev.activity_type}</span>
+                                  <span className="text-[9px] text-muted-foreground shrink-0">
+                                    {ev.created_at ? format(new Date(ev.created_at), 'dd MMM HH:mm') : '—'}
+                                  </span>
+                                </div>
+                                <p className="text-[10px] text-muted-foreground">{ev.tool_category || ev.activity_type}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground text-sm">No activity recorded yet</div>
+                      )}
+                    </TabsContent>
+
+                    <TabsContent value="tools" className="mt-0">
+                      {activityDetails?.topTools?.length > 0 ? (
+                        <div className="space-y-2">
+                          {activityDetails.topTools.map((tool: any, i: number) => {
+                            const maxUses = Math.max(...activityDetails.topTools.map((t: any) => Number(t.uses)));
+                            return (
+                              <div key={i} className="space-y-0.5">
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-medium truncate max-w-[60%]">{tool.tool_id}</span>
+                                  <span className="text-muted-foreground">{tool.uses} uses</span>
+                                </div>
+                                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                                  <div
+                                    className="h-full bg-primary rounded-full"
+                                    style={{ width: `${(Number(tool.uses) / maxUses) * 100}%` }}
+                                  />
+                                </div>
+                                <p className="text-[9px] text-muted-foreground">
+                                  Last: {tool.last_used ? format(new Date(tool.last_used), 'dd MMM yyyy') : '—'}
+                                  {tool.tool_category ? ` · ${tool.tool_category}` : ''}
+                                </p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground text-sm">No tool usage recorded</div>
+                      )}
+                    </TabsContent>
+
+                    <TabsContent value="pages" className="mt-0">
+                      {activityDetails?.pageViews?.length > 0 ? (
+                        <div className="space-y-1">
+                          {activityDetails.pageViews.map((pv: any, i: number) => (
+                            <div key={i} className="flex items-center justify-between gap-2 p-2 rounded-md text-xs hover-elevate">
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium truncate">{pv.path}</p>
+                                <p className="text-[9px] text-muted-foreground">{pv.title || 'No title'}</p>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <p className="text-[9px] text-muted-foreground">{pv.created_at ? format(new Date(pv.created_at), 'dd MMM HH:mm') : '—'}</p>
+                                {pv.time_on_page && <p className="text-[9px] text-green-600">{Math.round(Number(pv.time_on_page))}s</p>}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground text-sm">No page views recorded</div>
+                      )}
+                    </TabsContent>
+
+                    <TabsContent value="sessions" className="mt-0">
+                      {activityDetails?.sessions?.length > 0 ? (
+                        <div className="space-y-2">
+                          {activityDetails.sessions.map((sess: any, i: number) => (
+                            <div key={i} className="rounded-md border p-3 text-xs">
+                              <div className="flex items-center justify-between gap-2 mb-1">
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="text-[9px] capitalize">{sess.device_type || 'desktop'}</Badge>
+                                  <span className="text-muted-foreground">{sess.browser} · {sess.os}</span>
+                                </div>
+                                <span className="text-[9px] text-muted-foreground">
+                                  {sess.duration_seconds ? `${Math.round(Number(sess.duration_seconds) / 60)} min` : 'Active'}
+                                </span>
+                              </div>
+                              <p className="text-[9px] text-muted-foreground">
+                                {sess.started_at ? format(new Date(sess.started_at), 'dd MMM yyyy HH:mm') : '—'} → {sess.last_seen_at ? format(new Date(sess.last_seen_at), 'HH:mm') : '—'}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground text-sm">No sessions recorded</div>
+                      )}
+                    </TabsContent>
+
+                    <TabsContent value="heatmap" className="mt-0">
+                      <div className="space-y-3">
+                        <p className="text-xs text-muted-foreground">Activity heatmap (last 30 days) — darker = more activity</p>
+                        {activityDetails?.heatmap?.length > 0 ? (() => {
+                          const maxCount = Math.max(...activityDetails.heatmap.map((h: any) => Number(h.count)));
+                          const HOURS = Array.from({ length: 24 }, (_, i) => i);
+                          const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                          const heatGrid: Record<string, number> = {};
+                          activityDetails.heatmap.forEach((h: any) => {
+                            heatGrid[`${h.dow}-${h.hour}`] = Number(h.count);
+                          });
+                          return (
+                            <div className="overflow-x-auto">
+                              <div className="min-w-max space-y-0.5">
+                                {DAYS.map((day, dow) => (
+                                  <div key={dow} className="flex items-center gap-0.5">
+                                    <span className="text-[9px] text-muted-foreground w-7 shrink-0">{day}</span>
+                                    {HOURS.map(hour => {
+                                      const count = heatGrid[`${dow}-${hour}`] || 0;
+                                      const intensity = maxCount > 0 ? count / maxCount : 0;
+                                      return (
+                                        <div
+                                          key={hour}
+                                          className="w-4 h-4 rounded-sm"
+                                          title={`${day} ${hour}:00 — ${count} events`}
+                                          style={{ backgroundColor: count === 0 ? 'var(--muted)' : `rgba(var(--primary-rgb, 0, 94, 184), ${0.15 + intensity * 0.85})` }}
+                                        />
+                                      );
+                                    })}
+                                  </div>
+                                ))}
+                                <div className="flex items-center gap-0.5 mt-1">
+                                  <span className="w-7 shrink-0" />
+                                  {HOURS.filter(h => h % 4 === 0).map(h => (
+                                    <div key={h} className="text-[8px] text-muted-foreground" style={{ marginLeft: h === 0 ? 0 : `${(4 - 1) * 18}px` }}>{h}h</div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })() : (
+                          <div className="text-center py-8 text-muted-foreground text-sm">Not enough data for heatmap yet</div>
+                        )}
+                      </div>
+                    </TabsContent>
+                  </>
+                )}
+              </ScrollArea>
+            </Tabs>
+
+            <DialogFooter className="shrink-0">
+              <Button variant="outline" onClick={() => { setViewingUserActivity(null); setActivityTab("timeline"); }}>
                 Close
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Password Link — copyable URL for phone/in-person support */}
+        <Dialog open={!!resetPasswordLink} onOpenChange={(open) => !open && setResetPasswordLink(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <LockKeyhole className="h-3 w-3 text-primary" />
+                Password Reset Link Generated
+              </DialogTitle>
+              <DialogDescription>
+                Share this link with {resetPasswordLink?.email} securely. It expires in 1 hour.
+              </DialogDescription>
+            </DialogHeader>
+            {resetPasswordLink && (
+              <div className="space-y-3">
+                <div className="rounded-md border bg-muted/30 p-3">
+                  <p className="text-[9px] text-muted-foreground mb-1">Reset URL (expires {resetPasswordLink.expiresAt ? format(new Date(resetPasswordLink.expiresAt), 'dd MMM yyyy HH:mm') : '—'})</p>
+                  <p className="text-xs font-mono break-all">{resetPasswordLink.url}</p>
+                </div>
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    navigator.clipboard.writeText(resetPasswordLink.url);
+                    toast({ title: 'Link copied to clipboard' });
+                  }}
+                  data-testid="button-copy-reset-link"
+                >
+                  Copy Reset Link
+                </Button>
+                <p className="text-[10px] text-muted-foreground text-center">
+                  For security: share via official channel only. Link is single-use.
+                </p>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setResetPasswordLink(null)}>Close</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -14686,116 +14974,255 @@ export default function AdminDashboard() {
           </DialogContent>
         </Dialog>
 
-        {/* Admin Notes Modal */}
-        <Dialog open={!!notesUser} onOpenChange={(open) => !open && setNotesUser(null)}>
-          <DialogContent>
+        {/* Admin Notes — structured note history with categories, risk flags, timestamps */}
+        <Dialog open={!!notesUser} onOpenChange={(open) => { if (!open) { setNotesUser(null); setNotesNewText(""); setNotesCategory("general"); setNotesRisk("none"); } }}>
+          <DialogContent className="max-w-xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <FileText className="h-3 w-3" />
-                Admin Notes
+                <FileText className="h-3 w-3 text-primary" />
+                Admin Notes — {notesUser?.email}
               </DialogTitle>
               <DialogDescription>
-                Internal notes for {notesUser?.email} (not visible to user)
+                Internal notes — append-only history, not visible to the user
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-1">
-              <textarea
-                className="w-full h-40 p-3 rounded-lg border bg-muted/50 resize-none"
-                placeholder="Add internal notes about this user..."
-                value={adminNotes}
-                onChange={(e) => setAdminNotes(e.target.value)}
-                data-testid="textarea-admin-notes"
-              />
-            </div>
+            {notesUser && (() => {
+              let parsedNotes: any[] = [];
+              try {
+                const raw = (notesUser as any).adminNotes || '[]';
+                const parsed = JSON.parse(raw);
+                parsedNotes = Array.isArray(parsed) ? parsed : [];
+              } catch { parsedNotes = []; }
+              const riskColour = (r: string) => r === 'high' ? 'text-destructive border-destructive/30 bg-destructive/5' : r === 'medium' ? 'text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-900/20' : r === 'low' ? 'text-blue-600 border-blue-300 bg-blue-50 dark:bg-blue-900/20' : 'border bg-muted/30';
+              return (
+                <div className="space-y-4">
+                  {/* Note history */}
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Note History ({parsedNotes.length})</p>
+                    {parsedNotes.length === 0 ? (
+                      <div className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">No notes yet — add the first one below</div>
+                    ) : (
+                      <ScrollArea className="max-h-52">
+                        <div className="space-y-2">
+                          {[...parsedNotes].reverse().map((note: any, i: number) => (
+                            <div key={i} className={`rounded-md border p-3 text-xs ${riskColour(note.risk)}`}>
+                              <div className="flex items-center justify-between gap-2 mb-1">
+                                <div className="flex gap-2">
+                                  <Badge variant="outline" className="text-[9px] h-4 capitalize">{note.category || 'general'}</Badge>
+                                  {note.risk && note.risk !== 'none' && (
+                                    <Badge variant="outline" className="text-[9px] h-4 capitalize">{note.risk} risk</Badge>
+                                  )}
+                                </div>
+                                <span className="text-[9px] text-muted-foreground">
+                                  {note.addedBy} · {note.addedAt ? format(new Date(note.addedAt), 'dd MMM yyyy HH:mm') : '—'}
+                                </span>
+                              </div>
+                              <p className="leading-relaxed">{note.text}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* Add new note */}
+                  <div className="space-y-3">
+                    <p className="text-xs font-medium">Add New Note</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-[10px]">Category</Label>
+                        <Select value={notesCategory} onValueChange={setNotesCategory}>
+                          <SelectTrigger className="h-8 text-xs" data-testid="select-note-category">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="general">General</SelectItem>
+                            <SelectItem value="support">Support</SelectItem>
+                            <SelectItem value="billing">Billing</SelectItem>
+                            <SelectItem value="compliance">Compliance</SelectItem>
+                            <SelectItem value="risk">Risk</SelectItem>
+                            <SelectItem value="refund">Refund</SelectItem>
+                            <SelectItem value="chargeback">Chargeback</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px]">Risk Level</Label>
+                        <Select value={notesRisk} onValueChange={setNotesRisk}>
+                          <SelectTrigger className="h-8 text-xs" data-testid="select-note-risk">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">None</SelectItem>
+                            <SelectItem value="low">Low</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="high">High</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Textarea
+                        placeholder="Enter your note here..."
+                        value={notesNewText}
+                        onChange={(e) => setNotesNewText(e.target.value)}
+                        className="text-xs resize-none h-24"
+                        data-testid="textarea-admin-notes"
+                      />
+                      <p className="text-[9px] text-muted-foreground text-right">{notesNewText.length} chars</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
             <DialogFooter>
-              <Button variant="outline" onClick={() => setNotesUser(null)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setNotesUser(null)}>Close</Button>
               <Button
-                onClick={() => notesUser && notesMutation.mutate({ userId: notesUser.id, notes: adminNotes })}
-                disabled={notesMutation.isPending}
+                onClick={() => notesUser && notesNewText.trim() && notesMutation.mutate({
+                  userId: notesUser.id,
+                  notes: notesNewText.trim(),
+                  category: notesCategory,
+                  risk: notesRisk,
+                })}
+                disabled={notesMutation.isPending || !notesNewText.trim()}
                 data-testid="button-save-notes"
               >
-                {notesMutation.isPending ? "Saving..." : "Save Notes"}
+                {notesMutation.isPending ? "Saving..." : "Add Note"}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* View as User (Impersonation) Modal */}
-        <Dialog open={!!impersonatingUser} onOpenChange={(open) => { 
-          if (!open) { 
-            setImpersonatingUser(null); 
-            setImpersonationData(null); 
-          } 
+        {/* View as User — tabbed read-only support view */}
+        <Dialog open={!!impersonatingUser} onOpenChange={(open) => {
+          if (!open) { setImpersonatingUser(null); setImpersonationData(null); setImpersonatingTab("overview"); }
         }}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <UserCog className="h-3 w-3" />
-                View as User (Read-Only)
+                <UserCog className="h-3 w-3 text-primary" />
+                Account View — {impersonatingUser?.email}
               </DialogTitle>
               <DialogDescription>
-                Viewing {impersonatingUser?.email}'s account data for support purposes
+                Read-only support view. No actions are performed on behalf of the user.
               </DialogDescription>
             </DialogHeader>
-            {impersonationData ? (
-              <div className="space-y-1.5 py-1">
-                <div className="p-4 bg-muted rounded-lg">
-                  <h4 className="font-semibold mb-0.5">Account Overview</h4>
-                  <div className="grid grid-cols-2 gap-4 text-[9px]">
-                    <div>
-                      <p className="text-[9px] text-muted-foreground">Email</p>
-                      <p className="font-medium">{impersonationData.user?.email}</p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] text-muted-foreground">Tier</p>
-                      <Badge variant="outline" className="capitalize">{impersonationData.user?.subscriptionTier}</Badge>
-                    </div>
-                    <div>
-                      <p className="text-[9px] text-muted-foreground">Plan Credits</p>
-                      <p className="font-medium">{impersonationData.user?.planCredits || 0}</p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] text-muted-foreground">Bonus Credits</p>
-                      <p className="font-medium">{impersonationData.user?.bonusCredits || 0}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="font-semibold mb-0.5">Recent Business Plans ({impersonationData.businessPlans?.length || 0})</h4>
-                  {impersonationData.businessPlans?.length > 0 ? (
-                    <div className="space-y-0.5">
-                      {impersonationData.businessPlans.map((plan: any) => (
-                        <div key={plan.id} className="p-3 border rounded-lg text-[9px]">
-                          <div className="flex justify-between">
-                            <span className="font-medium">{plan.businessName || 'Unnamed Plan'}</span>
-                            <Badge variant="outline" className="text-xs">{plan.status}</Badge>
-                          </div>
-                          <p className="text-muted-foreground text-xs mt-1">
-                            Created: {plan.createdAt ? format(new Date(plan.createdAt), 'PPp') : 'N/A'}
-                          </p>
+            {!impersonationData ? (
+              <div className="py-8 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+                <p className="text-muted-foreground mt-2 text-sm">Loading account data...</p>
+              </div>
+            ) : (
+              <Tabs value={impersonatingTab} onValueChange={setImpersonatingTab} className="flex-1 overflow-hidden flex flex-col min-h-0">
+                <TabsList className="shrink-0 w-full justify-start">
+                  <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
+                  <TabsTrigger value="plans" className="text-xs">
+                    Plans ({impersonationData.businessPlans?.length || 0})
+                  </TabsTrigger>
+                  <TabsTrigger value="tools" className="text-xs">
+                    Tool Usage ({impersonationData.toolUsage?.length || 0})
+                  </TabsTrigger>
+                  <TabsTrigger value="sessions" className="text-xs">
+                    Sessions ({impersonationData.sessions?.length || 0})
+                  </TabsTrigger>
+                  <TabsTrigger value="pages" className="text-xs">Recent Pages</TabsTrigger>
+                </TabsList>
+
+                <ScrollArea className="flex-1 mt-2">
+                  <TabsContent value="overview" className="mt-0">
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { label: 'Email', value: impersonationData.user?.email },
+                        { label: 'Subscription', value: (impersonationData.user?.subscriptionTier || 'free').toUpperCase() },
+                        { label: 'Plan Credits', value: impersonationData.user?.planCredits ?? 0 },
+                        { label: 'Bonus Credits', value: impersonationData.user?.bonusCredits ?? 0 },
+                        { label: 'Account Created', value: impersonationData.user?.createdAt ? format(new Date(impersonationData.user.createdAt), 'dd MMM yyyy') : '—' },
+                        { label: 'Last Login', value: impersonationData.user?.lastLogin ? formatDistance(new Date(impersonationData.user.lastLogin), new Date(), { addSuffix: true }) : 'Never' },
+                      ].map(({ label, value }) => (
+                        <div key={label} className="rounded-md border bg-muted/20 p-3">
+                          <p className="text-[9px] text-muted-foreground mb-0.5">{label}</p>
+                          <p className="text-xs font-semibold">{String(value)}</p>
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <p className="text-muted-foreground text-[9px]">No business plans found</p>
-                  )}
-                </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {impersonationData.user?.isEmailVerified && <Badge className="bg-green-500 text-white text-[9px]">Email Verified</Badge>}
+                      {impersonationData.user?.isAdmin && <Badge className="bg-purple-600 text-white text-[9px]">Admin</Badge>}
+                      {impersonationData.user?.isBanned && <Badge variant="destructive" className="text-[9px]">Banned</Badge>}
+                    </div>
+                  </TabsContent>
 
-                <div className="p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
-                  <p className="text-[9px] text-orange-700 dark:text-orange-300">
-                    {impersonationData.impersonationNote}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="py-1 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
-                <p className="text-muted-foreground mt-0.5">Loading user data...</p>
-              </div>
+                  <TabsContent value="plans" className="mt-0 space-y-2">
+                    {impersonationData.businessPlans?.length > 0 ? impersonationData.businessPlans.map((plan: any) => (
+                      <div key={plan.id} className="rounded-md border p-3 text-xs">
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <span className="font-semibold">{plan.businessName || 'Unnamed Plan'}</span>
+                          <Badge variant="outline" className="text-[9px] capitalize">{plan.status}</Badge>
+                        </div>
+                        <p className="text-muted-foreground">
+                          {plan.industry || '—'} · Created {plan.createdAt ? format(new Date(plan.createdAt), 'dd MMM yyyy') : 'N/A'}
+                        </p>
+                      </div>
+                    )) : (
+                      <p className="text-sm text-muted-foreground text-center py-8">No business plans found</p>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="tools" className="mt-0 space-y-2">
+                    {impersonationData.toolUsage?.length > 0 ? impersonationData.toolUsage.map((tool: any, i: number) => {
+                      const maxUses = Math.max(...impersonationData.toolUsage.map((t: any) => Number(t.uses)));
+                      return (
+                        <div key={i} className="space-y-0.5">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-medium">{tool.tool_id}</span>
+                            <span className="text-muted-foreground">{tool.uses}×</span>
+                          </div>
+                          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                            <div className="h-full bg-primary rounded-full" style={{ width: `${(Number(tool.uses) / maxUses) * 100}%` }} />
+                          </div>
+                          <p className="text-[9px] text-muted-foreground">Last: {tool.last_used ? format(new Date(tool.last_used), 'dd MMM yyyy') : '—'}</p>
+                        </div>
+                      );
+                    }) : (
+                      <p className="text-sm text-muted-foreground text-center py-8">No tool usage recorded</p>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="sessions" className="mt-0 space-y-2">
+                    {impersonationData.sessions?.length > 0 ? impersonationData.sessions.map((sess: any, i: number) => (
+                      <div key={i} className="rounded-md border p-3 text-xs">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className="text-[9px] capitalize">{sess.device_type || 'desktop'}</Badge>
+                          <span className="text-muted-foreground">{sess.browser} · {sess.os}</span>
+                        </div>
+                        <p className="text-[9px] text-muted-foreground">
+                          {sess.started_at ? format(new Date(sess.started_at), 'dd MMM yyyy HH:mm') : '—'}
+                        </p>
+                      </div>
+                    )) : (
+                      <p className="text-sm text-muted-foreground text-center py-8">No sessions recorded</p>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="pages" className="mt-0 space-y-1">
+                    {impersonationData.recentPages?.length > 0 ? impersonationData.recentPages.map((pv: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between gap-2 p-2 rounded-md text-xs hover-elevate">
+                        <span className="font-medium truncate">{pv.path}</span>
+                        <span className="text-[9px] text-muted-foreground shrink-0">
+                          {pv.created_at ? format(new Date(pv.created_at), 'dd MMM HH:mm') : '—'}
+                        </span>
+                      </div>
+                    )) : (
+                      <p className="text-sm text-muted-foreground text-center py-8">No page view history</p>
+                    )}
+                  </TabsContent>
+                </ScrollArea>
+              </Tabs>
             )}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => { setImpersonatingUser(null); setImpersonationData(null); }}>
+            <DialogFooter className="shrink-0">
+              <Button variant="outline" onClick={() => { setImpersonatingUser(null); setImpersonationData(null); setImpersonatingTab("overview"); }}>
                 Close
               </Button>
             </DialogFooter>
