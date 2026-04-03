@@ -17,6 +17,7 @@ import type { BusinessPlan } from "@shared/schema";
 import { format } from "date-fns";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { useState, useEffect } from "react";
+import { useVisualPdfExport } from "@/hooks/useVisualPdfExport";
 
 // Local storage key for hidden demo plans
 const HIDDEN_DEMO_PLANS_KEY = "hiddenDemoPlans";
@@ -162,7 +163,28 @@ export default function Dashboard() {
   const [redirecting, setRedirecting] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [planToDelete, setPlanToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [exportingPlanId, setExportingPlanId] = useState<string | null>(null);
+  const [exportStage, setExportStage] = useState('');
   const { toast } = useToast();
+  const { exportVisualPdf } = useVisualPdfExport();
+
+  const handleDownload = async (plan: BusinessPlan, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setExportingPlanId(plan.id);
+    setExportStage('Preparing your plan...');
+    try {
+      await exportVisualPdf({
+        planId: plan.id,
+        businessName: plan.businessName || 'Business Plan',
+        onProgress: (stage) => setExportStage(stage),
+      });
+    } catch (err) {
+      toast({ title: 'Export failed', description: String(err), variant: 'destructive' });
+    } finally {
+      setExportingPlanId(null);
+      setExportStage('');
+    }
+  };
 
   const deletePlanMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -633,11 +655,21 @@ export default function Dashboard() {
                               <Button 
                                 size="sm"
                                 variant="default"
-                                onClick={(e) => { e.stopPropagation(); window.open(plan.pdfUrl!, '_blank'); }}
+                                onClick={(e) => handleDownload(plan, e)}
+                                disabled={exportingPlanId === plan.id}
                                 data-testid={`button-download-${plan.id}`}
                               >
-                                <Download className="h-3 w-3 mr-1" />
-                                Download
+                                {exportingPlanId === plan.id ? (
+                                  <>
+                                    <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                                    {exportStage || 'Exporting...'}
+                                  </>
+                                ) : (
+                                  <>
+                                    <Download className="h-3 w-3 mr-1" />
+                                    Download
+                                  </>
+                                )}
                               </Button>
                               <Button 
                                 size="sm"
@@ -793,10 +825,20 @@ export default function Dashboard() {
                             {selectedPlan.status === 'completed' && selectedPlan.pdfUrl && (
                               <Button 
                                 className="flex-1"
-                                onClick={() => window.open(selectedPlan.pdfUrl!, '_blank')}
+                                onClick={() => handleDownload(selectedPlan)}
+                                disabled={exportingPlanId === selectedPlan.id}
                               >
-                                <Download className="h-4 w-4 mr-2" />
-                                Download PDF
+                                {exportingPlanId === selectedPlan.id ? (
+                                  <>
+                                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                    {exportStage || 'Exporting...'}
+                                  </>
+                                ) : (
+                                  <>
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Download PDF
+                                  </>
+                                )}
                               </Button>
                             )}
                             {!selectedPlan.isDemoData && (

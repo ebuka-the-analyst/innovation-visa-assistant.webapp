@@ -16,11 +16,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useVisualPdfExport } from "@/hooks/useVisualPdfExport";
 import { 
   FileText, Upload, FolderOpen, Trash2, Download, Eye, 
   CheckCircle2, Clock, AlertTriangle, Plus, Search,
   FileImage, File, FileSpreadsheet, Shield, Sparkles, Send, Share2,
-  Palette, Lock, ChevronDown, ChevronUp
+  Palette, Lock, ChevronDown, ChevronUp, Loader2
 } from "lucide-react";
 import type { UserDocument, BusinessPlan } from "@shared/schema";
 
@@ -167,8 +168,28 @@ function formatFileSize(bytes: number) {
 export default function DocumentsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { exportVisualPdf } = useVisualPdfExport();
+  const [exportingPlanId, setExportingPlanId] = useState<string | null>(null);
+  const [exportStage, setExportStage] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const handleDownload = async (plan: BusinessPlan) => {
+    setExportingPlanId(plan.id);
+    setExportStage('Preparing your plan...');
+    try {
+      await exportVisualPdf({
+        planId: plan.id,
+        businessName: plan.businessName || 'Business Plan',
+        onProgress: (stage) => setExportStage(stage),
+      });
+    } catch (err) {
+      toast({ title: 'Export failed', description: String(err), variant: 'destructive' });
+    } finally {
+      setExportingPlanId(null);
+      setExportStage('');
+    }
+  };
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [uploadForm, setUploadForm] = useState({
     name: "",
@@ -637,20 +658,22 @@ export default function DocumentsPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <Button 
-                            variant="outline"
-                            size="icon"
-                            onClick={() => window.open(fullPdfUrl, '_blank')}
-                            data-testid={`button-view-plan-${plan.id}`}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button 
-                            onClick={() => window.open(fullPdfUrl, '_blank')}
+                          <Button
+                            onClick={() => handleDownload(plan)}
+                            disabled={exportingPlanId === plan.id}
                             data-testid={`button-download-plan-${plan.id}`}
                           >
-                            <Download className="w-4 h-4 mr-2" />
-                            Download
+                            {exportingPlanId === plan.id ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                {exportStage || 'Exporting...'}
+                              </>
+                            ) : (
+                              <>
+                                <Download className="w-4 h-4 mr-2" />
+                                Download PDF
+                              </>
+                            )}
                           </Button>
                           <Button 
                             variant="outline"
