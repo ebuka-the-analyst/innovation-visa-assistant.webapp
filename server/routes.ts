@@ -12465,28 +12465,29 @@ Return a JSON object with:
       // Get business plans
       const userPlans = await db.select().from(businessPlans).where(eq(businessPlans.userId, userId));
 
-      // Tool usage from user_activity_logs (the table we know exists)
-      const toolUsage = await safeQuery(async () => {
+      // Tool usage from activity_events (has tool_id + tool_category)
+      const toolUsageFromEvents = await safeQuery(async () => {
         const r = await db.execute(sql`
-          SELECT tool_id, tool_category, COUNT(*) as uses, MAX(created_at) as last_used
-          FROM user_activity_logs WHERE user_id = ${userId}
+          SELECT tool_id, tool_category, COUNT(*) as uses, MAX(occurred_at) as last_used
+          FROM activity_events WHERE user_id = ${userId} AND tool_id IS NOT NULL
           GROUP BY tool_id, tool_category ORDER BY uses DESC LIMIT 20
         `);
         return (r as any).rows || [];
       }, []);
 
-      // Also try tool_progress table
+      // Fallback: tool_progress (tracks any tool the user has interacted with)
       const toolProgressUsage = await safeQuery(async () => {
         const r = await db.execute(sql`
-          SELECT tool_id, COUNT(*) as uses, MAX(updated_at) as last_used
+          SELECT tool_id, NULL::text as tool_category,
+                 COALESCE(export_count, 1) as uses, updated_at as last_used
           FROM tool_progress WHERE user_id = ${userId}
-          GROUP BY tool_id ORDER BY uses DESC
+          ORDER BY updated_at DESC LIMIT 20
         `);
         return (r as any).rows || [];
       }, []);
 
-      // Merge both sources — prefer activity_logs, supplement with tool_progress
-      const allToolUsage = toolUsage.length > 0 ? toolUsage : toolProgressUsage;
+      // Use activity_events tool data, supplement with tool_progress
+      const allToolUsage = toolUsageFromEvents.length > 0 ? toolUsageFromEvents : toolProgressUsage;
 
       // AI interaction logs
       const aiLogs = await safeQuery(async () => {
@@ -12563,26 +12564,47 @@ Return a JSON object with:
         return (r as any).rows || [];
       }, []);
 
-      // Page views
+      // Page views — correct column names
       const recentPageViews = await safeQuery(async () => {
         const r = await db.execute(sql`
-          SELECT path, title, time_on_page, created_at
+          SELECT page_path AS path, page_title AS title,
+                 time_on_page_seconds AS time_on_page, view_started_at AS created_at
           FROM page_views WHERE user_id = ${userId}
-          ORDER BY created_at DESC LIMIT 20
+          ORDER BY view_started_at DESC LIMIT 20
         `);
         return (r as any).rows || [];
       }, []);
 
-      // Sessions
+      // Page views count for engagement score
+      const pageViewCount = await safeQuery(async () => {
+        const r = await db.execute(sql`SELECT COUNT(*) as cnt FROM page_views WHERE user_id = ${userId}`);
+        return parseInt(String((r as any).rows?.[0]?.cnt)) || 0;
+      }, 0);
+
+      // Sessions — correct column names
       const recentSessions = await safeQuery(async () => {
         const r = await db.execute(sql`
-          SELECT session_id, device_type, browser, os, started_at, last_seen_at,
-                 EXTRACT(EPOCH FROM (last_seen_at - started_at)) as duration_seconds
+          SELECT session_token AS session_id, device_type,
+                 browser_name AS browser, os_name AS os,
+                 session_started_at AS started_at, last_seen_at,
+                 total_duration_seconds AS duration_seconds
           FROM user_sessions WHERE user_id = ${userId}
-          ORDER BY started_at DESC LIMIT 10
+          ORDER BY session_started_at DESC LIMIT 10
         `);
         return (r as any).rows || [];
       }, []);
+
+      // Session count for engagement score
+      const sessionCount = await safeQuery(async () => {
+        const r = await db.execute(sql`SELECT COUNT(*) as cnt FROM user_sessions WHERE user_id = ${userId}`);
+        return parseInt(String((r as any).rows?.[0]?.cnt)) || 0;
+      }, 0);
+
+      // Activity events count for engagement score
+      const activityEventsCount = await safeQuery(async () => {
+        const r = await db.execute(sql`SELECT COUNT(*) as cnt FROM activity_events WHERE user_id = ${userId}`);
+        return parseInt(String((r as any).rows?.[0]?.cnt)) || 0;
+      }, 0);
 
       // Site feedback
       const feedback = await safeQuery(async () => {
@@ -12635,14 +12657,22 @@ Return a JSON object with:
         return (r as any).rows || [];
       }, []);
 
-      // Calculate engagement score (0-100)
+      // Calculate engagement score (0–100) using real data from tables that exist
       const daysSinceJoin = Math.max(1, Math.floor((Date.now() - new Date(userData.createdAt).getTime()) / (1000 * 60 * 60 * 24)));
-      const toolUsageScore = Math.min(30, allToolUsage.length * 3);
+      // Tier bonus: free=0, basic=8, premium=12, enterprise=14, ultimate=15
+      const tierMap: Record<string, number> = { free: 0, basic: 8, premium: 12, enterprise: 14, ultimate: 15 };
+      const tierScore = tierMap[userData.subscriptionTier || 'free'] || 0;
+      // Business plans: up to 20 pts (10 per plan, max 2)
       const planScore = Math.min(20, userPlans.length * 10);
-      const aiScore = Math.min(20, Math.floor(parseInt(String(totalAiInteractions)) / 5));
-      const activityScore = Math.min(15, activityTimeline.length / 2);
-      const paymentScore = parseFloat((payments as any).total_spent) > 0 ? 15 : 0;
-      const engagementScore = Math.round(Math.min(100, toolUsageScore + planScore + aiScore + activityScore + paymentScore));
+      // Tools touched (tool_progress entries or activity_events tools): up to 25 pts (5 per tool, max 5)
+      const toolScore = Math.min(25, allToolUsage.length * 5);
+      // Page views: up to 20 pts
+      const pvScore = Math.min(20, Math.floor(pageViewCount * 0.5));
+      // Sessions: up to 10 pts
+      const sessScore = Math.min(10, sessionCount * 2);
+      // Activity events: up to 10 pts
+      const evtScore = Math.min(10, Math.floor(activityEventsCount * 0.2));
+      const engagementScore = Math.round(Math.min(100, tierScore + planScore + toolScore + pvScore + sessScore + evtScore));
 
       // Determine risk/churn based on last activity
       const lastActiveDate = activityTimeline.length > 0
