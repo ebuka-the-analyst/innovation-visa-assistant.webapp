@@ -797,3 +797,76 @@ input, textarea, select {
   filter: none !important;
   opacity: 1 !important;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   GLOBAL CHECKBOX & RADIO STYLES
+   Applies to every native <input type="checkbox"> and <input type="radio">
+   across the entire app — user tools, admin dashboard, forms, tables.
+   Matches Shadcn design system: primary border, filled checked state, ring focus.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+input[type="checkbox"],
+input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid hsl(var(--primary));
+  background-color: hsl(var(--background));
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  vertical-align: middle;
+}
+
+input[type="checkbox"] {
+  border-radius: 0.25rem;
+}
+
+input[type="radio"] {
+  border-radius: 50%;
+}
+
+input[type="checkbox"]:hover,
+input[type="radio"]:hover {
+  border-color: hsl(var(--primary));
+  background-color: hsl(var(--accent));
+}
+
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
+}
+
+/* Checked checkbox: primary fill + white SVG checkmark */
+input[type="checkbox"]:checked {
+  background-color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M3 8l3.5 3.5L13 4'/%3E%3C/svg%3E");
+}
+
+/* Checked radio: primary fill + white centre dot */
+input[type="radio"]:checked {
+  background-color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='3.5' fill='white'/%3E%3C/svg%3E");
+}
+
+/* Indeterminate checkbox: primary fill + white dash */
+input[type="checkbox"]:indeterminate {
+  background-color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='white' stroke-width='2' stroke-linecap='round' d='M4 8h8'/%3E%3C/svg%3E");
+}
+
+input[type="checkbox"]:disabled,
+input[type="radio"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
