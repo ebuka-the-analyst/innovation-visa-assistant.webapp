@@ -2726,8 +2726,78 @@ ${generatedSections.join('\n\n---\n\n')}`;
   </div>
 `);
       
+      // ── User identity watermark ────────────────────────────────────────────
+      // Embed a repeating diagonal watermark + visible license footer with the
+      // user's name/email into every exported HTML frame.  Because the visual
+      // PDF exporter screenshots the iframe rather than printing it, the
+      // watermark is baked into every page image and cannot be stripped.
+      const userName = user.displayName || user.email?.split('@')[0] || 'Unknown User';
+      const userEmail = user.email || '';
+      const accessDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      const wmText = `LICENSED TO: ${userName}  •  ${userEmail}  •  ${accessDate}`;
+      const wmTextShort = `${userName} | ${userEmail}`;
+
+      // SVG tile – a diagonal label repeated as a CSS background
+      const svgTile = `<svg xmlns='http://www.w3.org/2000/svg' width='520' height='240'>
+        <text x='260' y='90' font-family='Arial,sans-serif' font-size='13' fill='rgba(0,0,0,0.10)'
+          transform='rotate(-28,260,90)' text-anchor='middle' font-weight='600'>${wmTextShort}</text>
+        <text x='260' y='170' font-family='Arial,sans-serif' font-size='13' fill='rgba(0,0,0,0.10)'
+          transform='rotate(-28,260,170)' text-anchor='middle' font-weight='600'>${wmTextShort}</text>
+      </svg>`;
+      const svgB64 = Buffer.from(svgTile).toString('base64');
+
+      const watermarkedHtml = enhancedHtml
+        .replace('</body>', `
+  <!-- Identity watermark overlay — baked into every exported page image -->
+  <div style="
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background-image:url('data:image/svg+xml;base64,${svgB64}');
+    background-size:520px 240px;
+    pointer-events:none;z-index:99999;
+  "></div>
+  <!-- Visible license footer at the bottom of content -->
+  <div style="
+    width:100%;background:#1a1a2e;color:#ffffff;
+    font-family:Arial,sans-serif;font-size:9pt;
+    padding:10px 24px;box-sizing:border-box;
+    display:flex;justify-content:space-between;align-items:center;
+    margin-top:32px;
+  ">
+    <span>&#128274; CONFIDENTIAL — ${wmText}</span>
+    <span style="opacity:0.6;font-size:8pt;">Plan ID: ${planId}</span>
+  </div>
+</body>`)
+        .replace('</head>', `
+  <!-- Watermark meta for audit trail -->
+  <meta name="pdf-licensed-to" content="${userEmail}">
+  <meta name="pdf-access-date" content="${accessDate}">
+  <meta name="pdf-plan-id" content="${planId}">
+</head>`);
+
+      // ── Audit log — record every export access ─────────────────────────────
+      try {
+        await db.insert(userActivityLogs).values({
+          userId: user.id,
+          activityType: 'plan_export',
+          toolId: `plan:${planId}`,
+          toolCategory: 'business_plan',
+          ipAddress: String(req.ip || req.headers['x-forwarded-for'] || 'unknown').slice(0, 50),
+          userAgent: String(req.headers['user-agent'] || '').slice(0, 500),
+          activityData: {
+            planId,
+            businessName: businessPlan.businessName,
+            tier: businessPlan.tier,
+            accessedAt: new Date().toISOString(),
+            licensedTo: userEmail,
+          },
+        });
+      } catch (logErr) {
+        // Non-fatal — just log
+        console.warn('[HTML View] Could not write audit log:', logErr);
+      }
+
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.send(enhancedHtml);
+      res.send(watermarkedHtml);
     } catch (error: any) {
       console.error("HTML view error:", {
         planId: req.params.planId,
@@ -5179,6 +5249,37 @@ EXAMPLES OF GOOD RESPONSES:
     } catch (error) {
       console.error("Admin user details error:", error);
       res.status(500).json({ error: "Failed to fetch user details" });
+    }
+  });
+
+  // Admin: export/download audit history for a specific user — for refund checks
+  app.get("/api/admin/users/:userId/export-history", requireAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const rows = await db.execute(sql`
+        SELECT
+          a.id,
+          a.activity_type,
+          a.tool_id,
+          a.activity_data,
+          a.ip_address,
+          a.user_agent,
+          a.created_at,
+          b.business_name,
+          b.tier,
+          b.status as plan_status
+        FROM user_activity_logs a
+        LEFT JOIN business_plans b
+          ON b.id = REPLACE(a.tool_id, 'plan:', '')
+        WHERE a.user_id = ${userId}
+          AND a.activity_type = 'plan_export'
+        ORDER BY a.created_at DESC
+        LIMIT 100
+      `);
+      res.json({ exports: rows.rows || [] });
+    } catch (error) {
+      console.error("Export history error:", error);
+      res.status(500).json({ error: "Failed to fetch export history" });
     }
   });
 

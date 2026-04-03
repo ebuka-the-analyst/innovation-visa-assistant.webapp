@@ -825,6 +825,18 @@ export default function AdminDashboard() {
     enabled: !!user?.isAdmin && activeSection === 'overview',
   });
 
+  // Export/download history — for refund fraud checks
+  const { data: exportHistoryData, isLoading: exportHistoryLoading } = useQuery<{ exports: any[] }>({
+    queryKey: ['/api/admin/users', viewingUserDetails?.id, 'export-history'],
+    queryFn: async () => {
+      if (!viewingUserDetails?.id) return { exports: [] };
+      const res = await fetch(`/api/admin/users/${viewingUserDetails.id}/export-history`, { credentials: 'include' });
+      if (!res.ok) return { exports: [] };
+      return res.json();
+    },
+    enabled: !!viewingUserDetails?.id && !!user?.isAdmin,
+  });
+
   // User analysis query (comprehensive analysis)
   const { data: userAnalysis, isLoading: userAnalysisLoading, refetch: refetchUserAnalysis } = useQuery<any>({
     queryKey: ['/api/admin/users', analyzingUser?.id, 'analysis'],
@@ -13888,6 +13900,51 @@ export default function AdminDashboard() {
                   <div className="text-[11px] font-bold">
                     {viewingUserDetails.totalPlans || 0}
                   </div>
+                </div>
+
+                <Separator />
+
+                {/* Export / Download Audit — key for refund decisions */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Label className="text-muted-foreground">Plan Export History</Label>
+                    {exportHistoryData && exportHistoryData.exports.length > 0 && (
+                      <Badge variant="destructive" className="text-[9px] h-4 px-1.5">
+                        {exportHistoryData.exports.length} export{exportHistoryData.exports.length !== 1 ? 's' : ''}
+                      </Badge>
+                    )}
+                  </div>
+                  {exportHistoryLoading ? (
+                    <p className="text-[11px] text-muted-foreground">Loading export history...</p>
+                  ) : !exportHistoryData?.exports?.length ? (
+                    <div className="rounded-md border border-dashed p-3 text-center">
+                      <p className="text-[11px] text-muted-foreground">No exports recorded — refund may be eligible</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                      {exportHistoryData.exports.map((exp: any, i: number) => (
+                        <div key={i} className="rounded-md border bg-destructive/5 border-destructive/20 p-2.5 text-[11px]">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <span className="font-semibold text-destructive">
+                              {exp.business_name || exp.tool_id?.replace('plan:', '') || 'Unknown Plan'}
+                            </span>
+                            <Badge variant="outline" className="text-[9px] h-4 capitalize">
+                              {exp.tier || '—'}
+                            </Badge>
+                          </div>
+                          <div className="text-muted-foreground flex flex-wrap gap-x-3 gap-y-0.5">
+                            <span>{exp.created_at ? new Date(exp.created_at).toLocaleString('en-GB') : '—'}</span>
+                            {exp.ip_address && <span>IP: {exp.ip_address}</span>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {exportHistoryData && exportHistoryData.exports.length > 0 && (
+                    <p className="text-[10px] text-destructive mt-1.5 font-medium">
+                      ⚠ This user has exported plan content. Refund request should be declined — content has been delivered.
+                    </p>
+                  )}
                 </div>
               </div>
             )}
