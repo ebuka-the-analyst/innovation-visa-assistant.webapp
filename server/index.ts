@@ -552,57 +552,60 @@ const blogLocalPaths = [
   path.join(process.cwd(), "public/assets/blog"),
 ];
 
-// Serve unique blog images
-app.get("/assets/blog/unique/:filename", async (req, res, next) => {
-  const filename = req.params.filename;
-  const localPath = path.join(process.cwd(), "client/src/assets/blog/unique", filename);
-  
-  if (fs.existsSync(localPath)) {
-    const ext = path.extname(filename).toLowerCase();
-    const contentType = ext === ".png" ? "image/png" : "image/jpeg";
-    res.set({
-      "Content-Type": contentType,
-      "Cache-Control": "public, max-age=604800",
-    });
-    return res.sendFile(localPath);
-  }
-  next();
-});
+// Unified blog image handler — covers all 4 URL patterns:
+//   /assets/blog/:filename
+//   /assets/blog/unique/:filename
+//   /objects/blog/:filename
+//   /objects/blog/unique/:filename
+const uniqueLocalPaths = [
+  path.join(process.cwd(), "client/src/assets/blog/unique"),
+  path.join(process.cwd(), "dist/public/assets/blog/unique"),
+  path.join(process.cwd(), "public/assets/blog/unique"),
+];
 
-app.get(["/assets/blog/:filename", "/objects/blog/:filename"], async (req, res, next) => {
-  const filename = req.params.filename;
-  
-  // Try local files first
-  for (const dir of blogLocalPaths) {
+async function serveBlogImage(filename: string, subdir: string | null, res: any, next: any) {
+  const ext = path.extname(filename).toLowerCase();
+  const contentType = ext === ".png" ? "image/png" : ext === ".webp" ? "image/webp" : "image/jpeg";
+
+  // Build ordered search paths — subdir-specific first, then all general paths
+  const searchPaths = subdir === "unique"
+    ? [...uniqueLocalPaths, ...blogLocalPaths]
+    : blogLocalPaths;
+
+  for (const dir of searchPaths) {
     const localPath = path.join(dir, filename);
     if (fs.existsSync(localPath)) {
-      const ext = path.extname(filename).toLowerCase();
-      const contentType = ext === ".png" ? "image/png" : "image/jpeg";
-      res.set({
-        "Content-Type": contentType,
-        "Cache-Control": "public, max-age=604800",
-      });
+      res.set({ "Content-Type": contentType, "Cache-Control": "public, max-age=604800" });
       return res.sendFile(localPath);
     }
   }
-  
-  // Fallback to S3
-  try {
-    if (s3Storage.isAvailable()) {
-      const s3Key = `blog-images/${filename}`;
-      const buffer = await s3Storage.downloadFile(s3Key);
-      res.set({
-        "Content-Type": "image/jpeg",
-        "Cache-Control": "public, max-age=604800",
-      });
-      return res.send(buffer);
+
+  // S3 fallback — try both with and without subdir prefix
+  if (s3Storage.isAvailable()) {
+    const s3Keys = subdir
+      ? [`blog-images/${subdir}/${filename}`, `blog-images/${filename}`]
+      : [`blog-images/${filename}`];
+    for (const s3Key of s3Keys) {
+      try {
+        const buffer = await s3Storage.downloadFile(s3Key);
+        res.set({ "Content-Type": contentType, "Cache-Control": "public, max-age=604800" });
+        return res.send(buffer);
+      } catch {}
     }
-  } catch (error) {
-    console.log(`[Blog] Image not found: ${filename}`);
   }
-  
+
+  console.log(`[Blog] Image not found: ${subdir ? subdir + "/" : ""}${filename}`);
   next();
+}
+
+app.get(["/assets/blog/unique/:filename", "/objects/blog/unique/:filename"], (req, res, next) => {
+  serveBlogImage(req.params.filename, "unique", res, next);
 });
+
+app.get(["/assets/blog/:filename", "/objects/blog/:filename"], (req, res, next) => {
+  serveBlogImage(req.params.filename, null, res, next);
+});
+
 console.log("[Blog] Image route configured (local + unique + S3 fallback)");
 
 app.use((req, res, next) => {
