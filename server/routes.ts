@@ -11827,51 +11827,73 @@ Return a JSON object with:
     try {
       const { userId } = req.params;
 
+      const safeQ = async <T>(fn: () => Promise<T>, fallback: T): Promise<T> => {
+        try { return await fn(); } catch { return fallback; }
+      };
+
       const [user] = await db.select().from(users).where(eq(users.id, userId));
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
 
-      const userBusinessPlans = await db.select()
-        .from(businessPlans)
-        .where(eq(businessPlans.userId, userId))
-        .orderBy(desc(businessPlans.createdAt))
-        .limit(10);
+      const userBusinessPlans = await safeQ(() =>
+        db.select().from(businessPlans).where(eq(businessPlans.userId, userId))
+          .orderBy(desc(businessPlans.createdAt)).limit(10), []);
 
-      // Tool usage summary
-      const toolUsageRaw = await db.execute(sql`
-        SELECT tool_id, tool_category, COUNT(*) as uses, MAX(created_at) as last_used
-        FROM user_activity_logs
-        WHERE user_id = ${userId}
+      // Tool usage from activity_events (has tool_id + tool_category)
+      const toolUsageRaw = await safeQ(() => db.execute(sql`
+        SELECT tool_id, tool_category, COUNT(*) as uses, MAX(occurred_at) as last_used
+        FROM activity_events
+        WHERE user_id = ${userId} AND tool_id IS NOT NULL
         GROUP BY tool_id, tool_category
         ORDER BY uses DESC
         LIMIT 15
-      `);
+      `), { rows: [] });
 
-      // Recent sessions
-      const sessionsRaw = await db.execute(sql`
-        SELECT session_id, device_type, browser, os, started_at, last_seen_at
+      // Fallback: tool_progress if activity_events is empty
+      const toolProgressRaw = await safeQ(() => db.execute(sql`
+        SELECT tool_id, NULL::text as tool_category,
+               export_count as uses, updated_at as last_used
+        FROM tool_progress
+        WHERE user_id = ${userId}
+        ORDER BY updated_at DESC
+        LIMIT 15
+      `), { rows: [] });
+
+      // Recent sessions — correct column names
+      const sessionsRaw = await safeQ(() => db.execute(sql`
+        SELECT session_token as session_id,
+               device_type,
+               browser_name AS browser,
+               os_name AS os,
+               session_started_at AS started_at,
+               last_seen_at
         FROM user_sessions
         WHERE user_id = ${userId}
-        ORDER BY started_at DESC
+        ORDER BY session_started_at DESC
         LIMIT 5
-      `);
+      `), { rows: [] });
 
-      // Recent page views
-      const pageViewsRaw = await db.execute(sql`
-        SELECT path, title, created_at
+      // Recent page views — correct column names
+      const pageViewsRaw = await safeQ(() => db.execute(sql`
+        SELECT page_path AS path,
+               page_title AS title,
+               view_started_at AS created_at,
+               time_on_page_seconds AS time_on_page
         FROM page_views
         WHERE user_id = ${userId}
-        ORDER BY created_at DESC
+        ORDER BY view_started_at DESC
         LIMIT 10
-      `);
+      `), { rows: [] });
+
+      const toolRows = (toolUsageRaw.rows?.length ? toolUsageRaw.rows : toolProgressRaw.rows) || [];
 
       const { password, verificationToken, resetToken, ...safeUser } = user;
 
       res.json({
         user: safeUser,
         businessPlans: userBusinessPlans,
-        toolUsage: toolUsageRaw.rows || [],
+        toolUsage: toolRows,
         sessions: sessionsRaw.rows || [],
         recentPages: pageViewsRaw.rows || [],
         impersonationNote: "Read-only support view — no actions performed on behalf of user"
@@ -12279,81 +12301,141 @@ Return a JSON object with:
     try {
       const { userId } = req.params;
 
-      // Tool usage from user_activity_logs
-      const toolUsageRaw = await db.execute(sql`
-        SELECT tool_id, tool_category, activity_type, activity_data, ip_address, created_at
+      const safeQ = async <T>(fn: () => Promise<T>, fallback: T): Promise<T> => {
+        try { return await fn(); } catch { return fallback; }
+      };
+
+      // Timeline: activity_events (has tool_id, tool_category, occurred_at)
+      const toolUsageRaw = await safeQ(() => db.execute(sql`
+        SELECT tool_id,
+               tool_category,
+               event_type AS activity_type,
+               payload AS activity_data,
+               page_path,
+               occurred_at AS created_at
+        FROM activity_events
+        WHERE user_id = ${userId}
+        ORDER BY occurred_at DESC
+        LIMIT 100
+      `), { rows: [] });
+
+      // Fallback timeline from user_activity_logs (no tool_id, but has activity_type)
+      const activityLogsRaw = await safeQ(() => db.execute(sql`
+        SELECT NULL::text AS tool_id,
+               NULL::text AS tool_category,
+               activity_type,
+               activity_data,
+               NULL::text AS page_path,
+               created_at
         FROM user_activity_logs
         WHERE user_id = ${userId}
         ORDER BY created_at DESC
         LIMIT 100
-      `);
+      `), { rows: [] });
 
-      // Top tools grouped
-      const topToolsRaw = await db.execute(sql`
-        SELECT tool_id, tool_category, COUNT(*) as uses, MAX(created_at) as last_used
-        FROM user_activity_logs
-        WHERE user_id = ${userId}
+      // Top tools grouped — from activity_events
+      const topToolsRaw = await safeQ(() => db.execute(sql`
+        SELECT tool_id,
+               tool_category,
+               COUNT(*) as uses,
+               MAX(occurred_at) as last_used
+        FROM activity_events
+        WHERE user_id = ${userId} AND tool_id IS NOT NULL
         GROUP BY tool_id, tool_category
         ORDER BY uses DESC
         LIMIT 20
-      `);
+      `), { rows: [] });
 
-      // Page views
-      const pageViewsRaw = await db.execute(sql`
-        SELECT path, title, referrer, time_on_page, created_at
+      // Fallback top tools from tool_progress
+      const toolProgressTopRaw = await safeQ(() => db.execute(sql`
+        SELECT tool_id,
+               NULL::text as tool_category,
+               export_count as uses,
+               updated_at as last_used
+        FROM tool_progress
+        WHERE user_id = ${userId}
+        ORDER BY updated_at DESC
+        LIMIT 20
+      `), { rows: [] });
+
+      // Page views — correct column names
+      const pageViewsRaw = await safeQ(() => db.execute(sql`
+        SELECT page_path AS path,
+               page_title AS title,
+               referrer_path AS referrer,
+               time_on_page_seconds AS time_on_page,
+               view_started_at AS created_at
         FROM page_views
         WHERE user_id = ${userId}
-        ORDER BY created_at DESC
+        ORDER BY view_started_at DESC
         LIMIT 50
-      `);
+      `), { rows: [] });
 
-      // Sessions
-      const sessionsRaw = await db.execute(sql`
-        SELECT session_id, device_type, browser, os, started_at, last_seen_at,
-          EXTRACT(EPOCH FROM (last_seen_at - started_at)) as duration_seconds
+      // Sessions — correct column names
+      const sessionsRaw = await safeQ(() => db.execute(sql`
+        SELECT session_token AS session_id,
+               device_type,
+               browser_name AS browser,
+               os_name AS os,
+               session_started_at AS started_at,
+               last_seen_at,
+               total_duration_seconds AS duration_seconds
         FROM user_sessions
         WHERE user_id = ${userId}
-        ORDER BY started_at DESC
+        ORDER BY session_started_at DESC
         LIMIT 20
-      `);
+      `), { rows: [] });
 
-      // Hour-of-day heatmap (last 30 days)
-      const heatmapRaw = await db.execute(sql`
+      // Hour-of-day heatmap (last 30 days) — from activity_events
+      const heatmapRaw = await safeQ(() => db.execute(sql`
         SELECT
-          EXTRACT(DOW FROM created_at AT TIME ZONE 'UTC') as dow,
-          EXTRACT(HOUR FROM created_at AT TIME ZONE 'UTC') as hour,
+          EXTRACT(DOW FROM occurred_at AT TIME ZONE 'UTC') as dow,
+          EXTRACT(HOUR FROM occurred_at AT TIME ZONE 'UTC') as hour,
           COUNT(*) as count
-        FROM user_activity_logs
-        WHERE user_id = ${userId}
-          AND created_at > NOW() - INTERVAL '30 days'
-        GROUP BY dow, hour
-        ORDER BY dow, hour
-      `);
-
-      // Daily activity for past 14 days
-      const dailyRaw = await db.execute(sql`
-        SELECT
-          DATE(created_at AT TIME ZONE 'UTC') as day,
-          COUNT(*) as events
-        FROM user_activity_logs
-        WHERE user_id = ${userId}
-          AND created_at > NOW() - INTERVAL '14 days'
-        GROUP BY day
-        ORDER BY day
-      `);
-
-      // Activity events (micro interactions)
-      const eventsRaw = await db.execute(sql`
-        SELECT event_type, event_data, page_path, created_at
         FROM activity_events
         WHERE user_id = ${userId}
-        ORDER BY created_at DESC
+          AND occurred_at > NOW() - INTERVAL '30 days'
+        GROUP BY dow, hour
+        ORDER BY dow, hour
+      `), { rows: [] });
+
+      // Daily activity for past 14 days — from activity_events
+      const dailyRaw = await safeQ(() => db.execute(sql`
+        SELECT
+          DATE(occurred_at AT TIME ZONE 'UTC') as day,
+          COUNT(*) as events
+        FROM activity_events
+        WHERE user_id = ${userId}
+          AND occurred_at > NOW() - INTERVAL '14 days'
+        GROUP BY day
+        ORDER BY day
+      `), { rows: [] });
+
+      // Micro interaction events
+      const eventsRaw = await safeQ(() => db.execute(sql`
+        SELECT event_type,
+               payload AS event_data,
+               page_path,
+               occurred_at AS created_at
+        FROM activity_events
+        WHERE user_id = ${userId}
+        ORDER BY occurred_at DESC
         LIMIT 50
-      `);
+      `), { rows: [] });
+
+      // Merge timelines: prefer activity_events, supplement with activity_logs
+      const mergedTimeline = toolUsageRaw.rows?.length
+        ? toolUsageRaw.rows
+        : activityLogsRaw.rows || [];
+
+      // Merge top tools: prefer activity_events, fallback to tool_progress
+      const mergedTopTools = topToolsRaw.rows?.length
+        ? topToolsRaw.rows
+        : toolProgressTopRaw.rows || [];
 
       res.json({
-        toolUsage: toolUsageRaw.rows || [],
-        topTools: topToolsRaw.rows || [],
+        toolUsage: mergedTimeline,
+        topTools: mergedTopTools,
         pageViews: pageViewsRaw.rows || [],
         sessions: sessionsRaw.rows || [],
         heatmap: heatmapRaw.rows || [],
