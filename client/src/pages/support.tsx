@@ -71,7 +71,7 @@ const FAQ_CATEGORIES = [
       },
       {
         q: "Can I get a refund?",
-        a: "We offer refunds within 48 hours of your first payment, provided no business plan has been generated and no premium content has been downloaded or accessed. Once a business plan is generated or premium tools are used, the subscription is non-refundable because the core AI-generated content — which took significant computational cost to create — has already been delivered to you. All exported documents are watermarked with your account details, so we maintain a full record of what was accessed. If you experience a genuine technical fault, contact support within 48 hours with details and we will review your case individually."
+        a: "We offer refunds within 48 hours of your first payment, provided no business plan has been generated and no premium content has been downloaded or accessed. Once a business plan is generated or premium tools are used, the subscription is non-refundable because the core AI-generated content — which took significant computational cost to create — has already been delivered to you. If you experience a genuine technical fault, contact support within 48 hours with details and we will review your case individually."
       },
       {
         q: "Do you offer discounts?",
