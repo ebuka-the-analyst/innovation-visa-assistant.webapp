@@ -2726,53 +2726,12 @@ ${generatedSections.join('\n\n---\n\n')}`;
   </div>
 `);
       
-      // ── User identity watermark ────────────────────────────────────────────
-      // Embed a repeating diagonal watermark + visible license footer with the
-      // user's name/email into every exported HTML frame.  Because the visual
-      // PDF exporter screenshots the iframe rather than printing it, the
-      // watermark is baked into every page image and cannot be stripped.
-      const userName = user.displayName || user.email?.split('@')[0] || 'Unknown User';
       const userEmail = user.email || '';
       const accessDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-      const wmText = `LICENSED TO: ${userName}  •  ${userEmail}  •  ${accessDate}`;
-      const wmTextShort = `${userName} | ${userEmail}`;
 
-      // SVG tile – a diagonal label repeated as a CSS background
-      const svgTile = `<svg xmlns='http://www.w3.org/2000/svg' width='520' height='240'>
-        <text x='260' y='90' font-family='Arial,sans-serif' font-size='13' fill='rgba(0,0,0,0.10)'
-          transform='rotate(-28,260,90)' text-anchor='middle' font-weight='600'>${wmTextShort}</text>
-        <text x='260' y='170' font-family='Arial,sans-serif' font-size='13' fill='rgba(0,0,0,0.10)'
-          transform='rotate(-28,260,170)' text-anchor='middle' font-weight='600'>${wmTextShort}</text>
-      </svg>`;
-      const svgB64 = Buffer.from(svgTile).toString('base64');
-
-      const watermarkedHtml = enhancedHtml
-        .replace('</body>', `
-  <!-- Identity watermark overlay — baked into every exported page image -->
-  <div style="
-    position:fixed;top:0;left:0;width:100%;height:100%;
-    background-image:url('data:image/svg+xml;base64,${svgB64}');
-    background-size:520px 240px;
-    pointer-events:none;z-index:99999;
-  "></div>
-  <!-- Visible license footer at the bottom of content -->
-  <div style="
-    width:100%;background:#1a1a2e;color:#ffffff;
-    font-family:Arial,sans-serif;font-size:9pt;
-    padding:10px 24px;box-sizing:border-box;
-    display:flex;justify-content:space-between;align-items:center;
-    margin-top:32px;
-  ">
-    <span>&#128274; CONFIDENTIAL — ${wmText}</span>
-    <span style="opacity:0.6;font-size:8pt;">Plan ID: ${planId}</span>
-  </div>
-</body>`)
-        .replace('</head>', `
-  <!-- Watermark meta for audit trail -->
-  <meta name="pdf-licensed-to" content="${userEmail}">
-  <meta name="pdf-access-date" content="${accessDate}">
-  <meta name="pdf-plan-id" content="${planId}">
-</head>`);
+      // No visible watermark or footer — document stays clean for endorsing body submission.
+      // Audit trail is recorded silently in the database below.
+      const watermarkedHtml = enhancedHtml;
 
       // ── Audit log — record every export access ─────────────────────────────
       try {
