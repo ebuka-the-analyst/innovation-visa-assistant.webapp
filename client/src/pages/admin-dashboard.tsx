@@ -1162,6 +1162,30 @@ export default function AdminDashboard() {
     enabled: !!user?.isAdmin && activeSection.startsWith('logs'),
   });
 
+  // Security events (real data for Access Control page)
+  const { data: securityEventsData, isLoading: securityEventsLoading } = useQuery<{
+    events: Array<{
+      id: string;
+      eventType: string;
+      severity: string;
+      userEmail?: string;
+      ipAddress?: string;
+      description: string;
+      isResolved: boolean;
+      createdAt: string;
+    }>;
+    stats: {
+      total: number;
+      unresolved: number;
+      byType: Record<string, number>;
+      bySeverity: Record<string, number>;
+    };
+  }>({
+    queryKey: ['/api/admin/security-events'],
+    enabled: !!user?.isAdmin && activeSection === 'settings-access',
+    refetchInterval: 30000,
+  });
+
   // System metrics
   const { data: systemMetrics, isLoading: systemMetricsLoading } = useQuery<SystemMetrics>({
     queryKey: ['/api/admin/system/metrics'],
@@ -13081,9 +13105,13 @@ export default function AdminDashboard() {
                       )}
 
                       {/* Access Control Section */}
-                      {activeSection === 'settings-access' && (
+                      {activeSection === 'settings-access' && (() => {
+                        const realAdmins = allUsersData?.users?.filter(u => u.isAdmin) || [];
+                        const activeSessionCount = overviewData?.kpiMetrics?.[1]?.value ?? 0;
+                        const unresolvedAlerts = securityEventsData?.stats?.unresolved ?? 0;
+                        return (
                         <>
-                          {/* Access Control Overview */}
+                          {/* Access Control Overview — all real data */}
                           <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                             <Card className="bg-gradient-to-br from-violet-500/10 to-violet-600/5 border-violet-500/20">
                               <CardContent className="pt-6">
@@ -13091,7 +13119,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-violet-500/10 flex items-center justify-center">
                                     <Shield className="h-3 w-3 text-violet-500" />
                                   </div>
-                                  <p className="text-xs font-bold text-violet-500">3</p>
+                                  <p className="text-xs font-bold text-violet-500">{realAdmins.length}</p>
                                   <p className="text-[9px] text-muted-foreground">Admin Users</p>
                                 </div>
                               </CardContent>
@@ -13102,8 +13130,8 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-blue-500/10 flex items-center justify-center">
                                     <LockKeyhole className="h-3 w-3 text-blue-500" />
                                   </div>
-                                  <p className="text-xs font-bold text-blue-500">12</p>
-                                  <p className="text-[9px] text-muted-foreground">Permission Sets</p>
+                                  <p className="text-xs font-bold text-blue-500">10</p>
+                                  <p className="text-[9px] text-muted-foreground">Permission Types</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -13113,7 +13141,7 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-green-500/10 flex items-center justify-center">
                                     <CheckCircle className="h-3 w-3 text-green-500" />
                                   </div>
-                                  <p className="text-xs font-bold text-green-500">45</p>
+                                  <p className="text-xs font-bold text-green-500">{activeSessionCount}</p>
                                   <p className="text-[9px] text-muted-foreground">Active Sessions</p>
                                 </div>
                               </CardContent>
@@ -13124,14 +13152,14 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-red-500/10 flex items-center justify-center">
                                     <AlertTriangle className="h-3 w-3 text-red-500" />
                                   </div>
-                                  <p className="text-xs font-bold text-red-500">2</p>
+                                  <p className="text-xs font-bold text-red-500">{unresolvedAlerts}</p>
                                   <p className="text-[9px] text-muted-foreground">Security Alerts</p>
                                 </div>
                               </CardContent>
                             </Card>
                           </div>
 
-                          {/* Admin Team Management */}
+                          {/* Admin Team — real users from database */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
                               <div className="flex items-center justify-between flex-wrap gap-1.5">
@@ -13140,91 +13168,68 @@ export default function AdminDashboard() {
                                     <Shield className="h-3 w-3 text-violet-500" />
                                     Admin Team
                                   </CardTitle>
-                                  <CardDescription className="text-[9px]">Manage administrator accounts and permissions</CardDescription>
+                                  <CardDescription className="text-[9px]">Administrator accounts with platform access</CardDescription>
                                 </div>
-                                <Button>
-                                  <Plus className="h-3 w-3 mr-2" />
-                                  Add Admin
-                                </Button>
                               </div>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-1.5">
-                                {[
-                                  { name: 'Ebuka Benedict Umeh', email: 'ebuka@example.com', role: 'Super Admin', status: 'Active', lastLogin: '2 hours ago', permissions: ['All'] },
-                                  { name: 'System Administrator', email: 'admin@ukvisaassistant.com', role: 'Admin', status: 'Active', lastLogin: '1 day ago', permissions: ['Users', 'Plans', 'Analytics'] },
-                                  { name: 'Support Manager', email: 'support@ukvisaassistant.com', role: 'Moderator', status: 'Active', lastLogin: '3 days ago', permissions: ['Users', 'Support'] },
-                                ].map((admin, i) => (
-                                  <Card key={i} className="hover-elevate">
-                                    <CardContent className="p-2">
-                                      <div className="flex items-center justify-between gap-4 flex-wrap">
-                                        <div className="flex items-center gap-1.5">
-                                          <div className={`h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold ${
-                                            admin.role === 'Super Admin' ? 'bg-gradient-to-br from-violet-500/20 to-purple-500/20 text-violet-600' :
-                                            admin.role === 'Admin' ? 'bg-gradient-to-br from-blue-500/20 to-cyan-500/20 text-blue-600' :
-                                            'bg-gradient-to-br from-green-500/20 to-emerald-500/20 text-green-600'
-                                          }`}>
-                                            {admin.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                                          </div>
-                                          <div>
-                                            <div className="flex items-center gap-2">
-                                              <p className="font-semibold">{admin.name}</p>
-                                              <Badge variant={admin.role === 'Super Admin' ? 'default' : 'secondary'} className="text-xs">
-                                                {admin.role}
-                                              </Badge>
+                              {realAdmins.length === 0 ? (
+                                <p className="text-[9px] text-muted-foreground text-center py-4">No admin users found.</p>
+                              ) : (
+                                <div className="space-y-1.5">
+                                  {realAdmins.map((admin, i) => {
+                                    const displayName = [admin.firstName, admin.lastName].filter(Boolean).join(' ') || admin.email;
+                                    const initials = displayName.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
+                                    return (
+                                      <Card key={admin.id} className="hover-elevate">
+                                        <CardContent className="p-2">
+                                          <div className="flex items-center justify-between gap-4 flex-wrap">
+                                            <div className="flex items-center gap-1.5">
+                                              <div className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold bg-gradient-to-br from-violet-500/20 to-purple-500/20 text-violet-600">
+                                                {initials}
+                                              </div>
+                                              <div>
+                                                <div className="flex items-center gap-2">
+                                                  <p className="font-semibold text-[10px]">{displayName}</p>
+                                                  <Badge variant="default" className="text-xs">Super Admin</Badge>
+                                                </div>
+                                                <p className="text-[9px] text-muted-foreground">{admin.email}</p>
+                                                <div className="flex items-center gap-1 mt-0.5">
+                                                  <Badge variant="outline" className="text-xs">All Permissions</Badge>
+                                                  {admin.isEmailVerified && (
+                                                    <Badge variant="outline" className="text-xs text-green-600 border-green-500/30">Verified</Badge>
+                                                  )}
+                                                </div>
+                                              </div>
                                             </div>
-                                            <p className="text-[9px] text-muted-foreground">{admin.email}</p>
-                                            <div className="flex items-center gap-1 mt-1">
-                                              {admin.permissions.map((perm, j) => (
-                                                <Badge key={j} variant="outline" className="text-xs">{perm}</Badge>
-                                              ))}
+                                            <div className="flex items-center gap-1.5">
+                                              <div className="text-right">
+                                                <Badge variant="default" className="text-xs bg-green-500">Active</Badge>
+                                                {admin.createdAt && (
+                                                  <p className="text-[9px] text-muted-foreground mt-0.5">
+                                                    Since {formatDistance(new Date(admin.createdAt), new Date(), { addSuffix: true })}
+                                                  </p>
+                                                )}
+                                              </div>
                                             </div>
                                           </div>
-                                        </div>
-                                        <div className="flex items-center gap-1.5">
-                                          <div className="text-right">
-                                            <Badge variant="default" className="text-xs bg-green-500">{admin.status}</Badge>
-                                            <p className="text-[9px] text-muted-foreground">Last login: {admin.lastLogin}</p>
-                                          </div>
-                                          <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                              <Button variant="ghost" size="icon">
-                                                <MoreVertical className="h-3 w-3" />
-                                              </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                              <DropdownMenuItem>
-                                                <Edit className="h-3 w-3 mr-2" />
-                                                Edit Permissions
-                                              </DropdownMenuItem>
-                                              <DropdownMenuItem>
-                                                <Eye className="h-3 w-3 mr-2" />
-                                                View Activity
-                                              </DropdownMenuItem>
-                                              <DropdownMenuSeparator />
-                                              <DropdownMenuItem className="text-destructive">
-                                                <Ban className="h-3 w-3 mr-2" />
-                                                Revoke Access
-                                              </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                          </DropdownMenu>
-                                        </div>
-                                      </div>
-                                    </CardContent>
-                                  </Card>
-                                ))}
-                              </div>
+                                        </CardContent>
+                                      </Card>
+                                    );
+                                  })}
+                                </div>
+                              )}
                             </CardContent>
                           </Card>
 
-                          {/* Permission Matrix */}
+                          {/* Permission Matrix — system design, accurate representation */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
                               <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <LockKeyhole className="h-3 w-3 text-blue-500" />
                                 Permission Matrix
                               </CardTitle>
-                              <CardDescription className="text-[9px]">Role-based access control settings</CardDescription>
+                              <CardDescription className="text-[9px]">Role-based access control — system-enforced permissions</CardDescription>
                             </CardHeader>
                             <CardContent>
                               <Table className="[&_td]:py-0.5 [&_td]:px-1.5 [&_th]:py-0.5 [&_th]:px-1.5 text-[9px]">
@@ -13267,54 +13272,69 @@ export default function AdminDashboard() {
                             </CardContent>
                           </Card>
 
-                          {/* Recent Security Events */}
+                          {/* Security Events — real events from database */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
                               <CardTitle className="text-[10px] font-semibold flex items-center gap-1">
                                 <AlertTriangle className="h-3 w-3 text-amber-500" />
                                 Security Events
                               </CardTitle>
-                              <CardDescription className="text-[9px]">Recent login attempts and security alerts</CardDescription>
+                              <CardDescription className="text-[9px]">Real security events logged by the platform</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-1">
-                                {[
-                                  { event: 'Successful admin login', user: 'ebuka@example.com', ip: '192.168.1.x', time: '2 hours ago', status: 'success' },
-                                  { event: 'Failed login attempt', user: 'unknown@attacker.com', ip: '45.33.x.x', time: '5 hours ago', status: 'blocked' },
-                                  { event: 'Password reset requested', user: 'support@ukvisaassistant.com', ip: '192.168.1.x', time: '1 day ago', status: 'success' },
-                                  { event: 'New admin added', user: 'System', ip: 'Internal', time: '3 days ago', status: 'success' },
-                                ].map((event, i) => (
-                                  <div key={i} className={`flex items-center justify-between p-3 rounded-lg ${
-                                    event.status === 'blocked' ? 'bg-red-500/10 border border-red-500/20' : 'bg-muted/50'
-                                  }`}>
-                                    <div className="flex items-center gap-1.5">
-                                      <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                                        event.status === 'blocked' ? 'bg-red-500/20' : 'bg-green-500/20'
+                              {securityEventsLoading ? (
+                                <div className="space-y-1">
+                                  {[1,2,3].map(i => <ShimmerSkeleton key={i} />)}
+                                </div>
+                              ) : securityEventsData?.events && securityEventsData.events.length > 0 ? (
+                                <div className="space-y-1">
+                                  {securityEventsData.events.slice(0, 10).map((evt) => {
+                                    const isBlocked = evt.severity === 'high' || evt.severity === 'critical' || evt.eventType === 'failed_login' || evt.eventType === 'blocked_request';
+                                    return (
+                                      <div key={evt.id} className={`flex items-center justify-between p-3 rounded-lg ${
+                                        isBlocked ? 'bg-red-500/10 border border-red-500/20' : 'bg-muted/50'
                                       }`}>
-                                        {event.status === 'blocked' ? (
-                                          <AlertTriangle className="h-3 w-3 text-red-500" />
-                                        ) : (
-                                          <CheckCircle className="h-3 w-3 text-green-500" />
-                                        )}
+                                        <div className="flex items-center gap-1.5">
+                                          <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                                            isBlocked ? 'bg-red-500/20' : 'bg-green-500/20'
+                                          }`}>
+                                            {isBlocked ? (
+                                              <AlertTriangle className="h-3 w-3 text-red-500" />
+                                            ) : (
+                                              <CheckCircle className="h-3 w-3 text-green-500" />
+                                            )}
+                                          </div>
+                                          <div>
+                                            <p className="font-medium text-[9px]">{evt.description}</p>
+                                            <p className="text-[9px] text-muted-foreground">
+                                              {evt.userEmail || 'System'}{evt.ipAddress ? ` • IP: ${evt.ipAddress}` : ''}
+                                            </p>
+                                          </div>
+                                        </div>
+                                        <div className="text-right">
+                                          <Badge variant={isBlocked ? 'destructive' : 'default'} className="text-xs">
+                                            {evt.isResolved ? 'resolved' : isBlocked ? 'alert' : 'info'}
+                                          </Badge>
+                                          <p className="text-[9px] text-muted-foreground mt-0.5">
+                                            {formatDistance(new Date(evt.createdAt), new Date(), { addSuffix: true })}
+                                          </p>
+                                        </div>
                                       </div>
-                                      <div>
-                                        <p className="font-medium text-[9px]">{event.event}</p>
-                                        <p className="text-[9px] text-muted-foreground">{event.user} • IP: {event.ip}</p>
-                                      </div>
-                                    </div>
-                                    <div className="text-right">
-                                      <Badge variant={event.status === 'blocked' ? 'destructive' : 'default'} className="text-xs">
-                                        {event.status}
-                                      </Badge>
-                                      <p className="text-[9px] text-muted-foreground">{event.time}</p>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
+                                    );
+                                  })}
+                                </div>
+                              ) : (
+                                <div className="text-center py-6">
+                                  <CheckCircle className="h-6 w-6 text-green-500 mx-auto mb-1.5" />
+                                  <p className="text-[10px] font-medium text-green-600">No security events detected</p>
+                                  <p className="text-[9px] text-muted-foreground mt-0.5">The platform is running cleanly with no suspicious activity.</p>
+                                </div>
+                              )}
                             </CardContent>
                           </Card>
                         </>
-                      )}
+                        );
+                      })()}
 
                       {/* Maintenance Section */}
                       {activeSection === 'settings-maintenance' && (
