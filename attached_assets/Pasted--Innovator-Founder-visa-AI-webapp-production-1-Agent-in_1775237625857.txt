@@ -1,0 +1,176 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+1
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+e1d09041
+Active
+
+Apr 3, 2026, 4:43 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+    at async drainHumanReviewQueue (file:///app/dist/index.js:13933:7)
+    at async Timeout._onTimeout (file:///app/dist/index.js:13995:9) {
+  length: 1316,
+  severity: 'ERROR',
+  code: '23502',
+  detail: 'Failing row contains (4b08f623-7ef4-4225-a967-41ae966c7fc8, When Endorsement Can Be Withdrawn: Avoiding Pitfalls, when-endorsement-can-be-withdrawn-avoiding-pitfalls-2026-04-03-4..., Learn the verified reasons endorsement may be withdrawn for the ..., <h2>When Endorsement Can Be Withdrawn: Avoiding Common Pitfalls<..., endorsement, {endorsement,"Innovator Founder Visa","UK immigration","visa com..., When Endorsement Can Be Withdrawn | Innovator Founder Visa, Learn the verified reasons endorsement may be withdrawn for the ..., {"UK Innovator Founder Visa","endorsement withdrawal","Innovator..., /objects/blog/unique/documents-checklist-1.png, 8, UK Visa Expert Team, Our team provides accurate, verified information about the UK In..., f, f, 0, null, 2026-04-03 05:07:37.345578, 2026-04-03 05:07:37.345578, human_review, null, 2026-04-03 05:07:37.343, t, f, null, null, null, 0, 0, 0, 0, 0, null, null, 0, 0, 0, null, null, 80, 45, 100, flagged, {"drainAttempts": 1, "autoFixAttempts": 5}, 2026-04-03 16:37:24.49, 2026-07-02 16:37:24.49, t, 8, 13, d2979e029fff8453a22825f206c0c7e0b2df2e03873f34774cabe04bed3963d9, 78, 98).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'blog_posts',
+  column: 'published_at',
+  dataType: undefined,
+  constraint: undefined,
+  file: 'execMain.c',
+  line: '2022',
+  routine: 'ExecConstraints'
+}
+[Pipeline] "drain-16:30" next run in 1433 min (Sat, 04 Apr 2026 16:30:00 GMT)
+[2026-04-03T16:43:02.704Z] POST /api/activity/session
+[2026-04-03T16:43:02.705Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+4:43:02 PM [express] GET /api/auth/user 200 in 217ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+4:43:02 PM [express] POST /api/activity/session 200 in 229ms :: {"sessionId":"a5c0d157-12ab-40ba-905…
+[2026-04-03T16:43:03.298Z] POST /api/activity/page-view
+4:43:03 PM [express] POST /api/activity/page-view 200 in 29ms :: {"pageViewId":"51ad0850-5e75-47e2-b…
+[2026-04-03T16:43:06.482Z] GET /api/admin/activity/sessions?active=true
+4:43:06 PM [express] GET /api/admin/activity/sessions 200 in 19ms :: {"sessions":[{"id":"a5c0d157-12…
+[2026-04-03T16:43:06.629Z] GET /api/admin/users/activity
+[2026-04-03T16:43:06.633Z] GET /api/admin/activity/overview
+4:43:06 PM [express] GET /api/admin/users/activity 404 in 20ms :: {"error":"User not found"}
+[2026-04-03T16:43:06.650Z] GET /api/admin/activity/live-feed
+4:43:06 PM [express] GET /api/admin/activity/live-feed 200 in 22ms :: {"activities":[{"id":"51ad0850…
+4:43:06 PM [express] GET /api/admin/activity/overview 200 in 55ms :: {"realtime":{"activeUsersNow":1…
+[2026-04-03T16:43:14.845Z] GET /api/admin/activity-log
+4:43:14 PM [express] GET /api/admin/activity-log 200 in 80ms :: [{"id":"plan-f9e23426-736a-415f-a5ee…
+[2026-04-03T16:43:15.428Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+4:43:15 PM [express] GET /api/admin/analytics/overview 200 in 411ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-03T16:43:16.712Z] GET /api/admin/activity/sessions?active=true
+4:43:16 PM [express] GET /api/admin/activity/sessions 200 in 19ms :: {"sessions":[{"id":"a5c0d157-12…
+[2026-04-03T16:43:17.043Z] GET /api/admin/activity/live-feed
+4:43:17 PM [express] GET /api/admin/activity/live-feed 200 in 22ms :: {"activities":[{"id":"51ad0850…
+[2026-04-03T16:43:18.041Z] GET /api/admin/analytics/revenue
+[Stripe] Using LIVE mode credentials - payments are real
+4:43:19 PM [express] GET /api/admin/analytics/revenue 200 in 990ms :: {"revenueToday":0,"revenueThis…
+[2026-04-03T16:43:33.296Z] POST /api/activity/session
+4:43:33 PM [express] POST /api/activity/session 200 in 228ms :: {"sessionId":"a5c0d157-12ab-40ba-905…
+[2026-04-03T16:43:45.306Z] GET /api/admin/activity-log
+4:43:45 PM [express] GET /api/admin/activity-log 200 in 244ms :: [{"id":"plan-f9e23426-736a-415f-a5e…
+[2026-04-03T16:43:46.204Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+4:43:46 PM [express] GET /api/admin/analytics/overview 200 in 381ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-03T16:43:49.236Z] GET /api/admin/analytics/revenue
+[Stripe] Using LIVE mode credentials - payments are real
+4:43:50 PM [express] GET /api/admin/analytics/revenue 200 in 892ms :: {"revenueToday":0,"revenueThis…
+[2026-04-03T16:44:03.301Z] POST /api/activity/session
+4:44:03 PM [express] POST /api/activity/session 200 in 225ms :: {"sessionId":"a5c0d157-12ab-40ba-905…
+[2026-04-03T16:44:07.888Z] GET /api/admin/analytics/tools?dateRange=%5Bobject+Object%5D
+4:44:07 PM [express] GET /api/admin/analytics/tools 200 in 18ms :: {"byActionType":{},"topTools":[],…
+[2026-04-03T16:44:15.919Z] GET /api/admin/activity-log
+4:44:15 PM [express] GET /api/admin/activity-log 200 in 80ms :: [{"id":"plan-f9e23426-736a-415f-a5ee…
+[2026-04-03T16:44:16.946Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+4:44:17 PM [express] GET /api/admin/analytics/overview 200 in 549ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-03T16:44:33.299Z] POST /api/activity/session
+4:44:33 PM [express] POST /api/activity/session 200 in 222ms :: {"sessionId":"a5c0d157-12ab-40ba-905…
+[2026-04-03T16:44:38.267Z] GET /api/admin/analytics/tools?dateRange=%5Bobject+Object%5D
+4:44:38 PM [express] GET /api/admin/analytics/tools 200 in 27ms :: {"byActionType":{},"topTools":[],…
+[2026-04-03T16:44:46.362Z] GET /api/admin/activity-log
+4:44:46 PM [express] GET /api/admin/activity-log 200 in 51ms :: [{"id":"plan-f9e23426-736a-415f-a5ee…
+[2026-04-03T16:44:47.866Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+4:44:48 PM [express] GET /api/admin/analytics/overview 200 in 378ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-03T16:44:53.503Z] POST /api/errors/log
+4:44:53 PM [express] POST /api/errors/log 200 in 17ms :: {"success":true}
+[2026-04-03T16:44:56.151Z] POST /api/activity/session/end
+4:44:56 PM [express] POST /api/activity/session/end 200 in 21ms :: {"success":true}
+[2026-04-03T17:32:05.863Z] POST /api/activity/session
+5:32:06 PM [express] POST /api/activity/session 200 in 223ms :: {"sessionId":"c383c183-6088-43ee-a1c…
+[2026-04-03T17:32:06.483Z] POST /api/activity/page-view
+5:32:06 PM [express] POST /api/activity/page-view 200 in 24ms :: {"pageViewId":"701a9bca-c851-4ae6-a…
+[2026-04-03T17:32:09.465Z] GET /admin
+[2026-04-03T17:32:09.466Z] POST /api/activity/session/end
+[SEO] Injecting meta for route: /
+5:32:09 PM [express] POST /api/activity/session/end 200 in 193ms :: {"success":true}
+[2026-04-03T17:32:09.702Z] GET /attached_assets/official_logo.webp
+[SEO] Injecting meta for route: /
+[2026-04-03T17:32:09.775Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+5:32:09 PM [express] GET /api/auth/user 200 in 18ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-03T17:32:10.077Z] POST /api/errors/log
+5:32:10 PM [express] POST /api/errors/log 200 in 17ms :: {"success":true}
+[2026-04-03T17:32:10.181Z] POST /api/activity/session
+[2026-04-03T17:32:10.187Z] POST /api/activity/session
+5:32:10 PM [express] POST /api/activity/session 200 in 24ms :: {"sessionId":"d46534e9-f6e8-43d9-a6cd…
+5:32:10 PM [express] POST /api/activity/session 200 in 47ms :: {"sessionId":"7ce0cf3c-550f-4464-9cb4…
+[2026-04-03T17:32:10.404Z] POST /api/activity/page-view
+5:32:10 PM [express] POST /api/activity/page-view 200 in 26ms :: {"pageViewId":"de91436a-ea82-4f8e-a…
+[2026-04-03T17:32:18.044Z] POST /api/activity/session/end
+5:32:18 PM [express] POST /api/activity/session/end 200 in 20ms :: {"success":true}
+[2026-04-03T17:32:27.858Z] POST /api/activity/session
+5:32:27 PM [express] POST /api/activity/session 200 in 25ms :: {"sessionId":"108cfdf0-75b8-4696-80d5…
+[2026-04-03T17:32:28.252Z] POST /api/activity/page-view
+5:32:28 PM [express] POST /api/activity/page-view 200 in 31ms :: {"pageViewId":"fa55cf6a-24fa-4f20-9…
+[2026-04-03T17:32:33.021Z] POST /api/activity/session/end
+5:32:33 PM [express] POST /api/activity/session/end 200 in 18ms :: {"success":true}
+
+

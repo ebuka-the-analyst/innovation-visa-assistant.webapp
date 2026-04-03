@@ -364,6 +364,21 @@ interface SystemMetrics {
   healthScore?: number;
 }
 
+interface ExtendedKPIs {
+  planCompletionRate: number;
+  completedPlans: number;
+  totalPlans: number;
+  monthlyRevenue: number;
+  revenueTarget: number;
+  toolAdoptionRate: number;
+  avgToolsPerUser: number;
+  uniqueToolsUsed: number;
+  totalTools: number;
+  dailyActiveUsers: number;
+  dailyActiveTarget: number;
+  overallScore: number;
+}
+
 interface OverviewData {
   kpiMetrics: KPIMetric[];
   timeSeriesData: TimeSeriesData[];
@@ -373,6 +388,7 @@ interface OverviewData {
   recentActivity: ActivityLogEntry[];
   systemMetrics: SystemMetrics;
   lastUpdated: string;
+  extendedKPIs?: ExtendedKPIs;
 }
 
 interface UsersAnalytics {
@@ -3088,9 +3104,9 @@ export default function AdminDashboard() {
                                 <div className="flex items-center gap-1.5">
                                   <div className="text-center px-2 py-0.5 bg-background rounded border">
                                     <p className={`text-xs font-bold ${
-                                      (overviewData.extendedKPIs?.overallScore || 0) >= 80 ? 'text-green-500' :
-                                      (overviewData.extendedKPIs?.overallScore || 0) >= 60 ? 'text-amber-500' : 'text-red-500'
-                                    }`}>{overviewData.extendedKPIs?.overallScore || 0}%</p>
+                                      (overviewData?.extendedKPIs?.overallScore || 0) >= 80 ? 'text-green-500' :
+                                      (overviewData?.extendedKPIs?.overallScore || 0) >= 60 ? 'text-amber-500' : 'text-red-500'
+                                    }`}>{overviewData?.extendedKPIs?.overallScore || 0}%</p>
                                     <p className="text-[9px] text-muted-foreground">Overall Score</p>
                                   </div>
                                   <div className="text-center px-2 py-0.5 bg-background rounded border">
@@ -3148,31 +3164,31 @@ export default function AdminDashboard() {
                                   <div className="flex items-center justify-between">
                                     <CardTitle className="text-[10px] font-medium">Plan Completion Rate</CardTitle>
                                     <Badge variant="outline" className={
-                                      (overviewData.extendedKPIs?.planCompletionRate || 0) >= 80 ? 'text-green-500 border-green-500/30' :
-                                      (overviewData.extendedKPIs?.planCompletionRate || 0) >= 50 ? 'text-amber-500 border-amber-500/30' : 'text-red-500 border-red-500/30'
+                                      (overviewData?.extendedKPIs?.planCompletionRate || 0) >= 80 ? 'text-green-500 border-green-500/30' :
+                                      (overviewData?.extendedKPIs?.planCompletionRate || 0) >= 50 ? 'text-amber-500 border-amber-500/30' : 'text-red-500 border-red-500/30'
                                     }>
-                                      {(overviewData.extendedKPIs?.planCompletionRate || 0) >= 80 ? 'On Track' :
-                                       (overviewData.extendedKPIs?.planCompletionRate || 0) >= 50 ? 'Needs Focus' : 'Critical'}
+                                      {(overviewData?.extendedKPIs?.planCompletionRate || 0) >= 80 ? 'On Track' :
+                                       (overviewData?.extendedKPIs?.planCompletionRate || 0) >= 50 ? 'Needs Focus' : 'Critical'}
                                     </Badge>
                                   </div>
                                 </CardHeader>
                                 <CardContent className="p-2 space-y-1">
                                   <div className="flex items-end justify-between">
                                     <div>
-                                      <p className="text-[9px] font-bold">{overviewData.extendedKPIs?.planCompletionRate || 0}%</p>
-                                      <p className="text-[9px] text-muted-foreground">{overviewData.extendedKPIs?.completedPlans || 0} of {overviewData.extendedKPIs?.totalPlans || 0} completed</p>
+                                      <p className="text-[9px] font-bold">{overviewData?.extendedKPIs?.planCompletionRate || 0}%</p>
+                                      <p className="text-[9px] text-muted-foreground">{overviewData?.extendedKPIs?.completedPlans || 0} of {overviewData?.extendedKPIs?.totalPlans || 0} completed</p>
                                     </div>
                                     <div className="text-right">
                                       <p className="text-xs font-semibold text-muted-foreground">/ 80%</p>
                                       <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
-                                  <Progress value={overviewData.extendedKPIs?.planCompletionRate || 0} className="h-1" />
+                                  <Progress value={overviewData?.extendedKPIs?.planCompletionRate || 0} className="h-1" />
                                   <div className="flex items-center justify-between text-[9px]">
                                     <span className="text-muted-foreground">vs Target</span>
                                     <span className={`font-medium ${
-                                      (overviewData.extendedKPIs?.planCompletionRate || 0) >= 80 ? 'text-green-500' : 'text-amber-500'
-                                    }`}>{Math.round(((overviewData.extendedKPIs?.planCompletionRate || 0) / 80) * 100)}% of goal</span>
+                                      (overviewData?.extendedKPIs?.planCompletionRate || 0) >= 80 ? 'text-green-500' : 'text-amber-500'
+                                    }`}>{Math.round(((overviewData?.extendedKPIs?.planCompletionRate || 0) / 80) * 100)}% of goal</span>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -3189,31 +3205,31 @@ export default function AdminDashboard() {
                                   <div className="flex items-center justify-between">
                                     <CardTitle className="text-[10px] font-medium">Monthly Revenue</CardTitle>
                                     <Badge variant="outline" className={
-                                      (overviewData.extendedKPIs?.monthlyRevenue || 0) >= (overviewData.extendedKPIs?.revenueTarget || 2000) ? 'text-green-500 border-green-500/30' :
-                                      (overviewData.extendedKPIs?.monthlyRevenue || 0) >= ((overviewData.extendedKPIs?.revenueTarget || 2000) * 0.5) ? 'text-amber-500 border-amber-500/30' : 'text-red-500 border-red-500/30'
+                                      (overviewData?.extendedKPIs?.monthlyRevenue || 0) >= (overviewData?.extendedKPIs?.revenueTarget || 2000) ? 'text-green-500 border-green-500/30' :
+                                      (overviewData?.extendedKPIs?.monthlyRevenue || 0) >= ((overviewData?.extendedKPIs?.revenueTarget || 2000) * 0.5) ? 'text-amber-500 border-amber-500/30' : 'text-red-500 border-red-500/30'
                                     }>
-                                      {(overviewData.extendedKPIs?.monthlyRevenue || 0) >= (overviewData.extendedKPIs?.revenueTarget || 2000) ? 'Exceeding' :
-                                       (overviewData.extendedKPIs?.monthlyRevenue || 0) >= ((overviewData.extendedKPIs?.revenueTarget || 2000) * 0.5) ? 'Growing' : 'Needs Focus'}
+                                      {(overviewData?.extendedKPIs?.monthlyRevenue || 0) >= (overviewData?.extendedKPIs?.revenueTarget || 2000) ? 'Exceeding' :
+                                       (overviewData?.extendedKPIs?.monthlyRevenue || 0) >= ((overviewData?.extendedKPIs?.revenueTarget || 2000) * 0.5) ? 'Growing' : 'Needs Focus'}
                                     </Badge>
                                   </div>
                                 </CardHeader>
                                 <CardContent className="p-2 space-y-1">
                                   <div className="flex items-end justify-between">
                                     <div>
-                                      <p className="text-[9px] font-bold">£{(overviewData.extendedKPIs?.monthlyRevenue || 0).toLocaleString()}</p>
+                                      <p className="text-[9px] font-bold">£{(overviewData?.extendedKPIs?.monthlyRevenue || 0).toLocaleString()}</p>
                                       <p className="text-[9px] text-muted-foreground">Current MRR</p>
                                     </div>
                                     <div className="text-right">
-                                      <p className="text-xs font-semibold text-muted-foreground">/ £{(overviewData.extendedKPIs?.revenueTarget || 2000).toLocaleString()}</p>
+                                      <p className="text-xs font-semibold text-muted-foreground">/ £{(overviewData?.extendedKPIs?.revenueTarget || 2000).toLocaleString()}</p>
                                       <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
-                                  <Progress value={Math.min(((overviewData.extendedKPIs?.monthlyRevenue || 0) / (overviewData.extendedKPIs?.revenueTarget || 2000)) * 100, 100)} className="h-1" />
+                                  <Progress value={Math.min(((overviewData?.extendedKPIs?.monthlyRevenue || 0) / (overviewData?.extendedKPIs?.revenueTarget || 2000)) * 100, 100)} className="h-1" />
                                   <div className="flex items-center justify-between text-[9px]">
                                     <span className="text-muted-foreground">vs Target</span>
                                     <span className={`font-medium ${
-                                      (overviewData.extendedKPIs?.monthlyRevenue || 0) >= (overviewData.extendedKPIs?.revenueTarget || 2000) ? 'text-green-500' : 'text-amber-500'
-                                    }`}>{Math.round(((overviewData.extendedKPIs?.monthlyRevenue || 0) / (overviewData.extendedKPIs?.revenueTarget || 2000)) * 100)}% of goal</span>
+                                      (overviewData?.extendedKPIs?.monthlyRevenue || 0) >= (overviewData?.extendedKPIs?.revenueTarget || 2000) ? 'text-green-500' : 'text-amber-500'
+                                    }`}>{Math.round(((overviewData?.extendedKPIs?.monthlyRevenue || 0) / (overviewData?.extendedKPIs?.revenueTarget || 2000)) * 100)}% of goal</span>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -3263,29 +3279,29 @@ export default function AdminDashboard() {
                                   <div className="flex items-center justify-between">
                                     <CardTitle className="text-[10px] font-medium">Tool Adoption Rate</CardTitle>
                                     <Badge variant="outline" className={
-                                      (overviewData.extendedKPIs?.toolAdoptionRate || 0) >= 75 ? 'text-green-500 border-green-500/30' :
-                                      (overviewData.extendedKPIs?.toolAdoptionRate || 0) >= 50 ? 'text-blue-500 border-blue-500/30' : 'text-amber-500 border-amber-500/30'
+                                      (overviewData?.extendedKPIs?.toolAdoptionRate || 0) >= 75 ? 'text-green-500 border-green-500/30' :
+                                      (overviewData?.extendedKPIs?.toolAdoptionRate || 0) >= 50 ? 'text-blue-500 border-blue-500/30' : 'text-amber-500 border-amber-500/30'
                                     }>
-                                      {(overviewData.extendedKPIs?.toolAdoptionRate || 0) >= 75 ? 'Excellent' :
-                                       (overviewData.extendedKPIs?.toolAdoptionRate || 0) >= 50 ? 'Growing' : 'Building'}
+                                      {(overviewData?.extendedKPIs?.toolAdoptionRate || 0) >= 75 ? 'Excellent' :
+                                       (overviewData?.extendedKPIs?.toolAdoptionRate || 0) >= 50 ? 'Growing' : 'Building'}
                                     </Badge>
                                   </div>
                                 </CardHeader>
                                 <CardContent className="p-2 space-y-1">
                                   <div className="flex items-end justify-between">
                                     <div>
-                                      <p className="text-[9px] font-bold">{overviewData.extendedKPIs?.toolAdoptionRate || 0}%</p>
-                                      <p className="text-[9px] text-muted-foreground">{overviewData.extendedKPIs?.uniqueToolsUsed || 0} of {overviewData.extendedKPIs?.totalTools || 109} tools</p>
+                                      <p className="text-[9px] font-bold">{overviewData?.extendedKPIs?.toolAdoptionRate || 0}%</p>
+                                      <p className="text-[9px] text-muted-foreground">{overviewData?.extendedKPIs?.uniqueToolsUsed || 0} of {overviewData?.extendedKPIs?.totalTools || 109} tools</p>
                                     </div>
                                     <div className="text-right">
                                       <p className="text-xs font-semibold text-muted-foreground">/ 75%</p>
                                       <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
-                                  <Progress value={overviewData.extendedKPIs?.toolAdoptionRate || 0} className="h-1" />
+                                  <Progress value={overviewData?.extendedKPIs?.toolAdoptionRate || 0} className="h-1" />
                                   <div className="flex items-center justify-between text-[9px]">
                                     <span className="text-muted-foreground">Avg tools/user</span>
-                                    <span className="text-[9px] font-medium text-blue-500">{overviewData.extendedKPIs?.avgToolsPerUser || 0} tools</span>
+                                    <span className="text-[9px] font-medium text-blue-500">{overviewData?.extendedKPIs?.avgToolsPerUser || 0} tools</span>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -3302,18 +3318,18 @@ export default function AdminDashboard() {
                                   <div className="flex items-center justify-between">
                                     <CardTitle className="text-[10px] font-medium">User Engagement</CardTitle>
                                     <Badge variant="outline" className={
-                                      ((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) >= 0.5 ? 'text-green-500 border-green-500/30' :
-                                      ((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) >= 0.25 ? 'text-blue-500 border-blue-500/30' : 'text-amber-500 border-amber-500/30'
+                                      ((overviewData?.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) >= 0.5 ? 'text-green-500 border-green-500/30' :
+                                      ((overviewData?.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) >= 0.25 ? 'text-blue-500 border-blue-500/30' : 'text-amber-500 border-amber-500/30'
                                     }>
-                                      {((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) >= 0.5 ? 'Excellent' :
-                                       ((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) >= 0.25 ? 'Good' : 'Building'}
+                                      {((overviewData?.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) >= 0.5 ? 'Excellent' :
+                                       ((overviewData?.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) >= 0.25 ? 'Good' : 'Building'}
                                     </Badge>
                                   </div>
                                 </CardHeader>
                                 <CardContent className="p-2 space-y-1">
                                   <div className="flex items-end justify-between">
                                     <div>
-                                      <p className="text-[9px] font-bold">{Math.round(((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) * 100)}%</p>
+                                      <p className="text-[9px] font-bold">{Math.round(((overviewData?.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) * 100)}%</p>
                                       <p className="text-[9px] text-muted-foreground">Daily active rate</p>
                                     </div>
                                     <div className="text-right">
@@ -3321,10 +3337,10 @@ export default function AdminDashboard() {
                                       <p className="text-[9px] text-muted-foreground">Target</p>
                                     </div>
                                   </div>
-                                  <Progress value={Math.min(((overviewData.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) * 100, 100)} className="h-1" />
+                                  <Progress value={Math.min(((overviewData?.extendedKPIs?.dailyActiveUsers || 0) / Math.max(filteredOverviewData?.kpiMetrics?.[0]?.value || 1, 1)) * 100, 100)} className="h-1" />
                                   <div className="flex items-center justify-between text-[9px]">
                                     <span className="text-muted-foreground">Active users</span>
-                                    <span className="text-[9px] font-medium text-blue-500">{overviewData.extendedKPIs?.dailyActiveUsers || 0} of {filteredOverviewData?.kpiMetrics?.[0]?.value || 0}</span>
+                                    <span className="text-[9px] font-medium text-blue-500">{overviewData?.extendedKPIs?.dailyActiveUsers || 0} of {filteredOverviewData?.kpiMetrics?.[0]?.value || 0}</span>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -3370,13 +3386,13 @@ export default function AdminDashboard() {
                                       <h4 className="text-[10px] font-semibold">£5,000 Monthly Recurring Revenue</h4>
                                       <p className="text-[9px] text-muted-foreground">Scale premium tier conversions</p>
                                     </div>
-                                    <Badge variant="secondary">£{(overviewData.extendedKPIs?.monthlyRevenue || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/£5,000</Badge>
+                                    <Badge variant="secondary">£{(overviewData?.extendedKPIs?.monthlyRevenue || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/£5,000</Badge>
                                   </div>
-                                  <Progress value={Math.min(((overviewData.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100, 100)} className="h-1" />
+                                  <Progress value={Math.min(((overviewData?.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100, 100)} className="h-1" />
                                   <div className="flex items-center justify-between mt-0.5 text-[9px]">
                                     <span className="text-muted-foreground">Due: Dec 31, 2025</span>
-                                    <span className={`font-medium ${((overviewData.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100 >= 75 ? 'text-green-500' : ((overviewData.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100 >= 50 ? 'text-amber-500' : 'text-red-500'}`}>
-                                      {Math.round(((overviewData.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100)}% complete
+                                    <span className={`font-medium ${((overviewData?.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100 >= 75 ? 'text-green-500' : ((overviewData?.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100 >= 50 ? 'text-amber-500' : 'text-red-500'}`}>
+                                      {Math.round(((overviewData?.extendedKPIs?.monthlyRevenue || 0) / 5000) * 100)}% complete
                                     </span>
                                   </div>
                                 </div>
@@ -3388,13 +3404,13 @@ export default function AdminDashboard() {
                                       <h4 className="text-[10px] font-semibold">75% Plan Completion Rate</h4>
                                       <p className="text-[9px] text-muted-foreground">Improve user journey and tool guidance</p>
                                     </div>
-                                    <Badge variant="secondary">{overviewData.extendedKPIs?.planCompletionRate || 0}%/75%</Badge>
+                                    <Badge variant="secondary">{overviewData?.extendedKPIs?.planCompletionRate || 0}%/75%</Badge>
                                   </div>
-                                  <Progress value={Math.min(((overviewData.extendedKPIs?.planCompletionRate || 0) / 75) * 100, 100)} className="h-1" />
+                                  <Progress value={Math.min(((overviewData?.extendedKPIs?.planCompletionRate || 0) / 75) * 100, 100)} className="h-1" />
                                   <div className="flex items-center justify-between mt-0.5 text-[9px]">
                                     <span className="text-muted-foreground">Due: Dec 31, 2025</span>
-                                    <span className={`font-medium ${((overviewData.extendedKPIs?.planCompletionRate || 0) / 75) * 100 >= 75 ? 'text-green-500' : ((overviewData.extendedKPIs?.planCompletionRate || 0) / 75) * 100 >= 50 ? 'text-amber-500' : 'text-red-500'}`}>
-                                      {Math.round(((overviewData.extendedKPIs?.planCompletionRate || 0) / 75) * 100)}% complete
+                                    <span className={`font-medium ${((overviewData?.extendedKPIs?.planCompletionRate || 0) / 75) * 100 >= 75 ? 'text-green-500' : ((overviewData?.extendedKPIs?.planCompletionRate || 0) / 75) * 100 >= 50 ? 'text-amber-500' : 'text-red-500'}`}>
+                                      {Math.round(((overviewData?.extendedKPIs?.planCompletionRate || 0) / 75) * 100)}% complete
                                     </span>
                                   </div>
                                 </div>
@@ -5702,22 +5718,22 @@ export default function AdminDashboard() {
                                       <circle 
                                         cx="50" cy="50" r="40" fill="none" 
                                         stroke="#22c55e" strokeWidth="8"
-                                        strokeDasharray={`${(overviewData.extendedKPIs?.planCompletionRate || 0) * 2.51} 251.2`}
+                                        strokeDasharray={`${(overviewData?.extendedKPIs?.planCompletionRate || 0) * 2.51} 251.2`}
                                         strokeLinecap="round"
                                       />
                                     </svg>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                      <span className="text-[11px] font-bold">{overviewData.extendedKPIs?.planCompletionRate || 0}%</span>
+                                      <span className="text-[11px] font-bold">{overviewData?.extendedKPIs?.planCompletionRate || 0}%</span>
                                       <span className="text-[9px] text-muted-foreground">Complete</span>
                                     </div>
                                   </div>
                                   <div className="flex gap-4 mt-1 text-[9px]">
                                     <div className="text-center">
-                                      <p className="font-bold text-green-500">{overviewData.extendedKPIs?.completedPlans || 0}</p>
+                                      <p className="font-bold text-green-500">{overviewData?.extendedKPIs?.completedPlans || 0}</p>
                                       <p className="text-[9px] text-muted-foreground">Completed</p>
                                     </div>
                                     <div className="text-center">
-                                      <p className="font-bold">{overviewData.extendedKPIs?.totalPlans || 0}</p>
+                                      <p className="font-bold">{overviewData?.extendedKPIs?.totalPlans || 0}</p>
                                       <p className="text-[9px] text-muted-foreground">Total Plans</p>
                                     </div>
                                   </div>
@@ -5738,8 +5754,8 @@ export default function AdminDashboard() {
                               <CardContent>
                                 <div className="space-y-1.5">
                                   {[
-                                    { stage: 'Completed Plans', count: overviewData.extendedKPIs?.completedPlans || 0, color: 'green' },
-                                    { stage: 'In Progress', count: (overviewData.extendedKPIs?.totalPlans || 0) - (overviewData.extendedKPIs?.completedPlans || 0), color: 'blue' },
+                                    { stage: 'Completed Plans', count: overviewData?.extendedKPIs?.completedPlans || 0, color: 'green' },
+                                    { stage: 'In Progress', count: (overviewData?.extendedKPIs?.totalPlans || 0) - (overviewData?.extendedKPIs?.completedPlans || 0), color: 'blue' },
                                   ].map((item, index) => (
                                     <motion.div
                                       key={item.stage}
@@ -5755,7 +5771,7 @@ export default function AdminDashboard() {
                                       <Badge className={`${item.color === 'green' ? 'bg-green-500/10 text-green-500' : 'bg-blue-500/10 text-blue-500'}`}>{item.count}</Badge>
                                     </motion.div>
                                   ))}
-                                  {(overviewData.extendedKPIs?.totalPlans || 0) === 0 && (
+                                  {(overviewData?.extendedKPIs?.totalPlans || 0) === 0 && (
                                     <p className="text-[9px] text-muted-foreground text-center py-1">
                                       No business plans created yet. Data will appear as users create plans.
                                     </p>
