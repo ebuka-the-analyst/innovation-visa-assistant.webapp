@@ -70,10 +70,16 @@ function HeroCard({ post }: { post: BlogPost }) {
   return (
     <Link href={`/blog/${post.slug}`} data-testid={`link-hero-${post.slug}`}>
       <div className="group relative overflow-hidden rounded-md cursor-pointer h-[340px] md:h-[420px]">
-        {img ? (
-          <img src={img} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
-        ) : (
-          <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
+        {/* Gradient always rendered as fallback background */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
+        {/* Image overlays gradient; hides itself on error so gradient shows through */}
+        {img && (
+          <img
+            src={img}
+            alt={post.title}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
         <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-7">
@@ -109,10 +115,14 @@ function PostCard({ post }: { post: BlogPost }) {
     <Link href={`/blog/${post.slug}`} data-testid={`link-card-${post.slug}`}>
       <article className="group flex flex-col h-full bg-card border rounded-md overflow-hidden cursor-pointer hover-elevate">
         <div className="relative h-36 overflow-hidden flex-shrink-0">
-          {img ? (
-            <img src={img} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-          ) : (
-            <div className={`w-full h-full bg-gradient-to-br ${gradient}`} />
+          <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
+          {img && (
+            <img
+              src={img}
+              alt={post.title}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
           )}
           <div className="absolute top-2 left-2">
             <CatLabel cat={post.category} />
@@ -142,8 +152,15 @@ function SidebarRow({ post }: { post: BlogPost }) {
   return (
     <Link href={`/blog/${post.slug}`} data-testid={`link-sidebar-${post.slug}`}>
       <div className="group flex gap-2.5 py-2.5 border-b last:border-b-0 cursor-pointer">
-        <div className={`w-14 h-14 rounded flex-shrink-0 overflow-hidden ${!img ? `bg-gradient-to-br ${gradient}` : ""}`}>
-          {img && <img src={img} alt="" className="w-full h-full object-cover" />}
+        <div className={`relative w-14 h-14 rounded flex-shrink-0 overflow-hidden bg-gradient-to-br ${gradient}`}>
+          {img && (
+            <img
+              src={img}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <CatLabel cat={post.category} />

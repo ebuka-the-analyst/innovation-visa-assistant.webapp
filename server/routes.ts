@@ -132,6 +132,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize S3 storage for cross-platform file storage
   s3Storage.initialize();
 
+  // Startup: auto-heal any blog posts with broken/local image URLs
+  // Runs silently in background so it doesn't delay server boot
+  setImmediate(async () => {
+    try {
+      const imageKeywords: Array<[string, string]> = [
+        ["biometric appointment",    "/objects/blog/unique/biometric-scan-1.png"],
+        ["biometric",                "/objects/blog/biometric-appointment.jpg"],
+        ["endorsement withdrawal",   "/objects/blog/unique/endorsement-warning.png"],
+        ["endorsement maintenance",  "/objects/blog/unique/endorsement-maintenance.png"],
+        ["endorsement compliance",   "/objects/blog/unique/endorsement-compliance.png"],
+        ["endorsement review",       "/objects/blog/unique/endorsement-review-1.png"],
+        ["endorsing body",           "/objects/blog/unique/endorsing-body-meeting.png"],
+        ["endorsement",              "/objects/blog/compliance-endorsement.jpg"],
+        ["interview",                "/objects/blog/interview-preparation.jpg"],
+        ["document checklist",       "/objects/blog/unique/documents-checklist-1.png"],
+        ["documents checklist",      "/objects/blog/unique/documents-checklist-1.png"],
+        ["documents organized",      "/objects/blog/unique/documents-organized.png"],
+        ["document",                 "/objects/blog/documents-checklist.jpg"],
+        ["business plan",            "/objects/blog/business-plan.jpg"],
+        ["financial projection",     "/objects/blog/unique/financial-projections.png"],
+        ["financial",                "/objects/blog/financial-requirements.jpg"],
+        ["bank account",             "/objects/blog/unique/bank-account-1.png"],
+        ["banking",                  "/objects/blog/business-banking.jpg"],
+        ["business account",         "/objects/blog/unique/bank-account-1.png"],
+        ["business",                 "/objects/blog/business-meeting.jpg"],
+        ["company registration",     "/objects/blog/unique/companies-house-1.png"],
+        ["companies house",          "/objects/blog/unique/companies-house-1.png"],
+        ["company",                  "/objects/blog/company-registration.jpg"],
+        ["family",                   "/objects/blog/family-visa.jpg"],
+        ["dependent",                "/objects/blog/family-visa.jpg"],
+        ["settlement",               "/objects/blog/settlement-ilr.jpg"],
+        ["ilr",                      "/objects/blog/settlement-ilr.jpg"],
+        ["tax consultation",         "/objects/blog/unique/tax-consultation.png"],
+        ["tax",                      "/objects/blog/tax-considerations.jpg"],
+        ["grant funding",            "/objects/blog/unique/grant-funding-success.png"],
+        ["grants",                   "/objects/blog/uk-grants.jpg"],
+        ["funding",                  "/objects/blog/unique/grant-funding-success.png"],
+        ["scalability",              "/objects/blog/unique/scalability-chart-1.png"],
+        ["scale",                    "/objects/blog/scalability-growth.jpg"],
+        ["growth",                   "/objects/blog/scalability-growth.jpg"],
+        ["english language",         "/objects/blog/unique/english-test-prep.png"],
+        ["english",                  "/objects/blog/english-requirements.jpg"],
+        ["contact meeting",          "/objects/blog/unique/contact-meeting-1.png"],
+        ["meeting prep",             "/objects/blog/unique/meeting-prep-1.png"],
+        ["meeting",                  "/objects/blog/business-meeting.jpg"],
+        ["online banking",           "/objects/blog/unique/online-banking-setup.png"],
+        ["visa center",              "/objects/blog/unique/visa-center-waiting.png"],
+        ["visa documents",           "/objects/blog/unique/visa-documents-spread.png"],
+        ["innovation",               "/objects/blog/innovation-scalability.jpg"],
+        ["visa",                     "/objects/blog/visa-process.jpg"],
+        ["uk",                       "/objects/blog/uk-business.jpg"],
+      ];
+      const catMap: Record<string, string> = {
+        "visa-updates":      "/objects/blog/visa-process.jpg",
+        "business-planning": "/objects/blog/business-plan.jpg",
+        "endorsement":       "/objects/blog/compliance-endorsement.jpg",
+        "success-stories":   "/objects/blog/scalability-growth.jpg",
+        "uk-immigration":    "/objects/blog/uk-business.jpg",
+        "guides":            "/objects/blog/documents-checklist.jpg",
+      };
+      const pickImage = (title: string, category: string): string => {
+        const lower = title.toLowerCase();
+        for (const [kw, path] of imageKeywords) {
+          if (lower.includes(kw)) return path;
+        }
+        return catMap[category] || "/objects/blog/uk-business.jpg";
+      };
+
+      const posts = await db.select({
+        id: blogPosts.id,
+        title: blogPosts.title,
+        category: blogPosts.category,
+        featured_image: blogPosts.featured_image,
+      }).from(blogPosts);
+
+      let healed = 0;
+      for (const post of posts) {
+        const url = post.featured_image;
+        if (!url || !url.startsWith("/objects/blog/")) {
+          const newImage = pickImage(post.title, post.category);
+          await db.update(blogPosts).set({ featured_image: newImage }).where(eq(blogPosts.id, post.id));
+          healed++;
+        }
+      }
+      if (healed > 0) {
+        console.log(`[Blog] Auto-healed ${healed} blog post image URLs on startup`);
+      }
+    } catch (e) {
+      // Non-fatal — don't crash the server
+      console.warn("[Blog] Startup image heal failed (non-fatal):", e);
+    }
+  });
+
   // Auth endpoint - user object already includes all fields from Google OAuth
   // No need to fetch from database again since it's already in req.user
 
@@ -14548,76 +14641,107 @@ Return a JSON object with:
   app.get("/api/cron/generate-blogs", handleCronBlogGeneration);
   app.post("/api/cron/generate-blogs", handleCronBlogGeneration);
   
-  // Admin: Fix blog image URLs to use object storage paths
+  // Admin: Fix blog image URLs — ensures every post has a working /objects/blog/ URL
   app.post("/api/admin/blog/fix-images", requireAdmin, async (req, res) => {
     try {
-      // Image mapping based on keywords
-      const imageKeywords: Record<string, string> = {
-        "biometric": "/objects/blog/biometric-appointment.jpg",
-        "interview": "/objects/blog/interview-preparation.jpg",
-        "endorsing body": "/objects/blog/endorsing-body.jpg",
-        "endorsement": "/objects/blog/compliance-endorsement.jpg",
-        "document": "/objects/blog/documents-checklist.jpg",
-        "checklist": "/objects/blog/documents-checklist.jpg",
-        "business plan": "/objects/blog/business-plan.jpg",
-        "business": "/objects/blog/business-meeting.jpg",
-        "financial": "/objects/blog/financial-requirements.jpg",
-        "projections": "/objects/blog/financial-projections.jpg",
-        "family": "/objects/blog/family-visa.jpg",
-        "dependent": "/objects/blog/family-visa.jpg",
-        "settlement": "/objects/blog/settlement-ilr.jpg",
-        "ilr": "/objects/blog/settlement-ilr.jpg",
-        "tax": "/objects/blog/tax-considerations.jpg",
-        "grant": "/objects/blog/uk-grants.jpg",
-        "funding": "/objects/blog/uk-grants.jpg",
-        "company": "/objects/blog/company-registration.jpg",
-        "innovation": "/objects/blog/innovation-scalability.jpg",
-        "scalability": "/objects/blog/scalability-growth.jpg",
-        "growth": "/objects/blog/scalability-growth.jpg",
-        "english": "/objects/blog/english-requirements.jpg",
-        "visa": "/objects/blog/visa-process.jpg",
-        "uk": "/objects/blog/uk-business.jpg",
+      // Keyword → image mapping (priority order: more specific first)
+      const imageKeywords: Array<[string, string]> = [
+        ["biometric appointment",    "/objects/blog/unique/biometric-scan-1.png"],
+        ["biometric",                "/objects/blog/biometric-appointment.jpg"],
+        ["endorsement withdrawal",   "/objects/blog/unique/endorsement-warning.png"],
+        ["endorsement maintenance",  "/objects/blog/unique/endorsement-maintenance.png"],
+        ["endorsement compliance",   "/objects/blog/unique/endorsement-compliance.png"],
+        ["endorsement review",       "/objects/blog/unique/endorsement-review-1.png"],
+        ["endorsing body",           "/objects/blog/unique/endorsing-body-meeting.png"],
+        ["endorsement",              "/objects/blog/compliance-endorsement.jpg"],
+        ["interview",                "/objects/blog/interview-preparation.jpg"],
+        ["document checklist",       "/objects/blog/unique/documents-checklist-1.png"],
+        ["documents checklist",      "/objects/blog/unique/documents-checklist-1.png"],
+        ["documents organized",      "/objects/blog/unique/documents-organized.png"],
+        ["document",                 "/objects/blog/documents-checklist.jpg"],
+        ["business plan",            "/objects/blog/business-plan.jpg"],
+        ["financial projection",     "/objects/blog/unique/financial-projections.png"],
+        ["financial",                "/objects/blog/financial-requirements.jpg"],
+        ["bank account",             "/objects/blog/unique/bank-account-1.png"],
+        ["banking",                  "/objects/blog/business-banking.jpg"],
+        ["business account",         "/objects/blog/unique/bank-account-1.png"],
+        ["business",                 "/objects/blog/business-meeting.jpg"],
+        ["company registration",     "/objects/blog/unique/companies-house-1.png"],
+        ["companies house",          "/objects/blog/unique/companies-house-1.png"],
+        ["company",                  "/objects/blog/company-registration.jpg"],
+        ["family",                   "/objects/blog/family-visa.jpg"],
+        ["dependent",                "/objects/blog/family-visa.jpg"],
+        ["settlement",               "/objects/blog/settlement-ilr.jpg"],
+        ["ilr",                      "/objects/blog/settlement-ilr.jpg"],
+        ["tax consultation",         "/objects/blog/unique/tax-consultation.png"],
+        ["tax",                      "/objects/blog/tax-considerations.jpg"],
+        ["grant funding",            "/objects/blog/unique/grant-funding-success.png"],
+        ["grants",                   "/objects/blog/uk-grants.jpg"],
+        ["funding",                  "/objects/blog/unique/grant-funding-success.png"],
+        ["scalability",              "/objects/blog/unique/scalability-chart-1.png"],
+        ["scale",                    "/objects/blog/scalability-growth.jpg"],
+        ["growth",                   "/objects/blog/scalability-growth.jpg"],
+        ["english language",         "/objects/blog/unique/english-test-prep.png"],
+        ["english",                  "/objects/blog/english-requirements.jpg"],
+        ["contact meeting",          "/objects/blog/unique/contact-meeting-1.png"],
+        ["meeting prep",             "/objects/blog/unique/meeting-prep-1.png"],
+        ["meeting",                  "/objects/blog/business-meeting.jpg"],
+        ["online banking",           "/objects/blog/unique/online-banking-setup.png"],
+        ["visa center",              "/objects/blog/unique/visa-center-waiting.png"],
+        ["visa documents",           "/objects/blog/unique/visa-documents-spread.png"],
+        ["innovation",               "/objects/blog/innovation-scalability.jpg"],
+        ["visa",                     "/objects/blog/visa-process.jpg"],
+        ["uk",                       "/objects/blog/uk-business.jpg"],
+      ];
+
+      // A URL is "good" only if it starts with /objects/blog/ — guaranteed to route correctly
+      const isGoodUrl = (url: string | null) => !!url && url.startsWith("/objects/blog/");
+
+      const pickImage = (title: string, category: string): string => {
+        const lower = title.toLowerCase();
+        for (const [keyword, path] of imageKeywords) {
+          if (lower.includes(keyword)) return path;
+        }
+        // Category fallback
+        const catMap: Record<string, string> = {
+          "visa-updates":      "/objects/blog/visa-process.jpg",
+          "business-planning": "/objects/blog/business-plan.jpg",
+          "endorsement":       "/objects/blog/compliance-endorsement.jpg",
+          "success-stories":   "/objects/blog/scalability-growth.jpg",
+          "uk-immigration":    "/objects/blog/uk-business.jpg",
+          "guides":            "/objects/blog/documents-checklist.jpg",
+        };
+        return catMap[category] || "/objects/blog/uk-business.jpg";
       };
-      
-      // Get all posts with null images
-      const postsToFix = await db.select({
+
+      const allPosts = await db.select({
         id: blogPosts.id,
         title: blogPosts.title,
         category: blogPosts.category,
-        featured_image: blogPosts.featured_image
+        featured_image: blogPosts.featured_image,
       }).from(blogPosts);
-      
+
       let updatedCount = 0;
-      for (const post of postsToFix) {
-        if (!post.featured_image || post.featured_image.includes('/assets/blog/')) {
-          const titleLower = post.title.toLowerCase();
-          let newImage = "/objects/blog/uk-business.jpg"; // default
-          
-          for (const [keyword, imagePath] of Object.entries(imageKeywords)) {
-            if (titleLower.includes(keyword)) {
-              newImage = imagePath;
-              break;
-            }
-          }
-          
+      for (const post of allPosts) {
+        if (!isGoodUrl(post.featured_image)) {
+          const newImage = pickImage(post.title, post.category);
           await db.update(blogPosts)
             .set({ featured_image: newImage })
             .where(eq(blogPosts.id, post.id));
           updatedCount++;
         }
       }
-      
-      // Get updated posts for verification
-      const updatedPosts = await db.select({ 
-        id: blogPosts.id, 
+
+      const sample = await db.select({
+        id: blogPosts.id,
         title: blogPosts.title,
-        featured_image: blogPosts.featured_image 
+        featured_image: blogPosts.featured_image,
       }).from(blogPosts).limit(10);
-      
+
       res.json({
         success: true,
-        message: `Updated ${updatedCount} blog posts with images`,
-        sample: updatedPosts
+        message: `Healed ${updatedCount} of ${allPosts.length} blog posts`,
+        sample,
       });
     } catch (error: any) {
       console.error("[Admin] Fix blog images error:", error);

@@ -140,28 +140,29 @@ async function runAutoMigrations() {
   }
   
   // Assign unique images to each blog post - ensures NO duplicates
+  // IMPORTANT: Always use /objects/blog/unique/ paths (not /assets/) — these are routed correctly everywhere
   try {
     const allUniqueImages = [
-      "/assets/blog/unique/biometric-scan-1.png",
-      "/assets/blog/unique/endorsement-maintenance.png",
-      "/assets/blog/unique/meeting-prep-1.png",
-      "/assets/blog/unique/contact-meeting-1.png",
-      "/assets/blog/unique/companies-house-1.png",
-      "/assets/blog/unique/bank-account-1.png",
-      "/assets/blog/unique/visa-center-waiting.png",
-      "/assets/blog/unique/scalability-chart-1.png",
-      "/assets/blog/unique/english-test-prep.png",
-      "/assets/blog/unique/visa-documents-spread.png",
-      "/assets/blog/unique/endorsing-body-meeting.png",
-      "/assets/blog/unique/tax-consultation.png",
-      "/assets/blog/unique/endorsement-compliance.png",
-      "/assets/blog/unique/financial-projections.png",
-      "/assets/blog/unique/endorsement-review-1.png",
-      "/assets/blog/unique/grant-funding-success.png",
-      "/assets/blog/unique/online-banking-setup.png",
-      "/assets/blog/unique/endorsement-warning.png",
-      "/assets/blog/unique/documents-organized.png",
-      "/assets/blog/unique/documents-checklist-1.png",
+      "/objects/blog/unique/biometric-scan-1.png",
+      "/objects/blog/unique/endorsement-maintenance.png",
+      "/objects/blog/unique/meeting-prep-1.png",
+      "/objects/blog/unique/contact-meeting-1.png",
+      "/objects/blog/unique/companies-house-1.png",
+      "/objects/blog/unique/bank-account-1.png",
+      "/objects/blog/unique/visa-center-waiting.png",
+      "/objects/blog/unique/scalability-chart-1.png",
+      "/objects/blog/unique/english-test-prep.png",
+      "/objects/blog/unique/visa-documents-spread.png",
+      "/objects/blog/unique/endorsing-body-meeting.png",
+      "/objects/blog/unique/tax-consultation.png",
+      "/objects/blog/unique/endorsement-compliance.png",
+      "/objects/blog/unique/financial-projections.png",
+      "/objects/blog/unique/endorsement-review-1.png",
+      "/objects/blog/unique/grant-funding-success.png",
+      "/objects/blog/unique/online-banking-setup.png",
+      "/objects/blog/unique/endorsement-warning.png",
+      "/objects/blog/unique/documents-organized.png",
+      "/objects/blog/unique/documents-checklist-1.png",
     ];
 
     const result = await db.execute(sql`SELECT id, featured_image FROM blog_posts ORDER BY created_at ASC`);

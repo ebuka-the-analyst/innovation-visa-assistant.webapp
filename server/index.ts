@@ -598,12 +598,12 @@ async function serveBlogImage(filename: string, subdir: string | null, res: any,
   next();
 }
 
-app.get(["/assets/blog/unique/:filename", "/objects/blog/unique/:filename"], (req, res, next) => {
-  serveBlogImage(req.params.filename, "unique", res, next);
+app.get(["/assets/blog/unique/:filename", "/objects/blog/unique/:filename"], async (req, res, next) => {
+  await serveBlogImage(req.params.filename, "unique", res, next);
 });
 
-app.get(["/assets/blog/:filename", "/objects/blog/:filename"], (req, res, next) => {
-  serveBlogImage(req.params.filename, null, res, next);
+app.get(["/assets/blog/:filename", "/objects/blog/:filename"], async (req, res, next) => {
+  await serveBlogImage(req.params.filename, null, res, next);
 });
 
 console.log("[Blog] Image route configured (local + unique + S3 fallback)");
