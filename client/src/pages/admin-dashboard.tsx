@@ -144,7 +144,8 @@ import {
   Timer,
   Tablet,
   Monitor,
-  Wrench
+  Wrench,
+  Eye
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Link } from "wouter";
@@ -14117,9 +14118,15 @@ export default function AdminDashboard() {
                     </div>
                     <div className="text-right">
                       <p className="text-[9px] text-muted-foreground">Member since</p>
-                      <p className="font-medium">{format(new Date(userAnalysis.user.createdAt), 'MMM dd, yyyy')}</p>
+                      <p className="font-medium text-xs">{format(new Date(userAnalysis.user.createdAt), 'MMM dd, yyyy')}</p>
                       <p className="text-[9px] text-muted-foreground mt-0.5">Last active</p>
-                      <p className="font-medium">{formatDistance(new Date(userAnalysis.activity.lastActive), new Date(), { addSuffix: true })}</p>
+                      <p className="font-medium text-xs">
+                        {userAnalysis.activity.lastActive
+                          ? formatDistance(new Date(userAnalysis.activity.lastActive), new Date(), { addSuffix: true })
+                          : 'Never'}
+                      </p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">Days on platform</p>
+                      <p className="font-medium text-xs">{userAnalysis.activity.daysSinceJoin} days</p>
                     </div>
                   </div>
 
@@ -14256,6 +14263,76 @@ export default function AdminDashboard() {
                       </div>
                     </Card>
                   )}
+
+                  {/* Activity: Page Views, Sessions, Exports */}
+                  <div className="grid grid-cols-3 gap-1.5">
+                    <Card className="p-4">
+                      <h4 className="font-semibold mb-2 flex items-center gap-2 text-xs">
+                        <Eye className="h-3 w-3 text-blue-500" />
+                        Recent Page Views ({userAnalysis.activity.totalPageViews})
+                      </h4>
+                      {userAnalysis.activity.pageViews?.length > 0 ? (
+                        <div className="space-y-1">
+                          {userAnalysis.activity.pageViews.slice(0, 6).map((pv: any, i: number) => (
+                            <div key={i} className="flex items-center justify-between gap-1">
+                              <span className="text-[9px] truncate font-medium">{pv.path}</span>
+                              <span className="text-[9px] text-muted-foreground shrink-0">
+                                {pv.created_at ? format(new Date(pv.created_at), 'dd MMM') : '—'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-[9px] text-muted-foreground">No page views recorded</p>
+                      )}
+                    </Card>
+
+                    <Card className="p-4">
+                      <h4 className="font-semibold mb-2 flex items-center gap-2 text-xs">
+                        <Monitor className="h-3 w-3 text-purple-500" />
+                        Sessions ({userAnalysis.activity.totalSessions})
+                      </h4>
+                      {userAnalysis.activity.sessions?.length > 0 ? (
+                        <div className="space-y-1">
+                          {userAnalysis.activity.sessions.slice(0, 4).map((sess: any, i: number) => (
+                            <div key={i} className="text-[9px]">
+                              <div className="flex items-center gap-1">
+                                <Badge variant="outline" className="text-[8px] h-3 capitalize">{sess.device_type || 'desktop'}</Badge>
+                                <span className="text-muted-foreground">{sess.browser}</span>
+                              </div>
+                              <p className="text-muted-foreground">
+                                {sess.started_at ? format(new Date(sess.started_at), 'dd MMM HH:mm') : '—'}
+                                {sess.duration_seconds > 0 ? ` · ${Math.round(sess.duration_seconds / 60)}m` : ''}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-[9px] text-muted-foreground">No sessions recorded</p>
+                      )}
+                    </Card>
+
+                    <Card className="p-4">
+                      <h4 className="font-semibold mb-2 flex items-center gap-2 text-xs">
+                        <Download className="h-3 w-3 text-green-500" />
+                        Export History ({userAnalysis.activity.exportHistory?.length || 0})
+                      </h4>
+                      {userAnalysis.activity.exportHistory?.length > 0 ? (
+                        <div className="space-y-1">
+                          {userAnalysis.activity.exportHistory.slice(0, 5).map((ex: any, i: number) => (
+                            <div key={i} className="flex items-center justify-between gap-1">
+                              <span className="text-[9px] font-medium capitalize">{(ex.export_type || ex.tool_id || 'export').replace(/-/g, ' ')}</span>
+                              <span className="text-[9px] text-muted-foreground shrink-0">
+                                {ex.created_at ? format(new Date(ex.created_at), 'dd MMM') : '—'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-[9px] text-muted-foreground">No exports recorded</p>
+                      )}
+                    </Card>
+                  </div>
 
                   {/* Support & Security */}
                   <div className="grid grid-cols-2 gap-1.5">
