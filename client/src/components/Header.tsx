@@ -6,8 +6,8 @@ import logoLightImg from "@assets/official_logo.webp";
 import logoDarkImg from "@assets/logo_dark.webp";
 import ThemeToggle from "./ThemeToggle";
 import LanguageSelector from "./LanguageSelector";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -23,16 +23,19 @@ export default function Header() {
 
   const isAuthenticated = !!user;
 
-  // Logout mutation
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest('POST', '/api/auth/logout');
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      setLocation('/');
-    },
-  });
+  // Logout — clear UI instantly, fire server call in background
+  const [loggingOut, setLoggingOut] = useState(false);
+  const handleLogout = () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    // Wipe auth state immediately so the UI responds at once
+    queryClient.setQueryData(['/api/auth/user'], null);
+    queryClient.clear();
+    setLocation('/');
+    // Destroy server session in background (non-blocking)
+    fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
+  };
+  const logoutMutation = { mutate: handleLogout, isPending: loggingOut };
 
   useEffect(() => {
     let lastScrollY = window.scrollY;

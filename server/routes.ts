@@ -204,15 +204,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: blogPosts.id,
         title: blogPosts.title,
         category: blogPosts.category,
-        featured_image: blogPosts.featured_image,
+        featuredImage: blogPosts.featuredImage,
       }).from(blogPosts);
 
       let healed = 0;
       for (const post of posts) {
-        const url = post.featured_image;
+        const url = post.featuredImage;
         if (!url || !url.startsWith("/objects/blog/")) {
           const newImage = pickImage(post.title, post.category);
-          await db.update(blogPosts).set({ featured_image: newImage }).where(eq(blogPosts.id, post.id));
+          await db.update(blogPosts).set({ featuredImage: newImage }).where(eq(blogPosts.id, post.id));
           healed++;
         }
       }
