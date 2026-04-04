@@ -1162,16 +1162,20 @@ export default function AdminDashboard() {
     enabled: !!user?.isAdmin && activeSection.startsWith('logs'),
   });
 
-  // Security events (real data for Access Control page)
-  const { data: securityEventsData, isLoading: securityEventsLoading } = useQuery<{
+  // Security events (used for both Access Control and Security Logs sections)
+  const { data: securityEventsData, isLoading: securityEventsLoading, refetch: refetchSecurityEvents } = useQuery<{
     events: Array<{
       id: string;
       eventType: string;
       severity: string;
-      userEmail?: string;
-      ipAddress?: string;
+      userId: string | null;
+      userEmail: string | null;
+      ipAddress: string | null;
+      userAgent: string | null;
       description: string;
+      metadata: any;
       isResolved: boolean;
+      resolution: string | null;
       createdAt: string;
     }>;
     stats: {
@@ -1182,7 +1186,7 @@ export default function AdminDashboard() {
     };
   }>({
     queryKey: ['/api/admin/security-events'],
-    enabled: !!user?.isAdmin && activeSection === 'settings-access',
+    enabled: !!user?.isAdmin && (activeSection === 'settings-access' || activeSection === 'logs-security'),
     refetchInterval: 30000,
   });
 
@@ -1544,34 +1548,6 @@ export default function AdminDashboard() {
     onError: (error: Error) => {
       toast({ title: "Failed to clear errors", description: error.message, variant: "destructive" });
     },
-  });
-
-  // Security events query
-  const { data: securityEventsData, isLoading: securityEventsLoading, refetch: refetchSecurityEvents } = useQuery<{
-    events: Array<{
-      id: string;
-      eventType: string;
-      severity: string;
-      userId: string | null;
-      userEmail: string | null;
-      ipAddress: string | null;
-      userAgent: string | null;
-      description: string;
-      metadata: any;
-      isResolved: boolean;
-      resolution: string | null;
-      createdAt: string;
-    }>;
-    stats: {
-      total: number;
-      unresolved: number;
-      byType: Record<string, number>;
-      bySeverity: Record<string, number>;
-    };
-  }>({
-    queryKey: ['/api/admin/security-events'],
-    enabled: !!user?.isAdmin && activeSection === 'logs-security',
-    refetchInterval: 30000,
   });
 
   // Resolve security event mutation
