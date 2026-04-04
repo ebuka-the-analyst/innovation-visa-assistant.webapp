@@ -126,6 +126,19 @@ export default function BlogDashboard() {
     queryKey: ["/api/admin/blog/review-queue"],
   });
 
+  // Verifier health status — only fetched on demand
+  const [verifierCheckEnabled, setVerifierCheckEnabled] = useState(false);
+  const { data: verifierStatus, isLoading: verifierStatusLoading, refetch: refetchVerifierStatus } = useQuery<{
+    checkedAt: string;
+    compositeScore: number;
+    verifiers: Array<{ name: string; status: "ok" | "unavailable" | "error"; score: number | null; error?: string }>;
+  }>({
+    queryKey: ["/api/admin/blog/verifier-status"],
+    enabled: verifierCheckEnabled,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+  });
+
   // Re-verify single post mutation
   const reverifyMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -1024,6 +1037,23 @@ export default function BlogDashboard() {
                   Refresh
                 </Button>
                 <Button
+                  variant="outline"
+                  size="sm"
+                  data-testid="button-check-verifiers"
+                  disabled={verifierStatusLoading}
+                  onClick={() => {
+                    setVerifierCheckEnabled(true);
+                    setTimeout(() => refetchVerifierStatus(), 50);
+                  }}
+                >
+                  {verifierStatusLoading ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <ShieldCheck className="h-4 w-4 mr-2" />
+                  )}
+                  Check Verifiers
+                </Button>
+                <Button
                   size="sm"
                   variant="default"
                   disabled={reverifyAllMutation.isPending || autoFixAllMutation.isPending || !reviewQueue?.length}
@@ -1068,6 +1098,45 @@ export default function BlogDashboard() {
                 </Button>
               </div>
             </div>
+
+            {/* Verifier Status Panel */}
+            {verifierStatus && (
+              <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-950/10">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      <Cpu className="h-4 w-4 text-blue-500" />
+                      Quad-AI Verifier Health Check
+                    </h3>
+                    <span className="text-xs text-muted-foreground">
+                      Checked {new Date(verifierStatus.checkedAt).toLocaleTimeString()}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-3">
+                    {verifierStatus.verifiers.map((v) => (
+                      <div key={v.name} className="text-center">
+                        <div className={`text-xs font-bold mb-1 ${v.status === "ok" ? "text-emerald-600" : "text-red-500"}`}>
+                          {v.status === "ok" ? (
+                            <Check className="h-4 w-4 mx-auto" />
+                          ) : (
+                            <X className="h-4 w-4 mx-auto" />
+                          )}
+                        </div>
+                        <div className="text-xs font-medium">{v.name}</div>
+                        <div className={`text-xs ${v.status === "ok" ? "text-emerald-600" : "text-muted-foreground"}`}>
+                          {v.status === "ok" ? `${v.score}/100` : "Unavailable"}
+                        </div>
+                        {v.error && (
+                          <div className="text-[10px] text-red-500 mt-1 break-all leading-tight" title={v.error}>
+                            {v.error.substring(0, 60)}{v.error.length > 60 ? "…" : ""}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {reviewLoading ? (
               <Card>

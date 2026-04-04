@@ -16177,6 +16177,40 @@ Return a JSON object with:
     }
   });
 
+  // Live verifier health check — tests all 4 AI verifiers with a tiny payload
+  app.get("/api/admin/blog/verifier-status", requireAdmin, async (req, res) => {
+    const MINI_TITLE = "UK Innovator Founder Visa: Key Facts";
+    const MINI_CONTENT = `<p>The UK Innovator Founder Visa requires a £1,270 maintenance fund held for 28 days. The application fee is £1,191. Endorsing bodies include Envestors, Innovator International, UKES, and GEP (invitation only). English level B2 is required. This article is for information only and does not constitute legal advice.</p>`;
+
+    // Import individual verifier functions dynamically
+    const mod = await import("./blogMultiVerifier.js");
+
+    // Run all 4 in parallel using the full verifyBlogPost (it already parallelises internally)
+    const result = await mod.verifyBlogPost(MINI_TITLE, MINI_CONTENT);
+
+    const statuses = [
+      { name: "Gemini",  status: result.geminiScore  !== null ? "ok" : "unavailable", score: result.geminiScore },
+      { name: "OpenAI",  status: result.openaiScore  !== null ? "ok" : "unavailable", score: result.openaiScore },
+      { name: "Claude",  status: result.claudeScore  !== null ? "ok" : "unavailable", score: result.claudeScore },
+      { name: "Qwen",    status: result.qwenScore    !== null ? "ok" : "unavailable", score: result.qwenScore },
+    ];
+
+    // Attach any error messages from the details object
+    const details: any = result.details || {};
+    for (const s of statuses) {
+      const key = s.name.toLowerCase();
+      if (s.status === "unavailable" && details[key]?.error) {
+        (s as any).error = String(details[key].error).substring(0, 200);
+      }
+    }
+
+    res.json({
+      checkedAt: new Date().toISOString(),
+      compositeScore: result.compositeScore,
+      verifiers: statuses,
+    });
+  });
+
   // Approve a human-review post and publish it
   app.post("/api/admin/blog/posts/:postId/approve", requireAdmin, async (req, res) => {
     try {

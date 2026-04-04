@@ -339,13 +339,8 @@ async function runOpenAIVerification(title: string, content: string): Promise<{
       } as any;
     }
     console.error("[MultiVerifier] OpenAI verification error:", errMsg);
-    return {
-      score: 0,
-      passed: false,
-      flags: [{ claim: "SYSTEM", issue: "OpenAI verification failed: " + errMsg, severity: "critical" }],
-      details: { error: errMsg },
-      error: errMsg,
-    };
+    const r: any = { score: -1, passed: false, flags: [], details: { error: errMsg }, error: errMsg, unavailable: true };
+    return r;
   }
 }
 
@@ -475,10 +470,10 @@ export interface VerificationResult {
   passed: boolean;
   requiresHumanReview: boolean;
   compositeScore: number;
-  geminiScore: number;
-  openaiScore: number;
-  qwenScore: number;
-  claudeScore: number;
+  geminiScore: number | null;
+  openaiScore: number | null;
+  qwenScore: number | null;
+  claudeScore: number | null;
   contradictionFlags: number;
   sourcesCited: number;
   contentHash: string;
@@ -602,10 +597,10 @@ export async function verifyBlogPost(title: string, content: string): Promise<Ve
     passed,
     requiresHumanReview,
     compositeScore,
-    geminiScore: geminiUnavailable ? 0 : geminiResult.score,
-    openaiScore: openaiUnavailable ? 0 : openaiResult.score,
-    qwenScore: qwenUnavailable ? 0 : qwenResult.score,
-    claudeScore: claudeUnavailable ? 0 : claudeResult.score,
+    geminiScore: geminiUnavailable ? null : geminiResult.score,
+    openaiScore: openaiUnavailable ? null : openaiResult.score,
+    qwenScore: qwenUnavailable ? null : qwenResult.score,
+    claudeScore: claudeUnavailable ? null : claudeResult.score,
     contradictionFlags: contradictions,
     sourcesCited: sources,
     contentHash: hash,
