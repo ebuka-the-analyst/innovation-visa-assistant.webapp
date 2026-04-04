@@ -367,7 +367,7 @@ async function runClaudeVerification(title: string, content: string): Promise<{
   try {
     const prompt = buildMarkerPrompt(title, content);
     const response = await claudeClient.messages.create({
-      model: "claude-haiku-4-5",
+      model: "claude-3-5-haiku-20241022",
       max_tokens: 2048,
       messages: [{ role: "user", content: prompt }],
     });
@@ -382,15 +382,11 @@ async function runClaudeVerification(title: string, content: string): Promise<{
     };
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
-    // Treat billing/quota/overload issues as unavailable (not a zero score)
-    if (errMsg.includes("429") || errMsg.includes("overloaded") || errMsg.includes("quota")
-      || errMsg.includes("credit balance") || errMsg.includes("too low") || errMsg.includes("billing")) {
-      console.warn("[MultiVerifier] Claude unavailable (billing/quota):", errMsg.substring(0, 120));
-      const r: any = { score: -1, passed: false, flags: [], details: { error: errMsg }, error: errMsg, unavailable: true };
-      return r;
-    }
-    console.error("[MultiVerifier] Claude error:", errMsg);
-    return { score: 0, passed: false, flags: [], details: { error: errMsg }, error: errMsg };
+    // Treat ALL API-level errors as unavailable (not a zero score) so they
+    // don't poison the composite average — the other verifiers still judge quality
+    console.warn("[MultiVerifier] Claude unavailable:", errMsg.substring(0, 120));
+    const r: any = { score: -1, passed: false, flags: [], details: { error: errMsg }, error: errMsg, unavailable: true };
+    return r;
   }
 }
 
@@ -433,12 +429,10 @@ async function runQwenVerification(title: string, content: string): Promise<{
     };
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
-    if (errMsg.includes("429") || errMsg.includes("quota") || errMsg.includes("rate")) {
-      const r: any = { score: -1, passed: false, flags: [], details: { error: errMsg }, error: errMsg, unavailable: true };
-      return r;
-    }
-    console.error("[MultiVerifier] Qwen verification error:", errMsg);
-    return { score: 0, passed: false, flags: [], details: { error: errMsg }, error: errMsg };
+    // Treat ALL errors as unavailable so they don't poison the composite with 0
+    console.warn("[MultiVerifier] Qwen unavailable:", errMsg.substring(0, 120));
+    const r: any = { score: -1, passed: false, flags: [], details: { error: errMsg }, error: errMsg, unavailable: true };
+    return r;
   }
 }
 
