@@ -1,0 +1,176 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+3
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+05aa3f33
+Active
+
+Apr 6, 2026, 3:39 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[2026-04-06T14:51:09.380Z] GET /assets/FloatingFeedback-CVQJ6jpN.js
+[2026-04-06T14:51:09.441Z] GET /assets/dialog-BzIxjS0_.js
+[2026-04-06T14:51:09.390Z] GET /assets/file-type-2-_RiFvry9.js
+[2026-04-06T14:51:09.399Z] GET /assets/message-square-e61wNRoO.js
+[2026-04-06T14:51:09.462Z] GET /assets/trending-down-DxbCBIhG.js
+[2026-04-06T14:51:09.403Z] GET /assets/label-C7EnVEmi.js
+[2026-04-06T14:51:09.412Z] GET /assets/wand-sparkles-Ce-2fb_V.js
+[2026-04-06T14:51:09.531Z] GET /assets/lock-9UhpSPYN.js
+[2026-04-06T14:51:09.532Z] GET /assets/lightbulb-B4a-g_g-.js
+[2026-04-06T14:51:09.563Z] GET /assets/menu-ChKPJu7R.js
+[2026-04-06T14:51:09.572Z] GET /assets/play-DRzbZSfy.js
+[2026-04-06T14:51:09.580Z] GET /assets/map-pin-CiumBRPi.js
+[2026-04-06T14:51:09.590Z] GET /assets/presentation-B7oOD-HR.js
+[2026-04-06T14:51:09.611Z] GET /assets/rotate-ccw-DF8bhgmw.js
+[2026-04-06T14:51:09.673Z] GET /assets/smartphone-s2SQ-LrV.js
+[2026-04-06T14:51:09.682Z] GET /assets/plus-Daj6Ap5Q.js
+[2026-04-06T14:51:09.883Z] GET /assets/camera-CD27q8Mx.js
+[2026-04-06T14:51:09.711Z] GET /assets/truck-Ca8TlNQK.js
+[2026-04-06T14:51:09.724Z] GET /assets/video-ZgWHleKB.js
+[2026-04-06T14:51:09.740Z] GET /assets/SiteFeedbackPopup-Bmu7sV_7.js
+[2026-04-06T14:51:09.750Z] GET /assets/seo-schemas-BJ2Px1iU.js
+[2026-04-06T14:51:09.762Z] GET /assets/CookieConsent-X9BfArpa.js
+[2026-04-06T14:51:09.824Z] GET /assets/box-pn4i9ZAl.js
+[2026-04-06T14:51:09.831Z] GET /assets/arrow-right-BZRBx6ZU.js
+[2026-04-06T14:51:09.873Z] GET /assets/tools-data-D9WloGv1.js
+[2026-04-06T14:51:10.068Z] GET /assets/ToolsChronographWheel-DwCiruOE.js
+[2026-04-06T14:51:10.071Z] GET /assets/circle-check-big-B4lUO4WW.js
+[2026-04-06T14:51:09.889Z] GET /assets/chart-line-Cpklw394.js
+[2026-04-06T14:51:09.932Z] GET /assets/activity-BIE7EmD3.js
+[2026-04-06T14:51:09.961Z] GET /assets/type-hleWq7Dx.js
+[2026-04-06T14:51:09.971Z] GET /assets/lucide-react-C6z7BmW9.js
+[2026-04-06T14:51:09.999Z] GET /assets/bell-JEWWHmCK.js
+[2026-04-06T14:51:10.005Z] GET /assets/arrow-down-right-BSvGwOji.js
+[2026-04-06T14:51:10.009Z] GET /assets/list-todo-5M1asVB7.js
+[2026-04-06T14:51:10.019Z] GET /assets/building-CHyG1sNj.js
+[2026-04-06T14:51:10.030Z] GET /assets/arrow-left-1uf6eR5a.js
+[2026-04-06T14:51:10.049Z] GET /assets/building-2-DBrnZpFE.js
+[2026-04-06T14:51:10.263Z] GET /assets/file-check-C-86DeAr.js
+[2026-04-06T14:51:10.270Z] GET /assets/file-pen-line-B01-JDvI.js
+[2026-04-06T14:51:10.091Z] GET /assets/check-BIgpCiTK.js
+[2026-04-06T14:51:10.123Z] GET /assets/cpu-kH2MUdTd.js
+[2026-04-06T14:51:10.133Z] GET /assets/download-B78EGI9P.js
+[2026-04-06T14:51:10.143Z] GET /assets/chevron-up-DNuNXhFN.js
+[2026-04-06T14:51:10.159Z] GET /assets/coins-DRG74JkQ.js
+[2026-04-06T14:51:10.170Z] GET /assets/car-DBkvbjv4.js
+[2026-04-06T14:51:10.171Z] GET /assets/clipboard-list-DiMWyxjd.js
+[2026-04-06T14:51:10.191Z] GET /assets/circle-Bc5b22Ct.js
+[2026-04-06T14:51:10.201Z] GET /assets/external-link-ogMbG9i2.js
+[2026-04-06T14:51:10.209Z] GET /assets/copyright-Duii_IoR.js
+[2026-04-06T14:51:10.230Z] GET /assets/list-checks-C6hNWx9e.js
+[2026-04-06T14:51:10.311Z] GET /assets/file-warning--3Ljlt1X.js
+[2026-04-06T14:51:10.312Z] GET /assets/eye-bIuy6bFU.js
+[2026-04-06T14:51:10.332Z] GET /assets/shield-alert-Dehhqe-P.js
+[2026-04-06T14:51:10.430Z] GET /assets/heart-owe22Lwl.js
+[2026-04-06T14:51:10.441Z] GET /assets/volume-x-DqxqsocH.js
+[2026-04-06T14:51:10.470Z] GET /assets/wheat-DPvjFQiV.js
+[2026-04-06T14:51:10.483Z] GET /assets/graduation-cap-BwT7yvJJ.js
+[2026-04-06T14:51:10.629Z] GET /assets/log-in-C5TB2z1d.js
+[2026-04-06T14:51:10.579Z] GET /assets/lock-9UhpSPYN.js
+[2026-04-06T14:51:10.658Z] GET /assets/search-zcIb_kmZ.js
+[2026-04-06T14:51:10.539Z] GET /assets/zoom-out-OdUC8DDF.js
+[2026-04-06T14:51:10.601Z] GET /assets/lock-open-B-LzTOWK.js
+[2026-04-06T14:51:10.623Z] GET /assets/medal-DjVS364S.js
+[2026-04-06T14:51:10.813Z] GET /assets/plane-BVYLvjUj.js
+[2026-04-06T14:51:10.821Z] GET /assets/square-CnBhSfjs.js
+[2026-04-06T14:51:10.702Z] GET /assets/percent-CjACix3E.js
+[2026-04-06T14:51:10.839Z] GET /assets/tag-pVZrviRE.js
+[2026-04-06T14:51:10.721Z] GET /assets/palette-jWgA9Rwb.js
+[2026-04-06T14:51:10.847Z] GET /assets/smartphone-s2SQ-LrV.js
+[2026-04-06T14:51:10.728Z] GET /assets/play-DRzbZSfy.js
+[2026-04-06T14:51:10.849Z] GET /assets/shield-check-rRmgCCHE.js
+[2026-04-06T14:51:10.873Z] GET /assets/timer-BwcYTRuS.js
+[2026-04-06T14:51:10.761Z] GET /assets/scale-BbUe6rxd.js
+[2026-04-06T14:51:10.781Z] GET /assets/plus-Daj6Ap5Q.js
+[2026-04-06T14:51:10.790Z] GET /assets/scan-3f9uNPM9.js
+[2026-04-06T14:51:10.879Z] GET /assets/star-BIJbgcgq.js
+[2026-04-06T14:51:10.901Z] GET /assets/test-tube-CM26c5GV.js
+[2026-04-06T14:51:10.940Z] GET /assets/volume-2-D7B2W3Al.js
+[2026-04-06T14:51:10.959Z] GET /assets/upload-0PG19eOB.js
+[2026-04-06T14:51:10.969Z] GET /assets/tram-front-0vlMVd_N.js
+[2026-04-06T14:51:10.983Z] GET /assets/user-DSQOtiS8.js
+[2026-04-06T14:51:10.992Z] GET /assets/trending-down-DxbCBIhG.js
+[2026-04-06T14:51:11.000Z] GET /assets/label-C7EnVEmi.js
+[2026-04-06T14:51:11.011Z] GET /assets/dialog-BzIxjS0_.js
+[2026-04-06T14:51:11.031Z] GET /assets/FloatingFeedback-CVQJ6jpN.js
+[2026-04-06T14:51:11.114Z] GET /assets/share-2-CSNRmrEK.js
+[2026-04-06T14:51:11.128Z] GET /assets/SEOHead-COM2KXBs.js
+[2026-04-06T14:51:11.152Z] GET /assets/SiteFeedbackPopup-Bmu7sV_7.js
+[2026-04-06T14:51:11.162Z] GET /assets/CookieConsent-X9BfArpa.js
+[2026-04-06T14:52:51.788Z] POST /api/activity/session/end
+2:52:49 PM [express] POST /api/activity/page-view 200 in 33ms :: {"pageViewId":"f74d15c1-ed3b-4985-9…
+[2026-04-06T14:52:50.108Z] POST /api/activity/session
+2:52:50 PM [express] POST /api/activity/session 200 in 30ms :: {"sessionId":"298e22d5-7490-4425-a944…
+[2026-04-06T14:52:50.263Z] GET /api/auth/user
+[2026-04-06T14:52:49.937Z] POST /api/activity/session/end
+[2026-04-06T14:52:48.662Z] POST /api/activity/session
+2:52:49 PM [express] POST /api/activity/session/end 200 in 47ms :: {"success":true}
+[2026-04-06T14:52:48.829Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+2:52:48 PM [express] GET /api/auth/user 200 in 64ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+2:52:50 PM [express] GET /api/auth/user 200 in 20ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+2:52:48 PM [express] POST /api/activity/session 200 in 233ms :: {"sessionId":"3c591954-b3a8-4a5f-af1…
+[2026-04-06T14:52:50.334Z] POST /api/activity/page-view
+2:52:50 PM [express] POST /api/activity/page-view 200 in 37ms :: {"pageViewId":"5d4aea68-59a5-4355-9…
+[2026-04-06T14:52:49.090Z] POST /api/activity/page-view
+2:52:51 PM [express] POST /api/activity/session/end 200 in 17ms :: {"success":true}
+[2026-04-06T14:53:03.719Z] POST /api/activity/session
+2:53:04 PM [express] POST /api/activity/page-view 200 in 31ms :: {"pageViewId":"9832a3df-03f0-49c8-8…
+
+
