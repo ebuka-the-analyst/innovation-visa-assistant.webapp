@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions, blogPosts, blogGenerationQueue, seoAutomationPlans, TIER_CREDITS as SCHEMA_TIER_CREDITS, getTierCredits, eventLog, apiLatencyLog } from "@shared/schema";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions, blogPosts, blogGenerationQueue, seoAutomationPlans, TIER_CREDITS as SCHEMA_TIER_CREDITS, getTierCredits, eventLog, apiLatencyLog, creditTransactions, interviewSessions } from "@shared/schema";
 import { generateBlogPost, generateMultiplePosts, generateBackdatedPosts } from "./blogGenerator";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
@@ -16573,28 +16573,9 @@ Best wishes.</div>
 
   <p style="margin-top:16px;"><strong>The above email exchange demonstrates unequivocally:</strong> (a) we received the complaint; (b) we identified and fixed the root cause; (c) we communicated the full resolution to the customer; and (d) the issue was resolved before the chargeback was filed.</p>
 
-  <h3 style="margin:24px 0 8px; color:#1a1a2e; font-size:11pt;">Exhibit B — AI Platform Chat Log (Critical Admission)</h3>
-  <p style="margin-bottom:10px; font-size:9.5pt;">After our resolution email was sent, the customer used our AI assistant chatbot on the platform — actively engaging with the service. During this session, the customer made a critical admission and was offered additional remedies before filing the chargeback:</p>
-  <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:4px; padding:16px; font-family:monospace; font-size:8.5pt; line-height:1.7; white-space:pre-wrap;">
-[Customer message]: "whats your take on refund if i dont like a service"
-
-[Platform AI]: "Refunds are considered on a case-by-case basis, typically within 14 days of purchase, in line with UK consumer rights and our terms. Since your Ultimate subscription has just been activated (and the technical issue resolved), a refund would depend on whether the service has now been delivered as promised — e.g., full access to tools, business plan generation, and VIP support."
-
-[Customer message]: "i access a 80 page business, but dont like the service"
-
-[Platform AI]: "If you've generated the 80-page business plan but are unhappy with the output or service quality, here's what you can do: Refund eligibility depends on whether the plan was delivered as functionally promised (i.e., full 80 pages, structured correctly, AI-generated per specifications) — not subjective satisfaction alone. UK consumer law generally doesn't entitle refunds solely for 'not liking' a digital service if it was delivered as described. However, we do offer complimentary revisions and VIP document review, so if the plan needs refinement (e.g., stronger market analysis, investor-ready formatting, endorsement alignment), our team can improve it — often faster than starting over."</div>
-
-  <div class="warning-box" style="background:#fff0f0; border-left-color:#c0392b; margin-top:14px;">
-    <strong>What Exhibit B proves:</strong>
-    <br>1. The customer <strong>explicitly confirmed they accessed and generated the 80-page business plan</strong> ("i access a 80 page business") — direct admission that the service was delivered.
-    <br>2. The customer's stated reason for dissatisfaction is <strong>"dont like the service"</strong> — subjective preference, not a service failure. UK consumer law does not entitle a refund for digital services on this basis alone.
-    <br>3. Our platform <strong>offered complimentary revisions and VIP document review</strong> as an alternative remedy before the chargeback was filed — the customer declined this offer and went to their bank instead.
-    <br>4. This chat log is a server-side record, timestamped and stored in our database. The customer cannot deny this conversation took place.
-  </div>
-
   ${notes ? `<div class="warning-box"><strong>Additional Notes:</strong><br>${notes}</div>` : ''}
 
-  <p>We have attached the full email thread (Exhibit A), the chat log (Exhibit B), activity logs, and account records as supporting evidence, and respectfully request that this dispute be ruled in our favour and the funds be returned to our account.</p>
+  <p>We have attached the full email thread (Exhibit A), the full activity logs export, and account records as supporting evidence, and respectfully request that this dispute be ruled in our favour and the funds be returned to our account.</p>
 
   <div class="signature-block">
     <p>Yours sincerely,</p>
@@ -16701,14 +16682,13 @@ Best wishes.</div>
   ` : ''}
 
   <h3>Submission Checklist</h3>
-  <div class="checklist-item" style="background:#fff0f0; border:1px solid #f5c6cb;"><span class="check" style="color:#c0392b">★</span><span><strong>Exhibit A — Support email thread (PDF)</strong> — "Re: Fwd: Urgent help needed" — from support@innovatorfoundervisaassistant.co.uk to ${customerEmail || 'customer'} — <em>proves issue was resolved before chargeback was filed</em></span></div>
-  <div class="checklist-item" style="background:#fff0f0; border:1px solid #f5c6cb;"><span class="check" style="color:#c0392b">★</span><span><strong>Exhibit B — Platform AI chat log (screenshot or PDF)</strong> — Customer states: <em>"i access a 80 page business, but dont like the service"</em> — direct admission that the 80-page plan was generated and delivered. Platform offered complimentary revisions; customer did not respond before filing chargeback. <em>This is your strongest evidence of service delivery.</em></span></div>
+  <div class="checklist-item" style="background:#fff0f0; border:1px solid #f5c6cb;"><span class="check" style="color:#c0392b">★</span><span><strong>Exhibit A — Support email thread (PDF)</strong> — "Re: Fwd: Urgent help needed" — from support@innovatorfoundervisaassistant.co.uk to ${customerEmail || 'customer'} — <em>your most important piece of evidence: proves issue was resolved before chargeback was filed</em></span></div>
   <div class="checklist-item"><span class="check">✓</span><span>Merchant rebuttal letter (this document, Page 2)</span></div>
-  <div class="checklist-item"><span class="check">✓</span><span>Screenshot of customer account record (from Railway production database — log in to Railway, run query against production DB)</span></div>
-  <div class="checklist-item"><span class="check">✓</span><span>Full activity log export (Admin → Customer Support → "Export His Full Logs" — shows all sessions, tool usage, page views)</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Full activity log export — shows all of the customer's sessions, page views, tools used, and business plans (run "Export His Full Logs" from admin → Customer Support on the Railway production app)</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Screenshot of customer account record (from Railway production database — shows tier, credits, registration date, email verified)</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Screenshot of any generated business plan in the customer's account — confirms the plan was produced and delivered</span></div>
   <div class="checklist-item"><span class="check">✓</span><span>Terms of Service document (screenshot or PDF from your website footer)</span></div>
   <div class="checklist-item"><span class="check">✓</span><span>Stripe payment receipt for the ${amount || '£110'} transaction</span></div>
-  <div class="checklist-item"><span class="check">✓</span><span>Screenshot of the generated 80-page business plan (from customer's account — confirms the plan was produced and delivered)</span></div>
   <div class="checklist-item"><span class="check">✓</span><span>Timeline statement (Page 3 of this document) showing chargeback was filed after resolution email was sent</span></div>
 
   <div class="confidential">Confidential</div>
@@ -16733,13 +16713,8 @@ Best wishes.</div>
 
   <p>The customer's own email confirms they were able to log in, access the questionnaire, and begin the business plan process. The problem they experienced was a technical activation issue (a credits allocation bug) — not a broken or nonexistent product. We fixed this issue and confirmed the fix to the customer. They did not follow up to say the fix had not worked. Instead, they filed a chargeback.</p>
 
-  <p>More critically: <strong>after our resolution email was sent, the customer continued using the platform and explicitly confirmed they had generated the 80-page business plan</strong> (Exhibit B — AI chat log). The customer's own words in that chat session were: <em>"i access a 80 page business, but dont like the service."</em> This is a direct, unprompted admission that the core deliverable — the 80-page business plan — was produced and accessed. The stated reason, "dont like the service," is a subjective preference, not a product failure. Our platform correctly informed the customer that UK consumer law does not entitle refunds for digital services on this basis alone, and offered complimentary revisions and VIP document review. The customer chose not to accept these remedies and instead filed a chargeback.</p>
-
   <div class="warning-box" style="background:#fff0f0; border-left-color:#c0392b; margin:16px 0;">
-    <strong>The decisive points:</strong>
-    <br><br>(1) Our resolution email was sent and received by the customer before the chargeback was filed. The customer did not respond to indicate the issue persisted. Instead, they went directly to their bank — a bad-faith chargeback.
-    <br><br>(2) The customer then continued using the platform and <strong>admitted in writing that they accessed and generated the 80-page business plan</strong>. The stated complaint — "dont like the service" — is not a valid basis for a chargeback under Stripe policy or UK consumer law for digital services already delivered.
-    <br><br>(3) We offered complimentary revisions and VIP document review as a remedy. The customer chose not to use them and filed a chargeback instead. This is textbook bad faith.
+    <strong>The decisive point:</strong> Our resolution email was sent and received by the customer before the chargeback was filed. The customer did not respond to that email to indicate the issue persisted — they went directly to their bank. This is the definition of a bad-faith chargeback: seeking a refund through the banking dispute process after the merchant has already identified, fixed, and communicated the resolution of the reported problem.
   </div>
 
   <h3>Stripe Policy Alignment — Why We Should Win This</h3>
@@ -16749,10 +16724,8 @@ Best wishes.</div>
   <div class="checklist-item"><span class="check">✓</span><span><strong>Clear Terms of Service accepted at signup</strong> — digital services are non-refundable once accessed</span></div>
   <div class="checklist-item"><span class="check">✓</span><span><strong>Complaint received and resolved before chargeback was filed</strong> — we investigated the bug, fixed it, and confirmed the resolution in writing to the customer</span></div>
   <div class="checklist-item"><span class="check">✓</span><span><strong>No further complaint received after resolution</strong> — the customer did not reply to indicate the fix had not worked; they filed a chargeback instead</span></div>
-  <div class="checklist-item"><span class="check">✓</span><span><strong>Customer admitted the service was delivered</strong> — in a chat session on our platform, the customer stated: <em>"i access a 80 page business, but dont like the service"</em> — confirming the 80-page business plan was generated and accessed (Exhibit B)</span></div>
-  <div class="checklist-item"><span class="check">✓</span><span><strong>Merchant offered additional remedies before chargeback</strong> — our platform offered complimentary revisions and VIP document review; the customer declined and filed a chargeback instead</span></div>
-  <div class="checklist-item"><span class="check">✓</span><span><strong>Supporting documentary evidence</strong> — we provide the complete email thread (Exhibit A), AI chat log (Exhibit B), activity logs, account records, and this formal rebuttal</span></div>
-  <p style="margin-top:14px;">Our case satisfies all of Stripe's merchant-favourable criteria. The chargeback reason of "product unacceptable" is directly contradicted by (a) the customer's own usage of the platform and (b) our resolution email confirming the product was fully operational before the dispute was filed.</p>
+  <div class="checklist-item"><span class="check">✓</span><span><strong>Supporting documentary evidence</strong> — we provide the complete email thread (Exhibit A), full activity log export, account records, and this formal rebuttal</span></div>
+  <p style="margin-top:14px;">Our case satisfies all of Stripe's merchant-favourable criteria. The chargeback reason of "product unacceptable" is directly contradicted by our resolution email confirming the issue was fixed and the account fully restored before the dispute was filed.</p>
 
   <h3>Formal Request</h3>
   <div class="info-box" style="border-left-color:#057a55; background:#f0faf4;">
@@ -16913,6 +16886,18 @@ Best wishes.</div>
       const plans = await db.select().from(businessPlans)
         .where(eq(businessPlans.userId, user.id))
         .orderBy(desc(businessPlans.createdAt));
+
+      // 5b. Credit transactions (shows when credits were used)
+      const credits = await db.select().from(creditTransactions)
+        .where(eq(creditTransactions.userId, user.id))
+        .orderBy(desc(creditTransactions.createdAt))
+        .limit(100);
+
+      // 5c. Interview sessions (AI interview usage)
+      const interviews = await db.select().from(interviewSessions)
+        .where(eq(interviewSessions.userId, user.id))
+        .orderBy(desc(interviewSessions.createdAt))
+        .limit(50);
 
       // 6. Stripe payments
       let stripePayments: any[] = [];
@@ -17137,6 +17122,7 @@ Best wishes.</div>
 <div class="section">
   <h2 class="sec">7. Business Plans Created (${plans.length})</h2>
   ${plans.length === 0 ? '<p style="color:#6b7280">No business plans created.</p>' : `
+  ${plans.length > 0 ? '<div class="success-box"><strong>Business plan(s) found:</strong> This user has created ' + plans.length + ' business plan(s). This directly proves the core service deliverable was used.</div>' : ''}
   <table>
     <tr><th>Plan ID</th><th>Status</th><th>Tier</th><th>Created</th><th>Last Updated</th></tr>
     ${plans.map(p => `
@@ -17146,6 +17132,42 @@ Best wishes.</div>
       <td>${(p as any).tier || '—'}</td>
       <td>${fmt(p.createdAt)}</td>
       <td>${fmt(p.updatedAt)}</td>
+    </tr>`).join('')}
+  </table>`}
+</div>
+
+<!-- SECTION 7b: CREDIT TRANSACTIONS -->
+<div class="section">
+  <h2 class="sec">7b. Credit Usage History (${credits.length} transactions)</h2>
+  ${credits.length === 0 ? '<p style="color:#6b7280">No credit transactions recorded.</p>' : `
+  <div class="info-box">Credits are consumed when the user generates a business plan. If credits were deducted, the plan generation was triggered.</div>
+  <table>
+    <tr><th>Date</th><th>Type</th><th>Amount</th><th>Balance After</th><th>Description</th></tr>
+    ${credits.map((c: any) => `
+    <tr>
+      <td class="mono">${fmt(c.createdAt)}</td>
+      <td><span class="pill ${c.type === 'deduction' ? 'pill-orange' : 'pill-green'}">${c.type || '—'}</span></td>
+      <td>${c.amount ?? '—'}</td>
+      <td>${c.balanceAfter ?? '—'}</td>
+      <td>${c.description || c.reason || '—'}</td>
+    </tr>`).join('')}
+  </table>`}
+</div>
+
+<!-- SECTION 7c: AI INTERVIEW SESSIONS -->
+<div class="section">
+  <h2 class="sec">7c. AI Interview Sessions (${interviews.length})</h2>
+  ${interviews.length === 0 ? '<p style="color:#6b7280">No AI interview sessions recorded.</p>' : `
+  <div class="info-box">Interview sessions show when the user engaged with the AI-guided business plan questionnaire — a core part of the service.</div>
+  <table>
+    <tr><th>Session ID</th><th>Status</th><th>Started</th><th>Last Updated</th><th>Messages</th></tr>
+    ${interviews.map((s: any) => `
+    <tr>
+      <td class="mono">${s.id}</td>
+      <td><span class="pill pill-blue">${s.status || '—'}</span></td>
+      <td>${fmt(s.createdAt)}</td>
+      <td>${fmt(s.updatedAt)}</td>
+      <td>${s.messageCount ?? (s.messages?.length ?? '—')}</td>
     </tr>`).join('')}
   </table>`}
 </div>
