@@ -253,6 +253,7 @@ export const createPricingSchema = (tierName: string, price: string, features: s
   "@type": "Product",
   "name": `${tierName} — UK Innovator Founder Visa Assistant`,
   "description": `${tierName} plan for UK Innovator Founder Visa application assistance`,
+  "image": `${BASE}/og-image.webp`,
   "brand": {
     "@type": "Brand",
     "name": "UK Innovator Founder Visa Assistant"
@@ -262,7 +263,42 @@ export const createPricingSchema = (tierName: string, price: string, features: s
     "price": price === "Free" ? "0" : price.replace("£", ""),
     "priceCurrency": "GBP",
     "availability": "https://schema.org/InStock",
-    "url": `${BASE}/pricing`
+    "url": `${BASE}/pricing`,
+    "shippingDetails": {
+      "@type": "OfferShippingDetails",
+      "shippingRate": {
+        "@type": "MonetaryAmount",
+        "value": "0",
+        "currency": "GBP"
+      },
+      "shippingDestination": {
+        "@type": "DefinedRegion",
+        "addressCountry": "GB"
+      },
+      "deliveryTime": {
+        "@type": "ShippingDeliveryTime",
+        "handlingTime": {
+          "@type": "QuantitativeValue",
+          "minValue": "0",
+          "maxValue": "0",
+          "unitCode": "DAY"
+        },
+        "transitTime": {
+          "@type": "QuantitativeValue",
+          "minValue": "0",
+          "maxValue": "0",
+          "unitCode": "DAY"
+        }
+      }
+    },
+    "hasMerchantReturnPolicy": {
+      "@type": "MerchantReturnPolicy",
+      "applicableCountry": "GB",
+      "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+      "merchantReturnDays": 14,
+      "returnMethod": "https://schema.org/ReturnByMail",
+      "returnFees": "https://schema.org/FreeReturn"
+    }
   },
   "additionalProperty": features.map(feature => ({
     "@type": "PropertyValue",

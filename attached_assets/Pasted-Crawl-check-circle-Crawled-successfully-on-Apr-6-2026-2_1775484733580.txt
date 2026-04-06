@@ -1,0 +1,364 @@
+Crawl
+check_circle
+Crawled successfully on Apr 6, 2026, 2:58:08 PM
+Detected items
+error
+Free Plan — UK Innovator Founder Visa Assistant
+1 critical issue
+2 non-critical issues
+
+Missing field "image"
+type
+Product
+name
+Free Plan — UK Innovator Founder Visa Assistant
+description
+Free Plan plan for UK Innovator Founder Visa application assistance
+brand
+type
+Brand
+name
+UK Innovator Founder Visa Assistant
+offers
+Missing field "shippingDetails" (optional)
+Missing field "hasMerchantReturnPolicy" (optional)
+type
+Offer
+price
+0
+priceCurrency
+GBP
+availability
+http://schema.org/InStock
+url
+https://innovatorfoundervisaassistant.co.uk/pricing
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Access to 13 essential tools
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Basic business overview
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Innovation introduction
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Essential compliance checklist
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Document organiser
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Visa timeline planner
+error
+Basic Plan — UK Innovator Founder Visa Assistant
+1 critical issue
+2 non-critical issues
+
+Missing field "image"
+type
+Product
+name
+Basic Plan — UK Innovator Founder Visa Assistant
+description
+Basic Plan plan for UK Innovator Founder Visa application assistance
+brand
+type
+Brand
+name
+UK Innovator Founder Visa Assistant
+offers
+Missing field "shippingDetails" (optional)
+Missing field "hasMerchantReturnPolicy" (optional)
+type
+Offer
+price
+29
+priceCurrency
+GBP
+availability
+http://schema.org/InStock
+url
+https://innovatorfoundervisaassistant.co.uk/pricing
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Includes 1 business plan coin
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Access to 20 tools
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Core innovation criteria coverage
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Basic viability analysis
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Essential scalability points
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Standard business plan format
+error
+Premium Plan — UK Innovator Founder Visa Assistant
+1 critical issue
+2 non-critical issues
+
+Missing field "image"
+type
+Product
+name
+Premium Plan — UK Innovator Founder Visa Assistant
+description
+Premium Plan plan for UK Innovator Founder Visa application assistance
+brand
+type
+Brand
+name
+UK Innovator Founder Visa Assistant
+offers
+Missing field "shippingDetails" (optional)
+Missing field "hasMerchantReturnPolicy" (optional)
+type
+Offer
+price
+59
+priceCurrency
+GBP
+availability
+http://schema.org/InStock
+url
+https://innovatorfoundervisaassistant.co.uk/pricing
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Includes 3 business plan coins
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Access to 83 tools
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Deeper innovation analysis
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Viability + financials
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Strong scalability strategy
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Industry-specific frameworks
+error
+Enterprise Plan — UK Innovator Founder Visa Assistant
+1 critical issue
+2 non-critical issues
+
+Missing field "image"
+type
+Product
+name
+Enterprise Plan — UK Innovator Founder Visa Assistant
+description
+Enterprise Plan plan for UK Innovator Founder Visa application assistance
+brand
+type
+Brand
+name
+UK Innovator Founder Visa Assistant
+offers
+Missing field "shippingDetails" (optional)
+Missing field "hasMerchantReturnPolicy" (optional)
+type
+Offer
+price
+85
+priceCurrency
+GBP
+availability
+http://schema.org/InStock
+url
+https://innovatorfoundervisaassistant.co.uk/pricing
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Includes 6 business plan coins
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Access to 109 tools
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Full innovation deep-dive
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Complete viability assessment
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Multi-market scalability strategy
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Advanced business modelling
+error
+Ultimate Plan — UK Innovator Founder Visa Assistant
+1 critical issue
+2 non-critical issues
+
+Missing field "image"
+type
+Product
+name
+Ultimate Plan — UK Innovator Founder Visa Assistant
+description
+Ultimate Plan plan for UK Innovator Founder Visa application assistance
+brand
+type
+Brand
+name
+UK Innovator Founder Visa Assistant
+offers
+Missing field "shippingDetails" (optional)
+Missing field "hasMerchantReturnPolicy" (optional)
+type
+Offer
+price
+110
+priceCurrency
+GBP
+availability
+http://schema.org/InStock
+url
+https://innovatorfoundervisaassistant.co.uk/pricing
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Includes 12 business plan coins
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Access to all 109 tools
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Priority support + live chat
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Expert-level endorsement preparation
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Best for serious iterations
+additionalProperty
+type
+PropertyValue
+name
+Feature
+value
+Multiple business angles coverage
