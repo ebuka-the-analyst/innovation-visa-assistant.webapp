@@ -17256,6 +17256,122 @@ Best wishes.</div>
     }
   });
 
+  // ─── robots.txt ────────────────────────────────────────────────────────────
+  app.get("/robots.txt", (_req, res) => {
+    res.type("text/plain").send(
+`User-agent: *
+Allow: /
+
+# Block private/admin areas
+Disallow: /admin
+Disallow: /admin/
+Disallow: /admin-dashboard
+Disallow: /admin/blog
+Disallow: /admin/seo-strategy
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /checkout
+Disallow: /questionnaire
+Disallow: /generation
+
+# Block auth pages (no SEO value)
+Disallow: /verify-email
+Disallow: /reset-password
+Disallow: /forgot-password
+
+Sitemap: https://innovatorfoundervisaassistant.co.uk/sitemap.xml
+`);
+  });
+
+  // ─── Dynamic sitemap.xml ────────────────────────────────────────────────────
+  app.get("/sitemap.xml", async (_req, res) => {
+    const BASE = "https://innovatorfoundervisaassistant.co.uk";
+    const now = new Date().toISOString().split("T")[0];
+
+    // Static high-priority pages
+    const staticPages: Array<{ loc: string; changefreq: string; priority: string; lastmod?: string }> = [
+      { loc: "/",                     changefreq: "daily",   priority: "1.0", lastmod: now },
+      { loc: "/pricing",              changefreq: "weekly",  priority: "0.9" },
+      { loc: "/tools-hub",            changefreq: "weekly",  priority: "0.9" },
+      { loc: "/features",             changefreq: "weekly",  priority: "0.8" },
+      { loc: "/blog",                 changefreq: "daily",   priority: "0.9" },
+      { loc: "/faq",                  changefreq: "monthly", priority: "0.8" },
+      { loc: "/ultimate-guide",       changefreq: "monthly", priority: "0.8" },
+      { loc: "/endorser-comparison",  changefreq: "monthly", priority: "0.7" },
+      { loc: "/success-stories",      changefreq: "weekly",  priority: "0.7" },
+      { loc: "/ai-assistant",         changefreq: "monthly", priority: "0.7" },
+      { loc: "/news",                 changefreq: "daily",   priority: "0.7" },
+      { loc: "/document-organizer",   changefreq: "monthly", priority: "0.6" },
+      { loc: "/expert-booking",       changefreq: "monthly", priority: "0.6" },
+      { loc: "/rejection-analysis",   changefreq: "monthly", priority: "0.6" },
+      { loc: "/settlement-planning",  changefreq: "monthly", priority: "0.6" },
+      { loc: "/login",                changefreq: "yearly",  priority: "0.3" },
+      { loc: "/signup",               changefreq: "yearly",  priority: "0.3" },
+    ];
+
+    // Tool pages (all 109 tools) — pulled from static list
+    const TOOL_IDS = [
+      "app-req-checker","advisors-finder","advisor-prep-guide","advisory-board-builder",
+      "business-plan","business-model-validator","budget-cost-analyzer","breakeven-calculator",
+      "compliance-checker","criteria-scorer","company-formation","doc-organizer","due-diligence",
+      "data-security","doc-verification","endorsement-readiness","endorser-comparison",
+      "evidence-collection","evidence-validator","traction-evidence","founder-portfolio",
+      "endorser-cover-letter","commercial-validation","oisc-compliance","market-data-verifier",
+      "mvp-demo-guide","financial-resilience","financial-projections","financial-modeling",
+      "funding-calculator","funding-sources","go-to-market","growth-strategy","grant-finder",
+      "hr-framework","immigration-timeline","innovation-score","ip-strategy","interview-prep",
+      "investor-pitch","job-creation-plan","kpi-dashboard","language-test-prep","legal-structure",
+      "letter-of-intent","market-entry","market-research","market-sizing","milestone-tracker",
+      "mvp-tracker","network-builder","offer-letters","partnership-agreement","patent-checker",
+      "pitch-deck","pivot-strategy","post-approval","press-kit","pricing-strategy",
+      "product-roadmap","referral-strategy","regulatory-compliance","rejection-analysis",
+      "remote-team","revenue-model","risk-assessment","scalability-planner","settlement-planning",
+      "share-structure","signature-builder","skills-gap","social-proof","startup-costs",
+      "team-builder","tech-stack-guide","term-sheet","timeline-planner","trademark-search",
+      "translation-guide","uk-banking","uk-company-setup","uk-tax-guide","venture-capital",
+      "visa-checklist","visa-timeline","waitlist-builder","website-compliance"
+    ];
+
+    const toolPages = TOOL_IDS.map(id => ({
+      loc: `/tools/${id}`,
+      changefreq: "monthly",
+      priority: "0.6",
+    }));
+
+    // Dynamic blog posts from DB
+    let blogEntries: Array<{ loc: string; changefreq: string; priority: string; lastmod?: string }> = [];
+    try {
+      const posts = await db
+        .select({ slug: blogPosts.slug, updatedAt: blogPosts.updatedAt, publishedAt: blogPosts.publishedAt })
+        .from(blogPosts)
+        .where(eq(blogPosts.status, "published"));
+      blogEntries = posts.map(p => ({
+        loc: `/blog/${p.slug}`,
+        changefreq: "monthly",
+        priority: "0.7",
+        lastmod: p.updatedAt ? new Date(p.updatedAt).toISOString().split("T")[0] : now,
+      }));
+    } catch { /* ignore DB errors in sitemap */ }
+
+    const allPages = [...staticPages, ...toolPages, ...blogEntries];
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+${allPages.map(p => `  <url>
+    <loc>${BASE}${p.loc}</loc>
+    ${p.lastmod ? `<lastmod>${p.lastmod}</lastmod>` : ""}
+    <changefreq>${p.changefreq}</changefreq>
+    <priority>${p.priority}</priority>
+  </url>`).join("\n")}
+</urlset>`;
+
+    res.type("application/xml").send(xml);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

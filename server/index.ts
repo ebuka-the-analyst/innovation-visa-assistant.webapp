@@ -27,10 +27,14 @@ function log(message: string, source = "express") {
 
 // Wrapper for setupVite that skips API routes (only used in development)
 async function setupVite(app: ExpressType, server: Server) {
-  // Add middleware to prevent Vite from handling API routes
+  // Add middleware to prevent Vite from handling API routes and critical SEO files
   app.use((req, res, next) => {
-    if (req.path.startsWith("/api/")) {
-      // For API routes, skip the Vite middleware by setting a flag
+    if (
+      req.path.startsWith("/api/") ||
+      req.path === "/robots.txt" ||
+      req.path === "/sitemap.xml"
+    ) {
+      // Skip the Vite middleware for these paths
       (req as any).skipVite = true;
     }
     next();
@@ -212,9 +216,9 @@ ${allUrls.map(u => `  <url>
   // Route-specific meta tags for SEO (server-side injection)
   const routeMeta: Record<string, { title: string; description: string; keywords?: string; schema?: any }> = {
     '/': {
-      title: 'UK Innovator Founder Visa Assistant | 100+ Professional AI Tools',
-      description: 'Get approved with our AI-powered UK Innovator Founder Visa platform. 100+ professional tools covering compliance, business plans, endorsement prep, and financial modelling. Expert-level guidance — start free today.',
-      keywords: 'UK Innovator Founder Visa, innovator founder visa tools, UK visa for entrepreneurs, endorsement preparation, business plan for visa',
+      title: 'UK Innovator Founder Visa Assistant — Business Plan, Endorsement & Compliance Tools',
+      description: 'The UK\'s leading AI platform for Innovator Founder Visa applications. Generate your 80-page business plan, prepare for endorsement, check compliance, and access 109 expert tools — from business model validation to financial projections.',
+      keywords: 'UK Innovator Founder Visa, Innovator Founder Visa, UK business visa, visa for entrepreneurs UK, innovator founder visa requirements, UK visa application, business plan for visa, endorsement UK visa',
       schema: { "@context": "https://schema.org", "@graph": [orgSchema, websiteSchema] }
     },
     '/blog': {

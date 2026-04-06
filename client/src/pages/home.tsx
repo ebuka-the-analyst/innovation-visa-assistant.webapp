@@ -62,8 +62,8 @@ export default function Home() {
     <div className="min-h-screen">
       <GlobalNavButton />
       <SEOHead
-        title="UK Innovator Founder Visa Assistant | 100+ Professional Tools & Expert Guidance"
-        description="Get approved with our AI-powered UK Innovator Founder Visa platform. 100+ professional-level tools covering compliance, business plans, financial modeling, and endorsement preparation. Start your journey today."
+        title="UK Innovator Founder Visa Assistant — Business Plan, Endorsement & Compliance Tools"
+        description="The UK's leading AI platform for Innovator Founder Visa applications. Generate your 80-page business plan, prepare for endorsement, check compliance, and access 109 expert tools — from business model validation to financial projections."
         canonical="https://innovatorfoundervisaassistant.co.uk/"
         keywords="UK Innovator Founder Visa, Innovator Founder Visa, UK business visa, visa for entrepreneurs UK, innovator founder visa requirements, UK visa application, business plan for visa, endorsement UK visa"
         schema={combinedSchema}

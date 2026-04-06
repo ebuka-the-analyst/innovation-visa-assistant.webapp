@@ -12,7 +12,7 @@ export const organizationSchema = {
     "width": 1200,
     "height": 630
   },
-  "description": "AI-powered platform providing 100+ professional-level tools for UK Innovator Founder Visa applications. Covers compliance, business planning, financial modelling, and endorsement preparation.",
+  "description": "AI-powered platform providing 109 professional-level tools for UK Innovator Founder Visa applications. Covers compliance, business planning, financial modelling, and endorsement preparation.",
   "foundingDate": "2025",
   "address": {
     "@type": "PostalAddress",
@@ -50,7 +50,7 @@ export const softwareApplicationSchema = {
     "bestRating": "5",
     "worstRating": "1"
   },
-  "description": "Comprehensive UK Innovator Founder Visa application toolkit with 100+ professional-level tools for compliance, business planning, and endorsement success."
+  "description": "Comprehensive UK Innovator Founder Visa application toolkit with 109 professional-level tools for compliance, business planning, and endorsement success."
 };
 
 export const websiteSchema = {
