@@ -16383,7 +16383,7 @@ Return a JSON object with:
       deadline = '',
       notes = '',
       resolution = '',
-      adminName = 'Platform Administrator',
+      adminName = 'support@innovatorfoundervisaassistant.co.uk',
       evidence = '',
       planName = 'UK Innovator Founder Visa Assistant',
       supportContactDate = 'April 1, 2025',
@@ -16581,8 +16581,9 @@ Best wishes.</div>
     <p>Yours sincerely,</p>
     <br><br>
     <div class="signature-line"></div>
-    <p><strong>${adminName}</strong><br>
+    <p><strong>Customer Support Team</strong><br>
     ${planName}<br>
+    <strong>${adminName}</strong><br>
     Date: ${today}</p>
   </div>
 
@@ -16742,9 +16743,10 @@ Best wishes.</div>
 
   <div class="signature-block">
     <div class="signature-line"></div>
-    <p><strong>${adminName}</strong><br>
-    Authorised Signatory<br>
-    ${planName}</p>
+    <p><strong>Customer Support Team</strong><br>
+    Authorised Representative<br>
+    ${planName}<br>
+    ${adminName}</p>
   </div>
 
   <div class="confidential">Confidential — For Stripe Submission Only</div>

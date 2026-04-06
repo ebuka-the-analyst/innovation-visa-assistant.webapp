@@ -620,7 +620,7 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
   const [dispResolution, setDispResolution] = useState('');
   const [dispEvidence, setDispEvidence] = useState('');
   const [dispDeadline, setDispDeadline] = useState('2026-05-14');
-  const [dispAdminName, setDispAdminName] = useState('Platform Administrator');
+  const [dispAdminName, setDispAdminName] = useState('support@innovatorfoundervisaassistant.co.uk');
 
   const loadAdamyaCase = () => {
     setDispCustomerEmail('adamyaraj2@gmail.com');
@@ -1091,8 +1091,8 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Your Name (for document)</Label>
-              <Input placeholder="e.g. Platform Administrator" value={dispAdminName} onChange={(e) => setDispAdminName(e.target.value)} data-testid="input-admin-name" />
+              <Label className="text-xs font-medium">Signatory / Contact (for document)</Label>
+              <Input placeholder="e.g. support@innovatorfoundervisaassistant.co.uk" value={dispAdminName} onChange={(e) => setDispAdminName(e.target.value)} data-testid="input-admin-name" />
             </div>
           </div>
 
