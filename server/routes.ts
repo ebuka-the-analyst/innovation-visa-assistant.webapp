@@ -16370,8 +16370,327 @@ Return a JSON object with:
   });
 
   // ============================================================================
-  // CUSTOMER SUPPORT — User lookup, tier fix, dispute tracking
+  // CUSTOMER SUPPORT — User lookup, tier fix, dispute tracking, export pack
   // ============================================================================
+
+  // Generate a professional Stripe dispute response pack as print-ready HTML
+  app.get("/api/admin/support/dispute-pack", requireAdmin, async (req, res) => {
+    const {
+      customerEmail = '',
+      disputeId = '',
+      amount = '',
+      reason = '',
+      deadline = '',
+      notes = '',
+      resolution = '',
+      adminName = 'Platform Administrator',
+      evidence = '',
+      planName = 'UK Innovator Founder Visa Assistant',
+    } = req.query as Record<string, string>;
+
+    const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    const deadlineFormatted = deadline ? new Date(deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'As specified by Stripe';
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stripe Dispute Response Pack — ${disputeId || 'Reference Pending'}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; color: #1a1a2e; background: #fff; font-size: 11pt; line-height: 1.7; }
+  
+  .cover { width: 210mm; min-height: 297mm; background: linear-gradient(135deg, #005EB8 0%, #003d7a 60%, #001f3d 100%); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 50px; page-break-after: always; }
+  .cover-badge { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.4); border-radius: 4px; padding: 8px 20px; font-size: 9pt; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 40px; font-family: Arial, sans-serif; }
+  .cover h1 { font-size: 32pt; font-weight: 700; margin-bottom: 16px; line-height: 1.2; }
+  .cover h2 { font-size: 16pt; font-weight: 300; opacity: 0.85; margin-bottom: 50px; }
+  .cover-meta { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; padding: 30px 40px; width: 100%; max-width: 500px; text-align: left; font-family: Arial, sans-serif; }
+  .cover-meta-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 10pt; }
+  .cover-meta-row:last-child { border-bottom: none; }
+  .cover-meta-label { opacity: 0.7; }
+  .cover-meta-value { font-weight: 600; }
+  .cover-footer { margin-top: 40px; opacity: 0.6; font-size: 9pt; font-family: Arial, sans-serif; }
+  .urgent-badge { background: #e3b341; color: #1a1a2e; border-radius: 4px; padding: 4px 12px; font-size: 9pt; font-weight: 700; font-family: Arial, sans-serif; margin-top: 20px; display: inline-block; }
+
+  .page { width: 210mm; min-height: 297mm; padding: 25mm 20mm; page-break-after: always; position: relative; }
+  .page:last-child { page-break-after: auto; }
+  
+  .page-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 3px solid #005EB8; margin-bottom: 28px; }
+  .page-header-title { font-size: 8pt; color: #666; font-family: Arial, sans-serif; text-transform: uppercase; letter-spacing: 1px; }
+  .page-header-ref { font-size: 8pt; color: #005EB8; font-family: Arial, sans-serif; font-weight: 600; }
+  
+  h2.section-title { font-size: 18pt; color: #005EB8; margin-bottom: 6px; padding-bottom: 8px; border-bottom: 2px solid #e8f0fc; }
+  h3 { font-size: 12pt; color: #1a1a2e; margin: 20px 0 8px; font-family: Arial, sans-serif; }
+  p { margin-bottom: 12px; }
+  
+  .letter-date { text-align: right; margin-bottom: 30px; color: #666; font-size: 10pt; }
+  .letter-address { margin-bottom: 30px; line-height: 1.5; }
+  .letter-subject { font-weight: 700; font-size: 12pt; margin-bottom: 20px; text-decoration: underline; }
+  
+  .info-box { background: #f0f6ff; border-left: 4px solid #005EB8; padding: 16px 20px; border-radius: 0 6px 6px 0; margin: 16px 0; font-family: Arial, sans-serif; font-size: 10pt; }
+  .warning-box { background: #fff8e6; border-left: 4px solid #e3b341; padding: 16px 20px; border-radius: 0 6px 6px 0; margin: 16px 0; font-family: Arial, sans-serif; font-size: 10pt; }
+  .success-box { background: #f0faf4; border-left: 4px solid #057a55; padding: 16px 20px; border-radius: 0 6px 6px 0; margin: 16px 0; font-family: Arial, sans-serif; font-size: 10pt; }
+  
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-family: Arial, sans-serif; font-size: 10pt; }
+  th { background: #005EB8; color: white; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 9pt; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 9px 14px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: #f8faff; }
+  
+  .evidence-item { display: flex; gap: 12px; align-items: flex-start; margin: 12px 0; padding: 12px 16px; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb; font-family: Arial, sans-serif; font-size: 10pt; }
+  .evidence-num { background: #005EB8; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 8pt; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .evidence-text { flex: 1; line-height: 1.5; }
+  
+  .checklist-item { display: flex; gap: 10px; align-items: flex-start; margin: 8px 0; font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.5; }
+  .check { color: #057a55; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  
+  .signature-block { margin-top: 40px; padding-top: 20px; }
+  .signature-line { border-bottom: 1px solid #333; width: 200px; margin-bottom: 6px; }
+  
+  .page-num { position: absolute; bottom: 15mm; right: 20mm; font-size: 8pt; color: #999; font-family: Arial, sans-serif; }
+  .confidential { position: absolute; bottom: 15mm; left: 20mm; font-size: 8pt; color: #bbb; font-family: Arial, sans-serif; letter-spacing: 1px; text-transform: uppercase; }
+
+  .highlight { background: #fffbeb; border: 1px solid #e3b341; border-radius: 4px; padding: 2px 6px; font-weight: 600; }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print { display: none !important; }
+    .cover { min-height: 297mm; }
+    .page { min-height: 297mm; }
+  }
+
+  .print-btn { position: fixed; top: 20px; right: 20px; background: #005EB8; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 11pt; cursor: pointer; font-family: Arial, sans-serif; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 9999; }
+  .print-btn:hover { background: #003d7a; }
+</style>
+</head>
+<body>
+<button class="print-btn no-print" onclick="window.print()">Print / Save as PDF</button>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <div class="cover-badge">Stripe Dispute Response</div>
+  <h1>Chargeback<br>Defence Pack</h1>
+  <h2>${planName}</h2>
+  <div class="cover-meta">
+    <div class="cover-meta-row"><span class="cover-meta-label">Dispute Reference</span><span class="cover-meta-value">${disputeId || '—'}</span></div>
+    <div class="cover-meta-row"><span class="cover-meta-label">Customer</span><span class="cover-meta-value">${customerEmail || '—'}</span></div>
+    <div class="cover-meta-row"><span class="cover-meta-label">Amount Disputed</span><span class="cover-meta-value">${amount || '—'}</span></div>
+    <div class="cover-meta-row"><span class="cover-meta-label">Reason Stated</span><span class="cover-meta-value">${reason || '—'}</span></div>
+    <div class="cover-meta-row"><span class="cover-meta-label">Prepared By</span><span class="cover-meta-value">${adminName}</span></div>
+    <div class="cover-meta-row"><span class="cover-meta-label">Prepared On</span><span class="cover-meta-value">${today}</span></div>
+  </div>
+  <div class="urgent-badge">RESPOND BY: ${deadlineFormatted}</div>
+  <div class="cover-footer">CONFIDENTIAL — FOR STRIPE SUBMISSION ONLY</div>
+</div>
+
+<!-- PAGE 2: MERCHANT REBUTTAL LETTER -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-title">Merchant Rebuttal Letter</div>
+    <div class="page-header-ref">${disputeId || 'REF PENDING'}</div>
+  </div>
+  <h2 class="section-title">Formal Merchant Rebuttal</h2>
+
+  <p class="letter-date">${today}</p>
+
+  <div class="letter-address">
+    <strong>To: Stripe Dispute Resolution Team</strong><br>
+    Re: Chargeback Reference ${disputeId || '[Reference]'}<br>
+    Customer: ${customerEmail || '[Customer Email]'}<br>
+    Amount: ${amount || '[Amount]'}
+  </div>
+
+  <p class="letter-subject">Subject: Formal Response to "Product Unacceptable" Chargeback</p>
+
+  <p>We write in formal response to the above-referenced chargeback filed against our platform, <strong>${planName}</strong>, on the grounds that the product was "unacceptable."</p>
+
+  <p>We respectfully but firmly contest this dispute. The customer was provided with full, unrestricted access to our AI-powered visa guidance platform immediately upon payment. Our records confirm that the customer registered an account, verified their email address, and accessed our service. The platform delivered its documented features as described at the point of sale.</p>
+
+  <p>We wish to draw your attention to the following key facts:</p>
+
+  <div class="info-box">
+    <strong>1. Service was fully delivered.</strong> The customer gained immediate access to our platform's complete feature set, including AI-guided compliance tools, business plan generators, document templates, and expert guidance — all of which are functional digital services.
+  </div>
+
+  <div class="info-box">
+    <strong>2. No prior support contact was made.</strong> Before filing this chargeback, the customer did not contact our support team to raise any concern or request a resolution. This is inconsistent with a good-faith dispute and denies us the opportunity to remedy any issue.
+  </div>
+
+  <div class="info-box">
+    <strong>3. Terms of Service were accepted.</strong> The customer accepted our Terms of Service at the point of registration, which clearly states that access to digital services is non-refundable once the service has been accessed.
+  </div>
+
+  ${notes ? `<div class="warning-box"><strong>Additional Context:</strong><br>${notes}</div>` : ''}
+
+  <p>We have attached our supporting evidence and respectfully request that this dispute be ruled in our favour and the funds be returned to our account.</p>
+
+  <div class="signature-block">
+    <p>Yours sincerely,</p>
+    <br><br>
+    <div class="signature-line"></div>
+    <p><strong>${adminName}</strong><br>
+    ${planName}<br>
+    Date: ${today}</p>
+  </div>
+
+  <div class="confidential">Confidential</div>
+  <div class="page-num">Page 2 of 5</div>
+</div>
+
+<!-- PAGE 3: CASE SUMMARY & TIMELINE -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-title">Case Summary & Timeline</div>
+    <div class="page-header-ref">${disputeId || 'REF PENDING'}</div>
+  </div>
+  <h2 class="section-title">Case Summary</h2>
+
+  <table>
+    <tr><th>Field</th><th>Detail</th></tr>
+    <tr><td>Dispute Reference</td><td><strong>${disputeId || '—'}</strong></td></tr>
+    <tr><td>Customer Email</td><td>${customerEmail || '—'}</td></tr>
+    <tr><td>Amount Disputed</td><td>${amount || '—'}</td></tr>
+    <tr><td>Dispute Reason (Customer)</td><td>${reason || 'Product unacceptable'}</td></tr>
+    <tr><td>Our Response</td><td>We contest this chargeback in full</td></tr>
+    <tr><td>Response Deadline</td><td><strong>${deadlineFormatted}</strong></td></tr>
+    <tr><td>Response Prepared</td><td>${today}</td></tr>
+    <tr><td>Prepared By</td><td>${adminName}</td></tr>
+  </table>
+
+  <h3>Event Timeline</h3>
+  <table>
+    <tr><th>#</th><th>Event</th><th>Detail</th></tr>
+    <tr><td>1</td><td>Customer registers account</td><td>Email: ${customerEmail || '—'} | Platform: ${planName}</td></tr>
+    <tr><td>2</td><td>Email verification</td><td>Customer verifies their account email address</td></tr>
+    <tr><td>3</td><td>Subscription purchased</td><td>Customer pays ${amount || '[amount]'} and gains platform access</td></tr>
+    <tr><td>4</td><td>Platform access granted</td><td>Immediate access to all subscribed features</td></tr>
+    <tr><td>5</td><td>No support contact made</td><td>Customer did not contact support prior to chargeback</td></tr>
+    <tr><td>6</td><td>Chargeback filed</td><td>Dispute ${disputeId || '[ID]'} raised — reason: "${reason || 'Product unacceptable'}"</td></tr>
+    <tr><td>7</td><td>Merchant response prepared</td><td>${today} — This document</td></tr>
+  </table>
+
+  <div class="confidential">Confidential</div>
+  <div class="page-num">Page 3 of 5</div>
+</div>
+
+<!-- PAGE 4: EVIDENCE CHECKLIST -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-title">Evidence Summary</div>
+    <div class="page-header-ref">${disputeId || 'REF PENDING'}</div>
+  </div>
+  <h2 class="section-title">Evidence of Service Delivery</h2>
+
+  <p>The following categories of evidence support our position that the service was fully delivered as described. Items should be attached to your Stripe dispute submission:</p>
+
+  <div class="evidence-item">
+    <div class="evidence-num">1</div>
+    <div class="evidence-text"><strong>Account Registration Record</strong> — Screenshot of user's account in the database showing their email, registration date, and verified status. Confirms the customer knowingly signed up and accepted the Terms of Service.</div>
+  </div>
+  <div class="evidence-item">
+    <div class="evidence-num">2</div>
+    <div class="evidence-text"><strong>Email Verification Record</strong> — Log confirming the customer verified their email address, demonstrating active and intentional participation.</div>
+  </div>
+  <div class="evidence-item">
+    <div class="evidence-num">3</div>
+    <div class="evidence-text"><strong>Login & Activity Logs</strong> — Server-side session logs showing the customer's IP, browser, device, and timestamps of access to the platform after payment. Demonstrates the service was actively used.</div>
+  </div>
+  <div class="evidence-item">
+    <div class="evidence-num">4</div>
+    <div class="evidence-text"><strong>Tool Usage Records</strong> — Activity event records from the platform database showing which specific tools, features, and pages the customer engaged with. Strong proof of service consumption.</div>
+  </div>
+  <div class="evidence-item">
+    <div class="evidence-num">5</div>
+    <div class="evidence-text"><strong>Business Plan / Generated Output</strong> — If the customer generated any business plans or reports, export a copy as evidence they used the core feature of the service.</div>
+  </div>
+  <div class="evidence-item">
+    <div class="evidence-num">6</div>
+    <div class="evidence-text"><strong>Terms of Service & Refund Policy</strong> — A copy of the Terms of Service showing the digital goods / no-refund policy clause that the customer accepted at signup.</div>
+  </div>
+  <div class="evidence-item">
+    <div class="evidence-num">7</div>
+    <div class="evidence-text"><strong>Payment Confirmation Email</strong> — The Stripe receipt sent to the customer confirming what they purchased and the amount charged.</div>
+  </div>
+  <div class="evidence-item">
+    <div class="evidence-num">8</div>
+    <div class="evidence-text"><strong>No Prior Support Contact</strong> — Confirm (via support inbox screenshot or statement) that the customer filed the chargeback without first contacting support. Stripe weights this heavily against the customer.</div>
+  </div>
+
+  ${evidence ? `
+  <h3>Admin Notes on Evidence Gathered</h3>
+  <div class="success-box">${evidence}</div>
+  ` : ''}
+
+  <h3>Submission Checklist</h3>
+  <div class="checklist-item"><span class="check">✓</span><span>Merchant rebuttal letter (this document, Page 2)</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Screenshot of customer account record</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Activity log / session records export</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Terms of Service document</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Stripe payment receipt for the transaction</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Any customer-generated output (business plan, report)</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Statement confirming no prior support contact</span></div>
+
+  <div class="confidential">Confidential</div>
+  <div class="page-num">Page 4 of 5</div>
+</div>
+
+<!-- PAGE 5: RESOLUTION & CLOSING STATEMENT -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-title">Resolution Statement</div>
+    <div class="page-header-ref">${disputeId || 'REF PENDING'}</div>
+  </div>
+  <h2 class="section-title">Resolution & Closing Statement</h2>
+
+  ${resolution ? `
+  <h3>Current Resolution Status</h3>
+  <div class="success-box">${resolution}</div>
+  ` : ''}
+
+  <h3>Our Position</h3>
+  <p>${planName} is a professional, AI-powered SaaS platform designed to assist entrepreneurs with UK visa applications. The service delivers substantial value through over 100 AI-powered tools, compliance checkers, business plan generators, and expert guidance modules.</p>
+  <p>The customer paid for and received access to a fully functional platform. The characterisation of our product as "unacceptable" is not substantiated by any evidence and contradicts the customer's own usage records.</p>
+
+  <h3>Precedent & Stripe Policy Alignment</h3>
+  <p>Under Stripe's dispute resolution guidelines, a merchant who can demonstrate:</p>
+  <div class="checklist-item"><span class="check">✓</span><span>The customer created an account and verified their identity</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>The customer accessed and used the service after payment</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Clear, accessible Terms of Service were presented and accepted</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>No prior contact was made to the merchant's support team</span></div>
+  <p style="margin-top:14px;">…has strong grounds for the dispute to be ruled in the merchant's favour.</p>
+
+  <h3>Request</h3>
+  <div class="info-box">
+    We respectfully request that Stripe rule this dispute <strong>in favour of the merchant</strong>, reverse the chargeback, and return the sum of <strong>${amount || '[amount]'}</strong> to our account. We are prepared to provide additional evidence upon request and cooperate fully with any further investigation.
+  </div>
+
+  <table style="margin-top:30px;">
+    <tr><th>Document</th><th>Detail</th></tr>
+    <tr><td>Prepared by</td><td>${adminName}</td></tr>
+    <tr><td>Prepared on</td><td>${today}</td></tr>
+    <tr><td>Dispute reference</td><td>${disputeId || '—'}</td></tr>
+    <tr><td>Amount contested</td><td>${amount || '—'}</td></tr>
+    <tr><td>Response deadline</td><td>${deadlineFormatted}</td></tr>
+  </table>
+
+  <div class="signature-block">
+    <div class="signature-line"></div>
+    <p><strong>${adminName}</strong><br>
+    Authorised Signatory<br>
+    ${planName}</p>
+  </div>
+
+  <div class="confidential">Confidential — For Stripe Submission Only</div>
+  <div class="page-num">Page 5 of 5</div>
+</div>
+
+</body>
+</html>`;
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+  });
 
   // Search user by email + return Stripe payment history + business plans
   app.get("/api/admin/support/lookup", requireAdmin, async (req, res) => {

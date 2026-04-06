@@ -618,6 +618,34 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
   const [dispStatus, setDispStatus] = useState('open');
   const [dispNotes, setDispNotes] = useState('');
   const [dispResolution, setDispResolution] = useState('');
+  const [dispEvidence, setDispEvidence] = useState('');
+  const [dispDeadline, setDispDeadline] = useState('2026-05-14');
+  const [dispAdminName, setDispAdminName] = useState('Platform Administrator');
+
+  const loadAdamyaCase = () => {
+    setDispCustomerEmail('adamyaraj2@gmail.com');
+    setDispDisputeId('du_1TIKfKK9BSTYpDOqrDunVaVy');
+    setDispAmount('£110');
+    setDispReason('Product unacceptable');
+    setDispStatus('open');
+    setDispDeadline('2026-05-14');
+    setDispNotes('Customer Adamya Raj filed a £110 chargeback claiming product was unacceptable. No prior contact with our support team was made before the dispute was raised.');
+  };
+
+  const openDisputePack = () => {
+    const params = new URLSearchParams({
+      customerEmail: dispCustomerEmail,
+      disputeId: dispDisputeId,
+      amount: dispAmount,
+      reason: dispReason,
+      deadline: dispDeadline,
+      notes: dispNotes,
+      resolution: dispResolution,
+      evidence: dispEvidence,
+      adminName: dispAdminName,
+    });
+    window.open(`/api/admin/support/dispute-pack?${params.toString()}`, '_blank');
+  };
 
   const { data: lookupData, isLoading: lookupLoading, error: lookupError } = useQuery<any>({
     queryKey: ['/api/admin/support/lookup', queryEmail],
@@ -708,6 +736,26 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
                 onClick={() => { setSearchEmail('adamyaraj2@gmail.com'); setQueryEmail('adamyaraj2@gmail.com'); }}>
                 Adamya Raj (£110 dispute)
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Railway notice */}
+        <Card className="border-amber-500/30 bg-amber-500/5">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex gap-3 items-start">
+              <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+              <div className="text-sm space-y-1">
+                <p className="font-semibold text-amber-700 dark:text-amber-500">You are on the Development Database</p>
+                <p className="text-muted-foreground text-xs">Customer data for real users (including Adamya Raj) is stored on your <strong>Railway production database</strong>, not here. To look them up:</p>
+                <ol className="text-xs text-muted-foreground list-decimal list-inside space-y-1 mt-1">
+                  <li>Log into <a href="https://railway.app" target="_blank" rel="noopener noreferrer" className="text-primary underline">railway.app</a> → your project → Variables</li>
+                  <li>Copy the <code className="bg-muted px-1 rounded">DATABASE_URL</code> connection string</li>
+                  <li>Use any Postgres client (e.g. TablePlus, psql) and run: <code className="bg-muted px-1 rounded">SELECT * FROM users WHERE email ILIKE '%adamya%';</code></li>
+                  <li>Then query <code className="bg-muted px-1 rounded">activity_events</code> and <code className="bg-muted px-1 rounded">user_sessions</code> by that user ID for usage evidence</li>
+                </ol>
+                <p className="text-xs text-muted-foreground mt-1">Alternatively, switch your <code className="bg-muted px-1 rounded">DATABASE_URL</code> env var here temporarily to point at Railway, but remember to switch it back.</p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -950,50 +998,72 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
   // ---- DISPUTE TRACKER ----
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-      {/* Log New Dispute */}
+
+      {/* Active Case Banner */}
+      <Card className="border-orange-500/30 bg-orange-500/5">
+        <CardContent className="pt-4 pb-4">
+          <div className="flex flex-wrap items-start gap-3 justify-between">
+            <div className="flex gap-3 items-start">
+              <AlertCircle className="h-4 w-4 text-orange-600 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-semibold text-orange-700 dark:text-orange-400 text-sm">Active Case: Adamya Raj — £110 Chargeback</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  <span className="font-mono">du_1TIKfKK9BSTYpDOqrDunVaVy</span> · adamyaraj2@gmail.com · Respond by <strong className="text-orange-600">14 May 2026</strong>
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Respond via <a href="https://dashboard.stripe.com/disputes" target="_blank" rel="noopener noreferrer" className="text-primary underline">Stripe Dashboard → Disputes</a>
+                </p>
+              </div>
+            </div>
+            <Button size="sm" onClick={loadAdamyaCase} data-testid="button-load-adamya">
+              <FilePlus className="h-3.5 w-3.5 mr-1" />
+              Load This Case
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Dispute Details Form */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Scale className="h-4 w-4 text-primary" />
-            Log / Track a Dispute
+          <CardTitle className="flex items-center justify-between gap-2 flex-wrap text-base">
+            <span className="flex items-center gap-2"><Scale className="h-4 w-4 text-primary" />Dispute Details</span>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={openDisputePack}
+              disabled={!dispCustomerEmail}
+              data-testid="button-export-pack"
+              className="bg-[#005EB8] hover:bg-[#003d7a] text-white"
+            >
+              <Download className="h-3.5 w-3.5 mr-1.5" />
+              Export Dispute Pack (PDF)
+            </Button>
           </CardTitle>
-          <CardDescription>Record Stripe chargebacks and customer disputes for admin tracking. Data stored in audit trail.</CardDescription>
+          <CardDescription>Fill in the case details below, then click "Export Dispute Pack" to generate the 5-page Stripe submission document.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs">Customer Email</Label>
-              <Input
-                placeholder="customer@example.com"
-                value={dispCustomerEmail}
-                onChange={(e) => setDispCustomerEmail(e.target.value)}
-                data-testid="input-dispute-email"
-              />
+              <Label className="text-xs font-medium">Customer Email *</Label>
+              <Input placeholder="customer@example.com" value={dispCustomerEmail} onChange={(e) => setDispCustomerEmail(e.target.value)} data-testid="input-dispute-email" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Stripe Dispute ID</Label>
-              <Input
-                placeholder="du_xxxxxxxxxxxxxxxx"
-                value={dispDisputeId}
-                onChange={(e) => setDispDisputeId(e.target.value)}
-                data-testid="input-dispute-id"
-              />
+              <Label className="text-xs font-medium">Stripe Dispute ID</Label>
+              <Input placeholder="du_xxxxxxxxxxxxxxxx" value={dispDisputeId} onChange={(e) => setDispDisputeId(e.target.value)} data-testid="input-dispute-id" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Amount (e.g. £110)</Label>
-              <Input
-                placeholder="£110"
-                value={dispAmount}
-                onChange={(e) => setDispAmount(e.target.value)}
-                data-testid="input-dispute-amount"
-              />
+              <Label className="text-xs font-medium">Amount Disputed</Label>
+              <Input placeholder="e.g. £110" value={dispAmount} onChange={(e) => setDispAmount(e.target.value)} data-testid="input-dispute-amount" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Status</Label>
+              <Label className="text-xs font-medium">Response Deadline</Label>
+              <Input type="date" value={dispDeadline} onChange={(e) => setDispDeadline(e.target.value)} data-testid="input-dispute-deadline" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Status</Label>
               <Select value={dispStatus} onValueChange={setDispStatus}>
-                <SelectTrigger data-testid="select-dispute-status">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger data-testid="select-dispute-status"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="open">Open</SelectItem>
                   <SelectItem value="under_review">Under Review</SelectItem>
@@ -1003,60 +1073,78 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Your Name (for document)</Label>
+              <Input placeholder="e.g. Platform Administrator" value={dispAdminName} onChange={(e) => setDispAdminName(e.target.value)} data-testid="input-admin-name" />
+            </div>
           </div>
+
           <div className="space-y-1.5">
-            <Label className="text-xs">Reason / Description</Label>
-            <Input
-              placeholder="e.g. Product unacceptable — customer claims no value received"
-              value={dispReason}
-              onChange={(e) => setDispReason(e.target.value)}
-              data-testid="input-dispute-reason"
-            />
+            <Label className="text-xs font-medium">Dispute Reason (customer's stated reason)</Label>
+            <Input placeholder="e.g. Product unacceptable — customer claims no value received" value={dispReason} onChange={(e) => setDispReason(e.target.value)} data-testid="input-dispute-reason" />
           </div>
+
           <div className="space-y-1.5">
-            <Label className="text-xs">Admin Notes</Label>
-            <Textarea
-              placeholder="Internal notes for this dispute..."
-              value={dispNotes}
-              onChange={(e) => setDispNotes(e.target.value)}
-              rows={3}
-              data-testid="textarea-dispute-notes"
-            />
+            <Label className="text-xs font-medium">Admin Notes (internal context — appears in document)</Label>
+            <Textarea placeholder="What happened? Did they contact support? What did they use on the platform? Any relevant context..." value={dispNotes} onChange={(e) => setDispNotes(e.target.value)} rows={3} data-testid="textarea-dispute-notes" />
           </div>
+
           <div className="space-y-1.5">
-            <Label className="text-xs">Resolution / Response</Label>
-            <Textarea
-              placeholder="What was communicated to customer or Stripe? Evidence submitted?"
-              value={dispResolution}
-              onChange={(e) => setDispResolution(e.target.value)}
-              rows={2}
-              data-testid="textarea-dispute-resolution"
-            />
+            <Label className="text-xs font-medium">Evidence Gathered (what you found on Railway / Stripe)</Label>
+            <Textarea placeholder="e.g. User logged in on [date], used Business Plan Generator, created 1 plan, accessed 4 tools. Session duration: 47 minutes. No support tickets raised." value={dispEvidence} onChange={(e) => setDispEvidence(e.target.value)} rows={3} data-testid="textarea-dispute-evidence" />
           </div>
-          <Button
-            disabled={!dispCustomerEmail || disputeMutation.isPending}
-            onClick={() => disputeMutation.mutate({
-              customerEmail: dispCustomerEmail,
-              disputeId: dispDisputeId,
-              amount: dispAmount,
-              reason: dispReason,
-              status: dispStatus,
-              notes: dispNotes,
-              resolution: dispResolution,
-            })}
-            data-testid="button-save-dispute"
-          >
-            {disputeMutation.isPending ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <FilePlus className="h-4 w-4 mr-2" />}
-            Save Dispute Record
-          </Button>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Resolution / What Was Done</Label>
+            <Textarea placeholder="What response did you submit to Stripe? What was the outcome?" value={dispResolution} onChange={(e) => setDispResolution(e.target.value)} rows={2} data-testid="textarea-dispute-resolution" />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={openDisputePack}
+              disabled={!dispCustomerEmail}
+              className="bg-[#005EB8] hover:bg-[#003d7a] text-white"
+              data-testid="button-export-pack-bottom"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export 5-Page Dispute Pack (Opens in New Tab → Print to PDF)
+            </Button>
+            <Button
+              variant="outline"
+              disabled={!dispCustomerEmail || disputeMutation.isPending}
+              onClick={() => disputeMutation.mutate({ customerEmail: dispCustomerEmail, disputeId: dispDisputeId, amount: dispAmount, reason: dispReason, status: dispStatus, notes: dispNotes, resolution: dispResolution })}
+              data-testid="button-save-dispute"
+            >
+              {disputeMutation.isPending ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+              Save to Audit Log
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Dispute List */}
+      {/* What to submit guide */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">How to Submit Your Response to Stripe</CardTitle>
+        </CardHeader>
+        <CardContent className="text-xs text-muted-foreground space-y-2">
+          <p className="font-medium text-foreground text-sm">Step-by-step submission process:</p>
+          <ol className="list-decimal list-inside space-y-2">
+            <li><strong>Fill in the form above</strong> — especially evidence gathered from Railway</li>
+            <li><strong>Click "Export Dispute Pack"</strong> — opens a 5-page professional document in a new tab</li>
+            <li><strong>Print to PDF</strong> — in your browser use Ctrl+P / Cmd+P → Save as PDF</li>
+            <li>Go to <a href="https://dashboard.stripe.com/disputes" target="_blank" rel="noopener noreferrer" className="text-primary underline font-medium">dashboard.stripe.com/disputes</a> → find <code className="bg-muted px-1 rounded">du_1TIKfKK9BSTYpDOqrDunVaVy</code></li>
+            <li>Click <strong>"Respond"</strong> and upload: (a) the dispute pack PDF, (b) any screenshots of usage, (c) your Terms of Service</li>
+            <li>Submit before <strong className="text-orange-600">14 May 2026</strong></li>
+          </ol>
+        </CardContent>
+      </Card>
+
+      {/* Tracked Disputes Log */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center justify-between gap-2 flex-wrap">
-            <span>Tracked Disputes</span>
+            <span>Audit Log — Saved Disputes</span>
             <Button size="sm" variant="outline" onClick={() => refetchDisputes()}>
               <RefreshCw className="h-3.5 w-3.5 mr-1" />Refresh
             </Button>
@@ -1064,17 +1152,19 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
         </CardHeader>
         <CardContent>
           {disputesLoading ? (
-            <div className="space-y-2">
-              {[1,2,3].map(i => <Skeleton key={i} className="h-16 w-full" />)}
-            </div>
+            <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-16 w-full" />)}</div>
           ) : !disputesData || disputesData.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">No disputes logged yet.</p>
+            <div className="text-center py-6 text-muted-foreground">
+              <Scale className="h-8 w-8 mx-auto mb-2 opacity-30" />
+              <p className="text-sm">No disputes saved yet.</p>
+              <p className="text-xs mt-1">Fill in the form above and click "Save to Audit Log" to track a case.</p>
+            </div>
           ) : (
             <div className="space-y-2">
               {disputesData.map((row: any) => {
                 const d = row.newValue || {};
                 return (
-                  <div key={row.id} className="p-3 rounded-md bg-muted/40 space-y-1.5 text-sm">
+                  <div key={row.id} className="p-3 rounded-md bg-muted/40 space-y-1.5 text-sm border border-border/50">
                     <div className="flex flex-wrap items-center gap-2 justify-between">
                       <div className="flex items-center gap-2 font-medium">
                         <Scale className="h-3.5 w-3.5 text-muted-foreground" />
@@ -1082,53 +1172,35 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
                       </div>
                       <div className="flex items-center gap-1.5">
                         {d.amount && <Badge variant="outline">{d.amount}</Badge>}
-                        <Badge className={
-                          d.status === 'won' ? 'bg-emerald-500/10 text-emerald-600' :
-                          d.status === 'lost' ? 'bg-red-500/10 text-red-600' :
-                          d.status === 'resolved' ? 'bg-blue-500/10 text-blue-600' :
-                          'bg-orange-500/10 text-orange-600'
-                        }>
+                        <Badge className={d.status === 'won' ? 'bg-emerald-500/10 text-emerald-600' : d.status === 'lost' ? 'bg-red-500/10 text-red-600' : d.status === 'resolved' ? 'bg-blue-500/10 text-blue-600' : 'bg-orange-500/10 text-orange-600'}>
                           {d.status || 'open'}
                         </Badge>
+                        <Button size="sm" variant="ghost" className="h-6 px-2 text-xs"
+                          onClick={() => {
+                            setDispCustomerEmail(row.targetEmail || d.customerEmail || '');
+                            setDispDisputeId(d.disputeId || '');
+                            setDispAmount(d.amount || '');
+                            setDispReason(d.reason || '');
+                            setDispStatus(d.status || 'open');
+                            setDispNotes(d.notes || '');
+                            setDispResolution(d.resolution || '');
+                          }}>
+                          Load
+                        </Button>
                       </div>
                     </div>
-                    {d.disputeId && (
-                      <p className="text-xs font-mono text-muted-foreground">Dispute: {d.disputeId}</p>
-                    )}
+                    {d.disputeId && <p className="text-xs font-mono text-muted-foreground">ID: {d.disputeId}</p>}
                     {d.reason && <p className="text-xs text-muted-foreground">{d.reason}</p>}
-                    {d.notes && (
-                      <p className="text-xs bg-muted/60 rounded p-1.5">{d.notes}</p>
-                    )}
-                    {d.resolution && (
-                      <p className="text-xs text-emerald-600">{d.resolution}</p>
-                    )}
+                    {d.notes && <p className="text-xs bg-muted/60 rounded p-1.5">{d.notes}</p>}
+                    {d.resolution && <p className="text-xs text-emerald-600">{d.resolution}</p>}
                     <p className="text-xs text-muted-foreground">
-                      Logged: {row.createdAt ? format(new Date(row.createdAt), 'dd MMM yyyy HH:mm') : '—'}
-                      {' · '}{row.adminEmail}
+                      {row.createdAt ? format(new Date(row.createdAt), 'dd MMM yyyy HH:mm') : '—'} · {row.adminEmail}
                     </p>
                   </div>
                 );
               })}
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Known active dispute quick reference */}
-      <Card className="border-orange-500/20">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm flex items-center gap-2 text-orange-600">
-            <AlertCircle className="h-4 w-4" />
-            Active Case: Adamya Raj — £110 Dispute
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-xs space-y-1 text-muted-foreground">
-          <p><span className="font-medium text-foreground">Customer:</span> adamyaraj2@gmail.com</p>
-          <p><span className="font-medium text-foreground">Dispute ID:</span> du_1TIKfKK9BSTYpDOqrDunVaVy</p>
-          <p><span className="font-medium text-foreground">Amount:</span> £110</p>
-          <p><span className="font-medium text-foreground">Reason:</span> Product unacceptable</p>
-          <p><span className="font-medium text-foreground">Respond by:</span> 14 May 2026</p>
-          <p className="mt-2">To respond: Log into <a href="https://dashboard.stripe.com/disputes" target="_blank" rel="noopener noreferrer" className="text-primary underline">Stripe Dashboard → Disputes</a> and submit evidence of service delivery.</p>
         </CardContent>
       </Card>
     </motion.div>
