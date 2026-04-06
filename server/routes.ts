@@ -16504,29 +16504,35 @@ Return a JSON object with:
     Amount: ${amount || '[Amount]'}
   </div>
 
-  <p class="letter-subject">Subject: Formal Response to "Product Unacceptable" Chargeback</p>
+  <p class="letter-subject">Subject: Formal Merchant Rebuttal — Chargeback Filed After Issue Was Resolved</p>
 
-  <p>We write in formal response to the above-referenced chargeback filed against our platform, <strong>${planName}</strong>, on the grounds that the product was "unacceptable."</p>
+  <p>We write in formal response to the above-referenced chargeback filed against our platform, <strong>${planName}</strong>. We respectfully but firmly contest this dispute in its entirety, and wish to bring the following critical facts to your attention.</p>
 
-  <p>We respectfully but firmly contest this dispute. The customer was provided with full, unrestricted access to our AI-powered visa guidance platform immediately upon payment. Our records confirm that the customer registered an account, verified their email address, and accessed our service. The platform delivered its documented features as described at the point of sale.</p>
+  <div class="warning-box" style="background:#fff0f0; border-left-color:#c0392b;">
+    <strong>Key Finding:</strong> The customer contacted our support team, the reported issue was identified and fully resolved on the same day (1 April 2025), a resolution confirmation was sent to the customer via email at 4:28 PM — and the chargeback was filed <em>after</em> this resolution. This constitutes a bad-faith dispute under Stripe's guidelines.
+  </div>
 
   <p>We wish to draw your attention to the following key facts:</p>
 
   <div class="info-box">
-    <strong>1. Service was fully delivered.</strong> The customer gained immediate access to our platform's complete feature set, including AI-guided compliance tools, business plan generators, document templates, and expert guidance — all of which are functional digital services.
+    <strong>1. Service was fully delivered.</strong> The customer purchased our Ultimate subscription plan and gained immediate access to our AI-powered visa guidance platform, including over 100 compliance tools, business plan generators, document templates, and expert guidance modules — all functional digital services.
   </div>
 
   <div class="info-box">
-    <strong>2. No prior support contact was made.</strong> Before filing this chargeback, the customer did not contact our support team to raise any concern or request a resolution. This is inconsistent with a good-faith dispute and denies us the opportunity to remedy any issue.
+    <strong>2. A technical activation issue was reported, and fixed the same day.</strong> The customer contacted our support team regarding a plan activation issue (their subscription tier had not fully propagated, though their credits had transferred). Our support team identified the root cause, applied the fix, and sent a resolution confirmation email to <em>${customerEmail || 'the customer'}</em> on <strong>1 April 2025 at 4:28 PM</strong> from <em>support@innovatorfoundervisaassistant.co.uk</em>. The customer's account was fully operational from this point.
   </div>
 
   <div class="info-box">
-    <strong>3. Terms of Service were accepted.</strong> The customer accepted our Terms of Service at the point of registration, which clearly states that access to digital services is non-refundable once the service has been accessed.
+    <strong>3. The chargeback was filed after the issue was resolved.</strong> Despite receiving our support response and having their issue corrected, the customer subsequently filed chargeback reference <em>${disputeId || '[ID]'}</em>. Filing a chargeback after a merchant has already resolved the reported issue is inconsistent with good-faith consumer conduct and contradicts the stated reason of "product unacceptable."
   </div>
 
-  ${notes ? `<div class="warning-box"><strong>Additional Context:</strong><br>${notes}</div>` : ''}
+  <div class="info-box">
+    <strong>4. Terms of Service were accepted.</strong> The customer accepted our Terms of Service at the point of registration, which clearly states that digital services are non-refundable once accessed. The customer accessed and used the platform prior to raising any concern.
+  </div>
 
-  <p>We have attached our supporting evidence and respectfully request that this dispute be ruled in our favour and the funds be returned to our account.</p>
+  ${notes ? `<div class="warning-box"><strong>Additional Admin Notes:</strong><br>${notes}</div>` : ''}
+
+  <p>We have attached our supporting evidence — including the support email thread confirming same-day resolution — and respectfully request that this dispute be ruled in our favour and the funds be returned to our account.</p>
 
   <div class="signature-block">
     <p>Yours sincerely,</p>
