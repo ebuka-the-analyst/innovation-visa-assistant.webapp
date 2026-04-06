@@ -607,20 +607,57 @@ function BacklinkEngine() {
 
                       {/* AI Generated Content */}
                       {t.aiGeneratedContent ? (
-                        <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <p className="text-xs font-medium text-muted-foreground">AI-Generated Submission Content</p>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs font-medium text-muted-foreground">8 Unique Variations — Copy one per account</p>
                             <Button
                               variant="outline" size="sm"
-                              onClick={() => { navigator.clipboard.writeText(t.aiGeneratedContent!); toast({ title: "Copied to clipboard!" }); }}
+                              onClick={() => contentMutation.mutate(t.id)}
+                              disabled={contentMutation.isPending}
                               className="h-6 text-xs px-2"
-                              data-testid={`button-copy-content-${t.id}`}
+                              data-testid={`button-regen-content-${t.id}`}
                             >
-                              <Copy className="w-3 h-3 mr-1" />Copy
+                              <Wand2 className="w-3 h-3 mr-1" />{contentMutation.isPending ? "Generating..." : "Regenerate"}
                             </Button>
                           </div>
-                          <pre className="text-xs bg-background border rounded p-3 whitespace-pre-wrap font-mono leading-relaxed max-h-48 overflow-y-auto">{t.aiGeneratedContent}</pre>
-                          <p className="text-xs text-muted-foreground mt-1">Generated {t.contentGeneratedAt ? new Date(t.contentGeneratedAt).toLocaleString() : ""}</p>
+                          {(() => {
+                            const raw = t.aiGeneratedContent!;
+                            const parts = raw.split(/===VARIATION \d+===/g).map(s => s.replace(/===END===/g, "").trim()).filter(Boolean);
+                            if (parts.length < 2) {
+                              return (
+                                <div>
+                                  <div className="flex justify-end mb-1">
+                                    <Button variant="outline" size="sm" className="h-6 text-xs px-2"
+                                      onClick={() => { navigator.clipboard.writeText(raw); toast({ title: "Copied!" }); }}>
+                                      <Copy className="w-3 h-3 mr-1" />Copy
+                                    </Button>
+                                  </div>
+                                  <pre className="text-xs bg-background border rounded p-3 whitespace-pre-wrap font-mono leading-relaxed max-h-48 overflow-y-auto">{raw}</pre>
+                                </div>
+                              );
+                            }
+                            return (
+                              <div className="space-y-2">
+                                {parts.map((variation, idx) => (
+                                  <div key={idx} className="border rounded bg-background">
+                                    <div className="flex items-center justify-between px-3 py-1.5 border-b bg-muted/40">
+                                      <span className="text-xs font-semibold text-muted-foreground">Variation {idx + 1} — Account {idx + 1}</span>
+                                      <Button
+                                        variant="outline" size="sm"
+                                        className="h-6 text-xs px-2"
+                                        onClick={() => { navigator.clipboard.writeText(variation); toast({ title: `Variation ${idx + 1} copied!` }); }}
+                                        data-testid={`button-copy-variation-${t.id}-${idx}`}
+                                      >
+                                        <Copy className="w-3 h-3 mr-1" />Copy
+                                      </Button>
+                                    </div>
+                                    <pre className="text-xs p-3 whitespace-pre-wrap font-mono leading-relaxed max-h-36 overflow-y-auto">{variation}</pre>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })()}
+                          <p className="text-xs text-muted-foreground">Generated {t.contentGeneratedAt ? new Date(t.contentGeneratedAt).toLocaleString() : ""}</p>
                         </div>
                       ) : (
                         <Button
@@ -630,7 +667,7 @@ function BacklinkEngine() {
                           data-testid={`button-gen-content-expanded-${t.id}`}
                         >
                           <Wand2 className="w-3.5 h-3.5 mr-1.5" />
-                          {contentMutation.isPending ? "Generating..." : "Generate Exact Submission Content"}
+                          {contentMutation.isPending ? "Generating 8 variations..." : "Generate 8 Unique Variations"}
                         </Button>
                       )}
 

@@ -17371,25 +17371,49 @@ Return ONLY the JSON array. No markdown. No explanation.`;
       const [target] = await db.select().from(backlinkTargets).where(eq(backlinkTargets.id, req.params.id)).limit(1);
       if (!target) return res.status(404).json({ error: "Target not found" });
 
-      const prompt = `You are a PhD-level SEO and outreach expert. Generate the exact submission content for a backlink opportunity.
+      const prompt = `You are a PhD-level SEO and outreach expert. Generate EXACTLY 8 uniquely worded submission content variations for a backlink opportunity. These will be posted from 8 different accounts so every variation MUST be completely different in structure, tone, opening, and phrasing — but all must be genuine, helpful, and natural.
 
 Platform: ${target.name} (${target.platform || target.category})
 Website URL: ${target.url}
 Submission URL: ${target.submissionUrl || target.url}
 Strategy: ${target.strategy || "Create a listing or post a helpful contribution"}
-Our site: UK Innovator Founder Visa Assistant (https://innovatorfoundervisaassistant.co.uk)
-Our anchor text to use: "${target.anchorText || "UK Innovator Founder Visa Assistant"}"
-Our description: The UK's leading AI platform for Innovator Founder Visa applications, with 109 expert tools covering compliance, business plan generation, endorsement preparation, and financial modeling.
+Our site: UK Innovator Founder Visa Assistant
+Our URL (MUST be included as a clickable link in every variation): https://innovatorfoundervisaassistant.co.uk
+Our anchor text: "${target.anchorText || "Innovator Founder Visa Assistant"}"
+Our description: The UK's leading AI platform for Innovator Founder Visa applications — 109 expert tools covering compliance, business plan generation, endorsement preparation, and financial modeling.
 
-Generate EXACTLY what the user should copy and paste to submit on this platform. Be specific and tailored to the platform type. Include:
-1. If it's a directory/listing: full company profile text (name, description, tags, category, website)
-2. If it's a forum/community: the exact post or reply text (helpful, not spammy, mentions our tool naturally)
-3. If it's a press outlet: a short, professional pitch email
-4. If it's LinkedIn: the exact article title and first 3 paragraphs
-5. If it's a podcast: a short guest pitch message
+RULES:
+- Every variation MUST include the full URL https://innovatorfoundervisaassistant.co.uk naturally within the text (not just at the end)
+- Each variation must have a completely different opening sentence, structure, and tone
+- Vary between: personal story, question opener, advice-first, statistic-led, problem-solution, recommendation, resource-sharing, experience-sharing styles
+- Keep each variation under 280 words
+- Never sound spammy — always be helpful and genuine
+- Never mention "AI-generated"
+- Platform type rules:
+  * forum/community → helpful post or reply mentioning the tool naturally
+  * directory/listing → full profile description text
+  * press outlet → pitch email (include EMAIL SUBJECT: line)
+  * LinkedIn → article excerpt with title
+  * podcast → guest pitch message
 
-Format as plain text the user can copy. Start with a clear label like "COMPANY DESCRIPTION:" or "FORUM POST:" or "EMAIL SUBJECT:" etc.
-Be persuasive, professional, and natural. Never mention this is AI-generated. Keep it under 400 words.`;
+Format your response EXACTLY like this with no extra text before or after:
+===VARIATION 1===
+[content here]
+===VARIATION 2===
+[content here]
+===VARIATION 3===
+[content here]
+===VARIATION 4===
+[content here]
+===VARIATION 5===
+[content here]
+===VARIATION 6===
+[content here]
+===VARIATION 7===
+[content here]
+===VARIATION 8===
+[content here]
+===END===`;
 
       const aiContent = await geminiAI.models.generateContent({
         model: "gemini-2.5-flash",
