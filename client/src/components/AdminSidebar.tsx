@@ -117,6 +117,8 @@ import {
   MessageSquare,
   CheckSquare,
   Star,
+  Headphones,
+  AlertCircle,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
@@ -203,6 +205,13 @@ const menuGroups = [
       { id: "logs-errors", label: "Error Log", icon: AlertTriangle, badge: "errors" },
       { id: "logs-audit", label: "Audit Trail", icon: History, badge: null },
       { id: "logs-security", label: "Security Events", icon: Shield, badge: null },
+    ]
+  },
+  {
+    label: "Customer Support",
+    items: [
+      { id: "support-lookup", label: "User Lookup & Fix", icon: Headphones, badge: null },
+      { id: "support-disputes", label: "Dispute Tracker", icon: AlertCircle, badge: null },
     ]
   },
   {

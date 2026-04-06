@@ -145,7 +145,9 @@ import {
   Tablet,
   Monitor,
   Wrench,
-  Eye
+  Headphones,
+  Scale,
+  FilePlus,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Link } from "wouter";
@@ -597,6 +599,541 @@ const TrendIndicator = memo(({ trend }: { trend: TrendData }) => {
 });
 
 TrendIndicator.displayName = 'TrendIndicator';
+
+// ===== CUSTOMER SUPPORT PANEL =====
+
+function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
+  const { toast } = useToast();
+  const [searchEmail, setSearchEmail] = useState('');
+  const [queryEmail, setQueryEmail] = useState('');
+  const [tierOverride, setTierOverride] = useState('');
+  const [creditsToAdd, setCreditsToAdd] = useState('');
+  const [overrideReason, setOverrideReason] = useState('');
+
+  // Dispute form state
+  const [dispCustomerEmail, setDispCustomerEmail] = useState('');
+  const [dispDisputeId, setDispDisputeId] = useState('');
+  const [dispAmount, setDispAmount] = useState('');
+  const [dispReason, setDispReason] = useState('');
+  const [dispStatus, setDispStatus] = useState('open');
+  const [dispNotes, setDispNotes] = useState('');
+  const [dispResolution, setDispResolution] = useState('');
+
+  const { data: lookupData, isLoading: lookupLoading, error: lookupError } = useQuery<any>({
+    queryKey: ['/api/admin/support/lookup', queryEmail],
+    enabled: !!queryEmail,
+  });
+
+  const { data: disputesData, isLoading: disputesLoading, refetch: refetchDisputes } = useQuery<any[]>({
+    queryKey: ['/api/admin/support/disputes'],
+    enabled: activeSection === 'support-disputes',
+  });
+
+  const tierMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('POST', `/api/admin/users/${data.userId}/tier-override`, data),
+    onSuccess: () => {
+      toast({ title: 'Tier updated', description: 'Account has been updated successfully.' });
+      setTierOverride('');
+      setOverrideReason('');
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/support/lookup', queryEmail] });
+    },
+    onError: (e: any) => toast({ title: 'Error', description: e.message, variant: 'destructive' }),
+  });
+
+  const creditsMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('POST', `/api/admin/users/${data.userId}/credits`, data),
+    onSuccess: () => {
+      toast({ title: 'Credits added', description: 'Credits have been added to the account.' });
+      setCreditsToAdd('');
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/support/lookup', queryEmail] });
+    },
+    onError: (e: any) => toast({ title: 'Error', description: e.message, variant: 'destructive' }),
+  });
+
+  const disputeMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('POST', '/api/admin/support/disputes', data),
+    onSuccess: () => {
+      toast({ title: 'Dispute saved', description: 'Dispute has been logged for tracking.' });
+      setDispDisputeId('');
+      setDispAmount('');
+      setDispReason('');
+      setDispNotes('');
+      setDispResolution('');
+      refetchDisputes();
+    },
+    onError: (e: any) => toast({ title: 'Error', description: e.message, variant: 'destructive' }),
+  });
+
+  const tierColors: Record<string, string> = {
+    free: 'bg-muted text-muted-foreground',
+    basic: 'bg-blue-500/10 text-blue-600',
+    premium: 'bg-purple-500/10 text-purple-600',
+    enterprise: 'bg-amber-500/10 text-amber-600',
+    ultimate: 'bg-emerald-500/10 text-emerald-600',
+  };
+
+  // ---- USER LOOKUP ----
+  if (activeSection === 'support-lookup') {
+    return (
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+        {/* Search Bar */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Headphones className="h-4 w-4 text-primary" />
+              Customer User Lookup
+            </CardTitle>
+            <CardDescription>Search by email to find a user, view their Stripe payment history, and apply quick fixes.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter email address (partial or full)..."
+                value={searchEmail}
+                onChange={(e) => setSearchEmail(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') setQueryEmail(searchEmail); }}
+                data-testid="input-support-email"
+                className="flex-1"
+              />
+              <Button onClick={() => setQueryEmail(searchEmail)} disabled={!searchEmail} data-testid="button-support-search">
+                <Search className="h-4 w-4 mr-2" />
+                Search
+              </Button>
+            </div>
+
+            {/* Quick preset — Adamya Raj dispute */}
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Quick:</span>
+              <Button size="sm" variant="outline" className="text-xs h-7"
+                onClick={() => { setSearchEmail('adamyaraj2@gmail.com'); setQueryEmail('adamyaraj2@gmail.com'); }}>
+                Adamya Raj (£110 dispute)
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {lookupLoading && (
+          <div className="space-y-2">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-48 w-full" />
+          </div>
+        )}
+
+        {lookupError && (
+          <Card className="border-destructive/30">
+            <CardContent className="pt-4">
+              <p className="text-sm text-destructive flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" /> Lookup failed. Please try again.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {lookupData && lookupData.totalFound === 0 && queryEmail && (
+          <Card>
+            <CardContent className="pt-6 text-center text-muted-foreground">
+              <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-40" />
+              <p className="font-medium">No user found</p>
+              <p className="text-sm mt-1">No account matches <span className="font-mono text-foreground">{queryEmail}</span> in this environment.</p>
+              <p className="text-xs mt-2 opacity-70">Note: Production data is on Railway. This is the dev database.</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {lookupData?.results?.map((u: any) => (
+          <Card key={u.id} className="overflow-hidden">
+            <CardHeader className="pb-3">
+              <div className="flex flex-wrap items-start gap-3 justify-between">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className="text-sm font-bold">
+                      {(u.firstName?.[0] || u.email?.[0] || '?').toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-semibold">{u.firstName} {u.lastName}</p>
+                    <p className="text-sm text-muted-foreground">{u.email}</p>
+                    <p className="text-xs text-muted-foreground">ID: {u.id}</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge className={tierColors[u.subscriptionTier] || 'bg-muted text-muted-foreground'}>
+                    {(u.subscriptionTier || 'free').toUpperCase()}
+                  </Badge>
+                  {u.isEmailVerified ? (
+                    <Badge className="bg-emerald-500/10 text-emerald-600">Verified</Badge>
+                  ) : (
+                    <Badge className="bg-red-500/10 text-red-600">Unverified</Badge>
+                  )}
+                  <Badge variant="outline">{u.planCredits ?? 0} credits</Badge>
+                </div>
+              </div>
+              {u.stripeCustomerId && (
+                <p className="text-xs text-muted-foreground mt-1 font-mono">Stripe: {u.stripeCustomerId}</p>
+              )}
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+              <Tabs defaultValue="payments">
+                <TabsList className="w-full">
+                  <TabsTrigger value="payments" className="flex-1">
+                    <CreditCard className="h-3.5 w-3.5 mr-1" />Stripe Payments
+                  </TabsTrigger>
+                  <TabsTrigger value="plans" className="flex-1">
+                    <FileText className="h-3.5 w-3.5 mr-1" />Business Plans
+                  </TabsTrigger>
+                  <TabsTrigger value="actions" className="flex-1">
+                    <Wrench className="h-3.5 w-3.5 mr-1" />Quick Fix
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Stripe Payments Tab */}
+                <TabsContent value="payments" className="mt-3">
+                  {!u.stripeCustomerId && u.stripePayments?.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No Stripe customer found for this email.</p>
+                  ) : u.stripePayments?.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No payment records found in Stripe.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {u.stripePayments?.map((p: any, i: number) => (
+                        p.error ? (
+                          <div key={i} className="text-xs text-destructive p-2 rounded-md bg-destructive/5">
+                            Stripe error: {p.error}
+                          </div>
+                        ) : (
+                          <div key={p.id} className="flex flex-wrap items-center gap-2 p-2.5 rounded-md bg-muted/40 text-sm">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-mono text-xs text-muted-foreground truncate">{p.id}</p>
+                              <p className="font-medium">
+                                {(p.currency || 'gbp').toUpperCase()} {((p.amount || 0) / 100).toFixed(2)}
+                              </p>
+                              {p.description && <p className="text-xs text-muted-foreground truncate">{p.description}</p>}
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              <Badge className={
+                                p.status === 'succeeded' ? 'bg-emerald-500/10 text-emerald-600' :
+                                p.status === 'failed' ? 'bg-red-500/10 text-red-600' :
+                                'bg-muted text-muted-foreground'
+                              }>
+                                {p.status}
+                              </Badge>
+                              {p.disputeId && (
+                                <Badge className="bg-orange-500/10 text-orange-600">
+                                  <AlertCircle className="h-3 w-3 mr-1" />Disputed
+                                </Badge>
+                              )}
+                              {p.refunded && <Badge className="bg-blue-500/10 text-blue-600">Refunded</Badge>}
+                              <p className="text-xs text-muted-foreground">{p.date ? format(new Date(p.date), 'dd MMM yyyy') : ''}</p>
+                            </div>
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+
+                {/* Business Plans Tab */}
+                <TabsContent value="plans" className="mt-3">
+                  {u.businessPlans?.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No business plans found.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {u.businessPlans?.map((plan: any) => (
+                        <div key={plan.id} className="flex items-center gap-2 p-2.5 rounded-md bg-muted/40 text-sm">
+                          <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-mono text-xs text-muted-foreground truncate">ID: {plan.id}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {plan.createdAt ? format(new Date(plan.createdAt), 'dd MMM yyyy') : ''}
+                            </p>
+                          </div>
+                          <Badge variant="outline" className="text-xs">{plan.status || 'draft'}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+
+                {/* Quick Fix Tab */}
+                <TabsContent value="actions" className="mt-3 space-y-4">
+                  {/* Tier Override */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium flex items-center gap-1.5">
+                      <Crown className="h-3.5 w-3.5 text-amber-500" />
+                      Override Subscription Tier
+                    </Label>
+                    <div className="flex flex-wrap gap-2">
+                      <Select value={tierOverride} onValueChange={setTierOverride}>
+                        <SelectTrigger className="flex-1 min-w-[140px]" data-testid="select-tier-override">
+                          <SelectValue placeholder="Select new tier..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="free">Free</SelectItem>
+                          <SelectItem value="basic">Basic</SelectItem>
+                          <SelectItem value="premium">Premium</SelectItem>
+                          <SelectItem value="enterprise">Enterprise</SelectItem>
+                          <SelectItem value="ultimate">Ultimate</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        placeholder="Reason (e.g. dispute resolution)..."
+                        value={overrideReason}
+                        onChange={(e) => setOverrideReason(e.target.value)}
+                        className="flex-1 min-w-[200px]"
+                        data-testid="input-override-reason"
+                      />
+                    </div>
+                    <Button
+                      size="sm"
+                      disabled={!tierOverride || tierMutation.isPending}
+                      onClick={() => tierMutation.mutate({ userId: u.id, tier: tierOverride, reason: overrideReason || 'Admin dispute resolution' })}
+                      data-testid="button-apply-tier"
+                    >
+                      {tierMutation.isPending ? <RefreshCw className="h-3.5 w-3.5 mr-1 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5 mr-1" />}
+                      Apply Tier Override
+                    </Button>
+                  </div>
+
+                  <Separator />
+
+                  {/* Add Credits */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium flex items-center gap-1.5">
+                      <Zap className="h-3.5 w-3.5 text-blue-500" />
+                      Add Plan Credits
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="number"
+                        placeholder="Number of credits to add..."
+                        value={creditsToAdd}
+                        onChange={(e) => setCreditsToAdd(e.target.value)}
+                        className="flex-1"
+                        data-testid="input-credits-amount"
+                      />
+                      <Button
+                        size="sm"
+                        disabled={!creditsToAdd || creditsMutation.isPending}
+                        onClick={() => creditsMutation.mutate({ userId: u.id, amount: parseInt(creditsToAdd), reason: overrideReason || 'Admin dispute resolution' })}
+                        data-testid="button-add-credits"
+                      >
+                        {creditsMutation.isPending ? <RefreshCw className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Plus className="h-3.5 w-3.5 mr-1" />}
+                        Add Credits
+                      </Button>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Pre-fill dispute form */}
+                  <div>
+                    <Button variant="outline" size="sm"
+                      onClick={() => {
+                        setDispCustomerEmail(u.email);
+                        // scroll up helper if needed
+                      }}
+                    >
+                      <Scale className="h-3.5 w-3.5 mr-1" />
+                      Log Dispute for This User
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-1">Go to "Dispute Tracker" tab after clicking to fill in details.</p>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        ))}
+      </motion.div>
+    );
+  }
+
+  // ---- DISPUTE TRACKER ----
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+      {/* Log New Dispute */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Scale className="h-4 w-4 text-primary" />
+            Log / Track a Dispute
+          </CardTitle>
+          <CardDescription>Record Stripe chargebacks and customer disputes for admin tracking. Data stored in audit trail.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Customer Email</Label>
+              <Input
+                placeholder="customer@example.com"
+                value={dispCustomerEmail}
+                onChange={(e) => setDispCustomerEmail(e.target.value)}
+                data-testid="input-dispute-email"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Stripe Dispute ID</Label>
+              <Input
+                placeholder="du_xxxxxxxxxxxxxxxx"
+                value={dispDisputeId}
+                onChange={(e) => setDispDisputeId(e.target.value)}
+                data-testid="input-dispute-id"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Amount (e.g. £110)</Label>
+              <Input
+                placeholder="£110"
+                value={dispAmount}
+                onChange={(e) => setDispAmount(e.target.value)}
+                data-testid="input-dispute-amount"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Status</Label>
+              <Select value={dispStatus} onValueChange={setDispStatus}>
+                <SelectTrigger data-testid="select-dispute-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="under_review">Under Review</SelectItem>
+                  <SelectItem value="won">Won (in our favour)</SelectItem>
+                  <SelectItem value="lost">Lost</SelectItem>
+                  <SelectItem value="resolved">Resolved</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Reason / Description</Label>
+            <Input
+              placeholder="e.g. Product unacceptable — customer claims no value received"
+              value={dispReason}
+              onChange={(e) => setDispReason(e.target.value)}
+              data-testid="input-dispute-reason"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Admin Notes</Label>
+            <Textarea
+              placeholder="Internal notes for this dispute..."
+              value={dispNotes}
+              onChange={(e) => setDispNotes(e.target.value)}
+              rows={3}
+              data-testid="textarea-dispute-notes"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Resolution / Response</Label>
+            <Textarea
+              placeholder="What was communicated to customer or Stripe? Evidence submitted?"
+              value={dispResolution}
+              onChange={(e) => setDispResolution(e.target.value)}
+              rows={2}
+              data-testid="textarea-dispute-resolution"
+            />
+          </div>
+          <Button
+            disabled={!dispCustomerEmail || disputeMutation.isPending}
+            onClick={() => disputeMutation.mutate({
+              customerEmail: dispCustomerEmail,
+              disputeId: dispDisputeId,
+              amount: dispAmount,
+              reason: dispReason,
+              status: dispStatus,
+              notes: dispNotes,
+              resolution: dispResolution,
+            })}
+            data-testid="button-save-dispute"
+          >
+            {disputeMutation.isPending ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <FilePlus className="h-4 w-4 mr-2" />}
+            Save Dispute Record
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Dispute List */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center justify-between gap-2 flex-wrap">
+            <span>Tracked Disputes</span>
+            <Button size="sm" variant="outline" onClick={() => refetchDisputes()}>
+              <RefreshCw className="h-3.5 w-3.5 mr-1" />Refresh
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {disputesLoading ? (
+            <div className="space-y-2">
+              {[1,2,3].map(i => <Skeleton key={i} className="h-16 w-full" />)}
+            </div>
+          ) : !disputesData || disputesData.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No disputes logged yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {disputesData.map((row: any) => {
+                const d = row.newValue || {};
+                return (
+                  <div key={row.id} className="p-3 rounded-md bg-muted/40 space-y-1.5 text-sm">
+                    <div className="flex flex-wrap items-center gap-2 justify-between">
+                      <div className="flex items-center gap-2 font-medium">
+                        <Scale className="h-3.5 w-3.5 text-muted-foreground" />
+                        {row.targetEmail || d.customerEmail || '—'}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        {d.amount && <Badge variant="outline">{d.amount}</Badge>}
+                        <Badge className={
+                          d.status === 'won' ? 'bg-emerald-500/10 text-emerald-600' :
+                          d.status === 'lost' ? 'bg-red-500/10 text-red-600' :
+                          d.status === 'resolved' ? 'bg-blue-500/10 text-blue-600' :
+                          'bg-orange-500/10 text-orange-600'
+                        }>
+                          {d.status || 'open'}
+                        </Badge>
+                      </div>
+                    </div>
+                    {d.disputeId && (
+                      <p className="text-xs font-mono text-muted-foreground">Dispute: {d.disputeId}</p>
+                    )}
+                    {d.reason && <p className="text-xs text-muted-foreground">{d.reason}</p>}
+                    {d.notes && (
+                      <p className="text-xs bg-muted/60 rounded p-1.5">{d.notes}</p>
+                    )}
+                    {d.resolution && (
+                      <p className="text-xs text-emerald-600">{d.resolution}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Logged: {row.createdAt ? format(new Date(row.createdAt), 'dd MMM yyyy HH:mm') : '—'}
+                      {' · '}{row.adminEmail}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Known active dispute quick reference */}
+      <Card className="border-orange-500/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2 text-orange-600">
+            <AlertCircle className="h-4 w-4" />
+            Active Case: Adamya Raj — £110 Dispute
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-xs space-y-1 text-muted-foreground">
+          <p><span className="font-medium text-foreground">Customer:</span> adamyaraj2@gmail.com</p>
+          <p><span className="font-medium text-foreground">Dispute ID:</span> du_1TIKfKK9BSTYpDOqrDunVaVy</p>
+          <p><span className="font-medium text-foreground">Amount:</span> £110</p>
+          <p><span className="font-medium text-foreground">Reason:</span> Product unacceptable</p>
+          <p><span className="font-medium text-foreground">Respond by:</span> 14 May 2026</p>
+          <p className="mt-2">To respond: Log into <a href="https://dashboard.stripe.com/disputes" target="_blank" rel="noopener noreferrer" className="text-primary underline">Stripe Dashboard → Disputes</a> and submit evidence of service delivery.</p>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
 
 // ===== MAIN COMPONENT =====
 
@@ -2453,6 +2990,8 @@ export default function AdminDashboard() {
       'logs-errors': 'Error Log',
       'logs-audit': 'Audit Trail',
       'logs-security': 'Security Events',
+      'support-lookup': 'Customer Support — User Lookup',
+      'support-disputes': 'Customer Support — Dispute Tracker',
       'comms-emails': 'Email Analytics',
       'comms-notifications': 'Notification Center',
       'feedback-overview': 'Feedback Analytics',
@@ -8779,6 +9318,11 @@ export default function AdminDashboard() {
                       )}
                     </motion.div>
                   </div>
+                )}
+
+                {/* Customer Support Section */}
+                {activeSection.startsWith('support') && (
+                  <CustomerSupportPanel activeSection={activeSection} />
                 )}
 
                 {/* Communications Section - 2 Unique Advanced Pages */}

@@ -1,0 +1,137 @@
+REVOLUT LTD has initiated a £110 GBP dispute
+Stripe<notifications@stripe.com>
+​You​
+
+
+ 
+ 
+ 
+Stripe	
+ 
+ 
+ 
+ 
+ 
+A £110 GBP payment for IFV-Assistant is being disputed by REVOLUT LTD because your customer says the product was defective, damaged or not as described.	
+ 
+ 
+ 
+ 
+If you don't agree with this dispute, you can submit evidence to counter it. A dispute countered fee applies to counter this dispute, in addition to the dispute received fee. If you win the dispute, the dispute countered fee is returned to you.	
+ 
+ 
+ 
+ 
+First time seeing a disputed payment? A payment is disputed when a customer contacts their bank to question a payment. The bank initiates this process by pulling the amount of the chargeback from Stripe, so this amount and a dispute fee will be deducted from your Stripe balance.	
+ 
+ 
+ 
+ 
+ 
+ 
+DISPUTE INFORMATION
+
+ 
+Dispute ID
+
+du_1TIKfKK9BSTYpDOqrDunVaVy
+
+Customer
+
+adamya raj
+
+Reason
+
+Product unacceptable
+
+Last day to submit evidence
+
+May 14, 2026
+
+ 
+View in Dashboard
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+How could funds be withdrawn without my consent?
+Accepting cards as a form of payment includes participation in that payment method's system of dispute resolution. Each card brand has a slightly different system, but the ability of card issuers to withdraw funds from a business that their customer has made a payment to is common to all of them. These systems also include rules that define how you can challenge this withdrawal.	
+ 
+ 
+ 
+ 
+ 
+Can I just refund the payment to resolve the dispute?
+The bank has already pulled the funds from Stripe, so if you agree with the decision to refund, you should accept the dispute from your Dashboard.	
+ 
+ 
+ 
+ 
+ 
+What is the dispute fee?
+Stripe deducts a dispute fee from your account balance when a customer initiates a dispute to process the dispute.	
+ 
+ 
+ 
+ 
+ 
+For more information, visit our full disputes FAQ.	
+ 
+ 
+ 
+ 
+Additional resources:	
+ 
+ 
+ 
+ 
+Review the life cycle of a dispute	
+ 
+ 
+ 
+ 
+Read about disputes and why they happen	
+ 
+ 
+ 
+ 
+Read about preventing disputes	
+ 
+ 
+ 
+ 
+Learn about how to respond to disputes	
+ 
+ 
+ 
+ 
+We're sorry you're facing this dispute, but we're here to help every step of the way. You can find answers to common dispute questions on our support site, and if you have further questions you can contact us for help.	
+ 
+ 
+ 
+ 
+Thank you,
+The Stripe team	
+ 
+ 
+ 
+ 
+ 
+This email relates to your IFV-Assistant Stripe account.
+Account ID: acct_1SdAGzK9BSTYpDOq
+Need to refer to this message? Use this ID: em_cleas1u64vgnvvpnwatjjmf1c73oed	
+ 
+ 
+ 
+Stripe Payments UK Limited is a company registered in England and Wales. Registered number: 08480771. Registered office: 9th Floor, 107 Cheapside, London, EC2V 6DN	
+ 
+ 
+ 
+You are currently subscribed to "Payment disputes or resolutions" emails. To unsubscribe, manage your communication preferences.	
+ 
+ 
+ 
+ 

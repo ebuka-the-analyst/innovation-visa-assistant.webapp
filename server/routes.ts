@@ -16369,6 +16369,137 @@ Return a JSON object with:
     }
   });
 
+  // ============================================================================
+  // CUSTOMER SUPPORT — User lookup, tier fix, dispute tracking
+  // ============================================================================
+
+  // Search user by email + return Stripe payment history + business plans
+  app.get("/api/admin/support/lookup", requireAdmin, async (req, res) => {
+    const { email } = req.query as { email: string };
+    if (!email) return res.status(400).json({ error: "email is required" });
+
+    try {
+      // 1. Find user in DB
+      const allUsers = await storage.getAllUsers();
+      const found = allUsers.filter(u =>
+        u.email?.toLowerCase().includes(email.toLowerCase())
+      );
+
+      const results = await Promise.all(found.map(async (u) => {
+        // 2. Get their business plans
+        const plans = await db.select({
+          id: businessPlans.id,
+          tier: businessPlans.tier,
+          status: businessPlans.status,
+          createdAt: businessPlans.createdAt,
+          updatedAt: businessPlans.updatedAt,
+        }).from(businessPlans)
+          .where(eq(businessPlans.userId, u.id))
+          .orderBy(desc(businessPlans.createdAt))
+          .limit(5);
+
+        // 3. Stripe payment info (if they have a customer ID)
+        let stripePayments: any[] = [];
+        let stripeCustomer: any = null;
+        if (u.stripeCustomerId) {
+          try {
+            const stripe = await getUncachableStripeClient();
+            stripeCustomer = await stripe.customers.retrieve(u.stripeCustomerId);
+            const charges = await stripe.charges.list({ customer: u.stripeCustomerId, limit: 10 });
+            stripePayments = charges.data.map(c => ({
+              id: c.id,
+              amount: c.amount,
+              currency: c.currency,
+              status: c.status,
+              description: c.description,
+              date: new Date(c.created * 1000).toISOString(),
+              refunded: c.refunded,
+              disputeId: c.dispute || null,
+            }));
+          } catch (e: any) {
+            stripePayments = [{ error: e.message }];
+          }
+        } else {
+          // Try to find by email in Stripe
+          try {
+            const stripe = await getUncachableStripeClient();
+            const customers = await stripe.customers.list({ email: u.email!, limit: 3 });
+            if (customers.data.length > 0) {
+              stripeCustomer = customers.data[0];
+              const charges = await stripe.charges.list({ customer: stripeCustomer.id, limit: 10 });
+              stripePayments = charges.data.map(c => ({
+                id: c.id,
+                amount: c.amount,
+                currency: c.currency,
+                status: c.status,
+                description: c.description,
+                date: new Date(c.created * 1000).toISOString(),
+                refunded: c.refunded,
+                disputeId: c.dispute || null,
+              }));
+            }
+          } catch (_e) {}
+        }
+
+        return {
+          id: u.id,
+          email: u.email,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          subscriptionTier: u.subscriptionTier || 'free',
+          subscriptionStatus: u.subscriptionStatus,
+          planCredits: u.planCredits,
+          stripeCustomerId: u.stripeCustomerId || stripeCustomer?.id,
+          isEmailVerified: u.isEmailVerified,
+          createdAt: u.createdAt,
+          businessPlans: plans,
+          stripePayments,
+        };
+      }));
+
+      res.json({ results, totalFound: results.length });
+    } catch (error: any) {
+      console.error("Support lookup error:", error);
+      res.status(500).json({ error: "Lookup failed: " + error.message });
+    }
+  });
+
+  // Save a dispute note for tracking
+  app.post("/api/admin/support/disputes", requireAdmin, async (req, res) => {
+    const { customerEmail, disputeId, amount, reason, status, notes, resolution } = req.body;
+    try {
+      const admin = req.user as any;
+      await db.insert(adminAuditLogs).values({
+        adminId: admin.id,
+        adminEmail: admin.email,
+        action: 'dispute_tracked',
+        actionCategory: 'support',
+        targetType: 'dispute',
+        targetId: disputeId || 'manual',
+        targetEmail: customerEmail,
+        newValue: { disputeId, amount, reason, status, notes, resolution } as any,
+        ipAddress: req.ip || 'unknown',
+        userAgent: req.headers['user-agent'] || '',
+      });
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Fetch tracked disputes from audit log
+  app.get("/api/admin/support/disputes", requireAdmin, async (req, res) => {
+    try {
+      const rows = await db.select().from(adminAuditLogs)
+        .where(eq(adminAuditLogs.action, 'dispute_tracked'))
+        .orderBy(desc(adminAuditLogs.createdAt))
+        .limit(50);
+      res.json(rows);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
