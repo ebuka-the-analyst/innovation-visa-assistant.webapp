@@ -1,0 +1,205 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+1
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+Limited Access
+
+Deploys have been paused temporarily
+
+
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+b78523b6
+Active
+
+Apr 6, 2026, 3:58 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[2026-04-06T15:39:57.237Z] POST /api/activity/page-view
+3:39:57 PM [express] POST /api/activity/page-view 200 in 45ms :: {"pageViewId":"0ccc165e-6677-4c5d-a…
+[2026-04-06T15:39:58.822Z] POST /api/activity/session/end
+3:39:58 PM [express] POST /api/activity/session/end 200 in 78ms :: {"success":true}
+[2026-04-06T15:40:08.326Z] POST /api/activity/session
+3:40:08 PM [express] POST /api/activity/session 200 in 61ms :: {"sessionId":"05b20913-79e2-4b0e-bc32…
+[2026-04-06T15:40:08.764Z] POST /api/activity/page-view
+3:40:08 PM [express] POST /api/activity/page-view 200 in 78ms :: {"pageViewId":"a7a86f00-f557-4651-b…
+3:40:10 PM [express] POST /api/activity/session/end 200 in 42ms :: {"success":true}
+[2026-04-06T15:40:10.952Z] GET /
+[2026-04-06T15:40:11.197Z] GET /attached_assets/official_logo.webp
+[SEO] Injecting meta for route: /
+[2026-04-06T15:40:11.510Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+3:40:11 PM [express] GET /api/auth/user 200 in 48ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-06T15:40:11.578Z] GET /assets/home-BPMVmfDK.js
+[2026-04-06T15:40:11.768Z] POST /api/activity/session
+[2026-04-06T15:40:11.770Z] POST /api/activity/session
+[2026-04-06T15:40:10.800Z] POST /api/activity/session/end
+[2026-04-06T15:40:11.799Z] GET /assets/sage_compliance_agent_avatar-AEwSnNGT.js
+[2026-04-06T15:40:11.810Z] GET /assets/accordion-DhO6dn4-.js
+3:40:11 PM [express] POST /api/activity/session 200 in 53ms :: {"sessionId":"aa6e89fb-351e-4841-b558…
+3:40:12 PM [express] POST /api/activity/session 200 in 291ms :: {"sessionId":"24c15724-f25b-4647-a4a…
+[2026-04-06T15:40:12.185Z] GET /assets/unnamed_(1)_1769196836272-C3D3CUA9.js
+[2026-04-06T15:40:12.197Z] POST /api/activity/page-view
+3:40:12 PM [express] POST /api/activity/page-view 200 in 20ms :: {"pageViewId":"e006af2e-ac4e-4cd7-8…
+[2026-04-06T15:40:12.424Z] GET /assets/worldIcon_1769203295221-DzvxfXYr.png
+[2026-04-06T15:40:12.469Z] GET /assets/sterling_financial_agent_avatar-uIkmFaUT.webp
+[2026-04-06T15:40:12.471Z] GET /assets/nova_innovation_agent_avatar-CUskZqSQ.webp
+[2026-04-06T15:40:12.984Z] GET /api/news
+[2026-04-06T15:40:13.026Z] GET /assets/atlas_growth_agent_avatar-BaRFd8Y2.webp
+3:40:13 PM [express] GET /api/news 200 in 68ms :: [{"id":"official-1","title":"Students can now swit…
+[2026-04-06T15:40:13.398Z] GET /assets/sage_compliance_agent_avatar-BmpLGD_4.webp
+[2026-04-06T15:40:14.671Z] GET /admin
+[SEO] Injecting meta for route: /
+[2026-04-06T15:40:14.926Z] GET /attached_assets/official_logo.webp
+[SEO] Injecting meta for route: /
+[2026-04-06T15:40:15.167Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+3:40:15 PM [express] GET /api/auth/user 200 in 57ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-06T15:40:15.459Z] GET /assets/table-D0qgw4T4.js
+[2026-04-06T15:40:15.463Z] GET /assets/admin-dashboard-B7MJehk3.js
+[2026-04-06T15:40:15.467Z] GET /assets/alert-dialog-BFYQMeQ-.js
+[2026-04-06T15:40:15.473Z] GET /assets/scroll-area-DRRPehuE.js
+[2026-04-06T15:40:15.490Z] POST /api/activity/session
+[2026-04-06T15:40:15.642Z] GET /assets/formatDistance-SfVy8A0_.js
+[2026-04-06T15:40:15.495Z] POST /api/activity/session
+[2026-04-06T15:40:15.655Z] GET /assets/Area-CHVs8sUb.js
+[2026-04-06T15:40:15.686Z] GET /assets/LineChart-CEws0B3u.js
+[2026-04-06T15:40:15.755Z] GET /assets/AreaChart--whKLB62.js
+[2026-04-06T15:40:15.626Z] GET /assets/checkbox-Btc22FWM.js
+[2026-04-06T15:40:15.694Z] GET /assets/useVisualPdfExport-BpODCkvM.js
+[2026-04-06T15:40:15.780Z] GET /assets/RadialBarChart-CqlCN1wm.js
+3:40:15 PM [express] POST /api/activity/session 200 in 137ms :: {"sessionId":"4b18960a-4395-4590-b0e…
+[2026-04-06T15:40:15.699Z] GET /assets/isBefore-CQ5r1P14.js
+[2026-04-06T15:40:15.789Z] GET /assets/Line-CwzjqlVv.js
+[2026-04-06T15:40:15.740Z] GET /assets/PieChart-CtgMQPWD.js
+[2026-04-06T15:40:15.635Z] GET /assets/format-GBQCH8QJ.js
+[2026-04-06T15:40:15.795Z] GET /assets/Treemap-BRVD5cic.js
+[2026-04-06T15:40:15.639Z] GET /assets/en-US-INwdnNYB.js
+[2026-04-06T15:40:15.953Z] POST /api/activity/page-view
+3:40:15 PM [express] POST /api/activity/session 200 in 435ms :: {"sessionId":"b4741679-c761-4fed-92e…
+3:40:15 PM [express] POST /api/activity/page-view 200 in 37ms :: {"pageViewId":"2d76a930-03dd-47eb-8…
+[2026-04-06T15:40:16.456Z] GET /api/admin/analytics/overview
+3:40:16 PM [express] GET /api/admin/users 200 in 77ms :: {"users":[{"id":"6f114670-9b01-452b-8e49-45…
+3:40:16 PM [express] GET /api/admin/activity-log 200 in 162ms :: [{"id":"user-6f114670-9b01-452b-8e4…
+[Stripe] Using LIVE mode credentials - payments are real
+3:40:17 PM [express] GET /api/admin/analytics/overview 200 in 730ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-06T15:40:16.460Z] GET /api/admin/users?page=1&pageSize=1000
+[2026-04-06T15:40:16.467Z] GET /api/admin/activity-log
+[2026-04-06T15:40:35.355Z] POST /api/activity/session/end
+[2026-04-06T15:40:35.357Z] GET /admin/seo-strategy
+[SEO] Injecting meta for route: /
+3:40:35 PM [express] POST /api/activity/session/end 200 in 290ms :: {"success":true}
+[2026-04-06T15:40:35.825Z] GET /attached_assets/official_logo.webp
+[SEO] Injecting meta for route: /
+[2026-04-06T15:40:36.006Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+3:40:36 PM [express] GET /api/auth/user 200 in 22ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-06T15:40:36.526Z] GET /api/partner/status
+[2026-04-06T15:40:36.528Z] POST /api/activity/session
+[2026-04-06T15:40:36.533Z] GET /api/seo/automation-status
+[2026-04-06T15:40:36.538Z] POST /api/activity/session
+[2026-04-06T15:40:36.545Z] GET /api/seo/backlink-targets
+3:40:36 PM [express] POST /api/activity/session 200 in 73ms :: {"sessionId":"b2b25888-e72c-489b-b0a8…
+3:40:36 PM [express] POST /api/activity/session 200 in 71ms :: {"sessionId":"cb28b407-ee30-43ab-8a79…
+3:40:36 PM [express] GET /api/partner/status 200 in 84ms :: {"isPartner":false,"promoCodeCount":0}
+3:40:36 PM [express] GET /api/seo/automation-status 500 in 106ms :: {"error":"column \"strategy_data…
+3:40:36 PM [express] GET /api/seo/backlink-targets 500 in 115ms :: {"error":"column \"live_checked_a…
+[2026-04-06T15:40:36.795Z] POST /api/activity/page-view
+3:40:36 PM [express] POST /api/activity/page-view 200 in 70ms :: {"pageViewId":"4e8922fa-f195-41c9-a…
+[2026-04-06T15:40:42.380Z] POST /api/seo/backlink-discover
+[2026-04-06T15:40:51.984Z] GET /api/seo/automation-status
+3:40:52 PM [express] GET /api/seo/automation-status 500 in 33ms :: {"error":"column \"strategy_data\…
+[2026-04-06T15:41:06.955Z] POST /api/activity/session
+[2026-04-06T15:41:07.002Z] GET /api/seo/backlink-targets
+3:41:07 PM [express] GET /api/seo/backlink-targets 500 in 383ms :: {"error":"column \"live_checked_a…
+3:41:07 PM [express] POST /api/activity/session 200 in 457ms :: {"sessionId":"cb28b407-ee30-43ab-8a7…
+[2026-04-06T15:41:07.476Z] GET /api/seo/automation-status
+3:41:07 PM [express] GET /api/seo/automation-status 500 in 15ms :: {"error":"column \"strategy_data\…
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+[2026-04-06T15:41:22.838Z] GET /api/seo/automation-status
+3:41:23 PM [express] GET /api/seo/automation-status 500 in 303ms :: {"error":"column \"strategy_data…
+[Backlink Discover] error: column "live_checked_at" of relation "backlink_targets" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/dist/index.js:31910:9 {
+  length: 145,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '297',
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1065',
+  routine: 'checkInsertTargets'
+}
+3:41:28 PM [express] POST /api/seo/backlink-discover 500 in 46193ms :: {"error":"column \"live_check…
+[2026-04-06T15:41:34.980Z] POST /api/activity/session/end
+[2026-04-06T15:41:34.991Z] POST /api/activity/session
+3:41:35 PM [express] POST /api/activity/session/end 200 in 69ms :: {"success":true}
+3:41:35 PM [express] POST /api/activity/session 200 in 246ms :: {"sessionId":"51f0a65c-0204-4b8d-8e6…
+[2026-04-06T15:41:35.667Z] POST /api/activity/page-view
+3:41:35 PM [express] POST /api/activity/page-view 200 in 44ms :: {"pageViewId":"973e83e4-d84d-4d40-9…
+[2026-04-06T15:41:36.546Z] POST /api/activity/session/end
+3:41:36 PM [express] POST /api/activity/session/end 200 in 49ms :: {"success":true}
+
+

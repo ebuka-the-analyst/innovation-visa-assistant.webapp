@@ -881,25 +881,28 @@ async function runAutoMigrations() {
     }
 
     // ── seo_automation_plans ────────────────────────────────────────────────
-    const seoAutoExists = await db.execute(sql`
+    // Check for the correct column (strategy_data). If missing, drop and recreate correctly.
+    const seoStrategyDataExists = await db.execute(sql`
       SELECT EXISTS (
-        SELECT FROM information_schema.tables WHERE table_name = 'seo_automation_plans'
-      ) as table_exists
+        SELECT FROM information_schema.columns
+        WHERE table_name = 'seo_automation_plans' AND column_name = 'strategy_data'
+      ) as col_exists
     `);
-    if (!seoAutoExists.rows[0]?.table_exists) {
-      log("[DB] Auto-migration: creating seo_automation_plans table");
+    if (!seoStrategyDataExists.rows[0]?.col_exists) {
+      log("[DB] Auto-migration: rebuilding seo_automation_plans table with correct schema");
+      await db.execute(sql`DROP TABLE IF EXISTS seo_automation_plans`);
       await db.execute(sql`
-        CREATE TABLE IF NOT EXISTS seo_automation_plans (
+        CREATE TABLE seo_automation_plans (
           id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
-          strategy_content TEXT NOT NULL,
-          blog_items JSONB NOT NULL DEFAULT '[]',
-          total_weeks INTEGER NOT NULL DEFAULT 13,
-          current_week INTEGER NOT NULL DEFAULT 0,
-          posts_per_week INTEGER NOT NULL DEFAULT 2,
+          strategy_data JSONB NOT NULL,
+          business_name VARCHAR(200),
           status VARCHAR(20) NOT NULL DEFAULT 'active',
-          activated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-          next_run_at TIMESTAMP,
-          last_run_at TIMESTAMP,
+          total_content_items INTEGER NOT NULL DEFAULT 0,
+          queued_items INTEGER NOT NULL DEFAULT 0,
+          completed_items INTEGER NOT NULL DEFAULT 0,
+          week_number INTEGER NOT NULL DEFAULT 1,
+          start_date TIMESTAMP NOT NULL DEFAULT NOW(),
+          next_queue_date TIMESTAMP,
           created_at TIMESTAMP NOT NULL DEFAULT NOW(),
           updated_at TIMESTAMP NOT NULL DEFAULT NOW()
         )
@@ -907,42 +910,45 @@ async function runAutoMigrations() {
     }
 
     // ── backlink_targets ─────────────────────────────────────────────────────
-    const backlinkExists = await db.execute(sql`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables WHERE table_name = 'backlink_targets'
-      ) as table_exists
+    // Create if missing, then ensure all columns exist via ADD COLUMN IF NOT EXISTS
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS backlink_targets (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255) NOT NULL,
+        url VARCHAR(500) NOT NULL,
+        submission_url VARCHAR(500),
+        category VARCHAR(100) NOT NULL DEFAULT 'community',
+        platform VARCHAR(100),
+        domain_authority INTEGER,
+        status VARCHAR(50) NOT NULL DEFAULT 'pending',
+        priority VARCHAR(20) NOT NULL DEFAULT 'medium',
+        effort VARCHAR(20) NOT NULL DEFAULT 'medium',
+        expected_impact VARCHAR(20) NOT NULL DEFAULT 'medium',
+        strategy TEXT,
+        ai_generated_content TEXT,
+        content_generated_at TIMESTAMP,
+        notes TEXT,
+        contact_email VARCHAR(255),
+        anchor_text VARCHAR(255),
+        link_type VARCHAR(50) DEFAULT 'dofollow',
+        submitted_at TIMESTAMP,
+        live_checked_at TIMESTAMP,
+        is_live BOOLEAN,
+        live_url VARCHAR(500),
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
     `);
-    if (!backlinkExists.rows[0]?.table_exists) {
-      log("[DB] Auto-migration: creating backlink_targets table");
-      await db.execute(sql`
-        CREATE TABLE IF NOT EXISTS backlink_targets (
-          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
-          name VARCHAR(255) NOT NULL,
-          url VARCHAR(500) NOT NULL,
-          submission_url VARCHAR(500),
-          category VARCHAR(50) NOT NULL DEFAULT 'community',
-          platform VARCHAR(100),
-          domain_authority INTEGER,
-          priority VARCHAR(20) NOT NULL DEFAULT 'medium',
-          effort VARCHAR(20) NOT NULL DEFAULT 'medium',
-          expected_impact VARCHAR(20) NOT NULL DEFAULT 'medium',
-          strategy TEXT,
-          anchor_text VARCHAR(255) NOT NULL DEFAULT 'UK Innovator Founder Visa Assistant',
-          link_type VARCHAR(20) NOT NULL DEFAULT 'dofollow',
-          contact_email VARCHAR(255),
-          status VARCHAR(20) NOT NULL DEFAULT 'pending',
-          submitted_at TIMESTAMP,
-          live_at TIMESTAMP,
-          last_checked_at TIMESTAMP,
-          is_live BOOLEAN NOT NULL DEFAULT false,
-          ai_generated_content TEXT,
-          content_generated_at TIMESTAMP,
-          notes TEXT,
-          created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-          updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-        )
-      `);
-    }
+    // Patch any missing columns on pre-existing table
+    await db.execute(sql`ALTER TABLE backlink_targets ADD COLUMN IF NOT EXISTS live_checked_at TIMESTAMP`);
+    await db.execute(sql`ALTER TABLE backlink_targets ADD COLUMN IF NOT EXISTS live_url VARCHAR(500)`);
+    await db.execute(sql`ALTER TABLE backlink_targets ADD COLUMN IF NOT EXISTS is_live BOOLEAN`);
+    await db.execute(sql`ALTER TABLE backlink_targets ADD COLUMN IF NOT EXISTS ai_generated_content TEXT`);
+    await db.execute(sql`ALTER TABLE backlink_targets ADD COLUMN IF NOT EXISTS content_generated_at TIMESTAMP`);
+    await db.execute(sql`ALTER TABLE backlink_targets ADD COLUMN IF NOT EXISTS notes TEXT`);
+    await db.execute(sql`ALTER TABLE backlink_targets ADD COLUMN IF NOT EXISTS anchor_text VARCHAR(255)`);
+    await db.execute(sql`ALTER TABLE backlink_targets ADD COLUMN IF NOT EXISTS submission_url VARCHAR(500)`);
+    log("[DB] Auto-migration: backlink_targets table ensured");
 
     log("[MIGRATION] Schema check complete");
   } catch (error) {
