@@ -1,0 +1,200 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+1
+
+Agent
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+Limited Access
+
+Deploys have been paused temporarily
+
+
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+b78523b6
+Active
+
+Apr 6, 2026, 3:58 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1065',
+  routine: 'checkInsertTargets'
+}
+3:41:28 PM [express] POST /api/seo/backlink-discover 500 in 46193ms :: {"error":"column \"live_check…
+[2026-04-06T15:41:34.980Z] POST /api/activity/session/end
+[2026-04-06T15:41:34.991Z] POST /api/activity/session
+3:41:35 PM [express] POST /api/activity/session/end 200 in 69ms :: {"success":true}
+3:41:35 PM [express] POST /api/activity/session 200 in 246ms :: {"sessionId":"51f0a65c-0204-4b8d-8e6…
+[2026-04-06T15:41:35.667Z] POST /api/activity/page-view
+3:41:35 PM [express] POST /api/activity/page-view 200 in 44ms :: {"pageViewId":"973e83e4-d84d-4d40-9…
+[2026-04-06T15:41:36.546Z] POST /api/activity/session/end
+3:41:36 PM [express] POST /api/activity/session/end 200 in 49ms :: {"success":true}
+[2026-04-06T15:44:17.482Z] GET /
+[2026-04-06T15:47:05.108Z] POST /api/activity/session
+3:47:05 PM [express] POST /api/activity/session 200 in 343ms :: {"sessionId":"925050a0-b6ee-40df-b2a…
+[2026-04-06T15:47:05.654Z] POST /api/activity/page-view
+3:47:05 PM [express] POST /api/activity/page-view 200 in 41ms :: {"pageViewId":"f1629e69-4f79-4792-9…
+[2026-04-06T15:47:17.458Z] POST /api/activity/session/end
+3:47:17 PM [express] POST /api/activity/session/end 200 in 499ms :: {"success":true}
+[2026-04-06T15:47:27.722Z] POST /api/activity/session
+3:47:27 PM [express] POST /api/activity/session 200 in 81ms :: {"sessionId":"7a80fbcd-5385-4adb-b40e…
+[2026-04-06T15:47:28.161Z] POST /api/activity/page-view
+3:47:28 PM [express] POST /api/activity/page-view 200 in 77ms :: {"pageViewId":"d3129359-5b52-449c-8…
+[2026-04-06T15:47:29.412Z] POST /api/activity/session/end
+3:47:29 PM [express] POST /api/activity/session/end 200 in 46ms :: {"success":true}
+[2026-04-06T15:50:04.456Z] GET /robots.txt
+[2026-04-06T15:55:16.961Z] POST /api/activity/session
+3:55:17 PM [express] POST /api/activity/session 200 in 279ms :: {"sessionId":"e10c91f7-9d94-46d1-a34…
+[2026-04-06T15:55:16.962Z] GET /api/auth/user
+[2026-04-06T15:55:17.020Z] GET /api/admin/activity-log
+3:55:17 PM [express] GET /api/admin/activity-log 200 in 247ms :: [{"id":"user-6f114670-9b01-452b-8e4…
+3:55:18 PM [express] GET /api/auth/user 200 in 35ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+[2026-04-06T15:55:17.440Z] POST /api/activity/page-view
+3:55:17 PM [express] GET /api/auth/user 200 in 260ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+3:55:17 PM [express] POST /api/activity/page-view 200 in 51ms :: {"pageViewId":"1fce7cda-ba78-4591-b…
+[2026-04-06T15:55:17.525Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+3:55:18 PM [express] GET /api/admin/analytics/overview 200 in 492ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-06T15:55:18.481Z] POST /api/activity/session/end
+[2026-04-06T15:55:18.495Z] GET /api/auth/user
+[2026-04-06T15:55:18.497Z] POST /api/activity/session/end
+3:55:18 PM [express] POST /api/activity/session/end 200 in 23ms :: {"success":true}
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+3:55:18 PM [express] POST /api/activity/session/end 200 in 32ms :: {"success":true}
+[2026-04-06T15:55:18.653Z] POST /api/activity/session
+[2026-04-06T15:55:18.686Z] GET /api/seo/backlink-targets
+[2026-04-06T15:55:18.687Z] GET /api/seo/automation-status
+3:55:18 PM [express] POST /api/activity/session 200 in 35ms :: {"sessionId":"91a95147-ee5b-43ee-9076…
+3:55:18 PM [express] GET /api/seo/backlink-targets 500 in 27ms :: {"error":"column \"live_checked_at…
+3:55:18 PM [express] GET /api/seo/automation-status 500 in 28ms :: {"error":"column \"strategy_data\…
+[2026-04-06T15:55:18.874Z] POST /api/activity/page-view
+3:55:18 PM [express] POST /api/activity/page-view 200 in 26ms :: {"pageViewId":"7f73f095-4c56-47db-9…
+[2026-04-06T15:55:21.654Z] POST /api/seo/backlink-discover
+[2026-04-06T15:55:23.300Z] POST /api/activity/session/end
+[2026-04-06T15:55:23.305Z] POST /api/activity/session
+3:55:23 PM [express] POST /api/activity/session/end 200 in 39ms :: {"success":true}
+3:55:23 PM [express] POST /api/activity/session 200 in 56ms :: {"sessionId":"6e759b5d-d0df-40bc-84be…
+[2026-04-06T15:55:23.736Z] POST /api/activity/page-view
+3:55:23 PM [express] POST /api/activity/page-view 200 in 56ms :: {"pageViewId":"597e45cb-dfaf-4d12-9…
+[2026-04-06T15:55:24.388Z] POST /api/activity/session/end
+3:55:24 PM [express] POST /api/activity/session/end 200 in 23ms :: {"success":true}
+[2026-04-06T15:56:00.094Z] GET /api/auth/user
+[2026-04-06T15:56:00.100Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+3:56:00 PM [express] GET /api/auth/user 200 in 335ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+3:56:00 PM [express] POST /api/activity/session 200 in 390ms :: {"sessionId":"045ed4e5-de03-4ba0-9bb…
+[2026-04-06T15:56:00.837Z] POST /api/activity/page-view
+3:56:00 PM [express] POST /api/activity/page-view 200 in 57ms :: {"pageViewId":"c3653c0f-d0e5-4b24-a…
+[2026-04-06T15:56:04.072Z] GET /api/seo/automation-status
+3:56:04 PM [express] GET /api/seo/automation-status 500 in 30ms :: {"error":"column \"strategy_data\…
+[2026-04-06T15:56:19.058Z] GET /api/seo/backlink-targets
+3:56:19 PM [express] GET /api/seo/backlink-targets 500 in 248ms :: {"error":"column \"live_checked_a…
+[2026-04-06T15:56:19.452Z] GET /api/seo/automation-status
+3:56:19 PM [express] GET /api/seo/automation-status 500 in 32ms :: {"error":"column \"strategy_data\…
+[2026-04-06T15:56:23.711Z] POST /api/activity/session/end
+3:56:23 PM [express] POST /api/activity/session/end 200 in 17ms :: {"success":true}
+[2026-04-06T15:56:24.759Z] POST /api/activity/session
+3:56:24 PM [express] POST /api/activity/session 200 in 31ms :: {"sessionId":"d862e05d-ae76-4972-b52f…
+[2026-04-06T15:56:25.130Z] POST /api/activity/page-view
+3:56:25 PM [express] POST /api/activity/page-view 200 in 34ms :: {"pageViewId":"1191e4d5-ae91-43ec-9…
+[2026-04-06T15:56:25.399Z] POST /api/activity/session/end
+3:56:25 PM [express] POST /api/activity/session/end 200 in 18ms :: {"success":true}
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '297',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1065',
+  routine: 'checkInsertTargets'
+}
+3:56:41 PM [express] POST /api/seo/backlink-discover 500 in 79521ms :: {"error":"column \"live_check…
+[Backlink Discover] error: column "live_checked_at" of relation "backlink_targets" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/dist/index.js:31910:9 {
+  length: 145,
+  severity: 'ERROR',
+
+
