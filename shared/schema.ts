@@ -3106,6 +3106,42 @@ export type SeoAutomationPlan = typeof seoAutomationPlans.$inferSelect;
 export type InsertSeoAutomationPlan = z.infer<typeof insertSeoAutomationPlanSchema>;
 
 // ============================================
+// BACKLINK INTELLIGENCE ENGINE (PhD-Level Authority Building)
+// ============================================
+export const backlinkTargets = pgTable("backlink_targets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 255 }).notNull(),
+  url: varchar("url", { length: 500 }).notNull(),
+  submissionUrl: varchar("submission_url", { length: 500 }),
+  category: varchar("category", { length: 100 }).notNull(), // forum | directory | community | press | blog | tool-directory | social | podcast | academic
+  platform: varchar("platform", { length: 100 }), // reddit | linkedin | product-hunt | g2 | capterra | etc.
+  domainAuthority: integer("domain_authority"), // estimated 1-100
+  status: varchar("status", { length: 50 }).notNull().default("pending"), // pending | in-progress | submitted | live | rejected
+  priority: varchar("priority", { length: 20 }).notNull().default("medium"), // critical | high | medium | low
+  effort: varchar("effort", { length: 20 }).notNull().default("medium"), // quick | medium | hard
+  expectedImpact: varchar("expected_impact", { length: 20 }).notNull().default("medium"), // high | medium | low
+  strategy: text("strategy"),
+  aiGeneratedContent: text("ai_generated_content"),
+  contentGeneratedAt: timestamp("content_generated_at"),
+  notes: text("notes"),
+  contactEmail: varchar("contact_email", { length: 255 }),
+  anchorText: varchar("anchor_text", { length: 255 }),
+  linkType: varchar("link_type", { length: 50 }).default("dofollow"), // dofollow | nofollow | ugc
+  submittedAt: timestamp("submitted_at"),
+  liveCheckedAt: timestamp("live_checked_at"),
+  isLive: boolean("is_live"),
+  liveUrl: varchar("live_url", { length: 500 }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertBacklinkTargetSchema = createInsertSchema(backlinkTargets).omit({
+  id: true, createdAt: true, updatedAt: true,
+});
+export type BacklinkTarget = typeof backlinkTargets.$inferSelect;
+export type InsertBacklinkTarget = z.infer<typeof insertBacklinkTargetSchema>;
+
+// ============================================
 // ENTERPRISE ANALYTICS SYSTEM (PhD-Level Comprehensive Tracking)
 // ============================================
 

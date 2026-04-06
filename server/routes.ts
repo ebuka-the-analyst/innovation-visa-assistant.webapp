@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions, blogPosts, blogGenerationQueue, seoAutomationPlans, TIER_CREDITS as SCHEMA_TIER_CREDITS, getTierCredits, eventLog, apiLatencyLog, creditTransactions, interviewSessions } from "@shared/schema";
+import { questionnaireSchema, successStories, documentTemplates, userTemplateDownloads, calendarEvents, supportSLA, users, businessPlans, errorLogs, siteFeedback, securityEvents, adminAuditLogs, userActivityLogs, referralCodes, promoCodes, userSessions, pageViews, activityEvents, emailLogs, adminNotifications, scheduledNotifications, userDocuments, documentExtractions, blogPosts, blogGenerationQueue, seoAutomationPlans, TIER_CREDITS as SCHEMA_TIER_CREDITS, getTierCredits, eventLog, apiLatencyLog, creditTransactions, interviewSessions, backlinkTargets } from "@shared/schema";
 import { generateBlogPost, generateMultiplePosts, generateBackdatedPosts } from "./blogGenerator";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { generatePDFContent, generatePDFUrl } from "./pdf";
@@ -17253,6 +17253,220 @@ Best wishes.</div>
       res.json(rows);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BACKLINK INTELLIGENCE ENGINE — PhD-Level Authority Building Automation
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // GET all backlink targets
+  app.get("/api/seo/backlink-targets", requireAdmin, async (_req, res) => {
+    try {
+      const targets = await db.select().from(backlinkTargets).orderBy(desc(backlinkTargets.createdAt));
+      res.json(targets);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // PATCH update a backlink target
+  app.patch("/api/seo/backlink-targets/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates: any = { ...req.body, updatedAt: new Date() };
+      if (updates.status === "submitted" && !updates.submittedAt) updates.submittedAt = new Date();
+      const [updated] = await db.update(backlinkTargets).set(updates).where(eq(backlinkTargets.id, id)).returning();
+      res.json(updated);
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // DELETE a backlink target
+  app.delete("/api/seo/backlink-targets/:id", requireAdmin, async (req, res) => {
+    try {
+      await db.delete(backlinkTargets).where(eq(backlinkTargets.id, req.params.id));
+      res.json({ success: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  // POST discover new backlink targets via Quad-AI
+  app.post("/api/seo/backlink-discover", requireAdmin, async (_req, res) => {
+    try {
+      const { GoogleGenerativeAI } = await import("@google/generative-ai");
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+      const prompt = `You are a PhD-level SEO authority building expert. Generate a comprehensive list of 40 real, specific backlink opportunities for the website "UK Innovator Founder Visa Assistant" (https://innovatorfoundervisaassistant.co.uk) — an AI-powered platform with 109 tools for UK Innovator Founder Visa applicants.
+
+Return ONLY a valid JSON array (no markdown, no explanation) with exactly 40 objects. Each object must have:
+- name: string (specific site/community name)
+- url: string (actual homepage URL)
+- submissionUrl: string (exact URL where to submit/post/list)
+- category: one of: "forum" | "directory" | "community" | "press" | "blog" | "tool-directory" | "social" | "podcast" | "academic"
+- platform: string (e.g. "reddit", "product-hunt", "linkedin", "g2", "britishexpats")
+- domainAuthority: number (realistic estimate 1-100)
+- priority: "critical" | "high" | "medium" | "low"
+- effort: "quick" | "medium" | "hard"
+- expectedImpact: "high" | "medium" | "low"
+- strategy: string (1-2 sentences: exact what to do — e.g. "Create a company profile listing with description and logo" or "Post a helpful reply in the 'UK Visas' subforum and mention the platform in context")
+- anchorText: string (recommended anchor text for the link, e.g. "UK Innovator Founder Visa Assistant" or "free visa compliance checker")
+- linkType: "dofollow" | "nofollow" | "ugc"
+- contactEmail: string or "" (if there is a known submission email)
+
+Include a realistic mix across all these categories:
+1. UK immigration/visa forums (britishexpats.com, r/ukvisa, ukexpat.com, expats.co.uk)
+2. UK startup/entrepreneur communities (r/startups, r/entrepreneur, Indie Hackers, Hacker News, Product Hunt, AngelList UK)
+3. Tool & software directories (G2, Capterra, Product Hunt, AlternativeTo, SaaSHub, GetApp, Slant)
+4. UK business directories (Startups.co.uk, F6S, Crunchbase, Companies House related sites, Gov.uk partner directories, British Chambers of Commerce, FSB, Enterprise Nation)
+5. Immigration/visa specific directories and blogs
+6. LinkedIn (article publishing, company page, relevant groups)
+7. UK press/media (TechCrunch UK, Business Insider, The Telegraph, The Guardian Small Business, Forbes, Entrepreneur.com)
+8. Academic/university entrepreneurship departments
+9. Podcast guesting opportunities
+10. YouTube/content partnerships
+
+Return ONLY the JSON array. No markdown. No explanation.`;
+
+      const result = await model.generateContent(prompt);
+      let text = result.response.text().trim();
+      if (text.startsWith("```")) text = text.replace(/```json?\n?/g, "").replace(/```/g, "").trim();
+
+      let discovered: any[] = JSON.parse(text);
+      if (!Array.isArray(discovered)) throw new Error("Invalid AI response format");
+
+      // Insert into DB (skip duplicates by URL)
+      const existing = await db.select({ url: backlinkTargets.url }).from(backlinkTargets);
+      const existingUrls = new Set(existing.map(e => e.url));
+      const newTargets = discovered.filter(t => t.url && !existingUrls.has(t.url));
+
+      if (newTargets.length > 0) {
+        await db.insert(backlinkTargets).values(newTargets.map(t => ({
+          name: t.name || "Unknown",
+          url: t.url,
+          submissionUrl: t.submissionUrl || null,
+          category: t.category || "community",
+          platform: t.platform || null,
+          domainAuthority: t.domainAuthority || null,
+          priority: t.priority || "medium",
+          effort: t.effort || "medium",
+          expectedImpact: t.expectedImpact || "medium",
+          strategy: t.strategy || null,
+          anchorText: t.anchorText || "UK Innovator Founder Visa Assistant",
+          linkType: t.linkType || "dofollow",
+          contactEmail: t.contactEmail || null,
+          status: "pending",
+        })));
+      }
+
+      res.json({ discovered: newTargets.length, skipped: discovered.length - newTargets.length });
+    } catch (e: any) {
+      console.error("[Backlink Discover]", e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // POST generate AI content for a specific backlink target
+  app.post("/api/seo/backlink-content/:id", requireAdmin, async (req, res) => {
+    try {
+      const [target] = await db.select().from(backlinkTargets).where(eq(backlinkTargets.id, req.params.id)).limit(1);
+      if (!target) return res.status(404).json({ error: "Target not found" });
+
+      const { GoogleGenerativeAI } = await import("@google/generative-ai");
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+      const prompt = `You are a PhD-level SEO and outreach expert. Generate the exact submission content for a backlink opportunity.
+
+Platform: ${target.name} (${target.platform || target.category})
+Website URL: ${target.url}
+Submission URL: ${target.submissionUrl || target.url}
+Strategy: ${target.strategy || "Create a listing or post a helpful contribution"}
+Our site: UK Innovator Founder Visa Assistant (https://innovatorfoundervisaassistant.co.uk)
+Our anchor text to use: "${target.anchorText || "UK Innovator Founder Visa Assistant"}"
+Our description: The UK's leading AI platform for Innovator Founder Visa applications, with 109 expert tools covering compliance, business plan generation, endorsement preparation, and financial modeling.
+
+Generate EXACTLY what the user should copy and paste to submit on this platform. Be specific and tailored to the platform type. Include:
+1. If it's a directory/listing: full company profile text (name, description, tags, category, website)
+2. If it's a forum/community: the exact post or reply text (helpful, not spammy, mentions our tool naturally)
+3. If it's a press outlet: a short, professional pitch email
+4. If it's LinkedIn: the exact article title and first 3 paragraphs
+5. If it's a podcast: a short guest pitch message
+
+Format as plain text the user can copy. Start with a clear label like "COMPANY DESCRIPTION:" or "FORUM POST:" or "EMAIL SUBJECT:" etc.
+Be persuasive, professional, and natural. Never mention this is AI-generated. Keep it under 400 words.`;
+
+      const result = await model.generateContent(prompt);
+      const content = result.response.text().trim();
+
+      const [updated] = await db.update(backlinkTargets)
+        .set({ aiGeneratedContent: content, contentGeneratedAt: new Date(), updatedAt: new Date() })
+        .where(eq(backlinkTargets.id, req.params.id))
+        .returning();
+
+      res.json({ content, target: updated });
+    } catch (e: any) {
+      console.error("[Backlink Content]", e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // POST check if a submitted backlink is live
+  app.post("/api/seo/backlink-check/:id", requireAdmin, async (req, res) => {
+    try {
+      const [target] = await db.select().from(backlinkTargets).where(eq(backlinkTargets.id, req.params.id)).limit(1);
+      if (!target) return res.status(404).json({ error: "Target not found" });
+
+      const checkUrl = target.liveUrl || target.submissionUrl || target.url;
+      let isLive = false;
+      let statusCode = 0;
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        const resp = await fetch(checkUrl, {
+          method: "HEAD",
+          signal: controller.signal,
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; LinkChecker/1.0)" },
+        });
+        clearTimeout(timeout);
+        statusCode = resp.status;
+        isLive = resp.status >= 200 && resp.status < 400;
+      } catch { isLive = false; }
+
+      const [updated] = await db.update(backlinkTargets)
+        .set({ isLive, liveCheckedAt: new Date(), updatedAt: new Date() })
+        .where(eq(backlinkTargets.id, req.params.id))
+        .returning();
+
+      res.json({ isLive, statusCode, target: updated });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // POST bulk check all submitted backlinks
+  app.post("/api/seo/backlink-check-all", requireAdmin, async (_req, res) => {
+    try {
+      const submitted = await db.select().from(backlinkTargets)
+        .where(eq(backlinkTargets.status, "submitted"));
+
+      const results = await Promise.all(submitted.map(async (target) => {
+        const checkUrl = target.liveUrl || target.submissionUrl || target.url;
+        let isLive = false;
+        try {
+          const controller = new AbortController();
+          setTimeout(() => controller.abort(), 5000);
+          const resp = await fetch(checkUrl, { method: "HEAD", signal: controller.signal });
+          isLive = resp.status >= 200 && resp.status < 400;
+        } catch { isLive = false; }
+
+        await db.update(backlinkTargets)
+          .set({ isLive, liveCheckedAt: new Date(), updatedAt: new Date() })
+          .where(eq(backlinkTargets.id, target.id));
+
+        return { id: target.id, name: target.name, isLive };
+      }));
+
+      res.json({ checked: results.length, results });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
     }
   });
 

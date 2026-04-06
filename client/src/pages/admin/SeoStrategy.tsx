@@ -1,19 +1,22 @@
 import { useState, useCallback, type ReactNode } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
   Search, Zap, TrendingUp, Globe, BookOpen, Building2, Star,
   Target, AlertTriangle, CheckCircle2, Clock, BarChart3, Link2,
   FileText, Calendar, Cpu, ChevronRight, Download, RefreshCw,
   Award, MapPin, MessageSquare, Camera, Circle, PlayCircle, ExternalLink,
-  PenLine, ListChecks, Bot, Pause, Play, Rocket, CalendarDays
+  PenLine, ListChecks, Bot, Pause, Play, Rocket, CalendarDays,
+  Wand2, Trash2, Copy, ShieldCheck, ShieldX, Filter, ArrowUpRight,
+  Database, ChevronDown
 } from "lucide-react";
 
 interface SEOAction {
@@ -234,6 +237,437 @@ interface AutomationPlan {
   progressPct: number;
 }
 
+// ─── Backlink Intelligence Engine Component ─────────────────────────────────
+
+type BLTarget = {
+  id: string; name: string; url: string; submissionUrl?: string;
+  category: string; platform?: string; domainAuthority?: number;
+  status: string; priority: string; effort: string; expectedImpact: string;
+  strategy?: string; aiGeneratedContent?: string; contentGeneratedAt?: string;
+  notes?: string; anchorText?: string; linkType?: string;
+  isLive?: boolean; liveCheckedAt?: string; submittedAt?: string; liveUrl?: string;
+};
+
+const STATUS_CFG: Record<string, { label: string; color: string }> = {
+  pending:     { label: "Pending",     color: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300" },
+  "in-progress":{ label: "In Progress",color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" },
+  submitted:   { label: "Submitted",   color: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300" },
+  live:        { label: "Live",        color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300" },
+  rejected:    { label: "Rejected",    color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300" },
+};
+const PRIORITY_CFG: Record<string, string> = {
+  critical: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+  high:     "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
+  medium:   "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  low:      "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+};
+const CAT_ICONS: Record<string, string> = {
+  forum: "💬", directory: "📂", community: "👥", press: "📰",
+  blog: "✍️", "tool-directory": "🛠️", social: "🌐", podcast: "🎙️", academic: "🎓",
+};
+
+function BacklinkEngine() {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterPriority, setFilterPriority] = useState("all");
+  const [search, setSearch] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [editNotes, setEditNotes] = useState<Record<string, string>>({});
+
+  const { data: targets = [], isLoading, refetch } = useQuery<BLTarget[]>({
+    queryKey: ["/api/seo/backlink-targets"],
+    refetchInterval: 30000,
+  });
+
+  const discoverMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/seo/backlink-discover").then(r => r.json()),
+    onSuccess: (data) => {
+      toast({ title: "AI Discovery Complete", description: `Found ${data.discovered} new targets (${data.skipped} already known).` });
+      qc.invalidateQueries({ queryKey: ["/api/seo/backlink-targets"] });
+    },
+    onError: (e: Error) => toast({ title: "Discovery Failed", description: e.message, variant: "destructive" }),
+  });
+
+  const contentMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("POST", `/api/seo/backlink-content/${id}`).then(r => r.json()),
+    onSuccess: (data) => {
+      toast({ title: "Content Generated", description: "Exact submission content is ready to copy." });
+      qc.invalidateQueries({ queryKey: ["/api/seo/backlink-targets"] });
+      setExpandedId(data.target.id);
+    },
+    onError: (e: Error) => toast({ title: "Generation Failed", description: e.message, variant: "destructive" }),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<BLTarget> }) =>
+      apiRequest("PATCH", `/api/seo/backlink-targets/${id}`, updates).then(r => r.json()),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/seo/backlink-targets"] }),
+    onError: (e: Error) => toast({ title: "Update Failed", description: e.message, variant: "destructive" }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("DELETE", `/api/seo/backlink-targets/${id}`).then(r => r.json()),
+    onSuccess: () => { toast({ title: "Target removed" }); qc.invalidateQueries({ queryKey: ["/api/seo/backlink-targets"] }); },
+    onError: (e: Error) => toast({ title: "Delete Failed", description: e.message, variant: "destructive" }),
+  });
+
+  const checkMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("POST", `/api/seo/backlink-check/${id}`).then(r => r.json()),
+    onSuccess: (data) => {
+      toast({ title: data.isLive ? "Link is Live!" : "Not Live Yet", description: `Status code: ${data.statusCode}`, variant: data.isLive ? "default" : "destructive" });
+      qc.invalidateQueries({ queryKey: ["/api/seo/backlink-targets"] });
+    },
+  });
+
+  const checkAllMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/seo/backlink-check-all").then(r => r.json()),
+    onSuccess: (data) => {
+      const live = data.results.filter((r: any) => r.isLive).length;
+      toast({ title: `Bulk Check Complete`, description: `${live} of ${data.checked} submitted links confirmed live.` });
+      qc.invalidateQueries({ queryKey: ["/api/seo/backlink-targets"] });
+    },
+  });
+
+  // Stats
+  const total = targets.length;
+  const live = targets.filter(t => t.status === "live").length;
+  const submitted = targets.filter(t => t.status === "submitted").length;
+  const pending = targets.filter(t => t.status === "pending").length;
+  const avgDA = targets.length > 0 ? Math.round(targets.filter(t => t.domainAuthority).reduce((s, t) => s + (t.domainAuthority || 0), 0) / Math.max(targets.filter(t => t.domainAuthority).length, 1)) : 0;
+  const criticalCount = targets.filter(t => t.priority === "critical" && t.status === "pending").length;
+
+  // Filtered targets
+  const filtered = targets.filter(t => {
+    if (filterStatus !== "all" && t.status !== filterStatus) return false;
+    if (filterCategory !== "all" && t.category !== filterCategory) return false;
+    if (filterPriority !== "all" && t.priority !== filterPriority) return false;
+    if (search && !t.name.toLowerCase().includes(search.toLowerCase()) && !t.url.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+
+  const categories = Array.from(new Set(targets.map(t => t.category)));
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <Link2 className="w-5 h-5 text-purple-500" />
+            Backlink Intelligence Engine
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            AI-powered authority building — discover targets, generate exact submission content, track live links
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {submitted > 0 && (
+            <Button variant="outline" size="sm" onClick={() => checkAllMutation.mutate()} disabled={checkAllMutation.isPending} data-testid="button-check-all-backlinks">
+              <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
+              {checkAllMutation.isPending ? "Checking..." : `Check ${submitted} Submitted`}
+            </Button>
+          )}
+          <Button onClick={() => discoverMutation.mutate()} disabled={discoverMutation.isPending} size="sm" data-testid="button-discover-backlinks">
+            <Wand2 className="w-3.5 h-3.5 mr-1.5" />
+            {discoverMutation.isPending ? "AI Discovering..." : "AI Discover Targets"}
+          </Button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        {[
+          { label: "Total Targets", value: total, color: "text-foreground", sub: "discovered" },
+          { label: "Live Backlinks", value: live, color: "text-green-600", sub: "confirmed live" },
+          { label: "Submitted", value: submitted, color: "text-yellow-600", sub: "awaiting" },
+          { label: "Pending", value: pending, color: "text-blue-600", sub: "to do" },
+          { label: "Avg. DA Score", value: avgDA || "—", color: "text-purple-600", sub: "domain authority" },
+        ].map(stat => (
+          <Card key={stat.label} className="text-center">
+            <CardContent className="pt-3 pb-3">
+              <div className={`text-2xl font-black ${stat.color}`}>{stat.value}</div>
+              <div className="text-xs font-medium text-foreground mt-0.5">{stat.label}</div>
+              <div className="text-xs text-muted-foreground">{stat.sub}</div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {criticalCount > 0 && (
+        <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+          <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
+          <span className="text-sm text-red-700 dark:text-red-300 font-medium">
+            {criticalCount} critical-priority targets are still pending — these are your highest-impact backlinks.
+          </span>
+        </div>
+      )}
+
+      {total === 0 && !isLoading && (
+        <Card className="border-dashed">
+          <CardContent className="py-10 text-center">
+            <Database className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground font-medium">No backlink targets yet</p>
+            <p className="text-sm text-muted-foreground mt-1 mb-4">Click "AI Discover Targets" to generate 40 real, specific opportunities using Gemini AI</p>
+            <Button onClick={() => discoverMutation.mutate()} disabled={discoverMutation.isPending} data-testid="button-discover-backlinks-empty">
+              <Wand2 className="w-4 h-4 mr-2" />
+              {discoverMutation.isPending ? "AI is generating targets..." : "Discover 40 Backlink Opportunities"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {total > 0 && (
+        <Card>
+          <CardContent className="p-4 space-y-3">
+            {/* Filters */}
+            <div className="flex flex-wrap gap-2">
+              <Input
+                placeholder="Search by name or URL..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="h-8 text-sm max-w-xs"
+                data-testid="input-backlink-search"
+              />
+              <select
+                value={filterStatus}
+                onChange={e => setFilterStatus(e.target.value)}
+                className="h-8 text-sm border rounded-md px-2 bg-background"
+                data-testid="select-backlink-status"
+              >
+                <option value="all">All Status</option>
+                {Object.entries(STATUS_CFG).map(([v, c]) => <option key={v} value={v}>{c.label}</option>)}
+              </select>
+              <select
+                value={filterCategory}
+                onChange={e => setFilterCategory(e.target.value)}
+                className="h-8 text-sm border rounded-md px-2 bg-background"
+                data-testid="select-backlink-category"
+              >
+                <option value="all">All Categories</option>
+                {categories.map(c => <option key={c} value={c}>{CAT_ICONS[c] || "•"} {c}</option>)}
+              </select>
+              <select
+                value={filterPriority}
+                onChange={e => setFilterPriority(e.target.value)}
+                className="h-8 text-sm border rounded-md px-2 bg-background"
+                data-testid="select-backlink-priority"
+              >
+                <option value="all">All Priorities</option>
+                {["critical","high","medium","low"].map(p => <option key={p} value={p}>{p.charAt(0).toUpperCase()+p.slice(1)}</option>)}
+              </select>
+              <span className="text-xs text-muted-foreground self-center ml-1">{filtered.length} of {total}</span>
+            </div>
+
+            {/* Table */}
+            <div className="space-y-2">
+              {filtered.map(t => (
+                <div key={t.id} className="border rounded-md overflow-hidden">
+                  {/* Row */}
+                  <div className="flex flex-wrap items-center gap-2 p-3">
+                    <div className="flex-1 min-w-0 space-y-0.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-medium truncate">{CAT_ICONS[t.category] || "•"} {t.name}</span>
+                        {t.domainAuthority && (
+                          <Badge variant="outline" className="text-xs px-1.5 py-0">DA {t.domainAuthority}</Badge>
+                        )}
+                        <Badge className={`text-xs px-1.5 py-0 ${PRIORITY_CFG[t.priority]}`}>{t.priority}</Badge>
+                        <Badge className={`text-xs px-1.5 py-0 ${STATUS_CFG[t.status]?.color}`}>
+                          {STATUS_CFG[t.status]?.label}
+                        </Badge>
+                        {t.isLive === true && <Badge className="text-xs px-1.5 py-0 bg-green-100 text-green-700">✓ Live</Badge>}
+                        {t.isLive === false && t.liveCheckedAt && <Badge className="text-xs px-1.5 py-0 bg-red-100 text-red-700">✗ Not live</Badge>}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">{t.url}</div>
+                      {t.strategy && <div className="text-xs text-muted-foreground line-clamp-1">{t.strategy}</div>}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {/* Status change */}
+                      <select
+                        value={t.status}
+                        onChange={e => updateMutation.mutate({ id: t.id, updates: { status: e.target.value } })}
+                        className="h-7 text-xs border rounded px-1.5 bg-background"
+                        data-testid={`select-status-${t.id}`}
+                      >
+                        {Object.entries(STATUS_CFG).map(([v, c]) => <option key={v} value={v}>{c.label}</option>)}
+                      </select>
+
+                      {/* Generate content */}
+                      <Button
+                        variant="outline" size="sm"
+                        onClick={() => contentMutation.mutate(t.id)}
+                        disabled={contentMutation.isPending}
+                        title="Generate AI submission content"
+                        data-testid={`button-generate-content-${t.id}`}
+                        className="h-7 px-2"
+                      >
+                        <Wand2 className="w-3 h-3" />
+                      </Button>
+
+                      {/* Check live */}
+                      {t.status === "submitted" && (
+                        <Button
+                          variant="outline" size="sm"
+                          onClick={() => checkMutation.mutate(t.id)}
+                          disabled={checkMutation.isPending}
+                          title="Check if backlink is live"
+                          data-testid={`button-check-${t.id}`}
+                          className="h-7 px-2"
+                        >
+                          <ShieldCheck className="w-3 h-3" />
+                        </Button>
+                      )}
+
+                      {/* Open URL */}
+                      <a href={t.submissionUrl || t.url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="ghost" size="sm" className="h-7 px-2" title="Open submission URL">
+                          <ArrowUpRight className="w-3 h-3" />
+                        </Button>
+                      </a>
+
+                      {/* Expand */}
+                      <Button
+                        variant="ghost" size="sm"
+                        onClick={() => setExpandedId(expandedId === t.id ? null : t.id)}
+                        className="h-7 px-2"
+                        data-testid={`button-expand-${t.id}`}
+                      >
+                        <ChevronDown className={`w-3 h-3 transition-transform ${expandedId === t.id ? "rotate-180" : ""}`} />
+                      </Button>
+
+                      {/* Delete */}
+                      <Button
+                        variant="ghost" size="sm"
+                        onClick={() => deleteMutation.mutate(t.id)}
+                        disabled={deleteMutation.isPending}
+                        className="h-7 px-2 text-red-500 hover:text-red-600"
+                        title="Remove target"
+                        data-testid={`button-delete-${t.id}`}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Expanded section */}
+                  {expandedId === t.id && (
+                    <div className="border-t bg-muted/30 p-3 space-y-3">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                        <div>
+                          <span className="font-medium text-muted-foreground">Category</span>
+                          <div>{t.category}</div>
+                        </div>
+                        <div>
+                          <span className="font-medium text-muted-foreground">Effort</span>
+                          <div>{t.effort}</div>
+                        </div>
+                        <div>
+                          <span className="font-medium text-muted-foreground">Expected Impact</span>
+                          <div>{t.expectedImpact}</div>
+                        </div>
+                        <div>
+                          <span className="font-medium text-muted-foreground">Link Type</span>
+                          <div>{t.linkType || "dofollow"}</div>
+                        </div>
+                        {t.anchorText && (
+                          <div className="col-span-2">
+                            <span className="font-medium text-muted-foreground">Anchor Text</span>
+                            <div>"{t.anchorText}"</div>
+                          </div>
+                        )}
+                        {t.submissionUrl && (
+                          <div className="col-span-2">
+                            <span className="font-medium text-muted-foreground">Submission URL</span>
+                            <a href={t.submissionUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline break-all">{t.submissionUrl}</a>
+                          </div>
+                        )}
+                        {t.submittedAt && (
+                          <div>
+                            <span className="font-medium text-muted-foreground">Submitted</span>
+                            <div>{new Date(t.submittedAt).toLocaleDateString()}</div>
+                          </div>
+                        )}
+                        {t.liveCheckedAt && (
+                          <div>
+                            <span className="font-medium text-muted-foreground">Last Checked</span>
+                            <div>{new Date(t.liveCheckedAt).toLocaleDateString()}</div>
+                          </div>
+                        )}
+                      </div>
+
+                      {t.strategy && (
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground mb-1">Strategy</p>
+                          <p className="text-sm">{t.strategy}</p>
+                        </div>
+                      )}
+
+                      {/* AI Generated Content */}
+                      {t.aiGeneratedContent ? (
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-xs font-medium text-muted-foreground">AI-Generated Submission Content</p>
+                            <Button
+                              variant="outline" size="sm"
+                              onClick={() => { navigator.clipboard.writeText(t.aiGeneratedContent!); toast({ title: "Copied to clipboard!" }); }}
+                              className="h-6 text-xs px-2"
+                              data-testid={`button-copy-content-${t.id}`}
+                            >
+                              <Copy className="w-3 h-3 mr-1" />Copy
+                            </Button>
+                          </div>
+                          <pre className="text-xs bg-background border rounded p-3 whitespace-pre-wrap font-mono leading-relaxed max-h-48 overflow-y-auto">{t.aiGeneratedContent}</pre>
+                          <p className="text-xs text-muted-foreground mt-1">Generated {t.contentGeneratedAt ? new Date(t.contentGeneratedAt).toLocaleString() : ""}</p>
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm" variant="outline"
+                          onClick={() => contentMutation.mutate(t.id)}
+                          disabled={contentMutation.isPending}
+                          data-testid={`button-gen-content-expanded-${t.id}`}
+                        >
+                          <Wand2 className="w-3.5 h-3.5 mr-1.5" />
+                          {contentMutation.isPending ? "Generating..." : "Generate Exact Submission Content"}
+                        </Button>
+                      )}
+
+                      {/* Notes */}
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-1">Notes</p>
+                        <div className="flex gap-2">
+                          <Textarea
+                            value={editNotes[t.id] !== undefined ? editNotes[t.id] : (t.notes || "")}
+                            onChange={e => setEditNotes(n => ({ ...n, [t.id]: e.target.value }))}
+                            placeholder="Add notes about submission status, contact made, etc."
+                            className="text-xs min-h-[60px]"
+                            data-testid={`textarea-notes-${t.id}`}
+                          />
+                          <Button
+                            variant="outline" size="sm" className="self-end"
+                            onClick={() => { updateMutation.mutate({ id: t.id, updates: { notes: editNotes[t.id] } }); toast({ title: "Notes saved" }); }}
+                            data-testid={`button-save-notes-${t.id}`}
+                          >
+                            Save
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+// ─── Main SEO Strategy Page ─────────────────────────────────────────────────
+
 export default function SeoStrategy() {
   const { toast } = useToast();
   const [result, setResult] = useState<SEOStrategyResult | null>(null);
@@ -410,6 +844,9 @@ export default function SeoStrategy() {
           </div>
         </CardContent>
       </Card>
+
+      {/* ── Backlink Intelligence Engine — always visible ── */}
+      <BacklinkEngine />
 
       {!result ? (
         /* Input Form */
