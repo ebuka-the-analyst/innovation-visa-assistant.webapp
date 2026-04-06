@@ -16386,7 +16386,10 @@ Return a JSON object with:
       adminName = 'Platform Administrator',
       evidence = '',
       planName = 'UK Innovator Founder Visa Assistant',
+      supportContactDate = 'April 1, 2025',
+      supportResolved = 'true',
     } = req.query as Record<string, string>;
+    const didContactSupport = supportResolved === 'true';
 
     const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
     const deadlineFormatted = deadline ? new Date(deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'As specified by Stripe';
