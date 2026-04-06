@@ -1,0 +1,176 @@
+
+
+Innovator-Founder-visa-AI-webapp
+
+production
+
+
+2
+
+Agent
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+asia-southeast1-eqsg3a
+1 Replica
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+2f6ac96a
+Active
+
+Apr 6, 2026, 3:16 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[2026-04-06T14:23:34.902Z] GET /assets/square-pen-KgdrSjSL.js
+[2026-04-06T14:23:34.910Z] GET /assets/square-CnBhSfjs.js
+[2026-04-06T14:23:34.922Z] GET /assets/qr-code-BaxHkgh5.js
+[2026-04-06T14:23:34.932Z] GET /assets/wallet-BJznV4aE.js
+[2026-04-06T14:23:34.943Z] GET /assets/user-check-VmxLPZ2S.js
+[2026-04-06T14:23:34.951Z] GET /assets/server-UyMHuB09.js
+[2026-04-06T14:23:34.961Z] GET /assets/trash-2-CvbJ6JOn.js
+[2026-04-06T14:23:34.972Z] GET /assets/plane-BVYLvjUj.js
+[2026-04-06T14:23:34.981Z] GET /assets/medal-DjVS364S.js
+[2026-04-06T14:23:34.989Z] GET /assets/test-tube-CM26c5GV.js
+[2026-04-06T14:23:35.001Z] GET /assets/textarea-mT7_jJ_l.js
+[2026-04-06T14:23:35.009Z] GET /assets/quote-Bf1D7tsC.js
+[2026-04-06T14:23:35.122Z] GET /assets/upload-0PG19eOB.js
+[2026-04-06T14:23:35.260Z] GET /assets/smartphone-s2SQ-LrV.js
+[2026-04-06T14:23:35.130Z] GET /assets/timer-BwcYTRuS.js
+[2026-04-06T14:23:35.139Z] GET /assets/SEOHead-COM2KXBs.js
+[2026-04-06T14:23:35.152Z] GET /assets/useTierAccess-5JvglVXN.js
+[2026-04-06T14:23:35.159Z] GET /assets/thumbs-up-fac2etg-.js
+[2026-04-06T14:23:35.172Z] GET /assets/seo-schemas-BJ2Px1iU.js
+[2026-04-06T14:23:35.179Z] GET /assets/pricing-CkCMrvYD.js
+[2026-04-06T14:23:35.192Z] GET /assets/badge-DrW3T8Og.js
+[2026-04-06T14:23:35.202Z] GET /assets/save-CzjhE236.js
+[2026-04-06T14:23:35.214Z] GET /assets/lock-open-B-LzTOWK.js
+[2026-04-06T14:23:35.225Z] GET /assets/lock-9UhpSPYN.js
+[2026-04-06T14:23:35.232Z] GET /assets/percent-CjACix3E.js
+[2026-04-06T14:23:35.242Z] GET /assets/video-ZgWHleKB.js
+[2026-04-06T14:23:35.252Z] GET /assets/pen-line-Bem-kukS.js
+[2026-04-06T14:23:35.091Z] GET /assets/shopping-cart-Da7-Jghg.js
+[2026-04-06T14:23:35.103Z] GET /assets/SiteFeedbackPopup-Bmu7sV_7.js
+[2026-04-06T14:23:35.076Z] GET /assets/label-C7EnVEmi.js
+[2026-04-06T14:23:35.111Z] GET /assets/wand-sparkles-Ce-2fb_V.js
+[2026-04-06T14:23:35.081Z] GET /assets/twitter-BIBWbFWb.js
+[2026-04-06T14:23:35.272Z] GET /assets/CookieConsent-X9BfArpa.js
+[2026-04-06T14:23:35.294Z] GET /assets/official_logo-BVc7E89s.webp
+[2026-04-06T14:23:35.284Z] GET /assets/user-DSQOtiS8.js
+[2026-04-06T14:23:36.473Z] GET /assets/official_logo-BVc7E89s.webp
+[2026-04-06T14:23:57.086Z] POST /api/activity/session
+2:23:57 PM [express] POST /api/activity/session 200 in 245ms :: {"sessionId":"97d666a6-0a95-45de-91f…
+[2026-04-06T14:24:27.094Z] POST /api/activity/session
+2:24:27 PM [express] POST /api/activity/session 200 in 278ms :: {"sessionId":"97d666a6-0a95-45de-91f…
+2:24:57 PM [express] POST /api/activity/session 200 in 260ms :: {"sessionId":"97d666a6-0a95-45de-91f…
+[2026-04-06T14:24:57.097Z] POST /api/activity/session
+[2026-04-06T14:25:27.086Z] POST /api/activity/session
+2:25:27 PM [express] POST /api/activity/session 200 in 251ms :: {"sessionId":"97d666a6-0a95-45de-91f…
+[2026-04-06T14:25:57.099Z] POST /api/activity/session
+2:25:57 PM [express] POST /api/activity/session 200 in 253ms :: {"sessionId":"97d666a6-0a95-45de-91f…
+[2026-04-06T14:26:27.088Z] POST /api/activity/session
+2:26:27 PM [express] POST /api/activity/session 200 in 251ms :: {"sessionId":"97d666a6-0a95-45de-91f…
+[2026-04-06T14:27:10.639Z] GET /api/auth/user
+[2026-04-06T14:27:10.643Z] POST /api/activity/session
+[2026-04-06T14:27:10.644Z] GET /api/admin/analytics/overview
+[2026-04-06T14:27:10.653Z] GET /api/admin/activity-log
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+2:27:10 PM [express] GET /api/auth/user 200 in 237ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+2:27:10 PM [express] POST /api/activity/session 200 in 238ms :: {"sessionId":"97d666a6-0a95-45de-91f…
+2:27:10 PM [express] GET /api/admin/activity-log 200 in 263ms :: [{"id":"user-6f114670-9b01-452b-8e4…
+[Stripe] Using LIVE mode credentials - payments are real
+2:27:11 PM [express] GET /api/admin/analytics/overview 200 in 688ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-04-06T14:27:11.848Z] POST /api/activity/session/end
+2:27:11 PM [express] POST /api/activity/session/end 200 in 27ms :: {"success":true}
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+2:30:03 PM [express] GET /api/auth/user 200 in 243ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c"…
+[2026-04-06T14:30:03.841Z] POST /api/activity/page-view
+[Pipeline] "drain-14:30" next run in 1440 min (Tue, 07 Apr 2026 14:30:00 GMT)
+2:30:03 PM [express] POST /api/activity/page-view 200 in 44ms :: {"pageViewId":"28300e01-e86f-436b-b…
+[2026-04-06T14:30:03.240Z] POST /api/activity/session
+[Pipeline] Draining human review queue…
+[2026-04-06T14:30:03.243Z] GET /api/auth/user
+2:30:03 PM [express] POST /api/activity/session 200 in 233ms :: {"sessionId":"fa3df522-5a65-493e-864…
+[Pipeline] Human review queue is empty — nothing to drain.
+[2026-04-06T14:30:11.421Z] GET /attached_assets/official_logo.webp
+[SEO] Injecting meta for route: /
+[2026-04-06T14:30:11.025Z] GET /admin/seo-strategy
+[2026-04-06T14:30:11.031Z] POST /api/activity/session/end
+2:30:11 PM [express] POST /api/activity/session/end 200 in 16ms :: {"success":true}
+[SEO] Injecting meta for route: /
+[2026-04-06T14:30:11.331Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+2:30:11 PM [express] GET /api/auth/user 200 in 26ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-04-06T14:30:11.582Z] POST /api/activity/session
+[2026-04-06T14:30:11.586Z] POST /api/activity/session
+2:30:12 PM [express] GET /api/seo/backlink-targets 500 in 24ms :: {"error":"relation \"backlink_targ…
+2:30:11 PM [express] POST /api/activity/session 200 in 44ms :: {"sessionId":"1e8bad27-682c-40a5-ac78…
+[2026-04-06T14:30:11.740Z] GET /assets/SeoStrategy-Ci9AmS7D.js
+[2026-04-06T14:30:11.828Z] POST /api/activity/page-view
+2:30:11 PM [express] GET /api/partner/status 200 in 234ms :: {"isPartner":false,"promoCodeCount":0}
+2:30:11 PM [express] POST /api/activity/page-view 200 in 36ms :: {"pageViewId":"f0e89de3-9b12-4f6a-8…
+[2026-04-06T14:30:12.139Z] GET /api/seo/backlink-targets
+[2026-04-06T14:30:12.140Z] GET /api/seo/automation-status
+2:30:12 PM [express] GET /api/seo/automation-status 500 in 20ms :: {"error":"relation \"seo_automati…
+[2026-04-06T14:30:11.606Z] GET /api/partner/status
+2:30:11 PM [express] POST /api/activity/session 200 in 39ms :: {"sessionId":"14cc9b93-105e-4983-b4d8…
+[2026-04-06T14:30:14.818Z] POST /api/seo/backlink-discover
+    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:404:12)
+    at importModuleDynamicallyCallback (node:internal/modules/esm/utils:176:14) {
+    at ModuleLoader.resolve (node:internal/modules/esm/loader:373:25)
+  code: 'ERR_MODULE_NOT_FOUND'
+    at ModuleLoader.getModuleJob (node:internal/modules/esm/loader:250:38)
+}
+    at ModuleLoader.import (node:internal/modules/esm/loader:336:34)
+    at importModuleDynamically (node:internal/modules/esm/translators:143:35)
+[Backlink Discover] Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@google/generative-ai' imported from /app/dist/index.js
+    at new NodeError (node:internal/errors:405:5)
+    at packageResolve (node:internal/modules/esm/resolve:916:9)
+    at moduleResolve (node:internal/modules/esm/resolve:973:20)
+    at defaultResolve (node:internal/modules/esm/resolve:1206:11)
+2:30:14 PM [express] POST /api/seo/backlink-discover 500 in 23ms :: {"error":"Cannot find package '@…
+[2026-04-06T14:30:20.534Z] POST /api/activity/session/end
+2:30:20 PM [express] POST /api/activity/session/end 200 in 34ms :: {"success":true}
+
+

@@ -880,6 +880,70 @@ async function runAutoMigrations() {
       `);
     }
 
+    // ── seo_automation_plans ────────────────────────────────────────────────
+    const seoAutoExists = await db.execute(sql`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables WHERE table_name = 'seo_automation_plans'
+      ) as table_exists
+    `);
+    if (!seoAutoExists.rows[0]?.table_exists) {
+      log("[DB] Auto-migration: creating seo_automation_plans table");
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS seo_automation_plans (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          strategy_content TEXT NOT NULL,
+          blog_items JSONB NOT NULL DEFAULT '[]',
+          total_weeks INTEGER NOT NULL DEFAULT 13,
+          current_week INTEGER NOT NULL DEFAULT 0,
+          posts_per_week INTEGER NOT NULL DEFAULT 2,
+          status VARCHAR(20) NOT NULL DEFAULT 'active',
+          activated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+          next_run_at TIMESTAMP,
+          last_run_at TIMESTAMP,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+    }
+
+    // ── backlink_targets ─────────────────────────────────────────────────────
+    const backlinkExists = await db.execute(sql`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables WHERE table_name = 'backlink_targets'
+      ) as table_exists
+    `);
+    if (!backlinkExists.rows[0]?.table_exists) {
+      log("[DB] Auto-migration: creating backlink_targets table");
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS backlink_targets (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          name VARCHAR(255) NOT NULL,
+          url VARCHAR(500) NOT NULL,
+          submission_url VARCHAR(500),
+          category VARCHAR(50) NOT NULL DEFAULT 'community',
+          platform VARCHAR(100),
+          domain_authority INTEGER,
+          priority VARCHAR(20) NOT NULL DEFAULT 'medium',
+          effort VARCHAR(20) NOT NULL DEFAULT 'medium',
+          expected_impact VARCHAR(20) NOT NULL DEFAULT 'medium',
+          strategy TEXT,
+          anchor_text VARCHAR(255) NOT NULL DEFAULT 'UK Innovator Founder Visa Assistant',
+          link_type VARCHAR(20) NOT NULL DEFAULT 'dofollow',
+          contact_email VARCHAR(255),
+          status VARCHAR(20) NOT NULL DEFAULT 'pending',
+          submitted_at TIMESTAMP,
+          live_at TIMESTAMP,
+          last_checked_at TIMESTAMP,
+          is_live BOOLEAN NOT NULL DEFAULT false,
+          ai_generated_content TEXT,
+          content_generated_at TIMESTAMP,
+          notes TEXT,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+    }
+
     log("[MIGRATION] Schema check complete");
   } catch (error) {
     console.error("[MIGRATION] Auto-migration error:", error);

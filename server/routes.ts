@@ -20,6 +20,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 // OpenAI is imported dynamically when needed
+import { GoogleGenAI } from "@google/genai";
 import { registerObjectStorageRoutes, ObjectStorageService } from "./replit_integrations/object_storage";
 import { s3Storage } from "./services/s3Storage";
 
@@ -27,6 +28,8 @@ const uploadsDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
+
+const geminiAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_2 || "" });
 
 const documentStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -17290,10 +17293,6 @@ Best wishes.</div>
   // POST discover new backlink targets via Quad-AI
   app.post("/api/seo/backlink-discover", requireAdmin, async (_req, res) => {
     try {
-      const { GoogleGenerativeAI } = await import("@google/generative-ai");
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
       const prompt = `You are a PhD-level SEO authority building expert. Generate a comprehensive list of 40 real, specific backlink opportunities for the website "UK Innovator Founder Visa Assistant" (https://innovatorfoundervisaassistant.co.uk) — an AI-powered platform with 109 tools for UK Innovator Founder Visa applicants.
 
 Return ONLY a valid JSON array (no markdown, no explanation) with exactly 40 objects. Each object must have:
@@ -17325,8 +17324,11 @@ Include a realistic mix across all these categories:
 
 Return ONLY the JSON array. No markdown. No explanation.`;
 
-      const result = await model.generateContent(prompt);
-      let text = result.response.text().trim();
+      const aiResult = await geminiAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
+      let text = (aiResult.text ?? "").trim();
       if (text.startsWith("```")) text = text.replace(/```json?\n?/g, "").replace(/```/g, "").trim();
 
       let discovered: any[] = JSON.parse(text);
@@ -17369,10 +17371,6 @@ Return ONLY the JSON array. No markdown. No explanation.`;
       const [target] = await db.select().from(backlinkTargets).where(eq(backlinkTargets.id, req.params.id)).limit(1);
       if (!target) return res.status(404).json({ error: "Target not found" });
 
-      const { GoogleGenerativeAI } = await import("@google/generative-ai");
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
       const prompt = `You are a PhD-level SEO and outreach expert. Generate the exact submission content for a backlink opportunity.
 
 Platform: ${target.name} (${target.platform || target.category})
@@ -17393,8 +17391,11 @@ Generate EXACTLY what the user should copy and paste to submit on this platform.
 Format as plain text the user can copy. Start with a clear label like "COMPANY DESCRIPTION:" or "FORUM POST:" or "EMAIL SUBJECT:" etc.
 Be persuasive, professional, and natural. Never mention this is AI-generated. Keep it under 400 words.`;
 
-      const result = await model.generateContent(prompt);
-      const content = result.response.text().trim();
+      const aiContent = await geminiAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
+      const content = (aiContent.text ?? "").trim();
 
       const [updated] = await db.update(backlinkTargets)
         .set({ aiGeneratedContent: content, contentGeneratedAt: new Date(), updatedAt: new Date() })
