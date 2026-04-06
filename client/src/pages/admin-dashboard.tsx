@@ -730,13 +730,21 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
               </Button>
             </div>
 
-            {/* Quick preset — Adamya Raj dispute */}
-            <div className="mt-2 flex items-center gap-2">
+            {/* Quick preset + export */}
+            <div className="mt-2 flex flex-wrap items-center gap-2">
               <span className="text-xs text-muted-foreground">Quick:</span>
               <Button size="sm" variant="outline" className="text-xs h-7"
                 onClick={() => { setSearchEmail('adamyaraj2@gmail.com'); setQueryEmail('adamyaraj2@gmail.com'); }}>
                 Adamya Raj (£110 dispute)
               </Button>
+              {queryEmail && (
+                <Button size="sm" variant="default" className="text-xs h-7 bg-[#005EB8] text-white"
+                  onClick={() => window.open(`/api/admin/support/user-logs-export?email=${encodeURIComponent(queryEmail)}`, '_blank')}
+                  data-testid="button-export-full-logs">
+                  <Download className="h-3 w-3 mr-1" />
+                  Export Full Logs for {queryEmail}
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -1016,10 +1024,18 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
                 </p>
               </div>
             </div>
-            <Button size="sm" onClick={loadAdamyaCase} data-testid="button-load-adamya">
-              <FilePlus className="h-3.5 w-3.5 mr-1" />
-              Load This Case
-            </Button>
+            <div className="flex gap-2 flex-wrap">
+              <Button size="sm" onClick={loadAdamyaCase} data-testid="button-load-adamya">
+                <FilePlus className="h-3.5 w-3.5 mr-1" />
+                Load This Case
+              </Button>
+              <Button size="sm" variant="outline"
+                onClick={() => window.open('/api/admin/support/user-logs-export?email=adamyaraj2%40gmail.com', '_blank')}
+                data-testid="button-export-adamya-logs">
+                <Download className="h-3.5 w-3.5 mr-1" />
+                Export His Full Logs
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

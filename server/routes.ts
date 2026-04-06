@@ -16800,6 +16800,326 @@ Return a JSON object with:
     }
   });
 
+  // Generate a comprehensive full activity log HTML report for a user (by email)
+  app.get("/api/admin/support/user-logs-export", requireAdmin, async (req, res) => {
+    const { email } = req.query as { email: string };
+    if (!email) return res.status(400).json({ error: "email is required" });
+
+    try {
+      // 1. Find user
+      const allUsers = await storage.getAllUsers();
+      const user = allUsers.find(u => u.email?.toLowerCase() === email.toLowerCase());
+      if (!user) {
+        return res.status(404).send(`<html><body style="font-family:Arial;padding:40px;"><h2>User not found</h2><p>No user found with email: <strong>${email}</strong></p><p>Note: This searches the <em>current</em> database. If you need production data, run this on Railway.</p></body></html>`);
+      }
+
+      // 2. Sessions
+      const sessions = await db.select().from(userSessions)
+        .where(eq(userSessions.userId, user.id))
+        .orderBy(desc(userSessions.sessionStartedAt))
+        .limit(200);
+
+      // 3. Page views
+      const pages = await db.select().from(pageViews)
+        .where(eq(pageViews.userId, user.id))
+        .orderBy(desc(pageViews.viewStartedAt))
+        .limit(500);
+
+      // 4. Activity events
+      const events = await db.select().from(activityEvents)
+        .where(eq(activityEvents.userId, user.id))
+        .orderBy(desc(activityEvents.occurredAt))
+        .limit(1000);
+
+      // 5. Business plans
+      const plans = await db.select().from(businessPlans)
+        .where(eq(businessPlans.userId, user.id))
+        .orderBy(desc(businessPlans.createdAt));
+
+      // 6. Stripe payments
+      let stripePayments: any[] = [];
+      let stripeCustomerId = user.stripeCustomerId || '';
+      try {
+        const stripe = await getUncachableStripeClient();
+        let custId = stripeCustomerId;
+        if (!custId) {
+          const customers = await stripe.customers.list({ email: user.email!, limit: 3 });
+          if (customers.data.length > 0) { custId = customers.data[0].id; stripeCustomerId = custId; }
+        }
+        if (custId) {
+          const charges = await stripe.charges.list({ customer: custId, limit: 20 });
+          stripePayments = charges.data.map(c => ({
+            id: c.id,
+            amount: (c.amount / 100).toFixed(2),
+            currency: c.currency.toUpperCase(),
+            status: c.status,
+            description: c.description || '—',
+            date: new Date(c.created * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+            refunded: c.refunded,
+            disputeId: c.dispute || null,
+          }));
+        }
+      } catch (_e) {}
+
+      // 7. Admin audit actions on this user
+      const auditActions = await db.select().from(adminAuditLogs)
+        .where(eq(adminAuditLogs.targetEmail, user.email!))
+        .orderBy(desc(adminAuditLogs.createdAt))
+        .limit(50);
+
+      // Compute summary stats
+      const totalDurationMins = Math.round(sessions.reduce((a, s) => a + (s.totalDurationSeconds || 0), 0) / 60);
+      const totalPageViews = pages.length;
+      const totalEvents = events.length;
+      const toolEvents = events.filter(e => e.toolId);
+      const uniqueTools = [...new Set(toolEvents.map(e => e.toolId))];
+      const pageFreq: Record<string, number> = {};
+      pages.forEach(p => { pageFreq[p.pagePath] = (pageFreq[p.pagePath] || 0) + 1; });
+      const topPages = Object.entries(pageFreq).sort((a, b) => b[1] - a[1]).slice(0, 15);
+      const toolFreq: Record<string, number> = {};
+      toolEvents.forEach(e => { if (e.toolId) toolFreq[e.toolId] = (toolFreq[e.toolId] || 0) + 1; });
+      const topTools = Object.entries(toolFreq).sort((a, b) => b[1] - a[1]).slice(0, 20);
+      const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const fmt = (d: any) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+
+      const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Full Activity Log — ${user.email}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; color: #1a1a2e; background: #fff; font-size: 10pt; line-height: 1.6; }
+  .cover { background: linear-gradient(135deg, #005EB8 0%, #001f3d 100%); color: white; padding: 50px 40px; page-break-after: always; }
+  .cover h1 { font-size: 26pt; margin-bottom: 8px; }
+  .cover h2 { font-size: 13pt; font-weight: 300; opacity: 0.8; margin-bottom: 30px; }
+  .cover-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 600px; font-size: 9pt; }
+  .cover-item { background: rgba(255,255,255,0.1); border-radius: 4px; padding: 10px 14px; }
+  .cover-item label { opacity: 0.7; display: block; font-size: 8pt; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .cover-item strong { font-size: 11pt; }
+  .badge { display: inline-block; background: #e3b341; color: #1a1a2e; border-radius: 3px; padding: 3px 10px; font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 20px; }
+  .print-btn { position: fixed; top: 16px; right: 16px; background: #005EB8; color: white; border: none; padding: 10px 20px; border-radius: 5px; font-size: 10pt; cursor: pointer; font-weight: 700; z-index: 9999; }
+  .print-btn:hover { background: #003d7a; }
+
+  .section { padding: 30px 40px; page-break-inside: avoid; }
+  .section + .section { border-top: 2px solid #e5e7eb; }
+  h2.sec { font-size: 15pt; color: #005EB8; margin-bottom: 16px; padding-bottom: 6px; border-bottom: 2px solid #dbeafe; }
+  h3 { font-size: 11pt; color: #374151; margin: 16px 0 8px; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-box { background: #f0f6ff; border: 1px solid #dbeafe; border-radius: 6px; padding: 14px 16px; text-align: center; }
+  .stat-num { font-size: 22pt; font-weight: 700; color: #005EB8; }
+  .stat-label { font-size: 8pt; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; margin-top: 4px; }
+
+  .highlight-box { background: #fffbeb; border-left: 4px solid #e3b341; padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 9pt; }
+  .success-box { background: #f0faf4; border-left: 4px solid #057a55; padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 9pt; }
+  .info-box { background: #f0f6ff; border-left: 4px solid #005EB8; padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 9pt; }
+
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 9pt; }
+  th { background: #005EB8; color: white; padding: 8px 12px; text-align: left; font-size: 8pt; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 7px 12px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8faff; }
+  tr:last-child td { border-bottom: none; }
+  .mono { font-family: monospace; font-size: 8pt; color: #6b7280; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 8pt; font-weight: 600; }
+  .pill-green { background: #dcfce7; color: #166534; }
+  .pill-orange { background: #fff7ed; color: #9a3412; }
+  .pill-blue { background: #dbeafe; color: #1e40af; }
+  .pill-red { background: #fee2e2; color: #991b1b; }
+  .page-break { page-break-before: always; }
+  .footer { text-align: center; font-size: 8pt; color: #9ca3af; padding: 20px; border-top: 1px solid #e5e7eb; }
+  @media print { .print-btn { display: none !important; } body { font-size: 9pt; } }
+</style>
+</head>
+<body>
+<button class="print-btn no-print" onclick="window.print()">Print / Save as PDF</button>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="badge">Evidence Report — Admin Use Only</div>
+  <h1 style="margin-top:16px;">Full User Activity Log</h1>
+  <h2>UK Innovator Founder Visa Assistant</h2>
+  <div class="cover-grid">
+    <div class="cover-item"><label>User Email</label><strong>${user.email}</strong></div>
+    <div class="cover-item"><label>Full Name</label><strong>${user.firstName || ''} ${user.lastName || ''}${!user.firstName && !user.lastName ? '(not set)' : ''}</strong></div>
+    <div class="cover-item"><label>User ID</label><strong class="mono" style="font-size:9pt">${user.id}</strong></div>
+    <div class="cover-item"><label>Registered</label><strong>${fmt(user.createdAt)}</strong></div>
+    <div class="cover-item"><label>Subscription Tier</label><strong>${(user.subscriptionTier || 'free').toUpperCase()}</strong></div>
+    <div class="cover-item"><label>Stripe Customer ID</label><strong class="mono" style="font-size:9pt">${stripeCustomerId || '—'}</strong></div>
+    <div class="cover-item"><label>Email Verified</label><strong>${user.isEmailVerified ? 'Yes' : 'No'}</strong></div>
+    <div class="cover-item"><label>Report Generated</label><strong>${today}</strong></div>
+  </div>
+</div>
+
+<!-- SECTION 1: SUMMARY STATS -->
+<div class="section">
+  <h2 class="sec">1. Activity Summary</h2>
+  <div class="stat-grid">
+    <div class="stat-box"><div class="stat-num">${sessions.length}</div><div class="stat-label">Total Sessions</div></div>
+    <div class="stat-box"><div class="stat-num">${totalDurationMins}</div><div class="stat-label">Total Minutes on Platform</div></div>
+    <div class="stat-box"><div class="stat-num">${totalPageViews}</div><div class="stat-label">Page Views</div></div>
+    <div class="stat-box"><div class="stat-num">${uniqueTools.length}</div><div class="stat-label">Unique Tools Used</div></div>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-box"><div class="stat-num">${totalEvents}</div><div class="stat-label">Activity Events Recorded</div></div>
+    <div class="stat-box"><div class="stat-num">${plans.length}</div><div class="stat-label">Business Plans Created</div></div>
+    <div class="stat-box"><div class="stat-num">${stripePayments.length}</div><div class="stat-label">Stripe Payments</div></div>
+    <div class="stat-box"><div class="stat-num">${auditActions.length}</div><div class="stat-label">Admin Actions on Account</div></div>
+  </div>
+  ${totalDurationMins > 0 || sessions.length > 0 ? `<div class="success-box"><strong>Service Usage Confirmed:</strong> This user has ${sessions.length} recorded session(s) with ${totalDurationMins} total minutes of platform use, ${totalPageViews} page views, and ${totalEvents} tracked activity events. This constitutes clear evidence of service delivery and active engagement.</div>` : `<div class="highlight-box"><strong>Note:</strong> No session data found in this database. If this is the dev database, please run this report on Railway production for the real data.</div>`}
+</div>
+
+<!-- SECTION 2: STRIPE PAYMENTS -->
+<div class="section">
+  <h2 class="sec">2. Payment History (Stripe)</h2>
+  ${stripePayments.length === 0 ? `<p style="color:#6b7280">No Stripe payment records found. Stripe customer ID: ${stripeCustomerId || 'not linked'}.</p>` : `
+  <table>
+    <tr><th>Date</th><th>Amount</th><th>Status</th><th>Description</th><th>Charge ID</th><th>Disputed?</th></tr>
+    ${stripePayments.map(p => `
+    <tr>
+      <td>${p.date}</td>
+      <td><strong>${p.currency} ${p.amount}</strong></td>
+      <td><span class="pill ${p.status === 'succeeded' ? 'pill-green' : 'pill-orange'}">${p.status}</span></td>
+      <td>${p.description}</td>
+      <td class="mono">${p.id}</td>
+      <td>${p.disputeId ? `<span class="pill pill-red">DISPUTED: ${p.disputeId}</span>` : `<span class="pill pill-green">No</span>`}${p.refunded ? ' <span class="pill pill-orange">Refunded</span>' : ''}</td>
+    </tr>`).join('')}
+  </table>`}
+</div>
+
+<!-- SECTION 3: ALL SESSIONS -->
+<div class="section page-break">
+  <h2 class="sec">3. Session History (${sessions.length} sessions)</h2>
+  ${sessions.length === 0 ? '<p style="color:#6b7280">No sessions recorded in this database.</p>' : `
+  <table>
+    <tr><th>#</th><th>Started</th><th>Last Seen</th><th>Duration</th><th>Device</th><th>Browser</th><th>OS</th><th>Country</th><th>Pages</th><th>Events</th></tr>
+    ${sessions.map((s, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${fmt(s.sessionStartedAt)}</td>
+      <td>${fmt(s.lastSeenAt)}</td>
+      <td>${s.totalDurationSeconds ? Math.round(s.totalDurationSeconds / 60) + ' min' : '—'}</td>
+      <td>${s.deviceType || '—'}</td>
+      <td>${s.browserName || '—'} ${s.browserVersion || ''}</td>
+      <td>${s.osName || '—'}</td>
+      <td>${s.country || s.countryCode || '—'}</td>
+      <td>${s.pageViewCount || 0}</td>
+      <td>${s.eventCount || 0}</td>
+    </tr>`).join('')}
+  </table>`}
+</div>
+
+<!-- SECTION 4: TOP PAGES -->
+<div class="section">
+  <h2 class="sec">4. Pages Visited (Top ${topPages.length})</h2>
+  ${topPages.length === 0 ? '<p style="color:#6b7280">No page view data recorded.</p>' : `
+  <table>
+    <tr><th>Page Path</th><th>Visit Count</th><th>% of Total</th></tr>
+    ${topPages.map(([path, count]) => `
+    <tr>
+      <td>${path}</td>
+      <td><strong>${count}</strong></td>
+      <td>${totalPageViews > 0 ? Math.round(count / totalPageViews * 100) : 0}%</td>
+    </tr>`).join('')}
+  </table>`}
+</div>
+
+<!-- SECTION 5: TOOL USAGE -->
+<div class="section">
+  <h2 class="sec">5. Tool Usage (${uniqueTools.length} unique tools, ${toolEvents.length} interactions)</h2>
+  ${topTools.length === 0 ? '<p style="color:#6b7280">No tool usage recorded.</p>' : `
+  ${topTools.length > 0 ? `<div class="success-box"><strong>Evidence of tool usage:</strong> This user interacted with ${uniqueTools.length} different tools across the platform. The most used tool was "${topTools[0][0]}" (${topTools[0][1]} times). This directly contradicts the claim that the product was "unacceptable."</div>` : ''}
+  <table>
+    <tr><th>Tool ID</th><th>Interactions</th></tr>
+    ${topTools.map(([tool, count]) => `
+    <tr><td>${tool}</td><td><strong>${count}</strong></td></tr>`).join('')}
+  </table>`}
+</div>
+
+<!-- SECTION 6: ALL ACTIVITY EVENTS (most recent 100) -->
+<div class="section page-break">
+  <h2 class="sec">6. Detailed Activity Events (showing ${Math.min(events.length, 100)} of ${events.length})</h2>
+  ${events.length === 0 ? '<p style="color:#6b7280">No activity events recorded.</p>' : `
+  <table>
+    <tr><th>Timestamp</th><th>Type</th><th>Category</th><th>Action</th><th>Label</th><th>Tool</th><th>Page</th></tr>
+    ${events.slice(0, 100).map(e => `
+    <tr>
+      <td class="mono">${fmt(e.occurredAt)}</td>
+      <td>${e.eventType}</td>
+      <td>${e.eventCategory}</td>
+      <td>${e.eventAction}</td>
+      <td>${e.eventLabel || '—'}</td>
+      <td>${e.toolId || '—'}</td>
+      <td>${e.pagePath || '—'}</td>
+    </tr>`).join('')}
+  </table>`}
+</div>
+
+<!-- SECTION 7: BUSINESS PLANS -->
+<div class="section">
+  <h2 class="sec">7. Business Plans Created (${plans.length})</h2>
+  ${plans.length === 0 ? '<p style="color:#6b7280">No business plans created.</p>' : `
+  <table>
+    <tr><th>Plan ID</th><th>Status</th><th>Tier</th><th>Created</th><th>Last Updated</th></tr>
+    ${plans.map(p => `
+    <tr>
+      <td class="mono">${p.id}</td>
+      <td><span class="pill pill-blue">${p.status || 'draft'}</span></td>
+      <td>${(p as any).tier || '—'}</td>
+      <td>${fmt(p.createdAt)}</td>
+      <td>${fmt(p.updatedAt)}</td>
+    </tr>`).join('')}
+  </table>`}
+</div>
+
+<!-- SECTION 8: ALL PAGE VIEWS (recent 200) -->
+<div class="section page-break">
+  <h2 class="sec">8. Full Page View Log (showing ${Math.min(pages.length, 200)} of ${pages.length})</h2>
+  ${pages.length === 0 ? '<p style="color:#6b7280">No page views recorded.</p>' : `
+  <table>
+    <tr><th>Timestamp</th><th>Page</th><th>Time on Page</th><th>Scroll Depth</th><th>Clicks</th></tr>
+    ${pages.slice(0, 200).map(p => `
+    <tr>
+      <td class="mono">${fmt(p.viewStartedAt)}</td>
+      <td>${p.pagePath}</td>
+      <td>${p.timeOnPageSeconds ? p.timeOnPageSeconds + 's' : '—'}</td>
+      <td>${p.scrollDepthPercent !== null ? p.scrollDepthPercent + '%' : '—'}</td>
+      <td>${p.clickCount ?? '—'}</td>
+    </tr>`).join('')}
+  </table>`}
+</div>
+
+<!-- SECTION 9: ADMIN ACTIONS -->
+<div class="section">
+  <h2 class="sec">9. Admin Actions on This Account (${auditActions.length})</h2>
+  ${auditActions.length === 0 ? '<p style="color:#6b7280">No admin actions recorded against this account.</p>' : `
+  <table>
+    <tr><th>Date</th><th>Action</th><th>Category</th><th>Admin</th><th>Notes</th></tr>
+    ${auditActions.map(a => `
+    <tr>
+      <td class="mono">${fmt(a.createdAt)}</td>
+      <td>${a.action}</td>
+      <td>${a.actionCategory || '—'}</td>
+      <td>${a.adminEmail}</td>
+      <td>${a.reason || JSON.stringify(a.newValue || {}).slice(0, 80)}</td>
+    </tr>`).join('')}
+  </table>`}
+</div>
+
+<div class="footer">
+  Full Activity Log Export — ${user.email} — Generated: ${today} — UK Innovator Founder Visa Assistant — CONFIDENTIAL
+</div>
+</body>
+</html>`;
+
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.send(html);
+    } catch (error: any) {
+      console.error("User logs export error:", error);
+      res.status(500).send(`<html><body style="font-family:Arial;padding:40px;"><h2>Error generating log</h2><pre>${error.message}</pre></body></html>`);
+    }
+  });
+
   // Save a dispute note for tracking
   app.post("/api/admin/support/disputes", requireAdmin, async (req, res) => {
     const { customerEmail, disputeId, amount, reason, status, notes, resolution } = req.body;
