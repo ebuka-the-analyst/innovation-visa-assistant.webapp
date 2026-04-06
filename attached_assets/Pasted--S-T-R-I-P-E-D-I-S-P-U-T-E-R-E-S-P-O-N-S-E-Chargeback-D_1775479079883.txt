@@ -1,0 +1,247 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+S T R I P E D I S P U T E R E S P O N S E
+
+
+
+
+Chargeback Defence Pack
+UK Innovator Founder Visa Assistant
+
+
+
+
+
+ 
+Dispute Reference Customer
+Amount Disputed
+
+Reason Stated Prepared By Prepared On
+ 
+edu_1TIKfKK9BSTYpDOqrDunVaVy
+
+adamyaraj2@gmail.com
+
+£110
+
+Product unacceptable
+
+Platform Administrator
+
+6 April 2026
+ 
+
+
+
+RESPOND BY: 14 May 2026
+
+
+
+CONFIDENTIAL — FOR STRIPE SUBMISSION ONLY
+ 
+
+
+
+
+
+
+
+
+MERCHANT REBUTTAL LETTER	REF PENDING
+
+
+
+
+Formal Merchant Rebuttal
+6 April 2026
+
+
+To: Stripe Dispute Resolution Team Re: Chargeback Reference [Reference] Customer: adamyaraj2@gmail.com Amount: [£110]
+
+Subject: Formal Merchant Rebuttal — Chargeback Filed After Issue Was Resolved
+
+We write in formal response to the above-referenced chargeback filed against our platform, UK Innovator Founder Visa Assistant. We respectfully but firmly contest this dispute in its entirety, and wish to bring the following critical facts to your attention.
+
+
+
+
+
+
+
+
+
+We wish to draw your attention to the following key facts:
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+We have attached our supporting evidence, including the support email thread confirming  resolution, and respectfully request that this dispute be ruled in our favour and the funds be returned to our account.
+
+
+
+Yours sincerely,
+
+
+Benedict Umeh
+Platform Administrator
+UK Innovator Founder Visa Assistant Date: 6 April 2026
+
+CONFIDENTIAL	Page 2 of 5
+ 
+
+
+
+
+
+
+
+
+CASE SUMMARY & TIMELINE	REF PENDING
+
+
+
+
+Case Summary
+
+	
+FIELD	DETAIL
+Dispute Reference	du_1TIKfKK9BSTYpDOqrDunVaVy 
+Customer Email	adamyaraj2@gmail.com
+Amount Disputed	£110
+Dispute Reason (Customer)	Product unacceptable
+Our Response	We contest this chargeback in full
+Response Deadline	14 May 2026
+Response Prepared	6 April 2026
+Prepared By	Platform Administrator
+
+Event Timeline
+
+#	EVENT	DETAIL
+1	Customer registers account	Email: adamyaraj2@gmail.com | Platform: UK Innovator Founder Visa Assistant
+2	Email verification	Customer verifies their account email address
+3	Ultimate subscription purchased	Customer pays [£110] Ultimate plan selected
+4	Partial activation issue	Account upgraded successfully; subscription tier did not fully propagate
+
+5	Customer contacts support	Customer emails support@innovatorfoundervisaassistant.co.uk reporting the activation issue (Subject: "Urgent help needed") 2026-03-25 12:15
+6	Issue investigated & resolved	Support team identifies root cause, applies fix, and sends resolution confirmation to adamyaraj2@gmail.com on 2026-04-01 16:28
+7	Chargeback filed — after resolution	Dispute [ID] raised with reason: "Product unacceptable"  filed after issue was already resolved
+ 
+
+8	Merchant dispute response prepared	6 April 2026 — This document
+
+
+
+
+CONFIDENTIAL	Page 3 of 5
+ 
+
+
+
+
+
+
+
+
+EVIDENCE SUMMARY	REF PENDING
+
+
+
+
+Evidence of Service Delivery
+The following categories of evidence support our position that the service was fully delivered as described. Items should be attached to your Stripe dispute submission:
+ 
+Submission Checklist
+✓	Support email thread (PDF) — "Re: Fwd: Urgent help needed" — from support@innovatorfoundervisaassistant.co.uk to adamyaraj2@gmail.com — your single most important piece of evidence
+✓	Merchant rebuttal letter (this document, Page 2)
+✓	Screenshot of customer account record (from Railway production database)
+✓	Activity log / session records export (use admin → Customer Support → "Export Logs" button)
+✓	Terms of Service document (screenshot or PDF from your website)
+✓	Stripe payment receipt for the [amount] transaction
+✓	Any customer-generated output (business plan, report) showing the service was used
+✓	Timeline statement showing chargeback was filed after resolution email was sent
+
+
+CONFIDENTIAL	Page 4 of 5
+ 
+
+
+
+
+
+
+
+
+RESOLUTION STATEMENT	REF PENDING
+
+
+
+
+Resolution & Closing Statement
+
+Our Position
+UK Innovator Founder Visa Assistant is a professional, AI-powered SaaS platform designed to assist entrepreneurs with UK visa applications. The service delivers substantial value through over 100 AI-powered tools, compliance checkers, business plan generators, and expert guidance modules.
+The customer paid for and received access to a fully functional platform. The characterisation of our product as "unacceptable" is not substantiated by any evidence and contradicts the customer's own usage records.
+
+Precedent & Stripe Policy Alignment
+Under Stripe's dispute resolution guidelines, a merchant who can demonstrate:
+
+✓	The customer created an account and verified their identity
+✓	The customer accessed and used the service after payment
+✓	Clear, accessible Terms of Service were presented and accepted
+✓	A reported issue was investigated and resolved before the chargeback was filed
+✓	The chargeback was filed after the merchant confirmed resolution — indicating bad faith
+
+…has strong grounds for the dispute to be ruled in the merchant's favour. Our case satisfies all of the above criteria.
+
+Request
+
+
+
+
+
+
+
+
+DOCUMENT	DETAIL
+Prepared by	Platform Administrator
+Prepared on	6 April 2026
+Dispute reference	—
+Amount contested	—
+ 
+
+Response deadline	14 May 2026
+
+
+
+
+Platform Administrator
+Authorised Signatory
+UK Innovator Founder Visa Assistant
+
+
+CONFIDENTIAL — FOR STRIPE SUBMISSION ONLY	Page 5 of 5
