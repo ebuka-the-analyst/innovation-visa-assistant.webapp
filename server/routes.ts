@@ -16509,7 +16509,7 @@ Return a JSON object with:
   <p>We write in formal response to the above-referenced chargeback filed against our platform, <strong>${planName}</strong>. We respectfully but firmly contest this dispute in its entirety, and wish to bring the following critical facts to your attention.</p>
 
   <div class="warning-box" style="background:#fff0f0; border-left-color:#c0392b;">
-    <strong>Key Finding:</strong> The customer contacted our support team, the reported issue was identified and fully resolved on the same day (1 April 2025), a resolution confirmation was sent to the customer via email at 4:28 PM — and the chargeback was filed <em>after</em> this resolution. This constitutes a bad-faith dispute under Stripe's guidelines.
+    <strong>Key Finding:</strong> The customer contacted our support team regarding a technical issue. Our team investigated, resolved the issue, and communicated the resolution to the customer — and the chargeback was filed <em>after</em> this resolution was completed. This constitutes a bad-faith dispute under Stripe's guidelines.
   </div>
 
   <p>We wish to draw your attention to the following key facts:</p>
@@ -16519,11 +16519,11 @@ Return a JSON object with:
   </div>
 
   <div class="info-box">
-    <strong>2. A technical activation issue was reported, and fixed the same day.</strong> The customer contacted our support team regarding a plan activation issue (their subscription tier had not fully propagated, though their credits had transferred). Our support team identified the root cause, applied the fix, and sent a resolution confirmation email to <em>${customerEmail || 'the customer'}</em> on <strong>1 April 2025 at 4:28 PM</strong> from <em>support@innovatorfoundervisaassistant.co.uk</em>. The customer's account was fully operational from this point.
+    <strong>2. A technical activation issue was reported, investigated, and resolved.</strong> The customer contacted our support team (support@innovatorfoundervisaassistant.co.uk) regarding a plan activation issue — their Ultimate subscription tier had not fully propagated following payment, though their credits had transferred correctly. Our support team investigated the root cause, applied the necessary fix, and communicated the resolution to the customer. The customer's account was confirmed fully operational prior to the chargeback being filed.
   </div>
 
   <div class="info-box">
-    <strong>3. The chargeback was filed after the issue was resolved.</strong> Despite receiving our support response and having their issue corrected, the customer subsequently filed chargeback reference <em>${disputeId || '[ID]'}</em>. Filing a chargeback after a merchant has already resolved the reported issue is inconsistent with good-faith consumer conduct and contradicts the stated reason of "product unacceptable."
+    <strong>3. The chargeback was filed after the issue was resolved.</strong> Despite our support team having investigated and resolved the reported issue, and having communicated this resolution to the customer at <em>${customerEmail || 'their registered email'}</em>, the customer subsequently filed chargeback reference <em>${disputeId || '[ID]'}</em> citing "product unacceptable." Filing a chargeback after a merchant has already acknowledged and resolved the complaint is inconsistent with good-faith consumer conduct. The stated reason does not reflect the actual circumstances.
   </div>
 
   <div class="info-box">
@@ -16572,11 +16572,12 @@ Return a JSON object with:
     <tr><th>#</th><th>Event</th><th>Detail</th></tr>
     <tr><td>1</td><td>Customer registers account</td><td>Email: ${customerEmail || '—'} | Platform: ${planName}</td></tr>
     <tr><td>2</td><td>Email verification</td><td>Customer verifies their account email address</td></tr>
-    <tr><td>3</td><td>Subscription purchased</td><td>Customer pays ${amount || '[amount]'} and gains platform access</td></tr>
-    <tr><td>4</td><td>Platform access granted</td><td>Immediate access to all subscribed features</td></tr>
-    <tr><td>5</td><td>No support contact made</td><td>Customer did not contact support prior to chargeback</td></tr>
-    <tr><td>6</td><td>Chargeback filed</td><td>Dispute ${disputeId || '[ID]'} raised — reason: "${reason || 'Product unacceptable'}"</td></tr>
-    <tr><td>7</td><td>Merchant response prepared</td><td>${today} — This document</td></tr>
+    <tr><td>3</td><td>Ultimate subscription purchased</td><td>Customer pays ${amount || '[amount]'} — Ultimate plan selected</td></tr>
+    <tr><td>4</td><td>Partial activation issue</td><td>Credits transferred successfully; subscription tier did not fully propagate — a known edge-case technical issue</td></tr>
+    <tr><td>5</td><td>Customer contacts support</td><td>Customer emails support@innovatorfoundervisaassistant.co.uk reporting the activation issue (Subject: "Urgent help needed")</td></tr>
+    <tr><td>6</td><td>Issue investigated &amp; resolved</td><td>Support team identifies root cause, applies fix, and sends resolution confirmation to ${customerEmail || 'customer'}</td></tr>
+    <tr><td>7</td><td>Chargeback filed — after resolution</td><td>Dispute ${disputeId || '[ID]'} raised with reason: "${reason || 'Product unacceptable'}" — filed after issue was already resolved</td></tr>
+    <tr><td>8</td><td>Merchant dispute response prepared</td><td>${today} — This document</td></tr>
   </table>
 
   <div class="confidential">Confidential</div>
@@ -16623,7 +16624,12 @@ Return a JSON object with:
   </div>
   <div class="evidence-item">
     <div class="evidence-num">8</div>
-    <div class="evidence-text"><strong>No Prior Support Contact</strong> — Confirm (via support inbox screenshot or statement) that the customer filed the chargeback without first contacting support. Stripe weights this heavily against the customer.</div>
+    <div class="evidence-text"><strong>Support Email Thread</strong> — The email correspondence between <em>support@innovatorfoundervisaassistant.co.uk</em> and <em>${customerEmail || 'the customer'}</em> (subject: "Re: Fwd: Urgent help needed"), showing that (a) the customer raised the issue, (b) the support team investigated and resolved it, and (c) a resolution confirmation was sent to the customer — all before the chargeback was filed. This is your strongest single piece of evidence.</div>
+  </div>
+
+  <div class="evidence-item">
+    <div class="evidence-num">9</div>
+    <div class="evidence-text"><strong>Chargeback Filed After Resolution — Timeline Evidence</strong> — A statement or screenshot demonstrating the chargeback dispute date falls after the support thread resolution date. This proves the customer had their issue resolved yet still filed the dispute, undermining the "product unacceptable" claim entirely.</div>
   </div>
 
   ${evidence ? `
@@ -16632,13 +16638,14 @@ Return a JSON object with:
   ` : ''}
 
   <h3>Submission Checklist</h3>
+  <div class="checklist-item"><span class="check">✓</span><span><strong>Support email thread (PDF)</strong> — "Re: Fwd: Urgent help needed" — from support@innovatorfoundervisaassistant.co.uk to ${customerEmail || 'customer'} — <em>your single most important piece of evidence</em></span></div>
   <div class="checklist-item"><span class="check">✓</span><span>Merchant rebuttal letter (this document, Page 2)</span></div>
-  <div class="checklist-item"><span class="check">✓</span><span>Screenshot of customer account record</span></div>
-  <div class="checklist-item"><span class="check">✓</span><span>Activity log / session records export</span></div>
-  <div class="checklist-item"><span class="check">✓</span><span>Terms of Service document</span></div>
-  <div class="checklist-item"><span class="check">✓</span><span>Stripe payment receipt for the transaction</span></div>
-  <div class="checklist-item"><span class="check">✓</span><span>Any customer-generated output (business plan, report)</span></div>
-  <div class="checklist-item"><span class="check">✓</span><span>Statement confirming no prior support contact</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Screenshot of customer account record (from Railway production database)</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Activity log / session records export (use admin → Customer Support → "Export Logs" button)</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Terms of Service document (screenshot or PDF from your website)</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Stripe payment receipt for the ${amount || '[amount]'} transaction</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Any customer-generated output (business plan, report) showing the service was used</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>Timeline statement showing chargeback was filed after resolution email was sent</span></div>
 
   <div class="confidential">Confidential</div>
   <div class="page-num">Page 4 of 5</div>
@@ -16666,8 +16673,9 @@ Return a JSON object with:
   <div class="checklist-item"><span class="check">✓</span><span>The customer created an account and verified their identity</span></div>
   <div class="checklist-item"><span class="check">✓</span><span>The customer accessed and used the service after payment</span></div>
   <div class="checklist-item"><span class="check">✓</span><span>Clear, accessible Terms of Service were presented and accepted</span></div>
-  <div class="checklist-item"><span class="check">✓</span><span>No prior contact was made to the merchant's support team</span></div>
-  <p style="margin-top:14px;">…has strong grounds for the dispute to be ruled in the merchant's favour.</p>
+  <div class="checklist-item"><span class="check">✓</span><span>A reported issue was investigated and resolved before the chargeback was filed</span></div>
+  <div class="checklist-item"><span class="check">✓</span><span>The chargeback was filed <em>after</em> the merchant confirmed resolution — indicating bad faith</span></div>
+  <p style="margin-top:14px;">…has strong grounds for the dispute to be ruled in the merchant's favour. Our case satisfies all of the above criteria.</p>
 
   <h3>Request</h3>
   <div class="info-box">

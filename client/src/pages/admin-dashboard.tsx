@@ -629,7 +629,8 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
     setDispReason('Product unacceptable');
     setDispStatus('open');
     setDispDeadline('2026-05-14');
-    setDispNotes('Customer Adamya Raj filed a £110 chargeback claiming product was unacceptable. No prior contact with our support team was made before the dispute was raised.');
+    setDispNotes('Customer Adamya Raj paid for the Ultimate plan. A technical activation issue occurred — credits transferred correctly but subscription tier did not fully propagate. Customer contacted support (Subject: "Urgent help needed"). Support team investigated the issue, applied a fix, and sent a resolution confirmation (email thread: "Re: Fwd: Urgent help needed" from support@innovatorfoundervisaassistant.co.uk). The chargeback was filed AFTER the resolution was communicated — this is the key argument.');
+    setDispResolution('Issue was identified as a plan activation propagation bug. Fix applied by admin. Resolution email sent to customer. Chargeback du_1TIKfKK9BSTYpDOqrDunVaVy was filed after this resolution — constitutes bad-faith dispute.');
   };
 
   const openDisputePack = () => {
