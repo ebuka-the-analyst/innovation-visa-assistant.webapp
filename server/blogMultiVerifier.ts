@@ -346,7 +346,38 @@ async function runOpenAIVerification(title: string, content: string): Promise<{
 
 // ============================================================================
 // CLAUDE VERIFIER (Marker 3 — Anthropic)
+// Dynamic model discovery: lists available models on first use and picks the
+// best haiku → sonnet → any model so it always works regardless of API key tier.
 // ============================================================================
+
+// Cache the resolved model name for the process lifetime (avoids listing every call)
+let _claudeModelCache: string | null = null;
+
+async function resolveClaudeModel(): Promise<string> {
+  if (_claudeModelCache) return _claudeModelCache;
+
+  try {
+    const listing = await claudeClient.models.list();
+    const models: string[] = listing.data.map((m: any) => m.id);
+    console.log(`[MultiVerifier] Available Claude models: ${models.join(", ")}`);
+
+    // Priority: haiku (cheapest/fastest) → sonnet → any available
+    const haiku  = models.filter(m => m.toLowerCase().includes("haiku")).sort().reverse();
+    const sonnet = models.filter(m => m.toLowerCase().includes("sonnet")).sort().reverse();
+    const chosen = haiku[0] || sonnet[0] || models[0];
+    if (!chosen) throw new Error("No Claude models available for this API key");
+
+    console.log(`[MultiVerifier] Selected Claude model: ${chosen}`);
+    _claudeModelCache = chosen;
+    return chosen;
+  } catch (e: any) {
+    // If listing fails use a known-good fallback — actual call will surface real error
+    const fallback = "claude-haiku-4-5-20251001";
+    console.warn(`[MultiVerifier] Could not list Claude models (${e?.message?.substring(0, 80)}), falling back to ${fallback}`);
+    _claudeModelCache = fallback;
+    return fallback;
+  }
+}
 
 async function runClaudeVerification(title: string, content: string): Promise<{
   score: number;
@@ -360,15 +391,16 @@ async function runClaudeVerification(title: string, content: string): Promise<{
     return r;
   }
   try {
+    const model = await resolveClaudeModel();
     const prompt = buildMarkerPrompt(title, content);
     const response = await claudeClient.messages.create({
-      model: "claude-haiku-4-5-20251001",
+      model,
       max_tokens: 2048,
       messages: [{ role: "user", content: prompt }],
     });
     const text = response.content[0]?.type === "text" ? response.content[0].text : "";
     const parsed = JSON.parse(extractJsonObject(text));
-    console.log(`[MultiVerifier] Claude success`);
+    console.log(`[MultiVerifier] Claude success (${model})`);
     return {
       score: Math.min(100, Math.max(0, parsed.totalScore || 0)),
       passed: parsed.passed === true,
@@ -377,10 +409,23 @@ async function runClaudeVerification(title: string, content: string): Promise<{
     };
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
-    // Treat ALL API-level errors as unavailable (not a zero score) so they
-    // don't poison the composite average — the other verifiers still judge quality
-    console.warn("[MultiVerifier] Claude unavailable:", errMsg.substring(0, 120));
-    const r: any = { score: -1, passed: false, flags: [], details: { error: errMsg }, error: errMsg, unavailable: true };
+    // Only clear the model cache for model-not-found errors, NOT billing/credit errors
+    const isModelError = errMsg.includes("not_found_error") || (errMsg.includes("404") && !errMsg.includes("credit"));
+    if (isModelError) {
+      console.warn("[MultiVerifier] Claude model cache cleared — will re-discover on next call");
+      _claudeModelCache = null;
+    }
+    // Produce a human-readable error for the health check panel
+    let friendlyError = errMsg;
+    if (errMsg.includes("credit balance") || errMsg.includes("credit_balance") || errMsg.includes("too low")) {
+      friendlyError = "Insufficient credits — top up at console.anthropic.com → Plans & Billing";
+    } else if (errMsg.includes("invalid_api_key") || errMsg.includes("authentication")) {
+      friendlyError = "Invalid API key — check ANTHROPIC_API_KEY in Railway Variables";
+    } else if (errMsg.includes("overloaded") || errMsg.includes("529")) {
+      friendlyError = "Anthropic servers overloaded — will retry automatically";
+    }
+    console.warn("[MultiVerifier] Claude unavailable:", friendlyError.substring(0, 120));
+    const r: any = { score: -1, passed: false, flags: [], details: { error: friendlyError }, error: friendlyError, unavailable: true };
     return r;
   }
 }
@@ -424,9 +469,17 @@ async function runQwenVerification(title: string, content: string): Promise<{
     };
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
-    // Treat ALL errors as unavailable so they don't poison the composite with 0
-    console.warn("[MultiVerifier] Qwen unavailable:", errMsg.substring(0, 120));
-    const r: any = { score: -1, passed: false, flags: [], details: { error: errMsg }, error: errMsg, unavailable: true };
+    // Produce a human-readable error for the health check panel
+    let friendlyError = errMsg;
+    if (errMsg.includes("good standing") || errMsg.includes("overdue") || errMsg.includes("Access denied")) {
+      friendlyError = "Overdue payment — log into aliyun.com (Alibaba Cloud) → Billing to clear balance";
+    } else if (errMsg.includes("401") || errMsg.includes("authentication") || errMsg.includes("invalid_api_key")) {
+      friendlyError = "Invalid Qwen API key — check QWEN_API_KEY in Railway Variables";
+    } else if (errMsg.includes("429") || errMsg.includes("rate") || errMsg.includes("quota")) {
+      friendlyError = "Qwen rate limit — will retry automatically";
+    }
+    console.warn("[MultiVerifier] Qwen unavailable:", friendlyError.substring(0, 120));
+    const r: any = { score: -1, passed: false, flags: [], details: { error: friendlyError }, error: friendlyError, unavailable: true };
     return r;
   }
 }
