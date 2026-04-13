@@ -1,0 +1,256 @@
+Skip to content
+Search
+Search
+/
+Ask AI
+IFV-Assistant
+Test mode (legacy)
+Get started
+Payments
+Revenue
+Platforms and marketplaces
+Money management
+Developer resources
+APIs & SDKs
+Help
+Overview
+Accept a payment
+Upgrade your integration
+Online payments
+Overview
+Find your use case
+Use Payment Links
+Build a payments page
+Build a custom integration with Elements
+Build an in-app integration
+Use Managed Payments
+Recurring payments
+In-person payments
+Terminal
+Payment Methods
+Add payment methods
+Manage payment methods
+Faster checkout with Link
+Payment operations
+Analytics
+Balances and settlement time
+Compliance and security
+Currencies
+Declines
+Disputes
+Overview
+How disputes work
+Handling
+Respond to disputes
+Network categories
+Reason codes and evidence submission
+Sample evidence packets
+Evidence best practices
+Manage disputes programmatically
+Dispute withdrawals
+High risk merchant lists
+Analytics
+Measuring disputes
+Monitoring programs
+Optimisation
+Dispute prevention
+Smart Disputes
+Radar fraud protection
+Payouts
+Receipts
+Refunds and cancellations
+Advanced integrations
+Custom payment flows
+Flexible acquiring
+Off-Session Payments
+Multiprocessor orchestration
+Beyond payments
+Incorporate your company
+Crypto
+Agentic commerce
+Machine payments
+Financial Connections
+Climate
+Verify identities
+United Kingdom
+English (United Kingdom)
+Home
+/
+Payments
+/
+Disputes
+
+Respond to disputes
+Learn how to challenge or accept a dispute in the Dashboard.
+Ask about this page
+Copy for LLM
+
+View as Markdown
+A dispute occurs when an account owner contacts their bank to contest a payment to you for a number of possible reasons. When an account owner files a dispute against a payment, their bank alerts Stripe. We then notify you through the following channels:
+
+Your email address
+The Stripe Dashboard
+A charge.dispute.created event (if your integration is set up to receive events to an event destination)
+A push notification (if you’re subscribed)
+Each of these notification channels provides a link to the Dispute details page in the Dashboard, where you can learn more about the reason for the dispute and take appropriate action. When you receive a dispute notification, take action to resolve it before the deadline (usually 7 to 21 days depending on the card network). If you don’t respond before the deadline, you automatically lose the dispute and can’t retrieve the disputed funds. You can see a detailed list of all your disputes in the Disputes tab.
+
+If you want to manage disputes programmatically instead of using the Dashboard, you can use the API.
+
+Automatically manage disputes in the Dashboard
+The following methods describe how you can automate the management of disputes-related tasks in the Dashboard.
+
+Automation tool	Purpose
+Stripe Workflows	Automate disputes-related tasks using custom logic without the need to write code. To set up a workflow, follow these steps. Workflows is also compatible with most Stripe products such as, but not limited to:
+online payments
+Stripe Invoicing
+Stripe Billing
+Stripe Radar
+Stripe Apps	Automate dispute management and handle chargebacks using fraud Stripe apps.
+Review the dispute category
+When you get a dispute, you can see the corresponding category or reason in your Dashboard and see the same information as the reason attribute for the Dispute object.
+
+Each dispute category specifies different response requirements and recommendations to appropriately respond to the root claim of the cardholder. Your first step is to review our response guidelines for the dispute category. This helps you collect the best evidence to counter the dispute claim.
+
+To review to a dispute, open its details page by selecting the applicable dispute in the list. If you use Organisations, the detailed list of disputed payments includes all your accounts. You can filter this list by account. In this view, you can also respond to disputes across any account.
+
+Enquiries
+Enquiries appear as disputed payments in the Dashboard, but they actually represent a pre-dispute stage that’s typically issued when an account owner doesn’t recognise a transaction on their account. Respond in this stage to resolve any questions and prevent a formal dispute escalation, which saves you time, fees, and your rating with the card networks.
+
+Note
+If an enquiry escalates to a chargeback, you must submit another response for the dispute.
+
+Visa compliance disputes
+Businesses receive Visa compliance disputes in certain cases when the card issuer believes the disputed transaction doesn’t conform to Visa’s network rules. If Visa compliance disputes can’t be resolved between the parties, the network resolves the dispute in exchange for a fee.
+
+If you contest a Visa compliance dispute, Stripe collects a US$500 (or local equivalent) amount in addition to the applicable Stripe dispute fee or fees. This amount covers the network costs associated with resolving Visa compliance disputes. Stripe refunds the US$500 network fee if you win the dispute. Learn how to respond to Visa compliance disputes using the API.
+
+Note
+Compliance cases filed by issuers are referred to as pre-compliance disputes by Visa. To learn more, see Visa rules.
+
+Fraudulent disputes
+To help you navigate fraudulent disputes, Stripe offers Visa CE 3.0 Eligibility and liability shift.
+
+Visa CE 3.0 Eligibility
+For fraudulent disputes with the Visa 10.4 (Card absent fraud) code, Stripe automatically evaluates your transaction history to determine eligibility with Visa Compelling Evidence 3.0. If your dispute is eligible, we notify you in the Dashboard and in the dispute email. In these cases, we encourage submitting evidence, because this eligibility typically translates to a significantly higher likelihood of overturning the dispute in your favour.
+
+Liability shift
+For fraudulent disputes that might be covered by the liability shift rule, Stripe automatically provides most of the evidence, such as the Electronic Commerce Indicator (ECI) from 3D Secure.
+
+Understand the complaint
+When possible, the Dispute details page provides you with a copy of the bank’s submission to Stripe based on the account owner’s claim. These are actual documents attached by card networks and can provide additional information about the disputed transaction, such as a text description from the account owner describing the specific complaint. When responding to the dispute, make sure to properly address the issue described in these files.
+
+If the dispute is still open and the bank has provided these files, select Review the claim details under step 1 of the checklist modal in the Dashboard to view them.
+
+The Dispute details page might also provide you with a way to email the account owner. We recommend contacting them, as it might give you insight to better understand the complaint and help you decide how to proceed. Be sure to keep a record of all communication with your customer during this process, as it provides evidence to submit with your response.
+
+Accept or challenge the dispute
+When you have a clear picture of the dispute details, decide whether to accept or challenge the dispute. If you prefer to handle disputes programmatically, use the API to respond to disputes. Always address a formally disputed payment through this process. The issuing bank has already refunded the account owner, and it’s the only way you can attempt to retrieve the disputed funds. Consider the following in your determination:
+
+Make sure the account owner’s claim is valid. If it’s not, gather the evidence required to disprove the claim.
+
+See if you can convince the account owner to withdraw their dispute if you resolve their complaint amicably. For example, you could offer a store credit or a replacement item.
+
+Check to see if the dispute is CE 3.0 Eligible. If it is, consider responding because Stripe provides most of the required evidence from your transaction history.
+
+Check to see if the dispute is covered by the liability shift rule. If it’s, consider responding with evidence on top of what Stripe automatically provides, such as the 3D Secure outcome.
+
+When you’ve decided how to respond, select the corresponding button on the Dispute details page in the Dashboard:
+
+Accept dispute: Submits a response to the issuing bank to affirm you aren’t contesting the refunded amount. Accepting inquiries doesn’t resolve the disputes. Instead, submit evidence to counter inquiries.
+
+Counter dispute: Opens a form that guides you through the submission process, prompts you for evidence relevant to both the dispute and response type, and allows you to upload supporting files.
+
+If you counter a dispute, a dispute countered fee applies, in addition to the dispute received fee. The cardholder’s bank reviews it and decides the dispute outcome. This can take up to 3 months. When Stripe receives the decision, you receive an email from us.
+
+Stripe returns the dispute countered fee if you win the dispute. Unless otherwise stated in your Stripe contract, we never return the dispute received fee.
+
+Regional considerations
+Mexico
+Japan
+The dispute countered fee doesn’t apply to businesses in Mexico and Japan.
+
+Submit evidence through the Dashboard
+You’ve only one opportunity to submit your response. Stripe immediately forwards your response and all supporting files to the issuing bank. You can’t edit the response or submit additional files, so make sure you’ve assembled all your evidence before you submit.
+
+Open the dispute response form: Click Counter dispute to open the Stripe dispute response form.
+
+Tell us about the dispute: In the first page of the form, tell us why you believe the dispute is in error and the product type of the original purchase. This information, along with the dispute category, helps Stripe recommend the most relevant evidence to support your challenge on the next page of the form. For example, you don’t need to provide shipping details for an online service. When your integration supports it, Stripe automatically captures the product type based on the original payment.
+
+Assemble your evidence: The second page of the form has a dynamic set of sections representing the most relevant details you can provide for your individual case.
+
+In the Supporting Files section, use the File Upload tool to attach evidence that matches the checklist of evidence types relevant to your dispute type and counter argument. For each uploaded file, specify which type of evidence it satisfies. You can only submit one file per type of evidence, so if you have several files representing one type of evidence, combine them into a single, multi-page file.
+
+Consider the following guidelines to make sure your supporting files are effective:
+
+Consult the evidence recommendations for your specific dispute category.
+
+For fraudulent disputes in particular, if your dispute is Visa CE 3.0 eligible, look for the Required for CE 3.0 badge throughout the response form. In most cases, Stripe pre-populates these fields with the required data from your transaction history.
+
+If the field is pre-populated, don’t edit it because you might affect eligibility.
+If the field is empty, add the requested information, such as the product description.
+If your dispute might be covered by the liability shift rule, we populate 3D Secure information such as the Electronic Commerce Indicator (ECI) automatically for you.
+
+Organise each piece of evidence according to the evidence type it satisfies – be as succinct as possible.
+
+Combine items of the same evidence type into a single file.
+
+Limit your evidence file size to the combined maximum of 4.5 MB.
+
+Limit your Mastercard evidence file length to the combined maximum of 19 pages.
+
+Banks evaluating the dispute won’t review any external content, so don’t include:
+
+Audio or video files
+Requests to call or email for more information
+Links to click for further information (for example, file downloads or links to tracking information)
+Background evidence: The other sections of the second page vary depending on the dispute type and your answers on the first page. When your integration supports it, Stripe automatically captures the data for these sections and pre-populates both the API evidence object attributes and the form fields in the Dashboard. If any of these fields aren’t pre-populated, include as much information as you can before you submit your response. These sections can include:
+
+Shipping details
+Refund policy details
+Customer details
+Product details
+The more information your integration collects and passes to Stripe when your customer makes a payment, the better your ability to prevent disputes and fraud from occurring, and challenge them effectively when they do.
+
+Submit evidence: Click the tickbox to acknowledge your understanding that your response is final. After you submit it, Stripe automatically puts the evidence you provide into a format accepted by the issuing bank and submits it for consideration. At this point, you can’t amend what you’ve submitted or provide any additional information, so make sure to include every relevant detail.
+
+In some cases, you might have multiple disputes associated with a single payment. If this occurs, consider responding to each dispute individually.
+
+Check the dispute status
+After you submit a response, the status of the dispute changes to under review. When the issuer informs Stripe of its decision, we inform you of the outcome by email, in the charge.dispute.closed event, and by updating the dispute status in the Dashboard and the Dispute API object to one of the following:
+
+won: Indicates that the bank decided in your favour and overturned the dispute. In this case, the issuing bank returns the debited chargeback amount to Stripe, and Stripe passes this amount back to you. For businesses in Mexico, the dispute fee might also be returned. Otherwise, the dispute fee isn’t returned.
+
+lost: Indicates that the bank decided in the account owner’s favour and upheld the dispute. In this case, the refund is permanent and the dispute fee isn’t returned.
+
+In some cases, the bank provides additional details about the dispute decision. Select View issuing bank response under Relevant documents in the dispute details to view them.
+
+See also
+Prevent disputes and fraud
+Dispute monitoring programmes
+Calculate dispute rates
+Was this page helpful?
+Yes
+No
+Need help? Contact Support.
+Chat with Stripe developers on Discord.
+Check out our changelog.
+Questions? Contact Sales.
+LLM? Read llms.txt.
+Powered by Markdoc
+On this page
+Automatically manage disputes in the Dashboard
+Review the dispute category
+Enquiries
+Visa compliance disputes
+Fraudulent disputes
+Understand the complaint
+Accept or challenge the dispute
+Submit evidence through the Dashboard
+Check the dispute status
+See also
+Related Guides
+How disputes work
+Dispute categories
+Dispute withdrawals
+
+Developers
