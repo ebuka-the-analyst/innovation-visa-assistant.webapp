@@ -17584,14 +17584,14 @@ Sitemap: https://innovatorfoundervisaassistant.co.uk/sitemap.xml
       const posts = await db
         .select({ slug: blogPosts.slug, updatedAt: blogPosts.updatedAt, publishedAt: blogPosts.publishedAt })
         .from(blogPosts)
-        .where(eq(blogPosts.status, "published"));
+        .where(eq(blogPosts.isPublished, true));
       blogEntries = posts.map(p => ({
         loc: `/blog/${p.slug}`,
         changefreq: "monthly",
-        priority: "0.7",
+        priority: "0.8",
         lastmod: p.updatedAt ? new Date(p.updatedAt).toISOString().split("T")[0] : now,
       }));
-    } catch { /* ignore DB errors in sitemap */ }
+    } catch (err) { console.error("[Sitemap] blog query failed:", err); }
 
     const allPages = [...staticPages, ...toolPages, ...blogEntries];
 
