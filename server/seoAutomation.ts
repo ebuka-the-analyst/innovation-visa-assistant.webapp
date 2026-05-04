@@ -3,7 +3,7 @@
  * 
  * Takes a generated SEO strategy and automatically:
  * 1. Extracts all content items (blog posts, FAQs, keyword pages)
- * 2. Staggers them across 13 weeks (2-3 posts per week)
+ * 2. Staggers them across 13 weeks (2 posts per week)
  * 3. Queues them into the blog generation pipeline
  * 4. Runs a weekly cron to queue the next batch automatically
  */
@@ -11,6 +11,8 @@
 import { db } from "./db.js";
 import { blogGenerationQueue, seoAutomationPlans } from "../shared/schema.js";
 import { eq, and } from "drizzle-orm";
+
+const MAX_POSTS_PER_WEEK = 2;
 
 export interface AutomationContentItem {
   title: string;
@@ -107,10 +109,12 @@ export async function queueWeekContent(
   items: AutomationContentItem[],
   weekNumber: number
 ): Promise<number> {
-  const weekItems = items.filter(item => item.weekNumber === weekNumber);
+  const weekItems = items
+    .filter(item => item.weekNumber === weekNumber)
+    .slice(0, MAX_POSTS_PER_WEEK); // Hard cap: never queue more than 2 per week
   if (weekItems.length === 0) return 0;
 
-  // Stagger publish dates across the week (Mon, Wed, Fri if 3 posts)
+  // Stagger publish dates across the week (Mon + Thu for 2 posts)
   const baseDate = new Date();
   const daysOffset = (weekNumber - 1) * 7;
 
