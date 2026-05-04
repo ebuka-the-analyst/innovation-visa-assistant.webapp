@@ -118,6 +118,10 @@ export default function BlogDashboard() {
       toast({ title: "Post Deleted", description: "Post has been removed." });
       refetchPosts();
       refetchStats();
+      refetchReview();
+    },
+    onError: (error: Error) => {
+      toast({ title: "Delete Failed", description: error.message || "Could not delete post. Please try again.", variant: "destructive" });
     },
   });
 
