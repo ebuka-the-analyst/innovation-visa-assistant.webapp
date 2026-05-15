@@ -51,22 +51,11 @@ function CatLabel({ cat, size = "sm" }: { cat: string; size?: "sm" | "lg" }) {
 }
 
 function SidebarPostRow({ post }: { post: BlogPost }) {
-  const p = post as any;
-  const img = p.featuredImage || null;
   const gradient = cardGradient(post.category);
   return (
     <Link href={`/blog/${post.slug}`}>
       <div className="group flex gap-2.5 py-2.5 border-b last:border-b-0 cursor-pointer">
-        <div className={`relative w-14 h-14 rounded flex-shrink-0 overflow-hidden bg-gradient-to-br ${gradient}`}>
-          {img && (
-            <img
-              src={img}
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover"
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            />
-          )}
-        </div>
+        <div className={`w-14 h-14 rounded flex-shrink-0 bg-gradient-to-br ${gradient}`} />
         <div className="flex-1 min-w-0">
           <CatLabel cat={post.category} />
           <p className="text-xs font-semibold leading-snug mt-0.5 line-clamp-2 group-hover:text-primary transition-colors">{post.title}</p>
@@ -140,7 +129,6 @@ export default function BlogPostPage() {
   }
 
   const p = post as any;
-  const img = p.featuredImage || null;
   const gradient = cardGradient(post.category);
   const isTripleVerified = p.verificationStatus === "passed" && p.aiVerificationScore >= 95;
 
@@ -183,14 +171,6 @@ export default function BlogPostPage() {
         {/* ── Hero banner ── */}
         <div className="relative w-full h-[240px] md:h-[360px] overflow-hidden">
           <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
-          {img && (
-            <img
-              src={img}
-              alt={post.title}
-              className="absolute inset-0 w-full h-full object-cover"
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            />
-          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/20" />
 
           {/* Back button */}
