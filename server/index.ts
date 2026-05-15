@@ -1051,6 +1051,21 @@ async function runAutoMigrations() {
     await db.execute(sql`ALTER TABLE backlink_targets ADD COLUMN IF NOT EXISTS submission_url VARCHAR(500)`);
     log("[DB] Auto-migration: backlink_targets table ensured");
 
+    // Migrate all blog posts from stock photos to SVG title card images
+    // This is idempotent — posts already using /api/blog/cover are skipped
+    const postsToMigrate = await db.execute(sql`
+      SELECT id, title, category FROM blog_posts
+      WHERE featured_image IS NULL
+         OR featured_image NOT LIKE '/api/blog/cover%'
+    `);
+    if (postsToMigrate.rows.length > 0) {
+      for (const row of postsToMigrate.rows as Array<{ id: string; title: string; category: string }>) {
+        const coverUrl = `/api/blog/cover?title=${encodeURIComponent(row.title)}&category=${encodeURIComponent(row.category || 'guides')}`;
+        await db.execute(sql`UPDATE blog_posts SET featured_image = ${coverUrl} WHERE id = ${row.id}`);
+      }
+      log(`[DB] Auto-migration: blog cover images updated for ${postsToMigrate.rows.length} posts`);
+    }
+
     log("[MIGRATION] Schema check complete");
   } catch (error) {
     console.error("[MIGRATION] Auto-migration error:", error);

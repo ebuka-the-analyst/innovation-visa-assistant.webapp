@@ -152,69 +152,11 @@ function getRandomCategory(): string {
 }
 
 // ============================================================================
-// FEATURED IMAGE SELECTION - Maps topics/keywords to relevant images
+// FEATURED IMAGE - Generate a branded title card SVG (no AI image generation)
 // ============================================================================
 
-const BLOG_IMAGES: Record<string, string> = {
-  "documents": "/objects/blog/documents-checklist.jpg",
-  "checklist": "/objects/blog/documents-checklist.jpg",
-  "application": "/objects/blog/documents-checklist.jpg",
-  "meeting": "/objects/blog/business-meeting.jpg",
-  "interview": "/objects/blog/interview-preparation.jpg",
-  "endorsing body": "/objects/blog/endorsing-body.jpg",
-  "endorsement": "/objects/blog/compliance-endorsement.jpg",
-  "process": "/objects/blog/visa-process.jpg",
-  "visa": "/objects/blog/visa-process.jpg",
-  "compliance": "/objects/blog/compliance-endorsement.jpg",
-  "maintaining": "/objects/blog/compliance-endorsement.jpg",
-  "banking": "/objects/blog/business-banking.jpg",
-  "bank account": "/objects/blog/business-banking.jpg",
-  "business plan": "/objects/blog/business-plan.jpg",
-  "financial projections": "/objects/blog/financial-projections.jpg",
-  "financial": "/objects/blog/financial-requirements.jpg",
-  "funds": "/objects/blog/financial-requirements.jpg",
-  "family": "/objects/blog/family-visa.jpg",
-  "dependent": "/objects/blog/family-visa.jpg",
-  "uk startup": "/objects/blog/uk-business.jpg",
-  "uk business": "/objects/blog/uk-business.jpg",
-  "london": "/objects/blog/uk-business.jpg",
-  "innovation": "/objects/blog/innovation-scalability.jpg",
-  "scalability": "/objects/blog/innovation-scalability.jpg",
-  "growth": "/objects/blog/scalability-growth.jpg",
-  "settlement": "/objects/blog/settlement-ilr.jpg",
-  "ilr": "/objects/blog/settlement-ilr.jpg",
-  "indefinite leave": "/objects/blog/settlement-ilr.jpg",
-  "tax": "/objects/blog/tax-considerations.jpg",
-  "grants": "/objects/blog/uk-grants.jpg",
-  "funding": "/objects/blog/uk-grants.jpg",
-  "registering": "/objects/blog/company-registration.jpg",
-  "company": "/objects/blog/company-registration.jpg",
-  "contact point": "/objects/blog/contact-meeting.jpg",
-  "english": "/objects/blog/english-requirements.jpg",
-  "language": "/objects/blog/english-requirements.jpg",
-  "biometric": "/objects/blog/biometric-appointment.jpg",
-};
-
-function selectFeaturedImage(topic: string, category: string): string {
-  const topicLower = topic.toLowerCase();
-  
-  // Check for keyword matches in order of specificity
-  for (const [keyword, imagePath] of Object.entries(BLOG_IMAGES)) {
-    if (topicLower.includes(keyword)) {
-      return imagePath;
-    }
-  }
-  
-  // Fallback based on category
-  const categoryImages: Record<string, string> = {
-    "visa-updates": "/objects/blog/visa-process.jpg",
-    "business-planning": "/objects/blog/business-plan.jpg",
-    "endorsement": "/objects/blog/endorsing-body.jpg",
-    "guides": "/objects/blog/documents-checklist.jpg",
-    "uk-immigration": "/objects/blog/uk-business.jpg",
-  };
-  
-  return categoryImages[category] || "/objects/blog/uk-business.jpg";
+function buildCoverImageUrl(title: string, category: string): string {
+  return `/api/blog/cover?title=${encodeURIComponent(title)}&category=${encodeURIComponent(category)}`;
 }
 
 // ============================================================================
@@ -460,7 +402,7 @@ Return ONLY valid JSON.`;
         metaTitle: parsed.metaTitle || parsed.title,
         metaDescription: parsed.metaDescription || parsed.excerpt,
         metaKeywords: parsed.metaKeywords || parsed.tags || [],
-        featuredImage: selectFeaturedImage(topic, category),
+        featuredImage: buildCoverImageUrl(parsed.title || topic, category),
         readingTime: parsed.readingTime || 8,
         author: "UK Visa Expert Team",
         authorBio: "Our team provides accurate, verified information about the UK Innovator Founder Visa process. All content is triple-verified by Qwen, Gemini, and OpenAI for factual accuracy against official GOV.UK sources.",

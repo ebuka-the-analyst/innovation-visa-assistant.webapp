@@ -14420,7 +14420,94 @@ Return a JSON object with:
   // ============================================
   // BLOG ROUTES - Automated SEO Content System
   // ============================================
-  
+
+  // ── Blog cover image generator (public) ────────────────────────────────────
+  // Returns an SVG title card with the post title boldly written on a coloured
+  // background. No external dependencies, no AI image generation needed.
+  app.get("/api/blog/cover", (req, res) => {
+    const raw = (req.query.title as string) || "UK Innovator Founder Visa";
+    const category = (req.query.category as string) || "guides";
+
+    // Escape XML special chars
+    const title = raw
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+
+    // Category → colour palette (NHS-inspired, matches site branding)
+    const palettes: Record<string, { bg1: string; bg2: string; accent: string; tag: string }> = {
+      "visa-updates":     { bg1: "#003087", bg2: "#005EB8", accent: "#41B6E6", tag: "VISA UPDATES" },
+      "business-planning":{ bg1: "#064e3b", bg2: "#059669", accent: "#6ee7b7", tag: "BUSINESS PLANNING" },
+      "endorsement":      { bg1: "#3b0764", bg2: "#7c3aed", accent: "#c4b5fd", tag: "ENDORSEMENT" },
+      "guides":           { bg1: "#78350f", bg2: "#d97706", accent: "#fde68a", tag: "GUIDES" },
+      "uk-immigration":   { bg1: "#1e3a5f", bg2: "#0f4c81", accent: "#93c5fd", tag: "UK IMMIGRATION" },
+    };
+    const p = palettes[category] || palettes["guides"];
+
+    // Word-wrap: split title into lines of max ~28 chars
+    function wrapWords(text: string, maxChars: number): string[] {
+      const words = text.split(" ");
+      const lines: string[] = [];
+      let line = "";
+      for (const w of words) {
+        if (line && (line + " " + w).length > maxChars) {
+          lines.push(line);
+          line = w;
+        } else {
+          line = line ? line + " " + w : w;
+        }
+      }
+      if (line) lines.push(line);
+      return lines.slice(0, 4); // max 4 lines
+    }
+
+    const lines = wrapWords(title, 28);
+    const fontSize = lines.length <= 2 ? 62 : lines.length === 3 ? 52 : 44;
+    const lineH = fontSize * 1.3;
+    const blockH = lines.length * lineH;
+    const startY = 290 - blockH / 2 + fontSize * 0.75;
+
+    const textSVG = lines
+      .map((ln, i) =>
+        `<text x="100" y="${startY + i * lineH}" fill="#ffffff" font-size="${fontSize}" font-weight="900" font-family="system-ui,-apple-system,'Segoe UI',Arial,sans-serif" letter-spacing="-0.5">${ln}</text>`
+      )
+      .join("\n    ");
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${p.bg1}"/>
+      <stop offset="100%" stop-color="${p.bg2}"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#grad)"/>
+  <!-- Decorative circles -->
+  <circle cx="1150" cy="-60" r="320" fill="${p.accent}" fill-opacity="0.12"/>
+  <circle cx="1050" cy="680" r="250" fill="${p.accent}" fill-opacity="0.08"/>
+  <circle cx="-80" cy="320" r="200" fill="${p.accent}" fill-opacity="0.06"/>
+  <!-- Left accent bar -->
+  <rect x="0" y="0" width="10" height="630" fill="${p.accent}" opacity="0.9"/>
+  <!-- Category tag -->
+  <rect x="100" y="88" width="${p.tag.length * 10 + 32}" height="36" rx="4" fill="${p.accent}" fill-opacity="0.25"/>
+  <text x="116" y="112" fill="${p.accent}" font-size="15" font-weight="700" font-family="system-ui,-apple-system,'Segoe UI',Arial,sans-serif" letter-spacing="2">${p.tag}</text>
+  <!-- Title -->
+  ${textSVG}
+  <!-- Bottom bar -->
+  <rect x="0" y="578" width="1200" height="52" fill="rgba(0,0,0,0.35)"/>
+  <!-- UK flag colours strip -->
+  <rect x="0" y="578" width="1200" height="3" fill="${p.accent}" opacity="0.7"/>
+  <!-- Branding -->
+  <text x="100" y="611" fill="rgba(255,255,255,0.75)" font-size="17" font-family="system-ui,-apple-system,'Segoe UI',Arial,sans-serif">innovatorfoundervisaassistant.co.uk</text>
+  <text x="1100" y="611" text-anchor="end" fill="rgba(255,255,255,0.5)" font-size="15" font-family="system-ui,-apple-system,'Segoe UI',Arial,sans-serif">UK Innovator Founder Visa Assistant</text>
+</svg>`;
+
+    res.setHeader("Content-Type", "image/svg+xml");
+    res.setHeader("Cache-Control", "public, max-age=604800, immutable");
+    res.send(svg);
+  });
+
   // Get all blog posts (public)
   app.get("/api/blog", async (req, res) => {
     try {
