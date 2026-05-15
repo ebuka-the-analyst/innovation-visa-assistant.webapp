@@ -100,16 +100,24 @@ function PostCard({ post }: { post: BlogPost }) {
   return (
     <Link href={`/blog/${post.slug}`} data-testid={`link-card-${post.slug}`}>
       <article className="group flex flex-col h-full bg-card border rounded-md overflow-hidden cursor-pointer hover-elevate">
+        {/* Gradient header with title overlaid */}
         <div className="relative h-36 overflow-hidden flex-shrink-0">
           <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
           <div className="absolute top-2 left-2">
             <CatLabel cat={post.category} />
           </div>
+          <div className="absolute bottom-0 left-0 right-0 p-2.5">
+            <h3
+              className="font-bold text-sm leading-snug line-clamp-3 text-white group-hover:text-white/90 transition-colors"
+              data-testid={`text-card-title-${post.id}`}
+            >
+              {post.title}
+            </h3>
+          </div>
         </div>
+        {/* Card body — excerpt + metadata only */}
         <div className="flex flex-col flex-1 p-3">
-          <h3 className="font-bold text-sm leading-snug line-clamp-3 mb-1.5 group-hover:text-primary transition-colors" data-testid={`text-card-title-${post.id}`}>
-            {post.title}
-          </h3>
           <p className="text-xs text-muted-foreground line-clamp-2 mb-auto">{post.excerpt}</p>
           <div className="flex items-center justify-between mt-2 pt-2 border-t text-xs text-muted-foreground">
             <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{fmtDate(post.publishedAt)}</span>
