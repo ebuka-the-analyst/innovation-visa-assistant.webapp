@@ -17,7 +17,7 @@
  * 3× DAILY SCHEDULE: 07:00, 12:00, 20:00 GMT
  */
 
-import { qwen, QWEN_MODELS } from "./qwenClient";
+// Qwen removed — using Gemini as primary writer (Qwen account in arrears)
 import { db } from "./db";
 import { blogPosts } from "@shared/schema";
 import { sql as drizzleSql } from "drizzle-orm";
@@ -433,31 +433,65 @@ OUTPUT FORMAT (JSON only):
 
 Return ONLY valid JSON.`;
 
-  const MAX_RETRIES = 1; // Only 1 attempt - rely on auto-correction instead of regeneration
-  
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+  // ── Gemini REST API (primary writer) ─────────────────────────────────────
+  // Tries all 4 API keys × 3 models. On 429 → rotate to next key.
+  // Falls through to OpenAI if every Gemini combo fails.
+  const GEMINI_API_KEYS = [
+    process.env.GEMINI_API_KEY,
+    process.env.GEMINI_API_KEY_2,
+    process.env.GEMINI_API_KEY_3,
+    process.env.GEMINI_API_KEY_4,
+  ].filter(Boolean) as string[];
+
+  const GEMINI_GENERATION_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"];
+
+  const systemInstruction = `You are a UK immigration information writer who creates accurate, helpful content. You NEVER fabricate case studies, statistics, or quotes. You ONLY use verified facts. You always include proper disclaimers. Your content is factual, practical, and trustworthy. Always respond with valid JSON only.`;
+
+  const geminiBody = {
+    system_instruction: { parts: [{ text: systemInstruction }] },
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.3,
+      maxOutputTokens: 8192,
+      responseMimeType: "application/json",
+    },
+  };
+
+  outer:
+  for (const geminiModel of GEMINI_GENERATION_MODELS) {
+    for (const apiKey of GEMINI_API_KEYS) {
     try {
-      console.log(`[Blog Generator] Generation attempt ${attempt}/${MAX_RETRIES}`);
-      
-      const response = await qwen.chat.completions.create({
-        model: QWEN_MODELS.plus,
-        messages: [
-          {
-            role: "system",
-            content: `You are a UK immigration information writer who creates accurate, helpful content. You NEVER fabricate case studies, statistics, or quotes. You ONLY use verified facts. You always include proper disclaimers. Your content is factual, practical, and trustworthy. Always respond with valid JSON only.`
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: 5000,
-        temperature: 0.3, // Low temperature for maximum factual accuracy
+      console.log(`[Blog Generator] Generating via Gemini (${geminiModel})…`);
+
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
+
+      const geminiRes = await fetch(geminiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(geminiBody),
       });
 
-      const content = response.choices[0]?.message?.content;
-      if (!content) throw new Error("No response from AI");
+      const geminiRaw = await geminiRes.text();
+      let geminiData: any;
+      try { geminiData = JSON.parse(geminiRaw); } catch {
+        console.warn(`[Blog Generator] Gemini ${geminiModel} JSON parse error`);
+        continue; // next key
+      }
+
+      if (!geminiRes.ok) {
+        const errMsg = geminiData?.error?.message || geminiRaw.substring(0, 150);
+        const status = geminiRes.status;
+        console.warn(`[Blog Generator] Gemini ${geminiModel} HTTP ${status}: ${errMsg.substring(0, 120)}`);
+        if (status === 429 || status === 403) continue; // rotate to next key
+        if (status === 404) continue outer; // model doesn't exist — try next model
+        continue; // other error — try next key
+      }
+
+      const content = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      if (!content) {
+        console.warn(`[Blog Generator] Gemini ${geminiModel} returned empty content`);
+        continue; // next key
+      }
       
       const parsed = JSON.parse(content);
       
@@ -578,7 +612,7 @@ Return ONLY valid JSON.`;
         featuredImage: buildCoverImageUrl(parsed.title || topic, category),
         readingTime: parsed.readingTime || 8,
         author: "UK Visa Expert Team",
-        authorBio: "Our team provides accurate, verified information about the UK Innovator Founder Visa process. All content is triple-verified by Qwen, Gemini, and OpenAI for factual accuracy against official GOV.UK sources.",
+        authorBio: "Our team provides accurate, verified information about the UK Innovator Founder Visa process. All content is multi-AI verified by Gemini and OpenAI for factual accuracy against official GOV.UK sources.",
         // Triple-AI verification
         aiVerificationScore: verificationResult?.compositeScore ?? null,
         geminiScore: verificationResult?.geminiScore ?? null,
@@ -594,14 +628,84 @@ Return ONLY valid JSON.`;
         isPublished,
         postStatus,
       };
-    } catch (error) {
-      console.error(`[Blog Generator] Generation attempt ${attempt} failed:`, error);
-      if (attempt === MAX_RETRIES) throw error;
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    } catch (error: any) {
+      console.error(`[Blog Generator] Gemini ${geminiModel} (key …${apiKey.slice(-6)}) failed:`, error?.message || error);
+      // Continue to next key/model
+    }
+    } // end for apiKey
+  } // end for geminiModel
+
+  // ── OpenAI fallback (gpt-4o-mini) ────────────────────────────────────────
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
+  if (OPENAI_API_KEY) {
+    try {
+      console.log("[Blog Generator] Falling back to OpenAI gpt-4o-mini…");
+      const oaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: systemInstruction },
+            { role: "user", content: prompt },
+          ],
+          response_format: { type: "json_object" },
+          max_tokens: 6000,
+          temperature: 0.3,
+        }),
+      });
+      const oaiData = await oaiRes.json() as any;
+      if (!oaiRes.ok) throw new Error(oaiData?.error?.message || `OpenAI HTTP ${oaiRes.status}`);
+      const oaiContent = oaiData.choices?.[0]?.message?.content;
+      if (!oaiContent) throw new Error("OpenAI returned empty content");
+
+      const parsed = JSON.parse(oaiContent);
+      let finalContent = correctContent(parsed.content || "");
+      if (!finalContent.includes("disclaimer-box") && !finalContent.includes("Important Notice")) {
+        finalContent += `\n<div class="disclaimer-box bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 my-6"><p class="text-sm"><strong>Important Notice:</strong> This article provides general information only and does not constitute immigration or legal advice. Requirements and fees may change. Always verify current information on <a href="https://www.gov.uk/innovator-founder-visa" target="_blank" rel="noopener" class="text-primary underline">GOV.UK</a> and consider consulting a qualified immigration adviser for your specific circumstances.</p></div>`;
+      }
+      const dateSlug = new Date().toISOString().split("T")[0];
+      const uniqueSlug = `${slugify(parsed.title)}-${dateSlug}-${Math.random().toString(36).substring(2, 6)}`;
+      let verificationResult = null;
+      try { verificationResult = await verifyBlogPost(parsed.title, finalContent); } catch {}
+      const isPublished = verificationResult?.passed ?? false;
+      return {
+        title: parsed.title,
+        slug: uniqueSlug,
+        excerpt: parsed.excerpt,
+        content: finalContent,
+        category,
+        tags: parsed.tags || [],
+        metaTitle: parsed.metaTitle || parsed.title,
+        metaDescription: parsed.metaDescription || parsed.excerpt,
+        metaKeywords: parsed.metaKeywords || parsed.tags || [],
+        featuredImage: buildCoverImageUrl(parsed.title || topic, category),
+        readingTime: parsed.readingTime || 8,
+        author: "UK Visa Expert Team",
+        authorBio: "Our team provides accurate, verified information about the UK Innovator Founder Visa process. All content is multi-AI verified by Gemini and OpenAI for factual accuracy against official GOV.UK sources.",
+        aiVerificationScore: verificationResult?.compositeScore ?? null,
+        geminiScore: verificationResult?.geminiScore ?? null,
+        openaiScore: verificationResult?.openaiScore ?? null,
+        verificationStatus: isPublished ? "passed" : "human_review",
+        verificationDetails: verificationResult?.details ?? null,
+        verifiedAt: verificationResult?.verifiedAt ?? null,
+        verificationExpiresAt: verificationResult?.verificationExpiresAt ?? null,
+        humanReviewRequired: verificationResult?.requiresHumanReview ?? true,
+        contradictionFlags: verificationResult?.contradictionFlags ?? 0,
+        sourcesCited: verificationResult?.sourcesCited ?? 0,
+        contentHash: verificationResult?.contentHash ?? computeContentHash(finalContent),
+        isPublished,
+        postStatus: isPublished ? "published" : "human_review",
+      };
+    } catch (oaiErr: any) {
+      console.error("[Blog Generator] OpenAI fallback failed:", oaiErr?.message || oaiErr);
     }
   }
-  
-  throw new Error("Failed to generate valid blog content after maximum retries");
+
+  throw new Error("Failed to generate blog content — all AI writers exhausted (Gemini + OpenAI)");
 }
 
 export async function generateMultiplePosts(count: number = 5): Promise<Array<{

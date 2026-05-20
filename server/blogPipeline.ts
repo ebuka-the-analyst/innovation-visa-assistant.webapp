@@ -6,20 +6,21 @@
  * external cron service required.
  *
  * PIPELINE PER POST:
- *   1. Qwen generates article
- *   2. Quad-AI verification (Gemini + OpenAI + Claude + Qwen)
+ *   1. Gemini (multi-key rotation: KEY1-4) generates article; OpenAI gpt-4o-mini fallback
+ *   2. Tri-AI verification (Gemini + OpenAI + Claude; Qwen removed — account in arrears)
  *   3. If composite ≥95 and no floor violation → auto-publish immediately
- *   4. If fails → auto-fix (Qwen reads all flags, surgically corrects)
+ *   4. If fails → auto-fix (Gemini reads all flags, surgically corrects; OpenAI fallback)
  *   5. Re-verify → if passes → auto-publish
  *   6. If still fails → repeat fix+verify up to MAX_FIX_ATTEMPTS times
  *   7. If still failing after all attempts → leave in human_review queue
  *
  * SCHEDULE:
- *   - Generate 4 posts at 07:00 GMT
- *   - Generate 4 posts at 12:00 GMT
- *   - Generate 4 posts at 16:00 GMT
- *   - Generate 4 posts at 20:00 GMT
+ *   - Generate 2 posts at 07:00 GMT
+ *   - Generate 2 posts at 12:00 GMT
+ *   - Generate 2 posts at 16:00 GMT
+ *   - Generate 2 posts at 20:00 GMT  (= 8 posts/day)
  *   - Drain human review queue at :30 past every even hour (00:30, 02:30, …)
+ *   - On startup: if no post published in 20h → immediate catch-up of 2 posts
  *
  * STATUS TRACKING:
  *   Fix attempt count is stored inside verificationDetails JSON so no schema
@@ -28,7 +29,7 @@
 
 import { db } from "./db.js";
 import { blogPosts } from "../shared/schema.js";
-import { eq, and, lte } from "drizzle-orm";
+import { eq, and, gte } from "drizzle-orm";
 import { generateBlogPost } from "./blogGenerator.js";
 import { verifyBlogPost, computeContentHash } from "./blogMultiVerifier.js";
 import { autoFixBlogPost } from "./blogAutoFixer.js";
@@ -37,7 +38,9 @@ import { autoFixBlogPost } from "./blogAutoFixer.js";
 
 const MAX_FIX_ATTEMPTS = 5;          // Max auto-fix rounds before giving up on a post
 const MAX_DRAIN_ATTEMPTS = 5;        // Max attempts per drain cycle on stuck review-queue posts
-const POSTS_PER_RUN = 4;            // Posts generated per scheduled run (4 runs × 4 posts = 16/day)
+const POSTS_PER_RUN = 2;            // Posts generated per scheduled run (4 runs × 2 posts = 8/day)
+const CATCHUP_POSTS = 2;            // Posts to generate immediately on startup if behind
+const CATCHUP_THRESHOLD_HOURS = 20; // Generate immediately if no post published in this many hours
 const INTER_POST_DELAY_MS = 3000;   // Delay between posts to avoid rate limits
 const INTER_FIX_DELAY_MS = 2000;    // Delay between fix iterations
 
@@ -305,12 +308,54 @@ function scheduleDaily(
   scheduleNext();
 }
 
+// ─── Startup catch-up: generate immediately if no recent posts ────────────────
+
+async function runCatchUpIfBehind(): Promise<void> {
+  try {
+    const cutoff = new Date(Date.now() - CATCHUP_THRESHOLD_HOURS * 60 * 60 * 1000);
+    const recent = await db
+      .select({ publishedAt: blogPosts.publishedAt })
+      .from(blogPosts)
+      .where(and(eq(blogPosts.isPublished, true), gte(blogPosts.publishedAt!, cutoff)))
+      .limit(1);
+
+    if (recent.length > 0) {
+      console.log("[Pipeline] Catch-up check: recent post found — no catch-up needed.");
+      return;
+    }
+
+    console.log(
+      `[Pipeline] No posts published in the last ${CATCHUP_THRESHOLD_HOURS}h — ` +
+      `running immediate catch-up (${CATCHUP_POSTS} posts)…`
+    );
+
+    for (let i = 0; i < CATCHUP_POSTS; i++) {
+      try {
+        const result = await generateWithAutoFix();
+        console.log(
+          `[Pipeline] Catch-up ${i + 1}/${CATCHUP_POSTS}: "${result.title.substring(0, 60)}" → ${result.status}`
+        );
+      } catch (err) {
+        console.error(`[Pipeline] Catch-up post ${i + 1}/${CATCHUP_POSTS} failed:`, err);
+      }
+      if (i < CATCHUP_POSTS - 1) await new Promise(r => setTimeout(r, INTER_POST_DELAY_MS));
+    }
+
+    console.log("[Pipeline] Catch-up generation complete.");
+  } catch (err) {
+    console.error("[Pipeline] Catch-up check failed:", err);
+  }
+}
+
 // ─── Start: wire up all schedules ─────────────────────────────────────────────
 
 export function startBlogPipeline(): void {
   console.log("[Pipeline] Automated blog pipeline starting…");
 
-  // Generation runs: 07:00, 12:00, 16:00, 20:00 GMT (4 runs × 4 posts = 16 posts/day)
+  // Immediate catch-up on startup (runs in background, 10s delay so DB is ready)
+  setTimeout(() => runCatchUpIfBehind(), 10_000);
+
+  // Generation runs: 07:00, 12:00, 16:00, 20:00 GMT (4 runs × 2 posts = 8/day)
   scheduleDaily("generate-07:00", 7,  0, scheduledGenerationRun);
   scheduleDaily("generate-12:00", 12, 0, scheduledGenerationRun);
   scheduleDaily("generate-16:00", 16, 0, scheduledGenerationRun);
@@ -323,7 +368,7 @@ export function startBlogPipeline(): void {
   }
 
   console.log(
-    "[Pipeline] Schedules set: generate at 07:00, 12:00, 20:00 GMT | " +
+    "[Pipeline] Schedules set: generate at 07:00, 12:00, 16:00, 20:00 GMT | " +
     "drain queue every 2 hours."
   );
 }

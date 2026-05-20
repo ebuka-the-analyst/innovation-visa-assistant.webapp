@@ -9,7 +9,7 @@
  *  5. Returns the fixed content + new verification result (caller decides publish/queue)
  */
 
-import { qwen, QWEN_MODELS } from "./qwenClient.js";
+// Qwen removed — using Gemini + OpenAI fallback (Qwen account in arrears)
 import { verifyBlogPost } from "./blogMultiVerifier.js";
 
 // ============================================================================
@@ -140,35 +140,69 @@ CORRECTION RULES:
 
 Return ONLY the corrected HTML (no JSON, no explanation, no markdown fences — just the HTML starting with the first tag).`;
 
-    try {
-      const response = await qwen.chat.completions.create({
-        model: QWEN_MODELS.plus,
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a UK immigration content editor. Return ONLY the corrected HTML article. No JSON, no explanation, no markdown. Just the corrected HTML.",
-          },
-          { role: "user", content: prompt },
-        ],
-        max_tokens: 6000,
-        temperature: 0.1, // Near-zero temp for precise, deterministic corrections
-      });
+    // Try Gemini (all 4 keys × 2 models), then OpenAI as fallback
+    const GEMINI_KEYS = [
+      process.env.GEMINI_API_KEY,
+      process.env.GEMINI_API_KEY_2,
+      process.env.GEMINI_API_KEY_3,
+      process.env.GEMINI_API_KEY_4,
+    ].filter(Boolean) as string[];
+    const FIXER_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
+    const fixerSystemText = "You are a UK immigration content editor. Return ONLY the corrected HTML article. No JSON, no explanation, no markdown. Just the corrected HTML.";
 
-      const corrected = response.choices[0]?.message?.content?.trim();
-      if (corrected && corrected.length > 500) {
-        fixedContent = corrected;
-        console.log(
-          `[AutoFixer] Qwen correction complete. Content length: ${fixedContent.length} chars`,
-        );
-      } else {
-        console.warn(
-          "[AutoFixer] Qwen returned insufficient content — keeping original",
-        );
+    let corrected: string | null = null;
+
+    outerFix:
+    for (const model of FIXER_MODELS) {
+      for (const key of GEMINI_KEYS) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: fixerSystemText }] },
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { temperature: 0.1, maxOutputTokens: 8192 },
+            }),
+          });
+          const data = await res.json() as any;
+          if (!res.ok) {
+            if (res.status === 404) continue outerFix;
+            continue; // 429/403 → next key
+          }
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+          if (text.length > 500) { corrected = text; break outerFix; }
+        } catch { continue; }
       }
-    } catch (err) {
-      console.error("[AutoFixer] Qwen correction call failed:", err);
-      // Fall through — still re-verify with original content
+    }
+
+    // OpenAI fallback if Gemini exhausted
+    if (!corrected && process.env.OPENAI_API_KEY) {
+      try {
+        const oaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [{ role: "system", content: fixerSystemText }, { role: "user", content: prompt }],
+            max_tokens: 6000,
+            temperature: 0.1,
+          }),
+        });
+        const oaiData = await oaiRes.json() as any;
+        const oaiText = oaiData.choices?.[0]?.message?.content?.trim() || "";
+        if (oaiText.length > 500) corrected = oaiText;
+      } catch (err) {
+        console.error("[AutoFixer] OpenAI fallback failed:", err);
+      }
+    }
+
+    if (corrected) {
+      fixedContent = corrected;
+      console.log(`[AutoFixer] Correction complete. Content length: ${fixedContent.length} chars`);
+    } else {
+      console.warn("[AutoFixer] All AI writers failed — keeping original content for re-verification");
     }
   } else {
     console.log(
