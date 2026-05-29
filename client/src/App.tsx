@@ -12,6 +12,7 @@ import { VoicePermissionProvider } from "@/contexts/VoicePermissionContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, LogOut, Loader2, LayoutDashboard, Wrench, FileText, HelpCircle } from "lucide-react";
+import { NotificationBell } from "@/components/NotificationBell";
 import logoLightImg from "@assets/official_logo.webp";
 import logoDarkImg from "@assets/logo_dark.webp";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -359,6 +360,8 @@ function UnifiedHeader() {
           {user.firstName || user.displayName || user.email}
         </span>
       )}
+      
+      {user && <NotificationBell />}
       
       <ThemeToggle />
       

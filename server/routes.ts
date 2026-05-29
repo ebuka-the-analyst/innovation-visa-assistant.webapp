@@ -13167,13 +13167,19 @@ Return a JSON object with:
           await Promise.allSettled(
             batch.map(user => {
               const firstName = user.first_name || user.email.split('@')[0];
-              // If message already contains HTML tags render it directly, otherwise
-              // convert newlines → <br> so plain-text messages look correct too.
+              // Clean message: strip document-level HTML tags so Gmail doesn't
+              // detect the content as a "quoted email" and collapse it with "..."
               const rawMsg: string = notification.message ?? '';
-              const containsHtml = /<[a-z][\s\S]*>/i.test(rawMsg);
+              const cleanMsg = rawMsg
+                .replace(/<!DOCTYPE[^>]*>/gi, '')
+                .replace(/<\/?html[^>]*>/gi, '')
+                .replace(/<head[\s\S]*?<\/head>/gi, '')
+                .replace(/<\/?body[^>]*>/gi, '')
+                .trim();
+              const containsHtml = /<[a-z][\s\S]*>/i.test(cleanMsg);
               const messageHtml = containsHtml
-                ? rawMsg
-                : rawMsg
+                ? cleanMsg
+                : cleanMsg
                     .split(/\n\n+/)
                     .map((para: string) => `<p style="margin:0 0 14px;color:#374151;font-size:15px;line-height:1.7;">${para.replace(/\n/g, '<br>')}</p>`)
                     .join('');
