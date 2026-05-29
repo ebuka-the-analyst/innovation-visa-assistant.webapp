@@ -13,12 +13,43 @@ import { Badge } from "@/components/ui/badge";
 import { 
   User as UserIcon, Bell, Shield, Palette, Trash2, Download, 
   CheckCircle2, AlertTriangle, Moon, Sun, Monitor,
-  Mail, Key, LogOut, Save, Clock, Calendar, Zap, Trophy, Target, Newspaper
+  Mail, Key, LogOut, Save, Clock, Calendar, Zap, Trophy, Target, Newspaper,
+  Info, CheckCircle, AlertCircle, Megaphone,
 } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+
+interface HistoryNotification {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  is_read: boolean;
+  sent_at?: string;
+  created_at: string;
+  action_url?: string;
+  action_text?: string;
+}
+
+const NOTIF_TYPE_CONFIG: Record<string, { color: string; bg: string; label: string; icon: React.ElementType }> = {
+  info:         { color: "text-blue-600 dark:text-blue-400",    bg: "bg-blue-100 dark:bg-blue-500/20",    label: "Info",         icon: Info },
+  success:      { color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-100 dark:bg-emerald-500/20", label: "Update",   icon: CheckCircle },
+  warning:      { color: "text-amber-600 dark:text-amber-400",   bg: "bg-amber-100 dark:bg-amber-500/20",   label: "Warning",    icon: AlertTriangle },
+  urgent:       { color: "text-red-600 dark:text-red-400",       bg: "bg-red-100 dark:bg-red-500/20",       label: "Urgent",     icon: AlertCircle },
+  announcement: { color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-100 dark:bg-purple-500/20", label: "Announcement", icon: Megaphone },
+};
+
+function timeAgoSettings(dateStr: string): string {
+  const date = new Date(dateStr);
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  if (seconds < 86400 * 7) return `${Math.floor(seconds / 86400)}d ago`;
+  return new Date(dateStr).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
 
 interface NotificationPreferences {
   weeklyDigest: boolean;
@@ -42,9 +73,26 @@ export default function Settings() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
+  // Read initial tab from URL ?tab= param
+  const initialTab = (() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const t = params.get("tab");
+      if (t && ["account", "preferences", "notifications", "privacy"].includes(t)) return t;
+    }
+    return "account";
+  })();
+  const [activeTab, setActiveTab] = useState(initialTab);
+
   // Fetch notification preferences from API
   const { data: notifPrefs, isLoading: notifLoading } = useQuery<NotificationPreferences>({
     queryKey: ['/api/notifications/preferences'],
+    enabled: !!user,
+  });
+
+  // Fetch notification history (all received broadcasts, including read ones)
+  const { data: notifHistory, isLoading: historyLoading } = useQuery<{ notifications: HistoryNotification[] }>({
+    queryKey: ['/api/notifications/history'],
     enabled: !!user,
   });
 
@@ -215,7 +263,7 @@ export default function Settings() {
           <p className="text-muted-foreground">Manage your account preferences and privacy settings</p>
         </div>
 
-        <Tabs defaultValue="account" className="space-y-6" data-testid="tabs-settings">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" data-testid="tabs-settings">
           <TabsList className="grid w-full grid-cols-4" data-testid="tabs-list-settings">
             <TabsTrigger value="account" className="flex items-center gap-2">
               <UserIcon className="w-4 h-4" />
@@ -614,6 +662,81 @@ export default function Settings() {
                       Enable Weekly Progress Digest above to customize your schedule
                     </AlertDescription>
                   </Alert>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Platform Announcements History */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Megaphone className="w-5 h-5" />
+                  Platform Announcements
+                </CardTitle>
+                <CardDescription>
+                  Messages sent to you from the UK Innovator Founder Visa Assistant team
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {historyLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="h-16 bg-muted rounded-lg animate-pulse" />
+                    ))}
+                  </div>
+                ) : !notifHistory?.notifications?.length ? (
+                  <div className="flex flex-col items-center justify-center py-10 text-center gap-2">
+                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                      <Bell className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground">No announcements yet</p>
+                    <p className="text-xs text-muted-foreground/60">Platform updates and announcements will appear here</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {notifHistory.notifications.map(n => {
+                      const cfg = NOTIF_TYPE_CONFIG[n.type] ?? NOTIF_TYPE_CONFIG.info;
+                      const Icon = cfg.icon;
+                      const ts = n.sent_at || n.created_at;
+                      return (
+                        <div
+                          key={n.id}
+                          className={`flex gap-3 p-3.5 rounded-lg border transition-colors ${
+                            n.is_read ? "bg-background border-border/50" : "bg-primary/5 border-primary/20"
+                          }`}
+                          data-testid={`announcement-item-${n.id}`}
+                        >
+                          <div className={`flex-shrink-0 flex items-center justify-center h-9 w-9 rounded-full ${cfg.bg}`}>
+                            <Icon className={`h-4 w-4 ${cfg.color}`} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                              <span className="text-sm font-semibold leading-tight">{n.title}</span>
+                              {!n.is_read && (
+                                <span className="flex-shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground text-[9px] font-bold uppercase tracking-wide">
+                                  New
+                                </span>
+                              )}
+                              <span className="text-xs text-muted-foreground ml-auto">{timeAgoSettings(ts)}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                              {n.message.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim()}
+                            </p>
+                            {(n.action_url || n.action_text) && (
+                              <a
+                                href={n.action_url || "#"}
+                                target={n.action_url?.startsWith("http") ? "_blank" : undefined}
+                                rel="noopener noreferrer"
+                                className="inline-block mt-1.5 text-xs font-medium text-primary hover:underline"
+                              >
+                                {n.action_text || "View details"} →
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </CardContent>
             </Card>

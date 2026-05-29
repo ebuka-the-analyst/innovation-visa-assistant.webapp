@@ -13334,6 +13334,28 @@ Return a JSON object with:
     }
   });
 
+  // User: Get all received notifications (including already-read ones) for history view
+  app.get("/api/notifications/history", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const tier = (req.user as any).subscriptionTier;
+      const history = await db.execute(sql`
+        SELECT n.*, (r.id IS NOT NULL) as is_read
+        FROM admin_notifications n
+        LEFT JOIN user_notification_reads r ON n.id = r.notification_id AND r.user_id = ${userId}
+        WHERE n.status = 'sent'
+          AND (n.target_type = 'all' OR (n.target_type = 'tier' AND n.target_value = ${tier}))
+          AND (n.expires_at IS NULL OR n.expires_at > NOW())
+        ORDER BY n.sent_at DESC
+        LIMIT 50
+      `);
+      res.json({ notifications: history.rows });
+    } catch (error) {
+      console.error("Get notification history error:", error);
+      res.status(500).json({ error: "Failed to fetch notification history" });
+    }
+  });
+
   // ============================================
   // ADMIN CAMPAIGNS API
   // ============================================
