@@ -41,8 +41,8 @@ const PRICING_TIERS = [
   { name: "Free", price: "£0", access: "Essential", pages: "10-15", colorClass: "border-muted" },
   { name: "Basic", price: "£9", access: "Extended", pages: "25-35", colorClass: "border-blue-500/30 dark:border-blue-400/30" },
   { name: "Premium", price: "£19", access: "Comprehensive", pages: "40-60", popular: true, colorClass: "border-purple-500 dark:border-purple-400 ring-2 ring-purple-500/20" },
-  { name: "Enterprise", price: "£29", access: "Full", pages: "50-80", colorClass: "border-orange-500/30 dark:border-orange-400/30" },
-  { name: "Ultimate", price: "£39", access: "Complete 100+", pages: "80+", premium: true, colorClass: "border-amber-500 dark:border-amber-400 ring-2 ring-amber-500/20" },
+  { name: "Enterprise", price: "£35", access: "Full", pages: "56-80", colorClass: "border-orange-500/30 dark:border-orange-400/30" },
+  { name: "Ultimate", price: "£49", access: "Complete 100+", pages: "80+", premium: true, colorClass: "border-amber-500 dark:border-amber-400 ring-2 ring-amber-500/20" },
 ];
 
 function AnimatedSidebarTrigger() {

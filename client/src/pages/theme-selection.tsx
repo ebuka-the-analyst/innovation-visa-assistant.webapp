@@ -1131,7 +1131,7 @@ export default function ThemeSelectionPage() {
                         data-testid="button-upgrade-for-custom-cover"
                       >
                         <Crown className="w-4 h-4 mr-2" />
-                        Upgrade from £29
+                        Upgrade from £19
                       </Button>
                     </div>
                   ) : backgroundImage ? (

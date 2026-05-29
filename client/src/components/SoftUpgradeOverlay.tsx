@@ -19,8 +19,8 @@ const tierPrices: Record<ToolTier, string> = {
   free: "£0",
   basic: "£9",
   premium: "£19",
-  enterprise: "£29",
-  ultimate: "£39",
+  enterprise: "£35",
+  ultimate: "£49",
 };
 
 const tierNames: Record<ToolTier, string> = {

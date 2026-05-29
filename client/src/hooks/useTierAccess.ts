@@ -19,21 +19,21 @@ const TIER_NAMES: Record<UserTier, string> = {
   ultimate: "Ultimate",
 };
 
-// 2026 PRICING - Effective January 2026
+// Global Founder Pricing - Effective May 2026
 const TIER_PRICES: Record<UserTier, string> = {
   free: "£0",
-  basic: "£29",
-  premium: "£59",
-  enterprise: "£85",
-  ultimate: "£110",
+  basic: "£9",
+  premium: "£19",
+  enterprise: "£35",
+  ultimate: "£49",
 };
 
 const TIER_PRICE_VALUES: Record<UserTier, number> = {
   free: 0,
-  basic: 29,
-  premium: 59,
-  enterprise: 85,
-  ultimate: 110,
+  basic: 9,
+  premium: 19,
+  enterprise: 35,
+  ultimate: 49,
 };
 
 const TIER_TOOL_COUNTS: Record<UserTier, number> = {
@@ -53,13 +53,13 @@ export const TIER_CREDITS: Record<UserTier, number> = {
   ultimate: 12,
 };
 
-// 2026 COIN TOP-UPS - Effective January 2026
+// Global Founder Coin Top-Ups - Effective May 2026
 export const ADDON_PRICING = {
-  singleCoin: { price: 15, credits: 1, name: "1 Coin" },
-  doubleCoins: { price: 25, credits: 2, name: "2 Coins", savings: 5 },
-  tripleCoins: { price: 35, credits: 3, name: "3 Coins", savings: 10 },
-  fiveCoins: { price: 55, credits: 5, name: "5 Coins", savings: 20 },
-  tenCoins: { price: 99, credits: 10, name: "10 Coins", savings: 51 },
+  singleCoin: { price: 5, credits: 1, name: "1 Coin" },
+  doubleCoins: { price: 9, credits: 2, name: "2 Coins", savings: 1 },
+  tripleCoins: { price: 12, credits: 3, name: "3 Coins", savings: 3 },
+  fiveCoins: { price: 19, credits: 5, name: "5 Coins", savings: 6 },
+  tenCoins: { price: 35, credits: 10, name: "10 Coins", savings: 15 },
 } as const;
 
 export const REFERRAL_REWARDS = {

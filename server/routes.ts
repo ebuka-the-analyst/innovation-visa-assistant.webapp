@@ -85,10 +85,10 @@ async function callAI(prompt: string): Promise<string> {
 // 2026 PRICING - Effective January 2026
 const PRICING = {
   free: { amount: 0, name: "Free Plan" },
-  basic: { amount: 2900, name: "Basic Plan" },
-  premium: { amount: 5900, name: "Premium Plan" },
-  enterprise: { amount: 8500, name: "Enterprise Plan" },
-  ultimate: { amount: 11000, name: "Ultimate Plan" },
+  basic: { amount: 900, name: "Basic Plan" },
+  premium: { amount: 1900, name: "Premium Plan" },
+  enterprise: { amount: 3500, name: "Enterprise Plan" },
+  ultimate: { amount: 4900, name: "Ultimate Plan" },
 };
 
 // Helper function to format time ago for email analytics
@@ -1776,11 +1776,11 @@ Respond ONLY with valid JSON in this exact format:
 
   // 2026 COIN PRICING - Effective January 2026
   const ADDON_PRICES = {
-    single_coin: { amount: 1500, credits: 1, name: "1 Coin" },
-    double_coins: { amount: 2500, credits: 2, name: "2 Coins" },
-    triple_coins: { amount: 3500, credits: 3, name: "3 Coins" },
-    five_coins: { amount: 5500, credits: 5, name: "5 Coins" },
-    ten_coins: { amount: 9900, credits: 10, name: "10 Coins" },
+    single_coin: { amount: 500, credits: 1, name: "1 Coin" },
+    double_coins: { amount: 900, credits: 2, name: "2 Coins" },
+    triple_coins: { amount: 1200, credits: 3, name: "3 Coins" },
+    five_coins: { amount: 1900, credits: 5, name: "5 Coins" },
+    ten_coins: { amount: 3500, credits: 10, name: "10 Coins" },
   };
 
   app.get("/api/credits/balance", isAuthenticated, async (req, res) => {

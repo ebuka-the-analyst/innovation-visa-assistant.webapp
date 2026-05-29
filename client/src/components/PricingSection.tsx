@@ -3,11 +3,11 @@ import { Card } from "@/components/ui/card";
 import { Check, X, Star } from "lucide-react";
 import { Link } from "wouter";
 
-// 2026 PRICING - Effective January 2026
+// Global Founder Pricing - Effective May 2026
 const tiers = [
   {
     name: "Basic",
-    price: "£29",
+    price: "£9",
     description: "Perfect for straightforward businesses",
     features: [
       { name: "1 business plan coin", included: true },
@@ -22,7 +22,7 @@ const tiers = [
   },
   {
     name: "Premium",
-    price: "£59",
+    price: "£19",
     description: "Most popular - comprehensive coverage",
     features: [
       { name: "3 business plan coins", included: true },
@@ -37,7 +37,7 @@ const tiers = [
   },
   {
     name: "Enterprise",
-    price: "£85",
+    price: "£35",
     description: "Maximum detail for complex ventures",
     features: [
       { name: "6 business plan coins", included: true },

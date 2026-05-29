@@ -7612,8 +7612,8 @@ export default function AdminDashboard() {
                                     const tierData = [
                                       { source: 'Basic (£9)', amount: revenueAnalytics?.revenueByTier?.basic || 0, color: 'bg-green-500' },
                                       { source: 'Premium (£19)', amount: revenueAnalytics?.revenueByTier?.premium || 0, color: 'bg-blue-500' },
-                                      { source: 'Enterprise (£29)', amount: revenueAnalytics?.revenueByTier?.enterprise || 0, color: 'bg-purple-500' },
-                                      { source: 'Ultimate (£39)', amount: revenueAnalytics?.revenueByTier?.ultimate || 0, color: 'bg-amber-500' },
+                                      { source: 'Enterprise (£35)', amount: revenueAnalytics?.revenueByTier?.enterprise || 0, color: 'bg-purple-500' },
+                                      { source: 'Ultimate (£49)', amount: revenueAnalytics?.revenueByTier?.ultimate || 0, color: 'bg-amber-500' },
                                     ];
                                     const totalRevenue = tierData.reduce((sum, t) => sum + t.amount, 0) || 1;
                                     return tierData.map((item, index) => {
@@ -7919,8 +7919,8 @@ export default function AdminDashboard() {
                                 <div className="space-y-1.5">
                                   {(() => {
                                     const tierData = [
-                                      { tier: 'Ultimate (£39)', mrr: (revenueAnalytics?.tierDistribution?.ultimate || 0) * 39, users: revenueAnalytics?.tierDistribution?.ultimate || 0, color: '#8b5cf6' },
-                                      { tier: 'Enterprise (£29)', mrr: (revenueAnalytics?.tierDistribution?.enterprise || 0) * 29, users: revenueAnalytics?.tierDistribution?.enterprise || 0, color: '#f59e0b' },
+                                      { tier: 'Ultimate (£49)', mrr: (revenueAnalytics?.tierDistribution?.ultimate || 0) * 49, users: revenueAnalytics?.tierDistribution?.ultimate || 0, color: '#8b5cf6' },
+                                      { tier: 'Enterprise (£35)', mrr: (revenueAnalytics?.tierDistribution?.enterprise || 0) * 35, users: revenueAnalytics?.tierDistribution?.enterprise || 0, color: '#f59e0b' },
                                       { tier: 'Premium (£19)', mrr: (revenueAnalytics?.tierDistribution?.premium || 0) * 19, users: revenueAnalytics?.tierDistribution?.premium || 0, color: '#3b82f6' },
                                       { tier: 'Basic (£9)', mrr: (revenueAnalytics?.tierDistribution?.basic || 0) * 9, users: revenueAnalytics?.tierDistribution?.basic || 0, color: '#22c55e' },
                                     ];

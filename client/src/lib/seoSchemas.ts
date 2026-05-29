@@ -188,7 +188,7 @@ export function createLocalBusinessSchema() {
     "name": "UK Innovator Founder Visa Assistant",
     "description": "AI-powered UK Innovator Founder Visa application assistance platform",
     "url": BASE_URL,
-    "priceRange": "£29-£110",
+    "priceRange": "£9-£49",
     "address": {
       "@type": "PostalAddress",
       "addressCountry": "GB"

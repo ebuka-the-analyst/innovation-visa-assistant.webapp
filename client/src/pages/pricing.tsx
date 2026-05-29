@@ -17,7 +17,7 @@ import { TIER_CREDITS, ADDON_PRICING, REFERRAL_REWARDS } from "@/hooks/useTierAc
 import logoLight from "@assets/official_logo.webp";
 import logoDark from "@assets/logo_dark.webp";
 
-// 2026 PRICING - Effective January 2026
+// Global Founder Pricing - Effective May 2026
 const tiers = [
   {
     id: "free",
@@ -39,8 +39,8 @@ const tiers = [
   {
     id: "basic",
     name: "Basic Plan",
-    price: "£29",
-    priceInPence: 2900,
+    price: "£9",
+    priceInPence: 900,
     credits: 1,
     description: "Perfect for straightforward businesses",
     pages: "25-35 pages",
@@ -56,8 +56,8 @@ const tiers = [
   {
     id: "premium",
     name: "Premium Plan",
-    price: "£59",
-    priceInPence: 5900,
+    price: "£19",
+    priceInPence: 1900,
     credits: 3,
     description: "Most popular - comprehensive coverage",
     pages: "40-55 pages",
@@ -74,8 +74,8 @@ const tiers = [
   {
     id: "enterprise",
     name: "Enterprise Plan",
-    price: "£85",
-    priceInPence: 8500,
+    price: "£35",
+    priceInPence: 3500,
     credits: 6,
     description: "Maximum detail for complex ventures",
     pages: "56-80 pages",
@@ -91,8 +91,8 @@ const tiers = [
   {
     id: "ultimate",
     name: "Ultimate Plan",
-    price: "£110",
-    priceInPence: 11000,
+    price: "£49",
+    priceInPence: 4900,
     credits: 12,
     description: "Maximum support for serious founders",
     pages: "80+ pages",
@@ -107,12 +107,12 @@ const tiers = [
   },
 ];
 
-// 2026 COIN TOP-UPS - Effective January 2026
+// Global Founder Coin Top-Ups - Effective May 2026
 const addons = [
   {
     id: "single_coin",
     name: "1 Coin",
-    price: "£15",
+    price: "£5",
     description: "1 extra business plan",
     icon: Coins,
     highlight: false,
@@ -120,8 +120,8 @@ const addons = [
   {
     id: "double_coins",
     name: "2 Coins",
-    price: "£25",
-    savings: "Save £5",
+    price: "£9",
+    savings: "Save £1",
     description: "2 extra business plans",
     icon: Coins,
     highlight: false,
@@ -129,8 +129,8 @@ const addons = [
   {
     id: "triple_coins",
     name: "3 Coins",
-    price: "£35",
-    savings: "Save £10",
+    price: "£12",
+    savings: "Save £3",
     description: "Perfect for iterations",
     icon: Coins,
     highlight: true,
@@ -138,8 +138,8 @@ const addons = [
   {
     id: "five_coins",
     name: "5 Coins",
-    price: "£55",
-    savings: "Save £20",
+    price: "£19",
+    savings: "Save £6",
     description: "Multiple ventures",
     icon: Coins,
     highlight: false,
@@ -147,7 +147,7 @@ const addons = [
   {
     id: "ten_coins",
     name: "10 Coins",
-    price: "£99",
+    price: "£35",
     savings: "Best Value",
     description: "Heavy usage pack",
     icon: Coins,
@@ -331,8 +331,8 @@ export default function Pricing() {
           
           <div className="min-h-screen bg-background">
             <SEOHead
-              title="Pricing Plans | UK Innovator Founder Visa Assistant - £0 to £39"
-              description="Choose from 5 pricing tiers for your UK Innovator Founder Visa application. Free, Basic £9, Premium £19 (most popular), Enterprise £29, Ultimate £39. All plans include 100+ professional-level tools, business plan generation and expert guidance."
+              title="Pricing Plans | UK Innovator Founder Visa Assistant - Start Free from £9"
+              description="Affordable AI-powered UK Innovator Founder Visa preparation platform. Start free or upgrade from £9 with business plan generation, document support, visa strategy tools, and endorsement readiness guidance."
               canonical="https://innovatorfoundervisaassistant.co.uk/pricing"
               keywords="UK Innovator Founder Visa cost, visa application pricing, business plan cost, innovator founder visa fees, visa assistance pricing"
               schema={combinedSchema}

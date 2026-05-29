@@ -6,7 +6,7 @@ import { Check } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 
-// 2026 PRICING - Effective January 2026
+// Global Founder Pricing - Effective May 2026
 const tiers = [
   {
     id: "free",
@@ -26,7 +26,7 @@ const tiers = [
   {
     id: "basic",
     name: "Basic Plan",
-    price: "£29",
+    price: "£9",
     description: "Perfect for straightforward businesses",
     pages: "25-35 pages",
     features: [
@@ -40,7 +40,7 @@ const tiers = [
   {
     id: "premium",
     name: "Premium Plan",
-    price: "£59",
+    price: "£19",
     description: "Most popular - comprehensive coverage",
     pages: "40-55 pages",
     popular: true,
@@ -56,7 +56,7 @@ const tiers = [
   {
     id: "enterprise",
     name: "Enterprise Plan",
-    price: "£85",
+    price: "£35",
     description: "Maximum detail for complex ventures",
     pages: "56-80 pages",
     features: [
@@ -71,7 +71,7 @@ const tiers = [
   {
     id: "ultimate",
     name: "Ultimate Plan",
-    price: "£110",
+    price: "£49",
     description: "Maximum support for serious founders",
     pages: "80+ pages",
     features: [

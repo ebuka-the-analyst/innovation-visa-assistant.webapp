@@ -120,8 +120,8 @@ export default function EverythingWeOfferSection() {
               { name: "Free", price: "£0", color: "bg-gray-50", access: "Essential" },
               { name: "Basic", price: "£9", color: "bg-blue-50", access: "Extended" },
               { name: "Premium", price: "£19", color: "bg-purple-50", access: "Comprehensive", popular: true },
-              { name: "Enterprise", price: "£29", color: "bg-orange-50", access: "Full" },
-              { name: "Ultimate", price: "£39", color: "bg-amber-50", access: "Complete 100+", premium: true },
+              { name: "Enterprise", price: "£35", color: "bg-orange-50", access: "Full" },
+              { name: "Ultimate", price: "£49", color: "bg-amber-50", access: "Complete 100+", premium: true },
             ].map((tier, idx) => (
               <Card key={idx} className={`p-4 text-center hover-elevate border-2 ${tier.color}`} data-testid={`tier-card-${idx}`}>
                 {tier.popular && <div className="text-xs font-bold text-purple-600 mb-2">Most Popular</div>}
