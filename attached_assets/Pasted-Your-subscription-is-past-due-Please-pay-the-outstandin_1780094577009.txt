@@ -1,0 +1,176 @@
+Your subscription is past due. Please pay the outstanding balance to avoid service disruption and continue using Railway.
+
+View Details
+
+
+Innovator-Founder-visa-Assistant
+
+production
+
+
+
+Agent
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+Southeast Asia
+1 Replica
+
+
+
+
+History
+
+Hide Skipped
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+e2e8f086
+Active
+
+May 29, 2026, 11:18 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[MultiVerifier] Available Gemini models for this key: gemini-2.5-flash, gemini-2.5-pro, gemini-2.0-flash, gemini-2.0-flash-001, gemini-2.0-flash-lite-001, gemini-2.0-flash-lite, gemini-2.5-flash-preview-tts, gemini-2.5-pro-preview-tts, gemini-flash-latest, gemini-flash-lite-latest, gemini-pro-latest, gemini-2.5-flash-lite, gemini-2.5-flash-image, gemini-3-pro-preview, gemini-3-flash-preview, gemini-3.1-pro-preview, gemini-3.1-pro-preview-customtools, gemini-3.1-flash-lite-preview, gemini-3.1-flash-lite, gemini-3-pro-image-preview, gemini-3-pro-image, gemini-3.1-flash-image-preview, gemini-3.1-flash-image, gemini-3.5-flash, gemini-3.1-flash-tts-preview, gemini-robotics-er-1.5-preview, gemini-robotics-er-1.6-preview, gemini-2.5-computer-use-preview-10-2025
+[MultiVerifier] Gemini trial order: gemini-2.5-flash, gemini-2.5-flash-lite, gemini-2.5-pro, gemini-flash-latest
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash
+Please retry in 17.272822766s.
+[MultiVerifier] Claude unavailable: Insufficient credits — top up at console.anthropic.com → Plans & Billing
+[MultiVerifier] Result: FLAGGED | Gemini: N/A | OpenAI: 100 | Claude: N/A | Qwen: N/A | Composite: 100
+[AutoFixer] Re-verification result: STILL_FLAGGED | Composite: 100
+[Pipeline] Failed to drain post "Job Creation Plans: What Endorsers Look For in Hir": error: null value in column "published_at" of relation "blog_posts" violates not-null constraint
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+  length: 1312,
+[2026-05-29T22:34:43.608Z] POST /api/activity/session
+  severity: 'ERROR',
+    at async drainHumanReviewQueue (file:///app/dist/index.js:14282:7)
+10:34:43 PM [express] POST /api/activity/session 200 in 68ms :: {"sessionId":"79c1149e-1d41-4858-8272…
+  code: '23502',
+    at async Timeout._onTimeout (file:///app/dist/index.js:14344:9) {
+  detail: "Failing row contains (43564adb-f126-4203-981b-a875059652b6, Job Creation Plans: What Endorsers Look For in Hiring Strategy, job-creation-plans-what-endorsers-look-for-in-hiring-strategy-20..., Learn how to align your job creation plans with endorsers' expec..., <h2>Understanding the Importance of Job Creation Plans</h2>\n" +
+    '<p>W..., business-planning, {"UK Innovator Founder Visa","job creation","business planning",..., Job Creation Plans for UK Innovator Founder Visa, Explore what endorsers seek in your job creation plans for the U..., {"UK Innovator Founder Visa","job creation plans","endorsing bod..., /objects/blog/business-plan.jpg, 8, UK Visa Expert Team, Our team provides accurate, verified information about the UK In..., f, f, 0, null, 2026-05-25 05:02:22.18216, 2026-05-25 05:02:22.18216, human_review, null, 2026-05-25 05:02:22.18, t, f, null, null, null, 0, 0, 0, 0, 0, null, null, 0, 0, 0, null, null, 100, null, 100, flagged, {"drainAttempts": 1, "autoFixAttempts": 5}, 2026-05-29 22:34:44.561, 2026-08-27 22:34:44.561, t, 0, 6, 9a2fbec9260fd36e884069a6ef96dc477c57c71bf0732f12304788fbbac506af, null, null).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'blog_posts',
+  column: 'published_at',
+  dataType: undefined,
+  constraint: undefined,
+  file: 'execMain.c',
+  line: '2022',
+  routine: 'ExecConstraints'
+}
+[Pipeline] "drain-22:30" next run in 1435 min (Sat, 30 May 2026 22:30:00 GMT)
+[2026-05-29T22:34:46.004Z] GET /api/admin/activity-log
+10:34:46 PM [express] GET /api/admin/activity-log 200 in 50ms :: [{"id":"user-672d4724-17ff-404e-96c4…
+[2026-05-29T22:34:46.272Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+10:34:46 PM [express] GET /api/admin/analytics/overview 200 in 297ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-05-29T22:34:49.793Z] GET /api/admin/audit-log
+10:34:49 PM [express] GET /api/admin/audit-log 200 in 19ms :: [{"id":"database-connected","action":"d…
+[2026-05-29T22:34:49.963Z] GET /api/admin/errors
+10:34:50 PM [express] GET /api/admin/errors 200 in 50ms :: {"errors":[{"id":"d24d27cd-f186-489f-a9bb-…
+[2026-05-29T22:35:13.614Z] POST /api/activity/session
+10:35:13 PM [express] POST /api/activity/session 200 in 75ms :: {"sessionId":"79c1149e-1d41-4858-8272…
+[2026-05-29T22:35:16.207Z] GET /api/admin/security-events
+10:35:16 PM [express] GET /api/admin/security-events 200 in 32ms :: {"events":[{"id":"6bf8b498-a5ac-4…
+[2026-05-29T22:35:16.405Z] GET /api/admin/activity-log
+10:35:16 PM [express] GET /api/admin/activity-log 200 in 23ms :: [{"id":"user-672d4724-17ff-404e-96c4…
+[2026-05-29T22:35:16.760Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+10:35:17 PM [express] GET /api/admin/analytics/overview 200 in 275ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-05-29T22:35:46.624Z] GET /api/admin/activity-log
+[2026-05-29T22:35:35.837Z] GET /api/admin/analytics/plans
+10:35:46 PM [express] GET /api/admin/activity-log 200 in 23ms :: [{"id":"user-672d4724-17ff-404e-96c4…
+[2026-05-29T22:35:35.839Z] GET /api/admin/plans?page=1&pageSize=25
+[2026-05-29T22:35:47.226Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+10:35:35 PM [express] GET /api/admin/plans 200 in 57ms :: {"plans":[],"total":0,"page":1,"pageSize":2…
+10:35:47 PM [express] GET /api/admin/analytics/overview 200 in 272ms :: {"kpiMetrics":[{"label":"Tota…
+10:35:35 PM [express] GET /api/admin/analytics/plans 200 in 60ms :: {"byTier":{"basic":0,"premium":0,…
+[2026-05-29T22:35:37.442Z] GET /api/admin/plans?page=1&pageSize=25&statusFilters=pending
+10:35:37 PM [express] GET /api/admin/plans 200 in 18ms :: {"plans":[],"total":0,"page":1,"pageSize":2…
+[2026-05-29T22:35:43.607Z] POST /api/activity/session
+10:35:43 PM [express] POST /api/activity/session 200 in 27ms :: {"sessionId":"79c1149e-1d41-4858-8272…
+[2026-05-29T22:35:45.539Z] GET /api/admin/analytics/emails
+10:35:45 PM [express] GET /api/admin/analytics/emails 200 in 23ms :: {"summary":{"totalSent30Days":4,…
+[2026-05-29T22:36:01.636Z] GET /api/admin/analytics/notifications
+10:36:01 PM [express] GET /api/admin/analytics/notifications 200 in 64ms :: {"summary":{"totalSent30D…
+[SEO] Injecting meta for route: /
+[2026-05-29T22:36:08.862Z] GET /guide
+[2026-05-29T22:36:13.600Z] POST /api/activity/session
+10:36:13 PM [express] POST /api/activity/session 200 in 65ms :: {"sessionId":"79c1149e-1d41-4858-8272…
+[2026-05-29T22:36:16.851Z] GET /api/admin/activity-log
+10:36:16 PM [express] GET /api/admin/activity-log 200 in 24ms :: [{"id":"user-672d4724-17ff-404e-96c4…
+[2026-05-29T22:36:17.700Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+10:36:17 PM [express] GET /api/admin/analytics/overview 200 in 271ms :: {"kpiMetrics":[{"label":"Tota…
+10:36:32 PM [express] GET /api/admin/analytics/notifications 200 in 80ms :: {"summary":{"totalSent30D…
+[2026-05-29T22:36:32.063Z] GET /api/admin/analytics/notifications
+[2026-05-29T22:36:43.611Z] POST /api/activity/session
+10:36:43 PM [express] POST /api/activity/session 200 in 63ms :: {"sessionId":"79c1149e-1d41-4858-8272…
+[2026-05-29T22:36:47.081Z] GET /api/admin/activity-log
+10:36:47 PM [express] GET /api/admin/activity-log 200 in 27ms :: [{"id":"user-672d4724-17ff-404e-96c4…
+[2026-05-29T22:36:48.133Z] POST /api/activity/session/end
+10:36:48 PM [express] POST /api/activity/session/end 200 in 19ms :: {"success":true}
+[2026-05-29T22:41:00.551Z] GET /api/admin/activity-log
+[2026-05-29T22:41:00.553Z] POST /api/activity/session
+[2026-05-29T22:41:00.554Z] GET /api/admin/analytics/notifications
+[2026-05-29T22:41:00.554Z] GET /api/auth/user
+[2026-05-29T22:41:00.555Z] GET /api/admin/analytics/overview
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:41:00 PM [express] GET /api/auth/user 200 in 71ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+10:41:00 PM [express] GET /api/admin/analytics/notifications 200 in 77ms :: {"summary":{"totalSent30D…
+10:41:00 PM [express] GET /api/admin/activity-log 200 in 85ms :: [{"id":"user-672d4724-17ff-404e-96c4…
+10:41:00 PM [express] POST /api/activity/session 200 in 84ms :: {"sessionId":"8a648d52-5ee8-4789-be9f…
+[Stripe] Using LIVE mode credentials - payments are real
+[2026-05-29T22:41:00.825Z] POST /api/activity/page-view
+10:41:00 PM [express] POST /api/activity/page-view 200 in 28ms :: {"pageViewId":"178fde66-e79f-434a-b…
+10:41:00 PM [express] GET /api/admin/analytics/overview 200 in 359ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-05-29T22:41:07.706Z] POST /api/activity/session/end
+10:41:07 PM [express] POST /api/activity/session/end 200 in 19ms :: {"success":true}
+10:41:20 PM [express] POST /api/activity/session 200 in 66ms :: {"sessionId":"b649a08f-d1e8-480b-bb58…
+[2026-05-29T22:41:20.535Z] POST /api/activity/page-view
+10:41:20 PM [express] POST /api/activity/page-view 200 in 25ms :: {"pageViewId":"aa07f7d2-0289-4443-9…
+[2026-05-29T22:41:27.678Z] POST /api/activity/session/end
+10:41:27 PM [express] POST /api/activity/session/end 200 in 27ms :: {"success":true}
+
+

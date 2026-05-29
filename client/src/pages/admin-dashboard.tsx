@@ -2712,16 +2712,20 @@ export default function AdminDashboard() {
   // Send broadcast notification mutation
   const sendBroadcastMutation = useMutation({
     mutationFn: async (data: { title: string; message: string; type: string; targetTiers: string[] }) => {
+      const hasTiers = data.targetTiers.length > 0;
       const response = await apiRequest('POST', '/api/admin/notifications', {
         title: data.title,
         message: data.message,
         type: data.type,
-        targetTiers: data.targetTiers.length > 0 ? data.targetTiers : null,
+        targetType: hasTiers ? 'tier' : 'all',
+        targetValue: hasTiers ? data.targetTiers[0] : null,
       });
-      const notification = await response.json();
+      const body = await response.json();
+      const notificationId = body?.notification?.id ?? body?.id;
+      if (!notificationId) throw new Error("Failed to create notification record");
       // Auto-send after creation
-      await apiRequest('POST', `/api/admin/notifications/${notification.id}/send`, {});
-      return notification;
+      await apiRequest('POST', `/api/admin/notifications/${notificationId}/send`, {});
+      return body;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/notifications'] });
