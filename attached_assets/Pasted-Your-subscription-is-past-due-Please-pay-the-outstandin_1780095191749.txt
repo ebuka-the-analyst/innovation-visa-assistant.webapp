@@ -1,0 +1,176 @@
+Your subscription is past due. Please pay the outstanding balance to avoid service disruption and continue using Railway.
+
+View Details
+
+
+Innovator-Founder-visa-Assistant
+
+production
+
+
+
+Agent
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+Southeast Asia
+1 Replica
+
+
+
+
+History
+
+Hide Skipped
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+5fd0bab1
+Active
+
+May 29, 2026, 11:46 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[2026-05-29T22:48:42.097Z] GET /assets/upload-D0t2Cqrm.js
+[2026-05-29T22:48:42.099Z] GET /assets/user-BqvaUb3H.js
+[2026-05-29T22:48:42.099Z] GET /assets/wand-sparkles-B4YS_e5N.js
+[2026-05-29T22:48:42.336Z] GET /assets/admin-dashboard-Kf_csrAX.js
+[2026-05-29T22:48:42.338Z] GET /assets/badge-CytnJ5sm.js
+[2026-05-29T22:48:42.340Z] GET /assets/skeleton-BB3qQlgX.js
+[2026-05-29T22:48:42.341Z] GET /assets/select-aTuoy2cq.js
+[2026-05-29T22:48:42.344Z] GET /assets/index-CwXFDxxi.js
+[2026-05-29T22:48:42.344Z] GET /assets/index-DjNQugiM.js
+[2026-05-29T22:48:42.345Z] GET /assets/table-BF-_q6Yb.js
+[2026-05-29T22:48:42.347Z] GET /assets/alert-dialog-BBnVn-lm.js
+[2026-05-29T22:48:42.347Z] GET /assets/checkbox-CXEFYp-5.js
+[2026-05-29T22:48:42.348Z] GET /assets/switch-BAjokIM6.js
+[2026-05-29T22:48:42.512Z] GET /assets/progress-DnpGsJ0d.js
+[2026-05-29T22:48:42.513Z] GET /assets/scroll-area-mUnolcQ0.js
+[2026-05-29T22:48:42.514Z] GET /assets/avatar-BMNhPrNr.js
+[2026-05-29T22:48:42.514Z] GET /assets/tabs-DYsOHjQE.js
+[2026-05-29T22:48:42.515Z] GET /assets/generateCategoricalChart-XS6ELUfg.js
+[2026-05-29T22:48:42.516Z] GET /assets/index-C0oGHVbz.js
+[2026-05-29T22:48:42.517Z] GET /assets/dropdown-menu-CUbK5eqn.js
+[2026-05-29T22:48:42.518Z] GET /assets/proxy--6_4ReEi.js
+[2026-05-29T22:48:42.519Z] GET /assets/YAxis-BmGYQETL.js
+[2026-05-29T22:48:42.519Z] GET /assets/AreaChart-CiHZJ-zt.js
+[2026-05-29T22:48:42.520Z] GET /assets/CartesianGrid-DtNnNoqB.js
+[2026-05-29T22:48:42.520Z] GET /assets/LineChart-BoRy_tUh.js
+[2026-05-29T22:48:42.524Z] GET /assets/Area-B0d-SrLv.js
+[2026-05-29T22:48:42.528Z] GET /assets/BarChart-DYYNkvUA.js
+[2026-05-29T22:48:42.531Z] GET /assets/Line-OkqkuIPb.js
+[2026-05-29T22:48:42.534Z] GET /assets/useVisualPdfExport-CmqDw51B.js
+[2026-05-29T22:48:42.537Z] GET /assets/index-D9ZtxXT8.js
+[2026-05-29T22:48:42.540Z] POST /api/activity/session
+[2026-05-29T22:48:42.546Z] GET /assets/Treemap-D39H5fYM.js
+[2026-05-29T22:48:42.550Z] GET /assets/PieChart-E4nM2I_-.js
+[2026-05-29T22:48:42.554Z] GET /assets/jspdf.es.min-CtL0QBXs.js
+[2026-05-29T22:48:42.559Z] GET /assets/PolarAngleAxis-CqRE7s54.js
+[2026-05-29T22:48:42.561Z] GET /assets/RadialBarChart-C8xjtTSu.js
+[2026-05-29T22:48:42.565Z] POST /api/activity/session
+10:48:42 PM [express] POST /api/activity/session 200 in 48ms :: {"sessionId":"aef26a76-6d92-4aa8-832a…
+10:48:42 PM [express] POST /api/activity/session 200 in 35ms :: {"sessionId":"6f561d84-2489-49e7-9035…
+[2026-05-29T22:48:42.775Z] POST /api/activity/page-view
+10:48:42 PM [express] POST /api/activity/page-view 200 in 28ms :: {"pageViewId":"2a712d53-4a0e-432a-b…
+[2026-05-29T22:48:43.353Z] GET /api/admin/analytics/overview
+[2026-05-29T22:48:43.354Z] GET /api/admin/activity-log
+[2026-05-29T22:48:43.354Z] GET /api/admin/analytics/notifications
+10:48:43 PM [express] GET /api/admin/activity-log 200 in 23ms :: [{"id":"user-672d4724-17ff-404e-96c4…
+10:48:43 PM [express] GET /api/admin/analytics/notifications 200 in 26ms :: {"summary":{"totalSent30D…
+[Stripe] Using LIVE mode credentials - payments are real
+10:48:43 PM [express] GET /api/admin/analytics/overview 200 in 267ms :: {"kpiMetrics":[{"label":"Tota…
+[Pipeline] Catch-up check: recent post found — no catch-up needed.
+[2026-05-29T22:48:58.357Z] GET /assets/index-CzY0pB1D.js
+[2026-05-29T22:49:21.253Z] GET /api/auth/user
+[2026-05-29T22:49:21.254Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:49:21 PM [express] GET /api/auth/user 200 in 59ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+10:49:21 PM [express] POST /api/activity/session 200 in 66ms :: {"sessionId":"5dfa54c3-492f-4343-922b…
+[2026-05-29T22:49:21.508Z] POST /api/activity/page-view
+10:49:21 PM [express] POST /api/activity/page-view 200 in 24ms :: {"pageViewId":"ed2f2f7e-955a-483f-8…
+[2026-05-29T22:49:30.680Z] POST /api/activity/session/end
+10:49:30 PM [express] POST /api/activity/session/end 200 in 18ms :: {"success":true}
+[2026-05-29T22:49:42.932Z] GET /api/news
+10:49:42 PM [express] GET /api/news 200 in 51ms :: [{"id":"official-1","title":"Students can now swit…
+[2026-05-29T22:50:11.855Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:50:11 PM [express] GET /api/auth/user 200 in 71ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+10:50:11 PM [express] POST /api/activity/session 200 in 77ms :: {"sessionId":"98920a85-2419-4f9a-8c36…
+[2026-05-29T22:50:11.854Z] GET /api/auth/user
+[2026-05-29T22:50:12.123Z] POST /api/activity/page-view
+10:50:18 PM [express] POST /api/admin/notifications 200 in 18ms :: {"success":true,"notification":{"i…
+10:50:12 PM [express] POST /api/activity/page-view 200 in 30ms :: {"pageViewId":"3e63e73a-fee4-49fd-a…
+[2026-05-29T22:50:19.089Z] POST /api/admin/notifications/db4dc891-fdc4-4fd9-8a4c-c0d31d9b976a/send
+[2026-05-29T22:50:13.587Z] GET /api/admin/activity-log
+[2026-05-29T22:50:13.588Z] GET /api/admin/analytics/notifications
+10:50:13 PM [express] GET /api/admin/activity-log 200 in 24ms :: [{"id":"user-672d4724-17ff-404e-96c4…
+10:50:13 PM [express] GET /api/admin/analytics/notifications 200 in 24ms :: {"summary":{"totalSent30D…
+[2026-05-29T22:50:13.811Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+10:50:14 PM [express] GET /api/admin/analytics/overview 200 in 299ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-05-29T22:50:18.883Z] POST /api/admin/notifications
+10:50:19 PM [express] POST /api/admin/notifications/db4dc891-fdc4-4fd9-8a4c-c0d31d9b976a/send 200 in …
+[2026-05-29T22:50:45.871Z] POST /api/activity/session/end
+10:50:44 PM [express] GET /api/auth/user 200 in 67ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+10:50:45 PM [express] POST /api/activity/session/end 200 in 20ms :: {"success":true}
+10:50:44 PM [express] GET /api/admin/activity-log 200 in 69ms :: [{"id":"user-672d4724-17ff-404e-96c4…
+10:50:44 PM [express] GET /api/admin/analytics/notifications 200 in 75ms :: {"summary":{"totalSent30D…
+[2026-05-29T22:50:44.420Z] GET /api/admin/analytics/notifications
+[Stripe] Using LIVE mode credentials - payments are real
+[2026-05-29T22:50:44.689Z] POST /api/activity/page-view
+10:50:44 PM [express] POST /api/activity/page-view 200 in 28ms :: {"pageViewId":"2317f5f0-64c5-41c7-8…
+10:50:44 PM [express] GET /api/admin/analytics/overview 200 in 340ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-05-29T22:50:44.422Z] POST /api/activity/session
+[2026-05-29T22:50:44.423Z] GET /api/admin/activity-log
+[2026-05-29T22:50:44.468Z] GET /api/admin/analytics/overview
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:50:47 PM [express] POST /api/activity/page-view 200 in 26ms :: {"pageViewId":"f78fd4f0-219a-4be2-b…
+[2026-05-29T22:50:47.682Z] POST /api/activity/page-view
+[2026-05-29T22:50:47.470Z] POST /api/activity/session
+10:50:47 PM [express] POST /api/activity/session 200 in 24ms :: {"sessionId":"4eba87e1-7dc8-40cc-bf64…
+[2026-05-29T22:51:02.746Z] POST /api/activity/session/end
+[2026-05-29T22:51:36.240Z] GET /api/auth/user
+[2026-05-29T22:51:36.243Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+10:51:36 PM [express] GET /api/auth/user 200 in 64ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+10:51:36 PM [express] POST /api/activity/session 200 in 70ms :: {"sessionId":"d7dab3bf-e694-436f-8db3…
+[2026-05-29T22:51:36.503Z] POST /api/activity/page-view
+10:51:36 PM [express] POST /api/activity/page-view 200 in 25ms :: {"pageViewId":"0ed9baee-b3ca-496e-8…
+[2026-05-29T22:51:37.815Z] POST /api/activity/session/end
+10:51:37 PM [express] POST /api/activity/session/end 200 in 19ms :: {"success":true}
+
+

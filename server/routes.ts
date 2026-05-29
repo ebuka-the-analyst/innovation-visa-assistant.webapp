@@ -13111,7 +13111,7 @@ Return a JSON object with:
     }
   });
 
-  // Send broadcast notification (mark as sent and count recipients)
+  // Send broadcast notification (emails all target users)
   app.post("/api/admin/notifications/:id/send", requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
@@ -13127,26 +13127,94 @@ Return a JSON object with:
 
       const notification = notifResult.rows[0] as any;
 
-      // Count recipients based on target type
-      let recipientCount = 0;
-      if (notification.target_type === 'all') {
-        const countResult = await db.execute(sql`SELECT COUNT(*) as count FROM users WHERE is_banned = false`);
-        recipientCount = parseInt((countResult.rows[0] as any).count);
-      } else if (notification.target_type === 'tier') {
-        const countResult = await db.execute(
-          sql`SELECT COUNT(*) as count FROM users WHERE subscription_tier = ${notification.target_value} AND is_banned = false`
+      // Fetch recipient users based on target type
+      let usersResult;
+      if (notification.target_type === 'tier' && notification.target_value) {
+        usersResult = await db.execute(
+          sql`SELECT id, email, first_name, last_name FROM users WHERE subscription_tier = ${notification.target_value} AND is_banned = false AND email IS NOT NULL`
         );
-        recipientCount = parseInt((countResult.rows[0] as any).count);
+      } else {
+        usersResult = await db.execute(
+          sql`SELECT id, email, first_name, last_name FROM users WHERE is_banned = false AND email IS NOT NULL`
+        );
       }
 
-      // Update notification as sent
+      const recipients = usersResult.rows as Array<{ id: string; email: string; first_name: string | null; last_name: string | null }>;
+      const recipientCount = recipients.length;
+
+      // Mark as sent immediately so the UI updates fast
       await db.execute(
         sql`UPDATE admin_notifications 
             SET status = 'sent', sent_at = NOW(), recipient_count = ${recipientCount}, updated_at = NOW()
             WHERE id = ${id}`
       );
 
+      // Respond to admin right away — emails are sent in the background
       res.json({ success: true, recipientCount });
+
+      // Send emails in the background (batched to avoid rate limits)
+      if (recipientCount > 0) {
+        const { sendEmail } = await import("./email");
+        const typeColors: Record<string, string> = {
+          info: '#005EB8', success: '#059669', warning: '#d97706', urgent: '#dc2626', announcement: '#7c3aed',
+        };
+        const accentColor = typeColors[notification.type] || '#005EB8';
+        const BATCH_SIZE = 10;
+        const BATCH_DELAY_MS = 1000;
+
+        for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
+          const batch = recipients.slice(i, i + BATCH_SIZE);
+          await Promise.allSettled(
+            batch.map(user => {
+              const firstName = user.first_name || user.email.split('@')[0];
+              return sendEmail({
+                to: user.email,
+                subject: notification.title,
+                emailType: 'broadcast',
+                userId: user.id,
+                html: `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:30px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:${accentColor};padding:28px 32px;text-align:center;">
+            <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.3px;">UK Innovator Founder Visa Assistant</h1>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:32px;">
+            <p style="margin:0 0 16px;color:#111827;font-size:15px;">Hi ${firstName},</p>
+            <h2 style="margin:0 0 16px;color:#111827;font-size:20px;font-weight:700;">${notification.title}</h2>
+            <div style="color:#374151;font-size:15px;line-height:1.7;white-space:pre-wrap;">${notification.message}</div>
+            <div style="margin-top:32px;text-align:center;">
+              <a href="https://innovatorfoundervisaassistant.co.uk" style="display:inline-block;background:${accentColor};color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:15px;font-weight:600;">Open Platform</a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f9fafb;padding:20px 32px;border-top:1px solid #e5e7eb;text-align:center;">
+            <p style="margin:0;color:#9ca3af;font-size:12px;">UK Innovator Founder Visa Assistant &bull; innovatorfoundervisaassistant.co.uk</p>
+            <p style="margin:6px 0 0;color:#9ca3af;font-size:12px;">You're receiving this because you have an account with us.</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
+              });
+            })
+          );
+          if (i + BATCH_SIZE < recipients.length) {
+            await new Promise(r => setTimeout(r, BATCH_DELAY_MS));
+          }
+        }
+        console.log(`[Broadcast] Sent notification "${notification.title}" to ${recipientCount} user(s)`);
+      }
     } catch (error) {
       console.error("Send notification error:", error);
       res.status(500).json({ error: "Failed to send notification" });
