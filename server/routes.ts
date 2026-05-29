@@ -13167,40 +13167,64 @@ Return a JSON object with:
           await Promise.allSettled(
             batch.map(user => {
               const firstName = user.first_name || user.email.split('@')[0];
+              // If message already contains HTML tags render it directly, otherwise
+              // convert newlines → <br> so plain-text messages look correct too.
+              const rawMsg: string = notification.message ?? '';
+              const containsHtml = /<[a-z][\s\S]*>/i.test(rawMsg);
+              const messageHtml = containsHtml
+                ? rawMsg
+                : rawMsg
+                    .split(/\n\n+/)
+                    .map((para: string) => `<p style="margin:0 0 14px;color:#374151;font-size:15px;line-height:1.7;">${para.replace(/\n/g, '<br>')}</p>`)
+                    .join('');
               return sendEmail({
                 to: user.email,
                 subject: notification.title,
                 emailType: 'broadcast',
                 userId: user.id,
-                html: `
-<!DOCTYPE html>
+                html: `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:30px 0;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>${notification.title}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f3f4f6;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f3f4f6;padding:30px 16px;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:8px;overflow:hidden;">
+
+        <!-- Header -->
         <tr>
-          <td style="background:${accentColor};padding:28px 32px;text-align:center;">
-            <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.3px;">UK Innovator Founder Visa Assistant</h1>
+          <td style="background-color:${accentColor};padding:24px 32px;text-align:center;">
+            <p style="margin:0;font-size:13px;color:rgba(255,255,255,0.75);letter-spacing:0.5px;text-transform:uppercase;font-weight:600;">UK Innovator Founder Visa Assistant</p>
+            <h1 style="margin:8px 0 0;color:#ffffff;font-size:22px;font-weight:700;line-height:1.3;">${notification.title}</h1>
           </td>
         </tr>
+
+        <!-- Body -->
         <tr>
-          <td style="padding:32px;">
-            <p style="margin:0 0 16px;color:#111827;font-size:15px;">Hi ${firstName},</p>
-            <h2 style="margin:0 0 16px;color:#111827;font-size:20px;font-weight:700;">${notification.title}</h2>
-            <div style="color:#374151;font-size:15px;line-height:1.7;white-space:pre-wrap;">${notification.message}</div>
-            <div style="margin-top:32px;text-align:center;">
-              <a href="https://innovatorfoundervisaassistant.co.uk" style="display:inline-block;background:${accentColor};color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:15px;font-weight:600;">Open Platform</a>
-            </div>
+          <td style="padding:32px 32px 24px;">
+            <p style="margin:0 0 20px;color:#111827;font-size:15px;line-height:1.6;">Hi ${firstName},</p>
+            <div style="color:#374151;font-size:15px;line-height:1.7;">${messageHtml}</div>
           </td>
         </tr>
+
+        <!-- CTA Button -->
         <tr>
-          <td style="background:#f9fafb;padding:20px 32px;border-top:1px solid #e5e7eb;text-align:center;">
-            <p style="margin:0;color:#9ca3af;font-size:12px;">UK Innovator Founder Visa Assistant &bull; innovatorfoundervisaassistant.co.uk</p>
-            <p style="margin:6px 0 0;color:#9ca3af;font-size:12px;">You're receiving this because you have an account with us.</p>
+          <td style="padding:0 32px 32px;text-align:center;">
+            <a href="https://innovatorfoundervisaassistant.co.uk/pricing" style="display:inline-block;background-color:${accentColor};color:#ffffff;text-decoration:none;padding:13px 32px;border-radius:6px;font-size:15px;font-weight:700;letter-spacing:0.2px;">View Updated Pricing</a>
           </td>
         </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background-color:#f9fafb;padding:20px 32px;border-top:1px solid #e5e7eb;text-align:center;">
+            <p style="margin:0;color:#6b7280;font-size:12px;line-height:1.6;">UK Innovator Founder Visa Assistant &bull; <a href="https://innovatorfoundervisaassistant.co.uk" style="color:#6b7280;text-decoration:underline;">innovatorfoundervisaassistant.co.uk</a></p>
+            <p style="margin:6px 0 0;color:#9ca3af;font-size:11px;">You're receiving this because you have an account with us. &bull; <a href="https://innovatorfoundervisaassistant.co.uk/account" style="color:#9ca3af;text-decoration:underline;">Manage preferences</a></p>
+          </td>
+        </tr>
+
       </table>
     </td></tr>
   </table>

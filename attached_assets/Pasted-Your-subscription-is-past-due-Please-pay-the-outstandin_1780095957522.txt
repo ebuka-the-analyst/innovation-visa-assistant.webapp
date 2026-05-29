@@ -1,0 +1,176 @@
+Your subscription is past due. Please pay the outstanding balance to avoid service disruption and continue using Railway.
+
+View Details
+
+
+Innovator-Founder-visa-Assistant
+
+production
+
+
+
+Agent
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+Southeast Asia
+1 Replica
+
+
+
+
+History
+
+Hide Skipped
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+6deddf97
+Active
+
+May 29, 2026, 11:55 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[2026-05-29T23:04:55.097Z] GET /assets/message-square-C3AQmUjw.js
+[2026-05-29T23:04:54.905Z] GET /assets/arrow-left-C46Nyzwu.js
+[2026-05-29T23:04:55.019Z] GET /assets/circle-x-DlUauRxf.js
+[2026-05-29T23:04:54.918Z] GET /assets/activity-CHILULIP.js
+[2026-05-29T23:04:55.022Z] GET /assets/box-BnStiiav.js
+[2026-05-29T23:04:55.024Z] GET /assets/circle-QtRAroz_.js
+[2026-05-29T23:04:55.030Z] GET /assets/book-DER_y-ib.js
+[2026-05-29T23:04:55.107Z] GET /assets/shield-alert-CnsEGFZT.js
+[2026-05-29T23:04:55.109Z] GET /assets/save-DdBDW4go.js
+[2026-05-29T23:04:55.110Z] GET /assets/search-C8Iy7jzU.js
+[2026-05-29T23:04:55.111Z] GET /assets/clock-B1ou_J3G.js
+[2026-05-29T23:04:55.112Z] GET /assets/code-CnFzU_uv.js
+[2026-05-29T23:04:55.114Z] GET /assets/wallet-B-sFXBuz.js
+[2026-05-29T23:04:55.116Z] GET /assets/database-LA6eiF7n.js
+[2026-05-29T23:04:55.120Z] GET /assets/dialog-n6g38I5L.js
+[2026-05-29T23:04:55.123Z] GET /assets/twitter-CSZmIk5i.js
+[2026-05-29T23:04:55.129Z] GET /assets/cookie-C4fJYu_G.js
+[2026-05-29T23:04:55.131Z] GET /assets/file-type-2-g6hhPsvF.js
+[2026-05-29T23:04:55.132Z] GET /assets/file-spreadsheet-CE3_5A84.js
+[2026-05-29T23:04:55.133Z] GET /assets/percent-BbG9F728.js
+[2026-05-29T23:04:55.136Z] GET /assets/eye-off-DsCDwgSp.js
+[2026-05-29T23:04:55.138Z] GET /assets/git-branch-C7psyVSj.js
+[2026-05-29T23:04:55.140Z] GET /assets/graduation-cap-T8-gKQEu.js
+[2026-05-29T23:04:55.141Z] GET /assets/crown-C7NnXK1x.js
+[2026-05-29T23:04:55.142Z] GET /assets/phone-DgzpOKRB.js
+[2026-05-29T23:04:55.143Z] GET /assets/key-DjxbFrjj.js
+[2026-05-29T23:04:55.145Z] GET /assets/plane-iPBlHupu.js
+[2026-05-29T23:04:55.146Z] GET /assets/pen-line-CQULSE8o.js
+[2026-05-29T23:04:55.147Z] GET /assets/plus-eukzGw90.js
+[2026-05-29T23:04:55.149Z] GET /assets/timer-CA7u2DD8.js
+[2026-05-29T23:04:55.150Z] GET /assets/textarea-BS-3_evy.js
+[2026-05-29T23:04:55.151Z] GET /assets/truck-Dvgdah3z.js
+[2026-05-29T23:04:55.152Z] GET /assets/wand-sparkles-B4YS_e5N.js
+[2026-05-29T23:04:55.153Z] GET /assets/test-tube-Efgs5jO5.js
+[2026-05-29T23:04:55.155Z] GET /assets/CookieConsent-DzNpvBqQ.js
+[2026-05-29T23:04:55.156Z] GET /assets/eye-ceHkWxcG.js
+[2026-05-29T23:04:55.159Z] GET /assets/heart-UfXbK9xn.js
+[2026-05-29T23:04:55.160Z] GET /assets/message-square-warning-BlBKiOqj.js
+[2026-05-29T23:04:55.162Z] GET /assets/mic-off-DHzm-f2t.js
+[2026-05-29T23:04:55.163Z] GET /assets/copyright-CZov4HJZ.js
+[2026-05-29T23:04:55.165Z] GET /assets/label-5ZdDnw-A.js
+[2026-05-29T23:04:55.167Z] GET /assets/zoom-out-BHbQH2-l.js
+[2026-05-29T23:04:55.168Z] GET /assets/star-CgD-fVla.js
+[2026-05-29T23:04:55.170Z] GET /assets/file-pen-line-ByAVvo7l.js
+[2026-05-29T23:04:55.172Z] GET /assets/share-2-Bi4jtT7Q.js
+[2026-05-29T23:04:55.173Z] GET /assets/shopping-cart-DKCO6hn9.js
+[2026-05-29T23:04:55.174Z] GET /assets/scale-DX4eJWwm.js
+[2026-05-29T23:04:55.175Z] GET /assets/filter-C3-Ht9eU.js
+[2026-05-29T23:04:55.177Z] GET /assets/menu-C_l_WbGR.js
+[2026-05-29T23:04:55.178Z] GET /assets/login-D4Lpj0sc.js
+[2026-05-29T23:04:55.179Z] GET /assets/link-2-eaONH1iz.js
+[2026-05-29T23:04:55.181Z] GET /assets/user-check-CLYyPuo_.js
+[2026-05-29T23:04:55.199Z] GET /assets/trending-down-ESYLht4e.js
+[2026-05-29T23:04:55.182Z] GET /assets/qr-code-D48nZm1b.js
+[2026-05-29T23:04:55.183Z] GET /assets/file-check-Ox_4dyzg.js
+[2026-05-29T23:04:55.185Z] GET /assets/server-CTkoJwB3.js
+[2026-05-29T23:04:55.186Z] GET /assets/info-Bv4qiwsp.js
+[2026-05-29T23:04:55.188Z] GET /assets/cloud-BodCYxOM.js
+[2026-05-29T23:04:55.189Z] GET /assets/thumbs-up-CKvx6oPv.js
+[2026-05-29T23:04:55.191Z] GET /assets/mail-4a9a8Qwi.js
+[2026-05-29T23:04:55.192Z] GET /assets/file-question-CDXzk7ap.js
+[2026-05-29T23:04:55.193Z] GET /assets/file-DOCM_J9H.js
+[2026-05-29T23:04:55.194Z] GET /assets/cpu-Pfo8DGVS.js
+[2026-05-29T23:04:55.195Z] GET /assets/map-pin-t6PddMkJ.js
+[2026-05-29T23:04:55.196Z] GET /assets/lightbulb-Le81y_JK.js
+[2026-05-29T23:04:55.197Z] GET /assets/flame-CrkrziGC.js
+[2026-05-29T23:04:55.199Z] GET /assets/image-DSjuvOIe.js
+[2026-05-29T23:04:55.200Z] GET /assets/user-plus-D7usLO4T.js
+[2026-05-29T23:04:55.201Z] GET /assets/tag-CJWNxrXI.js
+[2026-05-29T23:04:55.204Z] GET /assets/file-warning-CM27Kztv.js
+[2026-05-29T23:04:55.205Z] GET /assets/user-BqvaUb3H.js
+[2026-05-29T23:04:55.206Z] GET /assets/alert-8sp6mdKV.js
+[2026-05-29T23:04:55.211Z] GET /assets/wheat-CLigraWL.js
+[2026-05-29T23:04:55.213Z] GET /assets/pound-sterling-BvzpCpYP.js
+[2026-05-29T23:04:55.207Z] GET /assets/SiteFeedbackPopup-us2O4rGm.js
+[2026-05-29T23:04:55.208Z] GET /assets/square-usrWTPfb.js
+[2026-05-29T23:04:55.215Z] GET /assets/SEOHead-CDNvKOhq.js
+[2026-05-29T23:04:55.209Z] GET /assets/coins-DSTnTSzI.js
+[2026-05-29T23:04:55.216Z] GET /assets/volume-2-DluvhL3l.js
+[2026-05-29T23:04:55.209Z] GET /assets/log-in-BHSwWlTo.js
+[2026-05-29T23:04:55.211Z] GET /assets/play-Lrxx5swi.js
+[2026-05-29T23:04:55.217Z] GET /assets/trash-2-CzjmlQQ1.js
+[2026-05-29T23:04:55.218Z] GET /assets/monitor-Ctcab6mi.js
+[2026-05-29T23:04:55.220Z] GET /assets/file-image-Dr1JidOP.js
+[2026-05-29T23:04:55.221Z] GET /assets/FloatingFeedback-BJ8WOohz.js
+[2026-05-29T23:04:55.224Z] GET /assets/square-pen-Cp6s2Stf.js
+[2026-05-29T23:04:55.225Z] GET /assets/github-DqSf1u4i.js
+[2026-05-29T23:04:55.234Z] GET /assets/palette-DK2oOrNT.js
+[2026-05-29T23:04:55.235Z] GET /assets/upload-D0t2Cqrm.js
+[2026-05-29T23:04:55.237Z] GET /assets/tram-front-CU_IbZTk.js
+[2026-05-29T23:04:55.239Z] GET /assets/medal-Ds7px55L.js
+[2026-05-29T23:04:55.240Z] GET /assets/rotate-ccw-CVzCYrqb.js
+[2026-05-29T23:04:55.242Z] GET /assets/flag-CFMKwqi-.js
+[2026-05-29T23:04:55.243Z] GET /assets/external-link-CZZvYydB.js
+[2026-05-29T23:04:55.243Z] GET /assets/video-CTPoZ4-I.js
+[2026-05-29T23:04:55.226Z] GET /assets/lock-Drec5p6E.js
+[2026-05-29T23:04:55.245Z] GET /assets/scan-BXetNevX.js
+[2026-05-29T23:04:55.249Z] GET /assets/presentation-DrBziiNc.js
+[2026-05-29T23:04:55.228Z] GET /assets/lock-open-BCxLA6VL.js
+[2026-05-29T23:04:55.250Z] GET /assets/volume-x-CAIluNux.js
+[2026-05-29T23:04:55.229Z] GET /assets/package-C1Jf9yRJ.js
+[2026-05-29T23:04:55.259Z] GET /assets/smartphone-Gbt8OboT.js
+[2026-05-29T23:04:55.267Z] GET /assets/download-Di29LK6Q.js
+[2026-05-29T23:04:55.231Z] GET /assets/quote-C-0p8RSv.js
+[2026-05-29T23:04:59.893Z] POST /api/performance/metrics
+[2026-05-29T23:04:55.233Z] GET /assets/credit-card-Cd3p7K5e.js
+11:04:59 PM [express] POST /api/performance/metrics 204 in 33ms
+
+
