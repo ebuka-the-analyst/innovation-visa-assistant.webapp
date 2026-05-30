@@ -10,6 +10,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import { 
   User as UserIcon, Bell, Shield, Palette, Trash2, Download, 
   CheckCircle2, AlertTriangle, Moon, Sun, Monitor,
@@ -94,6 +97,24 @@ export default function Settings() {
   const { data: notifHistory, isLoading: historyLoading } = useQuery<{ notifications: HistoryNotification[] }>({
     queryKey: ['/api/notifications/history'],
     enabled: !!user,
+  });
+
+  // Viewing full notification in dialog
+  const [viewingNotif, setViewingNotif] = useState<HistoryNotification | null>(null);
+
+  // Delete (dismiss) a notification from history
+  const dismissMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest('DELETE', `/api/notifications/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications/history'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
+      toast({ title: "Announcement removed" });
+    },
+    onError: () => {
+      toast({ title: "Failed to remove announcement", variant: "destructive" });
+    },
   });
 
   // Update notification preferences mutation
@@ -719,19 +740,40 @@ export default function Settings() {
                               )}
                               <span className="text-xs text-muted-foreground ml-auto">{timeAgoSettings(ts)}</span>
                             </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
                               {n.message.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim()}
                             </p>
-                            {(n.action_url || n.action_text) && (
-                              <a
-                                href={n.action_url || "#"}
-                                target={n.action_url?.startsWith("http") ? "_blank" : undefined}
-                                rel="noopener noreferrer"
-                                className="inline-block mt-1.5 text-xs font-medium text-primary hover:underline"
+                            <div className="flex items-center gap-2 mt-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setViewingNotif(n)}
+                                data-testid={`button-view-announcement-${n.id}`}
                               >
-                                {n.action_text || "View details"} →
-                              </a>
-                            )}
+                                View
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => dismissMutation.mutate(n.id)}
+                                disabled={dismissMutation.isPending}
+                                data-testid={`button-delete-announcement-${n.id}`}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                                Delete
+                              </Button>
+                              {(n.action_url || n.action_text) && (
+                                <a
+                                  href={n.action_url || "#"}
+                                  target={n.action_url?.startsWith("http") ? "_blank" : undefined}
+                                  rel="noopener noreferrer"
+                                  className="text-xs font-medium text-primary hover:underline ml-auto"
+                                >
+                                  {n.action_text || "View details"} →
+                                </a>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -740,6 +782,55 @@ export default function Settings() {
                 )}
               </CardContent>
             </Card>
+
+            {/* View Announcement Dialog */}
+            <Dialog open={!!viewingNotif} onOpenChange={(open) => { if (!open) setViewingNotif(null); }}>
+              <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+                {viewingNotif && (() => {
+                  const cfg = NOTIF_TYPE_CONFIG[viewingNotif.type] ?? NOTIF_TYPE_CONFIG.info;
+                  const Icon = cfg.icon;
+                  const ts = viewingNotif.sent_at || viewingNotif.created_at;
+                  const hasHtml = /<[a-z][\s\S]*>/i.test(viewingNotif.message);
+                  return (
+                    <>
+                      <DialogHeader>
+                        <div className={`flex items-center gap-2 mb-1`}>
+                          <div className={`flex items-center justify-center h-7 w-7 rounded-full ${cfg.bg}`}>
+                            <Icon className={`h-3.5 w-3.5 ${cfg.color}`} />
+                          </div>
+                          <span className={`text-xs font-semibold uppercase tracking-wide ${cfg.color}`}>{cfg.label}</span>
+                          <span className="text-xs text-muted-foreground ml-auto">{timeAgoSettings(ts)}</span>
+                        </div>
+                        <DialogTitle className="text-base leading-snug">{viewingNotif.title}</DialogTitle>
+                        <DialogDescription className="sr-only">Platform announcement details</DialogDescription>
+                      </DialogHeader>
+                      <Separator className="my-3" />
+                      {hasHtml ? (
+                        <div
+                          className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed text-foreground"
+                          dangerouslySetInnerHTML={{ __html: viewingNotif.message }}
+                        />
+                      ) : (
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">{viewingNotif.message}</p>
+                      )}
+                      {(viewingNotif.action_url || viewingNotif.action_text) && (
+                        <div className="mt-4">
+                          <a
+                            href={viewingNotif.action_url || "#"}
+                            target={viewingNotif.action_url?.startsWith("http") ? "_blank" : undefined}
+                            rel="noopener noreferrer"
+                          >
+                            <Button variant="default" size="sm">
+                              {viewingNotif.action_text || "View details"}
+                            </Button>
+                          </a>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="privacy" className="space-y-4">

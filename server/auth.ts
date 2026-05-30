@@ -482,21 +482,26 @@ export async function setupAuth(app: Express) {
     }
   });
 
-  // Logout routes (both GET and POST) — respond instantly, clean up in background
+  // Logout routes (both GET and POST)
   const handleLogout = (req: any, res: any) => {
-    // Respond immediately so the client doesn't wait
-    if (req.method === 'POST') {
-      res.json({ success: true, redirectUrl: "/" });
-    } else {
-      res.redirect("/");
+    const isPost = req.method === 'POST';
+    const safeLogout = () => {
+      try { req.logout(() => {}); } catch {}
+    };
+    if (!req.session) {
+      safeLogout();
+      return isPost ? res.json({ success: true, redirectUrl: "/" }) : res.redirect("/");
     }
-    // Destroy session and passport state in background (non-blocking)
-    try {
-      req.logout(() => {});
-    } catch {}
-    try {
-      req.session.destroy(() => {});
-    } catch {}
+    safeLogout();
+    req.session.destroy((err: any) => {
+      if (err) console.error("[Auth] Session destroy error:", err);
+      res.clearCookie('connect.sid');
+      if (isPost) {
+        res.json({ success: true, redirectUrl: "/" });
+      } else {
+        res.redirect("/");
+      }
+    });
   };
 
   app.get("/api/logout", handleLogout);

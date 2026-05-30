@@ -1066,6 +1066,18 @@ async function runAutoMigrations() {
       log(`[DB] Auto-migration: blog cover images updated for ${postsToMigrate.rows.length} posts`);
     }
 
+    // Ensure user_notification_dismissals table exists (for user "delete from history" feature)
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS user_notification_dismissals (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id VARCHAR NOT NULL,
+        notification_id VARCHAR NOT NULL,
+        dismissed_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        UNIQUE(user_id, notification_id)
+      )
+    `);
+    log("[DB] Auto-migration: user_notification_dismissals table ensured");
+
     log("[MIGRATION] Schema check complete");
   } catch (error) {
     console.error("[MIGRATION] Auto-migration error:", error);

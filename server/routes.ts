@@ -13343,9 +13343,11 @@ Return a JSON object with:
         SELECT n.*, (r.id IS NOT NULL) as is_read
         FROM admin_notifications n
         LEFT JOIN user_notification_reads r ON n.id = r.notification_id AND r.user_id = ${userId}
+        LEFT JOIN user_notification_dismissals d ON n.id = d.notification_id AND d.user_id = ${userId}
         WHERE n.status = 'sent'
           AND (n.target_type = 'all' OR (n.target_type = 'tier' AND n.target_value = ${tier}))
           AND (n.expires_at IS NULL OR n.expires_at > NOW())
+          AND d.id IS NULL
         ORDER BY n.sent_at DESC
         LIMIT 50
       `);
@@ -13353,6 +13355,29 @@ Return a JSON object with:
     } catch (error) {
       console.error("Get notification history error:", error);
       res.status(500).json({ error: "Failed to fetch notification history" });
+    }
+  });
+
+  // User: Dismiss (delete) a notification from their history
+  app.delete("/api/notifications/:id", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const { id } = req.params;
+      await db.execute(sql`
+        INSERT INTO user_notification_dismissals (user_id, notification_id)
+        VALUES (${userId}, ${id})
+        ON CONFLICT DO NOTHING
+      `);
+      // Also mark as read so it leaves the bell badge
+      await db.execute(sql`
+        INSERT INTO user_notification_reads (user_id, notification_id)
+        VALUES (${userId}, ${id})
+        ON CONFLICT DO NOTHING
+      `);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Dismiss notification error:", error);
+      res.status(500).json({ error: "Failed to dismiss notification" });
     }
   });
 
