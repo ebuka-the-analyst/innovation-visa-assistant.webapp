@@ -483,23 +483,37 @@ export async function setupAuth(app: Express) {
   });
 
   // Logout routes (both GET and POST)
+  // IMPORTANT: Passport v0.6+ makes req.logout() async — it calls session.regenerate()
+  // internally before the callback fires. We must wait for that to complete before we
+  // call session.destroy(); otherwise passport crashes trying to regenerate a dead session.
   const handleLogout = (req: any, res: any) => {
     const isPost = req.method === 'POST';
-    const safeLogout = () => {
-      try { req.logout(() => {}); } catch {}
-    };
-    if (!req.session) {
-      safeLogout();
-      return isPost ? res.json({ success: true, redirectUrl: "/" }) : res.redirect("/");
-    }
-    safeLogout();
-    req.session.destroy((err: any) => {
-      if (err) console.error("[Auth] Session destroy error:", err);
+    const sendResponse = () => {
       res.clearCookie('connect.sid');
       if (isPost) {
         res.json({ success: true, redirectUrl: "/" });
       } else {
         res.redirect("/");
+      }
+    };
+
+    if (!req.session || !req.isAuthenticated || !req.isAuthenticated()) {
+      // Not authenticated — nothing to clean up, just respond
+      return sendResponse();
+    }
+
+    // Step 1: Let passport finish its async session.regenerate() internally
+    req.logout((logoutErr: any) => {
+      if (logoutErr) console.error("[Auth] Passport logout error:", logoutErr);
+
+      // Step 2: Now the session is a fresh empty one — destroy it cleanly
+      if (req.session) {
+        req.session.destroy((destroyErr: any) => {
+          if (destroyErr) console.error("[Auth] Session destroy error:", destroyErr);
+          sendResponse();
+        });
+      } else {
+        sendResponse();
       }
     });
   };

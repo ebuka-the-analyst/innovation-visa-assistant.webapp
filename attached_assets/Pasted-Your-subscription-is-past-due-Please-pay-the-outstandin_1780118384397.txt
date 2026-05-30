@@ -1,0 +1,183 @@
+Your subscription is past due. Please pay the outstanding balance to avoid service disruption and continue using Railway.
+
+View Details
+
+
+Innovator-Founder-visa-Assistant
+
+production
+
+
+
+Agent
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+Southeast Asia
+1 Replica
+
+
+
+
+History
+
+Hide Skipped
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+5e58c635
+Active
+
+May 30, 2026, 6:13 AM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[SEO] Injecting meta for route: /
+5:18:11 AM [express] POST /api/activity/session/end 200 in 11ms :: {"success":true}
+[2026-05-30T05:18:12.071Z] GET /attached_assets/official_logo.webp
+[2026-05-30T05:18:12.272Z] GET /api/partner/status
+[2026-05-30T05:18:12.273Z] GET /api/notifications
+[2026-05-30T05:18:12.274Z] POST /api/activity/session
+[2026-05-30T05:18:12.275Z] POST /api/activity/session
+5:18:12 AM [express] GET /api/notifications 200 in 11ms :: {"notifications":[]}
+5:18:12 AM [express] GET /api/partner/status 200 in 12ms :: {"isPartner":false,"promoCodeCount":0}
+[2026-05-30T05:18:12.289Z] GET /api/dashboard/plans
+[2026-05-30T05:18:12.289Z] GET /api/promos/my-redemptions
+5:18:12 AM [express] POST /api/activity/session 200 in 19ms :: {"sessionId":"f0f947d7-1559-4ef7-a73c…
+5:18:12 AM [express] GET /api/dashboard/plans 200 in 13ms :: []
+5:18:12 AM [express] GET /api/promos/my-redemptions 200 in 13ms :: {"redemptions":[{"id":"690912d7-e…
+5:18:12 AM [express] POST /api/activity/session 200 in 37ms :: {"sessionId":"f8b3b02c-09b8-4387-8f09…
+[2026-05-30T05:18:12.474Z] POST /api/activity/page-view
+5:18:12 AM [express] POST /api/activity/page-view 200 in 15ms :: {"pageViewId":"a9c810a4-a1e0-46cb-b…
+[2026-05-30T05:18:26.270Z] POST /api/activity/session/end
+5:18:26 AM [express] POST /api/activity/session/end 200 in 38ms :: {"success":true}
+[2026-05-30T05:18:58.230Z] GET /api/auth/user
+[2026-05-30T05:19:01.626Z] GET /api/auth/user
+[2026-05-30T05:18:58.231Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+[2026-05-30T05:19:01.627Z] GET /attached_assets/official_logo.webp
+5:18:58 AM [express] GET /api/auth/user 200 in 44ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[SEO] Injecting meta for route: /
+5:18:58 AM [express] POST /api/activity/session 200 in 50ms :: {"sessionId":"69231345-c21d-4505-95a1…
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+[2026-05-30T05:18:58.456Z] POST /api/activity/page-view
+5:19:01 AM [express] GET /api/auth/user 200 in 10ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+5:18:58 AM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"9aa497d6-a2c7-4d5f-9…
+[2026-05-30T05:19:01.824Z] GET /api/partner/status
+[2026-05-30T05:19:01.825Z] POST /api/activity/session
+[2026-05-30T05:19:01.404Z] POST /api/activity/session/end
+5:19:01 AM [express] GET /api/partner/status 200 in 11ms :: {"isPartner":false,"promoCodeCount":0}
+[2026-05-30T05:19:01.405Z] GET /dashboard
+[SEO] Injecting meta for route: /
+5:19:01 AM [express] POST /api/activity/session/end 200 in 10ms :: {"success":true}
+5:19:01 AM [express] POST /api/activity/session 200 in 16ms :: {"sessionId":"ffc0fc2f-c0cc-4d4c-990e…
+[2026-05-30T05:19:01.979Z] GET /api/notifications
+[2026-05-30T05:19:01.980Z] POST /api/activity/session
+[2026-05-30T05:19:01.989Z] GET /api/promos/my-redemptions
+5:19:01 AM [express] GET /api/notifications 200 in 11ms :: {"notifications":[]}
+5:19:01 AM [express] POST /api/activity/session 200 in 13ms :: {"sessionId":"b48d2ca9-4d42-4aa2-b5f8…
+[2026-05-30T05:19:01.995Z] GET /api/dashboard/plans
+5:19:02 AM [express] GET /api/dashboard/plans 200 in 12ms :: []
+[2026-05-30T05:19:02.013Z] POST /api/activity/page-view
+5:19:02 AM [express] GET /api/promos/my-redemptions 200 in 34ms :: {"redemptions":[{"id":"690912d7-e…
+5:19:02 AM [express] POST /api/activity/page-view 200 in 13ms :: {"pageViewId":"13e20ba3-9533-4bcb-8…
+[2026-05-30T05:19:04.668Z] POST /api/auth/logout
+5:19:04 AM [express] POST /api/auth/logout 200 in 9ms :: {"success":true,"redirectUrl":"/"}
+/app/node_modules/passport/lib/sessionmanager.js:83
+    req.session.regenerate(function(err) {
+                ^
+TypeError: Cannot read properties of undefined (reading 'regenerate')
+    at /app/node_modules/passport/lib/sessionmanager.js:83:17
+    at /app/node_modules/connect-pg-simple/index.js:394:24
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+Node.js v18.20.5
+Connecting to database...
+Connected successfully
+Found 273 SQL statements to execute
+theme_font column added or already exists
+theme_applied_at column added or already exists
+background_image column added or already exists
+use_full_cover_image column added or already exists
+text_elements column added or already exists
+cover_designs table created or already exists
+cover_designs indexes created or already exist
+premium_cover_purchases table created or already exists
+premium_cover_purchases indexes created or already exist
+blog_posts table created or already exists
+blog_posts indexes created or already exist
+npm warn config production Use `--omit=dev` instead.
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+Migration complete: 0 executed, 273 skipped (already exist)
+chart_data column added or already exists
+theme_id column added or already exists
+theme_primary_color column added or already exists
+theme_secondary_color column added or already exists
+[DB] Auto-migration: Assigned unique images to 16 blog posts
+[Email Service] Using Resend HTTP API (recommended)
+[Blog] Image route configured (local + unique + S3 fallback)
+5:19:07 AM [express] [MIGRATION] Checking for required schema updates...
+[Email Service] Resend configured and ready (HTTP API - recommended)
+[DB] Auto-migration: logo_element column ensured
+5:19:07 AM [express] [DB] Auto-migration: backlink_targets table ensured
+[DB] Auto-migration: 37 blog_posts column(s) ensured
+[DB] Auto-migration: blog_generation_queue table ensured
+[DB] Auto-migration: blog_generation_queue columns ensured
+[DB] Auto-migration: business_plans.toc_style column ensured
+[DB] Auto-migration: blog image URLs updated to object storage
+5:19:07 AM [express] [DB] Auto-migration: blog cover images updated for 150 posts
+5:19:07 AM [express] [DB] Auto-migration: user_notification_dismissals table ensured
+5:19:07 AM [express] [MIGRATION] Schema check complete
+[Auth] Google OAuth configured successfully
+[S3Storage] Configured with bucket: innovator-visa-documents, region: eu-north-1
+(node:27) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+no longer support Node.js v18.20.5 in January 2026.
+To continue receiving updates to AWS services, bug fixes, and security
+updates please upgrade to a supported Node.js LTS version.
+More information can be found at: https://a.co/c895JFp
+(Use `node --trace-warnings ...` to show where the warning was created)
+5:19:07 AM [express] serving on port 8080
+5:19:07 AM [express] [STRIPE] Secret Key Mode: LIVE | Public Key Mode: LIVE
+[Blog] Auto-healed 144 blog post image URLs on startup
+[Pipeline] Automated blog pipeline starting…
+[Pipeline] "generate-07:00" next run in 101 min (Sat, 30 May 2026 07:00:00 GMT)
+[Pipeline] "drain-06:30" next run in 71 min (Sat, 30 May 2026 06:30:00 GMT)
+[Pipeline] "drain-10:30" next run in 311 min (Sat, 30 May 2026 10:30:00 GMT)
+[Pipeline] "drain-16:30" next run in 671 min (Sat, 30 May 2026 16:30:00 GMT)
+[Pipeline] "drain-18:30" next run in 791 min (Sat, 30 May 2026 18:30:00 GMT)
+[Pipeline] Schedules set: generate at 07:00, 12:00, 16:00, 20:00 GMT | drain queue every 2 hours.
+
+
