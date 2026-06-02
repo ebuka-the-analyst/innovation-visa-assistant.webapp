@@ -228,28 +228,27 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
         { title: "Settings", url: "/settings", icon: Settings, description: "Configuration & preferences" },
       ],
     },
-    ...(currentUser?.isAdmin && !demoMode
-      ? [
-          {
-            label: "Admin",
-            icon: ShieldCheck,
-            items: [
-              {
-                title: "Admin Console",
-                url: "/admin",
-                icon: ShieldCheck,
-                description: "Platform management & analytics",
-                badge: "ADMIN",
-              },
-            ],
-          },
-        ]
-      : []),
   ];
 
   return (
     <Sidebar className="border-r">
       <SidebarContent className="py-2">
+        {currentUser?.isAdmin && !demoMode && (
+          <div className="px-2 pt-1 pb-2">
+            <button
+              onClick={() => setLocation("/admin")}
+              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md text-left transition-colors ${
+                location === "/admin"
+                  ? "bg-orange-600 text-white"
+                  : "bg-orange-500/15 text-orange-600 dark:text-orange-400 hover:bg-orange-500/25"
+              }`}
+              data-testid="nav-admin-console"
+            >
+              <ShieldCheck className="h-4 w-4 flex-shrink-0" />
+              <span className="text-xs font-semibold uppercase tracking-wide">Admin Console</span>
+            </button>
+          </div>
+        )}
         <SidebarMenu className="gap-0.5 px-2">
           {navGroups.map((group) => {
             const isOpen = openSections[group.label] ?? false;
