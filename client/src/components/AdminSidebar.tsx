@@ -226,6 +226,7 @@ const menuGroups = [
     items: [
       { id: "content-blog", label: "Blog Dashboard", icon: FileText, badge: null },
       { id: "content-seo", label: "SEO Analytics", icon: TrendingUp, badge: null },
+      { id: "content-social", label: "Social Post Generator", icon: Send, badge: "AI" },
     ]
   },
   {

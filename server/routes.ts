@@ -13382,6 +13382,115 @@ Return a JSON object with:
   });
 
   // ============================================
+  // ADMIN SOCIAL CONTENT GENERATOR
+  // ============================================
+
+  app.post("/api/admin/social-content/generate", requireAdmin, async (req, res) => {
+    try {
+      const { postStyle, voice, topic } = req.body;
+
+      const styleDescriptions: Record<string, string> = {
+        "linkedin-conversion": "a high-converting LinkedIn post with a strong hook, pain point, solution reveal, and clear CTA. Use short punchy lines, white space, and a signature 'save this post' or 'share with someone who needs this' CTA.",
+        "linkedin-story": "a LinkedIn story/case study post following the arc: before-struggle → discovery of the platform → transformation → result → takeaway. Make it emotionally resonant and specific.",
+        "linkedin-engagement": "a LinkedIn engagement post that sparks debate or opinion. Use a bold statement or question, invite people to comment, and create conversation. No hard CTA — just engagement.",
+        "linkedin-value": "a LinkedIn value post that teaches the reader something specific about the UK Innovator Founder Visa route. Use a numbered list or short paragraphs. End with a soft CTA to try the platform.",
+        "twitter-thread": "a Twitter/X thread of 6-9 tweets. Start with a strong hook tweet (tweet 1), then deliver value in subsequent tweets, and end with a CTA tweet. Format each tweet as '1/', '2/' etc.",
+      };
+
+      const voiceDescriptions: Record<string, string> = {
+        "platform": "Write from the perspective of the Innovator Founder Visa Assistant platform brand — professional, authoritative, informative, empowering. We are a UK-based AI tool that helps international founders navigate the UK Innovator Founder Visa route.",
+        "founder": "Write from the perspective of a founder who built this platform — personal, builder mindset, behind-the-scenes, relatable. Use 'I' voice, share the journey of building the tool.",
+        "student": "Write from the perspective of an international student or graduate who used the platform to navigate the UK Innovator Founder Visa — relatable, authentic, slightly anxious-turned-confident tone.",
+      };
+
+      const topicInstruction = topic
+        ? `The post should focus on this specific topic or angle: "${topic}"`
+        : `Pick the single most compelling angle for the IFV audience right now. Consider topics like: staying in the UK without employer sponsorship, how to pass the endorsing body assessment, the business plan requirements, how AI helps with visa applications, common mistakes founders make, or comparing IFV with other UK visa routes.`;
+
+      const prompt = `You are a world-class social media copywriter specialising in UK immigration and startup audiences.
+
+Write ${styleDescriptions[postStyle] || "a compelling LinkedIn post"}.
+
+${voiceDescriptions[voice] || voiceDescriptions["platform"]}
+
+${topicInstruction}
+
+Platform details you MUST reference naturally (don't force all of them — pick what's relevant):
+- Platform name: Innovator Founder Visa Assistant (INFV Assistant)
+- Website: innovatorfoundervisaassistant.co.uk
+- What it does: 100+ AI-powered tools for the UK Innovator Founder Visa — business plan builder, compliance checker, endorsement prep, financial modelling, team structuring, and more
+- Audience: International students, recent graduates, entrepreneurs wanting to remain in or move to the UK
+- Key differentiator: Expert-level guidance at a fraction of the cost of an immigration solicitor
+
+IMPORTANT RULES:
+- Do NOT use generic corporate language. Every sentence must earn its place.
+- Use UK English spelling throughout (e.g. "recognised", "organisation", "licence", "practise").
+- Do NOT use emojis of any kind.
+- The post must feel authentic, not like an ad.
+- Always include the website URL naturally at the end or within the CTA.
+- Output ONLY the post itself — no preamble, no explanation, no title, no markdown formatting headers. Just the raw post text ready to copy-paste.`;
+
+      // Try Gemini keys in sequence
+      const geminiKeys = [
+        process.env.GEMINI_API_KEY,
+        process.env.GEMINI_API_KEY_2,
+        process.env.GEMINI_API_KEY_3,
+        process.env.GEMINI_API_KEY_4,
+      ].filter(Boolean) as string[];
+
+      let content: string | null = null;
+
+      for (const key of geminiKeys) {
+        try {
+          const { GoogleGenAI } = await import("@google/genai");
+          const ai = new GoogleGenAI({ apiKey: key });
+          const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: { maxOutputTokens: 1200, temperature: 0.85 },
+          });
+          const text = response.text?.trim();
+          if (text && text.length > 50) {
+            content = text;
+            break;
+          }
+        } catch (err: any) {
+          if (err?.status === 429 || err?.message?.includes("429") || err?.message?.includes("quota")) {
+            continue; // Try next key
+          }
+          throw err;
+        }
+      }
+
+      // Fallback to OpenAI if all Gemini keys rate-limited
+      if (!content && process.env.OPENAI_API_KEY) {
+        try {
+          const OpenAI = (await import("openai")).default;
+          const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [{ role: "user", content: prompt }],
+            max_tokens: 1200,
+            temperature: 0.85,
+          });
+          content = completion.choices[0]?.message?.content?.trim() || null;
+        } catch (_) {
+          // OpenAI also failed
+        }
+      }
+
+      if (!content) {
+        return res.status(503).json({ error: "All AI providers are currently rate-limited. Please try again in a minute." });
+      }
+
+      res.json({ content });
+    } catch (error: any) {
+      console.error("[Social Content Generator] Error:", error);
+      res.status(500).json({ error: "Failed to generate post" });
+    }
+  });
+
+  // ============================================
   // ADMIN CAMPAIGNS API
   // ============================================
 

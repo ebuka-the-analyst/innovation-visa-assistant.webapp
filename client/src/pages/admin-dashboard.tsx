@@ -1224,6 +1224,242 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
   );
 }
 
+// ===== SOCIAL POST GENERATOR COMPONENT =====
+
+const POST_STYLES = [
+  { value: "linkedin-conversion", label: "LinkedIn Conversion Post", description: "Hook → Problem → Solution → CTA" },
+  { value: "linkedin-story", label: "LinkedIn Story / Case Study", description: "Narrative journey of a user using the platform" },
+  { value: "linkedin-engagement", label: "LinkedIn Engagement Post", description: "Question-driven, opinion, debate starter" },
+  { value: "linkedin-value", label: "LinkedIn Value Post", description: "Teach something about the IFV route" },
+  { value: "twitter-thread", label: "Twitter / X Thread", description: "5-10 tweet thread with hook tweet first" },
+];
+
+const VOICE_OPTIONS = [
+  { value: "platform", label: "INFV Platform Voice", description: "Professional, informative, platform-focused" },
+  { value: "founder", label: "Founder / Builder Voice", description: "Personal, story-driven, relatable" },
+  { value: "student", label: "International Student Voice", description: "From the perspective of a student using the platform" },
+];
+
+function SocialPostGenerator() {
+  const { toast } = useToast();
+  const [postStyle, setPostStyle] = useState("linkedin-conversion");
+  const [voice, setVoice] = useState("platform");
+  const [topic, setTopic] = useState("");
+  const [generatedPost, setGeneratedPost] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [savedPosts, setSavedPosts] = useState<Array<{ id: string; style: string; content: string; createdAt: string }>>([]);
+
+  const generateMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/admin/social-content/generate", {
+        postStyle,
+        voice,
+        topic: topic.trim() || null,
+      });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setGeneratedPost(data.content);
+      // Save to local list
+      setSavedPosts(prev => [{
+        id: Date.now().toString(),
+        style: postStyle,
+        content: data.content,
+        createdAt: new Date().toISOString(),
+      }, ...prev.slice(0, 9)]);
+    },
+    onError: () => {
+      toast({ title: "Generation failed", description: "Try again in a moment", variant: "destructive" });
+    },
+  });
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    toast({ title: "Copied to clipboard" });
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const currentStyle = POST_STYLES.find(s => s.value === postStyle);
+
+  return (
+    <div className="space-y-3">
+      {/* Header Card */}
+      <Card className="bg-gradient-to-br from-[#005EB8]/10 to-purple-500/5 border-[#005EB8]/20">
+        <CardHeader className="p-3 pb-2">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <Send className="h-4 w-4 text-[#005EB8]" />
+            Social Post Generator
+          </CardTitle>
+          <CardDescription className="text-xs">
+            Generate LinkedIn and social media posts to promote Innovator Founder Visa Assistant and drive sign-ups.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {/* Generator Panel */}
+        <Card>
+          <CardHeader className="p-3 pb-2">
+            <CardTitle className="text-xs font-semibold">Configure Post</CardTitle>
+          </CardHeader>
+          <CardContent className="p-3 pt-0 space-y-3">
+            {/* Post Style */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Post Style</Label>
+              <div className="space-y-1.5">
+                {POST_STYLES.map(s => (
+                  <button
+                    key={s.value}
+                    onClick={() => setPostStyle(s.value)}
+                    className={`w-full text-left px-3 py-2 rounded-lg border text-xs transition-colors ${
+                      postStyle === s.value
+                        ? "border-[#005EB8] bg-[#005EB8]/10 text-[#005EB8]"
+                        : "border-border hover:border-[#005EB8]/40 hover:bg-muted/50"
+                    }`}
+                    data-testid={`button-post-style-${s.value}`}
+                  >
+                    <div className="font-medium">{s.label}</div>
+                    <div className="text-muted-foreground text-[10px] mt-0.5">{s.description}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Voice */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Voice / Perspective</Label>
+              <div className="grid grid-cols-1 gap-1.5">
+                {VOICE_OPTIONS.map(v => (
+                  <button
+                    key={v.value}
+                    onClick={() => setVoice(v.value)}
+                    className={`text-left px-3 py-2 rounded-lg border text-xs transition-colors ${
+                      voice === v.value
+                        ? "border-[#005EB8] bg-[#005EB8]/10 text-[#005EB8]"
+                        : "border-border hover:border-[#005EB8]/40 hover:bg-muted/50"
+                    }`}
+                    data-testid={`button-voice-${v.value}`}
+                  >
+                    <div className="font-medium">{v.label}</div>
+                    <div className="text-muted-foreground text-[10px]">{v.description}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Topic */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Topic <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Textarea
+                placeholder="e.g. How to stay in the UK without employer sponsorship&#10;Leave blank to auto-pick a relevant topic"
+                value={topic}
+                onChange={e => setTopic(e.target.value)}
+                className="text-xs min-h-[72px] resize-none"
+                data-testid="input-social-topic"
+              />
+              <p className="text-[10px] text-muted-foreground">Leave blank and AI will pick a trending angle relevant to the IFV audience.</p>
+            </div>
+
+            <Button
+              className="w-full"
+              onClick={() => generateMutation.mutate()}
+              disabled={generateMutation.isPending}
+              data-testid="button-generate-social-post"
+            >
+              <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+              {generateMutation.isPending ? "Generating..." : "Generate Post"}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Output Panel */}
+        <div className="space-y-3">
+          {/* Generated Post */}
+          {(generatedPost || generateMutation.isPending) && (
+            <Card>
+              <CardHeader className="p-3 pb-2 flex flex-row items-center justify-between gap-2 flex-wrap">
+                <div>
+                  <CardTitle className="text-xs font-semibold">Generated Post</CardTitle>
+                  <CardDescription className="text-[10px]">{currentStyle?.label}</CardDescription>
+                </div>
+                {generatedPost && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleCopy(generatedPost)}
+                    data-testid="button-copy-social-post"
+                  >
+                    <Copy className="h-3 w-3 mr-1" />
+                    {copied ? "Copied!" : "Copy"}
+                  </Button>
+                )}
+              </CardHeader>
+              <CardContent className="p-3 pt-0">
+                {generateMutation.isPending ? (
+                  <div className="space-y-2">
+                    {[1,2,3,4,5].map(i => <Skeleton key={i} className={`h-3 ${i === 5 ? 'w-2/3' : 'w-full'}`} />)}
+                  </div>
+                ) : (
+                  <div className="bg-muted/50 rounded-lg p-3 max-h-[400px] overflow-y-auto">
+                    <pre className="text-xs leading-relaxed whitespace-pre-wrap font-sans text-foreground">{generatedPost}</pre>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Tips */}
+          {!generatedPost && !generateMutation.isPending && (
+            <Card className="border-dashed">
+              <CardContent className="p-4 text-center space-y-2">
+                <Send className="h-8 w-8 text-muted-foreground/40 mx-auto" />
+                <p className="text-xs font-medium text-muted-foreground">Ready to generate</p>
+                <p className="text-[10px] text-muted-foreground/60">
+                  Pick a style and voice, optionally add a topic, then hit Generate.
+                  Each post includes the platform URL and a relevant CTA.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Post History */}
+          {savedPosts.length > 0 && (
+            <Card>
+              <CardHeader className="p-3 pb-2">
+                <CardTitle className="text-xs font-semibold">Generated This Session</CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 pt-0 space-y-2 max-h-[280px] overflow-y-auto">
+                {savedPosts.map(p => (
+                  <div key={p.id} className="group relative bg-muted/40 rounded-lg p-2.5 hover:bg-muted/70 transition-colors">
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <span className="text-[10px] font-medium text-[#005EB8]">
+                        {POST_STYLES.find(s => s.value === p.style)?.label || p.style}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => { setGeneratedPost(p.content); handleCopy(p.content); }}
+                        data-testid={`button-reuse-post-${p.id}`}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground line-clamp-2 leading-relaxed">
+                      {p.content.substring(0, 120)}...
+                    </p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ===== MAIN COMPONENT =====
 
 export default function AdminDashboard() {
@@ -3091,6 +3327,7 @@ export default function AdminDashboard() {
       'feedback-responses': 'All Feedback Responses',
       'content-blog': 'Blog Dashboard',
       'content-seo': 'SEO Analytics',
+      'content-social': 'Social Post Generator',
       'referrals-overview': 'Referral Programme Overview',
       'referrals-codes': 'Referral Codes Management',
       'referrals-rewards': 'Pending Rewards',
@@ -10377,6 +10614,11 @@ export default function AdminDashboard() {
                             </>
                           )}
                         </>
+                      )}
+
+                      {/* Social Post Generator */}
+                      {activeSection === 'content-social' && (
+                        <SocialPostGenerator />
                       )}
 
                       {/* SEO Strategy Engine */}

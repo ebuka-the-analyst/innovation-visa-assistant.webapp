@@ -47,6 +47,7 @@ import {
   Bot,
   ChevronDown,
   ChevronRight,
+  ShieldCheck,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -227,6 +228,23 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
         { title: "Settings", url: "/settings", icon: Settings, description: "Configuration & preferences" },
       ],
     },
+    ...(currentUser?.isAdmin && !demoMode
+      ? [
+          {
+            label: "Admin",
+            icon: ShieldCheck,
+            items: [
+              {
+                title: "Admin Console",
+                url: "/admin",
+                icon: ShieldCheck,
+                description: "Platform management & analytics",
+                badge: "ADMIN",
+              },
+            ],
+          },
+        ]
+      : []),
   ];
 
   return (
