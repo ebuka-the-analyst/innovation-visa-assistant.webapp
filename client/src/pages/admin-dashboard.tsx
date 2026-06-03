@@ -57,6 +57,7 @@ import {
   Download,
   RefreshCw,
   CheckCircle,
+  CheckCircle2,
   XCircle,
   AlertCircle,
   Shield,
@@ -2588,6 +2589,20 @@ export default function AdminDashboard() {
     },
     onError: (error: Error) => {
       toast({ title: "Failed to clear errors", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Delete ALL errors mutation
+  const deleteAllErrorsMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest('DELETE', '/api/admin/errors/all', {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/errors'] });
+      toast({ title: "All error logs deleted" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to delete all errors", description: error.message, variant: "destructive" });
     },
   });
 
@@ -6639,110 +6654,82 @@ export default function AdminDashboard() {
                       {/* 5. COMPLETION RATES - Tool Completion Analytics */}
                       {activeSection === 'tools-completion' && (
                         <>
-                          {/* Completion Overview */}
+                          {/* Completion Overview — real data from overviewData */}
                           <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-teal-500/10 border-green-500/20">
                             <CardContent className="py-1">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-1.5">
-                                  <motion.div
-                                    className="p-3 rounded-xl bg-green-500 text-white"
-                                    animate={{ rotate: [0, 360] }}
-                                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                                  >
+                                  <div className="p-3 rounded-xl bg-green-500 text-white">
                                     <Target className="h-3 w-3" />
-                                  </motion.div>
+                                  </div>
                                   <div>
-                                    <p className="text-[9px] text-muted-foreground">Overall Completion Rate</p>
-                                    <p className="text-xs font-bold text-green-500">73.4%</p>
+                                    <p className="text-[9px] text-muted-foreground">Business Plan Completion Rate</p>
+                                    <p className="text-xs font-bold text-green-500">{overviewData?.extendedKPIs?.planCompletionRate ?? 0}%</p>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                   <div className="text-center">
-                                    <p className="text-[9px] text-muted-foreground">Fully Completed</p>
-                                    <p className="text-[9px] font-bold">5,847</p>
+                                    <p className="text-[9px] text-muted-foreground">Completed</p>
+                                    <p className="text-[9px] font-bold">{overviewData?.extendedKPIs?.completedPlans ?? 0}</p>
                                   </div>
                                   <div className="text-center">
-                                    <p className="text-[9px] text-muted-foreground">Partially</p>
-                                    <p className="text-[9px] font-bold">2,134</p>
+                                    <p className="text-[9px] text-muted-foreground">In Progress</p>
+                                    <p className="text-[9px] font-bold">{(overviewData?.extendedKPIs?.totalPlans ?? 0) - (overviewData?.extendedKPIs?.completedPlans ?? 0)}</p>
                                   </div>
                                   <div className="text-center">
-                                    <p className="text-[9px] text-muted-foreground">Abandoned</p>
-                                    <p className="text-[9px] font-bold">866</p>
+                                    <p className="text-[9px] text-muted-foreground">Total Plans</p>
+                                    <p className="text-[9px] font-bold">{overviewData?.extendedKPIs?.totalPlans ?? 0}</p>
                                   </div>
                                 </div>
                               </div>
                             </CardContent>
                           </Card>
 
-                          {/* Completion by Tool */}
+                          {/* Tool Usage — real data */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <CardTitle className="text-[10px] font-semibold">Completion Rates by Tool</CardTitle>
-                                  <CardDescription className="text-[9px]">Success rates for each tool</CardDescription>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="flex items-center gap-1">
-                                    <div className="w-3 h-3 rounded-full bg-green-500" />
-                                    <span className="text-xs">High (&gt;80%)</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <div className="w-3 h-3 rounded-full bg-amber-500" />
-                                    <span className="text-xs">Medium (50-80%)</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <div className="w-3 h-3 rounded-full bg-red-500" />
-                                    <span className="text-xs">Low (&lt;50%)</span>
-                                  </div>
-                                </div>
+                              <div>
+                                <CardTitle className="text-[10px] font-semibold">Tool Usage (by session events)</CardTitle>
+                                <CardDescription className="text-[9px]">Real counts from activity tracking — sorted by usage</CardDescription>
                               </div>
                             </CardHeader>
                             <CardContent>
+                              {(!overviewData?.toolUsage || overviewData.toolUsage.length === 0) ? (
+                                <p className="text-[9px] text-muted-foreground text-center py-4">No tool usage data yet. Data populates as users interact with tools.</p>
+                              ) : (
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
-                                {[
-                                  { tool: 'Document Checklist', rate: 94, started: 987 },
-                                  { tool: 'Visa Timeline Planner', rate: 89, started: 742 },
-                                  { tool: 'Innovation Score Calculator', rate: 85, started: 1523 },
-                                  { tool: 'Compliance Checker', rate: 82, started: 623 },
-                                  { tool: 'Business Plan Generator', rate: 71, started: 1847 },
-                                  { tool: 'Financial Projections Tool', rate: 68, started: 1156 },
-                                  { tool: 'Pitch Practice Coach', rate: 62, started: 1289 },
-                                  { tool: 'Market Analysis Tool', rate: 58, started: 856 },
-                                  { tool: 'Growth Strategy Builder', rate: 52, started: 578 },
-                                  { tool: 'Endorser Matcher', rate: 45, started: 689 },
-                                ].map((item, index) => (
-                                  <motion.div
-                                    key={item.tool}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.05 }}
-                                    className="p-4 rounded-lg border border-border/50 hover-elevate"
-                                  >
-                                    <div className="flex items-center justify-between mb-0.5">
-                                      <span className="font-medium text-[9px]">{item.tool}</span>
-                                      <Badge className={
-                                        item.rate >= 80 ? 'bg-green-500' :
-                                        item.rate >= 50 ? 'bg-amber-500' : 'bg-red-500'
-                                      }>
-                                        {item.rate}%
-                                      </Badge>
-                                    </div>
-                                    <div className="relative h-3 rounded-full bg-muted overflow-hidden">
+                                {(() => {
+                                  const maxUsage = Math.max(...(overviewData?.toolUsage || []).map((t: any) => parseInt(t.usage_count) || 0), 1);
+                                  return (overviewData?.toolUsage || []).slice(0, 20).map((item: any, index: number) => {
+                                    const count = parseInt(item.usage_count) || 0;
+                                    const pct = Math.round((count / maxUsage) * 100);
+                                    return (
                                       <motion.div
-                                        className={`absolute inset-y-0 left-0 rounded-full ${
-                                          item.rate >= 80 ? 'bg-green-500' :
-                                          item.rate >= 50 ? 'bg-amber-500' : 'bg-red-500'
-                                        }`}
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${item.rate}%` }}
-                                        transition={{ delay: index * 0.05 + 0.2, duration: 0.6 }}
-                                      />
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mt-0.5">{item.started} sessions started</p>
-                                  </motion.div>
-                                ))}
+                                        key={item.tool_id || index}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: index * 0.03 }}
+                                        className="p-3 rounded-lg border border-border/50"
+                                      >
+                                        <div className="flex items-center justify-between mb-1">
+                                          <span className="font-medium text-[9px] truncate max-w-[160px]">{item.tool_id || 'unknown'}</span>
+                                          <Badge variant="secondary" className="text-[9px]">{count} uses</Badge>
+                                        </div>
+                                        <div className="relative h-1.5 rounded-full bg-muted overflow-hidden">
+                                          <motion.div
+                                            className="absolute inset-y-0 left-0 rounded-full bg-primary"
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${pct}%` }}
+                                            transition={{ delay: index * 0.03 + 0.2, duration: 0.5 }}
+                                          />
+                                        </div>
+                                        {item.tool_category && <p className="text-[8px] text-muted-foreground mt-0.5">{item.tool_category}</p>}
+                                      </motion.div>
+                                    );
+                                  });
+                                })()}
                               </div>
+                              )}
                             </CardContent>
                           </Card>
 
@@ -9209,6 +9196,19 @@ export default function AdminDashboard() {
                                   >
                                     <Trash2 className="h-3 w-3 mr-2" />
                                     Clear Resolved
+                                  </Button>
+                                  <Button 
+                                    variant="destructive" 
+                                    size="sm"
+                                    onClick={() => {
+                                      if (confirm('Delete ALL error logs? This cannot be undone.')) {
+                                        deleteAllErrorsMutation.mutate();
+                                      }
+                                    }}
+                                    disabled={deleteAllErrorsMutation.isPending}
+                                  >
+                                    <Trash2 className="h-3 w-3 mr-2" />
+                                    {deleteAllErrorsMutation.isPending ? 'Deleting…' : 'Delete All'}
                                   </Button>
                                   <Button 
                                     variant="outline" 

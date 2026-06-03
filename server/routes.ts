@@ -4574,12 +4574,25 @@ EXAMPLES OF GOOD RESPONSES:
         ultimate: allUsers.filter(u => u.subscriptionTier === 'ultimate').length,
       };
       
-      // Revenue by tier (from metadata or calculations) - only count actual payments
+      // Helper: resolve tier from charge — checks metadata first, then amount
+      const resolveTier = (charge: any): string | null => {
+        // 1. Explicit metadata
+        if (charge.metadata?.tier) return charge.metadata.tier;
+        // 2. Amount-based detection (your actual tier prices in pence)
+        const amountGBP = charge.amount_captured / 100;
+        if (amountGBP === 9 || amountGBP === 108)  return 'basic';      // £9/mo or £108/yr
+        if (amountGBP === 19 || amountGBP === 228)  return 'premium';   // £19/mo or £228/yr
+        if (amountGBP === 35 || amountGBP === 420)  return 'enterprise'; // £35/mo or £420/yr
+        if (amountGBP === 49 || amountGBP === 588)  return 'ultimate';   // £49/mo or £588/yr
+        return null;
+      };
+
+      // Revenue by tier — use all valid paid charges (not just this month) for accurate totals
       const revenueByTier = {
-        basic: paidMonthCharges.filter(c => c.metadata?.tier === 'basic').reduce((s, c) => s + c.amount_captured / 100, 0),
-        premium: paidMonthCharges.filter(c => c.metadata?.tier === 'premium').reduce((s, c) => s + c.amount_captured / 100, 0),
-        enterprise: paidMonthCharges.filter(c => c.metadata?.tier === 'enterprise').reduce((s, c) => s + c.amount_captured / 100, 0),
-        ultimate: paidMonthCharges.filter(c => c.metadata?.tier === 'ultimate').reduce((s, c) => s + c.amount_captured / 100, 0),
+        basic:      paidValidCharges.filter(c => resolveTier(c) === 'basic').reduce((s, c) => s + c.amount_captured / 100, 0),
+        premium:    paidValidCharges.filter(c => resolveTier(c) === 'premium').reduce((s, c) => s + c.amount_captured / 100, 0),
+        enterprise: paidValidCharges.filter(c => resolveTier(c) === 'enterprise').reduce((s, c) => s + c.amount_captured / 100, 0),
+        ultimate:   paidValidCharges.filter(c => resolveTier(c) === 'ultimate').reduce((s, c) => s + c.amount_captured / 100, 0),
       };
       
       // Calculate Total Customers - use paid users from database as primary source
@@ -6051,6 +6064,17 @@ EXAMPLES OF GOOD RESPONSES:
     } catch (error) {
       console.error("Resolved errors clear failed:", error);
       res.status(500).json({ error: "Failed to clear resolved errors" });
+    }
+  });
+
+  // Delete ALL errors (admin only) - nuclear option
+  app.delete("/api/admin/errors/all", requireAdmin, async (req, res) => {
+    try {
+      await db.delete(errorLogs);
+      res.json({ success: true, message: "All error logs deleted" });
+    } catch (error) {
+      console.error("Delete all errors failed:", error);
+      res.status(500).json({ error: "Failed to delete all errors" });
     }
   });
 
