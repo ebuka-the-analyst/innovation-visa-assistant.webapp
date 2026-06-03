@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MessageSquareWarning, X, Send, Loader2, Bug, Lightbulb, HelpCircle, ThumbsUp, CheckCircle2 } from "lucide-react";
+import { MessageSquareWarning, X, Send, Loader2, Bug, Lightbulb, HelpCircle, ThumbsUp, CheckCircle2, Star } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,8 +22,10 @@ const feedbackOptions: FeedbackOption[] = [
   { type: "bug", label: "Report a Bug", icon: Bug, color: "#ef4444" },
   { type: "suggestion", label: "Suggestion", icon: Lightbulb, color: "#005EB8" },
   { type: "question", label: "Question", icon: HelpCircle, color: "#41B6E6" },
-  { type: "praise", label: "Praise", icon: ThumbsUp, color: "#22c55e" },
+  { type: "praise", label: "Rate Us ★", icon: ThumbsUp, color: "#22c55e" },
 ];
+
+const STAR_LABELS = ["", "Poor", "Fair", "Good", "Great", "Excellent"];
 
 export default function FloatingFeedback() {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,6 +40,8 @@ export default function FloatingFeedback() {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
+  const [rating, setRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
 
@@ -51,6 +55,7 @@ export default function FloatingFeedback() {
       subject: string;
       message: string;
       email: string;
+      rating?: number;
       pageUrl: string;
       userId?: string;
       browserInfo: string;
@@ -83,6 +88,8 @@ export default function FloatingFeedback() {
     setSubject("");
     setMessage("");
     setEmail("");
+    setRating(0);
+    setHoveredRating(0);
     setSubmitted(false);
   };
 
@@ -110,6 +117,7 @@ export default function FloatingFeedback() {
       subject: subject.trim() || `${feedbackOptions.find(o => o.type === feedbackType)?.label}`,
       message: message.trim(),
       email: user?.email || email.trim(),
+      rating: rating > 0 ? rating : undefined,
       pageUrl: window.location.pathname,
       userId: user?.id,
       browserInfo: navigator.userAgent,
@@ -246,9 +254,47 @@ export default function FloatingFeedback() {
                   </div>
                 </div>
 
+                {/* Star rating — always shown once type selected */}
+                {feedbackType && (
+                  <div>
+                    <Label className="text-sm font-medium mb-1.5 block">
+                      Rate your experience <span className="text-muted-foreground text-xs">(optional)</span>
+                    </Label>
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => {
+                        const display = hoveredRating || rating;
+                        return (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setRating(star === rating ? 0 : star)}
+                            onMouseEnter={() => setHoveredRating(star)}
+                            onMouseLeave={() => setHoveredRating(0)}
+                            className="p-0.5 transition-transform hover:scale-110"
+                            data-testid={`button-rating-${star}`}
+                          >
+                            <Star
+                              className="w-6 h-6 transition-colors"
+                              style={{
+                                fill: star <= display ? "#f59e0b" : "transparent",
+                                color: star <= display ? "#f59e0b" : "#9ca3af",
+                              }}
+                            />
+                          </button>
+                        );
+                      })}
+                      {(hoveredRating || rating) > 0 && (
+                        <span className="text-xs text-muted-foreground ml-1">
+                          {STAR_LABELS[hoveredRating || rating]}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <Label htmlFor="feedback-subject" className="text-sm font-medium mb-1.5 block">
-                    Subject (optional)
+                    Subject <span className="text-muted-foreground text-xs">(optional)</span>
                   </Label>
                   <Input
                     id="feedback-subject"
@@ -273,6 +319,8 @@ export default function FloatingFeedback() {
                         ? "Share your idea for improvement..."
                         : feedbackType === "question"
                         ? "What would you like to know?"
+                        : feedbackType === "praise"
+                        ? "What's working great for you? We'd love to hear it!"
                         : "Tell us more..."
                     }
                     value={message}

@@ -2652,9 +2652,15 @@ export default function AdminDashboard() {
   const { data: feedbackData } = useQuery<{
     feedback: Array<{
       id: string;
+      source: 'site' | 'floating';
       userId: string | null;
-      rating: number;
+      rating: number | null;
       comment: string | null;
+      subject: string | null;
+      feedbackType: string | null;
+      status: string | null;
+      priority: string | null;
+      adminNotes: string | null;
       pageUrl: string | null;
       timeSpentMinutes: number | null;
       userEmail: string | null;
@@ -10435,14 +10441,19 @@ export default function AdminDashboard() {
                                       >
                                         <div className="flex items-start justify-between">
                                           <div className="flex items-center gap-1.5">
-                                            <div className="flex">
-                                              {Array.from({ length: feedback.rating }).map((_, i) => (
-                                                <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
-                                              ))}
-                                            </div>
+                                            {feedback.rating != null && (
+                                              <div className="flex">
+                                                {Array.from({ length: feedback.rating }).map((_, i) => (
+                                                  <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
+                                                ))}
+                                              </div>
+                                            )}
                                             <span className="text-[9px] text-muted-foreground">
                                               {feedback.userName || feedback.userEmail || 'Anonymous'}
                                             </span>
+                                            {feedback.source && (
+                                              <Badge variant="secondary" className="text-xs capitalize">{feedback.source}</Badge>
+                                            )}
                                             {feedback.userTier && (
                                               <Badge variant="outline" className="text-xs">{feedback.userTier}</Badge>
                                             )}
@@ -10451,6 +10462,12 @@ export default function AdminDashboard() {
                                             {format(new Date(feedback.createdAt), 'MMM d, yyyy h:mm a')}
                                           </span>
                                         </div>
+                                        {feedback.subject && (
+                                          <p className="mt-1 text-[9px] font-medium">{feedback.subject}</p>
+                                        )}
+                                        {feedback.feedbackType && (
+                                          <Badge variant="outline" className="text-xs capitalize mt-0.5">{feedback.feedbackType}</Badge>
+                                        )}
                                         <p className="mt-2 text-[9px]">{feedback.comment}</p>
                                         <div className="flex items-center gap-2 mt-0.5">
                                           <Badge variant="secondary" className="text-xs">{feedback.pageUrl || 'Unknown page'}</Badge>
@@ -10510,24 +10527,39 @@ export default function AdminDashboard() {
                                       <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                                         {/* Rating & User */}
                                         <div>
-                                          <div className="flex items-center gap-1 mb-0.5">
-                                            {Array.from({ length: feedback.rating }).map((_, i) => (
-                                              <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
-                                            ))}
-                                            {Array.from({ length: 5 - feedback.rating }).map((_, i) => (
-                                              <Star key={i} className="h-3 w-3 text-muted-foreground/30" />
-                                            ))}
-                                          </div>
+                                          {feedback.rating != null ? (
+                                            <div className="flex items-center gap-0.5 mb-0.5">
+                                              {Array.from({ length: feedback.rating }).map((_, i) => (
+                                                <Star key={`f-${i}`} className="h-3 w-3 fill-amber-400 text-amber-400" />
+                                              ))}
+                                              {Array.from({ length: 5 - feedback.rating }).map((_, i) => (
+                                                <Star key={`e-${i}`} className="h-3 w-3 text-muted-foreground/30" />
+                                              ))}
+                                            </div>
+                                          ) : (
+                                            <p className="text-[9px] text-muted-foreground mb-0.5">No rating</p>
+                                          )}
                                           <p className="text-[9px] font-medium">
                                             {feedback.userName || feedback.userEmail || 'Anonymous'}
                                           </p>
-                                          {feedback.userTier && (
-                                            <Badge variant="outline" className="text-xs mt-1">{feedback.userTier}</Badge>
-                                          )}
+                                          <div className="flex flex-wrap gap-1 mt-1">
+                                            {feedback.source && (
+                                              <Badge variant="secondary" className="text-xs capitalize">{feedback.source}</Badge>
+                                            )}
+                                            {feedback.feedbackType && (
+                                              <Badge variant="outline" className="text-xs capitalize">{feedback.feedbackType}</Badge>
+                                            )}
+                                            {feedback.userTier && (
+                                              <Badge variant="outline" className="text-xs">{feedback.userTier}</Badge>
+                                            )}
+                                          </div>
                                         </div>
                                         
-                                        {/* Comment */}
+                                        {/* Subject + Comment */}
                                         <div className="md:col-span-2">
+                                          {feedback.subject && (
+                                            <p className="text-[9px] font-semibold mb-0.5">{feedback.subject}</p>
+                                          )}
                                           {feedback.comment ? (
                                             <p className="text-[9px]">{feedback.comment}</p>
                                           ) : (

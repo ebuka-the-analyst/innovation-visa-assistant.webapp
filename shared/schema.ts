@@ -2304,6 +2304,7 @@ export const floatingFeedback = pgTable("floating_feedback", {
   subject: varchar("subject", { length: 200 }),
   message: text("message").notNull(),
   email: varchar("email").notNull(),
+  rating: integer("rating"), // optional 1-5 star rating
   pageUrl: text("page_url"),
   browserInfo: text("browser_info"),
   screenSize: varchar("screen_size", { length: 20 }),

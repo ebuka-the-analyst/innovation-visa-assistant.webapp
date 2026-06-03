@@ -1,0 +1,175 @@
+
+
+Innovator-Founder-visa-Assistant
+
+production
+
+
+
+Agent
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+Southeast Asia
+1 Replica
+
+
+
+
+History
+
+Hide Skipped
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+cbdb157b
+Active
+
+Jun 3, 2026, 11:39 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+11:02:44 PM [express] GET /api/admin/analytics/subscriptions 200 in 249ms :: {"subscriptions":[]}
+[2026-06-03T23:02:57.595Z] POST /api/activity/session
+11:02:57 PM [express] POST /api/activity/session 200 in 79ms :: {"sessionId":"0434f59b-a325-4539-b885…
+[2026-06-03T23:02:58.313Z] GET /api/admin/activity-log
+11:02:58 PM [express] GET /api/admin/activity-log 200 in 27ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+[2026-06-03T23:02:58.807Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+11:02:59 PM [express] GET /api/admin/analytics/overview 200 in 381ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-06-03T23:02:59.506Z] GET /api/admin/feedback
+11:02:59 PM [express] GET /api/admin/feedback 200 in 26ms :: {"feedback":[]}
+[2026-06-03T23:03:11.477Z] GET /.aws/credentials
+[SEO] Injecting meta for route: /
+[2026-06-03T23:03:11.511Z] GET /.env.production
+[SEO] Injecting meta for route: /
+[2026-06-03T23:03:11.676Z] GET /.env
+[SEO] Injecting meta for route: /
+[2026-06-03T23:03:11.730Z] GET /aws.env
+[SEO] Injecting meta for route: /
+[2026-06-03T23:03:12.050Z] POST /api/activity/session/end
+11:03:12 PM [express] POST /api/activity/session/end 200 in 60ms :: {"success":true}
+[2026-06-03T23:04:36.549Z] GET /api/auth/user
+[2026-06-03T23:04:36.552Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+11:04:36 PM [express] GET /api/auth/user 200 in 75ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+11:04:36 PM [express] POST /api/activity/session 200 in 92ms :: {"sessionId":"f86d77b8-f926-4994-acb0…
+[2026-06-03T23:04:36.833Z] POST /api/activity/page-view
+11:04:36 PM [express] POST /api/activity/page-view 200 in 27ms :: {"pageViewId":"acc39ad2-d6c9-4414-9…
+[2026-06-03T23:04:47.394Z] POST /api/activity/session/end
+11:04:47 PM [express] POST /api/activity/session/end 200 in 70ms :: {"success":true}
+[2026-06-03T23:05:06.876Z] POST /api/activity/session
+11:05:06 PM [express] POST /api/activity/session 200 in 89ms :: {"sessionId":"205a5835-c259-42e5-a150…
+[2026-06-03T23:05:07.329Z] POST /api/activity/page-view
+11:05:07 PM [express] POST /api/activity/page-view 200 in 30ms :: {"pageViewId":"4cebd85a-2f16-43a1-8…
+[2026-06-03T23:05:37.332Z] POST /api/activity/session
+11:05:37 PM [express] POST /api/activity/session 200 in 27ms :: {"sessionId":"205a5835-c259-42e5-a150…
+[2026-06-03T23:05:28.823Z] GET /api/admin/activity-log
+11:05:28 PM [express] GET /api/admin/activity-log 200 in 67ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+[2026-06-03T23:05:29.434Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+11:05:29 PM [express] GET /api/admin/analytics/overview 200 in 353ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-06-03T23:05:30.062Z] GET /api/admin/feedback
+11:05:30 PM [express] GET /api/admin/feedback 200 in 28ms :: {"feedback":[]}
+[2026-06-03T23:05:47.321Z] POST /api/feedback/floating
+[Floating Feedback] New praise feedback from benedict9211@gmail.com
+11:05:47 PM [express] POST /api/feedback/floating 200 in 28ms :: {"success":true}
+[2026-06-03T23:05:59.499Z] GET /api/admin/activity-log
+11:05:59 PM [express] GET /api/admin/activity-log 200 in 82ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+[2026-06-03T23:06:00.078Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+11:06:00 PM [express] GET /api/admin/analytics/overview 200 in 354ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-06-03T23:06:00.450Z] GET /api/admin/feedback
+11:06:00 PM [express] GET /api/admin/feedback 200 in 20ms :: {"feedback":[]}
+[2026-06-03T23:06:06.858Z] POST /api/activity/session/end
+[2026-06-03T23:06:06.862Z] GET /admin
+11:06:06 PM [express] POST /api/activity/session/end 200 in 29ms :: {"success":true}
+[SEO] Injecting meta for route: /
+[2026-06-03T23:06:07.222Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+11:06:07 PM [express] GET /api/auth/user 200 in 21ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-06-03T23:06:07.294Z] GET /attached_assets/official_logo.webp
+[SEO] Injecting meta for route: /
+[2026-06-03T23:06:07.637Z] POST /api/activity/session
+[2026-06-03T23:06:07.641Z] POST /api/activity/session
+11:06:07 PM [express] POST /api/activity/session 200 in 37ms :: {"sessionId":"fbf764da-7704-4e03-a8fd…
+11:06:07 PM [express] POST /api/activity/session 200 in 61ms :: {"sessionId":"88805a19-8135-4353-bc4e…
+[2026-06-03T23:06:07.759Z] GET /api/admin/analytics/overview
+[2026-06-03T23:06:07.760Z] GET /api/admin/feedback
+[2026-06-03T23:06:07.767Z] GET /api/admin/activity-log
+11:06:07 PM [express] GET /api/admin/feedback 200 in 22ms :: {"feedback":[]}
+[Stripe] Using LIVE mode credentials - payments are real
+11:06:07 PM [express] GET /api/admin/activity-log 200 in 58ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+[2026-06-03T23:06:08.061Z] POST /api/activity/page-view
+11:06:08 PM [express] GET /api/admin/analytics/overview 200 in 334ms :: {"kpiMetrics":[{"label":"Tota…
+11:06:08 PM [express] POST /api/activity/page-view 200 in 38ms :: {"pageViewId":"d41434af-553e-492b-8…
+[2026-06-03T23:06:16.216Z] GET /admin
+[2026-06-03T23:06:16.223Z] POST /api/activity/session/end
+[SEO] Injecting meta for route: /
+11:06:16 PM [express] POST /api/activity/session/end 200 in 19ms :: {"success":true}
+[2026-06-03T23:06:16.628Z] POST /api/performance/metrics
+11:06:16 PM [express] POST /api/performance/metrics 204 in 19ms
+[2026-06-03T23:06:16.660Z] GET /attached_assets/official_logo.webp
+[SEO] Injecting meta for route: /
+[2026-06-03T23:06:16.740Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+11:06:16 PM [express] GET /api/auth/user 200 in 23ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-06-03T23:06:17.026Z] GET /api/admin/analytics/overview
+[2026-06-03T23:06:17.028Z] GET /api/admin/feedback
+[2026-06-03T23:06:17.029Z] GET /api/admin/activity-log
+11:06:17 PM [express] GET /api/admin/feedback 200 in 17ms :: {"feedback":[]}
+[Stripe] Using LIVE mode credentials - payments are real
+11:06:17 PM [express] GET /api/admin/activity-log 200 in 52ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+[2026-06-03T23:06:17.133Z] POST /api/activity/session
+[2026-06-03T23:06:17.136Z] POST /api/activity/session
+11:06:17 PM [express] POST /api/activity/session 200 in 26ms :: {"sessionId":"a1f23f4b-8812-4864-bf8d…
+11:06:17 PM [express] POST /api/activity/session 200 in 26ms :: {"sessionId":"c872f64c-0f2a-4858-a625…
+[2026-06-03T23:06:17.351Z] POST /api/activity/page-view
+11:06:17 PM [express] GET /api/admin/analytics/overview 200 in 329ms :: {"kpiMetrics":[{"label":"Tota…
+11:06:17 PM [express] POST /api/activity/page-view 200 in 23ms :: {"pageViewId":"01a90a7a-2c4c-4075-9…
+[2026-06-03T23:06:22.779Z] POST /api/performance/metrics
+11:06:22 PM [express] POST /api/performance/metrics 204 in 16ms
+[2026-06-03T23:06:26.147Z] POST /api/activity/session/end
+11:06:26 PM [express] POST /api/activity/session/end 200 in 20ms :: {"success":true}
+[2026-06-03T23:07:27.232Z] GET /api/auth/user
+[2026-06-03T23:07:27.233Z] POST /api/activity/session
+11:07:27 PM [express] POST /api/activity/session 200 in 48ms :: {"sessionId":"be3b673b-ff59-453a-85ea…
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+11:07:27 PM [express] GET /api/auth/user 200 in 70ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-06-03T23:07:27.472Z] POST /api/activity/page-view
+11:07:27 PM [express] POST /api/activity/page-view 200 in 30ms :: {"pageViewId":"39cc0f46-3fef-4f39-8…
+
+

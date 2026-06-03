@@ -12997,8 +12997,72 @@ Return a JSON object with:
   // Admin: Get site feedback
   app.get("/api/admin/feedback", requireAdmin, async (req, res) => {
     try {
-      const feedback = await db.select().from(siteFeedback).orderBy(sql`created_at DESC`).limit(100);
-      res.json({ feedback });
+      // Merge site_feedback (timed popup star ratings) + floating_feedback (chat bubble)
+      const siteFeedbackRows = await db.select().from(siteFeedback).orderBy(sql`created_at DESC`).limit(200);
+      const floatingRows = await db.execute(sql`
+        SELECT 
+          ff.id,
+          ff.user_id as "userId",
+          ff.type,
+          ff.subject,
+          ff.message,
+          ff.email,
+          ff.rating,
+          ff.page_url as "pageUrl",
+          ff.browser_info as "browserInfo",
+          ff.screen_size as "screenSize",
+          ff.status,
+          ff.priority,
+          ff.admin_notes as "adminNotes",
+          ff.created_at as "createdAt",
+          u.email as "userEmail",
+          u.first_name as "userName",
+          u.subscription_tier as "userTier"
+        FROM floating_feedback ff
+        LEFT JOIN users u ON ff.user_id = u.id
+        ORDER BY ff.created_at DESC
+        LIMIT 200
+      `);
+
+      // Normalise floating_feedback rows to match site_feedback shape
+      const normalisedFloating = (floatingRows.rows as any[]).map(r => ({
+        id: r.id,
+        source: 'floating' as const,
+        userId: r.userId || null,
+        rating: r.rating || null,
+        comment: r.message,           // floating uses "message" field
+        subject: r.subject || null,
+        feedbackType: r.type,         // bug / suggestion / question / praise / other
+        status: r.status,
+        priority: r.priority,
+        adminNotes: r.adminNotes,
+        pageUrl: r.pageUrl || null,
+        timeSpentMinutes: null,
+        userEmail: r.userEmail || r.email || null,
+        userName: r.userName || null,
+        userTier: r.userTier || null,
+        browserInfo: r.browserInfo || null,
+        screenSize: r.screenSize || null,
+        referrer: null,
+        createdAt: r.createdAt,
+      }));
+
+      const normalisedSite = siteFeedbackRows.map(r => ({
+        ...r,
+        source: 'site' as const,
+        subject: null,
+        feedbackType: 'rating' as const,
+        status: 'new',
+        priority: 'normal',
+        adminNotes: null,
+      }));
+
+      // Merge and sort by createdAt desc
+      const merged = [...normalisedSite, ...normalisedFloating].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+      res.json({ feedback: merged });
     } catch (error) {
       console.error("Admin feedback fetch error:", error);
       res.status(500).json({ error: "Failed to fetch feedback" });
@@ -13008,7 +13072,7 @@ Return a JSON object with:
   // Floating Feedback - Bug reports, suggestions, questions from floating button
   app.post("/api/feedback/floating", async (req, res) => {
     try {
-      const { type, subject, message, email, pageUrl, userId, browserInfo, screenSize } = req.body;
+      const { type, subject, message, email, rating, pageUrl, userId, browserInfo, screenSize } = req.body;
       
       const validTypes = ['bug', 'suggestion', 'question', 'praise', 'other'];
       if (!type || !validTypes.includes(type)) {
@@ -13022,15 +13086,16 @@ Return a JSON object with:
       if (!email || !email.trim()) {
         return res.status(400).json({ error: "Email is required" });
       }
-      
+
+      const ratingVal = rating && rating >= 1 && rating <= 5 ? rating : null;
       const user = req.user as any;
       
       await db.execute(sql`
-        INSERT INTO floating_feedback (user_id, type, subject, message, email, page_url, browser_info, screen_size)
-        VALUES (${userId || user?.id || null}, ${type}, ${subject || null}, ${message.trim()}, ${email.trim()}, ${pageUrl || null}, ${browserInfo || null}, ${screenSize || null})
+        INSERT INTO floating_feedback (user_id, type, subject, message, email, rating, page_url, browser_info, screen_size)
+        VALUES (${userId || user?.id || null}, ${type}, ${subject || null}, ${message.trim()}, ${email.trim()}, ${ratingVal}, ${pageUrl || null}, ${browserInfo || null}, ${screenSize || null})
       `);
       
-      console.log(`[Floating Feedback] New ${type} feedback from ${email}`);
+      console.log(`[Floating Feedback] New ${type} feedback${ratingVal ? ` (${ratingVal}★)` : ''} from ${email}`);
       
       res.json({ success: true });
     } catch (error) {
