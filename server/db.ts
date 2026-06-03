@@ -127,6 +127,12 @@ async function runAutoMigrations() {
     console.log('[DB] Auto-migration: business_plans.toc_style column ensured');
   } catch { /* already exists */ }
 
+  // floating_feedback: rating column (added Jun 2026)
+  try {
+    await db.execute(sql.raw(`ALTER TABLE floating_feedback ADD COLUMN IF NOT EXISTS rating INTEGER`));
+    console.log('[DB] Auto-migration: floating_feedback.rating column ensured');
+  } catch { /* already exists */ }
+
   // Update blog post image URLs to use object storage
   try {
     await db.execute(sql`
