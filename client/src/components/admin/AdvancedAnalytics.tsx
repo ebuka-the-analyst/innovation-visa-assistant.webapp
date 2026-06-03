@@ -348,7 +348,7 @@ export function HeatmapView({ isActive }: HeatmapViewProps) {
   const [days, setDays] = useState("7");
   
   const { data, isLoading, isError, error, refetch } = useQuery<HeatmapData>({
-    queryKey: ["/api/admin/analytics/heatmap", days],
+    queryKey: ["/api/admin/analytics/heatmap", { days }],
     enabled: isActive,
   });
 
@@ -527,7 +527,7 @@ export function UserJourneyView({ isActive }: UserJourneyViewProps) {
   const [days, setDays] = useState("7");
   
   const { data, isLoading, isError, error, refetch } = useQuery<JourneyData>({
-    queryKey: ["/api/admin/analytics/user-journeys", days],
+    queryKey: ["/api/admin/analytics/user-journeys", { days }],
     enabled: isActive,
   });
 
@@ -682,7 +682,7 @@ export function ConversionFunnelView({ isActive }: ConversionFunnelViewProps) {
   const [days, setDays] = useState("30");
   
   const { data, isLoading, isError, error, refetch } = useQuery<FunnelData>({
-    queryKey: ["/api/admin/analytics/conversion-funnel", days],
+    queryKey: ["/api/admin/analytics/conversion-funnel", { days }],
     enabled: isActive,
   });
 
@@ -833,7 +833,7 @@ export function ApiPerformanceView({ isActive }: ApiPerformanceViewProps) {
   const [hours, setHours] = useState("24");
   
   const { data, isLoading, isError, error, refetch } = useQuery<ApiPerformanceData>({
-    queryKey: ["/api/admin/analytics/api-performance", hours],
+    queryKey: ["/api/admin/analytics/api-performance", { hours }],
     enabled: isActive,
   });
 
@@ -1168,7 +1168,7 @@ export function AuditLogView({ isActive }: AuditLogViewProps) {
   const limit = 50;
   
   const { data, isLoading, isError, error, refetch } = useQuery<AuditData>({
-    queryKey: ["/api/admin/analytics/audit-log", page * limit, limit],
+    queryKey: ["/api/admin/analytics/audit-log", { offset: page * limit, limit }],
     enabled: isActive,
   });
 
@@ -1284,7 +1284,7 @@ export function CoinsUsageView({ isActive }: CoinsUsageViewProps) {
   const [days, setDays] = useState("30");
   
   const { data, isLoading, isError, error, refetch } = useQuery<CoinsData>({
-    queryKey: ["/api/admin/analytics/coins-usage", days],
+    queryKey: ["/api/admin/analytics/coins-usage", { days }],
     enabled: isActive,
   });
 
