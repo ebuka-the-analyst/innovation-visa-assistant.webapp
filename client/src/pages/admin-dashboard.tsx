@@ -831,18 +831,104 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
             </CardHeader>
 
             <CardContent className="space-y-4">
-              <Tabs defaultValue="payments">
-                <TabsList className="w-full">
-                  <TabsTrigger value="payments" className="flex-1">
-                    <CreditCard className="h-3.5 w-3.5 mr-1" />Stripe Payments
+              <Tabs defaultValue="overview">
+                <TabsList className="w-full flex-wrap h-auto gap-0.5">
+                  <TabsTrigger value="overview" className="flex-1 text-xs">
+                    <Users className="h-3 w-3 mr-1" />Overview
                   </TabsTrigger>
-                  <TabsTrigger value="plans" className="flex-1">
-                    <FileText className="h-3.5 w-3.5 mr-1" />Business Plans
+                  <TabsTrigger value="payments" className="flex-1 text-xs">
+                    <CreditCard className="h-3 w-3 mr-1" />Stripe
                   </TabsTrigger>
-                  <TabsTrigger value="actions" className="flex-1">
-                    <Wrench className="h-3.5 w-3.5 mr-1" />Quick Fix
+                  <TabsTrigger value="plans" className="flex-1 text-xs">
+                    <FileText className="h-3 w-3 mr-1" />Plans
+                  </TabsTrigger>
+                  <TabsTrigger value="sessions" className="flex-1 text-xs">
+                    <Monitor className="h-3 w-3 mr-1" />Sessions
+                  </TabsTrigger>
+                  <TabsTrigger value="errors" className="flex-1 text-xs">
+                    <AlertTriangle className="h-3 w-3 mr-1" />Errors
+                  </TabsTrigger>
+                  <TabsTrigger value="activity" className="flex-1 text-xs">
+                    <Activity className="h-3 w-3 mr-1" />Activity
+                  </TabsTrigger>
+                  <TabsTrigger value="actions" className="flex-1 text-xs">
+                    <Wrench className="h-3 w-3 mr-1" />Fix
                   </TabsTrigger>
                 </TabsList>
+
+                {/* Overview Tab */}
+                <TabsContent value="overview" className="mt-3 space-y-3">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {[
+                      { label: "Tier", value: (u.subscriptionTier || 'free').toUpperCase(), color: "text-primary" },
+                      { label: "Status", value: u.subscriptionStatus || 'inactive', color: u.subscriptionStatus === 'active' ? "text-emerald-500" : "text-muted-foreground" },
+                      { label: "Credits", value: `${u.planCredits ?? 0} plan / ${u.bonusCredits ?? 0} bonus`, color: "text-foreground" },
+                      { label: "Used", value: `${u.creditsUsed ?? 0}`, color: "text-muted-foreground" },
+                    ].map((item, i) => (
+                      <div key={i} className="bg-muted/40 rounded-md p-2.5">
+                        <p className="text-xs text-muted-foreground">{item.label}</p>
+                        <p className={`text-sm font-semibold mt-0.5 ${item.color}`}>{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-1.5 text-xs">
+                    <div className="flex items-center justify-between py-1 border-b border-border/50">
+                      <span className="text-muted-foreground">Email verified</span>
+                      <Badge className={u.isEmailVerified ? "bg-emerald-500/10 text-emerald-600" : "bg-red-500/10 text-red-600"}>
+                        {u.isEmailVerified ? "Yes" : "No"}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between py-1 border-b border-border/50">
+                      <span className="text-muted-foreground">Sign-up method</span>
+                      <Badge variant="outline">{u.googleId ? "Google OAuth" : "Email/Password"}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between py-1 border-b border-border/50">
+                      <span className="text-muted-foreground">Onboarding</span>
+                      <Badge className={u.hasCompletedOnboarding ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"}>
+                        {u.hasCompletedOnboarding ? "Completed" : "Incomplete"}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between py-1 border-b border-border/50">
+                      <span className="text-muted-foreground">Joined</span>
+                      <span className="font-medium">{u.createdAt ? format(new Date(u.createdAt), 'dd MMM yyyy HH:mm') : '—'}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-1 border-b border-border/50">
+                      <span className="text-muted-foreground">Last active</span>
+                      <span className="font-medium">{u.lastActivityAt ? format(new Date(u.lastActivityAt), 'dd MMM yyyy HH:mm') : '—'}</span>
+                    </div>
+                    {u.stripeCustomerId && (
+                      <div className="flex items-center justify-between py-1 border-b border-border/50">
+                        <span className="text-muted-foreground">Stripe ID</span>
+                        <span className="font-mono text-[10px]">{u.stripeCustomerId}</span>
+                      </div>
+                    )}
+                    {u.stripeSubscriptionId && (
+                      <div className="flex items-center justify-between py-1 border-b border-border/50">
+                        <span className="text-muted-foreground">Subscription ID</span>
+                        <span className="font-mono text-[10px]">{u.stripeSubscriptionId}</span>
+                      </div>
+                    )}
+                    {u.isBanned && (
+                      <div className="flex items-center justify-between py-1">
+                        <span className="text-muted-foreground">Account status</span>
+                        <Badge className="bg-red-500/10 text-red-600">BANNED</Badge>
+                      </div>
+                    )}
+                  </div>
+                  {u.topPages && u.topPages.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-xs font-semibold text-muted-foreground mb-1.5">Most visited pages</p>
+                      <div className="space-y-1">
+                        {u.topPages.slice(0, 5).map((page: any, i: number) => (
+                          <div key={i} className="flex items-center justify-between text-xs py-0.5">
+                            <span className="text-muted-foreground truncate max-w-[240px]">{page.page_path}</span>
+                            <Badge variant="secondary" className="text-[10px]">{page.visits} visits</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
 
                 {/* Stripe Payments Tab */}
                 <TabsContent value="payments" className="mt-3">
@@ -995,6 +1081,99 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
                     </Button>
                     <p className="text-xs text-muted-foreground mt-1">Go to "Dispute Tracker" tab after clicking to fill in details.</p>
                   </div>
+                </TabsContent>
+
+                {/* Sessions Tab */}
+                <TabsContent value="sessions" className="mt-3">
+                  {!u.sessions?.length ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No session data found.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {u.sessions.map((s: any, i: number) => (
+                        <div key={s.id || i} className="p-2.5 rounded-md bg-muted/40 text-xs space-y-1">
+                          <div className="flex items-center justify-between flex-wrap gap-1">
+                            <span className="font-medium">{s.sessionStartedAt ? format(new Date(s.sessionStartedAt), 'dd MMM yyyy HH:mm') : '—'}</span>
+                            <Badge className={s.isActive ? "bg-emerald-500/10 text-emerald-600" : "bg-muted text-muted-foreground"}>
+                              {s.isActive ? "Active" : "Ended"}
+                            </Badge>
+                          </div>
+                          <div className="text-muted-foreground flex flex-wrap gap-x-3 gap-y-0.5">
+                            {s.deviceType && <span>{s.deviceType}</span>}
+                            {s.browserName && <span>{s.browserName}</span>}
+                            {s.country && <span>{s.city ? `${s.city}, ` : ''}{s.country}</span>}
+                            {s.pageViewCount != null && <span>{s.pageViewCount} pages</span>}
+                            {s.totalDurationSeconds != null && <span>{Math.round(s.totalDurationSeconds / 60)}m</span>}
+                          </div>
+                          {s.entryPage && <p className="text-muted-foreground truncate">Entry: {s.entryPage}</p>}
+                          {s.lastSeenAt && <p className="text-muted-foreground">Last seen: {format(new Date(s.lastSeenAt), 'dd MMM HH:mm')}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+
+                {/* Errors Tab */}
+                <TabsContent value="errors" className="mt-3">
+                  {!u.recentErrors?.length ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No error logs for this user.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {u.recentErrors.map((e: any, i: number) => (
+                        <div key={e.id || i} className="p-2.5 rounded-md bg-red-500/5 border border-red-500/10 text-xs space-y-1">
+                          <div className="flex items-center justify-between flex-wrap gap-1">
+                            <Badge className="bg-red-500/10 text-red-600 text-[10px]">{e.error_type || 'unknown'}</Badge>
+                            <span className="text-muted-foreground">{e.created_at ? format(new Date(e.created_at), 'dd MMM HH:mm') : '—'}</span>
+                          </div>
+                          <p className="text-foreground truncate">{e.error_message || '—'}</p>
+                          {e.route && <p className="text-muted-foreground">Route: {e.route}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+
+                {/* Activity Tab */}
+                <TabsContent value="activity" className="mt-3">
+                  {!u.recentActivity?.length && !u.creditTransactions?.length ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No activity recorded.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {u.recentActivity?.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold text-muted-foreground mb-1.5">Recent Events</p>
+                          <div className="space-y-1">
+                            {u.recentActivity.map((a: any, i: number) => (
+                              <div key={a.id || i} className="flex items-center justify-between gap-2 text-xs py-1 border-b border-border/40">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <Badge variant="outline" className="text-[10px] shrink-0">{a.eventType}</Badge>
+                                  <span className="text-muted-foreground truncate">{a.eventAction}{a.toolId ? ` · ${a.toolId}` : ''}</span>
+                                </div>
+                                <span className="text-muted-foreground shrink-0">{a.occurredAt ? format(new Date(a.occurredAt), 'dd MMM HH:mm') : '—'}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {u.creditTransactions?.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold text-muted-foreground mb-1.5">Credit History</p>
+                          <div className="space-y-1">
+                            {u.creditTransactions.map((c: any, i: number) => (
+                              <div key={c.id || i} className="flex items-center justify-between gap-2 text-xs py-1 border-b border-border/40">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <Badge className={c.creditsChange >= 0 ? "bg-emerald-500/10 text-emerald-600 text-[10px]" : "bg-red-500/10 text-red-600 text-[10px]"}>
+                                    {c.creditsChange >= 0 ? '+' : ''}{c.creditsChange}
+                                  </Badge>
+                                  <span className="text-muted-foreground truncate">{c.description || c.type}</span>
+                                </div>
+                                <span className="text-muted-foreground shrink-0">{c.createdAt ? format(new Date(c.createdAt), 'dd MMM') : '—'}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>

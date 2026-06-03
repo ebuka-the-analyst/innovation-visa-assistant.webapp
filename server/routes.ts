@@ -15883,16 +15883,14 @@ IMPORTANT RULES:
         SELECT 
           aal.id,
           aal.admin_id,
-          COALESCE(aal.admin_email, u.email, 'unknown') as admin_email,
+          COALESCE(u.email, 'system') as admin_email,
           aal.action,
-          aal.action_category,
           aal.target_type,
           aal.target_id,
-          aal.target_email,
-          aal.reason,
-          aal.previous_value,
-          aal.new_value,
+          aal.details,
           aal.ip_address,
+          aal.status,
+          aal.metadata,
           aal.created_at
         FROM admin_audit_logs aal
         LEFT JOIN users u ON aal.admin_id = u.id
@@ -17172,6 +17170,66 @@ Best wishes.</div>
           } catch (_e) {}
         }
 
+        // 4. Recent sessions
+        const sessions = await db.select({
+          id: userSessions.id,
+          sessionStartedAt: userSessions.sessionStartedAt,
+          lastSeenAt: userSessions.lastSeenAt,
+          isActive: userSessions.isActive,
+          deviceType: userSessions.deviceType,
+          browserName: userSessions.browserName,
+          country: userSessions.country,
+          city: userSessions.city,
+          entryPage: userSessions.entryPage,
+          currentPage: userSessions.currentPage,
+          pageViewCount: userSessions.pageViewCount,
+          totalDurationSeconds: userSessions.totalDurationSeconds,
+        }).from(userSessions)
+          .where(eq(userSessions.userId, u.id))
+          .orderBy(desc(userSessions.sessionStartedAt))
+          .limit(5);
+
+        // 5. Recent errors for this user (use raw SQL due to schema drift in error_logs)
+        const errorsRaw = await db.execute(sql`
+          SELECT id, error_type, error_message, route, created_at
+          FROM error_logs WHERE user_id = ${u.id}
+          ORDER BY created_at DESC LIMIT 10
+        `);
+        const errors = errorsRaw.rows;
+
+        // 6. Recent activity events (tool usage, etc.)
+        const activities = await db.select({
+          id: activityEvents.id,
+          eventType: activityEvents.eventType,
+          eventAction: activityEvents.eventAction,
+          pagePath: activityEvents.pagePath,
+          toolId: activityEvents.toolId,
+          occurredAt: activityEvents.occurredAt,
+        }).from(activityEvents)
+          .where(eq(activityEvents.userId, u.id))
+          .orderBy(desc(activityEvents.occurredAt))
+          .limit(20);
+
+        // 7. Credit transactions
+        const credits = await db.select({
+          id: creditTransactions.id,
+          type: creditTransactions.type,
+          creditsChange: creditTransactions.creditsChange,
+          creditsType: creditTransactions.creditsType,
+          description: creditTransactions.description,
+          createdAt: creditTransactions.createdAt,
+        }).from(creditTransactions)
+          .where(eq(creditTransactions.userId, u.id))
+          .orderBy(desc(creditTransactions.createdAt))
+          .limit(15);
+
+        // 8. Page views (most visited pages)
+        const topPages = await db.execute(sql`
+          SELECT page_path, COUNT(*) as visits
+          FROM page_views WHERE user_id = ${u.id}
+          GROUP BY page_path ORDER BY visits DESC LIMIT 10
+        `);
+
         return {
           id: u.id,
           email: u.email,
@@ -17180,11 +17238,24 @@ Best wishes.</div>
           subscriptionTier: u.subscriptionTier || 'free',
           subscriptionStatus: u.subscriptionStatus,
           planCredits: u.planCredits,
+          bonusCredits: u.bonusCredits,
+          creditsUsed: u.creditsUsed,
           stripeCustomerId: u.stripeCustomerId || stripeCustomer?.id,
+          stripeSubscriptionId: u.stripeSubscriptionId,
           isEmailVerified: u.isEmailVerified,
+          isBanned: u.isBanned,
           createdAt: u.createdAt,
+          lastActivityAt: u.lastActivityAt,
+          hasCompletedOnboarding: u.hasCompletedOnboarding,
+          googleId: u.googleId,
+          adminNotes: u.adminNotes,
           businessPlans: plans,
           stripePayments,
+          sessions,
+          recentErrors: errors,
+          recentActivity: activities,
+          creditTransactions: credits,
+          topPages: topPages.rows,
         };
       }));
 
