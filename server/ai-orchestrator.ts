@@ -1,4 +1,8 @@
+import OpenAI from "openai";
 import { qwen, QWEN_MODELS } from "./qwenClient";
+
+// Primary OpenAI client (prioritised — funded)
+const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
 import { storage } from "./storage";
 import { 
   AI_ACTIONS, 
@@ -95,106 +99,125 @@ export async function orchestrateChat(
     sessionId: context.sessionId
   };
 
-  try {
-    // Call OpenAI with function calling enabled
-    const response = await qwen.chat.completions.create({
-      model: QWEN_MODELS.plus,
-      messages: [
-        { role: "system", content: ORCHESTRATOR_SYSTEM_PROMPT },
-        ...conversationHistory.map(msg => ({
-          role: msg.role as "user" | "assistant",
-          content: msg.content
-        })),
-        { role: "user", content: userMessage }
-      ],
-      tools: getOpenAIFunctions(),
-      tool_choice: "auto",
-      max_tokens: 800,
-      temperature: 0.7
-    });
+  // Try OpenAI first (primary — funded), fall back to Qwen
+  const providers = [
+    { name: "OpenAI", client: openaiClient, model: "gpt-4o-mini" },
+    { name: "Qwen", client: qwen, model: QWEN_MODELS.plus },
+  ];
 
-    const message = response.choices[0]?.message;
+  let lastError: any = null;
 
-    // Check if the model wants to call a function
-    if (message?.tool_calls && message.tool_calls.length > 0) {
-      const toolCall = message.tool_calls[0] as any;
-      const functionName = toolCall.function?.name || toolCall.name;
-      const functionArgs = JSON.parse(toolCall.function?.arguments || toolCall.arguments || "{}");
-
-      // Check if action exists
-      const action = AI_ACTIONS[functionName];
-      if (!action) {
-        return {
-          response: `I tried to perform an action but encountered an error. Please try rephrasing your request.`,
-          provider: "Qwen Orchestrator"
-        };
-      }
-
-      // Check if confirmation is required
-      if (requiresConfirmation(functionName)) {
-        const confirmDetails = getConfirmationDetails(functionName, functionArgs);
-        
-        // Create pending confirmation
-        const confirmation = await storage.createAiPendingConfirmation({
-          userId: user.id,
-          actionType: functionName,
-          actionCategory: action.category,
-          parameters: functionArgs,
-          confirmationMessage: confirmDetails?.message || "Please confirm this action.",
-          warningLevel: confirmDetails?.warningLevel || "normal",
-          requiresTypedConfirmation: confirmDetails?.warningLevel === "critical",
-          confirmationPhrase: confirmDetails?.warningLevel === "critical" ? "CONFIRM" : undefined,
-          expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
-        });
-
-        return {
-          response: `⚠️ **Confirmation Required**\n\n${confirmDetails?.message}\n\nClick "Confirm" to proceed or "Cancel" to abort.`,
-          provider: "Qwen Orchestrator",
-          pendingConfirmation: {
-            id: confirmation.id,
-            actionType: functionName,
-            message: confirmDetails?.message || "",
-            warningLevel: confirmDetails?.warningLevel || "normal"
-          }
-        };
-      }
-
-      // Execute the action
-      const actionResult = await executeAction(functionName, actionContext, functionArgs);
-
-      // Generate a follow-up response incorporating the action result
-      const followUpResponse = await qwen.chat.completions.create({
-        model: QWEN_MODELS.plus,
+  for (const provider of providers) {
+    try {
+      console.log(`[AI Orchestrator] Calling ${provider.name} (function calling)`);
+      const response = await provider.client.chat.completions.create({
+        model: provider.model,
         messages: [
-          { role: "system", content: "You are a helpful assistant. The user requested an action and you executed it. Provide a brief, helpful response that summarizes the result and offers any relevant next steps. Be conversational and supportive." },
-          { role: "user", content: `The user asked: "${userMessage}"\n\nAction executed: ${functionName}\nResult: ${actionResult.message}\n\nProvide a helpful response that incorporates this information.` }
+          { role: "system", content: ORCHESTRATOR_SYSTEM_PROMPT },
+          ...conversationHistory.map(msg => ({
+            role: msg.role as "user" | "assistant",
+            content: msg.content
+          })),
+          { role: "user", content: userMessage }
         ],
-        max_tokens: 300,
+        tools: getOpenAIFunctions(),
+        tool_choice: "auto",
+        max_tokens: 800,
         temperature: 0.7
       });
 
-      const finalResponse = followUpResponse.choices[0]?.message?.content || actionResult.message;
+      const message = response.choices[0]?.message;
 
+      // Check if the model wants to call a function
+      if (message?.tool_calls && message.tool_calls.length > 0) {
+        const toolCall = message.tool_calls[0] as any;
+        const functionName = toolCall.function?.name || toolCall.name;
+        const functionArgs = JSON.parse(toolCall.function?.arguments || toolCall.arguments || "{}");
+
+        const action = AI_ACTIONS[functionName];
+        if (!action) {
+          return {
+            response: `I tried to perform an action but encountered an error. Please try rephrasing your request.`,
+            provider: `${provider.name} Orchestrator`
+          };
+        }
+
+        if (requiresConfirmation(functionName)) {
+          const confirmDetails = getConfirmationDetails(functionName, functionArgs);
+          const confirmation = await storage.createAiPendingConfirmation({
+            userId: user.id,
+            actionType: functionName,
+            actionCategory: action.category,
+            parameters: functionArgs,
+            confirmationMessage: confirmDetails?.message || "Please confirm this action.",
+            warningLevel: confirmDetails?.warningLevel || "normal",
+            requiresTypedConfirmation: confirmDetails?.warningLevel === "critical",
+            confirmationPhrase: confirmDetails?.warningLevel === "critical" ? "CONFIRM" : undefined,
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+          });
+
+          return {
+            response: `⚠️ **Confirmation Required**\n\n${confirmDetails?.message}\n\nClick "Confirm" to proceed or "Cancel" to abort.`,
+            provider: `${provider.name} Orchestrator`,
+            pendingConfirmation: {
+              id: confirmation.id,
+              actionType: functionName,
+              message: confirmDetails?.message || "",
+              warningLevel: confirmDetails?.warningLevel || "normal"
+            }
+          };
+        }
+
+        const actionResult = await executeAction(functionName, actionContext, functionArgs);
+
+        // Follow-up response using same provider
+        const followUpResponse = await provider.client.chat.completions.create({
+          model: provider.model,
+          messages: [
+            { role: "system", content: "You are a helpful assistant. The user requested an action and you executed it. Provide a brief, helpful response that summarises the result and offers relevant next steps. Be conversational and supportive. Use UK English." },
+            { role: "user", content: `The user asked: "${userMessage}"\n\nAction executed: ${functionName}\nResult: ${actionResult.message}\n\nProvide a helpful response that incorporates this information.` }
+          ],
+          max_tokens: 300,
+          temperature: 0.7
+        });
+
+        const finalResponse = followUpResponse.choices[0]?.message?.content || actionResult.message;
+
+        return {
+          response: finalResponse,
+          provider: `${provider.name} Orchestrator`,
+          actionExecuted: functionName,
+          actionResult
+        };
+      }
+
+      // No function call — return regular response
       return {
-        response: finalResponse,
-        provider: "Qwen Orchestrator",
-        actionExecuted: functionName,
-        actionResult
+        response: message?.content || "I apologise, I couldn't process your request. Please try again.",
+        provider: `${provider.name} Orchestrator`
       };
+
+    } catch (error: any) {
+      const isPaymentError = error?.status === 400 && (
+        error?.error?.type === "Arrearage" ||
+        error?.message?.includes("Arrearage") ||
+        error?.message?.includes("overdue")
+      );
+      const isQuotaError = error?.status === 429 || error?.message?.includes("429") || error?.message?.includes("quota");
+
+      if (isPaymentError || isQuotaError) {
+        console.warn(`[AI Orchestrator] ${provider.name} unavailable (${isPaymentError ? "payment" : "quota"}), trying next provider`);
+        lastError = error;
+        continue;
+      }
+      console.error(`[AI Orchestrator] ${provider.name} error:`, error?.message || error);
+      lastError = error;
+      continue;
     }
-
-    // No function call - return regular response
-    return {
-      response: message?.content || "I apologize, I couldn't process your request. Please try again.",
-      provider: "Qwen Orchestrator"
-    };
-
-  } catch (error: any) {
-    console.error("[AI Orchestrator] Error:", error);
-    
-    // Fallback to regular chat
-    return regularChat(userMessage, conversationHistory);
   }
+
+  console.error("[AI Orchestrator] All providers failed, falling back to regular chat");
+  return regularChat(userMessage, conversationHistory);
 }
 
 // Helper functions for retry logic
@@ -283,12 +306,17 @@ RULES:
 
 Give direct, helpful answers.`;
 
-  // Qwen primary call with retry
-  try {
-    return await retryWithBackoff(async () => {
-      console.log("[AI Orchestrator] Calling Qwen for regular chat");
-      const response = await qwen.chat.completions.create({
-        model: QWEN_MODELS.plus,
+  // Provider chain: OpenAI first (funded), Qwen second
+  const chatProviders = [
+    { name: "OpenAI", client: openaiClient, model: "gpt-4o-mini" },
+    { name: "Qwen", client: qwen, model: QWEN_MODELS.turbo },
+  ];
+
+  for (const provider of chatProviders) {
+    try {
+      console.log(`[AI Orchestrator] Calling ${provider.name} for regular chat`);
+      const response = await provider.client.chat.completions.create({
+        model: provider.model,
         messages: [
           { role: "system", content: systemPrompt },
           ...conversationHistory.map(msg => ({
@@ -302,19 +330,25 @@ Give direct, helpful answers.`;
       });
 
       const content = response.choices[0]?.message?.content;
-      if (!content) {
-        throw new Error("Empty response from OpenAI");
+      if (!content) throw new Error("Empty response");
+
+      return { response: content, provider: provider.name };
+    } catch (error: any) {
+      const isPaymentError = error?.status === 400 && (
+        error?.error?.type === "Arrearage" || error?.message?.includes("Arrearage")
+      );
+      const isQuotaError = error?.status === 429 || error?.message?.includes("429");
+      if (isPaymentError || isQuotaError) {
+        console.warn(`[AI Orchestrator] ${provider.name} unavailable, trying next`);
+        continue;
       }
-      
-      return {
-        response: content,
-        provider: "Qwen"
-      };
-    }, 2, 1000, "Qwen regular chat");
-  } catch (error) {
-    console.error("[Regular Chat] All providers failed:", error);
-    return getIntelligentFallback(userMessage);
+      console.error(`[AI Orchestrator] ${provider.name} error:`, error?.message || error);
+      continue;
+    }
   }
+
+  console.error("[Regular Chat] All providers failed, using intelligent fallback");
+  return getIntelligentFallback(userMessage);
 }
 
 // Intelligent fallback responses when all AI providers fail

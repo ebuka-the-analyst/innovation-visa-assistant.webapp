@@ -1,4 +1,8 @@
+import OpenAI from "openai";
 import { qwen, QWEN_MODELS } from "./qwenClient";
+
+// Primary OpenAI client (prioritised — funded)
+const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
 
 interface Message {
   role: "user" | "assistant";
@@ -91,49 +95,55 @@ async function retryWithBackoff<T>(
   throw lastError || new Error(`${operationName} failed after ${maxRetries} attempts`);
 }
 
-async function callQwenWithRetry(
+async function callProviderWithRetry(
+  providerName: string,
+  client: OpenAI,
+  model: string,
   systemPrompt: string,
   conversationHistory: Message[],
   userMessage: string
 ): Promise<{ response: string; provider: string } | null> {
   try {
     return await retryWithBackoff(async () => {
-      console.log("[ChatService] Calling Qwen");
-      
-      const response = await qwen.chat.completions.create({
-        model: QWEN_MODELS.plus,
+      console.log(`[ChatService] Calling ${providerName}`);
+
+      const response = await client.chat.completions.create({
+        model,
         messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
+          { role: "system", content: systemPrompt },
           ...conversationHistory.map((msg) => ({
             role: msg.role,
             content: msg.content,
           })),
-          {
-            role: "user",
-            content: userMessage,
-          },
+          { role: "user", content: userMessage },
         ],
         max_tokens: 500,
         temperature: 0.7,
       });
 
       const content = response.choices[0]?.message?.content || "";
-      
-      if (!content) {
-        throw new Error("Empty response from Qwen");
-      }
-      
-      console.log("[ChatService] Qwen response received successfully");
+      if (!content) throw new Error(`Empty response from ${providerName}`);
+
+      console.log(`[ChatService] ${providerName} response received successfully`);
       return {
         response: addDisclaimerIfNeeded(content),
-        provider: "Qwen",
+        provider: providerName,
       };
-    }, 2, 1000, "Qwen API call");
+    }, 2, 1000, `${providerName} API call`);
   } catch (error: any) {
-    console.error("[ChatService] Qwen API failed after retries:", error?.message || error);
+    const isPaymentError =
+      error?.status === 400 &&
+      (error?.error?.type === "Arrearage" || error?.message?.includes("Arrearage"));
+    const isQuotaError =
+      error?.status === 429 || error?.message?.includes("429") || error?.message?.includes("quota");
+
+    if (isPaymentError) {
+      console.warn(`[ChatService] ${providerName} skipped — overdue payment`);
+    } else if (isQuotaError) {
+      console.warn(`[ChatService] ${providerName} skipped — quota exceeded`);
+    } else {
+      console.error(`[ChatService] ${providerName} failed:`, error?.message || error);
+    }
     return null;
   }
 }
@@ -144,13 +154,21 @@ export async function chatWithMultipleLLMs(
   newsContext?: NewsArticle[]
 ): Promise<{ response: string; provider: string }> {
   const systemPrompt = buildSystemPrompt(newsContext);
-  
-  const qwenResult = await callQwenWithRetry(systemPrompt, conversationHistory, userMessage);
-  if (qwenResult) {
-    return qwenResult;
+
+  // Provider chain: OpenAI first (funded/prioritised), Qwen as fallback
+  const providers: Array<{ name: string; client: OpenAI; model: string }> = [
+    { name: "OpenAI", client: openaiClient, model: "gpt-4o-mini" },
+    { name: "Qwen", client: qwen, model: QWEN_MODELS.plus },
+  ];
+
+  for (const p of providers) {
+    const result = await callProviderWithRetry(
+      p.name, p.client, p.model, systemPrompt, conversationHistory, userMessage
+    );
+    if (result) return result;
   }
 
-  console.log("[ChatService] Qwen failed, using intelligent fallback");
+  console.log("[ChatService] All providers failed, using intelligent fallback");
   return getIntelligentFallback(userMessage);
 }
 

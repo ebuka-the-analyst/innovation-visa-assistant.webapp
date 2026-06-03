@@ -1,0 +1,277 @@
+
+
+Innovator-Founder-visa-Assistant
+
+production
+
+
+
+Agent
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Console
+Settings
+innovatorfoundervisaassistant.co.uk
+Southeast Asia
+1 Replica
+
+
+
+
+History
+
+Hide Skipped
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+0df9f534
+Active
+
+Jun 3, 2026, 9:58 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[2026-06-03T21:13:28.475Z] GET /loaders/*
+[2026-06-03T21:13:28.476Z] GET /local/.env
+[2026-06-03T21:13:28.589Z] GET /media/.env
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.591Z] GET /messages/*
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.597Z] GET /metrics
+[SEO] Injecting meta for route: /
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.617Z] GET /myproject/settings.py
+[2026-06-03T21:13:28.479Z] GET /login
+[SEO] Injecting meta for route: /
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.621Z] GET /new/.env
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.482Z] GET /login?pp=enable&pp=env
+[2026-06-03T21:13:28.632Z] GET /node-api/.env
+[SEO] Injecting meta for route: /
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.528Z] GET /manage/*
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.576Z] GET /market/.env
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.584Z] GET /marketing/.env
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.586Z] GET /media/*
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.634Z] GET /node/.env
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.639Z] GET /node/api/.env
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.641Z] GET /node/backend/.env
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.644Z] GET /nodeapi/.env
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.646Z] GET /nodeweb/.env
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.647Z] GET /notifications/*
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.693Z] GET /oauth/*
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.741Z] GET /oauth/authorize
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.749Z] GET /old/.env
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.751Z] GET /old/aws_config
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.753Z] GET /opt/.env
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.755Z] GET /opt/mailcow-dockerized/mailcow.conf
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.758Z] GET /orders/*
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.784Z] GET /package-updates/*.cgi
+[2026-06-03T21:13:28.802Z] GET /package-updates/apt.cgi
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:28.780Z] GET /package-updates/
+[2026-06-03T21:13:28.914Z] GET /package-updates/yum.cgi
+[SEO] Injecting meta for route: /
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:29.147Z] GET /qa/.env
+[SEO] Injecting meta for route: /
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:29.579Z] GET /s3/backup
+[SEO] Injecting meta for route: /
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:29.940Z] GET /software/update.cgi
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:29.958Z] GET /src/.env
+[2026-06-03T21:13:30.082Z] GET /src/env.js
+[2026-06-03T21:13:30.218Z] GET /stripe.json
+[2026-06-03T21:13:30.319Z] GET /test
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:30.572Z] GET /var/task/serverless.json
+[SEO] Injecting meta for route: /
+[2026-06-03T21:13:30.712Z] GET /web/constant.js
+[SEO] Injecting meta for route: /
+Railway rate limit of 500 logs/sec reached for replica, update your application to reduce the logging rate. Messages dropped: 447
+[2026-06-03T21:13:54.058Z] POST /api/activity/session
+9:13:54 PM [express] POST /api/activity/session 200 in 58ms :: {"sessionId":"aea021de-9d2f-4376-8670…
+[2026-06-03T21:13:54.212Z] GET /api/admin/analytics/users
+9:13:54 PM [express] GET /api/admin/analytics/users 200 in 12ms :: {"byTier":{"free":15,"basic":0,"p…
+[2026-06-03T21:13:54.296Z] GET /api/admin/activity-log
+9:13:54 PM [express] GET /api/admin/activity-log 200 in 16ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+[2026-06-03T21:13:54.325Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+9:13:54 PM [express] GET /api/admin/analytics/overview 200 in 333ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-06-03T21:14:24.058Z] POST /api/activity/session
+9:14:24 PM [express] POST /api/activity/session 200 in 43ms :: {"sessionId":"aea021de-9d2f-4376-8670…
+[2026-06-03T21:14:24.594Z] GET /api/admin/analytics/users
+9:14:24 PM [express] GET /api/admin/analytics/users 200 in 14ms :: {"byTier":{"free":15,"basic":0,"p…
+[2026-06-03T21:14:24.649Z] GET /api/admin/activity-log
+9:14:24 PM [express] GET /api/admin/activity-log 200 in 17ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+[2026-06-03T21:14:24.833Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+9:14:25 PM [express] GET /api/admin/analytics/overview 200 in 319ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-06-03T21:14:31.029Z] POST /api/activity/session/end
+[2026-06-03T21:14:31.040Z] GET /admin
+9:14:31 PM [express] POST /api/activity/session/end 200 in 11ms :: {"success":true}
+[SEO] Injecting meta for route: /
+[2026-06-03T21:14:31.363Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+9:14:31 PM [express] GET /api/auth/user 200 in 9ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c","…
+[2026-06-03T21:14:31.436Z] GET /attached_assets/official_logo.webp
+[SEO] Injecting meta for route: /
+[2026-06-03T21:14:31.645Z] GET /api/admin/users?page=1&pageSize=25
+9:14:31 PM [express] GET /api/admin/users 200 in 17ms :: {"users":[{"id":"ec710389-941f-49d3-8da2-5b…
+[Stripe] Using LIVE mode credentials - payments are real
+[2026-06-03T21:14:31.729Z] POST /api/activity/session
+[2026-06-03T21:14:31.731Z] POST /api/activity/session
+9:14:31 PM [express] GET /api/admin/analytics/users 200 in 17ms :: {"byTier":{"free":15,"basic":0,"p…
+9:14:31 PM [express] POST /api/activity/session 200 in 15ms :: {"sessionId":"faf8df49-7a23-4f99-adb9…
+9:14:31 PM [express] GET /api/admin/activity-log 200 in 29ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+[2026-06-03T21:14:31.920Z] POST /api/activity/page-view
+9:14:31 PM [express] POST /api/activity/page-view 200 in 17ms :: {"pageViewId":"a6024867-24c4-415a-b…
+9:14:31 PM [express] POST /api/activity/session 200 in 35ms :: {"sessionId":"2429f7fa-c6a9-49b6-b38b…
+[2026-06-03T21:14:31.796Z] GET /api/admin/analytics/overview
+[2026-06-03T21:14:31.799Z] GET /api/admin/analytics/users
+[2026-06-03T21:14:31.804Z] GET /api/admin/activity-log
+9:14:32 PM [express] GET /api/admin/analytics/overview 200 in 328ms :: {"kpiMetrics":[{"label":"Tota…
+    cookies: [
+      'acw_tc=5895e63b-103e-954d-8f22-78390806f6eb574a23dd2f224d3d3ecac080c0462e4c;path=/;HttpOnly;Max-Age=1800'
+    at OpenAI.makeRequest (file:///app/node_modules/openai/client.mjs:330:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async orchestrateChat (file:///app/dist/index.js:11580:22)
+    at async file:///app/dist/index.js:20920:22 {
+  status: 400,
+  headers: HeadersList {
+[2026-06-03T21:14:38.951Z] POST /api/chat
+[AI Orchestrator] Error: BadRequestError: 400 Access denied, please make sure your account is in good standing. For details, see: https://www.alibabacloud.com/help/en/model-studio/error-code#overdue-payment
+    at APIError.generate (file:///app/node_modules/openai/core/error.mjs:41:20)
+    at OpenAI.makeStatusError (file:///app/node_modules/openai/client.mjs:162:32)
+[2026-06-03T21:14:38.867Z] POST /api/performance/metrics
+9:14:38 PM [express] POST /api/performance/metrics 204 in 11ms
+    ],
+    [Symbol(headers map)]: Map(12) {
+      'vary' => [Object],
+      'x-request-id' => [Object],
+      'content-type' => [Object],
+      'req-cost-time' => [Object],
+      'req-arrive-time' => [Object],
+      'resp-start-time' => [Object],
+      'x-envoy-upstream-service-time' => [Object],
+      'set-cookie' => [Object],
+      'content-encoding' => [Object],
+      'date' => [Object],
+      'server' => [Object],
+      'transfer-encoding' => [Object]
+    },
+    [Symbol(headers map sorted)]: [
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array],
+      [Array], [Array]
+    ]
+  },
+  requestID: '5895e63b-103e-954d-8f22-78390806f6eb',
+  error: {
+    message: 'Access denied, please make sure your account is in good standing. For details, see: https://www.alibabacloud.com/help/en/model-studio/error-code#overdue-payment',
+    type: 'Arrearage',
+    param: null,
+    code: 'Arrearage'
+  },
+  code: 'Arrearage',
+  param: null,
+  type: 'Arrearage'
+}
+[AI Orchestrator] Calling Qwen for regular chat
+[AI Orchestrator] Qwen regular chat attempt 1 failed, retrying in 1000ms...
+[AI Orchestrator] Calling Qwen for regular chat
+[AI Orchestrator] Qwen regular chat attempt 2 failed, retrying in 2000ms...
+[Regular Chat] All providers failed: BadRequestError: 400 Access denied, please make sure your account is in good standing. For details, see: https://www.alibabacloud.com/help/en/model-studio/error-code#overdue-payment
+    at APIError.generate (file:///app/node_modules/openai/core/error.mjs:41:20)
+    at OpenAI.makeStatusError (file:///app/node_modules/openai/client.mjs:162:32)
+    at OpenAI.makeRequest (file:///app/node_modules/openai/client.mjs:330:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/dist/index.js:11716:24
+    at async retryWithBackoff (file:///app/dist/index.js:11675:14)
+    at async regularChat (file:///app/dist/index.js:11714:12)
+    at async file:///app/dist/index.js:20920:22 {
+  status: 400,
+  headers: HeadersList {
+    cookies: [
+      'acw_tc=9e791d2e-5eab-9ee3-91eb-bb30a7287a3a24eaec25394ede328065e8e17e1a5c4c;path=/;HttpOnly;Max-Age=1800'
+    ],
+    [Symbol(headers map)]: Map(12) {
+      'vary' => [Object],
+      'x-request-id' => [Object],
+      'content-type' => [Object],
+      'req-cost-time' => [Object],
+  type: 'Arrearage'
+      'req-arrive-time' => [Object],
+      'transfer-encoding' => [Object]
+      'resp-start-time' => [Object],
+    },
+      'x-envoy-upstream-service-time' => [Object],
+    [Symbol(headers map sorted)]: [
+      [Array], [Array],
+      'set-cookie' => [Object],
+      [Array], [Array],
+    message: 'Access denied, please make sure your account is in good standing. For details, see: https://www.alibabacloud.com/help/en/model-studio/error-code#overdue-payment',
+      [Array], [Array],
+      'content-encoding' => [Object],
+      [Array], [Array],
+      'date' => [Object],
+      [Array], [Array],
+    type: 'Arrearage',
+      [Array], [Array]
+
+
