@@ -1,0 +1,176 @@
+
+
+Innovator-Founder-visa-Assistant
+
+production
+
+
+
+Agent
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Console
+Settings
+innovatorfoundervisaassistant.co.uk
+Southeast Asia
+1 Replica
+
+
+
+
+History
+
+Hide Skipped
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+a0896309
+Active
+
+Jun 4, 2026, 3:28 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[2026-06-04T14:31:21.874Z] GET /assets/Treemap-CYYYCbjQ.js
+[2026-06-04T14:31:21.874Z] POST /api/activity/session
+[2026-06-04T14:31:21.876Z] GET /assets/LineChart-CWSKAwov.js
+[2026-06-04T14:31:21.877Z] GET /assets/PolarAngleAxis-DHYO4uik.js
+[2026-06-04T14:31:21.878Z] GET /assets/useVisualPdfExport-D7S0QuTG.js
+[2026-06-04T14:31:21.879Z] GET /assets/switch-EkMrMVWD.js
+[2026-06-04T14:31:21.881Z] GET /assets/Area-CF9GplE0.js
+[2026-06-04T14:31:21.882Z] GET /assets/index-zxs06Tsc.js
+[2026-06-04T14:31:21.882Z] GET /assets/YAxis-DrWhFRZ1.js
+[2026-06-04T14:31:21.883Z] GET /assets/Line-ZFVKxlga.js
+[2026-06-04T14:31:21.883Z] GET /assets/BarChart-WQKoj-r_.js
+[2026-06-04T14:31:21.884Z] GET /assets/index-CujCmudY.js
+[2026-06-04T14:31:21.884Z] GET /assets/generateCategoricalChart-DZp1-J-q.js
+[2026-06-04T14:31:21.885Z] GET /assets/RadialBarChart-Bz9b9jsH.js
+[2026-06-04T14:31:21.885Z] GET /assets/tabs-BFDWR_Cn.js
+[2026-06-04T14:31:21.885Z] GET /assets/PieChart-CYG3EkTd.js
+[2026-06-04T14:31:21.886Z] GET /assets/dropdown-menu-C2ND_H-Z.js
+2:31:22 PM [express] POST /api/activity/page-view 200 in 31ms :: {"pageViewId":"669a66d0-9850-4a9d-a…
+[2026-06-04T14:31:21.886Z] GET /assets/scroll-area-CiKsqEVd.js
+[2026-06-04T14:31:21.887Z] POST /api/activity/session
+[2026-06-04T14:31:21.888Z] GET /assets/progress-BT8CyZ_u.js
+[2026-06-04T14:31:21.889Z] GET /assets/jspdf.es.min-DmsQYB7h.js
+[2026-06-04T14:31:21.889Z] GET /assets/AreaChart-BwhksqPp.js
+[2026-06-04T14:31:21.889Z] GET /assets/avatar-Xp0m7HL2.js
+[2026-06-04T14:31:21.891Z] GET /assets/proxy-A6URDTEe.js
+2:31:21 PM [express] POST /api/activity/session 200 in 76ms :: {"sessionId":"7443574e-8fb8-4bb4-a55b…
+2:31:21 PM [express] POST /api/activity/session 200 in 71ms :: {"sessionId":"8d040f64-fddd-43a0-b7e3…
+[2026-06-04T14:31:22.040Z] GET /assets/CartesianGrid-D0EGrHhJ.js
+[2026-06-04T14:31:22.142Z] POST /api/activity/page-view
+[2026-06-04T14:31:22.758Z] GET /api/admin/activity-log
+[2026-06-04T14:31:22.758Z] GET /api/admin/audit-log
+[2026-06-04T14:31:22.759Z] GET /api/admin/analytics/overview
+[2026-06-04T14:31:22.765Z] GET /api/admin/errors
+2:31:22 PM [express] GET /api/admin/audit-log 200 in 19ms :: [{"id":"database-connected","action":"d…
+2:31:22 PM [express] GET /api/admin/activity-log 200 in 22ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+[Stripe] Using LIVE mode credentials - payments are real
+2:31:22 PM [express] GET /api/admin/errors 200 in 48ms :: {"errors":[{"id":"9fb0e2af-17ba-498f-8bb9-…
+2:31:23 PM [express] GET /api/admin/analytics/overview 200 in 337ms :: {"kpiMetrics":[{"label":"Tota…
+[Pipeline] Catch-up check: recent post found — no catch-up needed.
+[2026-06-04T14:31:27.236Z] DELETE /api/admin/errors/all
+2:31:27 PM [express] DELETE /api/admin/errors/all 200 in 18ms :: {"success":true}
+[2026-06-04T14:31:27.613Z] GET /api/admin/errors
+2:31:27 PM [express] GET /api/admin/errors 200 in 44ms :: {"errors":[{"id":"9fb0e2af-17ba-498f-8bb9-…
+[2026-06-04T14:31:32.663Z] POST /api/performance/metrics
+2:31:32 PM [express] POST /api/performance/metrics 204 in 20ms
+[2026-06-04T14:31:39.131Z] DELETE /api/admin/errors/9fb0e2af-17ba-498f-8bb9-90780987d600
+2:31:39 PM [express] DELETE /api/admin/errors/9fb0e2af-17ba-498f-8bb9-90780987d600 200 in 21ms :: {"…
+[2026-06-04T14:31:39.514Z] GET /api/admin/errors
+2:31:39 PM [express] GET /api/admin/errors 200 in 41ms :: {"errors":[{"id":"5b9be613-feba-4970-a078-…
+[2026-06-04T14:31:44.176Z] DELETE /api/admin/errors/5b9be613-feba-4970-a078-e0b675e1cd2d
+2:31:44 PM [express] DELETE /api/admin/errors/5b9be613-feba-4970-a078-e0b675e1cd2d 200 in 19ms :: {"…
+[2026-06-04T14:31:44.553Z] GET /api/admin/errors
+2:31:44 PM [express] GET /api/admin/errors 200 in 45ms :: {"errors":[{"id":"aab913e5-cccd-420e-9572-…
+[2026-06-04T14:31:52.323Z] POST /api/activity/session
+2:31:52 PM [express] POST /api/activity/session 200 in 27ms :: {"sessionId":"8d040f64-fddd-43a0-b7e3…
+[2026-06-04T14:31:53.155Z] GET /api/admin/activity-log
+2:31:53 PM [express] GET /api/admin/activity-log 200 in 23ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+[2026-06-04T14:31:53.487Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+2:31:53 PM [express] GET /api/admin/analytics/overview 200 in 325ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-06-04T14:31:55.292Z] POST /api/activity/session/end
+2:31:55 PM [express] POST /api/activity/session/end 200 in 18ms :: {"success":true}
+[2026-06-04T14:33:53.311Z] GET /
+[2026-06-04T14:36:02.459Z] POST /api/activity/session
+[2026-06-04T14:36:02.463Z] GET /api/auth/user
+[2026-06-04T14:36:02.466Z] GET /api/admin/errors
+[2026-06-04T14:36:02.508Z] GET /api/admin/analytics/overview
+2:36:02 PM [express] POST /api/activity/session 200 in 52ms :: {"sessionId":"82138511-fffd-4236-a629…
+[2026-06-04T14:36:02.514Z] GET /api/admin/activity-log
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+2:36:02 PM [express] GET /api/auth/user 200 in 56ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[Stripe] Using LIVE mode credentials - payments are real
+2:36:02 PM [express] GET /api/admin/activity-log 200 in 29ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+2:36:02 PM [express] GET /api/admin/errors 200 in 90ms :: {"errors":[{"id":"aab913e5-cccd-420e-9572-…
+[2026-06-04T14:36:02.878Z] POST /api/activity/page-view
+2:36:02 PM [express] POST /api/activity/page-view 200 in 28ms :: {"pageViewId":"5377f87b-e7d6-42cd-8…
+2:36:02 PM [express] GET /api/admin/analytics/overview 200 in 462ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-06-04T14:36:04.634Z] POST /api/activity/session/end
+[2026-06-04T14:36:04.649Z] GET /admin
+2:36:04 PM [express] POST /api/activity/session/end 200 in 19ms :: {"success":true}
+[SEO] Injecting meta for route: /
+[2026-06-04T14:36:04.901Z] GET /attached_assets/official_logo.webp
+[SEO] Injecting meta for route: /
+[2026-06-04T14:36:04.988Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+2:36:05 PM [express] GET /api/auth/user 200 in 18ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-06-04T14:36:05.335Z] GET /api/admin/analytics/overview
+[Stripe] Using LIVE mode credentials - payments are real
+[2026-06-04T14:36:05.399Z] POST /api/activity/session
+[2026-06-04T14:36:05.404Z] POST /api/activity/session
+2:36:05 PM [express] POST /api/activity/session 200 in 26ms :: {"sessionId":"e4148199-aaba-4954-9842…
+[2026-06-04T14:36:05.501Z] GET /api/admin/audit-log
+[2026-06-04T14:36:05.504Z] GET /api/admin/errors
+[2026-06-04T14:36:05.507Z] GET /api/admin/activity-log
+2:36:05 PM [express] GET /api/admin/audit-log 200 in 20ms :: [{"id":"database-connected","action":"d…
+2:36:05 PM [express] GET /api/admin/activity-log 200 in 24ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+2:36:05 PM [express] GET /api/admin/errors 200 in 42ms :: {"errors":[{"id":"aab913e5-cccd-420e-9572-…
+[2026-06-04T14:36:05.614Z] POST /api/activity/page-view
+2:36:05 PM [express] POST /api/activity/page-view 200 in 30ms :: {"pageViewId":"cb5b7b03-a07e-4c57-a…
+2:36:05 PM [express] GET /api/admin/analytics/overview 200 in 336ms :: {"kpiMetrics":[{"label":"Tota…
+2:36:08 PM [express] POST /api/activity/session 200 in 28ms :: {"sessionId":"7b190d49-7c93-4579-9fce…
+[2026-06-04T14:36:09.246Z] DELETE /api/admin/errors/all
+2:36:09 PM [express] DELETE /api/admin/errors/all 200 in 22ms :: {"success":true}
+[2026-06-04T14:36:09.636Z] GET /api/admin/errors
+2:36:09 PM [express] GET /api/admin/errors 200 in 42ms :: {"errors":[{"id":"aab913e5-cccd-420e-9572-…
+[2026-06-04T14:36:14.673Z] POST /api/performance/metrics
+2:36:14 PM [express] POST /api/performance/metrics 204 in 16ms
+2:36:21 PM [express] POST /api/activity/session/end 200 in 18ms :: {"success":true}
+[2026-06-04T14:36:21.836Z] POST /api/activity/session/end
+
+

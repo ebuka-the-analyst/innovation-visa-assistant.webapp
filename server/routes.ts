@@ -6100,10 +6100,10 @@ EXAMPLES OF GOOD RESPONSES:
   // Delete ALL errors (admin only) - nuclear option
   app.delete("/api/admin/errors/all", requireAdmin, async (req, res) => {
     try {
-      await db.execute(sql`TRUNCATE TABLE error_logs`);
+      const result = await db.execute(sql`DELETE FROM error_logs`);
       // Clear dedup map so genuinely new errors can flow through fresh
       recentErrorFingerprints.clear();
-      console.log("[Admin] All error logs truncated via raw SQL");
+      console.log("[Admin] All error logs deleted via DELETE FROM");
       res.json({ success: true, message: "All error logs deleted" });
     } catch (error) {
       console.error("Delete all errors failed:", error);
