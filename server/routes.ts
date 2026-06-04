@@ -5940,6 +5940,18 @@ EXAMPLES OF GOOD RESPONSES:
         return res.status(400).json({ error: "Error message is required" });
       }
 
+      // Silently discard chunk-load errors — these are browser cache artifacts after
+      // a redeployment and are not actionable. They flood the DB after every release.
+      const msgLower = String(message).toLowerCase();
+      if (
+        msgLower.includes('dynamically imported module') ||
+        msgLower.includes('loading chunk') ||
+        msgLower.includes('loading css chunk') ||
+        msgLower.includes('importing a module script failed')
+      ) {
+        return res.json({ success: true, filtered: true });
+      }
+
       // Deduplicate: same errorType + first 200 chars of message = same fingerprint
       const fingerprint = `${errorType}:${String(message).slice(0, 200)}`;
       const now = Date.now();

@@ -17,6 +17,17 @@ class ErrorLogger {
   private maxQueueSize = 10;
   private recentFingerprints = new Map<string, number>();
 
+  private isChunkLoadError(message: string): boolean {
+    const msg = String(message).toLowerCase();
+    return (
+      msg.includes('dynamically imported module') ||
+      msg.includes('failed to fetch') ||
+      msg.includes('loading chunk') ||
+      msg.includes('loading css chunk') ||
+      msg.includes('importing a module script failed')
+    );
+  }
+
   private isDuplicate(data: ErrorLogData): boolean {
     const fingerprint = `${data.errorType}:${String(data.message).slice(0, 200)}`;
     const now = Date.now();
@@ -35,6 +46,8 @@ class ErrorLogger {
   }
 
   async log(data: ErrorLogData): Promise<void> {
+    // Chunk-load failures are deployment cache artifacts — never log them
+    if (this.isChunkLoadError(data.message)) return;
     if (this.isDuplicate(data)) return;
 
     if (this.isLogging) {
