@@ -650,7 +650,7 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
   };
 
   const { data: lookupData, isLoading: lookupLoading, error: lookupError } = useQuery<any>({
-    queryKey: ['/api/admin/support/lookup', queryEmail],
+    queryKey: ['/api/admin/support/lookup', { email: queryEmail }],
     enabled: !!queryEmail,
   });
 
@@ -665,7 +665,7 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
       toast({ title: 'Tier updated', description: 'Account has been updated successfully.' });
       setTierOverride('');
       setOverrideReason('');
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/support/lookup', queryEmail] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/support/lookup', { email: queryEmail }] });
     },
     onError: (e: any) => toast({ title: 'Error', description: e.message, variant: 'destructive' }),
   });
@@ -675,7 +675,7 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
     onSuccess: () => {
       toast({ title: 'Credits added', description: 'Credits have been added to the account.' });
       setCreditsToAdd('');
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/support/lookup', queryEmail] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/support/lookup', { email: queryEmail }] });
     },
     onError: (e: any) => toast({ title: 'Error', description: e.message, variant: 'destructive' }),
   });
@@ -750,25 +750,20 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
           </CardContent>
         </Card>
 
-        {/* Railway notice */}
-        <Card className="border-amber-500/30 bg-amber-500/5">
-          <CardContent className="pt-4 pb-4">
-            <div className="flex gap-3 items-start">
-              <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
-              <div className="text-sm space-y-1">
-                <p className="font-semibold text-amber-700 dark:text-amber-500">You are on the Development Database</p>
-                <p className="text-muted-foreground text-xs">Customer data for real users (including Adamya Raj) is stored on your <strong>Railway production database</strong>, not here. To look them up:</p>
-                <ol className="text-xs text-muted-foreground list-decimal list-inside space-y-1 mt-1">
-                  <li>Log into <a href="https://railway.app" target="_blank" rel="noopener noreferrer" className="text-primary underline">railway.app</a> → your project → Variables</li>
-                  <li>Copy the <code className="bg-muted px-1 rounded">DATABASE_URL</code> connection string</li>
-                  <li>Use any Postgres client (e.g. TablePlus, psql) and run: <code className="bg-muted px-1 rounded">SELECT * FROM users WHERE email ILIKE '%adamya%';</code></li>
-                  <li>Then query <code className="bg-muted px-1 rounded">activity_events</code> and <code className="bg-muted px-1 rounded">user_sessions</code> by that user ID for usage evidence</li>
-                </ol>
-                <p className="text-xs text-muted-foreground mt-1">Alternatively, switch your <code className="bg-muted px-1 rounded">DATABASE_URL</code> env var here temporarily to point at Railway, but remember to switch it back.</p>
+        {/* Dev-only notice — hidden in production */}
+        {!window.location.hostname.includes('innovatorfoundervisaassistant') && (
+          <Card className="border-amber-500/30 bg-amber-500/5">
+            <CardContent className="pt-4 pb-4">
+              <div className="flex gap-3 items-start">
+                <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                <div className="text-sm space-y-1">
+                  <p className="font-semibold text-amber-700 dark:text-amber-500">You are on the Development Database</p>
+                  <p className="text-muted-foreground text-xs">Customer data for real users is stored on your <strong>Railway production database</strong>, not here.</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {lookupLoading && (
           <div className="space-y-2">
