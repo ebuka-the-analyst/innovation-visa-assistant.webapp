@@ -9,12 +9,34 @@ interface ErrorLogData {
   severity?: 'info' | 'warning' | 'error' | 'critical';
 }
 
+const CLIENT_DEDUP_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+
 class ErrorLogger {
   private isLogging = false;
   private queue: ErrorLogData[] = [];
   private maxQueueSize = 10;
+  private recentFingerprints = new Map<string, number>();
+
+  private isDuplicate(data: ErrorLogData): boolean {
+    const fingerprint = `${data.errorType}:${String(data.message).slice(0, 200)}`;
+    const now = Date.now();
+    const lastSeen = this.recentFingerprints.get(fingerprint);
+    if (lastSeen && now - lastSeen < CLIENT_DEDUP_WINDOW_MS) {
+      return true;
+    }
+    this.recentFingerprints.set(fingerprint, now);
+    // Prune old entries
+    if (this.recentFingerprints.size > 100) {
+      for (const [key, ts] of this.recentFingerprints.entries()) {
+        if (now - ts > CLIENT_DEDUP_WINDOW_MS) this.recentFingerprints.delete(key);
+      }
+    }
+    return false;
+  }
 
   async log(data: ErrorLogData): Promise<void> {
+    if (this.isDuplicate(data)) return;
+
     if (this.isLogging) {
       if (this.queue.length < this.maxQueueSize) {
         this.queue.push(data);

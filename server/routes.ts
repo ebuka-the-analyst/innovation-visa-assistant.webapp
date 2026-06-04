@@ -5919,6 +5919,10 @@ EXAMPLES OF GOOD RESPONSES:
   // =====================
 
   // Log client-side errors (no auth required for error capture)
+  // In-memory deduplication: skip re-inserting the same error within 30 minutes
+  const recentErrorFingerprints = new Map<string, number>();
+  const ERROR_DEDUP_WINDOW_MS = 30 * 60 * 1000; // 30 minutes
+
   app.post("/api/errors/log", async (req, res) => {
     try {
       const { 
@@ -5934,6 +5938,23 @@ EXAMPLES OF GOOD RESPONSES:
 
       if (!message) {
         return res.status(400).json({ error: "Error message is required" });
+      }
+
+      // Deduplicate: same errorType + first 200 chars of message = same fingerprint
+      const fingerprint = `${errorType}:${String(message).slice(0, 200)}`;
+      const now = Date.now();
+      const lastSeen = recentErrorFingerprints.get(fingerprint);
+      if (lastSeen && now - lastSeen < ERROR_DEDUP_WINDOW_MS) {
+        // Silently accept but don't re-insert — prevents flood after "Delete All"
+        return res.json({ success: true, deduplicated: true });
+      }
+      recentErrorFingerprints.set(fingerprint, now);
+
+      // Prune old entries every 100 inserts (keep map lean)
+      if (recentErrorFingerprints.size > 500) {
+        for (const [key, ts] of recentErrorFingerprints.entries()) {
+          if (now - ts > ERROR_DEDUP_WINDOW_MS) recentErrorFingerprints.delete(key);
+        }
       }
 
       const user = req.user as any;
@@ -6071,6 +6092,8 @@ EXAMPLES OF GOOD RESPONSES:
   app.delete("/api/admin/errors/all", requireAdmin, async (req, res) => {
     try {
       await db.delete(errorLogs);
+      // Clear dedup map so that genuinely new errors can be logged fresh
+      recentErrorFingerprints.clear();
       res.json({ success: true, message: "All error logs deleted" });
     } catch (error) {
       console.error("Delete all errors failed:", error);
@@ -15506,12 +15529,15 @@ IMPORTANT RULES:
         ORDER BY date
       `);
 
-      // Aggregate hourly stats
-      const hourlyAggregates = await db.execute(sql`
-        SELECT * FROM hourly_activity_aggregates
-        WHERE hour_timestamp > ${since}
-        ORDER BY hour_timestamp
-      `);
+      // Aggregate hourly stats — table may not exist in all envs
+      let hourlyAggregates = { rows: [] as any[] };
+      try {
+        hourlyAggregates = await db.execute(sql`
+          SELECT * FROM hourly_activity_aggregates
+          WHERE hour_timestamp > ${since}
+          ORDER BY hour_timestamp
+        `);
+      } catch { /* table not yet created */ }
 
       res.json({
         heatmapData: heatmapData.rows,
@@ -15657,22 +15683,25 @@ IMPORTANT RULES:
         WHERE first_plan_time IS NOT NULL OR first_purchase_time IS NOT NULL
       `);
 
-      // Drop-off analysis by step
-      const dropOffByDevice = await db.execute(sql`
-        SELECT 
-          device_type,
-          funnel_name,
-          step_name,
-          step_index,
-          COUNT(*) as total,
-          SUM(CASE WHEN completed THEN 1 ELSE 0 END) as completed_count,
-          SUM(CASE WHEN dropped_off THEN 1 ELSE 0 END) as dropped_count,
-          ROUND(100.0 * SUM(CASE WHEN dropped_off THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0), 2) as drop_rate
-        FROM conversion_funnel_events
-        WHERE timestamp > ${since}
-        GROUP BY device_type, funnel_name, step_name, step_index
-        ORDER BY funnel_name, step_index
-      `);
+      // Drop-off analysis by step — table may not exist in all envs
+      let dropOffByDevice = { rows: [] as any[] };
+      try {
+        dropOffByDevice = await db.execute(sql`
+          SELECT 
+            device_type,
+            funnel_name,
+            step_name,
+            step_index,
+            COUNT(*) as total,
+            SUM(CASE WHEN completed THEN 1 ELSE 0 END) as completed_count,
+            SUM(CASE WHEN dropped_off THEN 1 ELSE 0 END) as dropped_count,
+            ROUND(100.0 * SUM(CASE WHEN dropped_off THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0), 2) as drop_rate
+          FROM conversion_funnel_events
+          WHERE timestamp > ${since}
+          GROUP BY device_type, funnel_name, step_name, step_index
+          ORDER BY funnel_name, step_index
+        `);
+      } catch { /* table not yet created */ }
 
       // Daily conversion trend
       const dailyConversions = await db.execute(sql`
@@ -15910,45 +15939,51 @@ IMPORTANT RULES:
       const days = parseInt(req.query.days as string) || 7;
       const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-      // Export success rate by type
-      const exportsByType = await db.execute(sql`
-        SELECT 
-          export_type,
-          COUNT(*) as total,
-          COUNT(*) FILTER (WHERE status = 'completed') as successful,
-          COUNT(*) FILTER (WHERE status = 'failed') as failed,
-          ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'completed') / NULLIF(COUNT(*), 0), 2) as success_rate,
-          ROUND(AVG(export_time_ms)::numeric, 2) as avg_export_time
-        FROM export_analytics
-        WHERE started_at > ${since}
-        GROUP BY export_type
-      `);
+      let exportsByType = { rows: [] as any[] };
+      let chartSuccess = { rows: [] as any[] };
+      let failures = { rows: [] as any[] };
 
-      // Chart embedding success
-      const chartSuccess = await db.execute(sql`
-        SELECT 
-          export_type,
-          SUM(charts_expected) as total_expected,
-          SUM(charts_embedded) as total_embedded,
-          ROUND(100.0 * SUM(charts_embedded) / NULLIF(SUM(charts_expected), 0), 2) as embed_rate
-        FROM export_analytics
-        WHERE started_at > ${since} AND charts_expected > 0
-        GROUP BY export_type
-      `);
+      try {
+        // Export success rate by type
+        exportsByType = await db.execute(sql`
+          SELECT 
+            export_type,
+            COUNT(*) as total,
+            COUNT(*) FILTER (WHERE status = 'completed') as successful,
+            COUNT(*) FILTER (WHERE status = 'failed') as failed,
+            ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'completed') / NULLIF(COUNT(*), 0), 2) as success_rate,
+            ROUND(AVG(export_time_ms)::numeric, 2) as avg_export_time
+          FROM export_analytics
+          WHERE started_at > ${since}
+          GROUP BY export_type
+        `);
 
-      // Export failures
-      const failures = await db.execute(sql`
-        SELECT 
-          export_type,
-          failure_stage,
-          error_code,
-          COUNT(*) as count
-        FROM export_analytics
-        WHERE started_at > ${since} AND status = 'failed'
-        GROUP BY export_type, failure_stage, error_code
-        ORDER BY count DESC
-        LIMIT 20
-      `);
+        // Chart embedding success
+        chartSuccess = await db.execute(sql`
+          SELECT 
+            export_type,
+            SUM(charts_expected) as total_expected,
+            SUM(charts_embedded) as total_embedded,
+            ROUND(100.0 * SUM(charts_embedded) / NULLIF(SUM(charts_expected), 0), 2) as embed_rate
+          FROM export_analytics
+          WHERE started_at > ${since} AND charts_expected > 0
+          GROUP BY export_type
+        `);
+
+        // Export failures
+        failures = await db.execute(sql`
+          SELECT 
+            export_type,
+            failure_stage,
+            error_code,
+            COUNT(*) as count
+          FROM export_analytics
+          WHERE started_at > ${since} AND status = 'failed'
+          GROUP BY export_type, failure_stage, error_code
+          ORDER BY count DESC
+          LIMIT 20
+        `);
+      } catch { /* export_analytics table not yet created in this env */ }
 
       res.json({
         exportsByType: exportsByType.rows,
@@ -15968,19 +16003,22 @@ IMPORTANT RULES:
       const limit = Math.min(parseInt(req.query.limit as string) || 100, 500);
       const offset = parseInt(req.query.offset as string) || 0;
 
+      // Use only columns defined in the current Drizzle schema to avoid column drift issues
       const auditLogs = await db.execute(sql`
         SELECT 
           aal.id,
           aal.admin_id,
-          COALESCE(u.email, 'system') as admin_email,
+          COALESCE(aal.admin_email, u.email, 'system') as admin_email,
           aal.action,
           aal.target_type,
           aal.target_id,
-          aal.details,
           aal.ip_address,
-          aal.status,
-          aal.metadata,
-          aal.created_at
+          aal.created_at,
+          aal.reason,
+          aal.previous_value,
+          aal.new_value,
+          aal.target_email,
+          aal.action_category
         FROM admin_audit_logs aal
         LEFT JOIN users u ON aal.admin_id = u.id
         ORDER BY aal.created_at DESC
@@ -15993,7 +16031,7 @@ IMPORTANT RULES:
 
       res.json({
         logs: auditLogs.rows,
-        total: parseInt(totalCount.rows[0]?.count || '0'),
+        total: parseInt((totalCount.rows[0] as any)?.count || '0'),
         limit,
         offset,
       });

@@ -1,0 +1,177 @@
+Elevated latency for some services routing through US West. We are investigating the incident.
+
+View details
+
+
+
+Innovator-Founder-visa-Assistant
+
+production
+
+
+
+Agent
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Settings
+innovatorfoundervisaassistant.co.uk
+Southeast Asia
+1 Replica
+
+
+
+
+History
+
+Hide Skipped
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+a4f28993
+Active
+
+Jun 4, 2026, 12:26 AM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+  column: undefined,
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+  dataType: undefined,
+    at async file:///app/dist/index.js:31013:29 {
+  constraint: undefined,
+  length: 116,
+  severity: 'ERROR',
+  code: '42P01',
+  file: 'parse_relation.c',
+  detail: undefined,
+  line: '1449',
+  hint: undefined,
+  routine: 'parserOpenTable'
+}
+  position: '396',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+8:53:39 AM [express] GET /api/admin/analytics/export-performance 500 in 16ms :: {"error":"Failed to …
+[2026-06-04T08:53:41.231Z] GET /api/admin/analytics/audit-log?offset=0&limit=50
+Audit log error: error: column aal.details does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///app/dist/index.js:31062:25 {
+  length: 110,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '198',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+8:53:41 AM [express] GET /api/admin/analytics/audit-log 500 in 45ms :: {"error":"Failed to fetch aud…
+[2026-06-04T08:53:43.746Z] GET /api/admin/analytics/coins-usage?days=30
+8:53:43 AM [express] GET /api/admin/analytics/coins-usage 200 in 40ms :: {"usageSummary":[],"topCons…
+[2026-06-04T08:53:46.644Z] POST /api/activity/session
+8:53:46 AM [express] POST /api/activity/session 200 in 15ms :: {"sessionId":"0ed66bd5-f152-4eab-924d…
+[2026-06-04T08:53:46.901Z] GET /api/admin/analytics/overview
+[2026-06-04T08:53:46.902Z] GET /api/admin/activity-log
+[Stripe] Using LIVE mode credentials - payments are real
+8:53:46 AM [express] GET /api/admin/activity-log 200 in 38ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+8:53:47 AM [express] GET /api/admin/analytics/overview 200 in 323ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-06-04T08:53:59.276Z] GET /api/admin/security-events
+[2026-06-04T08:53:59.278Z] GET /api/admin/audit-log
+8:53:59 AM [express] GET /api/admin/audit-log 200 in 77ms :: [{"id":"database-connected","action":"d…
+8:53:59 AM [express] GET /api/admin/security-events 200 in 82ms :: {"events":[{"id":"8421a127-95ad-4…
+[2026-06-04T08:54:08.691Z] GET /api/admin/errors
+8:54:08 AM [express] GET /api/admin/errors 200 in 49ms :: {"errors":[{"id":"aab913e5-cccd-420e-9572-…
+[2026-06-04T08:54:08.921Z] GET /
+[2026-06-04T08:54:13.767Z] DELETE /api/admin/errors/all
+8:54:13 AM [express] DELETE /api/admin/errors/all 200 in 17ms :: {"success":true}
+[2026-06-04T08:54:14.126Z] GET /api/admin/errors
+8:54:14 AM [express] GET /api/admin/errors 200 in 33ms :: {"errors":[{"id":"aab913e5-cccd-420e-9572-…
+[2026-06-04T08:54:16.490Z] POST /api/activity/session
+8:54:16 AM [express] POST /api/activity/session 200 in 18ms :: {"sessionId":"0ed66bd5-f152-4eab-924d…
+[2026-06-04T08:54:17.324Z] GET /api/admin/activity-log
+8:54:17 AM [express] GET /api/admin/activity-log 200 in 19ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+[2026-06-04T08:54:17.639Z] GET /api/admin/analytics/overview
+[2026-06-04T08:54:18.337Z] GET /attached_assets/official_logo.webp
+[SEO] Injecting meta for route: /
+[2026-06-04T08:54:18.502Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+8:54:18 AM [express] GET /api/auth/user 200 in 16ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[Stripe] Using LIVE mode credentials - payments are real
+[2026-06-04T08:54:17.883Z] POST /api/activity/session/end
+8:54:17 AM [express] POST /api/activity/session/end 200 in 15ms :: {"success":true}
+[2026-06-04T08:54:18.045Z] GET /admin
+8:54:18 AM [express] GET /api/admin/analytics/overview 200 in 412ms :: {"kpiMetrics":[{"label":"Tota…
+[SEO] Injecting meta for route: /
+[2026-06-04T08:54:18.999Z] GET /api/admin/errors
+[2026-06-04T08:54:19.014Z] POST /api/activity/session
+[Stripe] Using LIVE mode credentials - payments are real
+8:54:19 AM [express] GET /api/admin/activity-log 200 in 66ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+8:54:19 AM [express] POST /api/activity/session 200 in 60ms :: {"sessionId":"d797de7b-cc04-42ac-9267…
+8:54:19 AM [express] GET /api/admin/errors 200 in 82ms :: {"errors":[{"id":"aab913e5-cccd-420e-9572-…
+[2026-06-04T08:54:19.154Z] GET /api/admin/audit-log
+8:54:19 AM [express] GET /api/admin/audit-log 200 in 14ms :: [{"id":"database-connected","action":"d…
+[2026-06-04T08:54:19.223Z] POST /api/activity/page-view
+8:54:19 AM [express] POST /api/activity/page-view 200 in 27ms :: {"pageViewId":"13f6cfa9-06a4-4efd-b…
+8:54:19 AM [express] GET /api/admin/analytics/overview 200 in 345ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-06-04T08:54:18.843Z] POST /api/activity/session
+8:54:18 AM [express] POST /api/activity/session 200 in 17ms :: {"sessionId":"021f608f-8154-4275-82f9…
+[2026-06-04T08:54:18.993Z] GET /api/admin/analytics/overview
+[2026-06-04T08:54:18.998Z] GET /api/admin/activity-log
+[2026-06-04T08:54:24.840Z] POST /api/performance/metrics
+8:54:24 AM [express] POST /api/performance/metrics 204 in 15ms
+[2026-06-04T08:54:28.400Z] DELETE /api/admin/errors/all
+8:54:28 AM [express] DELETE /api/admin/errors/all 200 in 14ms :: {"success":true}
+[2026-06-04T08:54:28.592Z] GET /api/admin/errors
+8:54:28 AM [express] GET /api/admin/errors 200 in 50ms :: {"errors":[{"id":"aab913e5-cccd-420e-9572-…
+[2026-06-04T08:54:38.186Z] GET /api/admin/errors
+8:54:38 AM [express] GET /api/admin/errors 200 in 35ms :: {"errors":[{"id":"aab913e5-cccd-420e-9572-…
+[2026-06-04T08:54:40.200Z] GET /api/admin/errors
+8:54:40 AM [express] GET /api/admin/errors 200 in 31ms :: {"errors":[{"id":"aab913e5-cccd-420e-9572-…
+[2026-06-04T08:54:42.368Z] POST /api/activity/session/end
+8:54:42 AM [express] POST /api/activity/session/end 200 in 14ms :: {"success":true}
+
+

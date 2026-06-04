@@ -133,6 +133,74 @@ async function runAutoMigrations() {
     console.log('[DB] Auto-migration: floating_feedback.rating column ensured');
   } catch { /* already exists */ }
 
+  // export_analytics table (added Jun 2026)
+  try {
+    await db.execute(sql.raw(`
+      CREATE TABLE IF NOT EXISTS export_analytics (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::varchar,
+        plan_id VARCHAR NOT NULL,
+        user_id VARCHAR NOT NULL,
+        export_type VARCHAR(20) NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'started',
+        export_time_ms INTEGER,
+        pages_count INTEGER,
+        file_size_bytes INTEGER,
+        charts_expected INTEGER DEFAULT 0,
+        charts_embedded INTEGER DEFAULT 0,
+        missing_charts TEXT[],
+        started_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        completed_at TIMESTAMP,
+        error_code VARCHAR(50),
+        error_message TEXT,
+        failure_stage VARCHAR(50)
+      )
+    `));
+    console.log('[DB] Auto-migration: export_analytics table ensured');
+  } catch { /* already exists */ }
+
+  // conversion_funnel_events table (added Jun 2026)
+  try {
+    await db.execute(sql.raw(`
+      CREATE TABLE IF NOT EXISTS conversion_funnel_events (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::varchar,
+        user_id VARCHAR,
+        session_id VARCHAR(100),
+        funnel_name VARCHAR(100) NOT NULL,
+        step_name VARCHAR(100) NOT NULL,
+        step_index INTEGER NOT NULL,
+        completed BOOLEAN NOT NULL DEFAULT false,
+        dropped_off BOOLEAN NOT NULL DEFAULT false,
+        time_spent_seconds INTEGER,
+        entry_source VARCHAR(100),
+        device_type VARCHAR(20),
+        timestamp TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `));
+    console.log('[DB] Auto-migration: conversion_funnel_events table ensured');
+  } catch { /* already exists */ }
+
+  // hourly_activity_aggregates table (added Jun 2026)
+  try {
+    await db.execute(sql.raw(`
+      CREATE TABLE IF NOT EXISTS hourly_activity_aggregates (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::varchar,
+        hour_timestamp TIMESTAMP NOT NULL,
+        active_users INTEGER NOT NULL DEFAULT 0,
+        new_users INTEGER NOT NULL DEFAULT 0,
+        page_views INTEGER NOT NULL DEFAULT 0,
+        events INTEGER NOT NULL DEFAULT 0,
+        tool_runs INTEGER NOT NULL DEFAULT 0,
+        plans_created INTEGER NOT NULL DEFAULT 0,
+        plans_completed INTEGER NOT NULL DEFAULT 0,
+        exports INTEGER NOT NULL DEFAULT 0,
+        revenue REAL NOT NULL DEFAULT 0,
+        errors INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `));
+    console.log('[DB] Auto-migration: hourly_activity_aggregates table ensured');
+  } catch { /* already exists */ }
+
   // Update blog post image URLs to use object storage
   try {
     await db.execute(sql`
