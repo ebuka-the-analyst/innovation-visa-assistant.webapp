@@ -6072,21 +6072,21 @@ EXAMPLES OF GOOD RESPONSES:
     }
   });
 
-  // Delete error log (admin only)
-  app.delete("/api/admin/errors/:errorId", requireAdmin, async (req, res) => {
+  // Delete ALL errors (admin only) - must be before /:errorId to avoid route shadowing
+  app.delete("/api/admin/errors/all", requireAdmin, async (req, res) => {
     try {
-      const { errorId } = req.params;
-
-      await db.execute(sql`DELETE FROM error_logs WHERE id = ${errorId}`);
-
-      res.json({ success: true });
+      await db.execute(sql`DELETE FROM error_logs`);
+      // Clear dedup map so genuinely new errors can flow through fresh
+      recentErrorFingerprints.clear();
+      console.log("[Admin] All error logs deleted via DELETE FROM");
+      res.json({ success: true, message: "All error logs deleted" });
     } catch (error) {
-      console.error("Error deletion failed:", error);
-      res.status(500).json({ error: "Failed to delete error" });
+      console.error("Delete all errors failed:", error);
+      res.status(500).json({ error: "Failed to delete all errors" });
     }
   });
 
-  // Clear all resolved errors (admin only)
+  // Clear all resolved errors (admin only) - must be before /:errorId to avoid route shadowing
   app.delete("/api/admin/errors/resolved/all", requireAdmin, async (req, res) => {
     try {
       await db.execute(sql`DELETE FROM error_logs WHERE is_resolved = true`);
@@ -6097,17 +6097,17 @@ EXAMPLES OF GOOD RESPONSES:
     }
   });
 
-  // Delete ALL errors (admin only) - nuclear option
-  app.delete("/api/admin/errors/all", requireAdmin, async (req, res) => {
+  // Delete single error log (admin only) - must be AFTER /all and /resolved/all
+  app.delete("/api/admin/errors/:errorId", requireAdmin, async (req, res) => {
     try {
-      const result = await db.execute(sql`DELETE FROM error_logs`);
-      // Clear dedup map so genuinely new errors can flow through fresh
-      recentErrorFingerprints.clear();
-      console.log("[Admin] All error logs deleted via DELETE FROM");
-      res.json({ success: true, message: "All error logs deleted" });
+      const { errorId } = req.params;
+
+      await db.execute(sql`DELETE FROM error_logs WHERE id = ${errorId}`);
+
+      res.json({ success: true });
     } catch (error) {
-      console.error("Delete all errors failed:", error);
-      res.status(500).json({ error: "Failed to delete all errors" });
+      console.error("Error deletion failed:", error);
+      res.status(500).json({ error: "Failed to delete error" });
     }
   });
 

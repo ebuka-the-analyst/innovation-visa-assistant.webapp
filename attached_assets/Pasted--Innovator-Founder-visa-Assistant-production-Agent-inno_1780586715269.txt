@@ -1,0 +1,176 @@
+
+
+Innovator-Founder-visa-Assistant
+
+production
+
+
+
+Agent
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+Deployments
+Variables
+Metrics
+Console
+Settings
+innovatorfoundervisaassistant.co.uk
+Southeast Asia
+1 Replica
+
+
+
+
+History
+
+Hide Skipped
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+innovation-visa-assistant.webapp
+/
+de9aa797
+Active
+
+Jun 4, 2026, 3:39 PM GMT+1
+innovatorfoundervisaassistant.co.uk
+Details
+Build Logs
+Deploy Logs
+HTTP Logs
+Network Flow Logs
+Filter and search logs
+
+[Pipeline] "drain-08:30" next run in 1068 min (Fri, 05 Jun 2026 08:30:00 GMT)
+[Pipeline] "drain-10:30" next run in 1188 min (Fri, 05 Jun 2026 10:30:00 GMT)
+[Pipeline] "drain-12:30" next run in 1308 min (Fri, 05 Jun 2026 12:30:00 GMT)
+[Pipeline] "drain-14:30" next run in 1428 min (Fri, 05 Jun 2026 14:30:00 GMT)
+[Pipeline] Catch-up check: recent post found — no catch-up needed.
+[2026-06-04T14:48:10.084Z] GET /api/news
+[2026-06-04T14:48:10.095Z] GET /api/auth/user
+2:48:10 PM [express] GET /api/auth/user 401 in 3ms :: {"message":"Unauthorized"}
+2:48:10 PM [express] GET /api/news 200 in 14ms :: [{"id":"official-1","title":"Students can now swit…
+[2026-06-04T14:50:08.696Z] GET /api/admin/analytics/overview
+[2026-06-04T14:50:08.706Z] GET /api/admin/activity-log
+[2026-06-04T14:50:08.708Z] GET /api/auth/user
+[2026-06-04T14:50:08.712Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+2:50:08 PM [express] GET /api/auth/user 200 in 74ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+2:50:08 PM [express] GET /api/admin/activity-log 200 in 83ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+[Stripe] Using LIVE mode credentials - payments are real
+2:50:08 PM [express] POST /api/activity/session 200 in 115ms :: {"sessionId":"a35af31d-41a4-4188-ac4…
+2:50:09 PM [express] GET /api/admin/analytics/overview 200 in 467ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-06-04T14:50:09.200Z] POST /api/activity/page-view
+2:50:09 PM [express] POST /api/activity/page-view 200 in 34ms :: {"pageViewId":"3c42f926-f0b8-46d5-9…
+[2026-06-04T14:50:10.041Z] GET /api/admin/errors
+2:50:10 PM [express] GET /api/admin/errors 200 in 56ms :: {"errors":[{"id":"aab913e5-cccd-420e-9572-…
+[2026-06-04T14:50:37.431Z] POST /api/activity/session/end
+2:50:37 PM [express] POST /api/activity/session/end 200 in 70ms :: {"success":true}
+[2026-06-04T14:57:28.516Z] GET /blog/registering-your-uk-company-for-the-innovator-founder-visa-2026-05-07-gvvlqlr2
+[SEO] Injecting meta for route: /
+[2026-06-04T15:00:45.546Z] GET /assets/index-D8aYpBjI.js
+[2026-06-04T15:06:05.890Z] GET /guide
+[SEO] Injecting meta for route: /
+[2026-06-04T15:06:45.718Z] GET /blog/5-common-business-plan-mistakes-that-cause-rejection-2026-05-09-muqz3oqj
+[SEO] Injecting meta for route: /
+[2026-06-04T15:20:00.794Z] GET /
+3:22:53 PM [express] GET /api/admin/analytics/overview 200 in 765ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-06-04T15:22:52.823Z] GET /api/admin/errors
+[2026-06-04T15:22:52.824Z] GET /api/admin/analytics/overview
+[2026-06-04T15:22:52.825Z] GET /api/admin/activity-log
+[2026-06-04T15:22:52.826Z] POST /api/activity/session
+[2026-06-04T15:22:52.828Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+3:22:52 PM [express] GET /api/auth/user 200 in 70ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+3:22:52 PM [express] GET /api/admin/activity-log 200 in 97ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+3:22:52 PM [express] POST /api/activity/session 200 in 96ms :: {"sessionId":"db3c6681-0e07-42b6-857a…
+[Stripe] Using LIVE mode credentials - payments are real
+3:22:52 PM [express] GET /api/admin/errors 200 in 136ms :: {"errors":[{"id":"aab913e5-cccd-420e-9572…
+[2026-06-04T15:22:53.287Z] POST /api/activity/page-view
+3:22:53 PM [express] POST /api/activity/page-view 200 in 27ms :: {"pageViewId":"247ea4e2-58b3-4945-8…
+[2026-06-04T15:22:54.908Z] POST /api/activity/session/end
+[2026-06-04T15:22:54.927Z] GET /admin
+3:22:54 PM [express] POST /api/activity/session/end 200 in 20ms :: {"success":true}
+[SEO] Injecting meta for route: /
+[2026-06-04T15:22:55.181Z] GET /attached_assets/official_logo.webp
+[SEO] Injecting meta for route: /
+[2026-06-04T15:22:55.259Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+3:22:55 PM [express] GET /api/auth/user 200 in 19ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[Stripe] Using LIVE mode credentials - payments are real
+3:22:55 PM [express] GET /api/admin/errors 200 in 50ms :: {"errors":[{"id":"aab913e5-cccd-420e-9572-…
+[2026-06-04T15:22:55.665Z] POST /api/activity/session
+[2026-06-04T15:22:55.499Z] POST /api/activity/session
+3:22:55 PM [express] POST /api/activity/session 200 in 28ms :: {"sessionId":"7ac698f6-2ff8-4f6f-8a6b…
+[2026-06-04T15:22:55.581Z] GET /api/admin/analytics/overview
+[2026-06-04T15:22:55.585Z] GET /api/admin/errors
+3:22:55 PM [express] POST /api/activity/session 200 in 29ms :: {"sessionId":"72232624-91f0-43b9-a74c…
+[2026-06-04T15:22:55.700Z] GET /api/admin/audit-log
+3:22:55 PM [express] GET /api/admin/audit-log 200 in 20ms :: [{"id":"database-connected","action":"d…
+[2026-06-04T15:22:55.746Z] GET /api/admin/activity-log
+3:22:55 PM [express] GET /api/admin/activity-log 200 in 24ms :: [{"id":"user-ec710389-941f-49d3-8da2…
+[2026-06-04T15:22:55.888Z] POST /api/activity/page-view
+3:22:55 PM [express] POST /api/activity/page-view 200 in 27ms :: {"pageViewId":"79f5cac4-1c71-4329-8…
+3:22:55 PM [express] GET /api/admin/analytics/overview 200 in 384ms :: {"kpiMetrics":[{"label":"Tota…
+[2026-06-04T15:22:58.219Z] DELETE /api/admin/errors/all
+3:22:58 PM [express] DELETE /api/admin/errors/all 200 in 20ms :: {"success":true}
+[2026-06-04T15:22:58.431Z] GET /api/admin/errors
+3:22:58 PM [express] GET /api/admin/errors 200 in 42ms :: {"errors":[{"id":"aab913e5-cccd-420e-9572-…
+[2026-06-04T15:23:01.846Z] POST /api/activity/session/end
+[2026-06-04T15:23:01.849Z] POST /api/performance/metrics
+3:23:01 PM [express] POST /api/performance/metrics 204 in 19ms
+3:23:01 PM [express] POST /api/activity/session/end 200 in 34ms :: {"success":true}
+[2026-06-04T15:23:03.354Z] POST /api/activity/session
+3:23:03 PM [express] POST /api/activity/session 200 in 28ms :: {"sessionId":"2a0bb84d-4ed2-4512-9c7f…
+[2026-06-04T15:23:03.745Z] POST /api/activity/page-view
+3:23:03 PM [express] POST /api/activity/page-view 200 in 29ms :: {"pageViewId":"d5f0d5f5-5625-47b8-a…
+[2026-06-04T15:23:04.642Z] POST /api/activity/session/end
+3:23:04 PM [express] POST /api/activity/session/end 200 in 20ms :: {"success":true}
+[2026-06-04T15:24:37.282Z] GET /api/auth/user
+[2026-06-04T15:24:37.288Z] POST /api/activity/session
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+3:24:37 PM [express] GET /api/auth/user 200 in 64ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+3:24:37 PM [express] POST /api/activity/session 200 in 65ms :: {"sessionId":"50b094c1-4cce-4373-993b…
+[2026-06-04T15:24:37.715Z] POST /api/activity/page-view
+3:24:37 PM [express] POST /api/activity/page-view 200 in 28ms :: {"pageViewId":"82f57918-473c-490a-a…
+[2026-06-04T15:24:41.064Z] GET /api/auth/user
+[AUTH] Returning user benedict9211@gmail.com with subscriptionTier: ultimate (raw: ultimate)
+3:24:41 PM [express] GET /api/auth/user 200 in 22ms :: {"id":"6783e1ea-78f5-49c9-b67d-97dce58d193c",…
+[2026-06-04T15:24:41.225Z] POST /api/activity/session/end
+[2026-06-04T15:24:41.234Z] POST /api/activity/session
+3:24:41 PM [express] POST /api/activity/session/end 200 in 21ms :: {"success":true}
+3:24:41 PM [express] POST /api/activity/session 200 in 34ms :: {"sessionId":"38cec73d-7d81-46db-89e0…
+[2026-06-04T15:24:41.627Z] POST /api/activity/page-view
+3:24:41 PM [express] POST /api/activity/page-view 200 in 29ms :: {"pageViewId":"cad3c24a-df2b-40c4-9…
+[2026-06-04T15:24:43.160Z] POST /api/activity/session
+[2026-06-04T15:24:43.164Z] POST /api/activity/session/end
+3:24:43 PM [express] POST /api/activity/session/end 200 in 25ms :: {"success":true}
+3:24:43 PM [express] POST /api/activity/session 200 in 31ms :: {"sessionId":"6eca812f-1689-40b1-9b82…
+[2026-06-04T15:24:43.395Z] POST /api/activity/page-view
+3:24:43 PM [express] POST /api/activity/page-view 200 in 27ms :: {"pageViewId":"92042378-8720-4cf7-a…
+[2026-06-04T15:24:47.975Z] POST /api/activity/session/end
+3:24:47 PM [express] POST /api/activity/session/end 200 in 21ms :: {"success":true}
+
+
