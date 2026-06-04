@@ -6065,8 +6065,7 @@ EXAMPLES OF GOOD RESPONSES:
     try {
       const { errorId } = req.params;
 
-      await db.delete(errorLogs)
-        .where(eq(errorLogs.id, errorId));
+      await db.execute(sql`DELETE FROM error_logs WHERE id = ${errorId}`);
 
       res.json({ success: true });
     } catch (error) {
@@ -6078,9 +6077,7 @@ EXAMPLES OF GOOD RESPONSES:
   // Clear all resolved errors (admin only)
   app.delete("/api/admin/errors/resolved/all", requireAdmin, async (req, res) => {
     try {
-      await db.delete(errorLogs)
-        .where(eq(errorLogs.isResolved, true));
-
+      await db.execute(sql`DELETE FROM error_logs WHERE is_resolved = true`);
       res.json({ success: true, message: "All resolved errors cleared" });
     } catch (error) {
       console.error("Resolved errors clear failed:", error);
@@ -6091,9 +6088,10 @@ EXAMPLES OF GOOD RESPONSES:
   // Delete ALL errors (admin only) - nuclear option
   app.delete("/api/admin/errors/all", requireAdmin, async (req, res) => {
     try {
-      await db.delete(errorLogs);
-      // Clear dedup map so that genuinely new errors can be logged fresh
+      await db.execute(sql`TRUNCATE TABLE error_logs`);
+      // Clear dedup map so genuinely new errors can flow through fresh
       recentErrorFingerprints.clear();
+      console.log("[Admin] All error logs truncated via raw SQL");
       res.json({ success: true, message: "All error logs deleted" });
     } catch (error) {
       console.error("Delete all errors failed:", error);
