@@ -7,12 +7,17 @@ import {
 } from "@/components/ui/tooltip";
 import worldIcon from "@assets/worldIcon_1769203295221.png";
 import globeImage from "@assets/unnamed_(1)_1769196836272.png";
+import { useAuth } from "@/hooks/useAuth";
 
 export function GlobalNavButton() {
+  const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [showTooltip, setShowTooltip] = useState(false);
   const [isZooming, setIsZooming] = useState(false);
   const [isFadingOut, setIsFadingOut] = useState(false);
+
+  // Only visible to admins — /v2 is a hidden future feature
+  if (!user?.isAdmin) return null;
 
   const handleClick = () => {
     setShowTooltip(false);
