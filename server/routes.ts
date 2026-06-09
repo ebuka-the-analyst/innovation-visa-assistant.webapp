@@ -16388,6 +16388,60 @@ IMPORTANT RULES:
     }
   });
 
+  // Admin: Remove duplicate blog posts — keep the oldest post per title fingerprint
+  app.post("/api/admin/blog/deduplicate", requireAdmin, async (req, res) => {
+    try {
+      // Fetch all posts ordered oldest first
+      const all = await db
+        .select({ id: blogPosts.id, title: blogPosts.title, createdAt: blogPosts.createdAt })
+        .from(blogPosts)
+        .orderBy(blogPosts.createdAt);
+
+      // Build fingerprints and mark duplicates (keep first occurrence per fingerprint)
+      const STOP = new Set([
+        "a","an","the","and","or","but","for","to","of","in","on","with","your",
+        "you","how","what","why","when","who","is","are","was","were","be","been",
+        "do","does","did","uk","visa","innovator","founder","applicant","applicants",
+        "guide","guides","complete","explained","explaining","understanding","know",
+        "its","it","as","by","from","at","this","that","these","those","have","has",
+        "about","can","need","get","make","will","should","must","may","which",
+      ]);
+      const fp = (text: string) => new Set(
+        text.toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/)
+          .filter(w => w.length > 3 && !STOP.has(w))
+      );
+      const overlap = (a: Set<string>, b: Set<string>) => {
+        let shared = 0;
+        for (const w of a) if (b.has(w)) shared++;
+        const denom = Math.min(a.size, b.size);
+        return denom === 0 ? 0 : shared / denom;
+      };
+
+      const kept: Array<{ id: string; fp: Set<string> }> = [];
+      const toDelete: string[] = [];
+
+      for (const post of all) {
+        const postFp = fp(post.title);
+        const isDup = kept.some(k => overlap(k.fp, postFp) >= 0.6);
+        if (isDup) {
+          toDelete.push(post.id);
+        } else {
+          kept.push({ id: post.id, fp: postFp });
+        }
+      }
+
+      if (toDelete.length > 0) {
+        await db.delete(blogPosts).where(inArray(blogPosts.id, toDelete));
+      }
+
+      console.log(`[Admin] Blog deduplication: removed ${toDelete.length} duplicates, kept ${kept.length} posts`);
+      res.json({ removed: toDelete.length, kept: kept.length });
+    } catch (error) {
+      console.error("Blog deduplication error:", error);
+      res.status(500).json({ error: "Failed to deduplicate blog posts" });
+    }
+  });
+
   // Get all posts with filtering
   app.get("/api/admin/blog/posts", requireAdmin, async (req, res) => {
     try {

@@ -80,6 +80,21 @@ export default function BlogDashboard() {
     },
   });
 
+  // Remove duplicate posts mutation
+  const deduplicateMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", "/api/admin/blog/deduplicate");
+    },
+    onSuccess: (data: any) => {
+      toast({ title: "Duplicates Removed", description: `Removed ${data.removed} duplicate posts, kept ${data.kept} unique posts.` });
+      refetchStats();
+      refetchPosts();
+    },
+    onError: (error: any) => {
+      toast({ title: "Deduplication Failed", description: error.message, variant: "destructive" });
+    },
+  });
+
   // Update post mutation
   const updateMutation = useMutation({
     mutationFn: async (data: { id: string; updates: Partial<BlogPost> }) => {
@@ -318,6 +333,23 @@ export default function BlogDashboard() {
                 <Sparkles className="h-4 w-4 mr-2" />
               )}
               Generate Tomorrow's Post
+            </Button>
+            <Button
+              onClick={() => {
+                if (confirm("This will delete all duplicate blog posts, keeping one unique post per topic. Continue?")) {
+                  deduplicateMutation.mutate();
+                }
+              }}
+              disabled={deduplicateMutation.isPending}
+              variant="destructive"
+              data-testid="button-deduplicate-posts"
+            >
+              {deduplicateMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4 mr-2" />
+              )}
+              Remove Duplicates
             </Button>
           </div>
         </div>

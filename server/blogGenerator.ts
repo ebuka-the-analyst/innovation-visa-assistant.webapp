@@ -295,10 +295,13 @@ function slugify(text: string): string {
 /**
  * Picks an unused topic from the library.
  * Queries the database for existing post titles, computes fingerprints,
- * and skips any topic that is too similar to an existing post (≥ 50% overlap).
+ * and skips any topic that is too similar to an existing post (≥ 40% overlap).
+ * Also accepts an in-memory set of already-used topics for within-batch uniqueness.
  * Falls back to the least-recently-used topic if the entire library is covered.
  */
-async function pickUnusedTopic(): Promise<{ topic: string; category: string }> {
+async function pickUnusedTopic(
+  inBatchTitles: string[] = []
+): Promise<{ topic: string; category: string }> {
   // Fetch all existing titles from the database
   let existingTitles: string[] = [];
   try {
@@ -308,14 +311,17 @@ async function pickUnusedTopic(): Promise<{ topic: string; category: string }> {
     // If DB query fails, proceed with random selection
   }
 
-  const existingFingerprints = existingTitles.map(t => topicFingerprint(t));
+  // Combine DB titles + already-generated titles within this batch
+  const allTitles = [...existingTitles, ...inBatchTitles];
+  const existingFingerprints = allTitles.map(t => topicFingerprint(t));
 
   // Shuffle the library so we don't always pick in the same order
   const shuffled = [...TOPIC_LIBRARY].sort(() => Math.random() - 0.5);
 
   for (const entry of shuffled) {
     const fp = topicFingerprint(entry.topic);
-    const tooSimilar = existingFingerprints.some(ef => fingerprintOverlap(fp, ef) >= 0.5);
+    // Lower threshold to 0.4 so near-duplicate topics are caught more aggressively
+    const tooSimilar = existingFingerprints.some(ef => fingerprintOverlap(fp, ef) >= 0.4);
     if (!tooSimilar) return entry;
   }
 
@@ -323,6 +329,27 @@ async function pickUnusedTopic(): Promise<{ topic: string; category: string }> {
   // (allows genuine reruns only when the full library is exhausted)
   console.warn("[Blog] All topics already covered — cycling to least-recently-used topic");
   return shuffled[0];
+}
+
+/**
+ * After the AI generates a title, check it against existing DB titles and
+ * in-batch titles to catch cases where the AI drifts and produces the same
+ * headline for different topics.
+ */
+async function isTitleTooSimilarToExisting(
+  generatedTitle: string,
+  inBatchTitles: string[] = []
+): Promise<boolean> {
+  let existingTitles: string[] = [];
+  try {
+    const rows = await db.execute(drizzleSql`SELECT title FROM blog_posts`);
+    existingTitles = (rows.rows as Array<{ title: string }>).map(r => r.title);
+  } catch {
+    return false;
+  }
+  const allTitles = [...existingTitles, ...inBatchTitles];
+  const fp = topicFingerprint(generatedTitle);
+  return allTitles.some(t => fingerprintOverlap(fp, topicFingerprint(t)) >= 0.6);
 }
 
 // ============================================================================
@@ -337,7 +364,7 @@ function buildCoverImageUrl(title: string, category: string): string {
 // MAIN GENERATION FUNCTION
 // ============================================================================
 
-export async function generateBlogPost(): Promise<{
+export async function generateBlogPost(inBatchTitles: string[] = []): Promise<{
   title: string;
   slug: string;
   excerpt: string;
@@ -366,7 +393,7 @@ export async function generateBlogPost(): Promise<{
   isPublished: boolean;
   postStatus: string;
 }> {
-  const { topic, category } = await pickUnusedTopic();
+  const { topic, category } = await pickUnusedTopic(inBatchTitles);
   const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
   const prompt = `You are a UK immigration information writer. Write an ACCURATE, HELPFUL blog article using ONLY the verified facts provided below.
@@ -724,12 +751,25 @@ export async function generateMultiplePosts(count: number = 5): Promise<Array<{
   authorBio: string;
 }>> {
   const posts = [];
-  
+  // Track titles generated within this batch so each call to pickUnusedTopic
+  // sees them and won't pick the same (or similar) topic again.
+  const inBatchTitles: string[] = [];
+
   for (let i = 0; i < count; i++) {
     try {
       console.log(`[Blog Generator] Generating post ${i + 1} of ${count}...`);
-      const post = await generateBlogPost();
-      posts.push(post);
+      const post = await generateBlogPost(inBatchTitles);
+
+      // Guard: if the AI still produced a title too similar to an existing one,
+      // skip this post rather than saving a duplicate.
+      const isDuplicate = await isTitleTooSimilarToExisting(post.title, inBatchTitles);
+      if (isDuplicate) {
+        console.warn(`[Blog Generator] Skipping duplicate title: "${post.title}"`);
+      } else {
+        inBatchTitles.push(post.title);
+        posts.push(post);
+      }
+
       // Small delay between requests to avoid rate limiting
       if (i < count - 1) {
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -765,6 +805,7 @@ export async function generateBackdatedPosts(
   isFeatured: boolean;
 }>> {
   const posts = [];
+  const inBatchTitles: string[] = [];
   const now = new Date();
   
   for (let dayOffset = startDaysAgo; dayOffset >= 0 && posts.length < totalPosts; dayOffset--) {
@@ -773,7 +814,13 @@ export async function generateBackdatedPosts(
     for (let i = 0; i < postsForThisDay; i++) {
       try {
         console.log(`[Blog Generator] Generating backdated post ${posts.length + 1} of ${totalPosts} (Day -${dayOffset})...`);
-        const post = await generateBlogPost();
+        const post = await generateBlogPost(inBatchTitles);
+        const isDuplicate = await isTitleTooSimilarToExisting(post.title, inBatchTitles);
+        if (isDuplicate) {
+          console.warn(`[Blog Generator] Skipping duplicate backdated title: "${post.title}"`);
+          continue;
+        }
+        inBatchTitles.push(post.title);
         
         // Calculate backdated timestamp with random hour variation
         const publishedAt = new Date(now);
