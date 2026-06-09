@@ -25,7 +25,7 @@ export function GlobalNavButton() {
     
     // Navigate after animation
     setTimeout(() => {
-      setLocation("/");
+      setLocation("/v2");
     }, 1800);
   };
 
