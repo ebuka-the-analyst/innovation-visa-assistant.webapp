@@ -3735,7 +3735,9 @@ ${ctxLines ? `\nApplication context:\n${ctxLines}` : ""}
 Return only the enhanced text. No labels, no "Enhanced version:", just the improved response.`;
       }
 
-      // Try Gemini keys in rotation, then Qwen as final fallback
+      // Try every key × model combination — each model has its own quota bucket.
+      // Blog pipeline uses gemini-2.5-flash, so lighter/newer models here are
+      // unlikely to be exhausted at the same time.
       const GEMINI_KEYS = [
         process.env.GEMINI_API_KEY,
         process.env.GEMINI_API_KEY_2,
@@ -3743,29 +3745,60 @@ Return only the enhanced text. No labels, no "Enhanced version:", just the impro
         process.env.GEMINI_API_KEY_4,
       ].filter(Boolean) as string[];
 
-      let result: string | null = null;
+      const MODELS_TO_TRY = [
+        "gemini-2.5-flash-lite",
+        "gemini-2.0-flash-lite",
+        "gemini-2.0-flash",
+        "gemini-2.5-flash",
+        "gemini-3.5-flash",
+        "gemini-3.1-flash-lite",
+      ];
 
-      for (const apiKey of GEMINI_KEYS) {
-        try {
-          const { GoogleGenAI } = await import("@google/genai");
+      const { GoogleGenAI } = await import("@google/genai");
+
+      async function tryGeminiMatrix(): Promise<string | null> {
+        // Try all key × model combos — first key, all models; then second key, all models; etc.
+        for (const apiKey of GEMINI_KEYS) {
           const ai = new GoogleGenAI({ apiKey });
-          const response = await ai.models.generateContent({
-            model: "gemini-2.0-flash",
-            contents: prompt,
-            config: { temperature: 0.7, maxOutputTokens: 4000 },
-          });
-          const text = response.text?.trim();
-          if (text) { result = text; break; }
-        } catch (geminiErr: any) {
-          const msg = String(geminiErr?.message || "");
-          if (msg.includes("429") || msg.includes("quota") || msg.includes("rate")) continue;
-          throw geminiErr;
+          for (const model of MODELS_TO_TRY) {
+            try {
+              const response = await ai.models.generateContent({
+                model,
+                contents: prompt,
+                config: { temperature: 0.7, maxOutputTokens: 4000 },
+              });
+              const text = response.text?.trim();
+              if (text) {
+                console.log(`[Enhance] Success with key ...${apiKey.slice(-4)} model ${model}`);
+                return text;
+              }
+            } catch (err: any) {
+              const msg = String(err?.message || "");
+              if (msg.includes("429") || msg.includes("quota") || msg.includes("rate") || msg.includes("not found") || msg.includes("404")) {
+                continue; // try next model
+              }
+              throw err; // unexpected error — bubble up
+            }
+          }
         }
+        return null;
+      }
+
+      let result = await tryGeminiMatrix();
+
+      if (!result) {
+        // All Gemini combos rate-limited — wait 4 seconds and try once more
+        await new Promise(r => setTimeout(r, 4000));
+        result = await tryGeminiMatrix();
       }
 
       if (!result) {
-        // Final fallback: Qwen
-        result = await callAI(prompt);
+        // Last resort: Qwen (may also be unavailable, but worth trying)
+        try { result = await callAI(prompt); } catch { /* ignore */ }
+      }
+
+      if (!result) {
+        return res.status(503).json({ error: "All AI providers are currently rate-limited. Please try again in a minute." });
       }
 
       res.json({ result });

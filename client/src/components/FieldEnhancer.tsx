@@ -94,28 +94,37 @@ export function FieldEnhancer({
     setIsListening(false);
   }, []);
 
+  async function callEnhanceAPI(body: object): Promise<{ ok: boolean; result?: string; errorMsg?: string }> {
+    try {
+      const res = await fetch("/api/ai/questionnaire-enhance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return { ok: false, errorMsg: data?.error || "Please try again shortly." };
+      if (!data?.result) return { ok: false, errorMsg: "Empty response from AI." };
+      return { ok: true, result: data.result };
+    } catch {
+      return { ok: false, errorMsg: "Network error. Check your connection and try again." };
+    }
+  }
+
   const handleEnhance = async () => {
     if (!value.trim()) {
       toast({ title: "Nothing to enhance", description: "Write something first, then click Enhance.", variant: "destructive" });
       return;
     }
     setIsEnhancing(true);
-    try {
-      const res = await fetch("/api/ai/questionnaire-enhance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ mode: "enhance", fieldLabel, fieldName, currentText: value, context }),
-      });
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      onChange(data.result);
+    const { ok, result, errorMsg } = await callEnhanceAPI({ mode: "enhance", fieldLabel, fieldName, currentText: value, context });
+    if (ok && result) {
+      onChange(result);
       toast({ title: "Enhanced!", description: "Your response has been improved for the visa application." });
-    } catch {
-      toast({ title: "Enhancement failed", description: "Please try again shortly.", variant: "destructive" });
-    } finally {
-      setIsEnhancing(false);
+    } else {
+      toast({ title: "Enhancement failed", description: errorMsg, variant: "destructive" });
     }
+    setIsEnhancing(false);
   };
 
   const handleAddWords = async () => {
@@ -126,22 +135,14 @@ export function FieldEnhancer({
     }
     setWordCountOpen(false);
     setIsExpanding(true);
-    try {
-      const res = await fetch("/api/ai/questionnaire-enhance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ mode: "expand", fieldLabel, fieldName, currentText: value, wordCount: wc, context }),
-      });
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      onChange(data.result);
+    const { ok, result, errorMsg } = await callEnhanceAPI({ mode: "expand", fieldLabel, fieldName, currentText: value, wordCount: wc, context });
+    if (ok && result) {
+      onChange(result);
       toast({ title: `~${wc} words added`, description: "Your response has been expanded." });
-    } catch {
-      toast({ title: "Expansion failed", description: "Please try again shortly.", variant: "destructive" });
-    } finally {
-      setIsExpanding(false);
+    } else {
+      toast({ title: "Expansion failed", description: errorMsg, variant: "destructive" });
     }
+    setIsExpanding(false);
   };
 
   const busy = isEnhancing || isExpanding;
