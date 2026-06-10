@@ -1025,7 +1025,16 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   };
 
   const handleChange = (name: string, value: string) => {
-    setFormData({ ...formData, [name]: value });
+    // Functional update avoids stale closure overwriting sibling fields
+    setFormData(prev => ({ ...prev, [name]: value }));
+    // Write directly to localStorage immediately — no debounce, so data is
+    // NEVER lost even if the user navigates away or closes the tab instantly
+    try {
+      const raw = localStorage.getItem('autosave_questionnaire-form');
+      const current = raw ? JSON.parse(raw) : {};
+      localStorage.setItem('autosave_questionnaire-form', JSON.stringify({ ...current, [name]: value }));
+    } catch { /* silently ignore storage errors */ }
+    // Also update the autosave hook state (triggers re-renders across hooks)
     saveField(name, value);
   };
 

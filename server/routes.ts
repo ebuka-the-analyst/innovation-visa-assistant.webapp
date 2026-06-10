@@ -3735,7 +3735,39 @@ ${ctxLines ? `\nApplication context:\n${ctxLines}` : ""}
 Return only the enhanced text. No labels, no "Enhanced version:", just the improved response.`;
       }
 
-      const result = await callAI(prompt);
+      // Try Gemini keys in rotation, then Qwen as final fallback
+      const GEMINI_KEYS = [
+        process.env.GEMINI_API_KEY,
+        process.env.GEMINI_API_KEY_2,
+        process.env.GEMINI_API_KEY_3,
+        process.env.GEMINI_API_KEY_4,
+      ].filter(Boolean) as string[];
+
+      let result: string | null = null;
+
+      for (const apiKey of GEMINI_KEYS) {
+        try {
+          const { GoogleGenAI } = await import("@google/genai");
+          const ai = new GoogleGenAI({ apiKey });
+          const response = await ai.models.generateContent({
+            model: "gemini-2.0-flash",
+            contents: prompt,
+            config: { temperature: 0.7, maxOutputTokens: 4000 },
+          });
+          const text = response.text?.trim();
+          if (text) { result = text; break; }
+        } catch (geminiErr: any) {
+          const msg = String(geminiErr?.message || "");
+          if (msg.includes("429") || msg.includes("quota") || msg.includes("rate")) continue;
+          throw geminiErr;
+        }
+      }
+
+      if (!result) {
+        // Final fallback: Qwen
+        result = await callAI(prompt);
+      }
+
       res.json({ result });
     } catch (error) {
       console.error("Questionnaire enhance error:", error);
