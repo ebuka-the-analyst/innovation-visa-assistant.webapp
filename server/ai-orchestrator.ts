@@ -1,5 +1,4 @@
 import OpenAI from "openai";
-import { qwen, QWEN_MODELS } from "./qwenClient";
 
 // Primary OpenAI client (prioritised — funded)
 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
@@ -99,10 +98,9 @@ export async function orchestrateChat(
     sessionId: context.sessionId
   };
 
-  // Try OpenAI first (primary — funded), fall back to Qwen
+  // OpenAI only (primary)
   const providers = [
     { name: "OpenAI", client: openaiClient, model: "gpt-4o-mini" },
-    { name: "Qwen", client: qwen, model: QWEN_MODELS.plus },
   ];
 
   let lastError: any = null;
@@ -306,10 +304,9 @@ RULES:
 
 Give direct, helpful answers.`;
 
-  // Provider chain: OpenAI first (funded), Qwen second
+  // OpenAI only (primary)
   const chatProviders = [
     { name: "OpenAI", client: openaiClient, model: "gpt-4o-mini" },
-    { name: "Qwen", client: qwen, model: QWEN_MODELS.turbo },
   ];
 
   for (const provider of chatProviders) {

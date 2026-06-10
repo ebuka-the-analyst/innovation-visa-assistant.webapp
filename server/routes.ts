@@ -19,7 +19,7 @@ import { allQuestions, getQuestion, getRandomQuestion, getTotalQuestionCount } f
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-// OpenAI is imported dynamically when needed
+import OpenAI from "openai";
 import { GoogleGenAI } from "@google/genai";
 import { registerObjectStorageRoutes, ObjectStorageService } from "./replit_integrations/object_storage";
 import { s3Storage } from "./services/s3Storage";
@@ -64,21 +64,18 @@ const documentUpload = multer({
   },
 });
 
-// Qwen-powered AI generation system
+// OpenAI-powered AI generation system (primary provider)
+const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
+
 async function callAI(prompt: string): Promise<string> {
-  const { qwen, QWEN_MODELS } = await import("./qwenClient");
-  
-  const response = await qwen.chat.completions.create({
-    model: QWEN_MODELS.turbo,
+  const response = await openaiClient.chat.completions.create({
+    model: "gpt-4o-mini",
     messages: [{ role: "user", content: prompt }],
     max_tokens: 4000,
     temperature: 0.7,
   });
-  
   const content = response.choices[0]?.message?.content;
-  if (!content) {
-    throw new Error("Qwen returned empty response");
-  }
+  if (!content) throw new Error("OpenAI returned empty response");
   return content;
 }
 
@@ -3735,70 +3732,29 @@ ${ctxLines ? `\nApplication context:\n${ctxLines}` : ""}
 Return only the enhanced text. No labels, no "Enhanced version:", just the improved response.`;
       }
 
-      // Try every key × model combination — each model has its own quota bucket.
-      // Blog pipeline uses gemini-2.5-flash, so lighter/newer models here are
-      // unlikely to be exhausted at the same time.
-      const GEMINI_KEYS = [
-        process.env.GEMINI_API_KEY,
-        process.env.GEMINI_API_KEY_2,
-        process.env.GEMINI_API_KEY_3,
-        process.env.GEMINI_API_KEY_4,
-      ].filter(Boolean) as string[];
+      // OpenAI primary — gpt-4o and gpt-4o-mini as fallback
+      const enhanceModels = ["gpt-4o", "gpt-4o-mini"];
+      let result: string | null = null;
 
-      const MODELS_TO_TRY = [
-        "gemini-2.5-flash-lite",
-        "gemini-2.0-flash-lite",
-        "gemini-2.0-flash",
-        "gemini-2.5-flash",
-        "gemini-3.5-flash",
-        "gemini-3.1-flash-lite",
-      ];
-
-      const { GoogleGenAI } = await import("@google/genai");
-
-      async function tryGeminiMatrix(): Promise<string | null> {
-        // Try all key × model combos — first key, all models; then second key, all models; etc.
-        for (const apiKey of GEMINI_KEYS) {
-          const ai = new GoogleGenAI({ apiKey });
-          for (const model of MODELS_TO_TRY) {
-            try {
-              const response = await ai.models.generateContent({
-                model,
-                contents: prompt,
-                config: { temperature: 0.7, maxOutputTokens: 4000 },
-              });
-              const text = response.text?.trim();
-              if (text) {
-                console.log(`[Enhance] Success with key ...${apiKey.slice(-4)} model ${model}`);
-                return text;
-              }
-            } catch (err: any) {
-              const msg = String(err?.message || "");
-              if (msg.includes("429") || msg.includes("quota") || msg.includes("rate") || msg.includes("not found") || msg.includes("404")) {
-                continue; // try next model
-              }
-              throw err; // unexpected error — bubble up
-            }
-          }
+      for (const model of enhanceModels) {
+        try {
+          const oaiRes = await openaiClient.chat.completions.create({
+            model,
+            messages: [{ role: "user", content: prompt }],
+            max_tokens: 4000,
+            temperature: 0.7,
+          });
+          const text = oaiRes.choices[0]?.message?.content?.trim();
+          if (text) { result = text; break; }
+        } catch (err: any) {
+          const msg = String(err?.message || "");
+          if (msg.includes("429") || msg.includes("quota") || msg.includes("rate")) continue;
+          throw err;
         }
-        return null;
-      }
-
-      let result = await tryGeminiMatrix();
-
-      if (!result) {
-        // All Gemini combos rate-limited — wait 4 seconds and try once more
-        await new Promise(r => setTimeout(r, 4000));
-        result = await tryGeminiMatrix();
       }
 
       if (!result) {
-        // Last resort: Qwen (may also be unavailable, but worth trying)
-        try { result = await callAI(prompt); } catch { /* ignore */ }
-      }
-
-      if (!result) {
-        return res.status(503).json({ error: "All AI providers are currently rate-limited. Please try again in a minute." });
+        return res.status(503).json({ error: "OpenAI is currently rate-limited. Please try again in a moment." });
       }
 
       res.json({ result });
@@ -8725,17 +8681,17 @@ Return ONLY valid JSON, no markdown or explanation.`;
 
       try {
         // Check if we have OpenAI API key
-        if (!process.env.QWEN_API_KEY) {
-          console.log("[Document Extract] No Qwen API key configured - using placeholders");
+        if (!process.env.OPENAI_API_KEY) {
+          console.log("[Document Extract] No OpenAI API key configured - using placeholders");
           throw new Error("No AI keys configured");
         }
         
-        // Use Qwen for document extraction
-        if (documentContents.length > 0 && process.env.QWEN_API_KEY) {
-          console.log("[Document Extract] Using Qwen for extraction...");
+        // Use OpenAI for document extraction
+        if (documentContents.length > 0 && process.env.OPENAI_API_KEY) {
+          console.log("[Document Extract] Using OpenAI for extraction...");
           
           try {
-            const { qwen, QWEN_MODELS } = await import("./qwenClient");
+            const docOpenAI = openaiClient;
             
             // Separate content types
             const textDocuments = documentContents.filter(d => d.isText);
@@ -8887,8 +8843,8 @@ Return ONLY valid JSON:
                 }
                 
                 try {
-                  const chunkResponse = await qwen.chat.completions.create({
-                    model: QWEN_MODELS.plus,
+                  const chunkResponse = await docOpenAI.chat.completions.create({
+                    model: "gpt-4o-mini",
                     messages: [{
                       role: "user",
                       content: extractionPrompt.replace('{CHUNK_CONTENT}', allChunks[i])
@@ -8987,8 +8943,8 @@ Return ONLY valid JSON:
               }));
               
               try {
-                const visionResponse = await qwen.chat.completions.create({
-                  model: QWEN_MODELS.vl,
+                const visionResponse = await docOpenAI.chat.completions.create({
+                  model: "gpt-4o-mini",
                   messages: [{
                     role: "user",
                     content: [
@@ -9010,7 +8966,7 @@ Return ONLY valid JSON:
                       },
                       ...imageContents
                     ]
-                  }],
+                  }] as any,
                   max_tokens: 1024
                 });
                 
@@ -9050,18 +9006,16 @@ Return ONLY valid JSON:
             if (textDocuments.length === 0 && imageDocuments.length === 0) {
               throw new Error("No document content to process");
             }
-          } catch (qwenError: any) {
-            console.error(`[Document Extract] Qwen failed: ${qwenError.message}`);
+          } catch (openaiError: any) {
+            console.error(`[Document Extract] OpenAI failed: ${openaiError.message}`);
             // Don't throw - let it fall through to intelligent placeholders
           }
         } else {
-          // No document contents - use Qwen text-based extraction with metadata only
+          // No document contents - use OpenAI text-based extraction with metadata only
           console.log("[Document Extract] No document contents, using text-based extraction...");
           
-          const { qwen, QWEN_MODELS } = await import("./qwenClient");
-          
-          const response = await qwen.chat.completions.create({
-            model: QWEN_MODELS.plus,
+          const response = await openaiClient.chat.completions.create({
+            model: "gpt-4o-mini",
             messages: [
               {
                 role: "user",
@@ -10619,10 +10573,8 @@ ENHANCEMENT GUIDELINES:
 
 OUTPUT: Return ONLY the enhanced answer text, ready to submit. Do not include explanations or meta-commentary. Keep it between 100-250 words for optimal impact.`;
 
-      const { qwen: qwenClient, QWEN_MODELS: QM } = await import("./qwenClient");
-
-      const completion = await qwenClient.chat.completions.create({
-        model: QM.turbo,
+      const completion = await openaiClient.chat.completions.create({
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: "You are an expert visa application consultant specializing in UK Innovator Founder Visa. Enhance answers to be compelling, evidence-based, and endorser-ready." },
           { role: "user", content: enhancePrompt }
@@ -10682,10 +10634,8 @@ OUTPUT FORMAT:
 - Make it easy for the applicant to customize
 - Do not include explanations - just the draft answer ready to edit`;
 
-      const { qwen: qwenClient2, QWEN_MODELS: QM2 } = await import("./qwenClient");
-
-      const completion = await qwenClient2.chat.completions.create({
-        model: QM2.turbo,
+      const completion = await openaiClient.chat.completions.create({
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: "You are an expert UK Innovator Founder Visa consultant. Generate helpful draft answers that applicants can personalize with their specific details." },
           { role: "user", content: draftPrompt }
@@ -10832,10 +10782,8 @@ OUTPUT FORMAT:
 - Use confident, visa-ready language
 - Include any specific dates, numbers, or achievements found in documents`;
 
-      const { qwen: qwenClient3, QWEN_MODELS: QM3 } = await import("./qwenClient");
-
-      const completion = await qwenClient3.chat.completions.create({
-        model: QM3.turbo,
+      const completion = await openaiClient.chat.completions.create({
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: "You are an expert UK Innovator Founder Visa consultant. Generate answers using the applicant's own document data to create personalized, evidence-based responses." },
           { role: "user", content: autofillPrompt }
@@ -10971,11 +10919,11 @@ Focus specifically on UK Innovator Founder Visa requirements and Home Office cri
 
       let responseText: string | null = null;
 
-      // Use Qwen for AI response
+      // Use OpenAI for AI response
       try {
         responseText = await callAI(`${systemPrompt}\n\nUser query: ${userPrompt}`);
-      } catch (qwenError: any) {
-        console.log("Qwen failed:", qwenError?.message);
+      } catch (aiError: any) {
+        console.log("OpenAI callAI failed:", aiError?.message);
       }
 
       // If we got a response from OpenAI, return it
@@ -11086,15 +11034,15 @@ Reference actual visa requirements where relevant.`;
       
       let output: string | null = null;
 
-      // Use Qwen for autopilot step
+      // Use OpenAI for autopilot step
       try {
-        console.log(`[Autopilot] Calling Qwen for step: ${stepId}`);
+        console.log(`[Autopilot] Calling OpenAI for step: ${stepId}`);
         output = await callAI(`${systemPrompt}\n\n${userMessage}`);
         if (output) {
-          console.log(`[Autopilot] Qwen success for step: ${stepId}, output length: ${output.length}`);
+          console.log(`[Autopilot] OpenAI success for step: ${stepId}, output length: ${output.length}`);
         }
-      } catch (qwenError: any) {
-        console.error(`[Autopilot] Qwen failed for step ${stepId}:`, qwenError?.message);
+      } catch (aiError: any) {
+        console.error(`[Autopilot] OpenAI failed for step ${stepId}:`, aiError?.message);
       }
 
       // Calculate score based on content quality
@@ -11194,7 +11142,7 @@ Keep responses focused, professional, and relevant to UK visa requirements.`;
       }
 
       // Check if AI is available - if not, return error instead of fake scores
-      if (!process.env.QWEN_API_KEY) {
+      if (!process.env.OPENAI_API_KEY) {
         return res.json({
           score: 0,
           feedback: "**Evaluation Unavailable.** AI service is not configured. Please contact support@ukvisaassistant.com for assistance.",
@@ -11273,8 +11221,8 @@ BE HARSH BUT FAIR. This is visa preparation - false confidence could lead to rej
           score: Math.min(100, Math.max(0, score)),
           feedback: feedbackText
         });
-      } catch (qwenError) {
-        console.error("Qwen evaluation error:", qwenError);
+      } catch (aiEvalError) {
+        console.error("AI evaluation error:", aiEvalError);
         return res.json({
           score: 0,
           feedback: "**Evaluation Unavailable.** We're experiencing a connectivity issue with our AI evaluation service. Please try again in a moment. If this problem persists, please contact support@ukvisaassistant.com for assistance.",

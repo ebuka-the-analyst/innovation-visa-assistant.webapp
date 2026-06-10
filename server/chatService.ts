@@ -1,5 +1,4 @@
 import OpenAI from "openai";
-import { qwen, QWEN_MODELS } from "./qwenClient";
 
 // Primary OpenAI client (prioritised — funded)
 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
@@ -155,10 +154,9 @@ export async function chatWithMultipleLLMs(
 ): Promise<{ response: string; provider: string }> {
   const systemPrompt = buildSystemPrompt(newsContext);
 
-  // Provider chain: OpenAI first (funded/prioritised), Qwen as fallback
+  // Provider chain: OpenAI only (primary)
   const providers: Array<{ name: string; client: OpenAI; model: string }> = [
     { name: "OpenAI", client: openaiClient, model: "gpt-4o-mini" },
-    { name: "Qwen", client: qwen, model: QWEN_MODELS.plus },
   ];
 
   for (const p of providers) {

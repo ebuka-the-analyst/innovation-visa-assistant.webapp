@@ -140,51 +140,20 @@ CORRECTION RULES:
 
 Return ONLY the corrected HTML (no JSON, no explanation, no markdown fences — just the HTML starting with the first tag).`;
 
-    // Try Gemini (all 4 keys × 2 models), then OpenAI as fallback
-    const GEMINI_KEYS = [
-      process.env.GEMINI_API_KEY,
-      process.env.GEMINI_API_KEY_2,
-      process.env.GEMINI_API_KEY_3,
-      process.env.GEMINI_API_KEY_4,
-    ].filter(Boolean) as string[];
-    const FIXER_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
     const fixerSystemText = "You are a UK immigration content editor. Return ONLY the corrected HTML article. No JSON, no explanation, no markdown. Just the corrected HTML.";
 
     let corrected: string | null = null;
 
-    outerFix:
-    for (const model of FIXER_MODELS) {
-      for (const key of GEMINI_KEYS) {
-        try {
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-          const res = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              system_instruction: { parts: [{ text: fixerSystemText }] },
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { temperature: 0.1, maxOutputTokens: 8192 },
-            }),
-          });
-          const data = await res.json() as any;
-          if (!res.ok) {
-            if (res.status === 404) continue outerFix;
-            continue; // 429/403 → next key
-          }
-          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
-          if (text.length > 500) { corrected = text; break outerFix; }
-        } catch { continue; }
-      }
-    }
-
-    // OpenAI fallback if Gemini exhausted
-    if (!corrected && process.env.OPENAI_API_KEY) {
+    // OpenAI primary (gpt-4o then gpt-4o-mini), Gemini as fallback
+    const oaiFixModels = ["gpt-4o", "gpt-4o-mini"];
+    for (const model of oaiFixModels) {
+      if (corrected) break;
       try {
         const oaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
           method: "POST",
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
           body: JSON.stringify({
-            model: "gpt-4o-mini",
+            model,
             messages: [{ role: "system", content: fixerSystemText }, { role: "user", content: prompt }],
             max_tokens: 6000,
             temperature: 0.1,
@@ -194,7 +163,42 @@ Return ONLY the corrected HTML (no JSON, no explanation, no markdown fences — 
         const oaiText = oaiData.choices?.[0]?.message?.content?.trim() || "";
         if (oaiText.length > 500) corrected = oaiText;
       } catch (err) {
-        console.error("[AutoFixer] OpenAI fallback failed:", err);
+        console.error(`[AutoFixer] OpenAI ${model} failed:`, err);
+      }
+    }
+
+    // Gemini fallback if OpenAI exhausted
+    if (!corrected) {
+      const GEMINI_KEYS = [
+        process.env.GEMINI_API_KEY,
+        process.env.GEMINI_API_KEY_2,
+        process.env.GEMINI_API_KEY_3,
+        process.env.GEMINI_API_KEY_4,
+      ].filter(Boolean) as string[];
+      const FIXER_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
+      outerFix:
+      for (const model of FIXER_MODELS) {
+        for (const key of GEMINI_KEYS) {
+          try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+            const res = await fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                system_instruction: { parts: [{ text: fixerSystemText }] },
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { temperature: 0.1, maxOutputTokens: 8192 },
+              }),
+            });
+            const data = await res.json() as any;
+            if (!res.ok) {
+              if (res.status === 404) continue outerFix;
+              continue;
+            }
+            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+            if (text.length > 500) { corrected = text; break outerFix; }
+          } catch { continue; }
+        }
       }
     }
 

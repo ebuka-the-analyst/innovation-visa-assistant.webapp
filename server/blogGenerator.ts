@@ -460,9 +460,116 @@ OUTPUT FORMAT (JSON only):
 
 Return ONLY valid JSON.`;
 
-  // ── Gemini REST API (primary writer) ─────────────────────────────────────
-  // Tries all 4 API keys × 3 models. On 429 → rotate to next key.
-  // Falls through to OpenAI if every Gemini combo fails.
+  const systemInstruction = `You are a UK immigration information writer who creates accurate, helpful content. You NEVER fabricate case studies, statistics, or quotes. You ONLY use verified facts. You always include proper disclaimers. Your content is factual, practical, and trustworthy. Always respond with valid JSON only.`;
+
+  // ── OpenAI REST API (primary writer) ─────────────────────────────────────
+  // Tries gpt-4o first, then gpt-4o-mini. Falls through to Gemini if all fail.
+  const OPENAI_GEN_MODELS = ["gpt-4o", "gpt-4o-mini"];
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
+
+  if (OPENAI_API_KEY) {
+    for (const oaiModel of OPENAI_GEN_MODELS) {
+      try {
+        console.log(`[Blog Generator] Trying OpenAI ${oaiModel}…`);
+        const oaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: oaiModel,
+            messages: [
+              { role: "system", content: systemInstruction },
+              { role: "user", content: prompt },
+            ],
+            response_format: { type: "json_object" },
+            max_tokens: 8000,
+            temperature: 0.3,
+          }),
+        });
+        const oaiData = await oaiRes.json() as any;
+        if (!oaiRes.ok) {
+          console.warn(`[Blog Generator] OpenAI ${oaiModel} HTTP ${oaiRes.status}: ${oaiData?.error?.message}`);
+          continue;
+        }
+        const oaiContent = oaiData.choices?.[0]?.message?.content;
+        if (!oaiContent) { console.warn(`[Blog Generator] OpenAI ${oaiModel} empty content`); continue; }
+
+        const parsed = JSON.parse(oaiContent);
+        let finalContent = correctContent(parsed.content || "");
+
+        // Ensure disclaimer
+        const contentHasDisclaimerNow = finalContent.includes("disclaimer-box") || finalContent.includes("Important Notice:");
+        if (!contentHasDisclaimerNow) {
+          finalContent += `\n<div class="disclaimer-box bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 my-6"><p class="text-sm"><strong>Important Notice:</strong> This article provides general information only and does not constitute immigration or legal advice. Requirements and fees may change. Always verify current information on <a href="https://www.gov.uk/innovator-founder-visa" target="_blank" rel="noopener" class="text-primary underline">GOV.UK</a> and consider consulting a qualified immigration adviser for your specific circumstances.</p></div>`;
+        }
+
+        // Validate
+        const validationResult = validateBlogContent({
+          title: parsed.title, excerpt: parsed.excerpt, content: finalContent,
+          category, tags: parsed.tags || [], metaTitle: parsed.metaTitle, metaDescription: parsed.metaDescription
+        });
+        console.log("[Blog Generator] Validation Report:"); console.log(generateValidationReport(validationResult));
+
+        const dateSlug = new Date().toISOString().split("T")[0];
+        const uniqueSlug = `${slugify(parsed.title)}-${dateSlug}-${Math.random().toString(36).substring(2, 6)}`;
+
+        let verificationResult = null;
+        let verificationStatus = "pending";
+        let isPublished = false;
+        let postStatus = "draft";
+        try {
+          console.log(`[Blog Generator] Running triple-AI verification (OpenAI ${oaiModel})…`);
+          verificationResult = await verifyBlogPost(parsed.title, finalContent);
+          if (verificationResult.passed) {
+            verificationStatus = "passed"; isPublished = true; postStatus = "published";
+            console.log(`[Blog Generator] ✓ Verification PASSED — Composite: ${verificationResult.compositeScore}/100. Auto-publishing.`);
+          } else {
+            verificationStatus = "human_review";
+            console.warn(`[Blog Generator] ✗ Verification FAILED — Composite: ${verificationResult.compositeScore}/100. Sending to human review.`);
+          }
+        } catch (verifyError) {
+          console.error("[Blog Generator] Verification error:", verifyError);
+          verificationStatus = "human_review";
+        }
+
+        return {
+          title: parsed.title,
+          slug: uniqueSlug,
+          excerpt: parsed.excerpt,
+          content: finalContent,
+          category,
+          tags: parsed.tags || [],
+          metaTitle: parsed.metaTitle || parsed.title,
+          metaDescription: parsed.metaDescription || parsed.excerpt,
+          metaKeywords: parsed.metaKeywords || parsed.tags || [],
+          featuredImage: buildCoverImageUrl(parsed.title || topic, category),
+          readingTime: parsed.readingTime || 8,
+          author: "UK Visa Expert Team",
+          authorBio: "Our team provides accurate, verified information about the UK Innovator Founder Visa process. All content is multi-AI verified by OpenAI and Gemini for factual accuracy against official GOV.UK sources.",
+          aiVerificationScore: verificationResult?.compositeScore ?? null,
+          geminiScore: verificationResult?.geminiScore ?? null,
+          openaiScore: verificationResult?.openaiScore ?? null,
+          verificationStatus,
+          verificationDetails: verificationResult?.details ?? null,
+          verifiedAt: verificationResult?.verifiedAt ?? null,
+          verificationExpiresAt: verificationResult?.verificationExpiresAt ?? null,
+          humanReviewRequired: verificationResult?.requiresHumanReview ?? true,
+          contradictionFlags: verificationResult?.contradictionFlags ?? 0,
+          sourcesCited: verificationResult?.sourcesCited ?? 0,
+          contentHash: verificationResult?.contentHash ?? computeContentHash(finalContent),
+          isPublished,
+          postStatus,
+        };
+      } catch (error: any) {
+        console.error(`[Blog Generator] OpenAI ${oaiModel} failed:`, error?.message || error);
+      }
+    }
+  }
+
+  // ── Gemini REST API (fallback writer) ────────────────────────────────────
+  // Tries all 4 API keys × 3 models. Only used if OpenAI is unavailable.
   const GEMINI_API_KEYS = [
     process.env.GEMINI_API_KEY,
     process.env.GEMINI_API_KEY_2,
@@ -471,8 +578,6 @@ Return ONLY valid JSON.`;
   ].filter(Boolean) as string[];
 
   const GEMINI_GENERATION_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"];
-
-  const systemInstruction = `You are a UK immigration information writer who creates accurate, helpful content. You NEVER fabricate case studies, statistics, or quotes. You ONLY use verified facts. You always include proper disclaimers. Your content is factual, practical, and trustworthy. Always respond with valid JSON only.`;
 
   const geminiBody = {
     system_instruction: { parts: [{ text: systemInstruction }] },
@@ -662,77 +767,7 @@ Return ONLY valid JSON.`;
     } // end for apiKey
   } // end for geminiModel
 
-  // ── OpenAI fallback (gpt-4o-mini) ────────────────────────────────────────
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
-  if (OPENAI_API_KEY) {
-    try {
-      console.log("[Blog Generator] Falling back to OpenAI gpt-4o-mini…");
-      const oaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            { role: "system", content: systemInstruction },
-            { role: "user", content: prompt },
-          ],
-          response_format: { type: "json_object" },
-          max_tokens: 6000,
-          temperature: 0.3,
-        }),
-      });
-      const oaiData = await oaiRes.json() as any;
-      if (!oaiRes.ok) throw new Error(oaiData?.error?.message || `OpenAI HTTP ${oaiRes.status}`);
-      const oaiContent = oaiData.choices?.[0]?.message?.content;
-      if (!oaiContent) throw new Error("OpenAI returned empty content");
-
-      const parsed = JSON.parse(oaiContent);
-      let finalContent = correctContent(parsed.content || "");
-      if (!finalContent.includes("disclaimer-box") && !finalContent.includes("Important Notice")) {
-        finalContent += `\n<div class="disclaimer-box bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 my-6"><p class="text-sm"><strong>Important Notice:</strong> This article provides general information only and does not constitute immigration or legal advice. Requirements and fees may change. Always verify current information on <a href="https://www.gov.uk/innovator-founder-visa" target="_blank" rel="noopener" class="text-primary underline">GOV.UK</a> and consider consulting a qualified immigration adviser for your specific circumstances.</p></div>`;
-      }
-      const dateSlug = new Date().toISOString().split("T")[0];
-      const uniqueSlug = `${slugify(parsed.title)}-${dateSlug}-${Math.random().toString(36).substring(2, 6)}`;
-      let verificationResult = null;
-      try { verificationResult = await verifyBlogPost(parsed.title, finalContent); } catch {}
-      const isPublished = verificationResult?.passed ?? false;
-      return {
-        title: parsed.title,
-        slug: uniqueSlug,
-        excerpt: parsed.excerpt,
-        content: finalContent,
-        category,
-        tags: parsed.tags || [],
-        metaTitle: parsed.metaTitle || parsed.title,
-        metaDescription: parsed.metaDescription || parsed.excerpt,
-        metaKeywords: parsed.metaKeywords || parsed.tags || [],
-        featuredImage: buildCoverImageUrl(parsed.title || topic, category),
-        readingTime: parsed.readingTime || 8,
-        author: "UK Visa Expert Team",
-        authorBio: "Our team provides accurate, verified information about the UK Innovator Founder Visa process. All content is multi-AI verified by Gemini and OpenAI for factual accuracy against official GOV.UK sources.",
-        aiVerificationScore: verificationResult?.compositeScore ?? null,
-        geminiScore: verificationResult?.geminiScore ?? null,
-        openaiScore: verificationResult?.openaiScore ?? null,
-        verificationStatus: isPublished ? "passed" : "human_review",
-        verificationDetails: verificationResult?.details ?? null,
-        verifiedAt: verificationResult?.verifiedAt ?? null,
-        verificationExpiresAt: verificationResult?.verificationExpiresAt ?? null,
-        humanReviewRequired: verificationResult?.requiresHumanReview ?? true,
-        contradictionFlags: verificationResult?.contradictionFlags ?? 0,
-        sourcesCited: verificationResult?.sourcesCited ?? 0,
-        contentHash: verificationResult?.contentHash ?? computeContentHash(finalContent),
-        isPublished,
-        postStatus: isPublished ? "published" : "human_review",
-      };
-    } catch (oaiErr: any) {
-      console.error("[Blog Generator] OpenAI fallback failed:", oaiErr?.message || oaiErr);
-    }
-  }
-
-  throw new Error("Failed to generate blog content — all AI writers exhausted (Gemini + OpenAI)");
+  throw new Error("Failed to generate blog content — all AI writers exhausted (OpenAI + Gemini fallback)");
 }
 
 export async function generateMultiplePosts(count: number = 5): Promise<Array<{

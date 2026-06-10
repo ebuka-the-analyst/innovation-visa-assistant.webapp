@@ -1,0 +1,1 @@
+- [AI provider priority](ai-provider-priority.md) — OpenAI is primary for ALL generation; Gemini/Qwen are fallbacks only. Never restore Qwen as primary.
