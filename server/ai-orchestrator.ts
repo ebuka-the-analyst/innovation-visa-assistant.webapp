@@ -100,7 +100,7 @@ export async function orchestrateChat(
 
   // OpenAI only (primary)
   const providers = [
-    { name: "OpenAI", client: openaiClient, model: "gpt-4o-mini" },
+    { name: "OpenAI", client: openaiClient, model: "gpt-4o" },
   ];
 
   let lastError: any = null;
@@ -306,7 +306,7 @@ Give direct, helpful answers.`;
 
   // OpenAI only (primary)
   const chatProviders = [
-    { name: "OpenAI", client: openaiClient, model: "gpt-4o-mini" },
+    { name: "OpenAI", client: openaiClient, model: "gpt-4o" },
   ];
 
   for (const provider of chatProviders) {

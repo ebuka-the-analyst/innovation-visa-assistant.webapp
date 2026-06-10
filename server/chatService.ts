@@ -156,7 +156,7 @@ export async function chatWithMultipleLLMs(
 
   // Provider chain: OpenAI only (primary)
   const providers: Array<{ name: string; client: OpenAI; model: string }> = [
-    { name: "OpenAI", client: openaiClient, model: "gpt-4o-mini" },
+    { name: "OpenAI", client: openaiClient, model: "gpt-4o" },
   ];
 
   for (const p of providers) {

@@ -302,7 +302,7 @@ async function runOpenAIVerification(title: string, content: string): Promise<{
   try {
     const prompt = buildMarkerPrompt(title, content);
     const response = await openaiClient.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",

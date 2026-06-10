@@ -69,7 +69,7 @@ const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
 
 async function callAI(prompt: string): Promise<string> {
   const response = await openaiClient.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-4o",
     messages: [{ role: "user", content: prompt }],
     max_tokens: 4000,
     temperature: 0.7,
@@ -8844,7 +8844,7 @@ Return ONLY valid JSON:
                 
                 try {
                   const chunkResponse = await docOpenAI.chat.completions.create({
-                    model: "gpt-4o-mini",
+                    model: "gpt-4o",
                     messages: [{
                       role: "user",
                       content: extractionPrompt.replace('{CHUNK_CONTENT}', allChunks[i])
@@ -8944,7 +8944,7 @@ Return ONLY valid JSON:
               
               try {
                 const visionResponse = await docOpenAI.chat.completions.create({
-                  model: "gpt-4o-mini",
+                  model: "gpt-4o",
                   messages: [{
                     role: "user",
                     content: [
@@ -9015,7 +9015,7 @@ Return ONLY valid JSON:
           console.log("[Document Extract] No document contents, using text-based extraction...");
           
           const response = await openaiClient.chat.completions.create({
-            model: "gpt-4o-mini",
+            model: "gpt-4o",
             messages: [
               {
                 role: "user",
@@ -10574,7 +10574,7 @@ ENHANCEMENT GUIDELINES:
 OUTPUT: Return ONLY the enhanced answer text, ready to submit. Do not include explanations or meta-commentary. Keep it between 100-250 words for optimal impact.`;
 
       const completion = await openaiClient.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
         messages: [
           { role: "system", content: "You are an expert visa application consultant specializing in UK Innovator Founder Visa. Enhance answers to be compelling, evidence-based, and endorser-ready." },
           { role: "user", content: enhancePrompt }
@@ -10635,7 +10635,7 @@ OUTPUT FORMAT:
 - Do not include explanations - just the draft answer ready to edit`;
 
       const completion = await openaiClient.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
         messages: [
           { role: "system", content: "You are an expert UK Innovator Founder Visa consultant. Generate helpful draft answers that applicants can personalize with their specific details." },
           { role: "user", content: draftPrompt }
@@ -10783,7 +10783,7 @@ OUTPUT FORMAT:
 - Include any specific dates, numbers, or achievements found in documents`;
 
       const completion = await openaiClient.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
         messages: [
           { role: "system", content: "You are an expert UK Innovator Founder Visa consultant. Generate answers using the applicant's own document data to create personalized, evidence-based responses." },
           { role: "user", content: autofillPrompt }
@@ -13668,10 +13668,8 @@ IMPORTANT RULES:
       // Fallback to OpenAI if all Gemini keys rate-limited
       if (!content && process.env.OPENAI_API_KEY) {
         try {
-          const OpenAI = (await import("openai")).default;
-          const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-          const completion = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
+          const completion = await openaiClient.chat.completions.create({
+            model: "gpt-4o",
             messages: [{ role: "user", content: prompt }],
             max_tokens: 1200,
             temperature: 0.85,
