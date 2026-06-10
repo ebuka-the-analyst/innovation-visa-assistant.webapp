@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ArrowRight, ArrowLeft, CheckCircle, AlertTriangle, Tag, Check, X, Loader2, Save, RotateCcw, Building2, Stethoscope, ShoppingBag, Laptop, Lightbulb, FileText, Upload, Sparkles, ChevronDown, ChevronUp, Palette, Lock } from "lucide-react";
+import { FieldEnhancer } from "@/components/FieldEnhancer";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -3368,12 +3369,17 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
                     </SelectContent>
                   </Select>
                 ) : field.type === "textarea" ? (
-                  <Textarea
-                    id={field.name}
-                    placeholder={`Enter detailed response...`}
+                  <FieldEnhancer
+                    fieldName={field.name}
+                    fieldLabel={field.label}
                     value={formData[field.name] || ""}
-                    onChange={(e) => handleChange(field.name, e.target.value)}
-                    className="min-h-[150px]"
+                    onChange={(val) => handleChange(field.name, val)}
+                    context={{
+                      founderName: formData.fullLegalName,
+                      businessName: formData.businessName,
+                      industry: formData.industry,
+                      businessStage: formData.innovationStage,
+                    }}
                     data-testid={`input-${field.name}`}
                   />
                 ) : (

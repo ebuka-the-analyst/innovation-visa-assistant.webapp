@@ -3675,6 +3675,74 @@ Keep it concise but impactful. Return only the enhanced text.`;
     }
   });
 
+  // Questionnaire field enhancer — enhance or expand any textarea answer
+  app.post("/api/ai/questionnaire-enhance", isAuthenticated, async (req, res) => {
+    try {
+      const { mode, fieldLabel, fieldName, currentText, wordCount, context } = req.body;
+
+      if (!currentText || !String(currentText).trim()) {
+        return res.status(400).json({ error: "No text provided" });
+      }
+
+      const ctxLines = context
+        ? Object.entries(context as Record<string, string>)
+            .filter(([, v]) => v && String(v).trim())
+            .map(([k, v]) => `- ${k}: ${v}`)
+            .join("\n")
+        : "";
+
+      let prompt: string;
+
+      if (mode === "expand") {
+        const wc = Math.min(Math.max(parseInt(wordCount) || 100, 50), 500);
+        prompt = `You are an expert UK Innovator Founder Visa consultant helping a founder strengthen their visa application.
+
+The founder has written the following for the field "${fieldLabel}":
+
+"""
+${currentText}
+"""
+
+Your task: expand this text by approximately ${wc} words. Rules you must follow:
+1. Stay 100% faithful to every specific fact, number, name, company, date, and claim the founder has written — never invent anything
+2. Add genuine depth: more context, stronger evidence, clearer cause-and-effect, specific examples that logically follow from what's written
+3. Never insert generic phrases ("cutting-edge", "innovative", "revolutionary") unless the founder used them
+4. Match the founder's own voice, tone, and style exactly
+5. The expansion must flow naturally from the existing text — no repetition, no headers, no labels
+6. This is for a UK Innovator Founder Visa application — your expansion should emphasise the three criteria: innovation, viability, and scalability where naturally relevant
+${ctxLines ? `\nApplication context:\n${ctxLines}` : ""}
+
+Return the COMPLETE text (original + expansion combined as one continuous response). No labels, no "Expanded version:", just the text.`;
+      } else {
+        prompt = `You are an expert UK Innovator Founder Visa consultant helping a founder strengthen their visa application.
+
+The founder has written the following for the field "${fieldLabel}":
+
+"""
+${currentText}
+"""
+
+Your task: rewrite and enhance this response to make it significantly stronger for the UK Innovator Founder Visa application. Rules you must follow:
+1. Preserve every specific fact, number, name, company, and claim — never fabricate or invent anything
+2. Make the language more compelling and professional for UK endorser bodies (Envestors, UKES, Innovator International, Global Entrepreneurs Programme)
+3. Add structure where helpful (clear paragraphs, logical flow) but avoid unnecessary bullet points unless already present
+4. Naturally emphasise the three Innovator Founder Visa criteria: innovation, viability, scalability — using only what the founder has provided
+5. Eliminate vague or weak phrasing ("I think", "maybe", "sort of") and replace with confident, evidence-based language
+6. Preserve the founder's authentic voice and perspective — this should sound like them, improved
+7. Do NOT add generic buzzwords not grounded in the founder's actual content
+${ctxLines ? `\nApplication context:\n${ctxLines}` : ""}
+
+Return only the enhanced text. No labels, no "Enhanced version:", just the improved response.`;
+      }
+
+      const result = await callAI(prompt);
+      res.json({ result });
+    } catch (error) {
+      console.error("Questionnaire enhance error:", error);
+      res.status(500).json({ error: "Failed to enhance" });
+    }
+  });
+
   // Ask innovation coach a question
   app.post("/api/ai/coach/ask", isAuthenticated, async (req, res) => {
     try {
