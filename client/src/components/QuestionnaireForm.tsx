@@ -476,18 +476,26 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   // Owner-only prefill: fills only empty fields with Benedict's data
   const isOwner = user?.email?.toLowerCase() === 'benedict9211@gmail.com';
   const handleOwnerPrefill = () => {
-    setFormData(prev => {
-      const updated = { ...prev };
-      let filled = 0;
-      Object.entries(BENEDICT_PREFILL_DATA).forEach(([key, value]) => {
-        if (!prev[key] || prev[key].trim() === '') {
-          updated[key] = value;
-          filled++;
-        }
-      });
-      toast({ title: `Prefilled ${filled} empty field${filled !== 1 ? 's' : ''}`, description: "Existing answers were not overwritten.", duration: 3000 });
-      return updated;
+    // Compute the merged data outside of setFormData so we can persist it immediately
+    const currentData = formData;
+    const updated = { ...currentData };
+    let filled = 0;
+    Object.entries(BENEDICT_PREFILL_DATA).forEach(([key, value]) => {
+      if (!currentData[key] || currentData[key].trim() === '') {
+        updated[key] = value;
+        filled++;
+      }
     });
+
+    // Write to localStorage IMMEDIATELY — before any debounce — so tab switches never lose this data
+    try {
+      localStorage.setItem('autosave_questionnaire-form', JSON.stringify(updated));
+    } catch { /* ignore storage errors */ }
+
+    setFormData(updated);
+    // Also sync the autosave hook state so the indicator shows "Saved"
+    saveAllFields(updated);
+    toast({ title: `Prefilled ${filled} empty field${filled !== 1 ? 's' : ''}`, description: "Existing answers were not overwritten.", duration: 3000 });
   };
   
   // Auto-fill from documents states
