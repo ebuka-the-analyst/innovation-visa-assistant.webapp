@@ -336,7 +336,7 @@ async function pickUnusedTopic(
  * in-batch titles to catch cases where the AI drifts and produces the same
  * headline for different topics.
  */
-async function isTitleTooSimilarToExisting(
+export async function isTitleTooSimilarToExisting(
   generatedTitle: string,
   inBatchTitles: string[] = []
 ): Promise<boolean> {

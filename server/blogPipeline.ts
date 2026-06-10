@@ -30,7 +30,7 @@
 import { db } from "./db.js";
 import { blogPosts } from "../shared/schema.js";
 import { eq, and, gte } from "drizzle-orm";
-import { generateBlogPost } from "./blogGenerator.js";
+import { generateBlogPost, isTitleTooSimilarToExisting } from "./blogGenerator.js";
 import { verifyBlogPost, computeContentHash } from "./blogMultiVerifier.js";
 import { autoFixBlogPost } from "./blogAutoFixer.js";
 
@@ -50,11 +50,18 @@ type BlogPostRow = typeof blogPosts.$inferSelect;
 
 // ─── Core: generate one post with automatic fix loop ─────────────────────────
 
-async function generateWithAutoFix(): Promise<{ title: string; status: string; compositeScore: number }> {
+async function generateWithAutoFix(inBatchTitles: string[] = []): Promise<{ title: string; status: string; compositeScore: number }> {
   console.log("[Pipeline] Generating new blog post…");
 
-  // Step 1: Generate
-  const raw = await generateBlogPost();
+  // Step 1: Generate (pass in-batch titles so pickUnusedTopic avoids them)
+  const raw = await generateBlogPost(inBatchTitles);
+
+  // Step 1b: Reject if the AI produced a title too similar to an existing post
+  const isDuplicate = await isTitleTooSimilarToExisting(raw.title, inBatchTitles);
+  if (isDuplicate) {
+    console.warn(`[Pipeline] Duplicate title detected — skipping: "${raw.title.substring(0, 60)}"`);
+    throw new Error(`Duplicate title skipped: "${raw.title.substring(0, 60)}"`);
+  }
 
   // Step 2: Verify
   let verification = await verifyBlogPost(raw.title, raw.content);
@@ -251,10 +258,12 @@ async function drainHumanReviewQueue(): Promise<void> {
 async function scheduledGenerationRun(): Promise<void> {
   console.log(`[Pipeline] Scheduled generation run — generating ${POSTS_PER_RUN} posts…`);
   const results: Array<{ title: string; status: string; compositeScore: number }> = [];
+  const inBatchTitles: string[] = []; // Track titles within this run to avoid same-batch duplicates
 
   for (let i = 0; i < POSTS_PER_RUN; i++) {
     try {
-      const result = await generateWithAutoFix();
+      const result = await generateWithAutoFix(inBatchTitles);
+      inBatchTitles.push(result.title);
       results.push(result);
     } catch (err) {
       console.error(`[Pipeline] Post ${i + 1}/${POSTS_PER_RUN} failed completely:`, err);
@@ -329,9 +338,11 @@ async function runCatchUpIfBehind(): Promise<void> {
       `running immediate catch-up (${CATCHUP_POSTS} posts)…`
     );
 
+    const catchupBatchTitles: string[] = [];
     for (let i = 0; i < CATCHUP_POSTS; i++) {
       try {
-        const result = await generateWithAutoFix();
+        const result = await generateWithAutoFix(catchupBatchTitles);
+        catchupBatchTitles.push(result.title);
         console.log(
           `[Pipeline] Catch-up ${i + 1}/${CATCHUP_POSTS}: "${result.title.substring(0, 60)}" → ${result.status}`
         );
