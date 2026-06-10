@@ -15,12 +15,11 @@
  *   7. If still failing after all attempts → leave in human_review queue
  *
  * SCHEDULE:
- *   - Generate 2 posts at 07:00 GMT
- *   - Generate 2 posts at 12:00 GMT
- *   - Generate 2 posts at 16:00 GMT
- *   - Generate 2 posts at 20:00 GMT  (= 8 posts/day)
+ *   - Generate 2 posts every Monday    at 09:00 GMT
+ *   - Generate 2 posts every Wednesday at 09:00 GMT
+ *   - Generate 2 posts every Friday    at 09:00 GMT  (= 6 posts/week)
  *   - Drain human review queue at :30 past every even hour (00:30, 02:30, …)
- *   - On startup: if no post published in 20h → immediate catch-up of 2 posts
+ *   - On startup: if no post published in 72h → immediate catch-up of 2 posts
  *
  * STATUS TRACKING:
  *   Fix attempt count is stored inside verificationDetails JSON so no schema
@@ -38,11 +37,15 @@ import { autoFixBlogPost } from "./blogAutoFixer.js";
 
 const MAX_FIX_ATTEMPTS = 5;          // Max auto-fix rounds before giving up on a post
 const MAX_DRAIN_ATTEMPTS = 5;        // Max attempts per drain cycle on stuck review-queue posts
-const POSTS_PER_RUN = 2;            // Posts generated per scheduled run (4 runs × 2 posts = 8/day)
+const POSTS_PER_RUN = 2;            // Posts generated per scheduled run (Mon/Wed/Fri × 2 = 6/week)
 const CATCHUP_POSTS = 2;            // Posts to generate immediately on startup if behind
-const CATCHUP_THRESHOLD_HOURS = 20; // Generate immediately if no post published in this many hours
+const CATCHUP_THRESHOLD_HOURS = 72; // Catch up only if no post in 3 days (matches MWF cadence)
 const INTER_POST_DELAY_MS = 3000;   // Delay between posts to avoid rate limits
 const INTER_FIX_DELAY_MS = 2000;    // Delay between fix iterations
+
+// Days of week that blog posts are generated (0=Sun, 1=Mon, 3=Wed, 5=Fri)
+const GENERATION_DAYS = new Set([1, 3, 5]); // Monday, Wednesday, Friday
+const GENERATION_HOUR_GMT = 9;              // 09:00 GMT
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -281,14 +284,43 @@ async function scheduledGenerationRun(): Promise<void> {
   );
 }
 
-// ─── Scheduler: compute ms until next target time (GMT) ──────────────────────
+// ─── Scheduler: compute ms until next Mon/Wed/Fri at 09:00 GMT ───────────────
 
-function msUntilNextGMT(hour: number, minute: number = 0): number {
+function msUntilNextGenerationDay(): number {
   const now = new Date();
-  const target = new Date(now);
-  target.setUTCHours(hour, minute, 0, 0);
-  if (target <= now) target.setUTCDate(target.getUTCDate() + 1);
-  return target.getTime() - now.getTime();
+  // Walk forward day by day (max 7 days) to find the next Mon/Wed/Fri at 09:00 GMT
+  for (let daysAhead = 0; daysAhead <= 7; daysAhead++) {
+    const candidate = new Date(now);
+    candidate.setUTCDate(candidate.getUTCDate() + daysAhead);
+    candidate.setUTCHours(GENERATION_HOUR_GMT, 0, 0, 0);
+    if (GENERATION_DAYS.has(candidate.getUTCDay()) && candidate > now) {
+      return candidate.getTime() - now.getTime();
+    }
+  }
+  // Fallback: 7 days (should never reach here)
+  return 7 * 24 * 60 * 60 * 1000;
+}
+
+function scheduleWeekly(fn: () => Promise<void>): void {
+  const scheduleNext = () => {
+    const delay = msUntilNextGenerationDay();
+    const nextRun = new Date(Date.now() + delay);
+    const dayName = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][nextRun.getUTCDay()];
+    console.log(
+      `[Pipeline] "generate-MWF" next run in ${Math.round(delay / 60000)} min ` +
+      `(${dayName} ${nextRun.toUTCString()})`
+    );
+    setTimeout(async () => {
+      try {
+        await fn();
+      } catch (err) {
+        console.error(`[Pipeline] "generate-MWF" run failed:`, err);
+      } finally {
+        scheduleNext(); // Always reschedule for the next MWF slot
+      }
+    }, delay);
+  };
+  scheduleNext();
 }
 
 function scheduleDaily(
@@ -298,7 +330,11 @@ function scheduleDaily(
   fn: () => Promise<void>
 ): void {
   const scheduleNext = () => {
-    const delay = msUntilNextGMT(gmtHour, gmtMinute);
+    const now = new Date();
+    const target = new Date(now);
+    target.setUTCHours(gmtHour, gmtMinute, 0, 0);
+    if (target <= now) target.setUTCDate(target.getUTCDate() + 1);
+    const delay = target.getTime() - now.getTime();
     const nextRun = new Date(Date.now() + delay);
     console.log(
       `[Pipeline] "${label}" next run in ${Math.round(delay / 60000)} min ` +
@@ -310,7 +346,7 @@ function scheduleDaily(
       } catch (err) {
         console.error(`[Pipeline] "${label}" run failed:`, err);
       } finally {
-        scheduleNext(); // Always reschedule
+        scheduleNext();
       }
     }, delay);
   };
@@ -366,11 +402,8 @@ export function startBlogPipeline(): void {
   // Immediate catch-up on startup (runs in background, 10s delay so DB is ready)
   setTimeout(() => runCatchUpIfBehind(), 10_000);
 
-  // Generation runs: 07:00, 12:00, 16:00, 20:00 GMT (4 runs × 2 posts = 8/day)
-  scheduleDaily("generate-07:00", 7,  0, scheduledGenerationRun);
-  scheduleDaily("generate-12:00", 12, 0, scheduledGenerationRun);
-  scheduleDaily("generate-16:00", 16, 0, scheduledGenerationRun);
-  scheduleDaily("generate-20:00", 20, 0, scheduledGenerationRun);
+  // Generation: Monday, Wednesday, Friday at 09:00 GMT — 2 posts each = 6 posts/week
+  scheduleWeekly(scheduledGenerationRun);
 
   // Human review queue drain: every 2 hours at :30 past (00:30, 02:30, …)
   const drainHours = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22];
@@ -379,7 +412,7 @@ export function startBlogPipeline(): void {
   }
 
   console.log(
-    "[Pipeline] Schedules set: generate at 07:00, 12:00, 16:00, 20:00 GMT | " +
+    "[Pipeline] Schedules set: generate Mon/Wed/Fri at 09:00 GMT (2 posts each) | " +
     "drain queue every 2 hours."
   );
 }
