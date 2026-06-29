@@ -858,13 +858,7 @@ function topicFingerprint(text: string): Set<string> {
 
 function fingerprintOverlap(a: Set<string>, b: Set<string>): number {
   let shared = 0;
-
-  a.forEach((w) => {
-    if (b.has(w)) {
-      shared++;
-    }
-  });
-
+  for (const w of a) if (b.has(w)) shared++;
   const denominator = Math.min(a.size, b.size);
   return denominator === 0 ? 0 : shared / denominator;
 }
@@ -875,42 +869,6 @@ function slugify(text: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .substring(0, 200);
-}
-
-const MIN_BLOG_WORDS = 1200;
-
-function stripHtml(content: string): string {
-  return content
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&[a-zA-Z0-9#]+;/g, " ");
-}
-
-function countContentWords(content: string): number {
-  return stripHtml(content).trim().split(/\s+/).filter(Boolean).length;
-}
-
-function isOpenAiComplete(finishReason: unknown): boolean {
-  return !finishReason || finishReason === "stop";
-}
-
-function isGeminiComplete(finishReason: unknown): boolean {
-  return !finishReason || finishReason === "STOP";
-}
-
-function hasMinimumArticleLength(
-  content: string,
-  providerLabel: string,
-): boolean {
-  const wordCount = countContentWords(content);
-  if (wordCount < MIN_BLOG_WORDS) {
-    console.warn(
-      `[Blog Generator] ${providerLabel} returned short content (${wordCount} words). Minimum is ${MIN_BLOG_WORDS}. Trying next writer.`,
-    );
-    return false;
-  }
-  return true;
 }
 
 /**
@@ -1072,8 +1030,6 @@ CRITICAL RULES - FOLLOW EXACTLY:
    - Practical and actionable advice
    - Well-structured with clear headings
    - 1500-2200 words
-   - Minimum accepted length is ${MIN_BLOG_WORDS} words; do not return a short summary or partial article
-   - Complete every section fully before writing the disclaimer
 
 6. FORMAT (HTML):
    - Use <h2> for main sections
@@ -1140,24 +1096,8 @@ Return ONLY valid JSON.`;
           console.warn(`[Blog Generator] OpenAI ${oaiModel} empty content`);
           continue;
         }
-        const finishReason = oaiData.choices?.[0]?.finish_reason;
-        if (!isOpenAiComplete(finishReason)) {
-          console.warn(
-            `[Blog Generator] OpenAI ${oaiModel} incomplete response (finish_reason: ${finishReason}). Trying next writer.`,
-          );
-          continue;
-        }
 
         const parsed = JSON.parse(oaiContent);
-        if (
-          typeof parsed.content !== "string" ||
-          parsed.content.trim().length === 0
-        ) {
-          console.warn(
-            `[Blog Generator] OpenAI ${oaiModel} returned invalid or empty article content`,
-          );
-          continue;
-        }
         let finalContent = correctContent(parsed.content || "");
 
         // Ensure disclaimer
@@ -1166,10 +1106,6 @@ Return ONLY valid JSON.`;
           finalContent.includes("Important Notice:");
         if (!contentHasDisclaimerNow) {
           finalContent += `\n<div class="disclaimer-box bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 my-6"><p class="text-sm"><strong>Important Notice:</strong> This article provides general information only and does not constitute immigration or legal advice. Requirements and fees may change. Always verify current information on <a href="https://www.gov.uk/innovator-founder-visa" target="_blank" rel="noopener" class="text-primary underline">GOV.UK</a> and consider consulting a qualified immigration adviser for your specific circumstances.</p></div>`;
-        }
-
-        if (!hasMinimumArticleLength(finalContent, `OpenAI ${oaiModel}`)) {
-          continue;
         }
 
         // Validate
@@ -1316,16 +1252,8 @@ Return ONLY valid JSON.`;
           continue; // other error — try next key
         }
 
-        const candidate = geminiData?.candidates?.[0];
-        const finishReason = candidate?.finishReason;
-        if (!isGeminiComplete(finishReason)) {
-          console.warn(
-            `[Blog Generator] Gemini ${geminiModel} incomplete response (finishReason: ${finishReason}). Trying next key/model.`,
-          );
-          continue;
-        }
-
-        const content = candidate?.content?.parts?.[0]?.text || "";
+        const content =
+          geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
         if (!content) {
           console.warn(
             `[Blog Generator] Gemini ${geminiModel} returned empty content`,
@@ -1334,15 +1262,6 @@ Return ONLY valid JSON.`;
         }
 
         const parsed = JSON.parse(content);
-        if (
-          typeof parsed.content !== "string" ||
-          parsed.content.trim().length === 0
-        ) {
-          console.warn(
-            `[Blog Generator] Gemini ${geminiModel} returned invalid or empty article content`,
-          );
-          continue; // next key
-        }
 
         // MANDATORY CONTENT REQUIREMENTS CHECK
         const contentHasDisclaimer =
@@ -1417,11 +1336,6 @@ Return ONLY valid JSON.`;
 
         // Final content is already corrected above
         const correctedContent = finalContent;
-        if (
-          !hasMinimumArticleLength(correctedContent, `Gemini ${geminiModel}`)
-        ) {
-          continue; // next key/model
-        }
 
         // Add unique slug with date
         const dateSlug = new Date().toISOString().split("T")[0];

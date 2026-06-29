@@ -1,12 +1,12 @@
 /**
  * PhD-Level Multi-Model SEO Strategy Engine
- * 
+ *
  * Uses all 4 AI models in parallel across 4 specialised domains:
  * - Gemini: GBP & local SEO strategy + competitor positioning
  * - OpenAI GPT-4o: Technical SEO + keyword gap analysis
  * - Claude (Anthropic): Content strategy + entity building + authority
  * - Qwen: Blog content calendar + service page templates + GBP posts
- * 
+ *
  * Based on the 20-prompt SEO framework, adapted for multi-model verification.
  */
 
@@ -16,7 +16,9 @@ import { GoogleGenAI } from "@google/genai";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const gemini = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_2 || "" });
+const gemini = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_2 || "",
+});
 
 export interface SEOBusinessContext {
   businessName: string;
@@ -97,7 +99,12 @@ export interface SEOStrategyResult {
   gbpStrategy: {
     categoryRecommendations: string[];
     descriptionVersions: string[];
-    postingCalendar: { week: number; topic: string; type: string; copy: string }[];
+    postingCalendar: {
+      week: number;
+      topic: string;
+      type: string;
+      copy: string;
+    }[];
     attributesToAdd: string[];
     photoStrategy: string;
   };
@@ -107,40 +114,81 @@ export interface SEOStrategyResult {
     internalLinkingOpportunities: string[];
     pageSpeedRecommendations: string[];
     technicalAuditChecklist: string[];
-    newPagesNeeded: { urlSlug: string; titleTag: string; h1: string; metaDescription: string; contentOutline: string[] }[];
+    newPagesNeeded: {
+      urlSlug: string;
+      titleTag: string;
+      h1: string;
+      metaDescription: string;
+      contentOutline: string[];
+    }[];
   };
   authorityBuilding: {
-    linkBuildingOpportunities: { source: string; type: string; strategy: string }[];
+    linkBuildingOpportunities: {
+      source: string;
+      type: string;
+      strategy: string;
+    }[];
     prOpportunities: string[];
     partnershipOpportunities: string[];
     reviewRequestScript: string;
-    reviewResponseTemplates: { fiveStar: string; fourStar: string; threeStar: string; oneTwo: string };
+    reviewResponseTemplates: {
+      fiveStar: string;
+      fourStar: string;
+      threeStar: string;
+      oneTwo: string;
+    };
   };
   competitorGap: {
-    topicGaps: { topic: string; competitorRanking: string; yourAction: string }[];
+    topicGaps: {
+      topic: string;
+      competitorRanking: string;
+      yourAction: string;
+    }[];
     contentGaps: string[];
     keywordGaps: string[];
     differentiationAngles: string[];
   };
   featuredSnippets: {
-    opportunities: { query: string; snippetType: string; contentFormat: string; answer: string }[];
+    opportunities: {
+      query: string;
+      snippetType: string;
+      contentFormat: string;
+      answer: string;
+    }[];
     voiceSearchQuestions: string[];
     peopleAlsoAsk: string[];
   };
   internationalSEO: {
-    countryStrategy: { country: string; language: string; priority: string; keyActions: string[] }[];
+    countryStrategy: {
+      country: string;
+      language: string;
+      priority: string;
+      keyActions: string[];
+    }[];
     hreflangRecommendations: string[];
     currencyAndLocalisation: string[];
   };
   cro: {
-    landingPageRecommendations: { page: string; issue: string; fix: string; expectedImpact: string }[];
+    landingPageRecommendations: {
+      page: string;
+      issue: string;
+      fix: string;
+      expectedImpact: string;
+    }[];
     ctaOptimisation: string[];
     trustSignals: string[];
     funnelImprovements: string[];
   };
   faqLibrary: { question: string; answer: string }[];
   contentPillars: { pillar: string; supportingTopics: string[] }[];
-  homepageCopy: { headline: string; subheadline: string; ctaText: string; valueProp: string; servicesOverview: string; socialProof: string };
+  homepageCopy: {
+    headline: string;
+    subheadline: string;
+    ctaText: string;
+    valueProp: string;
+    servicesOverview: string;
+    socialProof: string;
+  };
   metaTags: { page: string; titleTag: string; metaDescription: string }[];
   verificationNotes: string;
   modelContributions: {
@@ -399,39 +447,50 @@ Return as structured JSON:
 }
 
 async function callQwen(prompt: string): Promise<string> {
-  const response = await fetch("https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${process.env.QWEN_API_KEY}`,
-      "Content-Type": "application/json",
+  const response = await fetch(
+    "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.QWEN_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "qwen-plus",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a PhD-level SEO strategist and content specialist. Always respond with valid JSON only — no markdown, no explanations, just the JSON object.",
+          },
+          { role: "user", content: prompt },
+        ],
+        max_tokens: 8000,
+        temperature: 0.3,
+        response_format: { type: "json_object" },
+      }),
     },
-    body: JSON.stringify({
-      model: "qwen-plus",
-      messages: [
-        {
-          role: "system",
-          content: "You are a PhD-level SEO strategist and content specialist. Always respond with valid JSON only — no markdown, no explanations, just the JSON object."
-        },
-        { role: "user", content: prompt }
-      ],
-      max_tokens: 8000,
-      temperature: 0.3,
-      response_format: { type: "json_object" }
-    })
-  });
+  );
 
   if (!response.ok) {
-    throw new Error(`Qwen API error: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Qwen API error: ${response.status} ${response.statusText}`,
+    );
   }
 
-  const data = await response.json() as { choices?: { message?: { content?: string } }[] };
+  const data = (await response.json()) as {
+    choices?: { message?: { content?: string } }[];
+  };
   return data.choices?.[0]?.message?.content || "{}";
 }
 
 function safeParseJSON(raw: string): Record<string, unknown> {
   try {
     // Extract JSON if wrapped in markdown code blocks
-    const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const cleaned = raw
+      .replace(/```json\n?/g, "")
+      .replace(/```\n?/g, "")
+      .trim();
     return JSON.parse(cleaned);
   } catch {
     // Try to extract first JSON object
@@ -447,147 +506,212 @@ function safeParseJSON(raw: string): Record<string, unknown> {
   }
 }
 
-export async function generateSEOStrategy(ctx: SEOBusinessContext): Promise<SEOStrategyResult> {
+export async function generateSEOStrategy(
+  ctx: SEOBusinessContext,
+): Promise<SEOStrategyResult> {
   const startTime = Date.now();
-  console.log(`[SEO Engine] Starting quad-model SEO analysis for: ${ctx.businessName}`);
+  console.log(
+    `[SEO Engine] Starting quad-model SEO analysis for: ${ctx.businessName}`,
+  );
 
   // Run all 4 models in parallel
-  const [geminiResult, openaiResult, claudeResult, qwenResult] = await Promise.allSettled([
-    // Gemini: Local SEO + GBP
-    (async () => {
-      const result = await gemini.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: buildGeminiPrompt(ctx),
-        config: {
-          temperature: 0.3,
-          maxOutputTokens: 8192,
-          responseMimeType: "application/json"
-        }
-      });
-      return safeParseJSON(result.text ?? "{}");
-    })(),
-
-    // OpenAI: Technical SEO + Keywords
-    (async () => {
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are a PhD-level technical SEO and keyword strategist. Respond with valid JSON only — no markdown, no explanations."
+  const [geminiResult, openaiResult, claudeResult, qwenResult] =
+    await Promise.allSettled([
+      // Gemini: Local SEO + GBP
+      (async () => {
+        const result = await gemini.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: buildGeminiPrompt(ctx),
+          config: {
+            temperature: 0.3,
+            maxOutputTokens: 8192,
+            responseMimeType: "application/json",
           },
-          { role: "user", content: buildOpenAIPrompt(ctx) }
-        ],
-        max_tokens: 8000,
-        temperature: 0.3,
-        response_format: { type: "json_object" }
-      });
-      return safeParseJSON(response.choices[0].message.content || "{}");
-    })(),
+        });
+        return safeParseJSON(result.text ?? "{}");
+      })(),
 
-    // Claude: Content + Entity + Authority
-    (async () => {
-      const response = await anthropic.messages.create({
-        model: "claude-opus-4-5",
-        max_tokens: 16000,
-        temperature: 0.3 as number,
-        system: "You are a PhD-level SEO content strategist and entity optimisation specialist. Respond with valid JSON only — no markdown, no explanations outside the JSON structure.",
-        messages: [{ role: "user", content: buildClaudePrompt(ctx) }]
-      });
-      const content = response.content[0];
-      return safeParseJSON(content.type === "text" ? content.text : "{}");
-    })(),
+      // OpenAI: Technical SEO + Keywords
+      (async () => {
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a PhD-level technical SEO and keyword strategist. Respond with valid JSON only — no markdown, no explanations.",
+            },
+            { role: "user", content: buildOpenAIPrompt(ctx) },
+          ],
+          max_tokens: 8000,
+          temperature: 0.3,
+          response_format: { type: "json_object" },
+        });
+        return safeParseJSON(response.choices[0].message.content || "{}");
+      })(),
 
-    // Qwen: Content Production
-    (async () => {
-      const raw = await callQwen(buildQwenPrompt(ctx));
-      return safeParseJSON(raw);
-    })(),
-  ]);
+      // Claude: Content + Entity + Authority
+      (async () => {
+        const response = await anthropic.messages.create({
+          model: "claude-opus-4-5",
+          max_tokens: 16000,
+          temperature: 0.3 as number,
+          system:
+            "You are a PhD-level SEO content strategist and entity optimisation specialist. Respond with valid JSON only — no markdown, no explanations outside the JSON structure.",
+          messages: [{ role: "user", content: buildClaudePrompt(ctx) }],
+        });
+        const content = response.content[0];
+        return safeParseJSON(content.type === "text" ? content.text : "{}");
+      })(),
 
-  const geminiData = geminiResult.status === "fulfilled" ? geminiResult.value : {};
-  const openaiData = openaiResult.status === "fulfilled" ? openaiResult.value : {};
-  const claudeData = claudeResult.status === "fulfilled" ? claudeResult.value : {};
+      // Qwen: Content Production
+      (async () => {
+        const raw = await callQwen(buildQwenPrompt(ctx));
+        return safeParseJSON(raw);
+      })(),
+    ]);
+
+  const geminiData =
+    geminiResult.status === "fulfilled" ? geminiResult.value : {};
+  const openaiData =
+    openaiResult.status === "fulfilled" ? openaiResult.value : {};
+  const claudeData =
+    claudeResult.status === "fulfilled" ? claudeResult.value : {};
   const qwenData = qwenResult.status === "fulfilled" ? qwenResult.value : {};
 
-  if (geminiResult.status === "rejected") console.error("[SEO Engine] Gemini failed:", geminiResult.reason);
-  if (openaiResult.status === "rejected") console.error("[SEO Engine] OpenAI failed:", openaiResult.reason);
-  if (claudeResult.status === "rejected") console.error("[SEO Engine] Claude failed:", claudeResult.reason);
-  if (qwenResult.status === "rejected") console.error("[SEO Engine] Qwen failed:", qwenResult.reason);
+  if (geminiResult.status === "rejected")
+    console.error("[SEO Engine] Gemini failed:", geminiResult.reason);
+  if (openaiResult.status === "rejected")
+    console.error("[SEO Engine] OpenAI failed:", openaiResult.reason);
+  if (claudeResult.status === "rejected")
+    console.error("[SEO Engine] Claude failed:", claudeResult.reason);
+  if (qwenResult.status === "rejected")
+    console.error("[SEO Engine] Qwen failed:", qwenResult.reason);
 
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
   console.log(`[SEO Engine] All models completed in ${elapsed}s`);
 
   // Score aggregation
   const scores = {
-    technical: Number((openaiData as Record<string, unknown>)?.technicalScore) || 65,
+    technical:
+      Number((openaiData as Record<string, unknown>)?.technicalScore) || 65,
     content: Number((qwenData as Record<string, unknown>)?.contentScore) || 60,
-    authority: Number((claudeData as Record<string, unknown>)?.authorityScore) || 55,
-    local: ((geminiData as Record<string, unknown>)?.localSEOScore as Record<string, number>)?.local || 70,
+    authority:
+      Number((claudeData as Record<string, unknown>)?.authorityScore) || 55,
+    local:
+      (
+        (geminiData as Record<string, unknown>)?.localSEOScore as Record<
+          string,
+          number
+        >
+      )?.local || 70,
     overall: 0,
   };
-  scores.overall = Math.round((scores.technical + scores.content + scores.authority + scores.local) / 4);
+  scores.overall = Math.round(
+    (scores.technical + scores.content + scores.authority + scores.local) / 4,
+  );
 
   // Build critical actions from all models
   const criticalActions: SEOAction[] = [
-    ...(((geminiData as Record<string, unknown>)?.gbpQuickWins as string[]) || []).slice(0, 3).map((a: string) => ({
-      priority: "critical" as const,
-      category: "Local SEO / GBP",
-      action: a,
-      impact: "High visibility improvement in Google Maps pack",
-      effort: "quick-win" as const,
-      metric: "GBP impressions + map pack ranking"
-    })),
-    ...(((openaiData as Record<string, unknown>)?.technicalFixes as string[]) || []).slice(0, 3).map((a: string) => ({
-      priority: "high" as const,
-      category: "Technical SEO",
-      action: a,
-      impact: "Improved crawlability and indexing",
-      effort: "week" as const,
-      metric: "Core Web Vitals scores + indexing coverage"
-    })),
+    ...(
+      ((geminiData as Record<string, unknown>)?.gbpQuickWins as string[]) || []
+    )
+      .slice(0, 3)
+      .map((a: string) => ({
+        priority: "critical" as const,
+        category: "Local SEO / GBP",
+        action: a,
+        impact: "High visibility improvement in Google Maps pack",
+        effort: "quick-win" as const,
+        metric: "GBP impressions + map pack ranking",
+      })),
+    ...(
+      ((openaiData as Record<string, unknown>)?.technicalFixes as string[]) ||
+      []
+    )
+      .slice(0, 3)
+      .map((a: string) => ({
+        priority: "high" as const,
+        category: "Technical SEO",
+        action: a,
+        impact: "Improved crawlability and indexing",
+        effort: "week" as const,
+        metric: "Core Web Vitals scores + indexing coverage",
+      })),
   ];
 
   // Quick wins
   const quickWins: SEOAction[] = [
-    ...(((openaiData as Record<string, unknown>)?.page2Goldmine as Array<{keyword: string; estimatedPosition: number; fixes: string[]}>)|| []).slice(0, 5).map((item) => ({
-      priority: "high" as const,
-      category: "Page-2 Keywords",
-      action: `Optimise for "${item.keyword}" (currently ~pos ${item.estimatedPosition}): ${item.fixes?.slice(0, 2).join("; ")}`,
-      impact: "Move from page 2 to page 1 — 5-10x click increase",
-      effort: "week" as const,
-      metric: `Ranking position for "${item.keyword}"`
-    })),
+    ...(
+      ((openaiData as Record<string, unknown>)?.page2Goldmine as Array<{
+        keyword: string;
+        estimatedPosition: number;
+        fixes: string[];
+      }>) || []
+    )
+      .slice(0, 5)
+      .map((item) => ({
+        priority: "high" as const,
+        category: "Page-2 Keywords",
+        action: `Optimise for "${item.keyword}" (currently ~pos ${item.estimatedPosition}): ${item.fixes?.slice(0, 2).join("; ")}`,
+        impact: "Move from page 2 to page 1 — 5-10x click increase",
+        effort: "week" as const,
+        metric: `Ranking position for "${item.keyword}"`,
+      })),
   ];
 
   // 30-day plan from OpenAI sprint
-  const thirtyDayPlan: SEOAction[] = (((openaiData as Record<string, unknown>)?.thirtyDaySprint as Array<{week: number; actions: string[]}>) || []).flatMap(week =>
+  const thirtyDayPlan: SEOAction[] = (
+    ((openaiData as Record<string, unknown>)?.thirtyDaySprint as Array<{
+      week: number;
+      actions: string[];
+    }>) || []
+  ).flatMap((week) =>
     (week.actions || []).map((action: string) => ({
       priority: "medium" as const,
       category: `Week ${week.week} Technical`,
       action,
       impact: "Compounding SEO improvement",
       effort: "week" as const,
-      metric: "Organic rankings + traffic"
-    }))
+      metric: "Organic rankings + traffic",
+    })),
   );
 
   // 90-day plan from Claude's editorial calendar (weeks 7-12) + entity building steps + link building
-  const claudeEditorial = ((claudeData as Record<string, unknown>)?.twelveWeekEditorial as Array<{week: number; title: string; type: string; targetKeyword: string}>) || [];
-  const claudeEntitySteps = ((claudeData as Record<string, unknown>)?.entityBuildingSteps as string[]) || [];
-  const claudeLinkBuilding = ((claudeData as Record<string, unknown>)?.linkBuildingOpportunities as Array<{source: string; type: string; strategy: string}>) || [];
-  const claudePR = ((claudeData as Record<string, unknown>)?.prOpportunities as string[]) || [];
+  const claudeEditorial =
+    ((claudeData as Record<string, unknown>)?.twelveWeekEditorial as Array<{
+      week: number;
+      title: string;
+      type: string;
+      targetKeyword: string;
+    }>) || [];
+  const claudeEntitySteps =
+    ((claudeData as Record<string, unknown>)
+      ?.entityBuildingSteps as string[]) || [];
+  const claudeLinkBuilding =
+    ((claudeData as Record<string, unknown>)
+      ?.linkBuildingOpportunities as Array<{
+      source: string;
+      type: string;
+      strategy: string;
+    }>) || [];
+  const claudePR =
+    ((claudeData as Record<string, unknown>)?.prOpportunities as string[]) ||
+    [];
 
   const ninetyDayPlan: SEOAction[] = [
     // Weeks 7-12 from editorial calendar
-    ...claudeEditorial.filter(i => i.week >= 7).slice(0, 4).map((item) => ({
-      priority: "medium" as const,
-      category: `Week ${item.week} Content`,
-      action: `Publish: "${item.title}" (${item.type}) — targeting "${item.targetKeyword}"`,
-      impact: "Topical authority and organic traffic compound growth",
-      effort: "month" as const,
-      metric: `Ranking + organic traffic for "${item.targetKeyword}"`
-    })),
+    ...claudeEditorial
+      .filter((i) => i.week >= 7)
+      .slice(0, 4)
+      .map((item) => ({
+        priority: "medium" as const,
+        category: `Week ${item.week} Content`,
+        action: `Publish: "${item.title}" (${item.type}) — targeting "${item.targetKeyword}"`,
+        impact: "Topical authority and organic traffic compound growth",
+        effort: "month" as const,
+        metric: `Ranking + organic traffic for "${item.targetKeyword}"`,
+      })),
     // Entity building steps
     ...claudeEntitySteps.slice(0, 4).map((step: string) => ({
       priority: "medium" as const,
@@ -595,7 +719,7 @@ export async function generateSEOStrategy(ctx: SEOBusinessContext): Promise<SEOS
       action: step,
       impact: "Knowledge panel acquisition and branded search growth",
       effort: "quarter" as const,
-      metric: "Domain authority + branded searches"
+      metric: "Domain authority + branded searches",
     })),
     // Link building
     ...claudeLinkBuilding.slice(0, 4).map((l) => ({
@@ -604,7 +728,7 @@ export async function generateSEOStrategy(ctx: SEOBusinessContext): Promise<SEOS
       action: `${l.type}: ${l.source} — ${l.strategy}`,
       impact: "Domain authority improvement",
       effort: "month" as const,
-      metric: "Referring domains + DA score"
+      metric: "Referring domains + DA score",
     })),
     // PR opportunities
     ...claudePR.slice(0, 3).map((pr: string) => ({
@@ -613,66 +737,119 @@ export async function generateSEOStrategy(ctx: SEOBusinessContext): Promise<SEOS
       action: pr,
       impact: "High-authority backlinks + brand awareness",
       effort: "quarter" as const,
-      metric: "Press mentions + editorial links"
+      metric: "Press mentions + editorial links",
     })),
   ];
 
   // Content calendar from Qwen (blog) + Claude (12-week editorial)
   const contentCalendar: ContentPiece[] = [
-    ...(((qwenData as Record<string, unknown>)?.blogCalendar as Array<{weekNumber: number; title: string; targetKeyword: string; outline: string[]; wordCount: number}>) || []).slice(0, 8).map((item) => ({
-      title: item.title,
-      type: "blog" as const,
-      targetKeyword: item.targetKeyword,
-      outline: item.outline || [],
-      wordCount: item.wordCount || 1500,
-      weekNumber: item.weekNumber,
-    })),
-    ...(((claudeData as Record<string, unknown>)?.twelveWeekEditorial as Array<{week: number; title: string; type: string; targetKeyword: string; outline: string[]; wordCount: number}>) || []).slice(0, 4).map((item) => ({
-      title: item.title,
-      type: (item.type as ContentPiece["type"]) || "blog",
-      targetKeyword: item.targetKeyword,
-      outline: item.outline || [],
-      wordCount: item.wordCount || 1500,
-      weekNumber: item.week,
-    })),
-    ...(((qwenData as Record<string, unknown>)?.servicePages as Array<{pageName: string; urlSlug: string; h1: string}>) || []).slice(0, 3).map((sp) => ({
-      title: sp.pageName,
-      type: "service-page" as const,
-      targetKeyword: sp.h1,
-      outline: [],
-      wordCount: 800,
-    })),
+    ...(
+      ((qwenData as Record<string, unknown>)?.blogCalendar as Array<{
+        weekNumber: number;
+        title: string;
+        targetKeyword: string;
+        outline: string[];
+        wordCount: number;
+      }>) || []
+    )
+      .slice(0, 8)
+      .map((item) => ({
+        title: item.title,
+        type: "blog" as const,
+        targetKeyword: item.targetKeyword,
+        outline: item.outline || [],
+        wordCount: item.wordCount || 1500,
+        weekNumber: item.weekNumber,
+      })),
+    ...(
+      ((claudeData as Record<string, unknown>)?.twelveWeekEditorial as Array<{
+        week: number;
+        title: string;
+        type: string;
+        targetKeyword: string;
+        outline: string[];
+        wordCount: number;
+      }>) || []
+    )
+      .slice(0, 4)
+      .map((item) => ({
+        title: item.title,
+        type: (item.type as ContentPiece["type"]) || "blog",
+        targetKeyword: item.targetKeyword,
+        outline: item.outline || [],
+        wordCount: item.wordCount || 1500,
+        weekNumber: item.week,
+      })),
+    ...(
+      ((qwenData as Record<string, unknown>)?.servicePages as Array<{
+        pageName: string;
+        urlSlug: string;
+        h1: string;
+      }>) || []
+    )
+      .slice(0, 3)
+      .map((sp) => ({
+        title: sp.pageName,
+        type: "service-page" as const,
+        targetKeyword: sp.h1,
+        outline: [],
+        wordCount: 800,
+      })),
   ];
 
   // Keyword opportunities from both Gemini and OpenAI
   const keywordOpportunities: KeywordOpportunity[] = [
-    ...(((geminiData as Record<string, unknown>)?.keywordMap as Array<{keyword: string; intent: string; action: string; page: string}>) || []).slice(0, 10).map((k) => ({
-      keyword: k.keyword,
-      intent: (k.intent as KeywordOpportunity["intent"]) || "solution-aware",
-      difficulty: "medium" as const,
-      action: (k.action as KeywordOpportunity["action"]) || "optimize-existing",
-      pageRecommendation: k.page || "",
-    })),
-    ...(((openaiData as Record<string, unknown>)?.keywordGaps as Array<{keyword: string; intent: string; difficulty: string; action: string; pageRecommendation: string}>) || []).slice(0, 10).map((k) => ({
-      keyword: k.keyword,
-      intent: (k.intent as KeywordOpportunity["intent"]) || "problem-aware",
-      difficulty: (k.difficulty as KeywordOpportunity["difficulty"]) || "medium",
-      action: (k.action as KeywordOpportunity["action"]) || "create-new",
-      pageRecommendation: k.pageRecommendation || "",
-    })),
+    ...(
+      ((geminiData as Record<string, unknown>)?.keywordMap as Array<{
+        keyword: string;
+        intent: string;
+        action: string;
+        page: string;
+      }>) || []
+    )
+      .slice(0, 10)
+      .map((k) => ({
+        keyword: k.keyword,
+        intent: (k.intent as KeywordOpportunity["intent"]) || "solution-aware",
+        difficulty: "medium" as const,
+        action:
+          (k.action as KeywordOpportunity["action"]) || "optimize-existing",
+        pageRecommendation: k.page || "",
+      })),
+    ...(
+      ((openaiData as Record<string, unknown>)?.keywordGaps as Array<{
+        keyword: string;
+        intent: string;
+        difficulty: string;
+        action: string;
+        pageRecommendation: string;
+      }>) || []
+    )
+      .slice(0, 10)
+      .map((k) => ({
+        keyword: k.keyword,
+        intent: (k.intent as KeywordOpportunity["intent"]) || "problem-aware",
+        difficulty:
+          (k.difficulty as KeywordOpportunity["difficulty"]) || "medium",
+        action: (k.action as KeywordOpportunity["action"]) || "create-new",
+        pageRecommendation: k.pageRecommendation || "",
+      })),
   ];
 
   // Build executive summary
   const summaries = [
     (geminiData as Record<string, unknown>)?.executiveSummaryLocal as string,
-    (openaiData as Record<string, unknown>)?.executiveSummaryTechnical as string,
-    (claudeData as Record<string, unknown>)?.executiveSummaryAuthority as string,
+    (openaiData as Record<string, unknown>)
+      ?.executiveSummaryTechnical as string,
+    (claudeData as Record<string, unknown>)
+      ?.executiveSummaryAuthority as string,
     (qwenData as Record<string, unknown>)?.executiveSummaryContent as string,
   ].filter(Boolean);
 
-  const executiveSummary = summaries.length > 0
-    ? summaries.join(" | ")
-    : `Comprehensive SEO analysis completed for ${ctx.businessName}. Overall score: ${scores.overall}/100. Focus on local SEO (${scores.local}/100), technical fixes (${scores.technical}/100), content production (${scores.content}/100), and authority building (${scores.authority}/100).`;
+  const executiveSummary =
+    summaries.length > 0
+      ? summaries.join(" | ")
+      : `Comprehensive SEO analysis completed for ${ctx.businessName}. Overall score: ${scores.overall}/100. Focus on local SEO (${scores.local}/100), technical fixes (${scores.technical}/100), content production (${scores.content}/100), and authority building (${scores.authority}/100).`;
 
   return {
     generatedAt: new Date().toISOString(),
@@ -686,88 +863,230 @@ export async function generateSEOStrategy(ctx: SEOBusinessContext): Promise<SEOS
     contentCalendar,
     keywordOpportunities,
     entityOptimization: {
-      schemaRecommendations: ((claudeData as Record<string, unknown>)?.schemaRecommendations as string[]) || [],
-      entityBuildingSteps: ((claudeData as Record<string, unknown>)?.entityBuildingSteps as string[]) || [],
-      knowledgePanelStrategy: ((claudeData as Record<string, unknown>)?.knowledgePanelStrategy as string) || "",
-      citationAuditFindings: ((claudeData as Record<string, unknown>)?.citationAuditFindings as string[]) || [],
-      eeaatSignals: ((claudeData as Record<string, unknown>)?.eeaatSignals as string[]) || [],
+      schemaRecommendations:
+        ((claudeData as Record<string, unknown>)
+          ?.schemaRecommendations as string[]) || [],
+      entityBuildingSteps:
+        ((claudeData as Record<string, unknown>)
+          ?.entityBuildingSteps as string[]) || [],
+      knowledgePanelStrategy:
+        ((claudeData as Record<string, unknown>)
+          ?.knowledgePanelStrategy as string) || "",
+      citationAuditFindings:
+        ((claudeData as Record<string, unknown>)
+          ?.citationAuditFindings as string[]) || [],
+      eeaatSignals:
+        ((claudeData as Record<string, unknown>)?.eeaatSignals as string[]) ||
+        [],
     },
     gbpStrategy: {
-      categoryRecommendations: ((geminiData as Record<string, unknown>)?.categoryRecommendations as string[]) || [],
-      descriptionVersions: ((geminiData as Record<string, unknown>)?.descriptionVersions as string[]) || [],
+      categoryRecommendations:
+        ((geminiData as Record<string, unknown>)
+          ?.categoryRecommendations as string[]) || [],
+      descriptionVersions:
+        ((geminiData as Record<string, unknown>)
+          ?.descriptionVersions as string[]) || [],
       postingCalendar: (() => {
-        const geminiPosts = ((geminiData as Record<string, unknown>)?.postingCalendar as Array<Record<string, unknown>>) || [];
-        const qwenPosts = ((qwenData as Record<string, unknown>)?.gbpPosts as Array<Record<string, unknown>>) || [];
+        const geminiPosts =
+          ((geminiData as Record<string, unknown>)?.postingCalendar as Array<
+            Record<string, unknown>
+          >) || [];
+        const qwenPosts =
+          ((qwenData as Record<string, unknown>)?.gbpPosts as Array<
+            Record<string, unknown>
+          >) || [];
         const source = geminiPosts.length > 0 ? geminiPosts : qwenPosts;
-        return source.map(p => ({
+        return source.map((p) => ({
           week: Number(p.week) || 1,
           topic: (p.topic as string) || (p.type as string) || "GBP Update",
           type: (p.type as string) || "update",
           copy: (p.copy as string) || "",
         }));
       })(),
-      attributesToAdd: ((geminiData as Record<string, unknown>)?.attributesToAdd as string[]) || [],
-      photoStrategy: "Upload 3-5 geotagged photos per week: week 1-2 (team/office), week 3-4 (before/after work), week 5-6 (location/neighbourhood), week 7-8 (client projects/results). Name files: [service]-[location]-[month]-[year].jpg",
+      attributesToAdd:
+        ((geminiData as Record<string, unknown>)
+          ?.attributesToAdd as string[]) || [],
+      photoStrategy:
+        "Upload 3-5 geotagged photos per week: week 1-2 (team/office), week 3-4 (before/after work), week 5-6 (location/neighbourhood), week 7-8 (client projects/results). Name files: [service]-[location]-[month]-[year].jpg",
     },
     technicalSEO: {
-      coreWebVitals: ((openaiData as Record<string, unknown>)?.coreWebVitals as string[]) || [],
-      structuredDataGaps: ((openaiData as Record<string, unknown>)?.technicalFixes as string[]) || [],
-      internalLinkingOpportunities: (((openaiData as Record<string, unknown>)?.internalLinking as Array<{from: string; to: string; anchorText: string}>) || []).map(l => `${l.from} → ${l.to} (anchor: "${l.anchorText}")`),
-      pageSpeedRecommendations: ((openaiData as Record<string, unknown>)?.coreWebVitals as string[]) || [],
-      technicalAuditChecklist: ((openaiData as Record<string, unknown>)?.technicalFixes as string[]) || [],
-      newPagesNeeded: ((openaiData as Record<string, unknown>)?.newPagesNeeded as { urlSlug: string; titleTag: string; h1: string; metaDescription: string; contentOutline: string[] }[]) || [],
+      coreWebVitals:
+        ((openaiData as Record<string, unknown>)?.coreWebVitals as string[]) ||
+        [],
+      structuredDataGaps:
+        ((openaiData as Record<string, unknown>)?.technicalFixes as string[]) ||
+        [],
+      internalLinkingOpportunities: (
+        ((openaiData as Record<string, unknown>)?.internalLinking as Array<{
+          from: string;
+          to: string;
+          anchorText: string;
+        }>) || []
+      ).map((l) => `${l.from} → ${l.to} (anchor: "${l.anchorText}")`),
+      pageSpeedRecommendations:
+        ((openaiData as Record<string, unknown>)?.coreWebVitals as string[]) ||
+        [],
+      technicalAuditChecklist:
+        ((openaiData as Record<string, unknown>)?.technicalFixes as string[]) ||
+        [],
+      newPagesNeeded:
+        ((openaiData as Record<string, unknown>)?.newPagesNeeded as {
+          urlSlug: string;
+          titleTag: string;
+          h1: string;
+          metaDescription: string;
+          contentOutline: string[];
+        }[]) || [],
     },
     authorityBuilding: {
-      linkBuildingOpportunities: (((claudeData as Record<string, unknown>)?.linkBuildingOpportunities as Array<{source: string; type: string; strategy: string}>) || []).map(l => ({
+      linkBuildingOpportunities: (
+        ((claudeData as Record<string, unknown>)
+          ?.linkBuildingOpportunities as Array<{
+          source: string;
+          type: string;
+          strategy: string;
+        }>) || []
+      ).map((l) => ({
         source: l.source || "",
         type: l.type || "",
         strategy: l.strategy || "",
       })),
-      prOpportunities: ((claudeData as Record<string, unknown>)?.prOpportunities as string[]) || [],
-      partnershipOpportunities: ((claudeData as Record<string, unknown>)?.partnershipOpportunities as string[]) || [],
-      reviewRequestScript: ((claudeData as Record<string, unknown>)?.reviewRequestScript as string) || "",
-      reviewResponseTemplates: ((claudeData as Record<string, unknown>)?.reviewResponseTemplates as { fiveStar: string; fourStar: string; threeStar: string; oneTwo: string }) || { fiveStar: "", fourStar: "", threeStar: "", oneTwo: "" },
+      prOpportunities:
+        ((claudeData as Record<string, unknown>)
+          ?.prOpportunities as string[]) || [],
+      partnershipOpportunities:
+        ((claudeData as Record<string, unknown>)
+          ?.partnershipOpportunities as string[]) || [],
+      reviewRequestScript:
+        ((claudeData as Record<string, unknown>)
+          ?.reviewRequestScript as string) || "",
+      reviewResponseTemplates: ((claudeData as Record<string, unknown>)
+        ?.reviewResponseTemplates as {
+        fiveStar: string;
+        fourStar: string;
+        threeStar: string;
+        oneTwo: string;
+      }) || { fiveStar: "", fourStar: "", threeStar: "", oneTwo: "" },
     },
     competitorGap: {
-      topicGaps: (((geminiData as Record<string, unknown>)?.competitorTopicGaps as Array<{topic: string; competitorRanking: string; yourAction: string}>) || []).map(g => ({
+      topicGaps: (
+        ((geminiData as Record<string, unknown>)?.competitorTopicGaps as Array<{
+          topic: string;
+          competitorRanking: string;
+          yourAction: string;
+        }>) || []
+      ).map((g) => ({
         topic: g.topic || "",
         competitorRanking: g.competitorRanking || "",
         yourAction: g.yourAction || "",
       })),
-      contentGaps: ((geminiData as Record<string, unknown>)?.competitorGaps as string[]) || [],
-      keywordGaps: (((openaiData as Record<string, unknown>)?.keywordGaps as Array<{keyword: string}>) || []).slice(0, 10).map(k => k.keyword),
-      differentiationAngles: ((geminiData as Record<string, unknown>)?.differentiationAngles as string[]) || [],
+      contentGaps:
+        ((geminiData as Record<string, unknown>)?.competitorGaps as string[]) ||
+        [],
+      keywordGaps: (
+        ((openaiData as Record<string, unknown>)?.keywordGaps as Array<{
+          keyword: string;
+        }>) || []
+      )
+        .slice(0, 10)
+        .map((k) => k.keyword),
+      differentiationAngles:
+        ((geminiData as Record<string, unknown>)
+          ?.differentiationAngles as string[]) || [],
     },
     featuredSnippets: {
-      opportunities: ((openaiData as Record<string, unknown>)?.featuredSnippetOpportunities as { query: string; snippetType: string; contentFormat: string; answer: string }[]) || [],
-      voiceSearchQuestions: ((openaiData as Record<string, unknown>)?.voiceSearchQuestions as string[]) || [],
-      peopleAlsoAsk: ((openaiData as Record<string, unknown>)?.peopleAlsoAsk as string[]) || [],
+      opportunities:
+        ((openaiData as Record<string, unknown>)
+          ?.featuredSnippetOpportunities as {
+          query: string;
+          snippetType: string;
+          contentFormat: string;
+          answer: string;
+        }[]) || [],
+      voiceSearchQuestions:
+        ((openaiData as Record<string, unknown>)
+          ?.voiceSearchQuestions as string[]) || [],
+      peopleAlsoAsk:
+        ((openaiData as Record<string, unknown>)?.peopleAlsoAsk as string[]) ||
+        [],
     },
     internationalSEO: {
-      countryStrategy: (((claudeData as Record<string, unknown>)?.internationalStrategy as Array<{country: string; language: string; priority: string; keyActions: string[]}>) || []).map(c => ({
+      countryStrategy: (
+        ((claudeData as Record<string, unknown>)
+          ?.internationalStrategy as Array<{
+          country: string;
+          language: string;
+          priority: string;
+          keyActions: string[];
+        }>) || []
+      ).map((c) => ({
         country: c.country || "",
         language: c.language || "",
         priority: c.priority || "medium",
         keyActions: c.keyActions || [],
       })),
-      hreflangRecommendations: ((claudeData as Record<string, unknown>)?.hreflangRecommendations as string[]) || [],
+      hreflangRecommendations:
+        ((claudeData as Record<string, unknown>)
+          ?.hreflangRecommendations as string[]) || [],
       currencyAndLocalisation: [],
     },
     cro: {
-      landingPageRecommendations: ((openaiData as Record<string, unknown>)?.croRecommendations as { page: string; issue: string; fix: string; expectedImpact: string }[]) || [],
-      ctaOptimisation: ((openaiData as Record<string, unknown>)?.ctaOptimisation as string[]) || [],
-      trustSignals: ((openaiData as Record<string, unknown>)?.trustSignals as string[]) || [],
-      funnelImprovements: ((openaiData as Record<string, unknown>)?.funnelImprovements as string[]) || [],
+      landingPageRecommendations:
+        ((openaiData as Record<string, unknown>)?.croRecommendations as {
+          page: string;
+          issue: string;
+          fix: string;
+          expectedImpact: string;
+        }[]) || [],
+      ctaOptimisation:
+        ((openaiData as Record<string, unknown>)
+          ?.ctaOptimisation as string[]) || [],
+      trustSignals:
+        ((openaiData as Record<string, unknown>)?.trustSignals as string[]) ||
+        [],
+      funnelImprovements:
+        ((openaiData as Record<string, unknown>)
+          ?.funnelImprovements as string[]) || [],
     },
-    faqLibrary: ((claudeData as Record<string, unknown>)?.faqPairs as { question: string; answer: string }[]) || [],
-    contentPillars: ((claudeData as Record<string, unknown>)?.contentPillars as { pillar: string; supportingTopics: string[] }[]) || [],
-    homepageCopy: ((qwenData as Record<string, unknown>)?.homepageCopy as { headline: string; subheadline: string; ctaText: string; valueProp: string; servicesOverview: string; socialProof: string }) || { headline: "", subheadline: "", ctaText: "", valueProp: "", servicesOverview: "", socialProof: "" },
-    metaTags: ((qwenData as Record<string, unknown>)?.metaTags as { page: string; titleTag: string; metaDescription: string }[]) || [],
+    faqLibrary:
+      ((claudeData as Record<string, unknown>)?.faqPairs as {
+        question: string;
+        answer: string;
+      }[]) || [],
+    contentPillars:
+      ((claudeData as Record<string, unknown>)?.contentPillars as {
+        pillar: string;
+        supportingTopics: string[];
+      }[]) || [],
+    homepageCopy: ((qwenData as Record<string, unknown>)?.homepageCopy as {
+      headline: string;
+      subheadline: string;
+      ctaText: string;
+      valueProp: string;
+      servicesOverview: string;
+      socialProof: string;
+    }) || {
+      headline: "",
+      subheadline: "",
+      ctaText: "",
+      valueProp: "",
+      servicesOverview: "",
+      socialProof: "",
+    },
+    metaTags:
+      ((qwenData as Record<string, unknown>)?.metaTags as {
+        page: string;
+        titleTag: string;
+        metaDescription: string;
+      }[]) || [],
     verificationNotes: `Analysis generated using quad-AI consensus: Gemini (local/GBP + competitor gap), GPT-4o (technical + featured snippets + CRO), Claude (content + entity + international SEO), Qwen (content production + homepage copy). Generated in ${elapsed}s. All recommendations are based on your business context — verify specifics against current Google guidelines before implementation.`,
     modelContributions: {
-      gemini: "Local SEO, GBP optimisation, competitor gap analysis, differentiation angles, location keyword mapping",
-      openai: "Technical SEO, keyword gaps, featured snippets, voice search, CRO recommendations, trust signals",
-      claude: "Entity optimisation, E-E-A-T signals, content pillars, authority building, international SEO, FAQ library, review templates",
+      gemini:
+        "Local SEO, GBP optimisation, competitor gap analysis, differentiation angles, location keyword mapping",
+      openai:
+        "Technical SEO, keyword gaps, featured snippets, voice search, CRO recommendations, trust signals",
+      claude:
+        "Entity optimisation, E-E-A-T signals, content pillars, authority building, international SEO, FAQ library, review templates",
       qwen: "Blog calendar, service page templates, GBP posts, meta tags, homepage copy",
     },
   };
