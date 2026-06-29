@@ -438,11 +438,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if token is expired
       if (new Date() > user.resetTokenExpiry) {
         await storage.clearResetToken(user.id);
-        return res
-          .status(400)
-          .json({
-            error: "Reset token has expired. Please request a new one.",
-          });
+        return res.status(400).json({
+          error: "Reset token has expired. Please request a new one.",
+        });
       }
 
       // Hash new password
@@ -555,11 +553,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { tocStyle } = req.body;
 
         if (user.subscriptionTier !== "ultimate") {
-          return res
-            .status(403)
-            .json({
-              error: "Visual style customisation requires Ultimate tier",
-            });
+          return res.status(403).json({
+            error: "Visual style customisation requires Ultimate tier",
+          });
         }
 
         const plan = await storage.getBusinessPlan(planId as any);
@@ -1328,22 +1324,18 @@ Respond ONLY with valid JSON in this exact format:
           }
 
           if (promoCodeRecord.status !== "active") {
-            return res
-              .status(400)
-              .json({
-                error: "This promo code is no longer active",
-                promoError: true,
-              });
+            return res.status(400).json({
+              error: "This promo code is no longer active",
+              promoError: true,
+            });
           }
 
           const now = new Date();
           if (now < promoCodeRecord.validFrom) {
-            return res
-              .status(400)
-              .json({
-                error: "This promo code is not yet active",
-                promoError: true,
-              });
+            return res.status(400).json({
+              error: "This promo code is not yet active",
+              promoError: true,
+            });
           }
 
           if (promoCodeRecord.validUntil && now > promoCodeRecord.validUntil) {
@@ -1356,12 +1348,10 @@ Respond ONLY with valid JSON in this exact format:
             promoCodeRecord.maxTotalUses &&
             promoCodeRecord.currentUses >= promoCodeRecord.maxTotalUses
           ) {
-            return res
-              .status(400)
-              .json({
-                error: "This promo code has reached its usage limit",
-                promoError: true,
-              });
+            return res.status(400).json({
+              error: "This promo code has reached its usage limit",
+              promoError: true,
+            });
           }
 
           // Check tier eligibility
@@ -1370,12 +1360,10 @@ Respond ONLY with valid JSON in this exact format:
             promoCodeRecord.eligibleTiers.length > 0 &&
             !promoCodeRecord.eligibleTiers.includes(businessPlan.tier)
           ) {
-            return res
-              .status(400)
-              .json({
-                error: `This promo code is not valid for the ${businessPlan.tier} tier`,
-                promoError: true,
-              });
+            return res.status(400).json({
+              error: `This promo code is not valid for the ${businessPlan.tier} tier`,
+              promoError: true,
+            });
           }
 
           // Check minimum purchase amount
@@ -1383,12 +1371,10 @@ Respond ONLY with valid JSON in this exact format:
             promoCodeRecord.minPurchaseAmount &&
             pricing.amount < promoCodeRecord.minPurchaseAmount
           ) {
-            return res
-              .status(400)
-              .json({
-                error: `Minimum purchase of £${(promoCodeRecord.minPurchaseAmount / 100).toFixed(2)} required`,
-                promoError: true,
-              });
+            return res.status(400).json({
+              error: `Minimum purchase of £${(promoCodeRecord.minPurchaseAmount / 100).toFixed(2)} required`,
+              promoError: true,
+            });
           }
 
           // Apply the discount
@@ -1560,12 +1546,10 @@ Respond ONLY with valid JSON in this exact format:
           !tier ||
           !["basic", "premium", "enterprise", "ultimate"].includes(tier)
         ) {
-          return res
-            .status(400)
-            .json({
-              error:
-                "Valid tier is required (basic, premium, enterprise, or ultimate)",
-            });
+          return res.status(400).json({
+            error:
+              "Valid tier is required (basic, premium, enterprise, or ultimate)",
+          });
         }
 
         const pricing = PRICING[tier as keyof typeof PRICING];
@@ -1591,22 +1575,18 @@ Respond ONLY with valid JSON in this exact format:
           }
 
           if (promoCodeRecord.status !== "active") {
-            return res
-              .status(400)
-              .json({
-                error: "This promo code is no longer active",
-                promoError: true,
-              });
+            return res.status(400).json({
+              error: "This promo code is no longer active",
+              promoError: true,
+            });
           }
 
           const now = new Date();
           if (now < promoCodeRecord.validFrom) {
-            return res
-              .status(400)
-              .json({
-                error: "This promo code is not yet active",
-                promoError: true,
-              });
+            return res.status(400).json({
+              error: "This promo code is not yet active",
+              promoError: true,
+            });
           }
 
           if (promoCodeRecord.validUntil && now > promoCodeRecord.validUntil) {
@@ -1619,12 +1599,10 @@ Respond ONLY with valid JSON in this exact format:
             promoCodeRecord.maxTotalUses &&
             promoCodeRecord.currentUses >= promoCodeRecord.maxTotalUses
           ) {
-            return res
-              .status(400)
-              .json({
-                error: "This promo code has reached its usage limit",
-                promoError: true,
-              });
+            return res.status(400).json({
+              error: "This promo code has reached its usage limit",
+              promoError: true,
+            });
           }
 
           // Check tier eligibility
@@ -1633,12 +1611,10 @@ Respond ONLY with valid JSON in this exact format:
             promoCodeRecord.eligibleTiers.length > 0 &&
             !promoCodeRecord.eligibleTiers.includes(tier)
           ) {
-            return res
-              .status(400)
-              .json({
-                error: `This promo code is not valid for the ${tier} tier`,
-                promoError: true,
-              });
+            return res.status(400).json({
+              error: `This promo code is not valid for the ${tier} tier`,
+              promoError: true,
+            });
           }
 
           // Check minimum purchase amount
@@ -1646,12 +1622,10 @@ Respond ONLY with valid JSON in this exact format:
             promoCodeRecord.minPurchaseAmount &&
             pricing.amount < promoCodeRecord.minPurchaseAmount
           ) {
-            return res
-              .status(400)
-              .json({
-                error: `Minimum purchase of £${(promoCodeRecord.minPurchaseAmount / 100).toFixed(2)} required`,
-                promoError: true,
-              });
+            return res.status(400).json({
+              error: `Minimum purchase of £${(promoCodeRecord.minPurchaseAmount / 100).toFixed(2)} required`,
+              promoError: true,
+            });
           }
 
           // Apply the discount
@@ -1823,12 +1797,10 @@ Respond ONLY with valid JSON in this exact format:
           session.payment_status !== "paid" &&
           session.payment_status !== "no_payment_required"
         ) {
-          return res
-            .status(402)
-            .json({
-              error: "Payment not completed",
-              paymentStatus: session.payment_status,
-            });
+          return res.status(402).json({
+            error: "Payment not completed",
+            paymentStatus: session.payment_status,
+          });
         }
 
         // Verify this is a direct subscription for this user
@@ -1962,12 +1934,10 @@ Respond ONLY with valid JSON in this exact format:
           session.payment_status !== "paid" &&
           session.payment_status !== "no_payment_required"
         ) {
-          return res
-            .status(402)
-            .json({
-              error: "Payment not completed",
-              paymentStatus: session.payment_status,
-            });
+          return res.status(402).json({
+            error: "Payment not completed",
+            paymentStatus: session.payment_status,
+          });
         }
 
         // Verify this is a direct subscription for this user
@@ -2059,12 +2029,10 @@ Respond ONLY with valid JSON in this exact format:
       const session = await stripe.checkout.sessions.retrieve(sessionId);
 
       if (session.payment_status !== "paid") {
-        return res
-          .status(402)
-          .json({
-            error: "Payment not completed",
-            paymentStatus: session.payment_status,
-          });
+        return res.status(402).json({
+          error: "Payment not completed",
+          paymentStatus: session.payment_status,
+        });
       }
 
       if (session.metadata?.planId !== planId) {
@@ -3023,11 +2991,9 @@ ${generatedSections.join("\n\n---\n\n")}`;
       .fontSize(28)
       .fillColor("#FFFFFF")
       .text(businessPlan.businessName, 50, 80, { align: "center" });
-    doc
-      .fontSize(14)
-      .text("UK Innovator Founder Visa Business Plan", 50, 120, {
-        align: "center",
-      });
+    doc.fontSize(14).text("UK Innovator Founder Visa Business Plan", 50, 120, {
+      align: "center",
+    });
     doc
       .fontSize(12)
       .text(
@@ -3137,12 +3103,10 @@ ${generatedSections.join("\n\n---\n\n")}`;
       }
 
       if (businessPlan.status !== "completed") {
-        return res
-          .status(400)
-          .json({
-            error: "Business plan not ready yet",
-            status: businessPlan.status,
-          });
+        return res.status(400).json({
+          error: "Business plan not ready yet",
+          status: businessPlan.status,
+        });
       }
 
       if (!businessPlan.generatedContent) {
@@ -3170,12 +3134,10 @@ ${generatedSections.join("\n\n---\n\n")}`;
       }
 
       if (businessPlan.status !== "completed") {
-        return res
-          .status(400)
-          .json({
-            error: "Business plan not ready yet",
-            status: businessPlan.status,
-          });
+        return res.status(400).json({
+          error: "Business plan not ready yet",
+          status: businessPlan.status,
+        });
       }
 
       if (!businessPlan.generatedContent) {
@@ -3203,12 +3165,10 @@ ${generatedSections.join("\n\n---\n\n")}`;
       }
 
       if (businessPlan.status !== "completed") {
-        return res
-          .status(400)
-          .json({
-            error: "Business plan not ready yet",
-            status: businessPlan.status,
-          });
+        return res.status(400).json({
+          error: "Business plan not ready yet",
+          status: businessPlan.status,
+        });
       }
 
       if (!businessPlan.generatedContent) {
@@ -4569,12 +4529,10 @@ Return only the enhanced text. No labels, no "Enhanced version:", just the impro
         }
 
         if (!result) {
-          return res
-            .status(503)
-            .json({
-              error:
-                "OpenAI is currently rate-limited. Please try again in a moment.",
-            });
+          return res.status(503).json({
+            error:
+              "OpenAI is currently rate-limited. Please try again in a moment.",
+          });
         }
 
         res.json({ result });
@@ -6320,12 +6278,10 @@ EXAMPLES OF GOOD RESPONSES:
         });
       } catch (error: any) {
         console.error("Bulk email error:", error);
-        res
-          .status(500)
-          .json({
-            error: "Failed to send bulk emails",
-            message: error.message,
-          });
+        res.status(500).json({
+          error: "Failed to send bulk emails",
+          message: error.message,
+        });
       }
     },
   );
@@ -8456,23 +8412,19 @@ EXAMPLES OF GOOD RESPONSES:
       }
 
       if (promoCode.status !== "active") {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "This promo code is no longer active",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "This promo code is no longer active",
+        });
       }
 
       // Check validity period
       const now = new Date();
       if (now < promoCode.validFrom) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "This promo code is not yet active",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "This promo code is not yet active",
+        });
       }
       if (promoCode.validUntil && now > promoCode.validUntil) {
         return res
@@ -8485,12 +8437,10 @@ EXAMPLES OF GOOD RESPONSES:
         promoCode.maxTotalUses &&
         promoCode.currentUses >= promoCode.maxTotalUses
       ) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "This promo code has reached its usage limit",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "This promo code has reached its usage limit",
+        });
       }
 
       // Check per-user usage limit
@@ -8500,12 +8450,10 @@ EXAMPLES OF GOOD RESPONSES:
           promoCode.id,
         );
         if (userRedemptions >= promoCode.maxUsesPerUser) {
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "You have already used this promo code",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "You have already used this promo code",
+          });
         }
       }
 
@@ -9143,11 +9091,9 @@ EXAMPLES OF GOOD RESPONSES:
         parsedDiscountValue === undefined ||
         isNaN(parsedDiscountValue)
       ) {
-        return res
-          .status(400)
-          .json({
-            error: "Code, discount type, and valid discount value are required",
-          });
+        return res.status(400).json({
+          error: "Code, discount type, and valid discount value are required",
+        });
       }
 
       // Generate code if not provided
@@ -9193,12 +9139,10 @@ EXAMPLES OF GOOD RESPONSES:
       res.json(promoCode);
     } catch (error: any) {
       console.error("Admin create promo code error:", error);
-      res
-        .status(500)
-        .json({
-          error: "Failed to create promo code",
-          details: error?.message || String(error),
-        });
+      res.status(500).json({
+        error: "Failed to create promo code",
+        details: error?.message || String(error),
+      });
     }
   });
 
@@ -9793,23 +9737,18 @@ EXAMPLES OF GOOD RESPONSES:
       // Verify user owns the business plan
       const businessPlan = await storage.getBusinessPlan(businessPlanId);
       if (!businessPlan || businessPlan.userId !== user.id) {
-        return res
-          .status(403)
-          .json({
-            error:
-              "You do not have permission to request a review for this plan",
-          });
+        return res.status(403).json({
+          error: "You do not have permission to request a review for this plan",
+        });
       }
 
       // Check tier access (only Premium and above can request reviews)
       const userTier = user.tier || "free";
       if (!["premium", "enterprise", "ultimate"].includes(userTier)) {
-        return res
-          .status(403)
-          .json({
-            error:
-              "Lawyer review is only available for Premium, Enterprise, and Ultimate tier users",
-          });
+        return res.status(403).json({
+          error:
+            "Lawyer review is only available for Premium, Enterprise, and Ultimate tier users",
+        });
       }
 
       // Calculate SLA based on tier
@@ -9945,11 +9884,9 @@ EXAMPLES OF GOOD RESPONSES:
       const analytics = await storage.getPartnerAnalytics(user.id);
 
       if (analytics.promoCodes.length === 0) {
-        return res
-          .status(403)
-          .json({
-            error: "You are not a partner. Contact admin to get a promo code.",
-          });
+        return res.status(403).json({
+          error: "You are not a partner. Contact admin to get a promo code.",
+        });
       }
 
       res.json(analytics);
@@ -10027,11 +9964,9 @@ EXAMPLES OF GOOD RESPONSES:
       );
 
       if (!allUserIds.includes(userId)) {
-        return res
-          .status(403)
-          .json({
-            error: "You can only contact users who used your promo code",
-          });
+        return res.status(403).json({
+          error: "You can only contact users who used your promo code",
+        });
       }
 
       const targetUser = await storage.getUser(userId);
@@ -13078,11 +13013,9 @@ END:VEVENT
         const premiumTiers = ["premium", "enterprise", "ultimate"];
 
         if (!premiumTiers.includes(userTier)) {
-          return res
-            .status(403)
-            .json({
-              error: "This feature requires a Premium or higher subscription",
-            });
+          return res.status(403).json({
+            error: "This feature requires a Premium or higher subscription",
+          });
         }
 
         const { answer, questionId, category, sessionId } = req.body;
@@ -13149,11 +13082,9 @@ OUTPUT: Return ONLY the enhanced answer text, ready to submit. Do not include ex
         const premiumTiers = ["premium", "enterprise", "ultimate"];
 
         if (!premiumTiers.includes(userTier)) {
-          return res
-            .status(403)
-            .json({
-              error: "This feature requires a Premium or higher subscription",
-            });
+          return res.status(403).json({
+            error: "This feature requires a Premium or higher subscription",
+          });
         }
 
         const { questionId, question, category, sessionId, tier } = req.body;
@@ -14079,12 +14010,9 @@ Return a JSON object with:
         .limit(1);
 
       if (existingTestUsers.length > 0) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "Test users already seeded. Delete existing test users first.",
-          });
+        return res.status(400).json({
+          error: "Test users already seeded. Delete existing test users first.",
+        });
       }
 
       const bcrypt = (await import("bcrypt")).default;
@@ -16489,12 +16417,10 @@ Return a JSON object with:
         res.json(analysis);
       } catch (error: any) {
         console.error("User analysis error:", error);
-        res
-          .status(500)
-          .json({
-            error: "Failed to generate user analysis",
-            details: error.message,
-          });
+        res.status(500).json({
+          error: "Failed to generate user analysis",
+          details: error.message,
+        });
       }
     },
   );
@@ -17230,12 +17156,10 @@ IMPORTANT RULES:
         }
 
         if (!content) {
-          return res
-            .status(503)
-            .json({
-              error:
-                "All AI providers are currently rate-limited. Please try again in a minute.",
-            });
+          return res.status(503).json({
+            error:
+              "All AI providers are currently rate-limited. Please try again in a minute.",
+          });
         }
 
         res.json({ content });
@@ -17870,12 +17794,10 @@ IMPORTANT RULES:
       } = req.body;
 
       if (!sessionId || !eventType || !eventCategory || !eventAction) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "Required fields: sessionId, eventType, eventCategory, eventAction",
-          });
+        return res.status(400).json({
+          error:
+            "Required fields: sessionId, eventType, eventCategory, eventAction",
+        });
       }
 
       // Create event
@@ -22303,7 +22225,7 @@ Return ONLY the JSON array. No markdown. No explanation.`;
     }
   });
 
-  // POST generate AI content for a specific backlink target
+  // POST generate AI submission content for a specific backlink target (single ready-to-post draft)
   app.post("/api/seo/backlink-content/:id", requireAdmin, async (req, res) => {
     try {
       const [target] = await db
@@ -22313,55 +22235,94 @@ Return ONLY the JSON array. No markdown. No explanation.`;
         .limit(1);
       if (!target) return res.status(404).json({ error: "Target not found" });
 
-      const prompt = `You are a PhD-level SEO and outreach expert. Generate EXACTLY 8 uniquely worded submission content variations for a backlink opportunity. These will be posted from 8 different accounts so every variation MUST be completely different in structure, tone, opening, and phrasing — but all must be genuine, helpful, and natural.
+      const prompt = `You are a senior SEO outreach strategist and community-safe copywriter.
 
-Platform: ${target.name} (${target.platform || target.category})
-Website URL: ${target.url}
-Submission URL: ${target.submissionUrl || target.url}
-Strategy: ${target.strategy || "Create a listing or post a helpful contribution"}
-Our site: UK Innovator Founder Visa Assistant
-Our URL (MUST be included as a clickable link in every variation): https://innovatorfoundervisaassistant.co.uk
-Our anchor text: "${target.anchorText || "Innovator Founder Visa Assistant"}"
-Our description: The UK's leading AI platform for Innovator Founder Visa applications — 109 expert tools covering compliance, business plan generation, endorsement preparation, and financial modeling.
+Generate ONE complete, ready-to-post SEO submission for this exact backlink opportunity. This is for the small magic-wand button that drafts the MAIN submission content, not the 8-variation generator.
 
-RULES:
-- Every variation MUST include the full URL https://innovatorfoundervisaassistant.co.uk naturally within the text (not just at the end)
-- Each variation must have a completely different opening sentence, structure, and tone
-- Vary between: personal story, question opener, advice-first, statistic-led, problem-solution, recommendation, resource-sharing, experience-sharing styles
-- Keep each variation under 280 words
-- Never sound spammy — always be helpful and genuine
-- Never mention "AI-generated"
-- Platform type rules:
-  * forum/community → helpful post or reply mentioning the tool naturally
-  * directory/listing → full profile description text
-  * press outlet → pitch email (include EMAIL SUBJECT: line)
-  * LinkedIn → article excerpt with title
-  * podcast → guest pitch message
+TARGET WEBSITE CONTEXT:
+- Website/community name: ${target.name}
+- Platform/category: ${target.platform || target.category}
+- Main website URL: ${target.url}
+- Submission/posting URL: ${target.submissionUrl || target.url}
+- Category: ${target.category}
+- Link type: ${target.linkType || "ugc"}
+- Domain authority estimate: ${target.domainAuthority || "unknown"}
+- Priority: ${target.priority || "medium"}
+- Effort level: ${target.effort || "medium"}
+- Expected SEO impact: ${target.expectedImpact || "medium"}
 
-Format your response EXACTLY like this with no extra text before or after:
-===VARIATION 1===
-[content here]
-===VARIATION 2===
-[content here]
-===VARIATION 3===
-[content here]
-===VARIATION 4===
-[content here]
-===VARIATION 5===
-[content here]
-===VARIATION 6===
-[content here]
-===VARIATION 7===
-[content here]
-===VARIATION 8===
-[content here]
-===END===`;
+SPECIFIC STRATEGY TO FOLLOW:
+${target.strategy || "Create a helpful, non-spammy contribution that naturally recommends the platform."}
 
-      const aiContent = await geminiAI.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-      });
-      const content = (aiContent.text ?? "").trim();
+RECOMMENDED ANCHOR TEXT:
+"${target.anchorText || "UK startup visa support"}"
+
+OUR PLATFORM:
+Name: UK Innovator Founder Visa Assistant
+URL: https://innovatorfoundervisaassistant.co.uk
+Description: An AI-powered platform for UK Innovator Founder Visa applicants, with tools for business plan generation, endorsement preparation, compliance checks, document review, interview practice, and visa planning.
+
+PRIMARY AUDIENCE:
+International entrepreneurs, UK visa applicants, startup founders, graduate visa holders, skilled workers considering business routes, and founders preparing Innovator Founder Visa endorsement.
+
+OUTPUT REQUIREMENTS:
+- Write ONE polished submission only.
+- Make it specific to ${target.name}; do not write generic copy.
+- Follow the stated strategy closely.
+- Include https://innovatorfoundervisaassistant.co.uk naturally.
+- Use the anchor text naturally where possible: "${target.anchorText || "UK startup visa support"}".
+- Keep the tone helpful, credible, and non-spammy.
+- Do not claim guaranteed visa approval.
+- Do not offer legal advice.
+- Do not say "official", "Home Office approved", "guaranteed", or "best".
+- If this is a forum/community, write it as a helpful post or reply.
+- If this is a directory, write it as a professional listing/profile description.
+- If this is a press outlet, write it as a concise pitch with an EMAIL SUBJECT line.
+- If this is LinkedIn, write it as an insight-led founder post.
+- If this is a podcast, write it as a guest pitch.
+- Aim for 150-260 words unless the platform type clearly needs a shorter format.
+
+Return ONLY the final submission content. Do not include labels, markdown fences, explanations, or multiple variations.`;
+
+      let content = "";
+
+      try {
+        const aiContent = await geminiAI.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: prompt,
+        });
+        content = (aiContent.text ?? "").trim();
+      } catch (geminiError: any) {
+        console.warn(
+          "[Backlink Content] Gemini failed, falling back to OpenAI:",
+          geminiError?.message || geminiError,
+        );
+
+        const completion = await openaiClient.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a senior SEO outreach copywriter. Return only one polished, ready-to-post backlink submission.",
+            },
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          temperature: 0.7,
+          max_tokens: 1200,
+        });
+
+        content = completion.choices[0]?.message?.content?.trim() || "";
+      }
+
+      if (!content || content.length < 120) {
+        return res
+          .status(500)
+          .json({ error: "AI did not return valid submission content" });
+      }
 
       const [updated] = await db
         .update(backlinkTargets)
