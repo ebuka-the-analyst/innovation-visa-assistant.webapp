@@ -598,28 +598,53 @@ function BacklinkEngine() {
       apiRequest("POST", `/api/seo/backlink-content/${id}`).then((r) =>
         r.json(),
       ),
-    onSuccess: (data) => {
-      const generatedTarget = data?.target as BLTarget | undefined;
+    onSuccess: async (data, id) => {
+      const generatedContent = (
+        data?.content ||
+        data?.target?.aiGeneratedContent ||
+        ""
+      ).trim();
+      const targetId = data?.target?.id || id;
 
-      toast({
-        title: "Content Generated",
-        description: "Exact submission content is ready to copy.",
-      });
+      if (generatedContent) {
+        setEditNotes((prev) => ({ ...prev, [targetId]: generatedContent }));
 
-      if (generatedTarget?.id) {
         qc.setQueryData<BLTarget[]>(
           ["/api/seo/backlink-targets"],
           (oldTargets = []) =>
             oldTargets.map((target) =>
-              target.id === generatedTarget.id
-                ? { ...target, ...generatedTarget }
+              target.id === targetId
+                ? {
+                    ...target,
+                    ...(data?.target || {}),
+                    aiGeneratedContent: generatedContent,
+                    notes: generatedContent,
+                    contentGeneratedAt:
+                      data?.target?.contentGeneratedAt ||
+                      new Date().toISOString(),
+                  }
                 : target,
             ),
         );
 
-        setExpandedId(generatedTarget.id);
+        try {
+          await apiRequest("PATCH", `/api/seo/backlink-targets/${targetId}`, {
+            notes: generatedContent,
+          });
+        } catch (saveError) {
+          console.warn(
+            "Generated content was shown but could not be copied into notes:",
+            saveError,
+          );
+        }
       }
 
+      toast({
+        title: "Content Generated",
+        description:
+          "Exact submission content is saved in the content box below.",
+      });
+      setExpandedId(targetId);
       qc.invalidateQueries({ queryKey: ["/api/seo/backlink-targets"] });
     },
     onError: (e: Error) =>
@@ -1136,8 +1161,7 @@ function BacklinkEngine() {
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
                             <p className="text-xs font-medium text-muted-foreground">
-                              AI Submission Content — Copy and post on this
-                              website
+                              AI Submission Content — ready to copy
                             </p>
                             <Button
                               variant="outline"
@@ -1241,17 +1265,40 @@ function BacklinkEngine() {
                         </Button>
                       )}
 
-                      {/* Notes */}
+                      {/* AI Submission Content Editor */}
                       <div>
-                        <p className="text-xs font-medium text-muted-foreground mb-1">
-                          Notes
-                        </p>
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="text-xs font-medium text-muted-foreground">
+                            AI Submission Content
+                          </p>
+                          {(editNotes[t.id] ||
+                            t.aiGeneratedContent ||
+                            t.notes) && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-6 text-xs px-2"
+                              onClick={() => {
+                                const contentToCopy =
+                                  editNotes[t.id] !== undefined
+                                    ? editNotes[t.id]
+                                    : t.aiGeneratedContent || t.notes || "";
+                                navigator.clipboard.writeText(contentToCopy);
+                                toast({ title: "Copied!" });
+                              }}
+                              data-testid={`button-copy-submission-content-${t.id}`}
+                            >
+                              <Copy className="w-3 h-3 mr-1" />
+                              Copy
+                            </Button>
+                          )}
+                        </div>
                         <div className="flex gap-2">
                           <Textarea
                             value={
                               editNotes[t.id] !== undefined
                                 ? editNotes[t.id]
-                                : t.notes || ""
+                                : t.aiGeneratedContent || t.notes || ""
                             }
                             onChange={(e) =>
                               setEditNotes((n) => ({
@@ -1259,8 +1306,8 @@ function BacklinkEngine() {
                                 [t.id]: e.target.value,
                               }))
                             }
-                            placeholder="Add notes about submission status, contact made, etc."
-                            className="text-xs min-h-[60px]"
+                            placeholder="Generate AI submission content, then edit it here before posting."
+                            className="text-xs min-h-[180px] leading-relaxed"
                             data-testid={`textarea-notes-${t.id}`}
                           />
                           <Button
@@ -1268,11 +1315,15 @@ function BacklinkEngine() {
                             size="sm"
                             className="self-end"
                             onClick={() => {
+                              const contentToSave =
+                                editNotes[t.id] !== undefined
+                                  ? editNotes[t.id]
+                                  : t.aiGeneratedContent || t.notes || "";
                               updateMutation.mutate({
                                 id: t.id,
-                                updates: { notes: editNotes[t.id] },
+                                updates: { notes: contentToSave },
                               });
-                              toast({ title: "Notes saved" });
+                              toast({ title: "Submission content saved" });
                             }}
                             data-testid={`button-save-notes-${t.id}`}
                           >
