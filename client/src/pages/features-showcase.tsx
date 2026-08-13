@@ -11,6 +11,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import logoLight from "@assets/official_logo.webp";
 import logoDark from "@assets/logo_dark.webp";
+import { useCommercialCatalog, type PlanId } from "@/hooks/useCommercialCatalog";
 
 type IconName = keyof typeof Icons;
 
@@ -26,8 +27,8 @@ const FEATURE_CATEGORIES = [
 ];
 
 const MAIN_FEATURES = [
-  { title: "100+ AI-Powered Tools", description: "Complete toolkit from application to approval" },
-  { title: "5 Pricing Tiers", description: "Free to Ultimate with varying feature access" },
+  { title: "AI-Powered Tools", description: "Complete toolkit from application to approval" },
+  { title: "Pricing Plans", description: "Published plans with varying feature access" },
   { title: "Expert Dashboard", description: "Monitor your visa application progress" },
   { title: "Breaking News Ticker", description: "Real-time UK Innovator Founder Visa updates" },
   { title: "Diagnostics Engine", description: "Application readiness scoring with comprehensive analysis" },
@@ -37,13 +38,13 @@ const MAIN_FEATURES = [
   { title: "Settlement Planning", description: "Post-approval UK setup guidance" },
 ];
 
-const PRICING_TIERS = [
-  { name: "Free", price: "£0", access: "Essential", pages: "10-15", colorClass: "border-muted" },
-  { name: "Basic", price: "£9", access: "Extended", pages: "25-35", colorClass: "border-blue-500/30 dark:border-blue-400/30" },
-  { name: "Premium", price: "£19", access: "Comprehensive", pages: "40-60", popular: true, colorClass: "border-purple-500 dark:border-purple-400 ring-2 ring-purple-500/20" },
-  { name: "Enterprise", price: "£35", access: "Full", pages: "56-80", colorClass: "border-orange-500/30 dark:border-orange-400/30" },
-  { name: "Ultimate", price: "£49", access: "Complete 100+", pages: "80+", premium: true, colorClass: "border-amber-500 dark:border-amber-400 ring-2 ring-amber-500/20" },
-];
+const PRICING_PRESENTATION: Record<PlanId, { access: string; pages: string; colorClass: string }> = {
+  free: { access: "Essential", pages: "10-15", colorClass: "border-muted" },
+  basic: { access: "Extended", pages: "25-35", colorClass: "border-blue-500/30 dark:border-blue-400/30" },
+  premium: { access: "Comprehensive", pages: "40-60", colorClass: "border-purple-500 dark:border-purple-400 ring-2 ring-purple-500/20" },
+  enterprise: { access: "Full", pages: "56-80", colorClass: "border-orange-500/30 dark:border-orange-400/30" },
+  ultimate: { access: "Complete", pages: "80+", colorClass: "border-amber-500 dark:border-amber-400 ring-2 ring-amber-500/20" },
+};
 
 function AnimatedSidebarTrigger() {
   const { state, toggleSidebar } = useSidebar();
@@ -75,6 +76,21 @@ function AnimatedSidebarTrigger() {
 export default function FeaturesShowcase() {
   const { user } = useAuth();
   const isDemoMode = !user;
+  const { plans, toolCounts, formatPrice } = useCommercialCatalog();
+  const maximumToolCount = Math.max(0, ...Object.values(toolCounts));
+  const mainFeatures = MAIN_FEATURES.map((feature, index) => {
+    if (index === 0) return { ...feature, title: `${maximumToolCount} AI-Powered Tools` };
+    if (index === 1) return { ...feature, title: `${plans.length} Pricing Plan${plans.length === 1 ? "" : "s"}` };
+    return feature;
+  });
+  const pricingTiers = plans.map((plan) => ({
+    ...plan,
+    name: plan.displayName.replace(/\s+Plan$/i, ""),
+    price: formatPrice(plan.pricePence),
+    ...PRICING_PRESENTATION[plan.id],
+    popular: plan.id === "premium",
+    premium: plan.id === "ultimate",
+  }));
 
   const GetIconComponent = ({ name }: { name: string }) => {
     const Icon = Icons[name as IconName] as any;
@@ -128,7 +144,7 @@ export default function FeaturesShowcase() {
                   Everything You Need for UK Innovator Founder Visa Success
                 </h1>
                 <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-                  A complete platform with 100+ tools, AI agents, expert guidance, and everything required to turn your innovation into a visa-approved business
+                  A complete platform with {maximumToolCount} tools, AI agents, expert guidance, and everything required to turn your innovation into a visa-approved business
                 </p>
               </div>
             </div>
@@ -138,7 +154,7 @@ export default function FeaturesShowcase() {
               <section className="mb-12 md:mb-16 lg:mb-20">
                 <h2 className="text-xl sm:text-2xl md:text-xl font-bold mb-6 md:mb-8">Core Features</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 lg:gap-6">
-                  {MAIN_FEATURES.map((feature, idx) => (
+                  {mainFeatures.map((feature, idx) => (
                     <Card key={idx} className="p-6 hover-elevate" data-testid={`card-feature-${idx}`}>
                       <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
                       <p className="text-sm text-muted-foreground">{feature.description}</p>
@@ -149,7 +165,7 @@ export default function FeaturesShowcase() {
 
               {/* Tool Categories */}
               <section className="mb-12 md:mb-16 lg:mb-20">
-                <h2 className="text-xl sm:text-2xl md:text-xl font-bold mb-6 md:mb-8">100+ Professional-Level Tools</h2>
+                <h2 className="text-xl sm:text-2xl md:text-xl font-bold mb-6 md:mb-8">{maximumToolCount} Professional-Level Tools</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 lg:gap-8">
                   {FEATURE_CATEGORIES.map((category, idx) => (
                     <Card key={idx} className="p-6 hover-elevate border-l-4 border-l-primary" data-testid={`card-category-${idx}`}>
@@ -186,7 +202,7 @@ export default function FeaturesShowcase() {
               <section className="mb-12 md:mb-16 lg:mb-20">
                 <h2 className="text-xl sm:text-2xl md:text-xl font-bold mb-6 md:mb-8">Simple, Transparent Pricing</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
-                  {PRICING_TIERS.map((tier, idx) => (
+                  {pricingTiers.map((tier, idx) => (
                     <Card 
                       key={idx} 
                       className={`p-6 hover-elevate border-2 bg-card ${tier.colorClass}`} 
@@ -220,7 +236,7 @@ export default function FeaturesShowcase() {
                         <Wrench className="w-6 h-6" />
                       </div>
                       <h3 className="font-semibold mb-2">All Tools</h3>
-                      <p className="text-sm text-muted-foreground">Explore 100+ powerful tools</p>
+                      <p className="text-sm text-muted-foreground">Explore {maximumToolCount} powerful tools</p>
                     </Card>
                   </Link>
 
@@ -230,7 +246,7 @@ export default function FeaturesShowcase() {
                         <Wallet className="w-6 h-6" />
                       </div>
                       <h3 className="font-semibold mb-2">Pricing</h3>
-                      <p className="text-sm text-muted-foreground">5 tiers for every need</p>
+                      <p className="text-sm text-muted-foreground">{plans.length} published plan{plans.length === 1 ? "" : "s"} for different needs</p>
                     </Card>
                   </Link>
 

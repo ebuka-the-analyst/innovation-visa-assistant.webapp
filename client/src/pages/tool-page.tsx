@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, AlertCircle } from "lucide-react";
 import { Link } from "wouter";
+import { ToolEntitlementGuard } from "@/components/ToolEntitlementGuard";
 
 function LoadingFallback() {
   return (
@@ -54,8 +55,10 @@ export default function ToolPage() {
   }
 
   return (
-    <Suspense fallback={<LoadingFallback />}>
-      <ToolComponent />
-    </Suspense>
+    <ToolEntitlementGuard toolId={toolId}>
+      <Suspense fallback={<LoadingFallback />}>
+        <ToolComponent />
+      </Suspense>
+    </ToolEntitlementGuard>
   );
 }

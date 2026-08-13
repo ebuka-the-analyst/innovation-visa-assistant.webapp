@@ -2,6 +2,8 @@ import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import type { User, BusinessPlan } from "@shared/schema";
 import { ALL_TOOLS } from "@shared/tools-data";
+import { formatPrice, getToolCounts } from "@shared/commercialCatalog";
+import { getCommercialCatalog, getPublicCommercialCatalog } from "./services/commercialCatalogService";
 
 // ============================================
 // AI ACTION REGISTRY - Advanced AI Orchestrator
@@ -104,7 +106,8 @@ const getProgressAction: ActionDefinition = {
     }
     
     if (section === 'overall' || section === 'tools') {
-      const totalTools = ALL_TOOLS.length;
+      const catalog = await getPublicCommercialCatalog();
+      const totalTools = Math.max(...Object.values(catalog.toolCounts));
       progressData.tools = {
         totalAvailable: totalTools,
         uniqueToolsUsed,
@@ -142,7 +145,7 @@ const checkSubscriptionAction: ActionDefinition = {
   execute: async (context) => {
     const { user } = context;
     
-    const tierInfo = getTierInfo(user.subscriptionTier || 'free');
+    const tierInfo = await getTierInfo(user.subscriptionTier || 'free');
     
     return {
       success: true,
@@ -225,6 +228,8 @@ const getToolUsageAction: ActionDefinition = {
   parameters: {},
   execute: async (context) => {
     const toolUsage = await storage.getUserAnalytics(context.userId);
+    const catalog = await getPublicCommercialCatalog();
+    const totalRunnableTools = Math.max(...Object.values(catalog.toolCounts));
     
     // Group by tool and get last used
     const toolStats = toolUsage.reduce((acc: any, usage) => {
@@ -249,7 +254,7 @@ const getToolUsageAction: ActionDefinition = {
       .slice(0, 10);
     
     const message = sortedTools.length > 0
-      ? `📊 **Your Tool Usage:**\n\n${sortedTools.map((t, i) => `${i + 1}. **${t.toolName}** - Used ${t.usageCount} time${t.usageCount !== 1 ? 's' : ''}`).join('\n')}\n\nTotal unique tools used: ${Object.keys(toolStats).length} of ${ALL_TOOLS.length}`
+      ? `📊 **Your Tool Usage:**\n\n${sortedTools.map((t, i) => `${i + 1}. **${t.toolName}** - Used ${t.usageCount} time${t.usageCount !== 1 ? 's' : ''}`).join('\n')}\n\nTotal unique tools used: ${Object.keys(toolStats).length} of ${totalRunnableTools}`
       : "You haven't used any tools yet. Start with the Business Plan Generator or Innovation Score Calculator!";
     
     return {
@@ -421,18 +426,18 @@ const viewPaymentHistoryAction: ActionDefinition = {
     if (!user.stripeCustomerId) {
       return {
         success: true,
-        message: "No payment history found. You haven't made any purchases yet.",
-        data: { payments: [] }
+        message: "Detailed transaction history is not available here. Refer to your payment receipts for exact historical charges and the Pricing page for current listed prices.",
+        data: { payments: [], historyAvailable: false }
       };
     }
     
     // In a full implementation, this would fetch from Stripe
     // For now, we'll provide a summary based on user data
-    const tierInfo = getTierInfo(user.subscriptionTier || 'free');
+    const tierInfo = await getTierInfo(user.subscriptionTier || 'free');
     
     return {
       success: true,
-      message: `💳 **Payment Information:**\n\n• Current Tier: ${tierInfo.name}\n• Monthly Price: ${tierInfo.price}\n• Status: ${user.subscriptionStatus || 'N/A'}\n\nFor detailed invoices and payment history, please visit the Settings page > Billing section.`,
+      message: `💳 **Plan Information:**\n\n• Current Tier: ${tierInfo.name}\n• Current List Price: ${tierInfo.price} one-time\n• Status: ${user.subscriptionStatus || 'N/A'}\n\nThis is the current catalogue price, not necessarily the amount you paid. Refer to your payment receipt for the exact historical charge.`,
       data: {
         currentTier: user.subscriptionTier,
         tierPrice: tierInfo.price,
@@ -446,41 +451,19 @@ const viewPaymentHistoryAction: ActionDefinition = {
 // HELPER FUNCTIONS
 // ============================================
 
-function getTierInfo(tier: string): { name: string; price: string; toolCount: number; benefits: string[] } {
-  const tiers: Record<string, any> = {
-    free: {
-      name: 'Free',
-      price: '£0/month',
-      toolCount: 13,
-      benefits: ['13 essential tools', 'Basic visa guidance', 'Community support']
-    },
-    basic: {
-      name: 'Basic',
-      price: '£15/month',
-      toolCount: 20,
-      benefits: ['20 tools total', 'Essential documentation', 'Email support']
-    },
-    premium: {
-      name: 'Premium',
-      price: '£29/month',
-      toolCount: 83,
-      benefits: ['83 tools total', 'Comprehensive coverage', 'Priority support', 'AI assistance']
-    },
-    enterprise: {
-      name: 'Enterprise',
-      price: '£45/month',
-      toolCount: 109,
-      benefits: ['All 109 tools', 'Advanced IP strategy', 'Patent guidance', 'Dedicated support']
-    },
-    ultimate: {
-      name: 'Ultimate',
-      price: '£60/month',
-      toolCount: 109,
-      benefits: ['All 109 tools', 'VIP support', 'Personal strategist', 'Success guarantee']
-    }
+async function getTierInfo(tier: string): Promise<{ name: string; price: string; toolCount: number; benefits: string[] }> {
+  const { catalog } = await getCommercialCatalog();
+  const plan = catalog.plans.find((candidate) => candidate.id === tier) ?? catalog.plans.find((candidate) => candidate.id === 'free');
+  if (!plan) {
+    return { name: 'Free', price: formatPrice(0), toolCount: 0, benefits: [] };
+  }
+  const toolCounts = getToolCounts(catalog);
+  return {
+    name: plan.displayName,
+    price: formatPrice(plan.pricePence),
+    toolCount: toolCounts[plan.id],
+    benefits: plan.features,
   };
-  
-  return tiers[tier] || tiers.free;
 }
 
 function formatProgressMessage(section: string, data: any): string {
@@ -489,7 +472,7 @@ function formatProgressMessage(section: string, data: any): string {
       `**Overall Readiness:** ${data.overallReadiness}%\n\n` +
       `📝 Business Plan: ${data.businessPlan?.completionPercentage || 0}% complete\n` +
       `📁 Documents: ${data.documents?.totalDocuments || 0} uploaded\n` +
-      `🛠️ Tools: ${data.tools?.uniqueToolsUsed || 0} of ${data.tools?.totalAvailable || 109} used\n\n` +
+      `🛠️ Tools: ${data.tools?.uniqueToolsUsed || 0} of ${data.tools?.totalAvailable || 0} used\n\n` +
       `💡 **Next Step:** ${data.nextRecommendation || 'Keep up the great work!'}`;
   }
   
@@ -513,7 +496,7 @@ function formatProgressMessage(section: string, data: any): string {
   if (section === 'tools') {
     const tools = data.tools;
     return `🛠️ **Tool Usage:**\n\n` +
-      `Tools Used: ${tools?.uniqueToolsUsed || 0} of ${tools?.totalAvailable || 109}\n` +
+      `Tools Used: ${tools?.uniqueToolsUsed || 0} of ${tools?.totalAvailable || 0}\n` +
       `Usage: ${tools?.usagePercentage || 0}%\n\n` +
       'Explore more tools to strengthen your application!';
   }
@@ -524,7 +507,7 @@ function formatProgressMessage(section: string, data: any): string {
 function formatSubscriptionMessage(user: User, tierInfo: any): string {
   return `💎 **Your Subscription:**\n\n` +
     `**Current Tier:** ${tierInfo.name}\n` +
-    `**Monthly Price:** ${tierInfo.price}\n` +
+    `**One-time Plan Price:** ${tierInfo.price}\n` +
     `**Status:** ${user.subscriptionStatus || 'Active'}\n\n` +
     `**Benefits:**\n${tierInfo.benefits.map((b: string) => `• ${b}`).join('\n')}\n\n` +
     `You have access to ${tierInfo.toolCount} tools.`;

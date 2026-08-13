@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useCommercialCatalog } from "@/hooks/useCommercialCatalog";
 
 export type UserTier = "free" | "basic" | "premium" | "enterprise" | "ultimate";
 export type ToolTier = "free" | "basic" | "premium" | "enterprise" | "ultimate";
@@ -11,37 +12,12 @@ const TIER_HIERARCHY: Record<UserTier, number> = {
   ultimate: 4,
 };
 
-const TIER_NAMES: Record<UserTier, string> = {
+const FALLBACK_TIER_NAMES: Record<UserTier, string> = {
   free: "Free",
   basic: "Basic",
   premium: "Premium",
   enterprise: "Enterprise",
   ultimate: "Ultimate",
-};
-
-// Global Founder Pricing - Effective May 2026
-const TIER_PRICES: Record<UserTier, string> = {
-  free: "£0",
-  basic: "£9",
-  premium: "£19",
-  enterprise: "£35",
-  ultimate: "£49",
-};
-
-const TIER_PRICE_VALUES: Record<UserTier, number> = {
-  free: 0,
-  basic: 9,
-  premium: 19,
-  enterprise: 35,
-  ultimate: 49,
-};
-
-const TIER_TOOL_COUNTS: Record<UserTier, number> = {
-  free: 13,
-  basic: 20,
-  premium: 83,
-  enterprise: 109,
-  ultimate: 109,
 };
 
 // 2026 PRICING - Effective January 2026
@@ -80,6 +56,7 @@ interface UserWithCredits {
 }
 
 export function useTierAccess() {
+  const { getUpgradePlan, toolCounts, formatPrice } = useCommercialCatalog();
   const { data: user, isLoading } = useQuery<UserWithCredits>({
     queryKey: ['/api/auth/user'],
     retry: false,
@@ -103,15 +80,16 @@ export function useTierAccess() {
   };
 
   const getRequiredTierName = (toolTier: ToolTier): string => {
-    return TIER_NAMES[toolTier];
+    return getUpgradePlan(toolTier)?.displayName.replace(/\s+Plan$/i, "") ?? FALLBACK_TIER_NAMES[toolTier];
   };
 
   const getRequiredTierPrice = (toolTier: ToolTier): string => {
-    return TIER_PRICES[toolTier];
+    const plan = getUpgradePlan(toolTier);
+    return plan ? formatPrice(plan.pricePence) : "";
   };
 
   const getTierToolCount = (tier: UserTier): number => {
-    return TIER_TOOL_COUNTS[tier];
+    return toolCounts[tier] ?? 0;
   };
 
   const canAccessTool = (toolTier: ToolTier): boolean => {
@@ -127,9 +105,8 @@ export function useTierAccess() {
   };
 
   const getUpgradePrice = (targetTier: UserTier): number => {
-    const currentPrice = TIER_PRICE_VALUES[userTier];
-    const targetPrice = TIER_PRICE_VALUES[targetTier];
-    return Math.max(0, targetPrice - currentPrice);
+    const targetPrice = getUpgradePlan(targetTier)?.pricePence ?? 0;
+    return targetPrice / 100;
   };
 
   const getCreditDisplay = (): string => {

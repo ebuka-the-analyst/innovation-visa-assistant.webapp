@@ -390,9 +390,9 @@ function serveStatic(app: ExpressType) {
       }
     },
     '/pricing': {
-      title: 'UK Innovator Founder Visa Assistant Pricing | Free to Ultimate Plans',
-      description: 'Flexible pricing plans for the UK Innovator Founder Visa Assistant platform. Start free, upgrade as you grow. Access 100+ professional tools from £29/month.',
-      keywords: 'UK visa assistant pricing, visa tools subscription, innovator visa platform cost'
+      title: 'UK Innovator Founder Visa Assistant Pricing Plans',
+      description: 'Current one-time pricing for UK Innovator Founder Visa Assistant plans. Start free and compare the tools included with each published plan.',
+      keywords: 'UK visa assistant pricing, visa tool plans, innovator visa platform cost'
     },
     '/about': {
       title: 'About UK Innovator Founder Visa Assistant | AI-Powered Visa Guidance',

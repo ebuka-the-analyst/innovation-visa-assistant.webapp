@@ -5,14 +5,21 @@ import { PremiumUpgradeOverlay } from "@/components/PremiumUpgradeOverlay";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Lock, Loader2 } from "lucide-react";
+import { useToolAccess } from "@/hooks/useCommercialCatalog";
 
 interface ToolAccessGuardProps {
   children: React.ReactNode;
   requiredTier: ToolTier;
   toolName: string;
+  toolId?: string;
 }
 
-export function ToolAccessGuard({ children, requiredTier, toolName }: ToolAccessGuardProps) {
+const TOOL_PATH_ALIASES: Record<string, string> = {
+  "document-organizer": "doc-organizer",
+  "rfe-defence-lab": "rfe-defense",
+};
+
+export function ToolAccessGuard({ children, requiredTier, toolName, toolId }: ToolAccessGuardProps) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [, setLocation] = useLocation();
   const {
@@ -22,8 +29,21 @@ export function ToolAccessGuard({ children, requiredTier, toolName }: ToolAccess
     isLoading,
     isAuthenticated,
   } = useTierAccess();
+  const {
+    getToolAccess,
+    isLoading: isToolAccessLoading,
+    isError: isToolAccessError,
+  } = useToolAccess(isAuthenticated);
+  const pathToolId = typeof window === "undefined"
+    ? undefined
+    : window.location.pathname.replace(/^\/tools\//, "").replace(/^\//, "").split("/")[0];
+  const resolvedToolId = toolId ?? TOOL_PATH_ALIASES[pathToolId || ""] ?? pathToolId;
+  const managedEntitlement = resolvedToolId ? getToolAccess(resolvedToolId) : undefined;
+  const effectiveRequiredTier = managedEntitlement?.minimumPlanId ?? requiredTier;
 
-  const hasAccess = canAccessTool(requiredTier);
+  const hasAccess = resolvedToolId
+    ? !isToolAccessError && managedEntitlement?.allowed === true
+    : canAccessTool(effectiveRequiredTier);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -31,7 +51,7 @@ export function ToolAccessGuard({ children, requiredTier, toolName }: ToolAccess
     }
   }, [isLoading, isAuthenticated, setLocation]);
 
-  if (isLoading) {
+  if (isLoading || (isAuthenticated && isToolAccessLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -52,7 +72,7 @@ export function ToolAccessGuard({ children, requiredTier, toolName }: ToolAccess
                   </div>
                   <h2 className="text-xl font-bold mb-3">{toolName}</h2>
                   <p className="text-lg text-muted-foreground mb-2">
-                    This tool requires the <strong>{getRequiredTierName(requiredTier)} Plan</strong>
+                    This tool requires the <strong>{getRequiredTierName(effectiveRequiredTier)} Plan</strong>
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Upgrade to unlock this powerful feature and access professional-level analysis
@@ -95,9 +115,9 @@ export function ToolAccessGuard({ children, requiredTier, toolName }: ToolAccess
         <PremiumUpgradeOverlay
           isOpen={showUpgradeModal}
           onClose={() => setShowUpgradeModal(false)}
-          requiredTier={requiredTier}
-          requiredTierName={getRequiredTierName(requiredTier)}
-          requiredTierPrice={getRequiredTierPrice(requiredTier)}
+          requiredTier={effectiveRequiredTier}
+          requiredTierName={getRequiredTierName(effectiveRequiredTier)}
+          requiredTierPrice={getRequiredTierPrice(effectiveRequiredTier)}
           toolName={toolName}
         />
       </>

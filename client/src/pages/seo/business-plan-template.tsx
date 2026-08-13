@@ -27,8 +27,7 @@ const howToSchema = createHowToSchema(
 
 const productSchema = createProductSchema(
   "UK Innovator Founder Visa Business Plan Generator",
-  "AI-powered business plan generator specifically designed for UK Innovator Founder Visa applications",
-  "29"
+  "AI-powered business plan generator specifically designed for UK Innovator Founder Visa applications"
 );
 
 const breadcrumbSchema = createBreadcrumbSchema([

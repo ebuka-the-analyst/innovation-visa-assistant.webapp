@@ -46,6 +46,7 @@ import { THEME_TEMPLATES, AVAILABLE_FONTS, PRESET_COLORS, EXCEL_COLOR_THEMES, ge
 import { ThemePreviewSVG } from "@/components/ThemePreviewSVG";
 import { CoverPageEditor, TextElement, LogoElement } from "@/components/CoverPageEditor";
 import { useTierAccess } from "@/hooks/useTierAccess";
+import { useCommercialCatalog } from "@/hooks/useCommercialCatalog";
 import { Lock, Crown, Filter, ShoppingCart, Check } from "lucide-react";
 import { 
   PREMIUM_COVER_TEMPLATES,
@@ -81,6 +82,9 @@ export default function ThemeSelectionPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { hasAccessToTier } = useTierAccess();
+  const { plans, revision, formatPrice } = useCommercialCatalog();
+  const paidPrices = plans.filter((plan) => plan.pricePence > 0).map((plan) => plan.pricePence);
+  const lowestPaidPrice = formatPrice(paidPrices.length > 0 ? Math.min(...paidPrices) : 0);
   
   // Custom cover upload available to all paid tiers (Basic+)
   const canUploadCustomCover = hasAccessToTier('basic');
@@ -586,8 +590,10 @@ export default function ThemeSelectionPage() {
 
       if (responseData.planId) {
         // Create checkout session
-        const checkoutResponse = await apiRequest('POST', '/api/payment/create-checkout', { 
-          planId: responseData.planId 
+        const checkoutResponse = await apiRequest('POST', '/api/payment/create-checkout', {
+          businessPlanId: responseData.planId,
+          planId: responseData.planTier || tier,
+          expectedRevision: revision,
         });
         const checkoutData = await checkoutResponse.json();
 
@@ -1131,7 +1137,7 @@ export default function ThemeSelectionPage() {
                         data-testid="button-upgrade-for-custom-cover"
                       >
                         <Crown className="w-4 h-4 mr-2" />
-                        Upgrade from £19
+                        Upgrade from {lowestPaidPrice}
                       </Button>
                     </div>
                   ) : backgroundImage ? (
