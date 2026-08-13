@@ -13,7 +13,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createPricingSchema } from "@/lib/seo-schemas";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { TIER_CREDITS, ADDON_PRICING, REFERRAL_REWARDS } from "@/hooks/useTierAccess";
+import { TIER_CREDITS, REFERRAL_REWARDS } from "@/hooks/useTierAccess";
 import { useCommercialCatalog, type PlanId } from "@/hooks/useCommercialCatalog";
 import logoLight from "@assets/official_logo.webp";
 import logoDark from "@assets/logo_dark.webp";
@@ -26,59 +26,11 @@ const PLAN_PAGES: Record<PlanId, string> = {
   ultimate: "80+ pages",
 };
 
-// Global Founder Coin Top-Ups - Effective May 2026
-const addons = [
-  {
-    id: "single_coin",
-    name: "1 Coin",
-    price: "£5",
-    description: "1 extra business plan",
-    icon: Coins,
-    highlight: false,
-  },
-  {
-    id: "double_coins",
-    name: "2 Coins",
-    price: "£9",
-    savings: "Save £1",
-    description: "2 extra business plans",
-    icon: Coins,
-    highlight: false,
-  },
-  {
-    id: "triple_coins",
-    name: "3 Coins",
-    price: "£12",
-    savings: "Save £3",
-    description: "Perfect for iterations",
-    icon: Coins,
-    highlight: true,
-  },
-  {
-    id: "five_coins",
-    name: "5 Coins",
-    price: "£19",
-    savings: "Save £6",
-    description: "Multiple ventures",
-    icon: Coins,
-    highlight: false,
-  },
-  {
-    id: "ten_coins",
-    name: "10 Coins",
-    price: "£35",
-    savings: "Best Value",
-    description: "Heavy usage pack",
-    icon: Coins,
-    highlight: true,
-  },
-];
-
 export default function Pricing() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [processingTier, setProcessingTier] = useState<string | null>(null);
-  const { plans, revision, toolCounts, formatPrice } = useCommercialCatalog();
+  const { plans, coinPacks, revision, toolCounts, formatPrice } = useCommercialCatalog();
   const tiers = plans.map((plan) => ({
     ...plan,
     name: plan.displayName,
@@ -176,7 +128,7 @@ export default function Pricing() {
   // Addon purchase mutation
   const addonMutation = useMutation({
     mutationFn: async (addonType: string) => {
-      const response = await apiRequest('POST', '/api/credits/purchase-addon', { addonType });
+      const response = await apiRequest('POST', '/api/credits/purchase-addon', { addonType, expectedRevision: revision });
       return response.json();
     },
     onSuccess: (data: any) => {
@@ -408,28 +360,28 @@ export default function Pricing() {
             </div>
             
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
-              {addons.map((addon) => {
-                const Icon = addon.icon;
+              {coinPacks.map((addon) => {
+                const highlight = addon.badgeLabel === "Best Value" || addon.credits === 3;
                 return (
                   <Card 
                     key={addon.id} 
-                    className={`relative hover-elevate ${addon.highlight ? 'border-primary' : ''}`}
+                    className={`relative hover-elevate ${highlight ? 'border-primary' : ''}`}
                     data-testid={`card-addon-${addon.id}`}
                   >
-                    {addon.savings && (
+                    {addon.badgeLabel && (
                       <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10">
                         <Badge className="bg-green-500 text-white px-2 py-0 text-[10px] lg:text-xs whitespace-nowrap">
-                          {addon.savings}
+                          {addon.badgeLabel}
                         </Badge>
                       </div>
                     )}
                     
                     <CardHeader className="pb-1 pt-4 px-3 lg:px-4">
                       <div className="flex items-center gap-1.5 mb-1">
-                        <Icon className="h-4 w-4 text-primary flex-shrink-0" />
-                        <CardTitle className="text-sm lg:text-base truncate">{addon.name}</CardTitle>
+                        <Coins className="h-4 w-4 text-primary flex-shrink-0" />
+                        <CardTitle className="text-sm lg:text-base truncate">{addon.displayName}</CardTitle>
                       </div>
-                      <div className="text-xl lg:text-lg font-bold">{addon.price}</div>
+                      <div className="text-xl lg:text-lg font-bold">{formatPrice(addon.pricePence)}</div>
                     </CardHeader>
                     
                     <CardContent className="pb-2 px-3 lg:px-4">
@@ -438,7 +390,7 @@ export default function Pricing() {
                     
                     <CardFooter className="pt-1 px-3 lg:px-4 pb-3">
                       <Button
-                        className={`w-full ${addon.highlight ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}`}
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
                         size="sm"
                         onClick={() => handlePurchaseAddon(addon.id)}
                         disabled={processingTier === addon.id || addonMutation.isPending}
@@ -447,7 +399,7 @@ export default function Pricing() {
                         {processingTier === addon.id && addonMutation.isPending ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                          "Buy"
+                            addon.ctaLabel
                         )}
                       </Button>
                     </CardFooter>

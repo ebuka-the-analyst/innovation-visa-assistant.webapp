@@ -29,15 +29,6 @@ export const TIER_CREDITS: Record<UserTier, number> = {
   ultimate: 12,
 };
 
-// Global Founder Coin Top-Ups - Effective May 2026
-export const ADDON_PRICING = {
-  singleCoin: { price: 5, credits: 1, name: "1 Coin" },
-  doubleCoins: { price: 9, credits: 2, name: "2 Coins", savings: 1 },
-  tripleCoins: { price: 12, credits: 3, name: "3 Coins", savings: 3 },
-  fiveCoins: { price: 19, credits: 5, name: "5 Coins", savings: 6 },
-  tenCoins: { price: 35, credits: 10, name: "10 Coins", savings: 15 },
-} as const;
-
 export const REFERRAL_REWARDS = {
   creditsPerReferral: 1,
   description: "Earn 1 credit for each friend who signs up and subscribes",

@@ -114,8 +114,12 @@ function getChangeSummary(previous: CommercialCatalog, next: CommercialCatalog) 
   const changedToolIds = Array.from(toolIds).filter(
     (toolId) => previous.minimumPlanByTool[toolId] !== next.minimumPlanByTool[toolId],
   );
+  const previousCoinPacks = new Map(previous.coinPacks.map((pack) => [pack.id, pack]));
+  const changedCoinPackIds = next.coinPacks
+    .filter((pack) => JSON.stringify(previousCoinPacks.get(pack.id)) !== JSON.stringify(pack))
+    .map((pack) => pack.id);
 
-  return { changedPlanIds, changedToolIds };
+  return { changedPlanIds, changedToolIds, changedCoinPackIds };
 }
 
 export async function saveCommercialCatalog(
@@ -176,7 +180,7 @@ export async function saveCommercialCatalog(
         key: COMMERCIAL_CATALOG_SETTING_KEY,
         value: next,
         category: "commercial",
-        description: "Published pricing, plan copy, and minimum plan required for each runnable tool",
+        description: "Published pricing, coin packs, plan copy, and minimum plan required for each runnable tool",
         dataType: "json",
         isPublic: false,
         lastModifiedBy: input.actor.id,
@@ -187,7 +191,7 @@ export async function saveCommercialCatalog(
         set: {
           value: next,
           category: "commercial",
-          description: "Published pricing, plan copy, and minimum plan required for each runnable tool",
+          description: "Published pricing, coin packs, plan copy, and minimum plan required for each runnable tool",
           dataType: "json",
           isPublic: false,
           lastModifiedBy: input.actor.id,

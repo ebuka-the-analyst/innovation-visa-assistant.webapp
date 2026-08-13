@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, CheckCircle2, PoundSterling, RefreshCw, RotateCcw, Save, Search, ShieldCheck } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Coins, PoundSterling, RefreshCw, RotateCcw, Save, Search, ShieldCheck } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -26,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
 type PlanId = "free" | "basic" | "premium" | "enterprise" | "ultimate";
+type CoinPackId = "single_coin" | "double_coins" | "triple_coins" | "five_coins" | "ten_coins";
 type PublicationStatus = "draft" | "published" | "archived";
 
 interface CommercialPlan {
@@ -44,9 +45,24 @@ interface CommercialPlan {
 interface CommercialCatalog {
   revision: number;
   plans: CommercialPlan[];
+  coinPacks: CommercialCoinPack[];
   minimumPlanByTool: Record<string, PlanId>;
   updatedAt?: string | null;
   updatedBy?: string | null;
+}
+
+interface CommercialCoinPack {
+  id: CoinPackId;
+  displayName: string;
+  pricePence: number;
+  currency: "GBP";
+  billingPeriod: "one_time";
+  credits: number;
+  description: string;
+  badgeLabel: string | null;
+  ctaLabel: string;
+  publicationStatus: PublicationStatus;
+  displayOrder: number;
 }
 
 interface AdminToolRecord {
@@ -87,6 +103,7 @@ interface NormalizedTool {
 
 interface ChangePreview {
   planChanges: string[];
+  coinPackChanges: string[];
   toolChanges: Array<{ id: string; name: string; from: PlanId; to: PlanId }>;
   accessReductions: number;
   priceChanges: number;
@@ -102,6 +119,14 @@ const PLAN_LABELS: Record<PlanId, string> = {
   ultimate: "Ultimate",
 };
 const PLAN_RANK = Object.fromEntries(PLAN_IDS.map((id, index) => [id, index])) as Record<PlanId, number>;
+const COIN_PACK_IDS: CoinPackId[] = ["single_coin", "double_coins", "triple_coins", "five_coins", "ten_coins"];
+const COIN_PACK_LABELS: Record<CoinPackId, string> = {
+  single_coin: "1 Coin",
+  double_coins: "2 Coins",
+  triple_coins: "3 Coins",
+  five_coins: "5 Coins",
+  ten_coins: "10 Coins",
+};
 const UNSAFE_PLAIN_TEXT = /[<>]|[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
 const UNSAFE_FEATURE_CLAIM = /\b\d+\s*(tools?|credits?|coins?|pages?)\b|\b\d+(?:\.\d+)?\s*%|£|\b(GBP|pounds?|pence|quid)\b|\/\s*(month|mo|year|yr|week|day|quarter)\b|\b(monthly|yearly|quarterly|weekly|daily|per\s+(month|year|plan|week|day|quarter)|one[- ]time|subscribe|subscription|recurring|renewals?|annually|annual|instalments?|installments?|billed|half[- ]price|discount(?:ed)?|percent(?:age)?|\d+(?:\.\d+)?\s*off|save\s+\d+|(all|every)\s+(tools?|features?)|(complete|full)\s+access\s+to\s+(all|every)\s+(tools?|features?)|unlimited\s+(tools?|features?|credits?|coins?|pages?))\b/i;
 const FREE_MARKETING_CLAIM = /(^|\s)free(?=\s|$|[!.,:;])|\bcomplimentary\b|\b(?:no|without)\s+(?:a\s+)?(?:costs?|charges?|fees?|payments?|paying)\b|\bzero[- ](?:cost|charge|fee)\b/i;
@@ -200,6 +225,13 @@ function normalizeForSave(catalog: CommercialCatalog): CommercialCatalog {
       ctaLabel: plan.ctaLabel.trim(),
       features: plan.features.map((feature) => feature.trim()).filter(Boolean),
     })),
+    coinPacks: catalog.coinPacks.map((pack) => ({
+      ...pack,
+      displayName: pack.displayName.trim(),
+      description: pack.description.trim(),
+      badgeLabel: pack.badgeLabel?.trim() || null,
+      ctaLabel: pack.ctaLabel.trim(),
+    })),
   };
 }
 
@@ -267,6 +299,46 @@ function validateCatalog(catalog: CommercialCatalog, tools: NormalizedTool[]): s
     errors.push("At least one paid plan must remain published.");
   }
 
+  if (catalog.coinPacks.length !== COIN_PACK_IDS.length || COIN_PACK_IDS.some((id) => !catalog.coinPacks.some((pack) => pack.id === id))) {
+    errors.push("All five fixed coin packs must be present exactly once.");
+  }
+  const coinPackOrders = new Set<number>();
+  const coinPackNames = new Set<string>();
+  for (const pack of catalog.coinPacks) {
+    const prefix = COIN_PACK_LABELS[pack.id] || pack.id;
+    const name = pack.displayName.trim();
+    const description = pack.description.trim();
+    const badge = pack.badgeLabel?.trim() || "";
+    const ctaLabel = pack.ctaLabel.trim();
+
+    if (!name || name.length > 60) errors.push(`${prefix}: display name must be 1-60 characters.`);
+    const normalizedName = name.toLocaleLowerCase("en-GB");
+    if (coinPackNames.has(normalizedName)) errors.push("Coin pack display names must be unique.");
+    coinPackNames.add(normalizedName);
+    if (!description || description.length > 180) errors.push(`${prefix}: description must be 1-180 characters.`);
+    if (badge.length > 40) errors.push(`${prefix}: badge label cannot exceed 40 characters.`);
+    if (!ctaLabel || ctaLabel.length > 40) errors.push(`${prefix}: button label must be 1-40 characters.`);
+    if ([name, description, badge, ctaLabel].some((value) => UNSAFE_PLAIN_TEXT.test(value))) {
+      errors.push(`${prefix}: coin-pack text must be plain text without HTML or control characters.`);
+    }
+    if (pack.currency !== "GBP") errors.push(`${prefix}: currency must remain GBP.`);
+    if (pack.billingPeriod !== "one_time") errors.push(`${prefix}: billing period must remain one-time.`);
+    if (!Number.isInteger(pack.pricePence) || pack.pricePence < 100 || pack.pricePence > 1_000_000) {
+      errors.push(`${prefix}: price must be between £1 and £10,000.`);
+    }
+    if (!Number.isInteger(pack.credits) || pack.credits < 1 || pack.credits > 100) {
+      errors.push(`${prefix}: coin quantity must be an integer from 1 to 100.`);
+    }
+    if (!Number.isInteger(pack.displayOrder) || pack.displayOrder < 0 || pack.displayOrder > 4) {
+      errors.push(`${prefix}: display order must be an integer from 0 to 4.`);
+    }
+    if (coinPackOrders.has(pack.displayOrder)) errors.push("Coin pack display order values must be unique.");
+    coinPackOrders.add(pack.displayOrder);
+  }
+  if (!catalog.coinPacks.some((pack) => pack.publicationStatus === "published")) {
+    errors.push("At least one coin pack must remain published.");
+  }
+
   const runnableTools = tools.filter((tool) => tool.available);
   const managedToolIds = new Set(runnableTools.map((tool) => tool.id));
   const assignmentIds = Object.keys(catalog.minimumPlanByTool);
@@ -303,6 +375,9 @@ export function PricingAccessManagement() {
   const [priceInputs, setPriceInputs] = useState<Record<PlanId, string>>(
     () => Object.fromEntries(PLAN_IDS.map((planId) => [planId, "0"])) as Record<PlanId, string>,
   );
+  const [coinPriceInputs, setCoinPriceInputs] = useState<Record<CoinPackId, string>>(
+    () => Object.fromEntries(COIN_PACK_IDS.map((packId) => [packId, "0"])) as Record<CoinPackId, string>,
+  );
 
   const catalogQuery = useQuery<AdminCatalogResponse>({
     queryKey: ["/api/admin/commercial-catalog"],
@@ -317,6 +392,9 @@ export function PricingAccessManagement() {
       setPriceInputs(Object.fromEntries(
         incoming.plans.map((plan) => [plan.id, formatPriceInput(plan.pricePence)]),
       ) as Record<PlanId, string>);
+      setCoinPriceInputs(Object.fromEntries(
+        incoming.coinPacks.map((pack) => [pack.id, formatPriceInput(pack.pricePence)]),
+      ) as Record<CoinPackId, string>);
       setValidationErrors([]);
     }
   }, [catalogQuery.data]);
@@ -332,9 +410,13 @@ export function PricingAccessManagement() {
       baseline.plans.some((plan) => {
         const input = priceInputs[plan.id];
         return !/^\d+(?:\.\d{0,2})?$/.test(input) || Math.round(Number(input) * 100) !== plan.pricePence;
+      }) ||
+      baseline.coinPacks.some((pack) => {
+        const input = coinPriceInputs[pack.id];
+        return !/^\d+(?:\.\d{0,2})?$/.test(input) || Math.round(Number(input) * 100) !== pack.pricePence;
       })
     )),
-    [baseline, draft, priceInputs],
+    [baseline, coinPriceInputs, draft, priceInputs],
   );
 
   const derivedCounts = useMemo(() => {
@@ -376,6 +458,7 @@ export function PricingAccessManagement() {
   const changePreview = useMemo<ChangePreview>(() => {
     const preview: ChangePreview = {
       planChanges: [],
+      coinPackChanges: [],
       toolChanges: [],
       accessReductions: 0,
       priceChanges: 0,
@@ -402,6 +485,29 @@ export function PricingAccessManagement() {
         JSON.stringify(previous.features) !== JSON.stringify(next.features)
       ) {
         preview.planChanges.push(`${next.displayName}: public copy updated`);
+      }
+    }
+
+    for (const next of draft.coinPacks) {
+      const previous = baseline.coinPacks.find((pack) => pack.id === next.id);
+      if (!previous) continue;
+      if (previous.pricePence !== next.pricePence) {
+        preview.priceChanges += 1;
+        preview.coinPackChanges.push(`${next.displayName}: ${formatPrice(previous.pricePence)} → ${formatPrice(next.pricePence)}`);
+      }
+      if (previous.publicationStatus !== next.publicationStatus) {
+        preview.publicationChanges += 1;
+        preview.coinPackChanges.push(`${next.displayName}: ${previous.publicationStatus} → ${next.publicationStatus}`);
+      }
+      if (previous.displayName !== next.displayName) preview.coinPackChanges.push(`${COIN_PACK_LABELS[next.id]} renamed to ${next.displayName}`);
+      if (previous.displayOrder !== next.displayOrder) preview.coinPackChanges.push(`${next.displayName}: display order ${previous.displayOrder} → ${next.displayOrder}`);
+      if (
+        previous.credits !== next.credits ||
+        previous.description !== next.description ||
+        previous.badgeLabel !== next.badgeLabel ||
+        previous.ctaLabel !== next.ctaLabel
+      ) {
+        preview.coinPackChanges.push(`${next.displayName}: public coin-pack details updated`);
       }
     }
 
@@ -446,6 +552,9 @@ export function PricingAccessManagement() {
         setPriceInputs(Object.fromEntries(
           saved.catalog.plans.map((plan) => [plan.id, formatPriceInput(plan.pricePence)]),
         ) as Record<PlanId, string>);
+        setCoinPriceInputs(Object.fromEntries(
+          saved.catalog.coinPacks.map((pack) => [pack.id, formatPriceInput(pack.pricePence)]),
+        ) as Record<CoinPackId, string>);
       }
       setReason("");
       setValidationErrors([]);
@@ -484,12 +593,23 @@ export function PricingAccessManagement() {
     setValidationErrors([]);
   };
 
+  const updateCoinPack = (packId: CoinPackId, updates: Partial<CommercialCoinPack>) => {
+    setDraft((current) => current ? {
+      ...current,
+      coinPacks: current.coinPacks.map((pack) => pack.id === packId ? { ...pack, ...updates } : pack),
+    } : current);
+    setValidationErrors([]);
+  };
+
   const resetDraft = () => {
     if (!baseline) return;
     setDraft(cloneCatalog(baseline));
     setPriceInputs(Object.fromEntries(
       baseline.plans.map((plan) => [plan.id, formatPriceInput(plan.pricePence)]),
     ) as Record<PlanId, string>);
+    setCoinPriceInputs(Object.fromEntries(
+      baseline.coinPacks.map((pack) => [pack.id, formatPriceInput(pack.pricePence)]),
+    ) as Record<CoinPackId, string>);
     setReason("");
     setValidationErrors([]);
   };
@@ -501,6 +621,12 @@ export function PricingAccessManagement() {
       const input = priceInputs[plan.id];
       if (!/^\d+(?:\.\d{0,2})?$/.test(input)) {
         errors.push(`${PLAN_LABELS[plan.id]}: price must use no more than two decimal places.`);
+      }
+    }
+    for (const pack of draft.coinPacks) {
+      const input = coinPriceInputs[pack.id];
+      if (!/^\d+(?:\.\d{0,2})?$/.test(input)) {
+        errors.push(`${COIN_PACK_LABELS[pack.id]}: coin-pack price must use no more than two decimal places.`);
       }
     }
     if (reason.trim().length < 10 || reason.trim().length > 500) {
@@ -609,8 +735,9 @@ export function PricingAccessManagement() {
       )}
 
       <Tabs defaultValue="plans" className="space-y-3">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-2xl grid-cols-3">
           <TabsTrigger value="plans">Plans &amp; Pricing</TabsTrigger>
+          <TabsTrigger value="coins">Coin Packs</TabsTrigger>
           <TabsTrigger value="tools">Tool Access</TabsTrigger>
         </TabsList>
 
@@ -725,6 +852,137 @@ export function PricingAccessManagement() {
                     <div className="rounded-md border bg-muted/30 p-2 text-xs">
                       <p className="font-medium">Fixed checkout behaviour</p>
                       <p className="mt-1 text-muted-foreground">Currency: GBP · Billing: one-time · Destination: code controlled</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="coins" className="mt-0 space-y-3">
+          <div className="grid gap-3 xl:grid-cols-2">
+            {COIN_PACK_IDS.map((packId) => {
+              const pack = draft.coinPacks.find((item) => item.id === packId);
+              if (!pack) return null;
+              return (
+                <Card key={pack.id} data-testid={`commercial-coin-pack-${pack.id}`}>
+                  <CardHeader className="p-3 pb-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <CardTitle className="flex items-center gap-2 text-sm">
+                          <Coins className="h-4 w-4 text-primary" /> {COIN_PACK_LABELS[pack.id]}
+                        </CardTitle>
+                        <CardDescription className="font-mono text-[10px]">{pack.id}</CardDescription>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold">{formatPrice(pack.pricePence)}</p>
+                        <p className="text-[10px] text-muted-foreground">{pack.credits} coin{pack.credits === 1 ? "" : "s"}</p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="grid gap-3 p-3 pt-1 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label htmlFor={`coin-name-${pack.id}`}>Display name</Label>
+                      <Input
+                        id={`coin-name-${pack.id}`}
+                        value={pack.displayName}
+                        maxLength={60}
+                        onChange={(event) => updateCoinPack(pack.id, { displayName: event.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor={`coin-price-${pack.id}`}>Price displayed and charged (GBP)</Label>
+                      <Input
+                        id={`coin-price-${pack.id}`}
+                        type="number"
+                        min={1}
+                        max={10000}
+                        step="0.01"
+                        value={coinPriceInputs[pack.id]}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setCoinPriceInputs((current) => ({ ...current, [pack.id]: value }));
+                          if (/^\d+(?:\.\d{0,2})?$/.test(value)) {
+                            updateCoinPack(pack.id, { pricePence: Math.round(Number(value) * 100) });
+                          } else {
+                            setValidationErrors([]);
+                          }
+                        }}
+                        data-testid={`input-coin-price-${pack.id}`}
+                      />
+                      <p className="text-[10px] text-muted-foreground">GBP · one-time payment · stored as whole pence</p>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor={`coin-credits-${pack.id}`}>Coins granted</Label>
+                      <Input
+                        id={`coin-credits-${pack.id}`}
+                        type="number"
+                        min={1}
+                        max={100}
+                        step={1}
+                        value={pack.credits}
+                        onChange={(event) => updateCoinPack(pack.id, { credits: Number(event.target.value) })}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor={`coin-badge-${pack.id}`}>Badge label</Label>
+                      <Input
+                        id={`coin-badge-${pack.id}`}
+                        value={pack.badgeLabel ?? ""}
+                        maxLength={40}
+                        placeholder="Optional"
+                        onChange={(event) => updateCoinPack(pack.id, { badgeLabel: event.target.value || null })}
+                      />
+                    </div>
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <Label htmlFor={`coin-description-${pack.id}`}>Description</Label>
+                      <Textarea
+                        id={`coin-description-${pack.id}`}
+                        value={pack.description}
+                        maxLength={180}
+                        rows={2}
+                        onChange={(event) => updateCoinPack(pack.id, { description: event.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor={`coin-cta-${pack.id}`}>Button label</Label>
+                      <Input
+                        id={`coin-cta-${pack.id}`}
+                        value={pack.ctaLabel}
+                        maxLength={40}
+                        onChange={(event) => updateCoinPack(pack.id, { ctaLabel: event.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Publication status</Label>
+                      <Select
+                        value={pack.publicationStatus}
+                        onValueChange={(value) => updateCoinPack(pack.id, { publicationStatus: value as PublicationStatus })}
+                      >
+                        <SelectTrigger data-testid={`select-coin-status-${pack.id}`}><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="published">Published</SelectItem>
+                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="archived">Archived</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor={`coin-order-${pack.id}`}>Display order</Label>
+                      <Input
+                        id={`coin-order-${pack.id}`}
+                        type="number"
+                        min={0}
+                        max={4}
+                        step={1}
+                        value={pack.displayOrder}
+                        onChange={(event) => updateCoinPack(pack.id, { displayOrder: Number(event.target.value) })}
+                      />
+                    </div>
+                    <div className="rounded-md border bg-muted/30 p-2 text-xs">
+                      <p className="font-medium">Fixed checkout behaviour</p>
+                      <p className="mt-1 text-muted-foreground">Currency: GBP · Billing: one-time · Destination: Stripe checkout</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -866,7 +1124,7 @@ export function PricingAccessManagement() {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs text-muted-foreground">
               {dirty
-                ? `${changePreview.planChanges.length} plan changes and ${changePreview.toolChanges.length} tool assignments are awaiting review.`
+                ? `${changePreview.planChanges.length} plan changes, ${changePreview.coinPackChanges.length} coin-pack changes and ${changePreview.toolChanges.length} tool assignments are awaiting review.`
                 : "No unsaved catalogue changes."}
             </p>
             <div className="flex gap-2">
@@ -893,7 +1151,7 @@ export function PricingAccessManagement() {
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               <div className="rounded-md border p-2 text-center"><p className="font-bold">{changePreview.priceChanges}</p><p className="text-[10px] text-muted-foreground">Price changes</p></div>
               <div className="rounded-md border p-2 text-center"><p className="font-bold">{changePreview.publicationChanges}</p><p className="text-[10px] text-muted-foreground">Status changes</p></div>
-              <div className="rounded-md border p-2 text-center"><p className="font-bold">{changePreview.toolChanges.length}</p><p className="text-[10px] text-muted-foreground">Tool moves</p></div>
+              <div className="rounded-md border p-2 text-center"><p className="font-bold">{changePreview.coinPackChanges.length}</p><p className="text-[10px] text-muted-foreground">Coin packs</p></div>
               <div className="rounded-md border border-amber-500/40 p-2 text-center"><p className="font-bold text-amber-600">{changePreview.accessReductions}</p><p className="text-[10px] text-muted-foreground">Access reductions</p></div>
             </div>
             {changePreview.planChanges.length > 0 && (
@@ -901,6 +1159,14 @@ export function PricingAccessManagement() {
                 <p className="mb-1 font-medium">Plan changes</p>
                 <ul className="list-disc space-y-1 pl-5 text-xs text-muted-foreground">
                   {changePreview.planChanges.map((change, index) => <li key={`${change}-${index}`}>{change}</li>)}
+                </ul>
+              </div>
+            )}
+            {changePreview.coinPackChanges.length > 0 && (
+              <div>
+                <p className="mb-1 font-medium">Coin-pack changes</p>
+                <ul className="list-disc space-y-1 pl-5 text-xs text-muted-foreground">
+                  {changePreview.coinPackChanges.map((change, index) => <li key={`${change}-${index}`}>{change}</li>)}
                 </ul>
               </div>
             )}
