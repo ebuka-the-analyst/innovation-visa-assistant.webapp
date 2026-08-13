@@ -2,8 +2,12 @@ import { SEOHead } from "@/components/SEOHead";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { FileText, Users, CreditCard, Shield, Scale, AlertTriangle, Mail } from "lucide-react";
+import { useCommercialCatalog } from "@/hooks/useCommercialCatalog";
 
 export default function TermsOfService() {
+  const { plans, toolCounts, formatPrice } = useCommercialCatalog();
+  const maximumToolCount = Math.max(0, ...Object.values(toolCounts));
+
   return (
     <>
       <SEOHead
@@ -21,7 +25,7 @@ export default function TermsOfService() {
               </div>
               <div>
                 <h1 className="text-xl font-bold" data-testid="heading-terms">Terms of Service</h1>
-                <p className="text-muted-foreground">Last Updated: January 21, 2026</p>
+                <p className="text-muted-foreground">Last Updated: August 12, 2026</p>
               </div>
             </div>
             <p className="text-muted-foreground max-w-2xl">
@@ -57,7 +61,7 @@ export default function TermsOfService() {
                     UK Innovator Founder Visa Assistant provides AI-powered tools and resources to help applicants prepare for the UK Innovator Founder Visa application process. Our services include:
                   </p>
                   <ul className="list-disc pl-6 text-muted-foreground space-y-1">
-                    <li>100+ professional-level business planning and visa preparation tools</li>
+                    <li>{maximumToolCount} professional-level business planning and visa preparation tools</li>
                     <li>Business plan generation and innovation assessment</li>
                     <li>Financial modeling and compliance checking</li>
                     <li>Pitch coaching and endorsement preparation</li>
@@ -94,26 +98,27 @@ export default function TermsOfService() {
                   <CreditCard className="w-5 h-5 text-orange-500" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold mb-3">4. Subscription and Payments</h2>
+                  <h2 className="text-xl font-semibold mb-3">4. Plans and Payments</h2>
                   
-                  <h3 className="font-semibold mb-2">4.1 Subscription Tiers</h3>
-                  <p className="text-muted-foreground mb-2">We offer five subscription tiers with access to our 100+ professional-level tools:</p>
+                  <h3 className="font-semibold mb-2">4.1 Plan Tiers</h3>
+                  <p className="text-muted-foreground mb-2">We offer {plans.length} published plans with access to our professional-level tools:</p>
                   <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-4">
-                    <li><strong>Free (£0):</strong> Essential tools access</li>
-                    <li><strong>Basic (£29/month):</strong> 1 coin credit for business plan generation</li>
-                    <li><strong>Premium (£59/month):</strong> 3 coin credits (Most Popular)</li>
-                    <li><strong>Enterprise (£85/month):</strong> 6 coin credits with priority support</li>
-                    <li><strong>Ultimate (£110/month):</strong> 12 coin credits + VIP support and all premium features</li>
+                    {plans.map((plan) => (
+                      <li key={plan.id}>
+                        <strong>{plan.displayName} ({formatPrice(plan.pricePence)}{plan.pricePence > 0 ? " one-time" : ""}):</strong>{" "}
+                        {plan.description}
+                      </li>
+                    ))}
                   </ul>
 
                   <h3 className="font-semibold mb-2">4.2 Payment Terms</h3>
                   <p className="text-muted-foreground mb-3">
-                    Subscriptions are billed monthly in advance. All payments are processed securely through Stripe. By providing payment information, you authorize us to charge the applicable fees.
+                    Paid plans are charged once at the price shown at checkout. All payments are processed securely through Stripe. By providing payment information, you authorize us to charge the applicable one-time fee.
                   </p>
 
                   <h3 className="font-semibold mb-2">4.3 Refund Policy</h3>
                   <p className="text-muted-foreground">
-                    We offer a 14-day money-back guarantee for first-time subscribers. Ultimate tier subscribers are covered by our Success Guarantee. Refund requests must be submitted to <a href="mailto:billing@innovatorfoundervisaassistant.co.uk" className="text-primary hover:underline">billing@innovatorfoundervisaassistant.co.uk</a>.
+                    We offer a 14-day money-back guarantee for first-time paid-plan purchases. Where a plan expressly includes a Success Guarantee, its stated conditions also apply. Refund requests must be submitted to <a href="mailto:billing@innovatorfoundervisaassistant.co.uk" className="text-primary hover:underline">billing@innovatorfoundervisaassistant.co.uk</a>.
                   </p>
                 </div>
               </div>
@@ -156,7 +161,7 @@ export default function TermsOfService() {
                   <h3 className="font-semibold mb-2">6.2 Protected Elements</h3>
                   <p className="text-muted-foreground mb-2">The following are specifically protected:</p>
                   <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-4">
-                    <li>All 109+ visa application tools and their unique implementations</li>
+                    <li>All {maximumToolCount} visa application tools and their unique implementations</li>
                     <li>AI agent designs (Nova, Sterling, Atlas, Sage) and their interaction patterns</li>
                     <li>Business plan generation algorithms and templates</li>
                     <li>User interface designs, layouts, and visual elements</li>
@@ -237,7 +242,7 @@ export default function TermsOfService() {
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-3">10. Termination</h2>
               <p className="text-muted-foreground mb-3">
-                We reserve the right to suspend or terminate your account at any time for violations of these Terms or fraudulent activity. You may cancel your subscription at any time through your account settings.
+                We reserve the right to suspend or terminate your account at any time for violations of these Terms or fraudulent activity. Current plan purchases are one-time payments rather than recurring subscriptions.
               </p>
               <p className="text-muted-foreground">
                 Upon termination, your access to paid features will cease, but your data will be retained according to our Privacy Policy.

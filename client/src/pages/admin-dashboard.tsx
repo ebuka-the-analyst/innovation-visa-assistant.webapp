@@ -28,6 +28,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { PromoCodeGenerator } from "@/components/admin/PromoCodeGenerator";
+import { PricingAccessManagement } from "@/components/admin/PricingAccessManagement";
 import { 
   RealtimeMonitor, 
   HeatmapView, 
@@ -40,6 +41,7 @@ import {
 } from "@/components/admin/AdvancedAnalytics";
 import { useToast } from "@/hooks/use-toast";
 import { useVisualPdfExport } from "@/hooks/useVisualPdfExport";
+import { useCommercialCatalog, type PlanId } from "@/hooks/useCommercialCatalog";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { format, formatDistance, subDays, subHours, startOfDay, endOfDay, differenceInSeconds } from "date-fns";
 import {
@@ -1641,6 +1643,14 @@ export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { exportVisualPdf, isExporting: isPdfExporting } = useVisualPdfExport();
+  const { plans: commercialPlans, formatPrice: formatCommercialPrice } = useCommercialCatalog();
+  const commercialPlanName = (planId: PlanId) =>
+    commercialPlans.find((plan) => plan.id === planId)?.displayName ||
+    `${planId.charAt(0).toUpperCase()}${planId.slice(1)}`;
+  const commercialPlanPrice = (planId: PlanId) => {
+    const plan = commercialPlans.find((candidate) => candidate.id === planId);
+    return plan ? (plan.pricePence === 0 ? "Free" : formatCommercialPrice(plan.pricePence)) : "Not published";
+  };
   const [pdfExportProgress, setPdfExportProgress] = useState<string | null>(null);
 
   // Section state — persisted in URL hash so refresh restores position
@@ -3521,6 +3531,7 @@ export default function AdminDashboard() {
       'feedback-overview': 'Feedback Analytics',
       'feedback-responses': 'All Feedback Responses',
       'content-blog': 'Blog Dashboard',
+      'content-pricing': 'Pricing & Plan Access',
       'content-seo': 'SEO Analytics',
       'content-social': 'Social Post Generator',
       'referrals-overview': 'Referral Programme Overview',
@@ -4281,7 +4292,7 @@ export default function AdminDashboard() {
                                   <div className="flex items-end justify-between">
                                     <div>
                                       <p className="text-[9px] font-bold">£{(overviewData?.extendedKPIs?.monthlyRevenue || 0).toLocaleString()}</p>
-                                      <p className="text-[9px] text-muted-foreground">Current MRR</p>
+                                      <p className="text-[9px] text-muted-foreground">Captured in the last 30 days</p>
                                     </div>
                                     <div className="text-right">
                                       <p className="text-xs font-semibold text-muted-foreground">/ £{(overviewData?.extendedKPIs?.revenueTarget || 2000).toLocaleString()}</p>
@@ -4443,12 +4454,12 @@ export default function AdminDashboard() {
                                   </div>
                                 </div>
 
-                                {/* Goal 2 - Real MRR from Stripe */}
+                                {/* Goal 2 - Captured payment revenue */}
                                 <div className="p-4 rounded-lg border bg-muted/30">
                                   <div className="flex items-start justify-between mb-0.5">
                                     <div>
-                                      <h4 className="text-[10px] font-semibold">£5,000 Monthly Recurring Revenue</h4>
-                                      <p className="text-[9px] text-muted-foreground">Scale premium tier conversions</p>
+                                      <h4 className="text-[10px] font-semibold">£5,000 Monthly Revenue</h4>
+                                      <p className="text-[9px] text-muted-foreground">Scale paid plan conversions</p>
                                     </div>
                                     <Badge variant="secondary">£{(overviewData?.extendedKPIs?.monthlyRevenue || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/£5,000</Badge>
                                   </div>
@@ -8012,16 +8023,16 @@ export default function AdminDashboard() {
                             <Card>
                               <CardHeader className="p-2 pb-1">
                                 <CardTitle className="text-[10px] font-semibold">Revenue by Tier</CardTitle>
-                                <CardDescription className="text-[9px]">Monthly revenue from each tier</CardDescription>
+                                <CardDescription className="text-[9px]">All-time captured Stripe charges by tier</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="space-y-1.5">
                                   {(() => {
                                     const tierData = [
-                                      { source: 'Basic (£9)', amount: revenueAnalytics?.revenueByTier?.basic || 0, color: 'bg-green-500' },
-                                      { source: 'Premium (£19)', amount: revenueAnalytics?.revenueByTier?.premium || 0, color: 'bg-blue-500' },
-                                      { source: 'Enterprise (£35)', amount: revenueAnalytics?.revenueByTier?.enterprise || 0, color: 'bg-purple-500' },
-                                      { source: 'Ultimate (£49)', amount: revenueAnalytics?.revenueByTier?.ultimate || 0, color: 'bg-amber-500' },
+                                      { source: commercialPlanName('basic'), amount: revenueAnalytics?.revenueByTier?.basic || 0, color: 'bg-green-500' },
+                                      { source: commercialPlanName('premium'), amount: revenueAnalytics?.revenueByTier?.premium || 0, color: 'bg-blue-500' },
+                                      { source: commercialPlanName('enterprise'), amount: revenueAnalytics?.revenueByTier?.enterprise || 0, color: 'bg-purple-500' },
+                                      { source: commercialPlanName('ultimate'), amount: revenueAnalytics?.revenueByTier?.ultimate || 0, color: 'bg-amber-500' },
                                     ];
                                     const totalRevenue = tierData.reduce((sum, t) => sum + t.amount, 0) || 1;
                                     return tierData.map((item, index) => {
@@ -8254,7 +8265,7 @@ export default function AdminDashboard() {
                           {/* MRR Summary Header */}
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-1.5">
                             {[
-                              { label: 'Current MRR', value: `£${(revenueAnalytics?.mrr || 0).toFixed(2)}`, change: `${(revenueAnalytics?.monthlyGrowth || 0) >= 0 ? '+' : ''}${revenueAnalytics?.monthlyGrowth || 0}%`, icon: DollarSign, color: 'green' },
+                              { label: 'Current MRR', value: `£${(revenueAnalytics?.mrr || 0).toFixed(2)}`, change: 'Stripe subscriptions', icon: DollarSign, color: 'green' },
                               { label: 'Active Subs', value: `${revenueAnalytics?.activeSubscriptions || 0}`, change: 'subscribers', icon: Plus, color: 'blue' },
                               { label: 'ARR', value: `£${(revenueAnalytics?.arr || 0).toFixed(2)}`, change: 'projected', icon: TrendingUp, color: 'purple' },
                               { label: 'Churned', value: `${revenueAnalytics?.cancelledSubscriptions || 0}`, change: `${(revenueAnalytics?.churnRate || 0).toFixed(1)}% churn`, icon: TrendingDown, color: 'red' },
@@ -8320,21 +8331,21 @@ export default function AdminDashboard() {
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-1.5">
                             <Card>
                               <CardHeader className="p-2 pb-1">
-                                <CardTitle className="text-[10px] font-semibold">MRR by Subscription Tier</CardTitle>
-                                <CardDescription className="text-[9px]">Revenue contribution per tier (from Stripe)</CardDescription>
+                                <CardTitle className="text-[10px] font-semibold">Users by Plan</CardTitle>
+                                <CardDescription className="text-[9px]">Current paid user distribution</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="space-y-1.5">
                                   {(() => {
                                     const tierData = [
-                                      { tier: 'Ultimate (£49)', mrr: (revenueAnalytics?.tierDistribution?.ultimate || 0) * 49, users: revenueAnalytics?.tierDistribution?.ultimate || 0, color: '#8b5cf6' },
-                                      { tier: 'Enterprise (£35)', mrr: (revenueAnalytics?.tierDistribution?.enterprise || 0) * 35, users: revenueAnalytics?.tierDistribution?.enterprise || 0, color: '#f59e0b' },
-                                      { tier: 'Premium (£19)', mrr: (revenueAnalytics?.tierDistribution?.premium || 0) * 19, users: revenueAnalytics?.tierDistribution?.premium || 0, color: '#3b82f6' },
-                                      { tier: 'Basic (£9)', mrr: (revenueAnalytics?.tierDistribution?.basic || 0) * 9, users: revenueAnalytics?.tierDistribution?.basic || 0, color: '#22c55e' },
+                                      { tier: commercialPlanName('ultimate'), users: revenueAnalytics?.tierDistribution?.ultimate || 0, color: '#8b5cf6' },
+                                      { tier: commercialPlanName('enterprise'), users: revenueAnalytics?.tierDistribution?.enterprise || 0, color: '#f59e0b' },
+                                      { tier: commercialPlanName('premium'), users: revenueAnalytics?.tierDistribution?.premium || 0, color: '#3b82f6' },
+                                      { tier: commercialPlanName('basic'), users: revenueAnalytics?.tierDistribution?.basic || 0, color: '#22c55e' },
                                     ];
-                                    const totalMrr = tierData.reduce((sum, t) => sum + t.mrr, 0) || 1;
+                                    const totalUsers = tierData.reduce((sum, item) => sum + item.users, 0) || 1;
                                     return tierData.map((item, index) => {
-                                      const percent = Math.round((item.mrr / totalMrr) * 100) || 0;
+                                      const percent = Math.round((item.users / totalUsers) * 100) || 0;
                                       return (
                                         <motion.div
                                           key={item.tier}
@@ -8349,7 +8360,7 @@ export default function AdminDashboard() {
                                               <span className="font-medium">{item.tier}</span>
                                               <Badge variant="secondary">{item.users} users</Badge>
                                             </div>
-                                            <span className="font-bold">£{item.mrr.toFixed(2)}/mo</span>
+                                            <span className="font-bold">{percent}%</span>
                                           </div>
                                           <div className="relative h-3 rounded-full bg-muted overflow-hidden">
                                             <motion.div
@@ -8595,11 +8606,11 @@ export default function AdminDashboard() {
                           {/* Tier Overview Cards */}
                           <div className="grid grid-cols-1 md:grid-cols-5 gap-1.5">
                             {[
-                              { tier: 'Free', price: 0, users: revenueAnalytics?.tierDistribution?.free || 0, color: '#94a3b8', icon: Users },
-                              { tier: 'Basic', price: 29, users: revenueAnalytics?.tierDistribution?.basic || 0, color: '#22c55e', icon: Zap },
-                              { tier: 'Premium', price: 49, users: revenueAnalytics?.tierDistribution?.premium || 0, color: '#3b82f6', icon: Star },
-                              { tier: 'Enterprise', price: 89, users: revenueAnalytics?.tierDistribution?.enterprise || 0, color: '#f59e0b', icon: Building },
-                              { tier: 'Ultimate', price: 129, users: revenueAnalytics?.tierDistribution?.ultimate || 0, color: '#8b5cf6', icon: Crown },
+                              { tier: commercialPlanName('free'), price: commercialPlanPrice('free'), users: revenueAnalytics?.tierDistribution?.free || 0, color: '#94a3b8', icon: Users },
+                              { tier: commercialPlanName('basic'), price: commercialPlanPrice('basic'), users: revenueAnalytics?.tierDistribution?.basic || 0, color: '#22c55e', icon: Zap },
+                              { tier: commercialPlanName('premium'), price: commercialPlanPrice('premium'), users: revenueAnalytics?.tierDistribution?.premium || 0, color: '#3b82f6', icon: Star },
+                              { tier: commercialPlanName('enterprise'), price: commercialPlanPrice('enterprise'), users: revenueAnalytics?.tierDistribution?.enterprise || 0, color: '#f59e0b', icon: Building },
+                              { tier: commercialPlanName('ultimate'), price: commercialPlanPrice('ultimate'), users: revenueAnalytics?.tierDistribution?.ultimate || 0, color: '#8b5cf6', icon: Crown },
                             ].map((tier, index) => (
                               <motion.div
                                 key={tier.tier}
@@ -8614,7 +8625,7 @@ export default function AdminDashboard() {
                                     </div>
                                     <p className="font-bold text-xs mt-0.5">{tier.tier}</p>
                                     <p className="text-xs font-bold mt-1" style={{ color: tier.color }}>
-                                      {tier.price === 0 ? 'Free' : `£${tier.price}`}
+                                      {tier.price}
                                     </p>
                                     <Badge className="mt-2" style={{ backgroundColor: `${tier.color}20`, color: tier.color }}>
                                       {tier.users} users
@@ -8674,7 +8685,7 @@ export default function AdminDashboard() {
                             <Card>
                               <CardHeader className="p-2 pb-1">
                                 <CardTitle className="text-[10px] font-semibold">Revenue by Tier</CardTitle>
-                                <CardDescription className="text-[9px]">Monthly revenue contribution</CardDescription>
+                                <CardDescription className="text-[9px]">All-time captured Stripe charges</CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <ResponsiveContainer width="100%" height={80}>
@@ -8690,7 +8701,7 @@ export default function AdminDashboard() {
                                     <YAxis type="category" dataKey="tier" stroke="hsl(var(--foreground))" fontSize={8} width={80} />
                                     <RechartsTooltip
                                       contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
-                                      formatter={(value: number) => [`£${value}/mo`, 'Revenue']}
+                                      formatter={(value: number) => [`£${value}`, 'Captured revenue']}
                                     />
                                     <Bar dataKey="revenue" radius={[0, 4, 4, 0]}>
                                       {[
@@ -8813,42 +8824,33 @@ export default function AdminDashboard() {
                             </Card>
                           </div>
 
-                          {/* LTV by Tier */}
+                          {/* Current list price by tier */}
                           <Card>
                             <CardHeader className="p-2 pb-1">
-                              <CardTitle className="text-[10px] font-semibold">Lifetime Value by Subscription Tier</CardTitle>
-                              <CardDescription className="text-[9px]">Projected revenue over customer lifetime</CardDescription>
+                              <CardTitle className="text-[10px] font-semibold">Current One-Time List Price by Plan</CardTitle>
+                              <CardDescription className="text-[9px]">Published catalogue price; historical charges may differ</CardDescription>
                             </CardHeader>
                             <CardContent>
                               <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                                 {[
-                                  { tier: 'Basic', ltv: 87, lifespan: 3, color: '#22c55e', arpu: 29 },
-                                  { tier: 'Premium', ltv: 294, lifespan: 6, color: '#3b82f6', arpu: 49 },
-                                  { tier: 'Enterprise', ltv: 712, lifespan: 8, color: '#f59e0b', arpu: 89 },
-                                  { tier: 'Ultimate', ltv: 1548, lifespan: 12, color: '#8b5cf6', arpu: 129 },
+                                  { planId: 'basic' as PlanId, color: '#22c55e' },
+                                  { planId: 'premium' as PlanId, color: '#3b82f6' },
+                                  { planId: 'enterprise' as PlanId, color: '#f59e0b' },
+                                  { planId: 'ultimate' as PlanId, color: '#8b5cf6' },
                                 ].map((item, index) => (
                                   <motion.div
-                                    key={item.tier}
+                                    key={item.planId}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.1 }}
                                   >
                                     <Card className="text-center" style={{ borderColor: item.color, borderWidth: '2px' }}>
                                       <CardContent className="pt-6">
-                                        <p className="font-medium" style={{ color: item.color }}>{item.tier}</p>
-                                        <p className="text-xs font-bold mt-0.5">£{item.ltv}</p>
-                                        <p className="text-[9px] text-muted-foreground mt-1">Lifetime Value</p>
+                                        <p className="font-medium" style={{ color: item.color }}>{commercialPlanName(item.planId)}</p>
+                                        <p className="text-xs font-bold mt-0.5">{commercialPlanPrice(item.planId)}</p>
+                                        <p className="text-[9px] text-muted-foreground mt-1">One-time list price</p>
                                         <Separator className="my-4" />
-                                        <div className="space-y-2 text-[9px]">
-                                          <div className="flex justify-between">
-                                            <span className="text-muted-foreground">ARPU</span>
-                                            <span className="font-medium">£{item.arpu}/mo</span>
-                                          </div>
-                                          <div className="flex justify-between">
-                                            <span className="text-muted-foreground">Avg. Lifespan</span>
-                                            <span className="font-medium">{item.lifespan} months</span>
-                                          </div>
-                                        </div>
+                                        <p className="text-[9px] text-muted-foreground">GBP · billed once</p>
                                       </CardContent>
                                     </Card>
                                   </motion.div>
@@ -10601,6 +10603,11 @@ export default function AdminDashboard() {
                       transition={{ duration: 0.5 }}
                       className="space-y-1.5"
                     >
+                      {/* Pricing & Plan Access */}
+                      {activeSection === 'content-pricing' && (
+                        <PricingAccessManagement />
+                      )}
+
                       {/* Blog Dashboard */}
                       {activeSection === 'content-blog' && (
                         <>

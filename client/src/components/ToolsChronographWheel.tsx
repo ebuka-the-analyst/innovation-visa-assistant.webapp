@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { useLocation } from "wouter";
 import { ALL_TOOLS } from "@shared/tools-data";
 import * as Icons from "lucide-react";
+import { useToolAccess } from "@/hooks/useCommercialCatalog";
+import { useAuth } from "@/hooks/useAuth";
 
 type IconName = keyof typeof Icons;
 
@@ -35,6 +37,11 @@ export default function ToolsChronographWheel() {
   const blockScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
   const tools = ALL_TOOLS;
   const selectedTool = tools[selectedToolIdx];
+  const auth = useAuth();
+  const { getToolAccess, isLoading: isToolAccessLoading, isError: isToolAccessError } = useToolAccess(auth.isAuthenticated);
+  const getEffectiveTier = (toolId: string) => getToolAccess(toolId)?.minimumPlanId;
+  const isToolLocked = (toolId: string) =>
+    isToolAccessLoading || isToolAccessError || getToolAccess(toolId)?.allowed !== true;
 
   // Record user activity
   const recordActivity = () => {
@@ -545,8 +552,9 @@ export default function ToolsChronographWheel() {
                   </div>
 
                   {/* Tier badge */}
-                  <div className={`flex-shrink-0 text-xs font-bold px-1 sm:px-2 py-0.5 sm:py-1 rounded border ${tierColors[tool.tier as keyof typeof tierColors]}`}>
-                    {tool.tier.charAt(0).toUpperCase()}
+                  <div className={`flex-shrink-0 text-xs font-bold px-1 sm:px-2 py-0.5 sm:py-1 rounded border ${getEffectiveTier(tool.id) ? tierColors[getEffectiveTier(tool.id)!] : "bg-muted border-border text-muted-foreground"}`}>
+                    {getEffectiveTier(tool.id)?.charAt(0).toUpperCase() ?? "?"}
+                    {isToolLocked(tool.id) ? <Icons.Lock className="inline w-3 h-3 ml-1" /> : null}
                   </div>
                 </div>
               ))}

@@ -6,6 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Download, ExternalLink, FileText, BarChart3, PieChart, TrendingUp, Users, Briefcase, Award, FileCheck, Sparkles, Target, Rocket, Building2, Zap, Shield, Clock, Check } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useCommercialCatalog } from "@/hooks/useCommercialCatalog";
+import { TIER_CREDITS } from "@/hooks/useTierAccess";
 
 interface SamplePlanModalProps {
   open: boolean;
@@ -161,6 +163,19 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
   const [selectedPlan, setSelectedPlan] = useState<SamplePlan | null>(null);
   const [viewFullOpen, setViewFullOpen] = useState(false);
   const { toast } = useToast();
+  const { getPlanById, toolCounts, formatPrice } = useCommercialCatalog();
+  const basicPlan = getPlanById("basic");
+  const premiumPlan = getPlanById("premium");
+  const enterprisePlan = getPlanById("enterprise");
+  const basicPlanLabel = basicPlan?.displayName.replace(/\s+Plan$/i, "") ?? "Basic";
+  const premiumPlanLabel = premiumPlan?.displayName.replace(/\s+Plan$/i, "") ?? "Premium";
+  const enterprisePlanLabel = enterprisePlan?.displayName.replace(/\s+Plan$/i, "") ?? "Enterprise";
+  const comparisonFeatures = (plan: NonNullable<typeof basicPlan>, pages: string) => [
+    `${pages} pages`,
+    `${TIER_CREDITS[plan.id]} business plan coin${TIER_CREDITS[plan.id] === 1 ? "" : "s"}`,
+    `${toolCounts[plan.id]} tools access`,
+    ...plan.features,
+  ].slice(0, 5);
 
   const handleViewFull = (plan: SamplePlan) => {
     setSelectedPlan(plan);
@@ -184,11 +199,12 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
   };
 
   const getTierLabel = (tier: string) => {
+    const label = getPlanById(tier)?.displayName.replace(/\s+Plan$/i, "") ?? tier;
     switch (tier) {
-      case "basic": return { label: "Basic", color: "bg-emerald-500 text-white" };
-      case "premium": return { label: "Premium", color: "bg-violet-500 text-white" };
-      case "enterprise": return { label: "Enterprise", color: "bg-amber-500 text-white" };
-      default: return { label: tier, color: "bg-gray-500 text-white" };
+      case "basic": return { label, color: "bg-emerald-500 text-white" };
+      case "premium": return { label, color: "bg-violet-500 text-white" };
+      case "enterprise": return { label, color: "bg-amber-500 text-white" };
+      default: return { label, color: "bg-gray-500 text-white" };
     }
   };
 
@@ -232,13 +248,13 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
           <TabsList className="grid w-full grid-cols-5 gap-1 mb-6 h-auto p-1">
             <TabsTrigger value="all" className="text-xs sm:text-sm py-2" data-testid="tab-sample-all">All Plans</TabsTrigger>
             <TabsTrigger value="basic" className="text-xs sm:text-sm py-2 gap-1" data-testid="tab-sample-basic">
-              <Zap className="w-3 h-3 hidden sm:inline" /> Basic
+              <Zap className="w-3 h-3 hidden sm:inline" /> {basicPlanLabel}
             </TabsTrigger>
             <TabsTrigger value="premium" className="text-xs sm:text-sm py-2 gap-1" data-testid="tab-sample-premium">
-              <Sparkles className="w-3 h-3 hidden sm:inline" /> Premium
+              <Sparkles className="w-3 h-3 hidden sm:inline" /> {premiumPlanLabel}
             </TabsTrigger>
             <TabsTrigger value="enterprise" className="text-xs sm:text-sm py-2 gap-1" data-testid="tab-sample-enterprise">
-              <Award className="w-3 h-3 hidden sm:inline" /> Enterprise
+              <Award className="w-3 h-3 hidden sm:inline" /> {enterprisePlanLabel}
             </TabsTrigger>
             <TabsTrigger value="features" className="text-xs sm:text-sm py-2" data-testid="tab-sample-features">Features</TabsTrigger>
           </TabsList>
@@ -258,7 +274,7 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
 
           <TabsContent value="basic" className="space-y-4">
             {SAMPLE_PLANS.filter(p => p.tier === "basic").length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No Basic tier examples available</p>
+              <p className="text-center text-muted-foreground py-8">No {basicPlanLabel} tier examples available</p>
             ) : (
               SAMPLE_PLANS.filter(p => p.tier === "basic").map((plan) => (
                 <SamplePlanCard 
@@ -348,23 +364,24 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
                 </h3>
                 <div className="grid md:grid-cols-3 gap-4">
                   {/* Basic Tier */}
+                  {basicPlan && (
                   <div className="bg-background/60 backdrop-blur-sm rounded-lg p-5 border border-emerald-500/30 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-emerald-500/20 to-transparent rounded-full blur-xl" />
                     <div className="flex items-center gap-2 mb-3">
                       <Zap className="w-5 h-5 text-emerald-500" />
-                      <h4 className="font-bold text-lg">Basic</h4>
-                      <Badge className="bg-emerald-500 text-white ml-auto">£29</Badge>
+                      <h4 className="font-bold text-lg">{basicPlan.displayName.replace(/\s+Plan$/i, "")}</h4>
+                      <Badge className="bg-emerald-500 text-white ml-auto">{formatPrice(basicPlan.pricePence)}</Badge>
                     </div>
                     <ul className="space-y-2 text-sm">
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> 25-35 pages</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> 1 business plan coin</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> Visual charts included</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> PDF + Word download</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> 20 tools access</li>
+                      {comparisonFeatures(basicPlan, "25-35").map((feature) => (
+                        <li key={feature} className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> {feature}</li>
+                      ))}
                     </ul>
                   </div>
+                  )}
                   
                   {/* Premium Tier */}
+                  {premiumPlan && (
                   <div className="bg-background/60 backdrop-blur-sm rounded-lg p-5 border-2 border-violet-500/50 relative overflow-hidden ring-2 ring-violet-500/20">
                     <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-violet-500/30 to-transparent rounded-full blur-xl" />
                     <div className="absolute -top-1 left-1/2 -translate-x-1/2 bg-violet-500 text-white text-xs px-3 py-0.5 rounded-full font-semibold">
@@ -372,34 +389,33 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
                     </div>
                     <div className="flex items-center gap-2 mb-3 mt-2">
                       <Sparkles className="w-5 h-5 text-violet-500" />
-                      <h4 className="font-bold text-lg">Premium</h4>
-                      <Badge className="bg-violet-500 text-white ml-auto">£59</Badge>
+                      <h4 className="font-bold text-lg">{premiumPlan.displayName.replace(/\s+Plan$/i, "")}</h4>
+                      <Badge className="bg-violet-500 text-white ml-auto">{formatPrice(premiumPlan.pricePence)}</Badge>
                     </div>
                     <ul className="space-y-2 text-sm">
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-violet-500" /> 40-55 pages</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-violet-500" /> 3 business plan coins</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-violet-500" /> All charts + financial tables</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-violet-500" /> 83 tools access</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-violet-500" /> Industry frameworks</li>
+                      {comparisonFeatures(premiumPlan, "40-55").map((feature) => (
+                        <li key={feature} className="flex items-center gap-2"><Check className="w-4 h-4 text-violet-500" /> {feature}</li>
+                      ))}
                     </ul>
                   </div>
+                  )}
                   
                   {/* Enterprise Tier */}
+                  {enterprisePlan && (
                   <div className="bg-background/60 backdrop-blur-sm rounded-lg p-5 border border-amber-500/30 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-amber-500/20 to-transparent rounded-full blur-xl" />
                     <div className="flex items-center gap-2 mb-3">
                       <Award className="w-5 h-5 text-amber-500" />
-                      <h4 className="font-bold text-lg">Enterprise</h4>
-                      <Badge className="bg-amber-500 text-white ml-auto">£85</Badge>
+                      <h4 className="font-bold text-lg">{enterprisePlan.displayName.replace(/\s+Plan$/i, "")}</h4>
+                      <Badge className="bg-amber-500 text-white ml-auto">{formatPrice(enterprisePlan.pricePence)}</Badge>
                     </div>
                     <ul className="space-y-2 text-sm">
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> 56-80 pages</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> 6 business plan coins</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> 109 tools access</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> Full innovation deep-dive</li>
-                      <li className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> Advanced modelling</li>
+                      {comparisonFeatures(enterprisePlan, "56-80").map((feature) => (
+                        <li key={feature} className="flex items-center gap-2"><Check className="w-4 h-4 text-amber-500" /> {feature}</li>
+                      ))}
                     </ul>
                   </div>
+                  )}
                 </div>
               </div>
 

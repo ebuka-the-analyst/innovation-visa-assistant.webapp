@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,16 @@ import ThemeToggle from "@/components/ThemeToggle";
 import logoLight from "@assets/official_logo.webp";
 import logoDark from "@assets/logo_dark.webp";
 import { trackBeginCheckout, trackViewItem, trackSubscriptionStart, trackCTAClick } from "@/lib/analytics";
+import { useCommercialCatalog, type PlanId } from "@/hooks/useCommercialCatalog";
+import { TIER_CREDITS } from "@/hooks/useTierAccess";
+
+const PLAN_PAGE_COPY: Record<PlanId, string> = {
+  free: "10-15 page plan",
+  basic: "25-35 page plan",
+  premium: "40-55 page plan",
+  enterprise: "56-80 page plan",
+  ultimate: "80+ page plan",
+};
 
 interface PromoCodeValidation {
   valid: boolean;
@@ -24,39 +34,26 @@ interface PromoCodeValidation {
   finalPrice?: number;
 }
 
-// Global Founder Pricing - Effective May 2026
-const PRICING: Record<string, { name: string; amount: number; description: string; features: string[] }> = {
-  basic: {
-    name: "Basic Plan",
-    amount: 900,
-    description: "Perfect for straightforward businesses",
-    features: ["1 business plan coin", "20 tools access", "25-35 page plan", "Core innovation coverage"]
-  },
-  premium: {
-    name: "Premium Plan",
-    amount: 1900,
-    description: "Most popular - comprehensive coverage",
-    features: ["3 business plan coins", "83 tools access", "40-55 page plan", "Industry frameworks"]
-  },
-  enterprise: {
-    name: "Enterprise Plan",
-    amount: 3500,
-    description: "Maximum detail for complex ventures",
-    features: ["6 business plan coins", "109 tools access", "56-80 page plan", "Advanced modelling"]
-  },
-  ultimate: {
-    name: "Ultimate Plan",
-    amount: 4900,
-    description: "Maximum support for serious founders",
-    features: ["12 business plan coins", "109 tools access", "80+ page plan", "Priority support"]
-  }
-};
-
 export default function Checkout() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { plans, revision, toolCounts, getPlanById } = useCommercialCatalog();
   const searchParams = new URLSearchParams(window.location.search);
-  const tier = searchParams.get('tier') || 'premium';
+  const requestedTier = searchParams.get('tier') || 'premium';
+  const requestedPlan = getPlanById(requestedTier);
+  const pricing = (requestedPlan?.pricePence ? requestedPlan : undefined)
+    ?? (getPlanById('premium')?.pricePence ? getPlanById('premium') : undefined)
+    ?? plans.find((plan) => plan.pricePence > 0)
+    ?? plans[0]!;
+  const tier = pricing.id;
+  const pricingFeatures = [
+    ...(TIER_CREDITS[pricing.id] > 0
+      ? [`Includes ${TIER_CREDITS[pricing.id]} business plan coin${TIER_CREDITS[pricing.id] === 1 ? "" : "s"}`]
+      : []),
+    PLAN_PAGE_COPY[pricing.id],
+    `Access to ${toolCounts[pricing.id]} tools`,
+    ...pricing.features,
+  ];
   
   const [promoCode, setPromoCode] = useState('');
   const [promoValidation, setPromoValidation] = useState<PromoCodeValidation | null>(null);
@@ -72,12 +69,15 @@ export default function Checkout() {
     retry: false,
   });
 
-  const pricing = PRICING[tier] || PRICING.premium;
-  const originalPrice = pricing.amount / 100;
-  const finalPrice = promoValidation?.valid && promoValidation.finalPrice 
+  const originalPrice = pricing.pricePence / 100;
+  const finalPrice = promoValidation?.valid && promoValidation.finalPrice !== undefined
     ? promoValidation.finalPrice / 100 
     : originalPrice;
   const discount = originalPrice - finalPrice;
+
+  useEffect(() => {
+    setPromoValidation(null);
+  }, [revision, tier]);
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -97,11 +97,11 @@ export default function Checkout() {
       const data = await response.json();
       
       if (data.valid) {
-        let finalPrice = pricing.amount;
+        let finalPrice = pricing.pricePence;
         if (data.discountType === 'percentage') {
-          finalPrice = Math.round(pricing.amount * (1 - data.discountValue / 100));
+          finalPrice = Math.round(pricing.pricePence * (1 - data.discountValue / 100));
         } else if (data.discountType === 'fixed') {
-          finalPrice = Math.max(0, pricing.amount - data.discountValue);
+          finalPrice = Math.max(0, pricing.pricePence - data.discountValue);
         }
         
         setPromoValidation({
@@ -111,7 +111,7 @@ export default function Checkout() {
             : `£${(data.discountValue / 100).toFixed(2)} discount applied!`,
           discountType: data.discountType,
           discountValue: data.discountValue,
-          originalPrice: pricing.amount,
+          originalPrice: pricing.pricePence,
           finalPrice
         });
       } else {
@@ -129,18 +129,26 @@ export default function Checkout() {
 
   const checkoutMutation = useMutation({
     mutationFn: async () => {
-      const payload: { tier: string; promoCode?: string } = { tier };
+      const payload: { planId: string; expectedRevision: number; promoCode?: string } = {
+        planId: tier,
+        expectedRevision: revision,
+      };
       if (promoValidation?.valid && promoCode.trim()) {
         payload.promoCode = promoCode.trim().toUpperCase();
       }
       const response = await apiRequest('POST', '/api/payment/direct-subscribe', payload);
       return response.json();
     },
-    onSuccess: (data: any) => {
+    onSuccess: async (data: any) => {
       if (data.skipCheckout) {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] }),
+          queryClient.invalidateQueries({ queryKey: ['/api/onboarding/status'] }),
+          queryClient.invalidateQueries({ queryKey: ['/api/tools/access'] }),
+        ]);
         toast({
           title: "Success!",
-          description: "Your subscription has been activated with 100% discount!",
+          description: "Your plan has been activated with a 100% discount!",
         });
         // Redirect to the URL provided by the server (questionnaire or generation)
         if (data.redirectUrl) {
@@ -169,14 +177,14 @@ export default function Checkout() {
   const handleCheckout = () => {
     // Track checkout begin event for GA4
     if (pricing) {
-      trackViewItem(tier, pricing.name, finalPrice, 'GBP');
-      trackBeginCheckout(finalPrice, 'GBP', [{
+      trackViewItem(tier, pricing.displayName, finalPrice, pricing.currency, revision);
+      trackBeginCheckout(finalPrice, pricing.currency, [{
         item_id: tier,
-        item_name: pricing.name,
+        item_name: pricing.displayName,
         price: finalPrice,
         quantity: 1,
-      }]);
-      trackSubscriptionStart(pricing.name, finalPrice, 'monthly');
+      }], revision);
+      trackSubscriptionStart(pricing.displayName, finalPrice, 'one_time', tier, revision);
     }
     trackCTAClick('proceed_to_payment', 'checkout_page');
     setIsProcessing(true);
@@ -194,8 +202,8 @@ export default function Checkout() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <SEOHead
-        title={`Checkout - ${pricing.name} | UK Innovator Founder Visa Assistant`}
-        description={`Complete your purchase of the ${pricing.name} for your UK Innovator Founder Visa application.`}
+        title={`Checkout - ${pricing.displayName} | UK Innovator Founder Visa Assistant`}
+        description={`Complete your purchase of the ${pricing.displayName} for your UK Innovator Founder Visa application.`}
         canonical={`https://innovatorfoundervisaassistant.co.uk/checkout?tier=${tier}`}
       />
       
@@ -237,10 +245,10 @@ export default function Checkout() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="p-4 bg-muted/50 rounded-lg">
-                  <h3 className="font-semibold text-lg">{pricing.name}</h3>
+                  <h3 className="font-semibold text-lg">{pricing.displayName}</h3>
                   <p className="text-sm text-muted-foreground mb-3">{pricing.description}</p>
                   <ul className="space-y-1.5">
-                    {pricing.features.map((feature, idx) => (
+                    {pricingFeatures.map((feature, idx) => (
                       <li key={idx} className="flex items-center gap-2 text-sm">
                         <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
                         <span>{feature}</span>

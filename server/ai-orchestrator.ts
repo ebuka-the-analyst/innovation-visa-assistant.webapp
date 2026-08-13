@@ -13,6 +13,8 @@ import {
   type ActionResult
 } from "./ai-actions";
 import type { User } from "@shared/schema";
+import { PLAN_IDS, formatPrice } from "@shared/commercialCatalog";
+import { getCommercialCatalog } from "./services/commercialCatalogService";
 
 // ============================================
 // AI ORCHESTRATOR - Advanced Command Center
@@ -65,6 +67,27 @@ RULES:
 
 When users ask about their account, progress, subscription, or want to make changes, USE THE APPROPRIATE FUNCTION rather than giving generic advice.`;
 
+async function getCommercialPromptContext(): Promise<string> {
+  const { catalog } = await getCommercialCatalog();
+  const publishedPlans = catalog.plans
+    .filter((plan) => plan.publicationStatus === "published")
+    .sort((a, b) => a.displayOrder - b.displayOrder)
+    .map((plan) => `${plan.displayName}: ${formatPrice(plan.pricePence)} one-time; ${plan.features.join("; ")}`)
+    .join("\n");
+  const toolGroups = PLAN_IDS.map((planId) => {
+    const toolIds = Object.entries(catalog.minimumPlanByTool)
+      .filter(([, minimumPlanId]) => minimumPlanId === planId)
+      .map(([toolId]) => toolId);
+    return `${planId} minimum: ${toolIds.join(", ") || "none"}`;
+  }).join("\n");
+
+  return `CURRENT COMMERCIAL CATALOGUE (revision ${catalog.revision}):
+Prices are one-time plan prices in GBP, never monthly subscriptions. Only quote these values.
+${publishedPlans}
+Tool access is cumulative: higher plans inherit lower-plan tools.
+${toolGroups}`;
+}
+
 // Convert action definitions to OpenAI function format
 function getOpenAIFunctions(): OpenAI.Chat.ChatCompletionTool[] {
   return getActionDefinitions().map(action => ({
@@ -84,10 +107,11 @@ export async function orchestrateChat(
   user: User | null,
   context: { ipAddress?: string; userAgent?: string; sessionId?: string; pageContext?: string }
 ): Promise<OrchestratorResult> {
+  const commercialPromptContext = await getCommercialPromptContext();
   
   // If no authenticated user, use regular chat without actions
   if (!user) {
-    return regularChat(userMessage, conversationHistory, context.pageContext);
+    return regularChat(userMessage, conversationHistory, context.pageContext, commercialPromptContext);
   }
 
   const actionContext: ActionContext = {
@@ -111,7 +135,7 @@ export async function orchestrateChat(
       const response = await provider.client.chat.completions.create({
         model: provider.model,
         messages: [
-          { role: "system", content: ORCHESTRATOR_SYSTEM_PROMPT },
+          { role: "system", content: `${ORCHESTRATOR_SYSTEM_PROMPT}\n\n${commercialPromptContext}` },
           ...conversationHistory.map(msg => ({
             role: msg.role as "user" | "assistant",
             content: msg.content
@@ -272,12 +296,13 @@ async function retryWithBackoff<T>(
 async function regularChat(
   userMessage: string,
   conversationHistory: Message[],
-  pageContext?: string
+  pageContext?: string,
+  commercialPromptContext?: string
 ): Promise<OrchestratorResult> {
   // Different system prompts based on page context
   const isGlobal = pageContext === "global";
   
-  const systemPrompt = isGlobal 
+  const baseSystemPrompt = isGlobal
     ? `You are the Global Visa Assistant - an AI-powered guide for exploring immigration options across 16 countries worldwide.
 
 AVAILABLE COUNTRIES:
@@ -303,6 +328,7 @@ RULES:
 - Focus only on Innovator Founder Visa
 
 Give direct, helpful answers.`;
+  const systemPrompt = `${baseSystemPrompt}\n\n${commercialPromptContext ?? await getCommercialPromptContext()}`;
 
   // OpenAI only (primary)
   const chatProviders = [

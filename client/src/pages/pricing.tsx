@@ -14,98 +14,17 @@ import { organizationSchema, createPricingSchema } from "@/lib/seo-schemas";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { TIER_CREDITS, ADDON_PRICING, REFERRAL_REWARDS } from "@/hooks/useTierAccess";
+import { useCommercialCatalog, type PlanId } from "@/hooks/useCommercialCatalog";
 import logoLight from "@assets/official_logo.webp";
 import logoDark from "@assets/logo_dark.webp";
 
-// Global Founder Pricing - Effective May 2026
-const tiers = [
-  {
-    id: "free",
-    name: "Free Plan",
-    price: "Free",
-    priceInPence: 0,
-    credits: 0,
-    description: "Start your Innovator Founder Visa journey",
-    pages: "10-15 pages",
-    features: [
-      "Access to 13 essential tools",
-      "Basic business overview",
-      "Innovation introduction",
-      "Essential compliance checklist",
-      "Document organiser",
-      "Visa timeline planner",
-    ],
-  },
-  {
-    id: "basic",
-    name: "Basic Plan",
-    price: "£9",
-    priceInPence: 900,
-    credits: 1,
-    description: "Perfect for straightforward businesses",
-    pages: "25-35 pages",
-    features: [
-      "Includes 1 business plan coin",
-      "Access to 20 tools",
-      "Core innovation criteria coverage",
-      "Basic viability analysis",
-      "Essential scalability points",
-      "Standard business plan format",
-    ],
-  },
-  {
-    id: "premium",
-    name: "Premium Plan",
-    price: "£19",
-    priceInPence: 1900,
-    credits: 3,
-    description: "Most popular - comprehensive coverage",
-    pages: "40-55 pages",
-    popular: true,
-    features: [
-      "Includes 3 business plan coins",
-      "Access to 83 tools",
-      "Deeper innovation analysis",
-      "Viability + financials",
-      "Strong scalability strategy",
-      "Industry-specific frameworks",
-    ],
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise Plan",
-    price: "£35",
-    priceInPence: 3500,
-    credits: 6,
-    description: "Maximum detail for complex ventures",
-    pages: "56-80 pages",
-    features: [
-      "Includes 6 business plan coins",
-      "Access to 109 tools",
-      "Full innovation deep-dive",
-      "Complete viability assessment",
-      "Multi-market scalability strategy",
-      "Advanced business modelling",
-    ],
-  },
-  {
-    id: "ultimate",
-    name: "Ultimate Plan",
-    price: "£49",
-    priceInPence: 4900,
-    credits: 12,
-    description: "Maximum support for serious founders",
-    pages: "80+ pages",
-    features: [
-      "Includes 12 business plan coins",
-      "Access to all 109 tools",
-      "Priority support + live chat",
-      "Expert-level endorsement preparation",
-      "Best for serious iterations",
-      "Multiple business angles coverage",
-    ],
-  },
-];
+const PLAN_PAGES: Record<PlanId, string> = {
+  free: "10-15 pages",
+  basic: "25-35 pages",
+  premium: "40-55 pages",
+  enterprise: "56-80 pages",
+  ultimate: "80+ pages",
+};
 
 // Global Founder Coin Top-Ups - Effective May 2026
 const addons = [
@@ -159,6 +78,23 @@ export default function Pricing() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [processingTier, setProcessingTier] = useState<string | null>(null);
+  const { plans, revision, toolCounts, formatPrice } = useCommercialCatalog();
+  const tiers = plans.map((plan) => ({
+    ...plan,
+    name: plan.displayName,
+    price: plan.pricePence === 0 ? "Free" : formatPrice(plan.pricePence),
+    priceInPence: plan.pricePence,
+    credits: TIER_CREDITS[plan.id],
+    pages: PLAN_PAGES[plan.id],
+    popular: plan.id === "premium",
+    features: [
+      ...(TIER_CREDITS[plan.id] > 0
+        ? [`Includes ${TIER_CREDITS[plan.id]} business plan coin${TIER_CREDITS[plan.id] === 1 ? "" : "s"}`]
+        : []),
+      `Access to ${toolCounts[plan.id]} tools`,
+      ...plan.features,
+    ],
+  }));
   
   const { data: user } = useQuery<{ 
     id: string; 
@@ -188,8 +124,12 @@ export default function Pricing() {
   )[0];
 
   const checkoutMutation = useMutation({
-    mutationFn: async ({ planId, newTier }: { planId: string; newTier: string }) => {
-      const response = await apiRequest('POST', '/api/payment/create-checkout', { planId });
+    mutationFn: async ({ businessPlanId, planId }: { businessPlanId: string; planId: string }) => {
+      const response = await apiRequest('POST', '/api/payment/create-checkout', {
+        businessPlanId,
+        planId,
+        expectedRevision: revision,
+      });
       return response.json();
     },
     onSuccess: (data: any) => {
@@ -212,7 +152,10 @@ export default function Pricing() {
   // Direct subscribe mutation - Stripe handles promo codes on checkout page
   const directSubscribeMutation = useMutation({
     mutationFn: async (tierId: string) => {
-      const response = await apiRequest('POST', '/api/payment/direct-subscribe', { tier: tierId });
+      const response = await apiRequest('POST', '/api/payment/direct-subscribe', {
+        planId: tierId,
+        expectedRevision: revision,
+      });
       return response.json();
     },
     onSuccess: (data: any) => {
@@ -279,14 +222,14 @@ export default function Pricing() {
 
     if (latestPlan && latestPlan.status === 'pending' && latestPlan.tier === tierId) {
       setProcessingTier(tierId);
-      checkoutMutation.mutate({ planId: latestPlan.id, newTier: tierId });
+      checkoutMutation.mutate({ businessPlanId: latestPlan.id, planId: tierId });
     } else {
       setLocation(`/questionnaire?tier=${tierId}`);
     }
   };
 
   const pricingSchemas = tiers.map(tier => 
-    createPricingSchema(tier.name, tier.price, tier.features)
+    createPricingSchema(tier.name, tier.priceInPence, tier.features, tier.currency)
   );
 
   const combinedSchema = {
@@ -331,8 +274,8 @@ export default function Pricing() {
           
           <div className="min-h-screen bg-background">
             <SEOHead
-              title="Pricing Plans | UK Innovator Founder Visa Assistant - Start Free from £9"
-              description="Affordable AI-powered UK Innovator Founder Visa preparation platform. Start free or upgrade from £9 with business plan generation, document support, visa strategy tools, and endorsement readiness guidance."
+              title="Pricing Plans | UK Innovator Founder Visa Assistant"
+              description="Affordable AI-powered UK Innovator Founder Visa preparation plans with business plan generation, document support, visa strategy tools, and endorsement readiness guidance."
               canonical="https://innovatorfoundervisaassistant.co.uk/pricing"
               keywords="UK Innovator Founder Visa cost, visa application pricing, business plan cost, innovator founder visa fees, visa assistance pricing"
               schema={combinedSchema}
@@ -418,7 +361,7 @@ export default function Pricing() {
                         ) : (
                           <>
                             <Zap className="mr-2 h-4 w-4" />
-                            Subscribe
+                            {tier.ctaLabel}
                           </>
                         )}
                       </Button>
@@ -438,7 +381,7 @@ export default function Pricing() {
                         disabled={isCurrentTier && tier.id !== 'free'}
                         data-testid={`button-select-${tier.id}`}
                       >
-                        {isCurrentTier ? "Current Plan" : "Get Started"}
+                        {isCurrentTier ? "Current Plan" : tier.ctaLabel}
                       </Button>
                     )}
 
@@ -525,7 +468,7 @@ export default function Pricing() {
         )}
 
               <div className="mt-8 lg:mt-12 text-center text-xs lg:text-sm text-muted-foreground px-4">
-                <p>All plans include AI-powered generation optimized for UK Innovator Founder Visa approval</p>
+                <p>Paid plans include business plan generation features for UK Innovator Founder Visa preparation</p>
               </div>
             </main>
           </div>

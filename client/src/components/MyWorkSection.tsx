@@ -10,6 +10,7 @@ import {
   CheckCircle2, AlertTriangle
 } from "lucide-react";
 import { ALL_TOOLS, type Tool } from "@shared/tools-data";
+import { useToolAccess } from "@/hooks/useCommercialCatalog";
 
 interface SavedWork {
   toolId: string;
@@ -100,6 +101,11 @@ function getTierBadge(tier: string) {
 
 export function MyWorkSection() {
   const [, setLocation] = useLocation();
+  const {
+    getToolAccess,
+    isLoading: isToolAccessLoading,
+    isError: isToolAccessError,
+  } = useToolAccess();
   const [savedWork, setSavedWork] = useState<SavedWork[]>([]);
   const [expanded, setExpanded] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -187,7 +193,11 @@ export function MyWorkSection() {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {displayedWork.map((work) => (
+        {displayedWork.map((work) => {
+          const entitlement = getToolAccess(work.toolId);
+          const effectiveTier = entitlement?.minimumPlanId ?? work.tier;
+          const accessUnavailable = isToolAccessLoading || isToolAccessError || !entitlement;
+          return (
           <Card 
             key={work.toolId} 
             className="hover-elevate cursor-pointer group"
@@ -201,8 +211,8 @@ export function MyWorkSection() {
                     <Badge variant="secondary" className={getCategoryColor(work.category)}>
                       {work.category}
                     </Badge>
-                    <Badge className={getTierBadge(work.tier)}>
-                      {work.tier}
+                    <Badge className={getTierBadge(effectiveTier)}>
+                      {effectiveTier}
                     </Badge>
                   </div>
                 </div>
@@ -233,15 +243,23 @@ export function MyWorkSection() {
                   size="sm" 
                   className="flex-1"
                   onClick={() => setLocation(`/tools/${work.toolId}`)}
+                  disabled={accessUnavailable}
                   data-testid={`button-continue-${work.toolId}`}
                 >
                   <ExternalLink className="h-3 w-3 mr-1" />
-                  Continue
+                  {isToolAccessLoading
+                    ? "Checking access"
+                    : accessUnavailable
+                      ? "Access unavailable"
+                      : entitlement.allowed
+                        ? "Continue"
+                        : "View access required"}
                 </Button>
               </div>
             </CardContent>
           </Card>
-        ))}
+          );
+        })}
       </div>
       
       {savedWork.length > 6 && (

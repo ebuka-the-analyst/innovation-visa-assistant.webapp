@@ -143,17 +143,26 @@ export const trackPlanComplete = (planId: string) => {
 };
 
 // E-commerce / Purchase Events (Enhanced for GA4)
-export const trackViewItem = (itemId: string, itemName: string, price: number, currency = 'GBP') => {
+export const trackViewItem = (
+  itemId: string,
+  itemName: string,
+  price: number,
+  currency = 'GBP',
+  catalogRevision?: number,
+) => {
   if (!isGAReady()) return;
   
   window.gtag('event', 'view_item', {
     currency: currency,
     value: price,
+    plan_id: itemId,
+    catalog_revision: catalogRevision,
     items: [{
       item_id: itemId,
       item_name: itemName,
       price: price,
       currency: currency,
+      catalog_revision: catalogRevision,
     }]
   });
 };
@@ -173,13 +182,14 @@ export const trackAddToCart = (itemId: string, itemName: string, price: number, 
   });
 };
 
-export const trackBeginCheckout = (value: number, currency = 'GBP', items?: any[]) => {
+export const trackBeginCheckout = (value: number, currency = 'GBP', items?: any[], catalogRevision?: number) => {
   if (!isGAReady()) return;
   
   window.gtag('event', 'begin_checkout', {
     currency: currency,
     value: value,
     items: items,
+    catalog_revision: catalogRevision,
   });
 };
 
@@ -201,11 +211,19 @@ export const trackPurchase = (
   });
 };
 
-export const trackSubscriptionStart = (planName: string, price: number, interval: 'monthly' | 'yearly') => {
+export const trackSubscriptionStart = (
+  planName: string,
+  price: number,
+  interval: 'one_time' | 'monthly' | 'yearly',
+  planId?: string,
+  catalogRevision?: number,
+) => {
   trackEvent('subscription_start', 'monetization', planName, price, {
     subscription_plan: planName,
     subscription_price: price,
     billing_interval: interval,
+    plan_id: planId,
+    catalog_revision: catalogRevision,
   });
 };
 

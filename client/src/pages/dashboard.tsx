@@ -18,6 +18,7 @@ import { format } from "date-fns";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { useState, useEffect } from "react";
 import { useVisualPdfExport } from "@/hooks/useVisualPdfExport";
+import { useToolAccess } from "@/hooks/useCommercialCatalog";
 
 // Local storage key for hidden demo plans
 const HIDDEN_DEMO_PLANS_KEY = "hiddenDemoPlans";
@@ -223,6 +224,12 @@ export default function Dashboard() {
     retry: false,
     staleTime: 30000,
   });
+  const {
+    accessByTool,
+    isLoading: toolAccessLoading,
+    isError: toolAccessError,
+  } = useToolAccess(Boolean(user));
+  const allowedToolCount = Object.values(accessByTool).filter((entry) => entry.allowed).length;
 
   const { data: businessPlans, isLoading: plansLoading, isError: plansError, refetch: refetchPlans } = useQuery<BusinessPlan[]>({
     queryKey: ['/api/dashboard/plans'],
@@ -494,8 +501,16 @@ export default function Dashboard() {
                     <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
                       <Calculator className="h-5 w-5 text-primary" />
                     </div>
-                    <span className="text-sm font-medium">109 Tools</span>
-                    <span className="text-xs text-muted-foreground">Access All</span>
+                    <span className="text-sm font-medium">
+                      {toolAccessLoading || toolAccessError ? "Plan Tools" : `${allowedToolCount} Tools`}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {toolAccessLoading
+                        ? "Checking Access"
+                        : toolAccessError
+                          ? "Access Unavailable"
+                          : "Included in Plan"}
+                    </span>
                   </Button>
                   <Button
                     variant="outline"

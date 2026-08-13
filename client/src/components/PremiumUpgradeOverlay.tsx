@@ -4,7 +4,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, Lock, Zap, Crown, CheckCircle2 } from "lucide-react";
-import { type ToolTier } from "@/hooks/useTierAccess";
+import { TIER_CREDITS, type ToolTier } from "@/hooks/useTierAccess";
+import { useCommercialCatalog } from "@/hooks/useCommercialCatalog";
 
 interface PremiumUpgradeOverlayProps {
   isOpen: boolean;
@@ -36,7 +37,7 @@ const tierBenefits: Record<ToolTier, string[]> = {
   basic: ["Extended tools access", "Standard business planning", "48-hour delivery", "PDF downloads"],
   premium: ["Comprehensive tools access", "Full analysis suite", "24-hour delivery", "Industry frameworks", "Market research"],
   enterprise: ["Full tools access", "Expert modeling", "12-hour priority", "Risk analysis", "Global roadmaps"],
-  ultimate: ["Complete access to 100+ professional-level tools", "24/7 VIP support", "Personal strategist", "Unlimited revisions", "Success guarantee"],
+  ultimate: ["Complete professional tool access", "24/7 VIP support", "Personal strategist", "Unlimited revisions", "Success guarantee"],
 };
 
 export function PremiumUpgradeOverlay({
@@ -48,8 +49,20 @@ export function PremiumUpgradeOverlay({
   toolName,
 }: PremiumUpgradeOverlayProps) {
   const [, setLocation] = useLocation();
+  const { getUpgradePlan, toolCounts, formatPrice } = useCommercialCatalog();
+  const requiredPlan = getUpgradePlan(requiredTier);
+  const currentTierName = requiredPlan?.displayName.replace(/\s+Plan$/i, "") ?? requiredTierName;
+  const currentTierPrice = requiredPlan ? formatPrice(requiredPlan.pricePence) : requiredTierPrice;
   const TierIcon = tierIcons[requiredTier];
-  const benefits = tierBenefits[requiredTier];
+  const benefits = requiredPlan
+    ? [
+        ...(TIER_CREDITS[requiredPlan.id] > 0
+          ? [`Includes ${TIER_CREDITS[requiredPlan.id]} business plan coin${TIER_CREDITS[requiredPlan.id] === 1 ? "" : "s"}`]
+          : []),
+        `Access to ${toolCounts[requiredPlan.id]} tools`,
+        ...requiredPlan.features,
+      ]
+    : tierBenefits[requiredTier];
 
   return (
     <AnimatePresence>
@@ -92,13 +105,13 @@ export function PremiumUpgradeOverlay({
                     </div>
                     <div>
                       <Badge className="bg-white/20 text-white border-white/30 mb-2">
-                        {requiredTierName} Required
+                        {currentTierName} Required
                       </Badge>
                       <h2 className="text-lg font-bold">Unlock {toolName}</h2>
                     </div>
                   </div>
                   <p className="text-white/90">
-                    This tool requires the <strong>{requiredTierName} Plan</strong> to access. Upgrade now to unlock this and many more powerful features.
+                    This tool requires the <strong>{currentTierName} Plan</strong> to access. Upgrade now to unlock this and many more powerful features.
                   </p>
                 </div>
 
@@ -107,7 +120,7 @@ export function PremiumUpgradeOverlay({
                   {/* Price */}
                   <div className="text-center mb-8">
                     <div className="text-2xl font-bold text-foreground mb-2">
-                      {requiredTierPrice}
+                      {currentTierPrice}
                     </div>
                     <div className="text-sm text-muted-foreground">one-time payment</div>
                   </div>
@@ -140,7 +153,7 @@ export function PremiumUpgradeOverlay({
                       data-testid="button-upgrade-now"
                     >
                       <Crown className="w-5 h-5 mr-2" />
-                      Upgrade to {requiredTierName}
+                      {requiredPlan?.ctaLabel ?? `Upgrade to ${currentTierName}`}
                     </Button>
                     <Button
                       onClick={onClose}

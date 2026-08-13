@@ -1,7 +1,7 @@
 // Dynamic tool routing - maps tool IDs to their components
 import { lazy } from 'react';
 
-const toolMap: Record<string, any> = {
+export const toolMap: Record<string, any> = {
   'points-calculator': lazy(() => import('@/pages/tools/points-calculator')),
   'savings-validator': lazy(() => import('@/pages/tools/savings-validator')),
   'fee-estimator': lazy(() => import('@/pages/tools/fee-estimator')),
@@ -155,10 +155,12 @@ const toolMap: Record<string, any> = {
   'ai-funding-negotiator': lazy(() => import('@/pages/tools/ai-funding-negotiator')),
 };
 
+export const RUNNABLE_TOOL_IDS = Object.freeze(Object.keys(toolMap));
+
 export function getToolComponent(toolId: string) {
-  return toolMap[toolId];
+  return isValidTool(toolId) ? toolMap[toolId] : undefined;
 }
 
 export function isValidTool(toolId: string) {
-  return toolId in toolMap;
+  return Object.prototype.hasOwnProperty.call(toolMap, toolId);
 }

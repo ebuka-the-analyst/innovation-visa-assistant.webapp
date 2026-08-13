@@ -3,6 +3,8 @@ import nodemailer from "nodemailer";
 import { Resend } from "resend";
 import { db } from "./db";
 import { emailLogs } from "@shared/schema";
+import { PLAN_IDS, formatPrice, getToolCounts } from "@shared/commercialCatalog";
+import { getCommercialCatalog } from "./services/commercialCatalogService";
 
 // Log email configuration status on startup - Resend is now primary (HTTP-based, works everywhere)
 const resendConfigured = !!process.env.RESEND_API_KEY;
@@ -425,7 +427,8 @@ export async function sendPaymentReceiptEmail(
   firstName: string,
   planName: string,
   amount: number,
-  sessionId: string
+  sessionId: string,
+  purchasedPlanId?: string,
 ): Promise<{ success: boolean; error?: string }> {
   const formattedAmount = (amount / 100).toFixed(2);
   const receiptNumber = `INV-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
@@ -441,18 +444,16 @@ export async function sendPaymentReceiptEmail(
     minute: '2-digit',
     timeZoneName: 'short'
   });
-  
-  // Get tier-specific features
-  const tierFeatures: Record<string, { tools: number; features: string[] }> = {
-    'Free': { tools: 13, features: ['Basic visa guidance tools', 'Essential compliance checklists', 'Community support'] },
-    'Basic': { tools: 20, features: ['All Free tools', '7 additional business tools', 'Basic business plan template', 'Email support'] },
-    'Premium': { tools: 83, features: ['All Basic tools', '63 premium AI-powered tools', 'Advanced business plan generator', 'Financial projections', 'Priority email support'] },
-    'Enterprise': { tools: 109, features: ['All Premium tools', '26 enterprise-grade tools', 'Advanced IP & patent strategy', 'Full compliance suite', 'Dedicated support channel'] },
-    'Ultimate': { tools: 109, features: ['All 109 tools unlocked', 'VIP priority support', 'Personal strategy sessions', 'Success guarantee', 'Lifetime updates'] }
-  };
-  
-  const tierInfo = tierFeatures[planName] || tierFeatures['Premium'];
-  const featuresHtml = tierInfo.features.map(f => `<li style="margin-bottom: 8px;">${f}</li>`).join('');
+  const { catalog: commercialCatalog } = await getCommercialCatalog();
+  const toolCounts = getToolCounts(commercialCatalog);
+  const planId = planName.replace(/\s+plan$/i, '').trim().toLowerCase();
+  const catalogPlan = commercialCatalog.plans.find(
+    (plan) => plan.id === purchasedPlanId || plan.id === planId || plan.displayName.toLocaleLowerCase("en-GB") === planName.toLocaleLowerCase("en-GB"),
+  );
+  const toolsIncluded = catalogPlan ? toolCounts[catalogPlan.id] : 0;
+  const featuresHtml = (catalogPlan?.features || [])
+    .map((feature) => `<li style="margin-bottom: 8px;">${escapeHtml(feature)}</li>`)
+    .join('');
   
   const html = `
     <!DOCTYPE html>
@@ -469,7 +470,7 @@ export async function sendPaymentReceiptEmail(
           <span style="color: white; font-size: 14px; font-weight: 600;">PAYMENT RECEIPT</span>
         </div>
         <h1 style="color: white; margin: 0; font-size: 32px; font-weight: 700;">Thank You for Your Purchase!</h1>
-        <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Your subscription is now active</p>
+        <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Your plan purchase is now active</p>
       </div>
       
       <div style="background: #ffffff; padding: 35px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
@@ -478,7 +479,7 @@ export async function sendPaymentReceiptEmail(
         <p style="font-size: 18px; margin-bottom: 25px; color: #333;">Dear ${escapeHtml(firstName)},</p>
         
         <p style="font-size: 16px; margin-bottom: 25px; color: #555;">
-          Thank you for subscribing to the UK Innovator Founder Visa Assistant. Your payment has been successfully processed and your account has been upgraded. You now have full access to all ${tierInfo.tools} tools included in your ${escapeHtml(planName)} tier.
+          Thank you for purchasing a UK Innovator Founder Visa Assistant plan. Your payment has been successfully processed and your account has been upgraded. You now have access to ${toolsIncluded} runnable tools included in your ${escapeHtml(planName)} tier.
         </p>
         
         <!-- Receipt Box -->
@@ -504,16 +505,16 @@ export async function sendPaymentReceiptEmail(
           <div style="padding: 25px;">
             <table style="width: 100%; font-size: 15px; border-collapse: collapse;">
               <tr>
-                <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Subscription Plan:</td>
+                <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Plan:</td>
                 <td style="padding: 12px 0; text-align: right; font-weight: 600; color: #333; border-bottom: 1px solid #eee;">${escapeHtml(planName)} Tier Access</td>
               </tr>
               <tr>
                 <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Tools Included:</td>
-                <td style="padding: 12px 0; text-align: right; font-weight: 600; color: #333; border-bottom: 1px solid #eee;">${tierInfo.tools} Professional Tools</td>
+                <td style="padding: 12px 0; text-align: right; font-weight: 600; color: #333; border-bottom: 1px solid #eee;">${toolsIncluded} Runnable Tools</td>
               </tr>
               <tr>
-                <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Access Duration:</td>
-                <td style="padding: 12px 0; text-align: right; font-weight: 600; color: #333; border-bottom: 1px solid #eee;">Lifetime Access</td>
+                <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Billing:</td>
+                <td style="padding: 12px 0; text-align: right; font-weight: 600; color: #333; border-bottom: 1px solid #eee;">One-time payment</td>
               </tr>
               <tr>
                 <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Payment Date:</td>
@@ -564,10 +565,9 @@ export async function sendPaymentReceiptEmail(
         <div style="background: #fff3e0; border-left: 4px solid #ffa536; padding: 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
           <h4 style="margin: 0 0 12px 0; color: #e65100; font-size: 16px;">Quick Start Tips:</h4>
           <ol style="margin: 0; padding-left: 20px; color: #555; font-size: 14px;">
-            <li style="margin-bottom: 8px;">Visit the <a href="${BASE_URL}/tools-hub" style="color: #11b6e9;">Tools Hub</a> to explore all available tools</li>
-            <li style="margin-bottom: 8px;">Start with the <a href="${BASE_URL}/tools/innovation-score" style="color: #11b6e9;">Innovation Score Calculator</a> to assess your readiness</li>
-            <li style="margin-bottom: 8px;">Generate your <a href="${BASE_URL}/tools/business-plan" style="color: #11b6e9;">Business Plan</a> for endorser applications</li>
-            <li style="margin-bottom: 8px;">Practice your pitch with the <a href="${BASE_URL}/tools/pitch-coach" style="color: #11b6e9;">AI Pitch Coach</a></li>
+            <li style="margin-bottom: 8px;">Visit the <a href="${BASE_URL}/tools-hub" style="color: #11b6e9;">Tools Hub</a> to explore the tools included in your plan</li>
+            <li style="margin-bottom: 8px;">Open your dashboard to review your application progress and available next steps</li>
+            <li style="margin-bottom: 8px;">Start with any included tool that matches the stage of your visa journey</li>
           </ol>
         </div>
         
@@ -639,16 +639,16 @@ export async function sendWelcomeEmail(
         <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(firstName)},</p>
         
         <p style="font-size: 16px; margin-bottom: 20px;">
-          Congratulations! Your email is now verified and you have full access to the UK Innovator Founder Visa Assistant platform.
+          Congratulations! Your email is now verified. You can access the features included in your current plan.
         </p>
         
         <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <h3 style="margin: 0 0 10px 0; color: #2e7d32;">Here's what you can do now:</h3>
           <ul style="margin: 0; padding-left: 20px; color: #333;">
-            <li>Access 109 professional visa preparation tools</li>
-            <li>Generate your comprehensive business plan</li>
-            <li>Practice endorser interviews with AI coaching</li>
-            <li>Track your visa readiness score</li>
+            <li>Explore the visa preparation tools included in your current plan</li>
+            <li>Use the planning and preparation features included in your current plan</li>
+            <li>Review your dashboard and available next steps</li>
+            <li>View other plans whenever you need additional tools</li>
           </ul>
         </div>
         
@@ -674,7 +674,7 @@ export async function sendWelcomeEmail(
         
         <div style="background: #fff3cd; border-left: 4px solid #ffa536; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <p style="margin: 0; font-size: 14px; color: #856404;">
-            <strong>Pro Tip:</strong> Start with the Business Plan Generator to create your visa-compliant business plan. It is free to try!
+            <strong>Pro Tip:</strong> Visit your dashboard to see the tools and planning features included in your current plan.
           </p>
         </div>
         
@@ -724,7 +724,7 @@ export async function sendAdminVerificationSuccessEmail(
         <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(firstName)},</p>
         
         <p style="font-size: 16px; margin-bottom: 20px;">
-          Great news! Your account has been verified by our team. You now have full access to all the features of the UK Innovator Founder Visa Assistant.
+          Great news! Your account has been verified by our team. You can now access the features included in your current plan.
         </p>
         
         <div style="background: #e8f5e9; border: 2px solid #4caf50; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
@@ -737,11 +737,10 @@ export async function sendAdminVerificationSuccessEmail(
         <div style="background: #fff; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <h3 style="margin: 0 0 10px 0; color: #2e7d32;">What you can do now:</h3>
           <ul style="margin: 0; padding-left: 20px; color: #333;">
-            <li>Access all 109 visa preparation tools</li>
-            <li>Generate your AI-powered business plan</li>
-            <li>Practice endorser interviews with AI coaching</li>
-            <li>Download professional visa documents</li>
-            <li>Track your visa readiness score</li>
+            <li>Explore the visa preparation tools included in your current plan</li>
+            <li>Use the planning and preparation features included in your current plan</li>
+            <li>Review your dashboard and available next steps</li>
+            <li>Browse other plans whenever you need additional tools</li>
           </ul>
         </div>
         
@@ -876,16 +875,28 @@ export async function sendUpgradeReminderEmail(
   daysActive: number
 ): Promise<{ success: boolean; error?: string }> {
   const pricingUrl = `${BASE_URL}/pricing`;
-
-  const tierBenefits: Record<string, { name: string; tools: number; price: number }> = {
-    free: { name: 'Free', tools: 13, price: 0 },
-    basic: { name: 'Basic', tools: 20, price: 29 },
-    premium: { name: 'Premium', tools: 83, price: 49 },
-    enterprise: { name: 'Enterprise', tools: 109, price: 89 },
-  };
-
-  const currentPlan = tierBenefits[currentTier] || tierBenefits.free;
-  const recommendedPlan = currentTier === 'free' ? tierBenefits.premium : tierBenefits.enterprise;
+  const { catalog: commercialCatalog } = await getCommercialCatalog();
+  const toolCounts = getToolCounts(commercialCatalog);
+  const currentPlan = commercialCatalog.plans.find((plan) => plan.id === currentTier)
+    ?? commercialCatalog.plans.find((plan) => plan.id === "free")
+    ?? commercialCatalog.plans[0];
+  if (!currentPlan) {
+    return { success: false, error: "No published commercial plans are available" };
+  }
+  const currentRank = PLAN_IDS.indexOf(currentPlan.id);
+  const recommendedPlan = PLAN_IDS.slice(currentRank + 1)
+    .map((planId) => commercialCatalog.plans.find(
+      (plan) => plan.id === planId && plan.publicationStatus === "published",
+    ))
+    .find((plan) => Boolean(plan));
+  if (!recommendedPlan) {
+    return { success: false, error: "No published upgrade plan is available" };
+  }
+  const currentToolCount = toolCounts[currentPlan.id];
+  const recommendedToolCount = toolCounts[recommendedPlan.id];
+  const recommendedFeatures = recommendedPlan.features
+    .map((feature) => `<li>${escapeHtml(feature)}</li>`)
+    .join("");
 
   const html = `
     <!DOCTYPE html>
@@ -904,20 +915,17 @@ export async function sendUpgradeReminderEmail(
         
         <p style="font-size: 16px; margin-bottom: 20px;">
           You've been using the UK Innovator Founder Visa Assistant for ${daysActive} days now. 
-          We noticed you're on the <strong>${currentPlan.name}</strong> plan with access to ${currentPlan.tools} tools.
+          We noticed you're on the <strong>${escapeHtml(currentPlan.displayName)}</strong> with access to ${currentToolCount} tools.
         </p>
         
         <div style="background: #fff; border: 2px solid #ffa536; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin: 0 0 15px 0; color: #333;">Upgrade to ${recommendedPlan.name} and get:</h3>
+          <h3 style="margin: 0 0 15px 0; color: #333;">Upgrade to ${escapeHtml(recommendedPlan.displayName)} and get:</h3>
           <ul style="margin: 0; padding-left: 20px; color: #333;">
-            <li><strong>${recommendedPlan.tools} professional tools</strong> (${recommendedPlan.tools - currentPlan.tools} more!)</li>
-            <li>AI-powered pitch practice coaching</li>
-            <li>Advanced financial modeling tools</li>
-            <li>Innovation score calculator</li>
-            <li>Priority support</li>
+            <li><strong>${recommendedToolCount} professional tools</strong> (${Math.max(0, recommendedToolCount - currentToolCount)} more)</li>
+            ${recommendedFeatures}
           </ul>
           <p style="margin: 15px 0 0 0; font-size: 24px; font-weight: bold; color: #ffa536;">
-            Only £${recommendedPlan.price}/month
+            ${formatPrice(recommendedPlan.pricePence)} one-time
           </p>
         </div>
         
@@ -931,7 +939,7 @@ export async function sendUpgradeReminderEmail(
                     font-size: 18px; 
                     font-weight: bold;
                     display: inline-block;">
-            Upgrade Now
+            ${escapeHtml(recommendedPlan.ctaLabel)}
           </a>
         </div>
         
@@ -1886,7 +1894,7 @@ export async function sendBulkWelcomeEmail(users: Array<{ id: string; email: str
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0;">
           <h3 style="color: #ffa536; margin-top: 0;">What's waiting for you:</h3>
           <ul style="list-style-type: none; padding: 0; margin: 0;">
-            <li style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong style="color: #11b6e9;">109+ Professional Tools</strong> - From business plan builders to compliance checkers</li>
+            <li style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong style="color: #11b6e9;">Professional Tools</strong> - Explore the tools included in your current plan</li>
             <li style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong style="color: #11b6e9;">AI-Powered Guidance</strong> - Get expert-level assistance 24/7</li>
             <li style="padding: 8px 0;"><strong style="color: #11b6e9;">Submission-Ready Documents</strong> - Generate visa-ready exports instantly</li>
           </ul>

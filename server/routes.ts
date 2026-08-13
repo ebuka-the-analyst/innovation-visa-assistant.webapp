@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
@@ -18,6 +18,7 @@ import {
   userActivityLogs,
   referralCodes,
   promoCodes,
+  promoRedemptions,
   userSessions,
   pageViews,
   activityEvents,
@@ -26,6 +27,7 @@ import {
   scheduledNotifications,
   userDocuments,
   documentExtractions,
+  paymentTransactions,
   blogPosts,
   blogGenerationQueue,
   seoAutomationPlans,
@@ -82,6 +84,24 @@ import {
   ObjectStorageService,
 } from "./replit_integrations/object_storage";
 import { s3Storage } from "./services/s3Storage";
+import {
+  MANAGED_TOOL_DEFINITIONS,
+  PLAN_IDS,
+  UNAVAILABLE_LISTED_TOOL_IDS,
+  UNLISTED_RUNNABLE_TOOL_IDS,
+  commercialCatalogSchema,
+  getMinimumPlanForTool,
+  getPlanById,
+  getToolCounts,
+  hasToolAccess,
+  type PlanId,
+} from "@shared/commercialCatalog";
+import {
+  getCommercialCatalog,
+  getPublicCommercialCatalog,
+  saveCommercialCatalog,
+} from "./services/commercialCatalogService";
+import { requireToolAccess } from "./middleware/requireToolAccess";
 
 const uploadsDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) {
@@ -140,14 +160,48 @@ async function callAI(prompt: string): Promise<string> {
   return content;
 }
 
-// 2026 PRICING - Effective January 2026
-const PRICING = {
-  free: { amount: 0, name: "Free Plan" },
-  basic: { amount: 900, name: "Basic Plan" },
-  premium: { amount: 1900, name: "Premium Plan" },
-  enterprise: { amount: 3500, name: "Enterprise Plan" },
-  ultimate: { amount: 4900, name: "Ultimate Plan" },
-};
+function isPlanId(value: unknown): value is PlanId {
+  return typeof value === "string" && PLAN_IDS.includes(value as PlanId);
+}
+
+function isTrustedWriteOrigin(req: Request): boolean {
+  const origin = req.get("origin");
+  if (!origin) return false;
+  try {
+    const parsedOrigin = new URL(origin);
+    const requestHost = req.get("host");
+    if (!requestHost || parsedOrigin.host !== requestHost) return false;
+    if (req.secure || req.get("x-forwarded-proto")?.split(",")[0].trim() === "https") {
+      return parsedOrigin.protocol === "https:";
+    }
+    return parsedOrigin.protocol === req.protocol + ":";
+  } catch {
+    return false;
+  }
+}
+
+function calculateDiscountedPlanAmount(
+  listAmountPence: number,
+  discountType: unknown,
+  discountValue: unknown,
+): number | undefined {
+  if (!Number.isInteger(listAmountPence) || listAmountPence < 0) return undefined;
+  if (!Number.isInteger(discountValue) || (discountValue as number) < 0) return undefined;
+
+  let finalAmount: number;
+  if (discountType === "percentage") {
+    if ((discountValue as number) > 100) return undefined;
+    finalAmount = Math.round(listAmountPence * (1 - (discountValue as number) / 100));
+  } else if (discountType === "fixed") {
+    finalAmount = Math.max(0, listAmountPence - (discountValue as number));
+  } else {
+    return undefined;
+  }
+
+  return Number.isInteger(finalAmount) && finalAmount >= 0 && finalAmount <= listAmountPence
+    ? finalAmount
+    : undefined;
+}
 
 // Helper function to format time ago for email analytics
 function formatTimeAgo(date: Date): string {
@@ -186,6 +240,160 @@ function formatEmailType(type: string): string {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google OAuth authentication (must be before routes)
   await setupAuth(app);
+
+  app.get("/api/pricing", async (_req, res) => {
+    try {
+      res.set("Cache-Control", "no-store");
+      res.json(await getPublicCommercialCatalog());
+    } catch (error) {
+      console.error("Commercial catalogue public read error:", error);
+      res.status(503).json({ error: "Current pricing is temporarily unavailable" });
+    }
+  });
+
+  app.get("/api/tools/access", isAuthenticated, async (req, res) => {
+    try {
+      const sessionUser = req.user as any;
+      const freshUser = await storage.getUser(sessionUser.id);
+      if (!freshUser) return res.status(401).json({ error: "Unauthorized" });
+
+      const userPlanId: PlanId = isPlanId(freshUser.subscriptionTier)
+        ? freshUser.subscriptionTier
+        : "free";
+      const { catalog } = await getCommercialCatalog();
+      const accessByTool = Object.fromEntries(
+        MANAGED_TOOL_DEFINITIONS.map((tool) => [
+          tool.id,
+          {
+            allowed: hasToolAccess(catalog, userPlanId, tool.id),
+            minimumPlanId: getMinimumPlanForTool(catalog, tool.id),
+            listed: tool.listed,
+            available: tool.available,
+          },
+        ]),
+      );
+
+      res.set("Cache-Control", "no-store");
+      res.json({ revision: catalog.revision, userPlanId, accessByTool });
+    } catch (error) {
+      console.error("Tool access read error:", error);
+      res.status(503).json({ error: "Tool access is temporarily unavailable" });
+    }
+  });
+
+  app.get(
+    "/api/admin/commercial-catalog",
+    isAuthenticated,
+    requireAdmin,
+    async (_req, res) => {
+      try {
+        const { catalog, source } = await getCommercialCatalog();
+        res.set("Cache-Control", "no-store");
+        res.json({
+          catalog,
+          source,
+          tools: MANAGED_TOOL_DEFINITIONS.map((tool) => ({
+            ...tool,
+            minimumPlanId: getMinimumPlanForTool(catalog, tool.id),
+          })),
+          warnings: {
+            unlistedRunnableToolIds: UNLISTED_RUNNABLE_TOOL_IDS,
+            unavailableListedToolIds: UNAVAILABLE_LISTED_TOOL_IDS,
+          },
+          toolCounts: getToolCounts(catalog),
+        });
+      } catch (error) {
+        console.error("Admin commercial catalogue read error:", error);
+        res.status(503).json({ error: "Commercial catalogue is temporarily unavailable" });
+      }
+    },
+  );
+
+  app.put(
+    "/api/admin/commercial-catalog",
+    isAuthenticated,
+    requireAdmin,
+    async (req, res) => {
+      try {
+        if (!req.is("application/json")) {
+          return res.status(415).json({ error: "Content-Type must be application/json" });
+        }
+        if (!isTrustedWriteOrigin(req)) {
+          return res.status(403).json({ error: "Untrusted request origin" });
+        }
+        const rawBody = (req as Request & { rawBody?: unknown }).rawBody;
+        const rawBodyLength = Buffer.isBuffer(rawBody)
+          ? rawBody.length
+          : Buffer.byteLength(JSON.stringify(req.body ?? {}), "utf8");
+        if (rawBodyLength > 256 * 1024) {
+          return res.status(413).json({ error: "Commercial catalogue request is too large" });
+        }
+
+        const allowedRequestKeys = new Set(["expectedRevision", "reason", "confirmation", "catalog"]);
+        if (
+          !req.body ||
+          typeof req.body !== "object" ||
+          Array.isArray(req.body) ||
+          Object.keys(req.body).some((key) => !allowedRequestKeys.has(key))
+        ) {
+          return res.status(422).json({ error: "The request contains unknown fields" });
+        }
+
+        const expectedRevision = req.body?.expectedRevision;
+        const reason = req.body?.reason;
+        if (!Number.isInteger(expectedRevision) || expectedRevision < 0) {
+          return res.status(422).json({ error: "expectedRevision must be a non-negative integer" });
+        }
+        if (req.body?.confirmation !== true) {
+          return res.status(422).json({ error: "Explicit confirmation is required" });
+        }
+        const parsedCatalog = commercialCatalogSchema.safeParse(req.body?.catalog);
+        if (!parsedCatalog.success) {
+          return res.status(422).json({
+            error: "Commercial catalogue validation failed",
+            details: parsedCatalog.error.flatten(),
+          });
+        }
+
+        const sessionUser = req.user as any;
+        const admin = await storage.getUser(sessionUser.id);
+        if (!admin?.isAdmin || !admin.email) {
+          return res.status(403).json({ error: "Forbidden: Admin access required" });
+        }
+
+        const saved = await saveCommercialCatalog({
+          expectedRevision,
+          reason,
+          catalog: parsedCatalog.data,
+          actor: { id: admin.id, email: admin.email },
+          ipAddress: req.ip,
+          userAgent: req.get("user-agent"),
+        });
+        res.json({
+          catalog: saved.catalog,
+          source: saved.source,
+          tools: MANAGED_TOOL_DEFINITIONS.map((tool) => ({
+            ...tool,
+            minimumPlanId: getMinimumPlanForTool(saved.catalog, tool.id),
+          })),
+          warnings: {
+            unlistedRunnableToolIds: UNLISTED_RUNNABLE_TOOL_IDS,
+            unavailableListedToolIds: UNAVAILABLE_LISTED_TOOL_IDS,
+          },
+          toolCounts: getToolCounts(saved.catalog),
+        });
+      } catch (error: any) {
+        if (error?.name === "CommercialCatalogConflictError") {
+          return res.status(409).json({ error: error.message });
+        }
+        if (error?.name === "CommercialCatalogValidationError" || error?.name === "ZodError") {
+          return res.status(422).json({ error: error.message, details: error?.details });
+        }
+        console.error("Admin commercial catalogue save error:", error);
+        res.status(503).json({ error: "Commercial catalogue could not be saved" });
+      }
+    },
+  );
 
   // Register object storage routes for cloud file uploads
   registerObjectStorageRoutes(app);
@@ -618,6 +826,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post(
     "/api/business-plans/:id/analyze-innovation",
     isAuthenticated,
+    requireToolAccess("innovation-score"),
     async (req, res) => {
       try {
         const user = req.user as any;
@@ -793,6 +1002,7 @@ Respond ONLY with valid JSON in this exact format:
       res.json({
         success: true,
         planId: businessPlan.id,
+        planTier: businessPlan.tier,
         message: "Questionnaire saved successfully",
       });
     } catch (error) {
@@ -1254,11 +1464,18 @@ Respond ONLY with valid JSON in this exact format:
     isAuthenticated,
     async (req, res) => {
       try {
-        const { planId, promoCode } = req.body;
+        const {
+          businessPlanId,
+          planId: requestedPlanId,
+          planTier: legacyRequestedTier,
+          expectedRevision,
+          promoCode,
+        } = req.body;
         const user = req.user as any;
+        const planId = businessPlanId || requestedPlanId;
 
         if (!planId) {
-          return res.status(400).json({ error: "Plan ID is required" });
+          return res.status(400).json({ error: "Business plan ID is required" });
         }
 
         const businessPlan = await storage.getBusinessPlan(planId);
@@ -1266,10 +1483,26 @@ Respond ONLY with valid JSON in this exact format:
           return res.status(404).json({ error: "Business plan not found" });
         }
 
-        const pricing = PRICING[businessPlan.tier as keyof typeof PRICING];
-        if (!pricing) {
+        const { catalog } = await getCommercialCatalog();
+        const requiresDisplayedPriceRevision = Boolean(businessPlanId);
+        if (
+          (requiresDisplayedPriceRevision && expectedRevision === undefined && catalog.revision !== 0) ||
+          (expectedRevision !== undefined && expectedRevision !== catalog.revision)
+        ) {
+          return res.status(409).json({
+            error: "Pricing changed while checkout was open. Refresh and review the current price.",
+            currentRevision: catalog.revision,
+          });
+        }
+        const explicitlyRequestedTier = businessPlanId ? requestedPlanId : legacyRequestedTier;
+        if (explicitlyRequestedTier !== undefined && explicitlyRequestedTier !== businessPlan.tier) {
+          return res.status(409).json({ error: "The selected plan no longer matches this business plan" });
+        }
+        const catalogPlan = getPlanById(catalog, businessPlan.tier);
+        if (!catalogPlan || catalogPlan.publicationStatus !== "published") {
           return res.status(400).json({ error: "Invalid tier" });
         }
+        const pricing = { amount: catalogPlan.pricePence, name: catalogPlan.displayName };
 
         // Handle free tier - skip checkout entirely
         if (pricing.amount === 0 || businessPlan.tier === "free") {
@@ -1377,19 +1610,19 @@ Respond ONLY with valid JSON in this exact format:
             });
           }
 
-          // Apply the discount
-          validPromoCode = promoCodeRecord;
-          if (validPromoCode.discountType === "percentage") {
-            finalAmount = Math.round(
-              pricing.amount * (1 - validPromoCode.discountValue / 100),
-            );
-          } else {
-            // Fixed amount - discountValue is already stored in pence
-            finalAmount = Math.max(
-              0,
-              pricing.amount - validPromoCode.discountValue,
-            );
+          const discountedAmount = calculateDiscountedPlanAmount(
+            pricing.amount,
+            promoCodeRecord.discountType,
+            promoCodeRecord.discountValue,
+          );
+          if (discountedAmount === undefined) {
+            return res.status(400).json({
+              error: "This promo code has an invalid discount configuration",
+              promoError: true,
+            });
           }
+          validPromoCode = promoCodeRecord;
+          finalAmount = discountedAmount;
         }
 
         // CRITICAL: If 100% discount applied (finalAmount = 0), bypass Stripe entirely
@@ -1489,7 +1722,7 @@ Respond ONLY with valid JSON in this exact format:
                 product_data: {
                   name: `Innovator Founder Visa Assistant - ${pricing.name}`,
                   description: validPromoCode
-                    ? `AI-powered UK Innovation Visa business plan - ${businessPlan.tier} tier (${validPromoCode.discountValue}% discount applied)`
+                    ? `AI-powered UK Innovation Visa business plan - ${businessPlan.tier} tier (application discount applied)`
                     : `AI-powered UK Innovation Visa business plan - ${businessPlan.tier} tier`,
                 },
                 unit_amount: finalAmount,
@@ -1503,11 +1736,29 @@ Respond ONLY with valid JSON in this exact format:
           cancel_url: `${baseUrl}/questionnaire`,
           metadata: {
             planId: businessPlan.id,
+            tier: businessPlan.tier,
+            planDisplayName: catalogPlan.displayName,
+            catalogRevision: catalog.revision.toString(),
+            billingPeriod: catalogPlan.billingPeriod,
+            currency: catalogPlan.currency,
+            listAmountPence: pricing.amount.toString(),
             promoCode: validPromoCode?.code || "",
             promoCodeId: validPromoCode?.id || "",
             promoCodeCreatorId: "",
             originalAmount: pricing.amount.toString(),
             discountAmount: (pricing.amount - finalAmount).toString(),
+          },
+          payment_intent_data: {
+            metadata: {
+              planId: businessPlan.id,
+              tier: businessPlan.tier,
+              planDisplayName: catalogPlan.displayName,
+              catalogRevision: catalog.revision.toString(),
+              billingPeriod: catalogPlan.billingPeriod,
+              currency: catalogPlan.currency,
+              listAmountPence: pricing.amount.toString(),
+              applicationDiscountPence: (pricing.amount - finalAmount).toString(),
+            },
           },
         });
 
@@ -1518,6 +1769,9 @@ Respond ONLY with valid JSON in this exact format:
         res.json({ sessionId: session.id, url: session.url });
       } catch (error: any) {
         console.error("Stripe checkout error:", error);
+        if (error?.name === "CommercialCatalogUnavailableError") {
+          return res.status(503).json({ error: "Current pricing is temporarily unavailable" });
+        }
         const errorMessage =
           error?.message ||
           error?.raw?.message ||
@@ -1539,25 +1793,34 @@ Respond ONLY with valid JSON in this exact format:
     isAuthenticated,
     async (req, res) => {
       try {
-        const { tier, promoCode } = req.body;
+        const { planId, tier: legacyTier, expectedRevision, promoCode } = req.body;
+        const tier = planId || legacyTier;
         const user = req.user as any;
 
-        if (
-          !tier ||
-          !["basic", "premium", "enterprise", "ultimate"].includes(tier)
-        ) {
+        if (!isPlanId(tier) || tier === "free") {
           return res.status(400).json({
             error:
               "Valid tier is required (basic, premium, enterprise, or ultimate)",
           });
         }
 
-        const pricing = PRICING[tier as keyof typeof PRICING];
-        if (!pricing || pricing.amount === 0) {
+        const { catalog } = await getCommercialCatalog();
+        if (
+          (expectedRevision === undefined && catalog.revision !== 0) ||
+          (expectedRevision !== undefined && expectedRevision !== catalog.revision)
+        ) {
+          return res.status(409).json({
+            error: "Pricing changed while checkout was open. Refresh and review the current price.",
+            currentRevision: catalog.revision,
+          });
+        }
+        const catalogPlan = getPlanById(catalog, tier);
+        if (!catalogPlan || catalogPlan.publicationStatus !== "published" || catalogPlan.pricePence === 0) {
           return res
             .status(400)
             .json({ error: "Invalid tier for direct subscription" });
         }
+        const pricing = { amount: catalogPlan.pricePence, name: catalogPlan.displayName };
 
         // Validate and apply promo code discount
         let finalAmount = pricing.amount;
@@ -1628,19 +1891,19 @@ Respond ONLY with valid JSON in this exact format:
             });
           }
 
-          // Apply the discount
-          validPromoCode = promoCodeRecord;
-          if (validPromoCode.discountType === "percentage") {
-            finalAmount = Math.round(
-              pricing.amount * (1 - validPromoCode.discountValue / 100),
-            );
-          } else {
-            // Fixed amount - discountValue is already stored in pence
-            finalAmount = Math.max(
-              0,
-              pricing.amount - validPromoCode.discountValue,
-            );
+          const discountedAmount = calculateDiscountedPlanAmount(
+            pricing.amount,
+            promoCodeRecord.discountType,
+            promoCodeRecord.discountValue,
+          );
+          if (discountedAmount === undefined) {
+            return res.status(400).json({
+              error: "This promo code has an invalid discount configuration",
+              promoError: true,
+            });
           }
+          validPromoCode = promoCodeRecord;
+          finalAmount = discountedAmount;
         }
 
         // CRITICAL: If 100% discount applied (finalAmount = 0), bypass Stripe entirely
@@ -1733,8 +1996,8 @@ Respond ONLY with valid JSON in this exact format:
                 product_data: {
                   name: `UK Innovator Founder Visa - ${pricing.name} Access`,
                   description: validPromoCode
-                    ? `Unlock ${pricing.name} tier access (${validPromoCode.discountValue}% discount applied)`
-                    : `Unlock ${pricing.name} tier access to all tools and features`,
+                    ? `Unlock ${pricing.name} plan access (application discount applied)`
+                    : `Unlock ${pricing.name} plan access`,
                 },
                 unit_amount: finalAmount,
               },
@@ -1749,11 +2012,30 @@ Respond ONLY with valid JSON in this exact format:
             pendingPlanId: pendingPlanId,
             directSubscription: "true",
             tier: tier,
+            planDisplayName: catalogPlan.displayName,
             userId: user.id,
+            catalogRevision: catalog.revision.toString(),
+            billingPeriod: catalogPlan.billingPeriod,
+            currency: catalogPlan.currency,
+            listAmountPence: pricing.amount.toString(),
             promoCode: validPromoCode?.code || "",
             promoCodeId: validPromoCode?.id || "",
             originalAmount: pricing.amount.toString(),
             discountAmount: (pricing.amount - finalAmount).toString(),
+          },
+          payment_intent_data: {
+            metadata: {
+              pendingPlanId,
+              directSubscription: "true",
+              tier,
+              planDisplayName: catalogPlan.displayName,
+              userId: user.id,
+              catalogRevision: catalog.revision.toString(),
+              billingPeriod: catalogPlan.billingPeriod,
+              currency: catalogPlan.currency,
+              listAmountPence: pricing.amount.toString(),
+              applicationDiscountPence: (pricing.amount - finalAmount).toString(),
+            },
           },
         });
 
@@ -1767,6 +2049,9 @@ Respond ONLY with valid JSON in this exact format:
         });
       } catch (error: any) {
         console.error("Direct subscription error:", error);
+        if (error?.name === "CommercialCatalogUnavailableError") {
+          return res.status(503).json({ error: "Current pricing is temporarily unavailable" });
+        }
         const errorMessage =
           error?.message ||
           error?.raw?.message ||
@@ -1777,10 +2062,7 @@ Respond ONLY with valid JSON in this exact format:
   );
 
   // Verify direct subscription (tier upgrade without business plan)
-  app.post(
-    "/api/payment/verify-subscription",
-    isAuthenticated,
-    async (req, res) => {
+  const verifyDirectSubscription: RequestHandler = async (req, res) => {
       try {
         const { sessionId } = req.body;
         const user = req.user as any;
@@ -1826,83 +2108,230 @@ Respond ONLY with valid JSON in this exact format:
             .json({ error: "Invalid tier in session metadata" });
         }
 
-        // Determine credits for this tier
         const creditsToAdd = getTierCredits(tier);
+        const purchaseAmount = session.amount_total ?? 0;
+        const purchasedPlanName = session.metadata?.planDisplayName || `${tier} Plan`;
+        const promoCodeId = session.metadata?.promoCodeId;
+        const promoCodeUsed = session.metadata?.promoCode;
+        const discountAmount = Number.parseInt(
+          session.metadata?.discountAmount || "0",
+          10,
+        );
+        const originalAmount = session.metadata?.originalAmount
+          ? Number.parseInt(session.metadata.originalAmount, 10)
+          : purchaseAmount;
+        if (
+          !Number.isInteger(purchaseAmount) ||
+          purchaseAmount < 0 ||
+          !Number.isInteger(discountAmount) ||
+          discountAmount < 0 ||
+          !Number.isInteger(originalAmount) ||
+          originalAmount < purchaseAmount
+        ) {
+          return res.status(400).json({ error: "Invalid payment amount metadata" });
+        }
 
-        // Idempotency: only grant credits if this is a fresh upgrade
-        const currentUser = await storage.getUser(user.id);
-        const alreadyUpgraded =
-          currentUser?.subscriptionTier === tier &&
-          (currentUser?.planCredits || 0) > 0;
+        // Use the existing payment ledger as the durable Checkout Session marker.
+        // Its deterministic primary key makes concurrent confirmations conflict safely;
+        // the advisory lock also serializes reconciliation of older random-ID markers.
+        const database = db as any;
+        const verification = await database.transaction(async (tx: any) => {
+          await tx.execute(
+            sql`SELECT pg_advisory_xact_lock(hashtext(${`direct-subscription:${sessionId}`}))`,
+          );
 
-        if (!alreadyUpgraded) {
-          // Upgrade user's tier AND grant plan credits
-          await storage.updateUser(user.id, {
-            subscriptionTier: tier,
-            subscriptionStatus: "active",
-            planCredits: creditsToAdd,
-          });
+          const currentUsers = await tx
+            .select({
+              subscriptionTier: users.subscriptionTier,
+              planCredits: users.planCredits,
+            })
+            .from(users)
+            .where(eq(users.id, user.id))
+            .limit(1);
+          const currentUser = currentUsers[0];
+          if (!currentUser) {
+            throw new Error("Authenticated user no longer exists");
+          }
+
+          const priorMarkers = await tx
+            .select({ id: paymentTransactions.id })
+            .from(paymentTransactions)
+            .where(
+              and(
+                eq(paymentTransactions.userId, user.id),
+                eq(paymentTransactions.stripePaymentId, sessionId),
+                eq(paymentTransactions.status, "succeeded"),
+              ),
+            )
+            .limit(1);
+          if (priorMarkers[0]) {
+            return {
+              newlyProcessed: false,
+              planCredits: currentUser.planCredits || 0,
+            };
+          }
+
+          const fulfillmentId = `stripe-checkout:${sessionId}`;
+          const insertedMarkers = await tx
+            .insert(paymentTransactions)
+            .values({
+              id: fulfillmentId,
+              userId: user.id,
+              stripePaymentId: sessionId,
+              type: "one_time",
+              tier,
+              amount: purchaseAmount,
+              currency: (session.currency || "gbp").toUpperCase(),
+              status: "succeeded",
+              // Keep the durable fulfillment marker independent of promo-code
+              // lifecycle. A promo may be deleted while this Stripe session is open.
+              promoCodeId: null,
+              discountAmount,
+              metadata: {
+                fulfillment: "direct_subscription",
+                planDisplayName: purchasedPlanName,
+                originalAmount,
+                catalogRevision: session.metadata?.catalogRevision || null,
+              },
+            })
+            .onConflictDoNothing({ target: paymentTransactions.id })
+            .returning({ id: paymentTransactions.id });
+          if (!insertedMarkers[0]) {
+            const existingMarkers = await tx
+              .select({
+                userId: paymentTransactions.userId,
+                stripePaymentId: paymentTransactions.stripePaymentId,
+                status: paymentTransactions.status,
+              })
+              .from(paymentTransactions)
+              .where(eq(paymentTransactions.id, fulfillmentId))
+              .limit(1);
+            const existingMarker = existingMarkers[0];
+            if (
+              !existingMarker ||
+              existingMarker.userId !== user.id ||
+              existingMarker.stripePaymentId !== sessionId ||
+              existingMarker.status !== "succeeded"
+            ) {
+              throw new Error("Checkout fulfillment marker conflict");
+            }
+            return {
+              newlyProcessed: false,
+              planCredits: currentUser.planCredits || 0,
+            };
+          }
+
+          const existingRedemptions = promoCodeId
+            ? await tx
+                .select({ id: promoRedemptions.id })
+                .from(promoRedemptions)
+                .where(
+                  and(
+                    eq(promoRedemptions.userId, user.id),
+                    eq(promoRedemptions.orderId, sessionId),
+                  ),
+                )
+                .limit(1)
+            : [];
+
+          // Sessions created before catalogue revisions were added have no durable
+          // marker. Preserve the former balance-based guard once, then record one.
+          const legacyAlreadyApplied =
+            !session.metadata?.catalogRevision &&
+            ((currentUser.subscriptionTier === tier &&
+              (currentUser.planCredits || 0) > 0) ||
+              Boolean(existingRedemptions[0]));
+
+          if (!legacyAlreadyApplied) {
+            await tx
+              .update(users)
+              .set({
+                subscriptionTier: tier,
+                subscriptionStatus: "active",
+                planCredits: creditsToAdd,
+              })
+              .where(eq(users.id, user.id));
+          }
+
+          if (promoCodeId && promoCodeUsed) {
+            if (!existingRedemptions[0]) {
+              await tx.insert(promoRedemptions).values({
+                promoCodeId,
+                userId: user.id,
+                orderId: sessionId,
+                discountApplied: discountAmount,
+                originalAmount,
+                finalAmount: purchaseAmount,
+                appliedAt: "checkout",
+              });
+              await tx
+                .update(promoCodes)
+                .set({
+                  currentUses: sql`${promoCodes.currentUses} + 1`,
+                  updatedAt: new Date(),
+                })
+                .where(eq(promoCodes.id, promoCodeId));
+            }
+          }
+
+          if (legacyAlreadyApplied) {
+            await tx
+              .update(paymentTransactions)
+              .set({
+                metadata: {
+                  fulfillment: "direct_subscription",
+                  planDisplayName: purchasedPlanName,
+                  originalAmount,
+                  catalogRevision: null,
+                  legacyReconciliation: true,
+                },
+              })
+              .where(eq(paymentTransactions.id, fulfillmentId));
+          }
+
+          return {
+            newlyProcessed: !legacyAlreadyApplied,
+            planCredits: legacyAlreadyApplied
+              ? currentUser.planCredits || 0
+              : creditsToAdd,
+          };
+        });
+
+        if (verification.newlyProcessed) {
           console.log(
             `[DIRECT SUBSCRIBE] User ${user.id} upgraded to ${tier} tier with ${creditsToAdd} credits`,
           );
         } else {
           console.log(
-            `[DIRECT SUBSCRIBE] User ${user.id} already on ${tier} with credits - skipping duplicate grant`,
+            `[DIRECT SUBSCRIBE] Checkout Session ${sessionId} was already processed - skipping duplicate side effects`,
           );
         }
-
-        const pricing = PRICING[tier as keyof typeof PRICING];
-        const purchaseAmount = pricing?.amount || 0;
 
         // Send payment receipt email
         try {
           const fullUser = await storage.getUser(user.id);
-          if (fullUser && fullUser.email) {
+          if (verification.newlyProcessed && fullUser?.email) {
             await sendPaymentReceiptEmail(
               fullUser.email,
               fullUser.firstName || "Customer",
-              pricing?.name || tier,
+              purchasedPlanName,
               purchaseAmount,
               sessionId,
+              tier,
             );
           }
         } catch (emailError) {
           console.error("Failed to send payment receipt email:", emailError);
         }
 
-        // Process promo code usage
-        try {
-          const promoCodeId = session.metadata?.promoCodeId;
-          const promoCodeUsed = session.metadata?.promoCode;
-          const discountAmount = parseInt(
-            session.metadata?.discountAmount || "0",
-          );
-          const originalAmount = parseInt(
-            session.metadata?.originalAmount || "0",
-          );
-
-          if (promoCodeId && promoCodeUsed) {
-            await storage.createPromoRedemption({
-              promoCodeId,
-              userId: user.id,
-              orderId: sessionId,
-              discountApplied: discountAmount,
-              originalAmount: originalAmount,
-              finalAmount: originalAmount - discountAmount,
-              appliedAt: "checkout",
-            });
-            await storage.incrementPromoCodeUsage(promoCodeId);
-          }
-        } catch (promoError) {
-          console.error("Failed to track promo code usage:", promoError);
-        }
-
         const creditsForTier = getTierCredits(tier);
         res.json({
           success: true,
           tier,
-          credits: creditsForTier,
-          message: `Successfully upgraded to ${tier} tier. ${creditsForTier} plan credits granted.`,
+          credits: verification.planCredits,
+          message: verification.newlyProcessed
+            ? `Successfully upgraded to ${tier} tier. ${creditsForTier} plan credits granted.`
+            : "This payment was already confirmed. No duplicate credits or side effects were applied.",
         });
       } catch (error: any) {
         console.error("Subscription verification error:", error);
@@ -1910,98 +2339,13 @@ Respond ONLY with valid JSON in this exact format:
           .status(500)
           .json({ error: "Verification failed", details: error.message });
       }
-    },
-  );
+  };
 
-  // Alias for /api/payment/verify-subscription - client calls this endpoint
-  app.post(
-    "/api/payments/confirm-subscription",
-    isAuthenticated,
-    async (req, res) => {
-      try {
-        const { sessionId } = req.body;
-        const user = req.user as any;
+  app.post("/api/payment/verify-subscription", isAuthenticated, verifyDirectSubscription);
 
-        if (!sessionId) {
-          return res.status(400).json({ error: "Session ID required" });
-        }
-
-        const stripe = await getUncachableStripeClient();
-        const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-        // Accept both "paid" (normal payment) and "no_payment_required" (100% discount)
-        if (
-          session.payment_status !== "paid" &&
-          session.payment_status !== "no_payment_required"
-        ) {
-          return res.status(402).json({
-            error: "Payment not completed",
-            paymentStatus: session.payment_status,
-          });
-        }
-
-        // Verify this is a direct subscription for this user
-        if (session.metadata?.userId !== user.id) {
-          return res
-            .status(403)
-            .json({ error: "User mismatch - security violation" });
-        }
-
-        if (session.metadata?.directSubscription !== "true") {
-          return res
-            .status(400)
-            .json({ error: "This is not a direct subscription session" });
-        }
-
-        const tier = session.metadata?.tier;
-        if (
-          !tier ||
-          !["basic", "premium", "enterprise", "ultimate"].includes(tier)
-        ) {
-          return res
-            .status(400)
-            .json({ error: "Invalid tier in session metadata" });
-        }
-
-        // Determine credits for this tier
-        const creditsToAdd = getTierCredits(tier);
-
-        // Idempotency: only grant credits if this is a fresh upgrade (user doesn't already have this tier with credits)
-        const currentUser = await storage.getUser(user.id);
-        const alreadyUpgraded =
-          currentUser?.subscriptionTier === tier &&
-          (currentUser?.planCredits || 0) > 0;
-
-        if (alreadyUpgraded) {
-          console.log(
-            `[CONFIRM SUBSCRIPTION] User ${user.id} already on ${tier} with credits - skipping duplicate grant`,
-          );
-        } else {
-          // Upgrade user's tier AND grant plan credits
-          await storage.updateUser(user.id, {
-            subscriptionTier: tier,
-            subscriptionStatus: "active",
-            planCredits: creditsToAdd,
-          });
-          console.log(
-            `[CONFIRM SUBSCRIPTION] User ${user.id} upgraded to ${tier} tier with ${creditsToAdd} credits`,
-          );
-        }
-
-        res.json({
-          success: true,
-          tier,
-          credits: creditsToAdd,
-          message: `Successfully upgraded to ${tier} tier. ${creditsToAdd} plan credits granted.`,
-        });
-      } catch (error: any) {
-        console.error("Subscription confirmation error:", error);
-        res
-          .status(500)
-          .json({ error: "Confirmation failed", details: error.message });
-      }
-    },
-  );
+  // Backward-compatible alias. Both routes share the same durable session-level
+  // verification, receipt, promo tracking and amount handling implementation.
+  app.post("/api/payments/confirm-subscription", isAuthenticated, verifyDirectSubscription);
 
   app.post("/api/payment/verify", isAuthenticated, async (req, res) => {
     try {
@@ -2028,7 +2372,10 @@ Respond ONLY with valid JSON in this exact format:
       const stripe = await getUncachableStripeClient();
       const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-      if (session.payment_status !== "paid") {
+      if (
+        session.payment_status !== "paid" &&
+        session.payment_status !== "no_payment_required"
+      ) {
         return res.status(402).json({
           error: "Payment not completed",
           paymentStatus: session.payment_status,
@@ -2041,32 +2388,233 @@ Respond ONLY with valid JSON in this exact format:
           .json({ error: "Metadata mismatch - security violation" });
       }
 
-      await storage.updateBusinessPlan(planId, { status: "paid" });
-
       // CRITICAL: Update user's subscription tier after successful payment
-      // This unlocks premium tool access based on the tier they purchased
-      const newTier = businessPlan.tier || "free";
-      await storage.updateUser(user.id, {
-        subscriptionTier: newTier,
-        subscriptionStatus: "active",
-      });
-      console.log(
-        `[PAYMENT] User ${user.id} upgraded to ${newTier} tier after payment for plan ${planId}`,
+      // New sessions trust the paid metadata tier. The validated plan tier is retained only
+      // for Checkout Sessions created before catalogue metadata was introduced.
+      const newTier = session.metadata?.tier || businessPlan.tier;
+      if (!isPlanId(newTier) || newTier === "free") {
+        return res.status(400).json({ error: "Invalid tier in payment metadata" });
+      }
+      const purchaseAmount = session.amount_total ?? 0;
+      const purchasedPlanName = session.metadata?.planDisplayName || `${businessPlan.tier} Plan`;
+      const promoCodeId = session.metadata?.promoCodeId;
+      const discountAmount = Number.parseInt(
+        session.metadata?.discountAmount || "0",
+        10,
       );
+      const originalAmount = session.metadata?.originalAmount
+        ? Number.parseInt(session.metadata.originalAmount, 10)
+        : purchaseAmount;
+      if (
+        !Number.isInteger(purchaseAmount) ||
+        purchaseAmount < 0 ||
+        !Number.isInteger(discountAmount) ||
+        discountAmount < 0 ||
+        !Number.isInteger(originalAmount) ||
+        originalAmount < purchaseAmount
+      ) {
+        return res.status(400).json({ error: "Invalid payment amount metadata" });
+      }
 
-      const pricing = PRICING[businessPlan.tier as keyof typeof PRICING];
-      const purchaseAmount = pricing?.amount || 0;
+      const database = db as any;
+      const fulfillment = await database.transaction(async (tx: any) => {
+        await tx.execute(
+          sql`SELECT pg_advisory_xact_lock(hashtext(${`business-plan-checkout:${sessionId}`}))`,
+        );
+
+        const currentPlans = await tx
+          .select({
+            status: businessPlans.status,
+            stripeSessionId: businessPlans.stripeSessionId,
+            userId: businessPlans.userId,
+          })
+          .from(businessPlans)
+          .where(eq(businessPlans.id, planId))
+          .limit(1);
+        const currentPlan = currentPlans[0];
+        if (
+          !currentPlan ||
+          currentPlan.userId !== user.id ||
+          currentPlan.stripeSessionId !== sessionId
+        ) {
+          throw new Error("Business plan payment ownership changed during verification");
+        }
+        const currentUsers = await tx
+          .select({ bonusCredits: users.bonusCredits })
+          .from(users)
+          .where(eq(users.id, user.id))
+          .limit(1);
+        const currentUser = currentUsers[0];
+        if (!currentUser) {
+          throw new Error("Authenticated user no longer exists");
+        }
+
+        const existingMarkers = await tx
+          .select({ id: paymentTransactions.id })
+          .from(paymentTransactions)
+          .where(
+            and(
+              eq(paymentTransactions.userId, user.id),
+              eq(paymentTransactions.stripePaymentId, sessionId),
+              eq(paymentTransactions.status, "succeeded"),
+            ),
+          )
+          .limit(1);
+        if (existingMarkers[0]) return { newlyProcessed: false };
+
+        const fulfillmentId = `stripe-plan:${sessionId}`;
+        const insertedMarkers = await tx
+          .insert(paymentTransactions)
+          .values({
+            id: fulfillmentId,
+            userId: user.id,
+            stripePaymentId: sessionId,
+            type: "one_time",
+            tier: newTier,
+            amount: purchaseAmount,
+            currency: (session.currency || "gbp").toUpperCase(),
+            status: "succeeded",
+            // Keep the durable fulfillment marker independent of promo-code
+            // lifecycle. A promo may be deleted while this Stripe session is open.
+            promoCodeId: null,
+            discountAmount,
+            metadata: {
+              fulfillment: "business_plan",
+              businessPlanId: planId,
+              planDisplayName: purchasedPlanName,
+              originalAmount,
+              catalogRevision: session.metadata?.catalogRevision || null,
+            },
+          })
+          .onConflictDoNothing({ target: paymentTransactions.id })
+          .returning({ id: paymentTransactions.id });
+        if (!insertedMarkers[0]) {
+          const markerRows = await tx
+            .select({
+              userId: paymentTransactions.userId,
+              stripePaymentId: paymentTransactions.stripePaymentId,
+              status: paymentTransactions.status,
+            })
+            .from(paymentTransactions)
+            .where(eq(paymentTransactions.id, fulfillmentId))
+            .limit(1);
+          const marker = markerRows[0];
+          if (
+            !marker ||
+            marker.userId !== user.id ||
+            marker.stripePaymentId !== sessionId ||
+            marker.status !== "succeeded"
+          ) {
+            throw new Error("Business plan fulfillment marker conflict");
+          }
+          return { newlyProcessed: false };
+        }
+
+        // A paid business plan is legacy fulfillment evidence only for sessions
+        // created before catalogue revision metadata and durable markers existed.
+        if (
+          !session.metadata?.catalogRevision &&
+          ["paid", "generating", "completed", "failed"].includes(currentPlan.status)
+        ) {
+          await tx
+            .update(paymentTransactions)
+            .set({
+              metadata: {
+                fulfillment: "business_plan",
+                businessPlanId: planId,
+                planDisplayName: purchasedPlanName,
+                originalAmount,
+                catalogRevision: session.metadata?.catalogRevision || null,
+                legacyReconciliation: true,
+              },
+            })
+            .where(eq(paymentTransactions.id, fulfillmentId));
+          return { newlyProcessed: false };
+        }
+
+        await tx
+          .update(businessPlans)
+          .set({ status: "paid" })
+          .where(eq(businessPlans.id, planId));
+        await tx
+          .update(users)
+          .set({
+            subscriptionTier: newTier,
+            subscriptionStatus: "active",
+            planCredits: getTierCredits(newTier),
+            lastCreditRefresh: new Date(),
+          })
+          .where(eq(users.id, user.id));
+        const grantedCredits = getTierCredits(newTier);
+        await tx.insert(creditTransactions).values({
+          userId: user.id,
+          type: "tier_purchase",
+          creditsChange: grantedCredits,
+          creditsType: "plan",
+          balanceAfter: grantedCredits + (currentUser.bonusCredits || 0),
+          referenceId: sessionId,
+          referenceType: "stripe_payment",
+          description: `${purchasedPlanName}: +${grantedCredits} plan credits`,
+          metadata: { businessPlanId: planId, tier: newTier },
+        });
+
+        const promoCodeUsed = session.metadata?.promoCode;
+        if (promoCodeId && promoCodeUsed) {
+          const existingRedemptions = await tx
+            .select({ id: promoRedemptions.id })
+            .from(promoRedemptions)
+            .where(
+              and(
+                eq(promoRedemptions.userId, user.id),
+                eq(promoRedemptions.orderId, sessionId),
+              ),
+            )
+            .limit(1);
+
+          if (!existingRedemptions[0]) {
+            await tx.insert(promoRedemptions).values({
+              promoCodeId,
+              userId: user.id,
+              orderId: sessionId,
+              originalAmount,
+              discountApplied: discountAmount,
+              finalAmount: purchaseAmount,
+              appliedAt: "checkout",
+            });
+            await tx
+              .update(promoCodes)
+              .set({
+                currentUses: sql`${promoCodes.currentUses} + 1`,
+                updatedAt: new Date(),
+              })
+              .where(eq(promoCodes.id, promoCodeId));
+          }
+        }
+
+        return { newlyProcessed: true };
+      });
+
+      if (fulfillment.newlyProcessed) {
+        console.log(
+          `[PAYMENT] User ${user.id} upgraded to ${newTier} tier after payment for plan ${planId}`,
+        );
+      } else {
+        console.log(
+          `[PAYMENT] Checkout Session ${sessionId} was already processed - skipping duplicate side effects`,
+        );
+      }
 
       // Send payment receipt email
       try {
         const fullUser = await storage.getUser(user.id);
-        if (fullUser && fullUser.email) {
+        if (fulfillment.newlyProcessed && fullUser?.email) {
           await sendPaymentReceiptEmail(
             fullUser.email,
             fullUser.firstName || "Customer",
-            pricing?.name || businessPlan.tier,
+            purchasedPlanName,
             purchaseAmount,
             sessionId,
+            newTier,
           );
         }
       } catch (emailError) {
@@ -2076,60 +2624,62 @@ Respond ONLY with valid JSON in this exact format:
 
       // Process referral rewards - check if user was referred
       try {
-        const referralEvent = await storage.getReferralEventByReferee(user.id);
-        if (referralEvent && referralEvent.status === "signed_up") {
-          const referralCode = await storage.getReferralCode(
-            referralEvent.referralCodeId,
-          );
-          if (referralCode) {
-            // Calculate reward based on referral code settings
-            let rewardAmount = 0;
-            if (referralCode.rewardType === "percentage") {
-              rewardAmount = Math.round(
-                (purchaseAmount * referralCode.rewardValue) / 100,
-              );
-            } else {
-              rewardAmount = referralCode.rewardValue;
-            }
-
-            // Create reward for the referrer
-            await storage.createReferralReward({
-              userId: referralCode.userId,
-              referralEventId: referralEvent.id,
-              type: "cash",
-              amount: rewardAmount,
-              currency: "GBP",
-              status: "pending",
-            });
-
-            // Update referral event to qualified
-            await storage.updateReferralEvent(referralEvent.id, {
-              status: "qualified",
-              qualifiedAt: new Date(),
-              rewardAmount,
-            });
-
-            // Update referral code stats
-            await storage.incrementReferralStats(
-              referralCode.id,
-              "successfulReferrals",
+        if (fulfillment.newlyProcessed && purchaseAmount > 0) {
+          const referralEvent = await storage.getReferralEventByReferee(user.id);
+          if (referralEvent && referralEvent.status === "signed_up") {
+            const referralCode = await storage.getReferralCode(
+              referralEvent.referralCodeId,
             );
-            await storage.updateReferralCode(referralCode.id, {
-              totalEarnings: referralCode.totalEarnings + rewardAmount,
-            });
-
-            // Send email notification to referrer
-            try {
-              const referrer = await storage.getUser(referralCode.userId);
-              if (referrer?.email) {
-                await sendReferralRewardEmail(
-                  referrer.email,
-                  referrer.firstName || "Friend",
-                  rewardAmount,
+            if (referralCode) {
+              // Calculate reward based on referral code settings
+              let rewardAmount = 0;
+              if (referralCode.rewardType === "percentage") {
+                rewardAmount = Math.round(
+                  (purchaseAmount * referralCode.rewardValue) / 100,
                 );
+              } else {
+                rewardAmount = referralCode.rewardValue;
               }
-            } catch (emailErr) {
-              console.error("Failed to send referral reward email:", emailErr);
+
+              // Create reward for the referrer
+              await storage.createReferralReward({
+                userId: referralCode.userId,
+                referralEventId: referralEvent.id,
+                type: "cash",
+                amount: rewardAmount,
+                currency: "GBP",
+                status: "pending",
+              });
+
+              // Update referral event to qualified
+              await storage.updateReferralEvent(referralEvent.id, {
+                status: "qualified",
+                qualifiedAt: new Date(),
+                rewardAmount,
+              });
+
+              // Update referral code stats
+              await storage.incrementReferralStats(
+                referralCode.id,
+                "successfulReferrals",
+              );
+              await storage.updateReferralCode(referralCode.id, {
+                totalEarnings: referralCode.totalEarnings + rewardAmount,
+              });
+
+              // Send email notification to referrer
+              try {
+                const referrer = await storage.getUser(referralCode.userId);
+                if (referrer?.email) {
+                  await sendReferralRewardEmail(
+                    referrer.email,
+                    referrer.firstName || "Friend",
+                    rewardAmount,
+                  );
+                }
+              } catch (emailErr) {
+                console.error("Failed to send referral reward email:", emailErr);
+              }
             }
           }
         }
@@ -2138,38 +2688,12 @@ Respond ONLY with valid JSON in this exact format:
         // Don't fail the request if referral processing fails
       }
 
-      // Process promo code usage - track promo code redemption
-      try {
-        const promoCodeId = session.metadata?.promoCodeId;
-        const promoCodeUsed = session.metadata?.promoCode;
-        const discountAmount = parseInt(
-          session.metadata?.discountAmount || "0",
-        );
-
-        if (promoCodeId && promoCodeUsed) {
-          // Increment promo code usage count
-          await storage.incrementPromoCodeUsage(promoCodeId);
-
-          // Record the redemption
-          await storage.createPromoRedemption({
-            promoCodeId,
-            userId: user.id,
-            originalAmount: 0,
-            discountApplied: discountAmount,
-            finalAmount: 0,
-            appliedAt: new Date().toISOString(),
-          });
-
-          console.log(
-            `Promo code ${promoCodeUsed} used successfully. Discount: £${(discountAmount / 100).toFixed(2)}`,
-          );
-        }
-      } catch (promoError) {
-        console.error("Failed to process promo code usage:", promoError);
-        // Don't fail the request if promo processing fails
-      }
-
-      res.json({ success: true, verified: true, tier: newTier });
+      res.json({
+        success: true,
+        verified: true,
+        tier: newTier,
+        alreadyProcessed: !fulfillment.newlyProcessed,
+      });
     } catch (error) {
       console.error("Payment verification error:", error);
       res.status(500).json({ error: "Failed to verify payment" });
@@ -2454,17 +2978,17 @@ Respond ONLY with valid JSON in this exact format:
     try {
       const user = req.user as any;
       const currentTier = user.subscriptionTier || "free";
-      const currentPrice =
-        PRICING[currentTier as keyof typeof PRICING]?.amount || 0;
+      const { catalog } = await getCommercialCatalog();
+      const currentPrice = getPlanById(catalog, currentTier)?.pricePence || 0;
 
       const upgradePrices: Record<string, { price: number; credits: number }> =
         {};
 
-      for (const [tier, pricing] of Object.entries(PRICING)) {
-        if (pricing.amount > currentPrice) {
-          upgradePrices[tier] = {
-            price: pricing.amount - currentPrice,
-            credits: getTierCredits(tier),
+      for (const plan of catalog.plans) {
+        if (plan.publicationStatus === "published" && plan.pricePence > currentPrice) {
+          upgradePrices[plan.id] = {
+            price: plan.pricePence,
+            credits: getTierCredits(plan.id),
           };
         }
       }
@@ -4573,26 +5097,13 @@ Keep your response concise (2-3 paragraphs max) but actionable.`;
     }
   });
 
-  // AI Tool Guide Feedback - provides personalized feedback for any tool's AI interview
-  // PAID TIER ONLY - Free users should not have access to AI-guided mode
-  app.post("/api/ai/tool-feedback", isAuthenticated, async (req, res) => {
+  // AI Tool Guide Feedback - provides personalized feedback for any entitled tool's AI interview
+  app.post(
+    "/api/ai/tool-feedback",
+    isAuthenticated,
+    requireToolAccess((req) => req.body?.toolId),
+    async (req, res) => {
     try {
-      // Validate user subscription tier - block free tier users
-      const userId = (req.user as any)?.id;
-      if (userId) {
-        const user = await storage.getUser(userId);
-        if (
-          !user ||
-          !user.subscriptionTier ||
-          user.subscriptionTier === "free"
-        ) {
-          return res.status(403).json({
-            error: "AI-Guided mode requires a paid subscription",
-            upgradeRequired: true,
-          });
-        }
-      }
-
       const { toolId, question, answer, agentPersonality, previousAnswers } =
         req.body;
 
@@ -4740,7 +5251,8 @@ EXAMPLES OF GOOD RESPONSES:
       console.error("Tool feedback outer error:", error);
       res.status(500).json({ error: "Failed to generate feedback" });
     }
-  });
+    },
+  );
 
   app.get("/api/news", async (req, res) => {
     try {
@@ -4802,7 +5314,11 @@ EXAMPLES OF GOOD RESPONSES:
   });
 
   // Session Handoff API for QR Mobile Upload
-  app.post("/api/session-handoff", async (req, res) => {
+  app.post(
+    "/api/session-handoff",
+    isAuthenticated,
+    requireToolAccess((req) => req.body?.toolId),
+    async (req, res) => {
     try {
       const { toolId, payload } = req.body;
 
@@ -4849,17 +5365,31 @@ EXAMPLES OF GOOD RESPONSES:
       console.error("Session handoff creation error:", error);
       res.status(500).json({ error: "Failed to create session handoff" });
     }
-  });
+    },
+  );
 
-  app.get("/api/session-handoff/:token", async (req, res) => {
+  app.get(
+    "/api/session-handoff/:token",
+    isAuthenticated,
+    async (req, res, next) => {
+      try {
+        const handoff = await storage.getSessionHandoff(req.params.token);
+        if (!handoff) {
+          return res.status(404).json({ error: "Session not found or expired" });
+        }
+        res.locals.sessionHandoff = handoff;
+        (req as any).resolvedSessionHandoff = handoff;
+        next();
+      } catch (error) {
+        console.error("Session handoff lookup error:", error);
+        res.status(500).json({ error: "Failed to retrieve session" });
+      }
+    },
+    requireToolAccess((req) => (req as any).resolvedSessionHandoff?.toolId),
+    async (req, res) => {
     try {
       const { token } = req.params;
-
-      const handoff = await storage.getSessionHandoff(token);
-
-      if (!handoff) {
-        return res.status(404).json({ error: "Session not found or expired" });
-      }
+      const handoff = res.locals.sessionHandoff;
 
       // Mark as consumed
       await storage.consumeSessionHandoff(token);
@@ -4872,7 +5402,8 @@ EXAMPLES OF GOOD RESPONSES:
       console.error("Session handoff retrieval error:", error);
       res.status(500).json({ error: "Failed to retrieve session" });
     }
-  });
+    },
+  );
 
   // Referral Tracking API for Share Buttons
   app.post("/api/referrals", async (req, res) => {
@@ -5842,11 +6373,9 @@ EXAMPLES OF GOOD RESPONSES:
         return cancelDate && cancelDate >= startOfMonth;
       }).length;
 
-      // Use database paid users count if Stripe subscriptions are empty
-      const effectiveActiveSubscriptions =
-        activeSubscriptions.length > 0
-          ? activeSubscriptions.length
-          : paidUsers.length;
+      // Only Stripe subscriptions count as active subscriptions. Current plan
+      // purchases are one-time payments and must not be relabelled as recurring.
+      const effectiveActiveSubscriptions = activeSubscriptions.length;
 
       const churnRate =
         effectiveActiveSubscriptions > 0
@@ -5878,30 +6407,9 @@ EXAMPLES OF GOOD RESPONSES:
         }
       }
 
-      // Count paying users (those without 100% free promo codes)
-      const payingBasic = allUsers.filter(
-        (u) => u.subscriptionTier === "basic" && !usersWithFreePromo.has(u.id),
-      ).length;
-      const payingPremium = allUsers.filter(
-        (u) =>
-          u.subscriptionTier === "premium" && !usersWithFreePromo.has(u.id),
-      ).length;
-      const payingEnterprise = allUsers.filter(
-        (u) =>
-          u.subscriptionTier === "enterprise" && !usersWithFreePromo.has(u.id),
-      ).length;
-      const payingUltimate = allUsers.filter(
-        (u) =>
-          u.subscriptionTier === "ultimate" && !usersWithFreePromo.has(u.id),
-      ).length;
-
-      // Calculate actual MRR (excluding users with 100% free promo codes)
-      const dbMrr =
-        payingBasic * 29 +
-        payingPremium * 49 +
-        payingEnterprise * 89 +
-        payingUltimate * 129;
-      const effectiveMrr = mrr > 0 ? mrr : dbMrr;
+      // Current plans are one-time purchases, so user tier counts must not be
+      // multiplied by catalogue prices and reported as recurring revenue.
+      const effectiveMrr = mrr;
       const effectiveArr = effectiveMrr * 12;
 
       // Count of free promo users for display
@@ -5917,7 +6425,7 @@ EXAMPLES OF GOOD RESPONSES:
         revenueYear1ToDate,
         monthlyGrowth,
 
-        // Subscription metrics - use database data if Stripe is empty
+        // Actual Stripe subscription metrics only
         mrr: effectiveMrr,
         arr: effectiveArr,
         activeSubscriptions: effectiveActiveSubscriptions,
@@ -8368,6 +8876,36 @@ EXAMPLES OF GOOD RESPONSES:
           valid: false,
           message: "This promo code has reached its usage limit",
         });
+      }
+
+      const requestedTier = typeof req.query.tier === "string" ? req.query.tier : undefined;
+      if (requestedTier) {
+        if (!isPlanId(requestedTier) || requestedTier === "free") {
+          return res.json({ valid: false, message: "Select a valid paid plan" });
+        }
+        const { catalog } = await getCommercialCatalog();
+        const selectedPlan = getPlanById(catalog, requestedTier);
+        if (!selectedPlan || selectedPlan.publicationStatus !== "published") {
+          return res.json({ valid: false, message: "This plan is not currently available" });
+        }
+        if (
+          promoCode.eligibleTiers?.length &&
+          !promoCode.eligibleTiers.includes(requestedTier)
+        ) {
+          return res.json({
+            valid: false,
+            message: `This promo code is not valid for the ${requestedTier} tier`,
+          });
+        }
+        if (
+          promoCode.minPurchaseAmount &&
+          selectedPlan.pricePence < promoCode.minPurchaseAmount
+        ) {
+          return res.json({
+            valid: false,
+            message: `Minimum purchase of £${(promoCode.minPurchaseAmount / 100).toFixed(2)} required`,
+          });
+        }
       }
 
       res.json({
@@ -13380,7 +13918,7 @@ OUTPUT FORMAT:
   // ============================================
 
   // ORACLE Supervisor - Delegate to specialist agents
-  app.post("/api/ai/oracle-delegate", isAuthenticated, async (req, res) => {
+  app.post("/api/ai/oracle-delegate", isAuthenticated, requireToolAccess("oracle-supervisor"), async (req, res) => {
     try {
       const { query, agentId, agentExpertise, agentPersonality, criterion } =
         req.body;
@@ -13530,7 +14068,7 @@ Focus specifically on UK Innovator Founder Visa requirements and Home Office cri
   });
 
   // Founder Autopilot - Step execution
-  app.post("/api/ai/autopilot-step", isAuthenticated, async (req, res) => {
+  app.post("/api/ai/autopilot-step", isAuthenticated, requireToolAccess("founder-autopilot"), async (req, res) => {
     try {
       const { stepId, stepName, agent, businessIdea, previousSteps } = req.body;
 
@@ -13661,7 +14199,7 @@ Reference actual visa requirements where relevant.`;
   });
 
   // Neural Twin - Generate founder responses
-  app.post("/api/ai/neural-twin", isAuthenticated, async (req, res) => {
+  app.post("/api/ai/neural-twin", isAuthenticated, requireToolAccess("neural-twin"), async (req, res) => {
     try {
       const { question, profile, previousMessages } = req.body;
 
@@ -13701,7 +14239,7 @@ Keep responses focused, professional, and relevant to UK visa requirements.`;
   });
 
   // Evaluate interview responses - PhD-level rigorous evaluation
-  app.post("/api/ai/evaluate-response", isAuthenticated, async (req, res) => {
+  app.post("/api/ai/evaluate-response", isAuthenticated, requireToolAccess("neural-twin"), async (req, res) => {
     try {
       const {
         response,
@@ -13831,7 +14369,7 @@ BE HARSH BUT FAIR. This is visa preparation - false confidence could lead to rej
   });
 
   // Voice-to-Document AI endpoint
-  app.post("/api/ai/voice-to-document", isAuthenticated, async (req, res) => {
+  app.post("/api/ai/voice-to-document", isAuthenticated, requireToolAccess("voice-builder"), async (req, res) => {
     try {
       const { transcript, documentType } = req.body;
 
@@ -14234,6 +14772,7 @@ Return a JSON object with:
   app.post(
     "/api/ai/find-network-matches",
     isAuthenticated,
+    requireToolAccess("ai-network-builder"),
     async (req, res) => {
       try {
         const { description, industry, type } = req.body;
@@ -14315,6 +14854,7 @@ Return a JSON object with:
   app.post(
     "/api/ai/generate-patent-blueprint",
     isAuthenticated,
+    requireToolAccess("ai-patent-generator"),
     async (req, res) => {
       try {
         const { title, description, technical } = req.body;
@@ -14387,7 +14927,7 @@ Return a JSON object with:
   );
 
   // AI Funding Negotiator - SAFE Terms Generator endpoint
-  app.post("/api/ai/generate-safe-terms", isAuthenticated, async (req, res) => {
+  app.post("/api/ai/generate-safe-terms", isAuthenticated, requireToolAccess("ai-funding-negotiator"), async (req, res) => {
     try {
       const { amount, stage, industry } = req.body;
 
@@ -14490,7 +15030,7 @@ Return a JSON object with:
   });
 
   // AI Auto-Remediation endpoint for risk analysis
-  app.post("/api/ai/auto-remediate", isAuthenticated, async (req, res) => {
+  app.post("/api/ai/auto-remediate", isAuthenticated, requireToolAccess("risk-analysis"), async (req, res) => {
     try {
       const { risk } = req.body;
 
@@ -14576,7 +15116,7 @@ Return a JSON object with:
   });
 
   // AI Document Scanner endpoint for weakness analysis
-  app.post("/api/ai/scan-documents", isAuthenticated, async (req, res) => {
+  app.post("/api/ai/scan-documents", isAuthenticated, requireToolAccess("weakness-analysis"), async (req, res) => {
     try {
       const { documents } = req.body;
 
@@ -16426,7 +16966,7 @@ Return a JSON object with:
   );
 
   // Regulatory updates endpoint
-  app.get("/api/regulations/updates", isAuthenticated, async (req, res) => {
+  app.get("/api/regulations/updates", isAuthenticated, requireToolAccess("regulatory-copilot"), async (req, res) => {
     try {
       // In production, this would fetch from external APIs or a database
       const updates = [
@@ -17458,7 +17998,7 @@ IMPORTANT RULES:
   // ============================================
 
   // Get tool progress for current user
-  app.get("/api/tools/:toolId/progress", isAuthenticated, async (req, res) => {
+  app.get("/api/tools/:toolId/progress", isAuthenticated, requireToolAccess((req) => req.params.toolId), async (req, res) => {
     try {
       const userId = (req.user as any).id;
       const { toolId } = req.params;
@@ -17479,7 +18019,7 @@ IMPORTANT RULES:
   });
 
   // Save tool progress
-  app.post("/api/tools/:toolId/progress", isAuthenticated, async (req, res) => {
+  app.post("/api/tools/:toolId/progress", isAuthenticated, requireToolAccess((req) => req.params.toolId), async (req, res) => {
     try {
       const userId = (req.user as any).id;
       const { toolId } = req.params;
@@ -17514,7 +18054,7 @@ IMPORTANT RULES:
   });
 
   // Mark tool as exported
-  app.post("/api/tools/:toolId/export", isAuthenticated, async (req, res) => {
+  app.post("/api/tools/:toolId/export", isAuthenticated, requireToolAccess((req) => req.params.toolId), async (req, res) => {
     try {
       const userId = (req.user as any).id;
       const { toolId } = req.params;
@@ -17536,15 +18076,24 @@ IMPORTANT RULES:
   app.get("/api/tools/progress/all", isAuthenticated, async (req, res) => {
     try {
       const userId = (req.user as any).id;
+      const freshUser = await storage.getUser(userId);
+      if (!freshUser) return res.status(401).json({ error: "Unauthorized" });
+      const userPlanId: PlanId = isPlanId(freshUser.subscriptionTier)
+        ? freshUser.subscriptionTier
+        : "free";
+      const { catalog } = await getCommercialCatalog();
 
       const result = await db.execute(
         sql`SELECT * FROM tool_progress WHERE user_id = ${userId} ORDER BY updated_at DESC`,
       );
 
-      res.json({ progress: result.rows });
+      const accessibleProgress = result.rows.filter((row: any) =>
+        typeof row.tool_id === "string" && hasToolAccess(catalog, userPlanId, row.tool_id),
+      );
+      res.json({ progress: accessibleProgress });
     } catch (error) {
       console.error("Get all tool progress error:", error);
-      res.status(500).json({ error: "Failed to fetch tool progress" });
+      res.status(503).json({ error: "Tool progress access could not be verified" });
     }
   });
 

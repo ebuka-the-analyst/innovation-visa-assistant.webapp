@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, Lock, Sparkles, ArrowRight, Crown } from "lucide-react";
 import { type ToolTier } from "@/hooks/useTierAccess";
+import { useCommercialCatalog } from "@/hooks/useCommercialCatalog";
 
 interface SoftUpgradeOverlayProps {
   isOpen: boolean;
@@ -15,15 +16,7 @@ interface SoftUpgradeOverlayProps {
   userTier: string;
 }
 
-const tierPrices: Record<ToolTier, string> = {
-  free: "£0",
-  basic: "£9",
-  premium: "£19",
-  enterprise: "£35",
-  ultimate: "£49",
-};
-
-const tierNames: Record<ToolTier, string> = {
+const fallbackTierNames: Record<ToolTier, string> = {
   free: "Free",
   basic: "Basic",
   premium: "Premium",
@@ -56,6 +49,10 @@ export function SoftUpgradeOverlay({
   userTier,
 }: SoftUpgradeOverlayProps) {
   const [, setLocation] = useLocation();
+  const { getUpgradePlan, formatPrice } = useCommercialCatalog();
+  const requiredPlan = getUpgradePlan(requiredTier);
+  const requiredTierName = requiredPlan?.displayName.replace(/\s+Plan$/i, "") ?? fallbackTierNames[requiredTier];
+  const requiredTierPrice = requiredPlan ? formatPrice(requiredPlan.pricePence) : "";
 
   const handleUpgrade = () => {
     onClose();
@@ -119,7 +116,7 @@ export function SoftUpgradeOverlay({
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Required</span>
                       <Badge className={tierColors[requiredTier]}>
-                        {tierNames[requiredTier]} Plan
+                        {requiredTierName} Plan
                       </Badge>
                     </div>
                   </div>
@@ -127,8 +124,8 @@ export function SoftUpgradeOverlay({
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10 mb-5">
                     <Sparkles className="w-5 h-5 text-primary flex-shrink-0" />
                     <p className="text-sm">
-                      Upgrade to <strong>{tierNames[requiredTier]}</strong> for just{" "}
-                      <span className="font-bold text-primary">{tierPrices[requiredTier]}</span> to unlock this tool and more.
+                      Upgrade to <strong>{requiredTierName}</strong> for just{" "}
+                      <span className="font-bold text-primary">{requiredTierPrice}</span> to unlock this tool and more.
                     </p>
                   </div>
 
@@ -139,7 +136,7 @@ export function SoftUpgradeOverlay({
                       data-testid="button-upgrade-plan"
                     >
                       <Crown className="w-4 h-4" />
-                      View Plans
+                      {requiredPlan?.ctaLabel ?? "View Plans"}
                       <ArrowRight className="w-4 h-4" />
                     </Button>
                     <Button

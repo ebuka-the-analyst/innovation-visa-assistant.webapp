@@ -2,57 +2,38 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Check, X, Star } from "lucide-react";
 import { Link } from "wouter";
+import { useCommercialCatalog, type PlanId } from "@/hooks/useCommercialCatalog";
+import { TIER_CREDITS } from "@/hooks/useTierAccess";
 
-// Global Founder Pricing - Effective May 2026
-const tiers = [
-  {
-    name: "Basic",
-    price: "£9",
-    description: "Perfect for straightforward businesses",
-    features: [
-      { name: "1 business plan coin", included: true },
-      { name: "25-35 page plan", included: true },
-      { name: "20 tools access", included: true },
-      { name: "PDF download", included: true },
-      { name: "Deeper innovation analysis", included: false },
-      { name: "Priority support", included: false },
-    ],
-    cta: "Get Started",
-    popular: false,
-  },
-  {
-    name: "Premium",
-    price: "£19",
-    description: "Most popular - comprehensive coverage",
-    features: [
-      { name: "3 business plan coins", included: true },
-      { name: "40-55 page plan", included: true },
-      { name: "83 tools access", included: true },
-      { name: "PDF download", included: true },
-      { name: "Deeper innovation analysis", included: true },
-      { name: "Industry-specific frameworks", included: true },
-    ],
-    cta: "Start Premium",
-    popular: true,
-  },
-  {
-    name: "Enterprise",
-    price: "£35",
-    description: "Maximum detail for complex ventures",
-    features: [
-      { name: "6 business plan coins", included: true },
-      { name: "56-80 page plan", included: true },
-      { name: "109 tools access", included: true },
-      { name: "PDF download", included: true },
-      { name: "Full innovation deep-dive", included: true },
-      { name: "Advanced business modelling", included: true },
-    ],
-    cta: "Go Enterprise",
-    popular: false,
-  },
-];
+const PLAN_PAGE_COPY: Record<PlanId, string> = {
+  free: "10-15 page plan",
+  basic: "25-35 page plan",
+  premium: "40-55 page plan",
+  enterprise: "56-80 page plan",
+  ultimate: "80+ page plan",
+};
 
 export default function PricingSection() {
+  const { plans, toolCounts, formatPrice } = useCommercialCatalog();
+  const tiers = plans
+    .filter((plan) => plan.pricePence > 0)
+    .slice(0, 3)
+    .map((plan) => ({
+      ...plan,
+      name: plan.displayName.replace(/\s+Plan$/i, ""),
+      price: formatPrice(plan.pricePence),
+      features: [
+        ...(TIER_CREDITS[plan.id] > 0
+          ? [`Includes ${TIER_CREDITS[plan.id]} business plan coin${TIER_CREDITS[plan.id] === 1 ? "" : "s"}`]
+          : []),
+        PLAN_PAGE_COPY[plan.id],
+        `Access to ${toolCounts[plan.id]} tools`,
+        ...plan.features,
+      ].slice(0, 6).map((name) => ({ name, included: true })),
+      cta: plan.ctaLabel,
+      popular: plan.id === "premium",
+    }));
+
   return (
     <section className="py-20 md:py-32 bg-gradient-to-b from-background to-accent/5" id="pricing">
       <div className="responsive-container">
@@ -68,7 +49,7 @@ export default function PricingSection() {
         <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto" style={{ perspective: "1000px" }}>
           {tiers.map((tier, index) => (
             <Card
-              key={tier.name}
+              key={tier.id}
               className={`relative p-8 transition-all duration-300 hover:-translate-y-2 ${
                 tier.popular
                   ? "scale-105 shadow-2xl border-primary bg-gradient-to-br from-card to-primary/5"
@@ -77,7 +58,7 @@ export default function PricingSection() {
               style={{
                 transform: tier.popular ? "translateY(-12px)" : undefined,
               }}
-              data-testid={`card-pricing-${tier.name.toLowerCase()}`}
+              data-testid={`card-pricing-${tier.id}`}
             >
               {tier.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
@@ -117,7 +98,7 @@ export default function PricingSection() {
                   className="w-full"
                   variant={tier.popular ? "default" : "outline"}
                   size="lg"
-                  data-testid={`button-select-${tier.name.toLowerCase()}`}
+                  data-testid={`button-select-${tier.id}`}
                 >
                   {tier.cta}
                 </Button>

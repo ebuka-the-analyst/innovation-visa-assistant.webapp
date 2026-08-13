@@ -11,6 +11,7 @@ import novaAvatar from "@assets/generated_images/nova_innovation_agent_avatar.we
 import sterlingAvatar from "@assets/generated_images/sterling_financial_agent_avatar.webp";
 import atlasAvatar from "@assets/generated_images/atlas_growth_agent_avatar.webp";
 import sageAvatar from "@assets/generated_images/sage_compliance_agent_avatar.webp";
+import { useCommercialCatalog, type PlanId } from "@/hooks/useCommercialCatalog";
 
 const getAgentForStage = (stageText: string) => {
   const stage = stageText.toLowerCase();
@@ -57,7 +58,7 @@ const tierPageTargets: Record<string, string> = {
   ultimate: "80+",
 };
 
-export default function GenerationProgress({ planId }: { planId: string }) {
+export default function GenerationProgress({ planId }: { planId?: string }) {
   const [status, setStatus] = useState<string>('pending');
   const [currentStage, setCurrentStage] = useState<string>('Initializing...');
   const [tier, setTier] = useState<string>('basic');
@@ -66,6 +67,14 @@ export default function GenerationProgress({ planId }: { planId: string }) {
   const [sectionNumber, setSectionNumber] = useState<number>(0);
   const [businessName, setBusinessName] = useState<string>('Business Plan');
   const { toast } = useToast();
+  const { getPlanById, getUpgradePlan, toolCounts } = useCommercialCatalog();
+  const currentToolCount = toolCounts[tier as PlanId] ?? 0;
+  const currentPlanName = getPlanById(tier)?.displayName ?? `${tier.charAt(0).toUpperCase()}${tier.slice(1)} Plan`;
+  const currentPlanLabel = currentPlanName.replace(/\s+Plan$/i, "");
+  const currentPlanFeatures = getPlanById(tier)?.features ?? [];
+  const basicUpgradePlan = getUpgradePlan("basic");
+  const basicUpgradeName = basicUpgradePlan?.displayName.replace(/\s+Plan$/i, "") ?? "Basic";
+  const basicUpgradeToolCount = basicUpgradePlan ? toolCounts[basicUpgradePlan.id] : 0;
 
   // Trigger a direct browser download without opening a new tab or any processing screen
   const handleDownload = (format: 'pdf' | 'word') => {
@@ -95,6 +104,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
         const sessionId = urlParams.get('session_id');
         const isFree = urlParams.get('free') === 'true';
         const alreadySubscribed = urlParams.get('already_subscribed') === 'true';
+        const promoApplied = urlParams.get('promo_applied') === 'true';
 
         // Free tier - no payment needed
         if (isFree) {
@@ -104,7 +114,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
         }
 
         // Premium/subscribed users - no payment session needed
-        if (alreadySubscribed) {
+        if (alreadySubscribed || promoApplied) {
           localStorage.setItem('trigger-onboarding-tour', 'true');
           await apiRequest('POST', '/api/generate/start', { planId });
           return;
@@ -350,7 +360,7 @@ export default function GenerationProgress({ planId }: { planId: string }) {
               <div className="flex items-center justify-center gap-2 text-emerald-500">
                 <CheckCircle className="w-8 h-8" />
                 <p className="text-xl font-bold">
-                  {tier === 'ultimate' ? 'Your Ultimate Business Plan is Complete!' : 'Your Business Plan is Ready!'}
+                  {tier === 'ultimate' ? `Your ${currentPlanLabel} Business Plan is Complete!` : 'Your Business Plan is Ready!'}
                 </p>
               </div>
 
@@ -540,53 +550,45 @@ export default function GenerationProgress({ planId }: { planId: string }) {
 
               <div className="bg-accent/20 rounded-lg p-4 mt-4">
                 <p className="text-xs font-medium text-foreground mb-2 text-center">
-                  {tier === 'free' && 'Free Plan'}
-                  {tier === 'basic' && 'Basic Plan'}
-                  {tier === 'premium' && 'Premium Plan'}
-                  {tier === 'enterprise' && 'Enterprise Plan'}
-                  {tier === 'ultimate' && 'Ultimate Plan'}
+                  {currentPlanName}
                 </p>
                 <div className="text-xs text-muted-foreground space-y-1">
                   {tier === 'free' && (
                     <>
                       <p className="text-center">10-15 page business plan</p>
-                      <p className="text-center">13 essential tools</p>
+                      <p className="text-center">{currentToolCount} essential tools</p>
+                      {currentPlanFeatures.slice(0, 2).map((feature) => <p key={feature} className="text-center">{feature}</p>)}
                       <p className="text-center text-foreground font-medium mt-2">
-                        Upgrade to Basic for 25-35 pages and 20 tools.
+                        Upgrade to {basicUpgradeName} for {basicUpgradeToolCount} tools and expanded plan features.
                       </p>
                     </>
                   )}
                   {tier === 'basic' && (
                     <>
                       <p className="text-center">25-35 page business plan</p>
-                      <p className="text-center">20 tools total</p>
-                      <p className="text-center">1 revision included</p>
+                      <p className="text-center">{currentToolCount} tools total</p>
+                      {currentPlanFeatures.slice(0, 3).map((feature) => <p key={feature} className="text-center">{feature}</p>)}
                     </>
                   )}
                   {tier === 'premium' && (
                     <>
                       <p className="text-center">40-60 page business plan</p>
-                      <p className="text-center">83 tools total</p>
-                      <p className="text-center">3 revisions included</p>
-                      <p className="text-center">Endorsing body selection guidance</p>
+                      <p className="text-center">{currentToolCount} tools total</p>
+                      {currentPlanFeatures.slice(0, 3).map((feature) => <p key={feature} className="text-center">{feature}</p>)}
                     </>
                   )}
                   {tier === 'enterprise' && (
                     <>
                       <p className="text-center">50-80 page business plan</p>
-                      <p className="text-center">All 109 tools</p>
-                      <p className="text-center">Unlimited revisions</p>
-                      <p className="text-center">IP & patent strategy included</p>
+                      <p className="text-center">{currentToolCount} tools total</p>
+                      {currentPlanFeatures.slice(0, 3).map((feature) => <p key={feature} className="text-center">{feature}</p>)}
                     </>
                   )}
                   {tier === 'ultimate' && (
                     <>
                       <p className="text-center">80+ page comprehensive business plan</p>
-                      <p className="text-center">All 109 tools + VIP support</p>
-                      <p className="text-center">RFE Defense Strategy included</p>
-                      <p className="text-center">Appeal Strategy & Success Coaching</p>
-                      <p className="text-center">Personal strategist access</p>
-                      <p className="text-center">Success guarantee</p>
+                      <p className="text-center">{currentToolCount} tools total</p>
+                      {currentPlanFeatures.slice(0, 4).map((feature) => <p key={feature} className="text-center">{feature}</p>)}
                     </>
                   )}
                 </div>

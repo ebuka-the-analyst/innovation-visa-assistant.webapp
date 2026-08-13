@@ -16,11 +16,13 @@ import { Search, Filter, Lock, CheckCircle, Loader2, Star, Clock, Heart, ArrowRi
 import * as Icons from "lucide-react";
 import Footer from "@/components/Footer";
 import { useTierAccess, type ToolTier } from "@/hooks/useTierAccess";
+import { useToolAccess } from "@/hooks/useCommercialCatalog";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, createBreadcrumbSchema } from "@/lib/seo-schemas";
 import { SoftUpgradeOverlay } from "@/components/SoftUpgradeOverlay";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 const FAVORITES_KEY = 'tools-favorites';
 const RECENT_KEY = 'tools-recently-used';
@@ -87,9 +89,20 @@ export default function ToolsHub() {
   const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
   const { toast } = useToast();
 
-  const { canAccessTool, userTier } = useTierAccess();
+  const { userTier } = useTierAccess();
+  const auth = useAuth();
+  const {
+    getToolAccess,
+    isLoading: isToolAccessLoading,
+    isError: isToolAccessError,
+  } = useToolAccess(auth.isAuthenticated);
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
   const { recent, addRecent } = useRecentlyUsed();
+
+  const getEffectiveTier = (tool: Tool): ToolTier | undefined =>
+    getToolAccess(tool.id)?.minimumPlanId;
+  const canAccessManagedTool = (tool: Tool): boolean =>
+    getToolAccess(tool.id)?.allowed === true;
 
   // Verify payment when returning from Stripe checkout
   useEffect(() => {
@@ -114,10 +127,11 @@ export default function ToolsHub() {
           // Invalidate user query to refresh tier access
           await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
           await queryClient.invalidateQueries({ queryKey: ['/api/onboarding/status'] });
+          await queryClient.invalidateQueries({ queryKey: ['/api/tools/access'] });
           
           toast({
             title: "Payment Successful!",
-            description: `Welcome! Your ${data.tier || 'upgraded'} tier subscription is now active.`,
+            description: `Welcome! Your ${data.tier || 'upgraded'} plan access is now active.`,
           });
           
           // Clean up URL parameters
@@ -141,7 +155,19 @@ export default function ToolsHub() {
   }, [toast]);
 
   const handleToolClick = (tool: Tool) => {
-    const hasAccess = canAccessTool(tool.tier as ToolTier);
+    if (!auth.isLoading && !auth.isAuthenticated) {
+      setLocation(`/login?redirect=${encodeURIComponent(`/tools/${tool.id}`)}`);
+      return;
+    }
+    if (isToolAccessLoading || isToolAccessError || !getToolAccess(tool.id)) {
+      toast({
+        title: "Access unavailable",
+        description: "Your current plan access could not be verified. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const hasAccess = canAccessManagedTool(tool);
     if (hasAccess) {
       addRecent(tool.id);
       setLocation(`/tools/${tool.id}`);
@@ -150,7 +176,7 @@ export default function ToolsHub() {
         id: tool.id,
         name: tool.name,
         description: tool.description,
-        tier: tool.tier as ToolTier,
+        tier: getEffectiveTier(tool)!,
       });
     }
   };
@@ -174,15 +200,15 @@ export default function ToolsHub() {
         tool.description.toLowerCase().includes(search.toLowerCase());
       const matchesCategory = !categoryFilter || tool.category === categoryFilter;
       const matchesStage = !stageFilter || tool.stage === stageFilter;
-      const matchesTier = !tierFilter || tool.tier === tierFilter;
+      const matchesTier = !tierFilter || getEffectiveTier(tool) === tierFilter;
 
       return matchesSearch && matchesCategory && matchesStage && matchesTier;
     });
-  }, [search, categoryFilter, stageFilter, tierFilter]);
+  }, [search, categoryFilter, stageFilter, tierFilter, getToolAccess]);
 
   const categories = Array.from(new Set(ALL_TOOLS.map((t) => t.category)));
   const stages = Array.from(new Set(ALL_TOOLS.map((t) => t.stage)));
-  const tiers = Array.from(new Set(ALL_TOOLS.map((t) => t.tier)));
+  const tiers: ToolTier[] = ["free", "basic", "premium", "enterprise", "ultimate"];
 
   const stageLabels = {
     before: "Before Applying",
@@ -228,7 +254,7 @@ export default function ToolsHub() {
     <>
       <SEOHead
         title="100+ UK Innovator Founder Visa Tools | Expert Application Assistant"
-        description="Access 100+ professional tools for your UK Innovator Founder Visa application. From compliance checkers to business plan generators, financial modeling to pitch coaching. Free to £60 tiers available."
+        description="Explore professional UK Innovator Founder Visa tools, from compliance checking and business planning to financial modelling and pitch coaching."
         canonical="https://innovatorfoundervisaassistant.co.uk/tools-hub"
         keywords="UK Innovator Founder Visa tools, business plan generator, compliance checker, financial projections, market analysis, visa application tools"
         schema={combinedSchema}
@@ -267,7 +293,7 @@ export default function ToolsHub() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
               {favoriteTools.slice(0, 6).map((tool) => {
-                const hasAccess = canAccessTool(tool.tier as ToolTier);
+                const hasAccess = canAccessManagedTool(tool);
                 return (
                   <Card
                     key={tool.id}
@@ -304,7 +330,7 @@ export default function ToolsHub() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
               {recentTools.map((tool) => {
-                const hasAccess = canAccessTool(tool.tier as ToolTier);
+                const hasAccess = canAccessManagedTool(tool);
                 return (
                   <Card
                     key={tool.id}
@@ -438,13 +464,14 @@ export default function ToolsHub() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {filteredTools.map((tool) => {
-                const hasAccess = canAccessTool(tool.tier as ToolTier);
+                const effectiveTier = getEffectiveTier(tool);
+                const hasAccess = canAccessManagedTool(tool);
                 return (
                   <Card
                     key={tool.id}
                     onClick={() => handleToolClick(tool)}
                     className={`p-6 hover-elevate cursor-pointer transition-all border-2 relative group ${
-                      tierColors[tool.tier as keyof typeof tierColors]
+                      effectiveTier ? tierColors[effectiveTier] : "bg-muted/30 border-border"
                     } ${!hasAccess ? 'opacity-80' : ''}`}
                     data-testid={`card-tool-${tool.id}`}
                   >
@@ -486,19 +513,19 @@ export default function ToolsHub() {
                         </div>
                         <div
                           className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                            tool.tier === "free"
+                            effectiveTier === "free"
                               ? "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                              : tool.tier === "basic"
+                              : effectiveTier === "basic"
                                 ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
-                                : tool.tier === "premium"
+                                : effectiveTier === "premium"
                                   ? "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300"
-                                  : tool.tier === "enterprise"
+                                  : effectiveTier === "enterprise"
                                     ? "bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300"
                                     : "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300"
                           }`}
                           data-testid={`badge-tier-${tool.id}`}
                         >
-                          {tierLabels[tool.tier as keyof typeof tierLabels]}
+                          {effectiveTier ? tierLabels[effectiveTier] : "Sign in to check"}
                         </div>
                       </div>
                     </div>
@@ -517,7 +544,9 @@ export default function ToolsHub() {
           </Card>
           <Card className="p-4 text-center">
             <div className="text-xl font-bold text-gray-600">
-              {ALL_TOOLS.filter((t) => t.tier === "free").length}
+              {auth.isAuthenticated && !isToolAccessLoading && !isToolAccessError
+                ? ALL_TOOLS.filter((tool) => getEffectiveTier(tool) === "free").length
+                : "—"}
             </div>
             <p className="text-xs text-muted-foreground mt-1">Free Tools</p>
           </Card>

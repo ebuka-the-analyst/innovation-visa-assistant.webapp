@@ -2,6 +2,8 @@ import { db } from "../db";
 import { notificationPreferences, scheduledNotifications, users } from "@shared/schema";
 import { eq, and, lte, sql } from "drizzle-orm";
 import { sendEmail } from "../email";
+import { getToolCounts } from "@shared/commercialCatalog";
+import { getCommercialCatalog } from "./commercialCatalogService";
 
 export interface NotificationData {
   userId: string;
@@ -223,21 +225,20 @@ export async function generateWeeklyDigestContent(userId: string): Promise<strin
   
   const firstName = user.firstName || 'there';
   const tier = user.subscriptionTier || 'free';
-  
-  const tierLabels: Record<string, string> = {
-    'free': 'Free',
-    'basic': 'Basic',
-    'premium': 'Premium',
-    'enterprise': 'Enterprise',
-    'ultimate': 'Ultimate'
-  };
+  const { catalog: commercialCatalog } = await getCommercialCatalog();
+  const toolCounts = getToolCounts(commercialCatalog);
+  const currentPlan = commercialCatalog.plans.find((plan) => plan.id === tier)
+    ?? commercialCatalog.plans.find((plan) => plan.id === "free");
+  const currentToolCount = currentPlan ? toolCounts[currentPlan.id] : 0;
+  const maximumToolCount = Math.max(...Object.values(toolCounts));
+  const currentPlanName = currentPlan?.displayName || "Current Plan";
 
   const progressTips = [
-    "Have you completed your Innovation Score assessment? It's crucial for understanding your visa readiness.",
-    "Consider using the Business Plan Generator to structure your application narrative.",
-    "The Pitch Practice Coach can help you prepare for endorser interviews.",
-    "Financial projections are key - use our Financial Modelling tools to demonstrate viability.",
-    "Don't forget to review compliance requirements with our Compliance Checker."
+    "Review the Tools Hub to choose an included tool for your current application stage.",
+    "Keep your dashboard progress up to date so your next steps remain easy to identify.",
+    "Use the planning and preparation features included in your current plan consistently.",
+    "Review your evidence regularly and address the highest-priority gaps first.",
+    "Check your plan access before starting a new tool or preparation task."
   ];
   
   const randomTip = progressTips[Math.floor(Math.random() * progressTips.length)];
@@ -249,9 +250,11 @@ export async function generateWeeklyDigestContent(userId: string): Promise<strin
     </div>
 
     <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-      <h3 style="color: white; margin: 0 0 10px 0;">Your Current Tier: ${tierLabels[tier]}</h3>
+      <h3 style="color: white; margin: 0 0 10px 0;">Your Current Plan: ${currentPlanName}</h3>
       <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 14px;">
-        ${tier === 'free' ? 'Upgrade to unlock 100+ professional tools!' : 'You have access to premium visa preparation tools.'}
+        ${tier === 'free'
+          ? `Upgrade to unlock up to ${maximumToolCount} professional tools!`
+          : `Your ${currentPlanName} includes ${currentToolCount} runnable tools.`}
       </p>
     </div>
 
@@ -263,10 +266,10 @@ export async function generateWeeklyDigestContent(userId: string): Promise<strin
     <div style="background: #fff; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
       <h3 style="color: #333; margin: 0 0 15px 0;">📋 Recommended Next Steps</h3>
       <ul style="color: #666; margin: 0; padding-left: 20px;">
-        <li style="margin-bottom: 8px;">Complete your Innovation Score Assessment</li>
-        <li style="margin-bottom: 8px;">Review the 3 Endorsement Criteria</li>
-        <li style="margin-bottom: 8px;">Practice with the AI Interview Coach</li>
-        <li style="margin-bottom: 8px;">Generate your personalized Business Plan</li>
+        <li style="margin-bottom: 8px;">Review your dashboard and current application progress</li>
+        <li style="margin-bottom: 8px;">Open the Tools Hub to see the tools included in your plan</li>
+        <li style="margin-bottom: 8px;">Choose the next included tool for your current application stage</li>
+        <li style="margin-bottom: 8px;">Review your evidence and outstanding preparation tasks</li>
       </ul>
     </div>
 

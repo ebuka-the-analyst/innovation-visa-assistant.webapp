@@ -7,7 +7,7 @@ export const organizationSchema = {
   "alternateName": "IFVA",
   "url": BASE_URL,
   "logo": `${BASE_URL}/og-image.webp`,
-  "description": "The UK's leading AI-powered platform for Innovator Founder Visa applications. Expert guidance, business plan generation, and 109+ professional tools.",
+  "description": "AI-powered platform for Innovator Founder Visa applications, with expert guidance, business plan generation, and professional tools.",
   "foundingDate": "2024",
   "address": {
     "@type": "PostalAddress",
@@ -31,13 +31,6 @@ export const webApplicationSchema = {
   "url": BASE_URL,
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Web Browser",
-  "offers": {
-    "@type": "AggregateOffer",
-    "priceCurrency": "GBP",
-    "lowPrice": "0",
-    "highPrice": "110",
-    "offerCount": "5"
-  },
   "aggregateRating": {
     "@type": "AggregateRating",
     "ratingValue": "4.9",
@@ -51,7 +44,7 @@ export const webApplicationSchema = {
     "Eligibility Assessment",
     "Document Management",
     "Endorsing Body Comparison",
-    "109+ Professional Tools"
+    "Professional Visa Tools"
   ]
 };
 
@@ -67,13 +60,7 @@ export const serviceSchema = {
     "@type": "Country",
     "name": "United Kingdom"
   },
-  "description": "Comprehensive AI-powered assistance for UK Innovator Founder Visa applications including business plan generation, document preparation, and endorsing body guidance.",
-  "offers": {
-    "@type": "Offer",
-    "priceCurrency": "GBP",
-    "price": "29",
-    "priceValidUntil": "2026-12-31"
-  }
+  "description": "Comprehensive AI-powered assistance for UK Innovator Founder Visa applications including business plan generation, document preparation, and endorsing body guidance."
 };
 
 export function createFAQSchema(faqs: Array<{ question: string; answer: string }>) {
@@ -160,7 +147,7 @@ export function createBreadcrumbSchema(items: Array<{ name: string; url: string 
 export function createProductSchema(
   name: string,
   description: string,
-  price: string,
+  price?: string,
   priceCurrency: string = "GBP"
 ) {
   return {
@@ -168,12 +155,14 @@ export function createProductSchema(
     "@type": "Product",
     "name": name,
     "description": description,
-    "offers": {
-      "@type": "Offer",
-      "priceCurrency": priceCurrency,
-      "price": price,
-      "availability": "https://schema.org/InStock"
-    },
+    ...(price ? {
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": priceCurrency,
+        "price": price,
+        "availability": "https://schema.org/InStock"
+      }
+    } : {}),
     "brand": {
       "@type": "Organization",
       "name": "UK Innovator Founder Visa Assistant"
@@ -188,7 +177,6 @@ export function createLocalBusinessSchema() {
     "name": "UK Innovator Founder Visa Assistant",
     "description": "AI-powered UK Innovator Founder Visa application assistance platform",
     "url": BASE_URL,
-    "priceRange": "£9-£49",
     "address": {
       "@type": "PostalAddress",
       "addressCountry": "GB"

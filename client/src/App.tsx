@@ -18,6 +18,7 @@ import logoDarkImg from "@assets/logo_dark.webp";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { initActivityTracking, trackRouteChange } from "@/lib/activityTracker";
 import { useInitGA, useAnalytics, useUserIdentification, useScrollTracking } from "@/hooks/use-analytics";
+import { ToolEntitlementGuard } from "@/components/ToolEntitlementGuard";
 
 // Lazy load ChatBot, FloatingFeedback and other heavy components
 const ChatBot = lazy(() => import("@/components/ChatBot"));
@@ -184,6 +185,39 @@ function AnimatedSidebarTrigger() {
   );
 }
 
+function entitlementRoute(toolId: string, Component: React.ComponentType) {
+  return function EntitlementRoute() {
+    return (
+      <ToolEntitlementGuard toolId={toolId}>
+        <Component />
+      </ToolEntitlementGuard>
+    );
+  };
+}
+
+const EntitledEndorserComparison = entitlementRoute("endorser-comparison", EndorserComparison);
+const EntitledDocumentOrganizer = entitlementRoute("doc-organizer", DocumentOrganizer);
+const EntitledRejectionAnalysis = entitlementRoute("rejection-analysis", RejectionAnalysis);
+const EntitledSettlementPlanning = entitlementRoute("settlement-planning", SettlementPlanning);
+const EntitledKPIDashboard = entitlementRoute("kpi-dashboard", KPIDashboard);
+const EntitledRFEDefenceLab = entitlementRoute("rfe-defense", RFEDefenceLab);
+const EntitledOracleSupervisor = entitlementRoute("oracle-supervisor", OracleSupervisor);
+const EntitledFounderAutopilot = entitlementRoute("founder-autopilot", FounderAutopilot);
+const EntitledNeuralTwin = entitlementRoute("neural-twin", NeuralTwin);
+const EntitledVoiceBuilder = entitlementRoute("voice-builder", VoiceBuilder);
+const EntitledRegulatoryCopilot = entitlementRoute("regulatory-copilot", RegulatoryCopilot);
+const EntitledEconomicImpact = entitlementRoute("economic-impact", EconomicImpact);
+const EntitledKnowledgeGraph = entitlementRoute("knowledge-graph", KnowledgeGraph);
+const EntitledInterviewPrep = entitlementRoute("interview-prep", InterviewPrep);
+const EntitledTractionEvidence = entitlementRoute("traction-evidence", TractionEvidence);
+const EntitledFounderPortfolio = entitlementRoute("founder-portfolio", FounderPortfolio);
+const EntitledEndorserCoverLetter = entitlementRoute("endorser-cover-letter", EndorserCoverLetter);
+const EntitledCommercialValidation = entitlementRoute("commercial-validation", CommercialValidation);
+const EntitledOISCCompliance = entitlementRoute("oisc-compliance", OISCCompliance);
+const EntitledMarketDataVerifier = entitlementRoute("market-data-verifier", MarketDataVerifier);
+const EntitledMVPDemoGuide = entitlementRoute("mvp-demo-guide", MVPDemoGuide);
+const EntitledFinancialResilience = entitlementRoute("financial-resilience", FinancialResilience);
+
 const navTabs = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Tools", href: "/tools-hub", icon: Wrench },
@@ -235,15 +269,15 @@ function Router() {
       <Route path="/theme-selection" component={ThemeSelection} />
       <Route path="/adaptive-intake" component={AdaptiveIntake} />
       <Route path="/generation" component={Generation} />
-      <Route path="/endorser-comparison" component={EndorserComparison} />
-      <Route path="/document-organizer" component={DocumentOrganizer} />
+      <Route path="/endorser-comparison" component={EntitledEndorserComparison} />
+      <Route path="/document-organizer" component={EntitledDocumentOrganizer} />
       <Route path="/expert-booking" component={ExpertBooking} />
-      <Route path="/rejection-analysis" component={RejectionAnalysis} />
-      <Route path="/settlement-planning" component={SettlementPlanning} />
+      <Route path="/rejection-analysis" component={EntitledRejectionAnalysis} />
+      <Route path="/settlement-planning" component={EntitledSettlementPlanning} />
       <Route path="/features-dashboard" component={FeaturesDashboard} />
-      <Route path="/kpi-dashboard" component={KPIDashboard} />
+      <Route path="/kpi-dashboard" component={EntitledKPIDashboard} />
       <Route path="/evidence-graph" component={EvidenceGraph} />
-      <Route path="/rfe-defence-lab" component={RFEDefenceLab} />
+      <Route path="/rfe-defence-lab" component={EntitledRFEDefenceLab} />
       <Route path="/diagnostics" component={Diagnostics} />
       <Route path="/settings" component={Settings} />
       <Route path="/data-manager" component={DataModal} />
@@ -260,13 +294,13 @@ function Router() {
       <Route path="/partner-dashboard" component={PartnerDashboard} />
       
       {/* OMNI Routes */}
-      <Route path="/oracle-supervisor" component={OracleSupervisor} />
-      <Route path="/founder-autopilot" component={FounderAutopilot} />
-      <Route path="/neural-twin" component={NeuralTwin} />
-      <Route path="/voice-builder" component={VoiceBuilder} />
-      <Route path="/regulatory-copilot" component={RegulatoryCopilot} />
-      <Route path="/economic-impact" component={EconomicImpact} />
-      <Route path="/knowledge-graph" component={KnowledgeGraph} />
+      <Route path="/oracle-supervisor" component={EntitledOracleSupervisor} />
+      <Route path="/founder-autopilot" component={EntitledFounderAutopilot} />
+      <Route path="/neural-twin" component={EntitledNeuralTwin} />
+      <Route path="/voice-builder" component={EntitledVoiceBuilder} />
+      <Route path="/regulatory-copilot" component={EntitledRegulatoryCopilot} />
+      <Route path="/economic-impact" component={EntitledEconomicImpact} />
+      <Route path="/knowledge-graph" component={EntitledKnowledgeGraph} />
       <Route path="/referral-dashboard" component={ReferralDashboard} />
       <Route path="/premium-features" component={PremiumFeatures} />
       <Route path="/achievements" component={Achievements} />
@@ -275,15 +309,15 @@ function Router() {
       <Route path="/success-stories" component={SuccessStories} />
       <Route path="/calendar" component={CalendarSync} />
       <Route path="/news" component={News} />
-      <Route path="/interview-prep" component={InterviewPrep} />
-      <Route path="/traction-evidence" component={TractionEvidence} />
-      <Route path="/founder-portfolio" component={FounderPortfolio} />
-      <Route path="/endorser-cover-letter" component={EndorserCoverLetter} />
-      <Route path="/commercial-validation" component={CommercialValidation} />
-      <Route path="/oisc-compliance" component={OISCCompliance} />
-      <Route path="/market-data-verifier" component={MarketDataVerifier} />
-      <Route path="/mvp-demo-guide" component={MVPDemoGuide} />
-      <Route path="/financial-resilience" component={FinancialResilience} />
+      <Route path="/interview-prep" component={EntitledInterviewPrep} />
+      <Route path="/traction-evidence" component={EntitledTractionEvidence} />
+      <Route path="/founder-portfolio" component={EntitledFounderPortfolio} />
+      <Route path="/endorser-cover-letter" component={EntitledEndorserCoverLetter} />
+      <Route path="/commercial-validation" component={EntitledCommercialValidation} />
+      <Route path="/oisc-compliance" component={EntitledOISCCompliance} />
+      <Route path="/market-data-verifier" component={EntitledMarketDataVerifier} />
+      <Route path="/mvp-demo-guide" component={EntitledMVPDemoGuide} />
+      <Route path="/financial-resilience" component={EntitledFinancialResilience} />
       <Route path="/visa-prefill" component={VisaPrefillDashboard} />
       <Route path="/ai-transparency" component={AITransparency} />
       <Route path="/testing-validation" component={TestingValidation} />

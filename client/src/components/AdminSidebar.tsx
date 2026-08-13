@@ -225,6 +225,7 @@ const menuGroups = [
   {
     label: "Content Management",
     items: [
+      { id: "content-pricing", label: "Pricing & Plan Access", icon: DollarSign, badge: null },
       { id: "content-blog", label: "Blog Dashboard", icon: FileText, badge: null },
       { id: "content-seo", label: "SEO Analytics", icon: TrendingUp, badge: null },
       { id: "content-social", label: "Social Post Generator", icon: Send, badge: "AI" },
@@ -287,6 +288,13 @@ const menuGroups = [
 
 export function AdminSidebar({ activeSection, onSectionChange, stats, hideDemoUsers, onHideDemoUsersChange }: AdminSidebarProps) {
   const [expandedGroups, setExpandedGroups] = useState<string[]>(["Dashboard", "User Intelligence", "Plan Lifecycle"]);
+
+  useEffect(() => {
+    const activeGroup = menuGroups.find((group) => group.items.some((item) => item.id === activeSection));
+    if (activeGroup) {
+      setExpandedGroups((current) => current.includes(activeGroup.label) ? current : [...current, activeGroup.label]);
+    }
+  }, [activeSection]);
 
   const toggleGroup = (label: string) => {
     setExpandedGroups(prev => 
