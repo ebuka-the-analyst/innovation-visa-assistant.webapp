@@ -90,6 +90,7 @@ import {
   UNAVAILABLE_LISTED_TOOL_IDS,
   UNLISTED_RUNNABLE_TOOL_IDS,
   commercialCatalogSchema,
+  getCoinPackById,
   getMinimumPlanForTool,
   getPlanById,
   getToolCounts,
@@ -2704,15 +2705,6 @@ Respond ONLY with valid JSON in this exact format:
   // ALL TIERS HAVE FINITE CREDIT LIMITS
   // SINGLE SOURCE OF TRUTH: Use getTierCredits() from shared/schema.ts everywhere
 
-  // 2026 COIN PRICING - Effective January 2026
-  const ADDON_PRICES = {
-    single_coin: { amount: 500, credits: 1, name: "1 Coin" },
-    double_coins: { amount: 900, credits: 2, name: "2 Coins" },
-    triple_coins: { amount: 1200, credits: 3, name: "3 Coins" },
-    five_coins: { amount: 1900, credits: 5, name: "5 Coins" },
-    ten_coins: { amount: 3500, credits: 10, name: "10 Coins" },
-  };
-
   app.get("/api/credits/balance", isAuthenticated, async (req, res) => {
     try {
       const sessionUser = req.user as any;
@@ -2840,11 +2832,24 @@ Respond ONLY with valid JSON in this exact format:
 
   app.post("/api/credits/purchase-addon", isAuthenticated, async (req, res) => {
     try {
-      const { addonType } = req.body;
+      const { addonType, expectedRevision } = req.body;
       const user = req.user as any;
 
-      const addon = ADDON_PRICES[addonType as keyof typeof ADDON_PRICES];
-      if (!addon) {
+      if (typeof addonType !== "string") {
+        return res.status(400).json({ error: "Invalid addon type" });
+      }
+      const { catalog } = await getCommercialCatalog();
+      if (
+        expectedRevision !== undefined &&
+        (!Number.isInteger(expectedRevision) || expectedRevision !== catalog.revision)
+      ) {
+        return res.status(409).json({
+          error: "Pricing changed after this page loaded. Refresh and review the latest coin-pack price before checkout.",
+          currentRevision: catalog.revision,
+        });
+      }
+      const addon = getCoinPackById(catalog, addonType);
+      if (!addon || addon.publicationStatus !== "published") {
         return res.status(400).json({ error: "Invalid addon type" });
       }
 
@@ -2879,13 +2884,11 @@ Respond ONLY with valid JSON in this exact format:
             price_data: {
               currency: "gbp",
               product_data: {
-                name: `UK Innovator Founder Visa - ${addon.name}`,
+                name: `UK Innovator Founder Visa - ${addon.displayName}`,
                 description:
-                  addonType === "ultimate_assurance"
-                    ? "Unlimited business plan generations for 1 year"
-                    : `${addon.credits} additional business plan credit${addon.credits > 1 ? "s" : ""}`,
+                  `${addon.credits} additional business plan credit${addon.credits > 1 ? "s" : ""}`,
               },
-              unit_amount: addon.amount,
+              unit_amount: addon.pricePence,
             },
             quantity: 1,
           },
@@ -2897,6 +2900,10 @@ Respond ONLY with valid JSON in this exact format:
           addonType,
           creditsToAdd: addon.credits.toString(),
           userId: user.id,
+          catalogRevision: catalog.revision.toString(),
+          listAmountPence: addon.pricePence.toString(),
+          currency: addon.currency,
+          billingPeriod: addon.billingPeriod,
         },
       });
 

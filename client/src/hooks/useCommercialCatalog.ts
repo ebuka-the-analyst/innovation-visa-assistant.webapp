@@ -9,12 +9,16 @@ import {
 } from "@shared/commercialCatalog";
 
 export type PublicPlan = PublicCommercialCatalog["plans"][number];
+export type PublicCoinPack = PublicCommercialCatalog["coinPacks"][number];
 
 const FALLBACK_PUBLIC_CATALOG: PublicCommercialCatalog = {
   revision: FALLBACK_COMMERCIAL_CATALOG.revision,
   source: "fallback",
   plans: FALLBACK_COMMERCIAL_CATALOG.plans
     .filter((plan) => plan.publicationStatus === "published")
+    .sort((a, b) => a.displayOrder - b.displayOrder),
+  coinPacks: FALLBACK_COMMERCIAL_CATALOG.coinPacks
+    .filter((pack) => pack.publicationStatus === "published")
     .sort((a, b) => a.displayOrder - b.displayOrder),
   toolCounts: getToolCounts(FALLBACK_COMMERCIAL_CATALOG),
 };
@@ -26,6 +30,8 @@ function isPublicCatalog(value: unknown): value is PublicCommercialCatalog {
   return Number.isInteger(candidate.revision)
     && Array.isArray(candidate.plans)
     && candidate.plans.length > 0
+    && Array.isArray(candidate.coinPacks)
+    && candidate.coinPacks.length > 0
     && candidate.plans.some((plan) => typeof plan?.pricePence === "number" && plan.pricePence > 0)
     && !!toolCounts
     && PLAN_IDS.every((planId) => Number.isInteger(toolCounts[planId]));
@@ -80,6 +86,7 @@ export function useCommercialCatalog() {
     revision: catalog.revision,
     source: catalog.source,
     plans: catalog.plans,
+    coinPacks: catalog.coinPacks,
     toolCounts: catalog.toolCounts,
     getPlanById: (planId: PlanId | string) => getPublishedPlanById(catalog, planId),
     getUpgradePlan: (minimumPlanId: PlanId) => getPublishedUpgradePlan(catalog, minimumPlanId),

@@ -5,6 +5,8 @@ export const COMMERCIAL_CATALOG_SETTING_KEY = "commercial.plan-catalog.v1";
 
 export const PLAN_IDS = ["free", "basic", "premium", "enterprise", "ultimate"] as const;
 export type PlanId = (typeof PLAN_IDS)[number];
+export const COIN_PACK_IDS = ["single_coin", "double_coins", "triple_coins", "five_coins", "ten_coins"] as const;
+export type CoinPackId = (typeof COIN_PACK_IDS)[number];
 export const PLAN_RANK: Record<PlanId, number> = {
   free: 0,
   basic: 1,
@@ -297,9 +299,99 @@ export type CommercialPlan = z.infer<typeof commercialPlanSchema>;
 
 const minimumPlanByToolSchema = z.record(z.string(), z.enum(PLAN_IDS));
 
+export const commercialCoinPackSchema = z.object({
+  id: z.enum(COIN_PACK_IDS),
+  displayName: plainText(60),
+  pricePence: z.number().int().min(100).max(1_000_000),
+  currency: z.literal("GBP"),
+  billingPeriod: z.literal("one_time"),
+  credits: z.number().int().min(1).max(100),
+  description: plainText(180),
+  badgeLabel: plainText(40).nullable(),
+  ctaLabel: commercialCopy(40),
+  publicationStatus: z.enum(["draft", "published", "archived"]),
+  displayOrder: z.number().int().min(0).max(COIN_PACK_IDS.length - 1),
+}).strict();
+
+export type CommercialCoinPack = z.infer<typeof commercialCoinPackSchema>;
+
+export const FALLBACK_COIN_PACKS: CommercialCoinPack[] = [
+  {
+    id: "single_coin",
+    displayName: "1 Coin",
+    pricePence: 4900,
+    currency: "GBP",
+    billingPeriod: "one_time",
+    credits: 1,
+    description: "1 extra business plan",
+    badgeLabel: null,
+    ctaLabel: "Buy",
+    publicationStatus: "published",
+    displayOrder: 0,
+  },
+  {
+    id: "double_coins",
+    displayName: "2 Coins",
+    pricePence: 8900,
+    currency: "GBP",
+    billingPeriod: "one_time",
+    credits: 2,
+    description: "2 extra business plans",
+    badgeLabel: "Save £9",
+    ctaLabel: "Buy",
+    publicationStatus: "published",
+    displayOrder: 1,
+  },
+  {
+    id: "triple_coins",
+    displayName: "3 Coins",
+    pricePence: 12900,
+    currency: "GBP",
+    billingPeriod: "one_time",
+    credits: 3,
+    description: "Perfect for iterations",
+    badgeLabel: "Save £18",
+    ctaLabel: "Buy",
+    publicationStatus: "published",
+    displayOrder: 2,
+  },
+  {
+    id: "five_coins",
+    displayName: "5 Coins",
+    pricePence: 19900,
+    currency: "GBP",
+    billingPeriod: "one_time",
+    credits: 5,
+    description: "Multiple ventures",
+    badgeLabel: "Save £46",
+    ctaLabel: "Buy",
+    publicationStatus: "published",
+    displayOrder: 3,
+  },
+  {
+    id: "ten_coins",
+    displayName: "10 Coins",
+    pricePence: 34900,
+    currency: "GBP",
+    billingPeriod: "one_time",
+    credits: 10,
+    description: "Heavy usage pack",
+    badgeLabel: "Best Value",
+    ctaLabel: "Buy",
+    publicationStatus: "published",
+    displayOrder: 4,
+  },
+];
+
+function mergeCoinPacks(value: unknown): CommercialCoinPack[] {
+  if (value === undefined) return JSON.parse(JSON.stringify(FALLBACK_COIN_PACKS));
+  return value as CommercialCoinPack[];
+}
+
 export const commercialCatalogSchema = z.object({
   revision: z.number().int().nonnegative(),
   plans: z.array(commercialPlanSchema).length(PLAN_IDS.length),
+  coinPacks: z.preprocess(mergeCoinPacks, z.array(commercialCoinPackSchema).length(COIN_PACK_IDS.length)),
   minimumPlanByTool: minimumPlanByToolSchema,
   updatedAt: z.string().datetime().nullable().optional(),
   updatedBy: z.string().trim().min(1).max(320).nullable().optional(),
@@ -326,6 +418,24 @@ export const commercialCatalogSchema = z.object({
   }
   if (!catalog.plans.some((plan) => plan.id !== "free" && plan.publicationStatus === "published")) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["plans"], message: "At least one paid plan must be published" });
+  }
+
+  const coinPackIds = catalog.coinPacks.map((pack) => pack.id);
+  for (const packId of COIN_PACK_IDS) {
+    if (coinPackIds.filter((id) => id === packId).length !== 1) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["coinPacks"], message: `Coin pack ${packId} must appear exactly once` });
+    }
+  }
+  const coinPackOrders = catalog.coinPacks.map((pack) => pack.displayOrder);
+  if (new Set(coinPackOrders).size !== coinPackOrders.length) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["coinPacks"], message: "Coin pack display order values must be unique" });
+  }
+  const coinPackNames = catalog.coinPacks.map((pack) => pack.displayName.trim().toLocaleLowerCase("en-GB"));
+  if (new Set(coinPackNames).size !== coinPackNames.length) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["coinPacks"], message: "Coin pack display names must be unique" });
+  }
+  if (!catalog.coinPacks.some((pack) => pack.publicationStatus === "published")) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["coinPacks"], message: "At least one coin pack must be published" });
   }
 
   const expectedIds = new Set<string>(RUNNABLE_TOOL_IDS);
@@ -567,6 +677,7 @@ export const FALLBACK_COMMERCIAL_CATALOG: CommercialCatalog = {
       displayOrder: 4,
     },
   ],
+  coinPacks: FALLBACK_COIN_PACKS,
   minimumPlanByTool: fallbackMinimumPlanByTool,
   updatedAt: null,
   updatedBy: null,
@@ -576,11 +687,16 @@ export interface PublicCommercialCatalog {
   revision: number;
   source: "database" | "fallback";
   plans: CommercialPlan[];
+  coinPacks: CommercialCoinPack[];
   toolCounts: Record<PlanId, number>;
 }
 
 export function getPlanById(catalog: CommercialCatalog, planId: string): CommercialPlan | undefined {
   return catalog.plans.find((plan) => plan.id === planId);
+}
+
+export function getCoinPackById(catalog: CommercialCatalog, coinPackId: string): CommercialCoinPack | undefined {
+  return catalog.coinPacks.find((pack) => pack.id === coinPackId);
 }
 
 export function getMinimumPlanForTool(catalog: CommercialCatalog, toolId: string): PlanId | undefined {
@@ -614,6 +730,9 @@ export function toPublicCommercialCatalog(
     source,
     plans: catalog.plans
       .filter((plan) => plan.publicationStatus === "published")
+      .sort((a, b) => a.displayOrder - b.displayOrder),
+    coinPacks: catalog.coinPacks
+      .filter((pack) => pack.publicationStatus === "published")
       .sort((a, b) => a.displayOrder - b.displayOrder),
     toolCounts: getToolCounts(catalog),
   };
