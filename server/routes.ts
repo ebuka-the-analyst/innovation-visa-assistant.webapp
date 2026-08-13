@@ -103,6 +103,12 @@ import {
   saveCommercialCatalog,
 } from "./services/commercialCatalogService";
 import { requireToolAccess } from "./middleware/requireToolAccess";
+import { BUSINESS_PLAN_MODEL } from "./aiModelConfig";
+import {
+  assessBusinessPlanQuality,
+  formatQualityReportMarkdown,
+  sanitizeBusinessPlanClaims,
+} from "./businessPlanQuality";
 
 const uploadsDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) {
@@ -151,7 +157,7 @@ const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
 
 async function callAI(prompt: string): Promise<string> {
   const response = await openaiClient.chat.completions.create({
-    model: "gpt-4o",
+    model: BUSINESS_PLAN_MODEL as any,
     messages: [{ role: "user", content: prompt }],
     max_tokens: 4000,
     temperature: 0.7,
@@ -3346,7 +3352,7 @@ Write the complete narrative for: ${section.title}
 Remember: Write FULL prose content for this section. No outlines or placeholders. Use ALL relevant data above.`;
 
       try {
-        // Use Qwen for business plan generation
+        // Use the configured business-plan model for generation.
         const fullPrompt = `${sectionSystemPrompt}\n\n${sectionUserPrompt}`;
         let sectionContent = await callAI(fullPrompt);
 
@@ -3428,7 +3434,7 @@ Remember: Write FULL prose content for this section. No outlines or placeholders
       .join("\n");
 
     // Stitch all sections together with Table of Contents
-    const generatedContent = `# BUSINESS PLAN: ${plan.businessName}
+    let generatedContent = `# BUSINESS PLAN: ${plan.businessName}
 **Industry:** ${plan.industry}
 **Tier:** ${plan.tier?.toUpperCase()}
 **Generated:** ${new Date().toLocaleDateString("en-GB")}
@@ -3449,6 +3455,14 @@ ${generatedSections.join("\n\n---\n\n")}`;
     const { generateChartData } = await import("./chartGenerator");
     const chartDataObj = generateChartData(plan);
     const chartData = JSON.stringify(chartDataObj);
+
+    await storage.updateBusinessPlan(planId, {
+      currentGenerationStage: "Reviewing plan against endorser-readiness benchmark...",
+    });
+
+    generatedContent = sanitizeBusinessPlanClaims(generatedContent);
+    const qualityReport = assessBusinessPlanQuality(plan, generatedContent, chartDataObj);
+    generatedContent = `${generatedContent}\n\n---\n\n${formatQualityReportMarkdown(qualityReport)}`;
 
     await storage.updateBusinessPlan(planId, {
       status: "completed",

@@ -922,6 +922,19 @@ export function generatePDFContent(plan: BusinessPlan): string {
       margin: 20px auto;
       page-break-inside: avoid;
     }
+    h2[id*="endorser-readiness-benchmark"] {
+      page-break-before: always;
+    }
+    h3 {
+      color: ${secondaryColor};
+      font-size: 14pt;
+      margin-top: 24px;
+      margin-bottom: 10px;
+    }
+    .table-wrapper table td:last-child,
+    .table-wrapper table th:last-child {
+      text-align: right;
+    }
     /* ── Per-plan visual style override (style ${effectiveStyle}) ── */
     ${getBodyStyleCSS(effectiveStyle, primaryColor, secondaryColor)}
   </style>

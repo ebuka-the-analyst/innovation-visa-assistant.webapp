@@ -1,6 +1,8 @@
 import type { BusinessPlan } from "@shared/schema";
 
 export interface ChartDataPayload {
+  qualityWarnings?: string[];
+  dataSourceNotes?: string[];
   financialProjections: {
     year: string;
     revenue: number;
@@ -146,14 +148,33 @@ export interface ChartDataPayload {
 }
 
 export function generateChartData(plan: BusinessPlan): ChartDataPayload {
+  const qualityWarnings: string[] = [];
+  const dataSourceNotes: string[] = [];
   const funding = plan.funding || 50000;
   const jobCreation = plan.jobCreation || 10;
   const cac = plan.customerAcquisitionCost || 500;
   const ltv = plan.lifetimeValue || 2000;
-  
-  const year1Revenue = Math.round(funding * 1.5);
-  const year2Revenue = Math.round(year1Revenue * 2.2);
-  const year3Revenue = Math.round(year2Revenue * 1.8);
+
+  if (!plan.funding) {
+    qualityWarnings.push("Funding allocation chart uses a default funding assumption because no funding amount was provided.");
+  }
+  if (!plan.customerAcquisitionCost || !plan.lifetimeValue) {
+    qualityWarnings.push("Unit economics chart uses fallback CAC/LTV values because complete unit-economics inputs were not provided.");
+  }
+
+  const parsedRevenues = parseThreeYearRevenue(plan.revenue || plan.monthlyProjections || "");
+  let year1Revenue = parsedRevenues?.[0] || 0;
+  let year2Revenue = parsedRevenues?.[1] || 0;
+  let year3Revenue = parsedRevenues?.[2] || 0;
+
+  if (parsedRevenues) {
+    dataSourceNotes.push("Financial projection chart is based on revenue figures found in the applicant's revenue/projection text.");
+  } else {
+    year1Revenue = Math.round(funding * 1.5);
+    year2Revenue = Math.round(year1Revenue * 2.2);
+    year3Revenue = Math.round(year2Revenue * 1.8);
+    qualityWarnings.push("Financial projection chart uses formula-based estimates because explicit Year 1-3 revenue figures were not detected.");
+  }
   
   const financialProjections = [
     { year: "Year 1", revenue: year1Revenue, costs: Math.round(year1Revenue * 0.8), profit: Math.round(year1Revenue * 0.2) },
@@ -168,6 +189,9 @@ export function generateChartData(plan: BusinessPlan): ChartDataPayload {
     const unit = tamMatch[2].toLowerCase();
     if (unit.includes('b')) tamValue = num * 1000000000;
     else if (unit.includes('m')) tamValue = num * 1000000;
+    dataSourceNotes.push("Market-size chart is based on the TAM figure found in the applicant's market-size text.");
+  } else {
+    qualityWarnings.push("Market-size chart uses fallback TAM/SAM/SOM values because a clear market-size figure was not detected.");
   }
   
   const marketSize = [
@@ -240,11 +264,7 @@ export function generateChartData(plan: BusinessPlan): ChartDataPayload {
     { category: "Contingency", amount: Math.round(funding * 0.05), percentage: 5 },
   ];
 
-  const revenueStreams = [
-    { stream: "Subscriptions", year1: Math.round(year1Revenue * 0.6), year2: Math.round(year2Revenue * 0.55), year3: Math.round(year3Revenue * 0.5) },
-    { stream: "Transaction Fees", year1: Math.round(year1Revenue * 0.25), year2: Math.round(year2Revenue * 0.3), year3: Math.round(year3Revenue * 0.35) },
-    { stream: "Enterprise", year1: Math.round(year1Revenue * 0.15), year2: Math.round(year2Revenue * 0.15), year3: Math.round(year3Revenue * 0.15) },
-  ];
+  const revenueStreams = buildRevenueStreams(plan, year1Revenue, year2Revenue, year3Revenue, qualityWarnings);
 
   const unitEconomics = [
     { metric: "CAC", value: cac, benchmark: cac * 1.3 },
@@ -377,6 +397,8 @@ export function generateChartData(plan: BusinessPlan): ChartDataPayload {
   ];
 
   return {
+    qualityWarnings: Array.from(new Set(qualityWarnings)),
+    dataSourceNotes: Array.from(new Set(dataSourceNotes)),
     financialProjections,
     marketSize,
     timeline,
@@ -404,6 +426,78 @@ export function generateChartData(plan: BusinessPlan): ChartDataPayload {
     researchGrid,
     businessJourney,
   };
+}
+
+function parseThreeYearRevenue(text: string): [number, number, number] | null {
+  const matches: RegExpExecArray[] = [];
+  const revenuePattern = /(?:year|yr|y)\s*([123])[^£\d]{0,20}£?\s*([\d,.]+)\s*(k|m|million|thousand)?/gi;
+  let match: RegExpExecArray | null;
+  while ((match = revenuePattern.exec(text)) !== null) {
+    matches.push(match);
+  }
+
+  const values = matches
+    .map((item) => ({
+      year: Number(item[1]),
+      value: normaliseCurrencyNumber(item[2], item[3]),
+    }))
+    .filter((entry) => entry.year >= 1 && entry.year <= 3 && entry.value > 0);
+
+  const byYear = new Map<number, number>();
+  for (const entry of values) {
+    if (!byYear.has(entry.year)) byYear.set(entry.year, entry.value);
+  }
+
+  if (byYear.has(1) && byYear.has(2) && byYear.has(3)) {
+    return [byYear.get(1)!, byYear.get(2)!, byYear.get(3)!];
+  }
+
+  return null;
+}
+
+function normaliseCurrencyNumber(value: string, unit?: string): number {
+  const base = Number(value.replace(/,/g, ""));
+  if (!Number.isFinite(base)) return 0;
+  const cleanUnit = (unit || "").toLowerCase();
+  if (cleanUnit === "m" || cleanUnit === "million") return Math.round(base * 1_000_000);
+  if (cleanUnit === "k" || cleanUnit === "thousand") return Math.round(base * 1_000);
+  return Math.round(base);
+}
+
+function buildRevenueStreams(
+  plan: BusinessPlan,
+  year1Revenue: number,
+  year2Revenue: number,
+  year3Revenue: number,
+  qualityWarnings: string[],
+): ChartDataPayload["revenueStreams"] {
+  const revenueText = `${plan.revenue || ""} ${(plan as any).businessModel || ""} ${plan.industry || ""}`.toLowerCase();
+  const isSubscription = /subscription|saas|monthly|annual|licen[cs]e/.test(revenueText);
+  const isTransactional = /transaction|commission|marketplace|fee per|usage/.test(revenueText);
+  const isProduct = /manufactur|product|hardware|retail|wholesale|unit sales|equipment|material/.test(revenueText);
+
+  if (!isSubscription && !isTransactional && !isProduct) {
+    qualityWarnings.push("Revenue-stream chart uses generic revenue buckets because the revenue model was not specific enough to classify.");
+    return [
+      { stream: "Core Sales", year1: Math.round(year1Revenue * 0.7), year2: Math.round(year2Revenue * 0.65), year3: Math.round(year3Revenue * 0.6) },
+      { stream: "Services", year1: Math.round(year1Revenue * 0.2), year2: Math.round(year2Revenue * 0.25), year3: Math.round(year3Revenue * 0.3) },
+      { stream: "Partnerships", year1: Math.round(year1Revenue * 0.1), year2: Math.round(year2Revenue * 0.1), year3: Math.round(year3Revenue * 0.1) },
+    ];
+  }
+
+  if (isProduct) {
+    return [
+      { stream: "Product Sales", year1: Math.round(year1Revenue * 0.75), year2: Math.round(year2Revenue * 0.7), year3: Math.round(year3Revenue * 0.65) },
+      { stream: "B2B Contracts", year1: Math.round(year1Revenue * 0.2), year2: Math.round(year2Revenue * 0.25), year3: Math.round(year3Revenue * 0.3) },
+      { stream: "Services & Support", year1: Math.round(year1Revenue * 0.05), year2: Math.round(year2Revenue * 0.05), year3: Math.round(year3Revenue * 0.05) },
+    ];
+  }
+
+  return [
+    { stream: isSubscription ? "Subscriptions" : "Core Fees", year1: Math.round(year1Revenue * 0.6), year2: Math.round(year2Revenue * 0.55), year3: Math.round(year3Revenue * 0.5) },
+    { stream: isTransactional ? "Transaction Fees" : "Usage Fees", year1: Math.round(year1Revenue * 0.25), year2: Math.round(year2Revenue * 0.3), year3: Math.round(year3Revenue * 0.35) },
+    { stream: "Enterprise / B2B", year1: Math.round(year1Revenue * 0.15), year2: Math.round(year2Revenue * 0.15), year3: Math.round(year3Revenue * 0.15) },
+  ];
 }
 
 function extractCompetitors(competitorsText: string): string[] {

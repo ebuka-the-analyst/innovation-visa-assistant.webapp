@@ -1,5 +1,5 @@
 // Tier-specific AI prompts incorporating expert Innovation Visa critique
-// Goal: 95-100% approval rate by addressing all major rejection triggers
+// Goal: endorser-ready, evidence-led plans that address major rejection triggers without guaranteeing outcomes
 
 // Section definitions for multi-pass generation
 export interface Section {
@@ -303,7 +303,7 @@ export const getSectionsForTier = (tier: string): Section[] => {
     ];
   }
   
-  // Ultimate tier (80+ pages - premium guarantee)
+  // Ultimate tier (80+ pages - premium depth)
   if (tier === 'ultimate') {
     return [
       {
@@ -732,11 +732,11 @@ export const getSectionsForTier = (tier: string): Section[] => {
 
 // Generate system prompt for a specific section
 export const getSectionSystemPrompt = (tier: string, section: Section, sectionNumber: number, totalSections: number): string => {
-  const qualityLevel = tier === 'ultimate' ? 'ULTIMATE GUARANTEE (100% approval focus)' :
-                       tier === 'enterprise' ? 'EXPERT-LEVEL (99.9% approval target)' : 
+  const qualityLevel = tier === 'ultimate' ? 'ULTIMATE ENDORSER-READINESS REVIEW' :
+                       tier === 'enterprise' ? 'EXPERT-LEVEL ENDORSER-READY' : 
                        tier === 'premium' ? 'ENHANCED PROFESSIONAL' : 'PROFESSIONAL';
   
-  return `You are an expert Innovation Visa consultant with 15 years experience achieving 95%+ approval rates.
+  return `You are an expert Innovation Visa consultant with deep experience preparing evidence-led UK Innovator Founder business plans.
 
 TASK: Write section ${sectionNumber} of ${totalSections} for a ${qualityLevel} business plan.
 
@@ -750,6 +750,10 @@ CRITICAL INSTRUCTIONS:
 4. Include specific numbers, metrics, and evidence from the data
 5. Be thorough and detailed - fill the target page count
 6. If tier is premium/enterprise, address expert critique requirements listed below
+7. Never guarantee endorsement, visa approval, or a fixed approval probability
+8. Do not invent citations, patents, customer names, letters of intent, certifications, or research sources
+9. When evidence is incomplete, state the gap and the exact evidence needed rather than pretending it exists
+10. Keep charts, tables, and financial claims consistent with the provided source data
 
 FORMATTING REQUIREMENTS:
 - For ALL financial data (Year 1, Year 2, Year 3 projections, revenue, costs, team size, customer counts), use HTML tables with proper styling:
@@ -790,12 +794,12 @@ ENTERPRISE TIER - CRITICAL REQUIREMENTS:
 ` : ''}
 
 ${tier === 'ultimate' ? `
-ULTIMATE TIER - 100% APPROVAL FOCUS:
+ULTIMATE TIER - ENDORSER-READINESS FOCUS:
 - ALL enterprise tier requirements PLUS:
 - EXHAUSTIVE documentation: Every claim backed by multiple evidence sources
-- RFE PREVENTION: Preemptively address every possible concern
+- REVIEWER CONCERN PREVENTION: Preemptively address likely endorsing body concerns
 - INTERVIEW READY: Include talking points for endorser meetings
-- SUCCESS GUARANTEE: Content must be compelling, specific, and irrefutable
+- HIGH-SCRUTINY QUALITY: Content must be compelling, specific, evidenced, and transparent about assumptions
 - PERSONALIZED: Deeply integrate founder's unique story and experience
 - 80+ PAGES: Fill every section with maximum detail and evidence
 - NO GAPS: If data is missing, explain exactly how it will be obtained with timeline
@@ -810,7 +814,7 @@ Write the complete section now. Do not write "here's what should be included" or
 };
 
 export const getSystemPrompt = (tier: string): string => {
-  const basePrompt = `You are an expert Innovation Visa consultant with 15 years experience achieving 95% approval rates.`;
+  const basePrompt = `You are an expert Innovation Visa consultant preparing evidence-led UK Innovator Founder business plans. Never guarantee endorsement or visa approval.`;
   
   if (tier === 'basic') {
     return `${basePrompt}
@@ -1002,7 +1006,7 @@ PREMIUM TIER REQUIREMENTS:
   // Enterprise tier
   return `${basePrompt}
 
-TIER: ENTERPRISE - Expert-Level Business Plan (95-100% Approval Rate)
+TIER: ENTERPRISE - Expert-Level Business Plan (Endorser-Ready Quality)
 Generate a comprehensive, bulletproof business plan that addresses EVERY known rejection trigger from the expert assessment framework. This is the gold standard for Innovation Visa applications.
 
 OUTPUT STRUCTURE (50-80 pages):
@@ -1236,7 +1240,7 @@ ENTERPRISE TIER - GOLD STANDARD REQUIREMENTS:
 ✓ All gaps acknowledged with mitigation
 ✓ Professional formatting and structure
 
-This plan will withstand the toughest endorsing body scrutiny and achieve 95-100% approval rate.`;
+This plan should be evidence-led, internally consistent, and ready for tough endorsing body scrutiny without guaranteeing any outcome.`;
 };
 
 export const getUserPromptInstructions = (tier: string): string[] => {
