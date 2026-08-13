@@ -156,12 +156,18 @@ const documentUpload = multer({
 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
 
 async function callAI(prompt: string): Promise<string> {
+  const isLatestGptFamily = /^gpt-5/i.test(BUSINESS_PLAN_MODEL);
+  const tokenLimitParam = isLatestGptFamily
+    ? { max_completion_tokens: 4000 }
+    : { max_tokens: 4000 };
+  const samplingParam = isLatestGptFamily ? {} : { temperature: 0.7 };
+
   const response = await openaiClient.chat.completions.create({
     model: BUSINESS_PLAN_MODEL as any,
     messages: [{ role: "user", content: prompt }],
-    max_tokens: 4000,
-    temperature: 0.7,
-  });
+    ...tokenLimitParam,
+    ...samplingParam,
+  } as any);
   const content = response.choices[0]?.message?.content;
   if (!content) throw new Error("OpenAI returned empty response");
   return content;
@@ -3411,6 +3417,20 @@ Remember: Write FULL prose content for this section. No outlines or placeholders
           code: error?.code,
           type: error?.type,
         });
+
+        if (
+          error?.status === 400 ||
+          error?.code === "unsupported_parameter" ||
+          error?.type === "invalid_request_error"
+        ) {
+          await storage.updateBusinessPlan(planId, {
+            status: "failed",
+            currentGenerationStage:
+              "Generation failed - AI model configuration needs attention",
+          });
+          throw error;
+        }
+
         generatedSections.push(
           `\n\n## ${section.title}\n\n[Generation failed for this section]`,
         );
