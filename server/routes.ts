@@ -157,19 +157,59 @@ const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
 
 async function callAI(prompt: string, maxTokens = 4000): Promise<string> {
   const isLatestGptFamily = /^gpt-5/i.test(BUSINESS_PLAN_MODEL);
-  const tokenLimitParam = isLatestGptFamily
-    ? { max_completion_tokens: maxTokens }
-    : { max_tokens: maxTokens };
-  const samplingParam = isLatestGptFamily ? {} : { temperature: 0.7 };
+
+  if (isLatestGptFamily) {
+    const response = await openaiClient.responses.create({
+      model: BUSINESS_PLAN_MODEL as any,
+      input: prompt,
+      max_output_tokens: maxTokens,
+      reasoning: { effort: "medium" },
+      text: { verbosity: "high" },
+    } as any);
+
+    const responseAny = response as any;
+    const outputText =
+      typeof responseAny.output_text === "string"
+        ? responseAny.output_text
+        : "";
+    const fallbackText = Array.isArray(responseAny.output)
+      ? responseAny.output
+          .flatMap((item: any) => item?.content || [])
+          .map((contentItem: any) => contentItem?.text || "")
+          .join("")
+      : "";
+    const content = (outputText || fallbackText).trim();
+
+    if (!content) {
+      console.error("OpenAI Responses API returned empty response", {
+        model: BUSINESS_PLAN_MODEL,
+        responseId: responseAny.id,
+        status: responseAny.status,
+        incompleteDetails: responseAny.incomplete_details,
+        usage: responseAny.usage,
+      });
+      throw new Error("OpenAI returned empty response");
+    }
+
+    return content;
+  }
 
   const response = await openaiClient.chat.completions.create({
     model: BUSINESS_PLAN_MODEL as any,
     messages: [{ role: "user", content: prompt }],
-    ...tokenLimitParam,
-    ...samplingParam,
+    max_tokens: maxTokens,
+    temperature: 0.7,
   } as any);
-  const content = response.choices[0]?.message?.content;
-  if (!content) throw new Error("OpenAI returned empty response");
+  const content = response.choices[0]?.message?.content?.trim();
+  if (!content) {
+    console.error("OpenAI Chat Completions API returned empty response", {
+      model: BUSINESS_PLAN_MODEL,
+      responseId: (response as any).id,
+      finishReason: response.choices[0]?.finish_reason,
+      usage: (response as any).usage,
+    });
+    throw new Error("OpenAI returned empty response");
+  }
   return content;
 }
 
