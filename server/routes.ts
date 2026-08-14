@@ -1,5 +1,6 @@
 import type { Express, Request, RequestHandler } from "express";
 import { createServer, type Server } from "http";
+import type { ChartDataPayload, ChartType } from "./chartGenerator";
 import { storage } from "./storage";
 import { db } from "./db";
 import {
@@ -3537,16 +3538,15 @@ ${generatedSections.join("\n\n---\n\n")}`;
 
     const pdfUrl = generatePDFUrl(planId);
 
-    // Generate chart data for visualizations
-    const { generateChartData } = await import("./chartGenerator");
-    const chartDataObj = generateChartData(plan);
-    const chartData = JSON.stringify(chartDataObj);
-
     await storage.updateBusinessPlan(planId, {
       currentGenerationStage: "Reviewing plan against endorser-readiness benchmark...",
     });
 
     generatedContent = sanitizeBusinessPlanClaims(generatedContent);
+    // Generate chart data only after the plan exists, so charts can be backed by the final plan text.
+    const { generateChartData } = await import("./chartGenerator");
+    const chartDataObj = generateChartData(plan, generatedContent);
+    const chartData = JSON.stringify(chartDataObj);
     const qualityReport = assessBusinessPlanQuality(plan, generatedContent, chartDataObj);
     generatedContent = `${generatedContent}\n\n---\n\n${formatQualityReportMarkdown(qualityReport)}`;
 
@@ -4192,12 +4192,12 @@ ${generatedSections.join("\n\n---\n\n")}`;
         return sharp.default(buffer).resize(width).png().toBuffer();
       };
 
-      let chartData: chartGenerator.ChartDataPayload | null = null;
+      let chartData: ChartDataPayload | null = null;
       if (businessPlan.chartData) {
         try {
           chartData = JSON.parse(
             businessPlan.chartData,
-          ) as chartGenerator.ChartDataPayload;
+          ) as ChartDataPayload;
         } catch (e) {
           console.error("Failed to parse chart data:", e);
         }
@@ -4207,7 +4207,7 @@ ${generatedSections.join("\n\n---\n\n")}`;
 
       const findChartsForSection = (
         sectionTitle: string,
-      ): chartGenerator.ChartType[] => {
+      ): ChartType[] => {
         for (const [key, charts] of Object.entries(
           chartGenerator.SECTION_CHART_MAP,
         )) {
@@ -4218,7 +4218,7 @@ ${generatedSections.join("\n\n---\n\n")}`;
             return charts;
           }
         }
-        const keywords: Record<string, chartGenerator.ChartType[]> = {
+        const keywords: Record<string, ChartType[]> = {
           executive: ["kpi"],
           summary: ["kpi"],
           overview: ["funding", "kpi"],
@@ -4255,9 +4255,10 @@ ${generatedSections.join("\n\n---\n\n")}`;
         return [];
       };
 
-      const addChartToDoc = async (chartType: chartGenerator.ChartType) => {
+      const addChartToDoc = async (chartType: ChartType) => {
         if (!chartData || usedCharts.has(chartType)) return;
         usedCharts.add(chartType);
+        if (!chartGenerator.chartHasEvidence(chartType, chartData)) return;
         try {
           const svgString = chartGenerator.generateSVGChart(
             chartType,
@@ -4435,42 +4436,6 @@ ${generatedSections.join("\n\n---\n\n")}`;
             children.push(
               new Paragraph({ children: runs, spacing: { after: 120 } }),
             );
-          }
-        }
-      }
-
-      if (chartData) {
-        const allChartTypes: chartGenerator.ChartType[] = [
-          "kpi",
-          "funding",
-          "financial",
-          "market",
-          "revenue_streams",
-          "unit_economics",
-          "customer_journey",
-          "competitor",
-          "gtm_channels",
-          "growth",
-          "hiring",
-          "tech_stack",
-          "risk",
-          "compliance",
-          "milestones",
-          "timeline",
-          "pricing",
-        ];
-        const remaining = allChartTypes.filter((ct) => !usedCharts.has(ct));
-        if (remaining.length > 0) {
-          children.push(
-            new Paragraph({ children: [new PageBreak()] }),
-            new Paragraph({
-              text: "Additional Visual Analytics",
-              heading: HeadingLevel.HEADING_1,
-              spacing: { before: 400, after: 300 },
-            }),
-          );
-          for (const chartType of remaining) {
-            await addChartToDoc(chartType);
           }
         }
       }
