@@ -3913,6 +3913,7 @@ ${generatedSections.join("\n\n---\n\n")}`;
 
       // Generate rich HTML with SVG charts using pdf.ts
       const htmlContent = generatePDFContent(planWithTheme);
+      const shouldAutoPrint = req.query.print === "1";
 
       // Add print-friendly styles and a print button
       const enhancedHtml = htmlContent
@@ -4018,6 +4019,15 @@ ${generatedSections.join("\n\n---\n\n")}`;
     <strong>To save as PDF:</strong><br/>
     Click the button above, then select "Save as PDF" as the destination in the print dialog.
   </div>
+  ${
+    shouldAutoPrint
+      ? `<script>
+    window.addEventListener("load", () => {
+      window.setTimeout(() => window.print(), 800);
+    });
+  </script>`
+      : ""
+  }
 `,
         );
 
@@ -4220,7 +4230,14 @@ ${generatedSections.join("\n\n---\n\n")}`;
         svgString: string,
         width = 550,
       ): Promise<Buffer> => {
-        const buffer = Buffer.from(svgString);
+        const exportSafeSvg = svgString
+          .replace(/<svg\b([^>]*)>/i, `<svg$1><style>text,tspan{font-family:'DejaVu Sans','Liberation Sans',Arial,Helvetica,sans-serif;}</style>`)
+          .replace(/£/g, "GBP ")
+          .replace(/→/g, "->")
+          .replace(/↑/g, "up")
+          .replace(/•/g, "-")
+          .replace(/[^\x09\x0A\x0D\x20-\x7E]/g, "");
+        const buffer = Buffer.from(exportSafeSvg, "utf8");
         return sharp.default(buffer).resize(width).png().toBuffer();
       };
 
