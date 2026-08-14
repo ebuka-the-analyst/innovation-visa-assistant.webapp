@@ -760,6 +760,7 @@ FORMATTING REQUIREMENTS:
 - Do not use Markdown code fences, triple-backtick text blocks, ASCII-art diagrams, box drawings, pipe diagrams, or flow diagrams made from text characters.
 - Do not use em dashes, en dashes, non-breaking hyphens, or other Unicode dash characters. Use a normal ASCII hyphen only when a dash is needed.
 - Do not create visual charts inside the prose. If exact source data exists, present it as a clear table; otherwise explain the evidence gap in prose.
+- When a section includes financial projections, market sizing, milestones, SWOT, or marketing-channel evidence, label the values clearly in text or tables so the renderer can create charts from those exact values only.
 - For ALL financial data (Year 1, Year 2, Year 3 projections, revenue, costs, team size, customer counts), use HTML tables with proper styling:
   <table class="financial-table" style="width:100%; border-collapse:collapse; margin:20px 0;">
     <thead><tr style="background:#005EB8; color:white;"><th style="padding:12px; border:1px solid #ddd;">Category</th><th style="padding:12px; border:1px solid #ddd;">Year 1</th><th style="padding:12px; border:1px solid #ddd;">Year 2</th><th style="padding:12px; border:1px solid #ddd;">Year 3</th></tr></thead>

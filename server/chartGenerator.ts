@@ -148,13 +148,58 @@ export interface ChartDataPayload {
 }
 
 const STRICT_CHART_SOURCE_NOTE = "Charts are generated only from explicit plan inputs or the final generated business plan text.";
+const CHART_EVIDENCE_NOTES = {
+  financial: "Financial projection chart is based on explicit revenue, cost, and profit figures found in the final business plan text.",
+  market: "Market-size chart is based on explicit TAM, SAM, or SOM figures found in the final business plan text.",
+  kpi: "KPI chart is based on explicit plan fields or explicit figures found in the final business plan text.",
+  milestones: "Milestone chart is based on explicit month-labelled milestones found in the final business plan text.",
+  timeline: "Timeline chart is based on explicit month-labelled roadmap or implementation milestones found in the final business plan text.",
+  swot: "SWOT chart is based on the generated SWOT section text.",
+  marketing_channels: "Marketing channel chart is based on explicit channel budget, lead, and CAC figures found in the final business plan text.",
+};
 
 export function generateChartData(plan: BusinessPlan, generatedContent: string = ""): ChartDataPayload {
   const qualityWarnings: string[] = [];
   const dataSourceNotes: string[] = [];
   const parsedRevenues = parseThreeYearRevenue(plan.revenue || plan.monthlyProjections || "");
+  const finalText = generatedContent || "";
 
   dataSourceNotes.push(STRICT_CHART_SOURCE_NOTE);
+
+  const financialProjections = extractFinancialProjectionsFromContent(finalText);
+  if (financialProjections.length >= 3) {
+    dataSourceNotes.push(CHART_EVIDENCE_NOTES.financial);
+  }
+
+  const marketSize = extractMarketSizeFromContent(finalText);
+  if (marketSize.length >= 2) {
+    dataSourceNotes.push(CHART_EVIDENCE_NOTES.market);
+  }
+
+  const kpiMetrics = buildEvidenceBackedKpis(plan, parsedRevenues);
+  if (kpiMetrics.length > 0) {
+    dataSourceNotes.push(CHART_EVIDENCE_NOTES.kpi);
+  }
+
+  const milestones = extractMilestonesFromContent(finalText);
+  if (milestones.length > 0) {
+    dataSourceNotes.push(CHART_EVIDENCE_NOTES.milestones);
+  }
+
+  const timeline = extractTimelineFromMilestones(milestones);
+  if (timeline.length > 0) {
+    dataSourceNotes.push(CHART_EVIDENCE_NOTES.timeline);
+  }
+
+  const swotAnalysis = extractSWOTFromContent(finalText);
+  if (swotAnalysis.some((item) => item.items.length > 0)) {
+    dataSourceNotes.push(CHART_EVIDENCE_NOTES.swot);
+  }
+
+  const marketingChannels = extractMarketingChannelsFromContent(finalText);
+  if (marketingChannels.length > 0) {
+    dataSourceNotes.push(CHART_EVIDENCE_NOTES.marketing_channels);
+  }
 
   return {
     qualityWarnings: Array.from(new Set([
@@ -162,12 +207,12 @@ export function generateChartData(plan: BusinessPlan, generatedContent: string =
       "Assumption-based visual charts are disabled; unsupported charts are skipped instead of filled with default data.",
     ])),
     dataSourceNotes: Array.from(new Set(dataSourceNotes)),
-    financialProjections: [],
-    marketSize: [],
-    timeline: extractTimelineFromContent(generatedContent),
+    financialProjections,
+    marketSize,
+    timeline,
     riskMatrix: [],
     competitorComparison: [],
-    kpiMetrics: buildEvidenceBackedKpis(plan, parsedRevenues),
+    kpiMetrics,
     fundingAllocation: [],
     revenueStreams: [],
     unitEconomics: [],
@@ -175,13 +220,13 @@ export function generateChartData(plan: BusinessPlan, generatedContent: string =
     techStack: [],
     customerJourney: [],
     goToMarketChannels: [],
-    milestones: extractMilestonesFromContent(generatedContent),
+    milestones,
     complianceRoadmap: [],
     growthMetrics: [],
     pricingTiers: [],
-    swotAnalysis: extractSWOTFromContent(generatedContent),
+    swotAnalysis,
     customerPersonas: [],
-    marketingChannels: extractMarketingChannelsFromContent(generatedContent),
+    marketingChannels,
     processFlow: [],
     customerSilhouettes: [],
     valueProposition: [],
@@ -190,288 +235,6 @@ export function generateChartData(plan: BusinessPlan, generatedContent: string =
     businessJourney: [],
   };
 
-  const funding = plan.funding || 50000;
-  const jobCreation = plan.jobCreation || 10;
-  const cac = plan.customerAcquisitionCost || 500;
-  const ltv = plan.lifetimeValue || 2000;
-
-  if (!plan.funding) {
-    qualityWarnings.push("Funding allocation chart uses a default funding assumption because no funding amount was provided.");
-  }
-  if (!plan.customerAcquisitionCost || !plan.lifetimeValue) {
-    qualityWarnings.push("Unit economics chart uses fallback CAC/LTV values because complete unit-economics inputs were not provided.");
-  }
-
-  const legacyParsedRevenues = parseThreeYearRevenue(plan.revenue || plan.monthlyProjections || "");
-  let year1Revenue = legacyParsedRevenues?.[0] || 0;
-  let year2Revenue = legacyParsedRevenues?.[1] || 0;
-  let year3Revenue = legacyParsedRevenues?.[2] || 0;
-
-  if (legacyParsedRevenues) {
-    dataSourceNotes.push("Financial projection chart is based on revenue figures found in the applicant's revenue/projection text.");
-  } else {
-    year1Revenue = Math.round(funding * 1.5);
-    year2Revenue = Math.round(year1Revenue * 2.2);
-    year3Revenue = Math.round(year2Revenue * 1.8);
-    qualityWarnings.push("Financial projection chart uses formula-based estimates because explicit Year 1-3 revenue figures were not detected.");
-  }
-  
-  const financialProjections = [
-    { year: "Year 1", revenue: year1Revenue, costs: Math.round(year1Revenue * 0.8), profit: Math.round(year1Revenue * 0.2) },
-    { year: "Year 2", revenue: year2Revenue, costs: Math.round(year2Revenue * 0.65), profit: Math.round(year2Revenue * 0.35) },
-    { year: "Year 3", revenue: year3Revenue, costs: Math.round(year3Revenue * 0.55), profit: Math.round(year3Revenue * 0.45) },
-  ];
-
-  const tamMatch = plan.marketSize?.match(/(\d+(?:\.\d+)?)\s*(billion|million|B|M)/i) || null;
-  let tamValue = 5000000000;
-  if (tamMatch !== null) {
-    const num = parseFloat(tamMatch![1] || "0");
-    const unit = (tamMatch![2] || "").toLowerCase();
-    if (unit.includes('b')) tamValue = num * 1000000000;
-    else if (unit.includes('m')) tamValue = num * 1000000;
-    dataSourceNotes.push("Market-size chart is based on the TAM figure found in the applicant's market-size text.");
-  } else {
-    qualityWarnings.push("Market-size chart uses fallback TAM/SAM/SOM values because a clear market-size figure was not detected.");
-  }
-  
-  const marketSize = [
-    { label: "TAM", value: Math.round(tamValue / 1000000), description: "Total Addressable Market (£M)" },
-    { label: "SAM", value: Math.round(tamValue / 10000000), description: "Serviceable Available Market (£M)" },
-    { label: "SOM", value: Math.round(tamValue / 100000000), description: "Serviceable Obtainable Market (£M)" },
-  ];
-
-  const timeline = [
-    { 
-      phase: "MVP & Launch", 
-      startMonth: 1, 
-      duration: 6,
-      tasks: ["Product development", "Beta testing", "Market launch"]
-    },
-    { 
-      phase: "Growth Phase", 
-      startMonth: 7, 
-      duration: 12,
-      tasks: ["Customer acquisition", "Team expansion", "Feature development"]
-    },
-    { 
-      phase: "Scale Phase", 
-      startMonth: 19, 
-      duration: 18,
-      tasks: ["Market expansion", "Enterprise sales", "International growth"]
-    },
-  ];
-
-  const riskMatrix = [
-    { risk: "Market Competition", likelihood: 4, impact: 3, category: "Market" },
-    { risk: "Regulatory Changes", likelihood: 2, impact: 5, category: "Compliance" },
-    { risk: "Technical Scalability", likelihood: 3, impact: 4, category: "Technical" },
-    { risk: "Funding Gap", likelihood: 3, impact: 5, category: "Financial" },
-    { risk: "Key Person Risk", likelihood: 2, impact: 4, category: "Operational" },
-    { risk: "Customer Churn", likelihood: 3, impact: 3, category: "Market" },
-  ];
-
-  const competitorNames = extractCompetitors(plan.competitors || "");
-  const competitorComparison = competitorNames.slice(0, 5).map((name, index) => ({
-    name: name.substring(0, 15),
-    innovation: Math.max(1, 5 - index),
-    price: 3 + (index % 3),
-    features: 4 - (index % 2),
-    support: 3 + (index % 2),
-    market: 5 - Math.floor(index / 2),
-  }));
-  
-  competitorComparison.unshift({
-    name: plan.businessName?.substring(0, 15) || "Our Solution",
-    innovation: 5,
-    price: 4,
-    features: 5,
-    support: 5,
-    market: 3,
-  });
-
-  const kpiMetrics = [
-    { label: "Target Customers", value: `${Math.round(funding / 100)}+`, trend: 'up' as const, color: '#10B981' },
-    { label: "Year 3 Revenue", value: `£${Math.round(year3Revenue / 1000)}K`, trend: 'up' as const, color: '#3B82F6' },
-    { label: "Team Size", value: `${jobCreation}`, trend: 'up' as const, color: '#8B5CF6' },
-    { label: "LTV/CAC Ratio", value: `${(ltv / cac).toFixed(1)}x`, trend: 'up' as const, color: '#F59E0B' },
-  ];
-
-  const fundingAllocation = [
-    { category: "Product Development", amount: Math.round(funding * 0.35), percentage: 35 },
-    { category: "Marketing & Sales", amount: Math.round(funding * 0.25), percentage: 25 },
-    { category: "Operations", amount: Math.round(funding * 0.20), percentage: 20 },
-    { category: "Team Hiring", amount: Math.round(funding * 0.15), percentage: 15 },
-    { category: "Contingency", amount: Math.round(funding * 0.05), percentage: 5 },
-  ];
-
-  const revenueStreams = buildRevenueStreams(plan, year1Revenue, year2Revenue, year3Revenue, qualityWarnings);
-
-  const unitEconomics = [
-    { metric: "CAC", value: cac, benchmark: cac * 1.3 },
-    { metric: "LTV", value: ltv, benchmark: ltv * 0.8 },
-    { metric: "LTV/CAC", value: Math.round(ltv / cac * 10) / 10, benchmark: 3 },
-    { metric: "Payback (months)", value: Math.round(cac / (ltv / 36)), benchmark: 12 },
-  ];
-
-  const hiringTimeline = [
-    { role: "Engineering", quarter: "Q1", count: 2 },
-    { role: "Sales", quarter: "Q2", count: 1 },
-    { role: "Marketing", quarter: "Q3", count: 1 },
-    { role: "Customer Success", quarter: "Q4", count: 2 },
-    { role: "Operations", quarter: "Q2 Y2", count: 2 },
-    { role: "Leadership", quarter: "Q4 Y2", count: 2 },
-  ];
-
-  const techStack = [
-    { layer: "Frontend", technologies: ["React", "TypeScript", "Tailwind"] },
-    { layer: "Backend", technologies: ["Node.js", "Express", "PostgreSQL"] },
-    { layer: "Cloud", technologies: ["AWS", "Docker", "CI/CD"] },
-    { layer: "AI/ML", technologies: ["OpenAI", "TensorFlow", "Analytics"] },
-  ];
-
-  const customerJourney = [
-    { stage: "Awareness", conversion: 100, description: "Marketing reach" },
-    { stage: "Interest", conversion: 35, description: "Website visits" },
-    { stage: "Trial", conversion: 12, description: "Free trial signups" },
-    { stage: "Purchase", conversion: 4, description: "Paid conversions" },
-    { stage: "Retention", conversion: 3.2, description: "Active customers" },
-  ];
-
-  const goToMarketChannels = [
-    { channel: "Content Marketing", budget: Math.round(funding * 0.08), expectedROI: 4.2 },
-    { channel: "Paid Ads", budget: Math.round(funding * 0.10), expectedROI: 2.8 },
-    { channel: "Partnerships", budget: Math.round(funding * 0.05), expectedROI: 5.5 },
-    { channel: "Events", budget: Math.round(funding * 0.02), expectedROI: 3.0 },
-  ];
-
-  const milestones = [
-    { milestone: "MVP Launch", month: 1, status: 'completed' as const },
-    { milestone: "First 100 Users", month: 4, status: 'in_progress' as const },
-    { milestone: "Seed Funding", month: 6, status: 'planned' as const },
-    { milestone: "1000 Customers", month: 12, status: 'planned' as const },
-    { milestone: "Break-even", month: 18, status: 'planned' as const },
-    { milestone: "Series A", month: 24, status: 'planned' as const },
-  ];
-
-  const complianceRoadmap = [
-    { requirement: "GDPR Compliance", deadline: "Month 1", status: 'done' as const, priority: 'high' as const },
-    { requirement: "ICO Registration", deadline: "Month 2", status: 'done' as const, priority: 'high' as const },
-    { requirement: "Data Protection", deadline: "Month 3", status: 'in_progress' as const, priority: 'high' as const },
-    { requirement: "Industry Certification", deadline: "Month 6", status: 'pending' as const, priority: 'medium' as const },
-    { requirement: "Security Audit", deadline: "Month 9", status: 'pending' as const, priority: 'medium' as const },
-  ];
-
-  const growthMetrics = [
-    { month: "M1", users: 50, revenue: Math.round(year1Revenue / 12 * 0.1), mrr: Math.round(year1Revenue / 12 * 0.08) },
-    { month: "M3", users: 200, revenue: Math.round(year1Revenue / 12 * 0.3), mrr: Math.round(year1Revenue / 12 * 0.25) },
-    { month: "M6", users: 500, revenue: Math.round(year1Revenue / 12 * 0.6), mrr: Math.round(year1Revenue / 12 * 0.5) },
-    { month: "M9", users: 900, revenue: Math.round(year1Revenue / 12 * 0.85), mrr: Math.round(year1Revenue / 12 * 0.75) },
-    { month: "M12", users: 1500, revenue: Math.round(year1Revenue / 12), mrr: Math.round(year1Revenue / 12 * 0.9) },
-  ];
-
-  const pricingTiers = [
-    { tier: "Starter", price: 49, features: 5, target: "Solo founders" },
-    { tier: "Professional", price: 99, features: 12, target: "Small teams" },
-    { tier: "Business", price: 199, features: 20, target: "Growing companies" },
-    { tier: "Enterprise", price: 499, features: 30, target: "Large organizations" },
-  ];
-
-  const swotAnalysis: ChartDataPayload['swotAnalysis'] = [
-    { category: 'strengths', items: ["Innovative technology", "Strong founding team", "First-mover advantage", "IP protection"] },
-    { category: 'weaknesses', items: ["Limited initial capital", "Small team size", "Brand awareness"] },
-    { category: 'opportunities', items: ["Growing market demand", "Regulatory changes favoring innovation", "Partnership opportunities", "International expansion"] },
-    { category: 'threats', items: ["Established competitors", "Economic uncertainty", "Changing regulations"] },
-  ];
-
-  const customerPersonas: ChartDataPayload['customerPersonas'] = [
-    { name: "Sarah", role: "Finance Director", age: "35-45", painPoints: ["Manual processes", "Compliance burden", "Data silos"], goals: ["Efficiency gains", "Better insights", "Cost reduction"] },
-    { name: "James", role: "SME Owner", age: "40-55", painPoints: ["Time constraints", "Cash flow management", "Limited resources"], goals: ["Business growth", "Automation", "Scalability"] },
-    { name: "Priya", role: "Operations Manager", age: "30-40", painPoints: ["Legacy systems", "Team coordination", "Reporting delays"], goals: ["Streamlined workflows", "Real-time data", "Team productivity"] },
-  ];
-
-  const marketingChannels: ChartDataPayload['marketingChannels'] = [
-    { channel: "Content Marketing", budget: Math.round(funding * 0.08), expectedLeads: 500, cac: Math.round(cac * 0.8) },
-    { channel: "LinkedIn Ads", budget: Math.round(funding * 0.06), expectedLeads: 300, cac: Math.round(cac * 1.2) },
-    { channel: "Google Ads", budget: Math.round(funding * 0.07), expectedLeads: 400, cac: Math.round(cac * 1.1) },
-    { channel: "Partnerships", budget: Math.round(funding * 0.04), expectedLeads: 200, cac: Math.round(cac * 0.6) },
-    { channel: "Events/Webinars", budget: Math.round(funding * 0.03), expectedLeads: 150, cac: Math.round(cac * 0.9) },
-  ];
-
-  const processFlow: ChartDataPayload['processFlow'] = [
-    { step: 1, title: "Idea Validation", description: "Research market needs and validate your business concept" },
-    { step: 2, title: "Business Planning", description: "Create detailed strategy, financial projections and roadmap" },
-    { step: 3, title: "Launch & Scale", description: "Execute your plan and grow your customer base" },
-  ];
-
-  const customerSilhouettes: ChartDataPayload['customerSilhouettes'] = [
-    { segment: "Enterprise", percentage: 35, color: "#005EB8" },
-    { segment: "Mid-Market", percentage: 40, color: "#10B981" },
-    { segment: "SMB", percentage: 20, color: "#F59E0B" },
-    { segment: "Startups", percentage: 5, color: "#8B5CF6" },
-  ];
-
-  const valueProposition: ChartDataPayload['valueProposition'] = [
-    { quadrant: 1, title: "Core Product", points: ["Primary value delivery", "Main features", "Key differentiators"] },
-    { quadrant: 2, title: "Customer Benefits", points: ["Time savings", "Cost reduction", "Better outcomes"] },
-    { quadrant: 3, title: "Market Position", points: ["Unique positioning", "Competitive edge", "Brand promise"] },
-    { quadrant: 4, title: "Growth Path", points: ["Scalability", "Expansion plans", "Future roadmap"] },
-  ];
-
-  const inspirationalQuote: ChartDataPayload['inspirationalQuote'] = {
-    quote: "Innovation distinguishes between a leader and a follower. Build something that matters.",
-    author: "Founder Vision",
-    role: "Business Philosophy"
-  };
-
-  const researchGrid: ChartDataPayload['researchGrid'] = [
-    { category: "Market Trends", findings: ["Growing demand", "Digital transformation", "Regulatory changes"], color: "#41B6E6" },
-    { category: "Customer Needs", findings: ["Efficiency", "Cost savings", "Better experience"], color: "#10B981" },
-    { category: "Opportunities", findings: ["Underserved market", "Technology gaps", "Partnership potential"], color: "#F59E0B" },
-  ];
-
-  const businessJourney: ChartDataPayload['businessJourney'] = [
-    { phase: "Foundation", activities: ["Legal setup", "Team building", "Initial funding"], icon: "foundation" },
-    { phase: "Development", activities: ["Product build", "Beta testing", "Market research"], icon: "development" },
-    { phase: "Launch", activities: ["Go-to-market", "Customer acquisition", "Brand building"], icon: "launch" },
-    { phase: "Growth", activities: ["Scaling", "Expansion", "Optimization"], icon: "growth" },
-  ];
-
-  const evidencedSwotAnalysis = extractSWOTFromContent(generatedContent);
-  const evidencedMilestones = extractMilestonesFromContent(generatedContent);
-  const evidencedTimeline = extractTimelineFromContent(generatedContent);
-  const evidencedMarketingChannels = extractMarketingChannelsFromContent(generatedContent);
-  const evidencedKpiMetrics = buildEvidenceBackedKpis(plan, parsedRevenues);
-
-  return {
-    qualityWarnings: Array.from(new Set(qualityWarnings)),
-    dataSourceNotes: Array.from(new Set(dataSourceNotes)),
-    financialProjections: [],
-    marketSize: [],
-    timeline: evidencedTimeline,
-    riskMatrix: [],
-    competitorComparison: [],
-    kpiMetrics: evidencedKpiMetrics,
-    fundingAllocation: [],
-    revenueStreams: [],
-    unitEconomics: [],
-    hiringTimeline: [],
-    techStack: [],
-    customerJourney: [],
-    goToMarketChannels: [],
-    milestones: evidencedMilestones,
-    complianceRoadmap: [],
-    growthMetrics: [],
-    pricingTiers: [],
-    swotAnalysis: evidencedSwotAnalysis,
-    customerPersonas: [],
-    marketingChannels: evidencedMarketingChannels,
-    processFlow: [],
-    customerSilhouettes: [],
-    valueProposition: [],
-    inspirationalQuote: { quote: "", author: "", role: "" },
-    researchGrid: [],
-    businessJourney: [],
-  };
 }
 
 function buildEvidenceBackedKpis(
@@ -508,6 +271,75 @@ function formatPounds(value: number): string {
   if (value >= 1_000_000) return `£${(value / 1_000_000).toFixed(value % 1_000_000 === 0 ? 0 : 1)}M`;
   if (value >= 1_000) return `£${Math.round(value / 1_000)}K`;
   return `£${value}`;
+}
+
+function extractFinancialProjectionsFromContent(content: string): ChartDataPayload["financialProjections"] {
+  const section = extractSection(content, /financial|revenue|projection|forecast/i) || content;
+  const revenue = extractThreeYearMetric(section, /revenue|sales|turnover/i);
+  const costs = extractThreeYearMetric(section, /costs?|expenses?|expenditure|operating costs?/i);
+  const profit = extractThreeYearMetric(section, /profit|net income|surplus|ebitda/i);
+
+  if (!revenue || !costs) return [];
+
+  return revenue.map((revenueValue, index) => {
+    const costValue = costs[index] || 0;
+    const explicitProfit = profit?.[index];
+    return {
+      year: `Year ${index + 1}`,
+      revenue: revenueValue,
+      costs: costValue,
+      profit: explicitProfit !== undefined ? explicitProfit : revenueValue - costValue,
+    };
+  });
+}
+
+function extractThreeYearMetric(content: string, labelPattern: RegExp): [number, number, number] | null {
+  const lines = content.split("\n");
+  for (const rawLine of lines) {
+    const line = rawLine.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    if (!labelPattern.test(line)) continue;
+    const values = extractCurrencyValues(line);
+    if (values.length >= 3) return [values[0], values[1], values[2]];
+  }
+  return null;
+}
+
+function extractCurrencyValues(text: string): number[] {
+  const values: number[] = [];
+  const currencyPattern = /(?:£|Â£|Ã‚Â£)\s*([\d,.]+)\s*(k|m|million|thousand)?/gi;
+  let match: RegExpExecArray | null;
+  while ((match = currencyPattern.exec(text)) !== null) {
+    const value = normaliseCurrencyNumber(match[1], match[2]);
+    if (value > 0) values.push(value);
+  }
+  return values;
+}
+
+function extractMarketSizeFromContent(content: string): ChartDataPayload["marketSize"] {
+  const section = extractSection(content, /market/i);
+  if (!section) return [];
+
+  const rows: ChartDataPayload["marketSize"] = [];
+  const definitions: Array<{ label: string; pattern: RegExp; description: string }> = [
+    { label: "TAM", pattern: /\b(TAM|total addressable market)\b/i, description: "Total Addressable Market" },
+    { label: "SAM", pattern: /\b(SAM|serviceable available market)\b/i, description: "Serviceable Available Market" },
+    { label: "SOM", pattern: /\b(SOM|serviceable obtainable market)\b/i, description: "Serviceable Obtainable Market" },
+  ];
+
+  for (const rawLine of section.split("\n")) {
+    const line = rawLine.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    const value = extractCurrencyValues(line)[0];
+    if (!value) continue;
+    const definition = definitions.find((item) => item.pattern.test(line));
+    if (!definition) continue;
+    rows.push({
+      label: definition.label,
+      value: Math.max(1, Math.round(value / 1_000_000)),
+      description: `${definition.description} (GBP millions)`,
+    });
+  }
+
+  return uniqueByLabel(rows, (item) => item.label).slice(0, 3);
 }
 
 function extractSWOTFromContent(content: string): ChartDataPayload["swotAnalysis"] {
@@ -570,7 +402,10 @@ function extractMilestonesFromContent(content: string): ChartDataPayload["milest
 }
 
 function extractTimelineFromContent(content: string): ChartDataPayload["timeline"] {
-  const milestones = extractMilestonesFromContent(content);
+  return extractTimelineFromMilestones(extractMilestonesFromContent(content));
+}
+
+function extractTimelineFromMilestones(milestones: ChartDataPayload["milestones"]): ChartDataPayload["timeline"] {
   if (milestones.length < 2) return [];
 
   return milestones.slice(0, 6).map((item, index, items) => {
@@ -590,9 +425,9 @@ function extractMarketingChannelsFromContent(content: string): ChartDataPayload[
   if (!section) return [];
 
   const rows: ChartDataPayload["marketingChannels"] = [];
-  const currencyPattern = /£\s*([\d,.]+)\s*(k|m|million|thousand)?/i;
+  const currencyPattern = /(?:£|Â£|Ã‚Â£)\s*([\d,.]+)\s*(k|m|million|thousand)?/i;
   const leadsPattern = /([\d,.]+)\s*(?:leads|lead|customers|users)/i;
-  const cacPattern = /CAC\s*:?\s*£?\s*([\d,.]+)\s*(k|m|million|thousand)?/i;
+  const cacPattern = /CAC\s*:?\s*(?:£|Â£|Ã‚Â£)?\s*([\d,.]+)\s*(k|m|million|thousand)?/i;
 
   for (const rawLine of section.split("\n")) {
     const line = rawLine.trim();
@@ -800,18 +635,19 @@ export const SECTION_CHART_MAP: Record<string, ChartType[]> = {
 export function chartHasEvidence(type: ChartType, data: ChartDataPayload): boolean {
   const hasStrictEvidencePolicy = data.dataSourceNotes?.includes(STRICT_CHART_SOURCE_NOTE) === true;
   if (!hasStrictEvidencePolicy) return false;
+  const hasEvidenceNote = (note: string) => data.dataSourceNotes?.includes(note) === true;
 
   switch (type) {
     case 'financial':
-      return false;
+      return hasEvidenceNote(CHART_EVIDENCE_NOTES.financial) && data.financialProjections.length >= 3;
     case 'market':
-      return false;
+      return hasEvidenceNote(CHART_EVIDENCE_NOTES.market) && data.marketSize.length >= 2;
     case 'risk':
       return false;
     case 'competitor':
       return false;
     case 'kpi':
-      return data.kpiMetrics.length > 0;
+      return hasEvidenceNote(CHART_EVIDENCE_NOTES.kpi) && data.kpiMetrics.length > 0;
     case 'funding':
       return false;
     case 'revenue_streams':
@@ -827,7 +663,7 @@ export function chartHasEvidence(type: ChartType, data: ChartDataPayload): boole
     case 'gtm_channels':
       return false;
     case 'milestones':
-      return data.milestones.length > 0;
+      return hasEvidenceNote(CHART_EVIDENCE_NOTES.milestones) && data.milestones.length > 0;
     case 'compliance':
       return false;
     case 'growth':
@@ -835,13 +671,13 @@ export function chartHasEvidence(type: ChartType, data: ChartDataPayload): boole
     case 'pricing':
       return false;
     case 'timeline':
-      return data.timeline.length > 0;
+      return hasEvidenceNote(CHART_EVIDENCE_NOTES.timeline) && data.timeline.length > 0;
     case 'swot':
-      return data.swotAnalysis.some((item) => item.items.length > 0);
+      return hasEvidenceNote(CHART_EVIDENCE_NOTES.swot) && data.swotAnalysis.some((item) => item.items.length > 0);
     case 'customer_personas':
       return false;
     case 'marketing_channels':
-      return data.marketingChannels.length > 0;
+      return hasEvidenceNote(CHART_EVIDENCE_NOTES.marketing_channels) && data.marketingChannels.length > 0;
     case 'process_flow':
       return false;
     case 'customer_silhouettes':

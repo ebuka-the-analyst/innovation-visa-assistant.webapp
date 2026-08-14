@@ -1,5 +1,11 @@
 import type { BusinessPlan } from "@shared/schema";
-import { chartHasEvidence, generateSVGChart, SECTION_CHART_MAP, type ChartDataPayload, type ChartType } from "./chartGenerator";
+import { chartHasEvidence, generateChartData, generateSVGChart, SECTION_CHART_MAP, type ChartDataPayload, type ChartType } from "./chartGenerator";
+
+const EVIDENCE_CHART_TYPES: ChartType[] = ["financial", "market", "kpi", "milestones", "timeline", "swot", "marketing_channels"];
+
+function hasRenderableEvidenceCharts(data: ChartDataPayload | null): boolean {
+  return data !== null && EVIDENCE_CHART_TYPES.some((chartType) => chartHasEvidence(chartType, data));
+}
 
 // Font family mappings for Google Fonts
 const FONT_FAMILIES: Record<string, string> = {
@@ -598,6 +604,9 @@ export function generatePDFContent(plan: BusinessPlan): string {
     } catch (e) {
       console.error('Failed to parse chart data:', e);
     }
+  }
+  if (!hasRenderableEvidenceCharts(chartData)) {
+    chartData = generateChartData(plan, content);
   }
   
   // Generate Google Fonts import URL for the selected font
