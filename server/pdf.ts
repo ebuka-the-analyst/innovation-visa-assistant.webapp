@@ -1367,7 +1367,7 @@ function getBodyStyleCSS(style: number, pc: string, sc: string): string {
       strong { color: ${sc}; }
       ul { list-style: none; padding-left: 16px; }
       ul li { padding-left: 22px; position: relative; margin-bottom: 6px; font-family: 'Roboto Condensed', sans-serif; }
-      ul li::before { content: '—'; position: absolute; left: 0; color: ${sc}; font-weight: 700; }
+      ul li::before { content: '-'; position: absolute; left: 0; color: ${sc}; font-weight: 700; }
       ol { list-style: none; counter-reset: corp1; padding-left: 16px; }
       ol li { counter-increment: corp1; padding-left: 36px; position: relative; margin-bottom: 9px; }
       ol li::before {
@@ -1588,7 +1588,7 @@ function getBodyStyleCSS(style: number, pc: string, sc: string): string {
       body { color: #222; }
       ul { list-style: none; padding-left: 18px; }
       ul li { padding-left: 24px; position: relative; margin-bottom: 7px; font-style: normal; }
-      ul li::before { content: '—'; position: absolute; left: 0; color: ${sc}; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; }
+      ul li::before { content: '-'; position: absolute; left: 0; color: ${sc}; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; }
       ol { list-style: none; counter-reset: news6; padding-left: 16px; }
       ol li { counter-increment: news6; padding-left: 30px; position: relative; margin-bottom: 9px; }
       ol li::before {
@@ -1905,11 +1905,11 @@ function generateTOCHTML(items: TOCItem[], planId: string, pc: string, sc: strin
             <span style="color:${pc};font-family:Georgia,serif;font-style:italic;font-size:11pt;min-width:22px;">${it.num}.</span>
             <a href="#${it.href}" style="color:#2d2d2d;text-decoration:none;font-family:Georgia,serif;font-size:10.5pt;">${it.text}</a>
           </div>
-          <span style="color:#cbd5e1;font-size:8pt;font-family:Georgia,serif;white-space:nowrap;padding-left:10px;">— — —</span>
+          <span style="color:#cbd5e1;font-size:8pt;font-family:Georgia,serif;white-space:nowrap;padding-left:10px;">- - -</span>
         </div>`).join('');
       return `<div style="background:#fefefe;border:1px solid #ddd;border-radius:4px;padding:36px 44px;margin:20px 0;page-break-after:always;">
         <div style="text-align:center;margin-bottom:28px;">
-          <div style="color:${pc};font-size:8pt;letter-spacing:4px;text-transform:uppercase;margin-bottom:8px;font-family:Georgia,serif;">— ${yr} —</div>
+          <div style="color:${pc};font-size:8pt;letter-spacing:4px;text-transform:uppercase;margin-bottom:8px;font-family:Georgia,serif;">- ${yr} -</div>
           <h2 style="color:#1a1a1a;font-family:Georgia,serif;font-size:18pt;font-weight:normal;letter-spacing:2px;margin:0;">Table of Contents</h2>
           <div style="width:60px;height:2px;background:${pc};margin:12px auto 0;"></div>
         </div>
@@ -1941,12 +1941,48 @@ function generateTOCHTML(items: TOCItem[], planId: string, pc: string, sc: strin
 
 // ─── Main content renderer ───────────────────────────────────────────────────
 
+export function sanitizeBusinessPlanOutputText(content: string): string {
+  return content
+    .replace(/[\u2012\u2013\u2014\u2015\u2212\u2011]/g, "-")
+    .replace(/```+\s*(?:text|plaintext|markdown|md)?\s*\n[\s\S]*?\n```+/gi, "")
+    .replace(/```+\s*(?:text|plaintext|markdown|md)?\s*/gi, "")
+    .replace(/```+/g, "")
+    .replace(/`+\s*(?:text|plaintext|markdown|md)\s*$/gim, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function normalizeHeadingForDedupe(value: string): string {
+  return sanitizeBusinessPlanOutputText(value)
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\*\*/g, "")
+    .replace(/^#+\s*/, "")
+    .replace(/^\d+(?:\.\d+)*\.?\s*/, "")
+    .replace(/\s+-\s+/g, " ")
+    .replace(/[^\w&]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+function isCodeFenceLine(line: string): boolean {
+  return /^`{1,3}\s*(?:text|plaintext|markdown|md)?\s*$/i.test(line) || /^`{3,}/.test(line);
+}
+
+function looksLikeAsciiDiagramLine(line: string): boolean {
+  if (!line) return false;
+  const arrowOrBox = /[┌┐└┘─│▼▲►◄]|-->|<--|=>|^\s*[|+\\/_-]{2,}/.test(line);
+  return arrowOrBox;
+}
+
 function formatContentWithCharts(markdown: string, chartData: ChartDataPayload | null, primaryColor: string, skipTitle: boolean = false, planId: string = '', secondaryColor: string = '#1e3a5f', tocStyleOverride?: number | null): string {
-  const lines = markdown.split('\n');
+  const lines = sanitizeBusinessPlanOutputText(markdown).split('\n');
   let html = '';
   let currentSection = '';
   let lastH2Title = '';
+  const renderedMajorHeadings = new Set<string>();
   const usedCharts = new Set<ChartType>();
+  let inCodeFence = false;
   
   let inToc = false;
   let tocItems: TOCItem[] = [];
@@ -1954,13 +1990,22 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
+
+    if (isCodeFenceLine(line)) {
+      inCodeFence = !inCodeFence;
+      continue;
+    }
+
+    if (inCodeFence || looksLikeAsciiDiagramLine(line)) {
+      continue;
+    }
     
     if (line.startsWith('## ')) {
       const sectionTitle = line.slice(3).trim();
-      const normalizedTitle = sectionTitle.replace(/^\d+\.\s*/, '').toLowerCase().trim();
-      const normalizedLast = lastH2Title.replace(/^\d+\.\s*/, '').toLowerCase().trim();
+      const normalizedTitle = normalizeHeadingForDedupe(sectionTitle);
+      const normalizedLast = normalizeHeadingForDedupe(lastH2Title);
       
-      if (normalizedTitle === normalizedLast) {
+      if (normalizedTitle && (normalizedTitle === normalizedLast || renderedMajorHeadings.has(normalizedTitle))) {
         continue;
       }
       
@@ -1978,6 +2023,7 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
       
       currentSection = sectionTitle;
       lastH2Title = sectionTitle;
+      if (normalizedTitle) renderedMajorHeadings.add(normalizedTitle);
       const sectionId = sectionTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       html += `<h2 id="${sectionId}">${sectionTitle}</h2>\n`;
       
@@ -2001,6 +2047,8 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
         }
       }
     } else if (line.startsWith('# ')) {
+      const headingTitle = line.slice(2).trim();
+      const normalizedTitle = normalizeHeadingForDedupe(headingTitle);
       // Skip the first H1 heading entirely when using custom cover (the cover already has the title)
       if (skipTitle && !skippedTitle) {
         skippedTitle = true;
@@ -2015,7 +2063,11 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
         }
         continue;
       }
-      html += `<h1>${line.slice(2)}</h1>\n`;
+      if (normalizedTitle && renderedMajorHeadings.has(normalizedTitle)) {
+        continue;
+      }
+      if (normalizedTitle) renderedMajorHeadings.add(normalizedTitle);
+      html += `<h1>${headingTitle}</h1>\n`;
     } else if (line.startsWith('#### ')) {
       html += `<h4>${line.slice(5)}</h4>\n`;
     } else if (line.startsWith('### ')) {
@@ -2083,6 +2135,10 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
           sepIdx = j;
           break;
         }
+      }
+
+      if (sepIdx === -1 && tableLines.length > 1) {
+        continue;
       }
 
       // Split a row into cell strings
@@ -2256,10 +2312,14 @@ function findChartsForSection(sectionTitle: string): ChartType[] {
 }
 
 function formatInline(text: string): string {
-  return text
+  return sanitizeBusinessPlanOutputText(text)
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/`(.+?)`/g, '<code style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px; font-family: monospace;">$1</code>');
+    .replace(/`([^`]+?)`/g, (_match, code) => {
+      const cleaned = sanitizeBusinessPlanOutputText(String(code)).trim();
+      if (!cleaned || /^(text|plaintext|markdown|md)$/i.test(cleaned)) return "";
+      return `<code style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px; font-family: monospace;">${cleaned}</code>`;
+    });
 }
 
 export function generatePDFUrl(planId: string): string {

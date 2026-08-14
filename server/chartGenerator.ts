@@ -147,12 +147,14 @@ export interface ChartDataPayload {
   }[];
 }
 
+const STRICT_CHART_SOURCE_NOTE = "Charts are generated only from explicit plan inputs or the final generated business plan text.";
+
 export function generateChartData(plan: BusinessPlan, generatedContent: string = ""): ChartDataPayload {
   const qualityWarnings: string[] = [];
   const dataSourceNotes: string[] = [];
   const parsedRevenues = parseThreeYearRevenue(plan.revenue || plan.monthlyProjections || "");
 
-  dataSourceNotes.push("Charts are generated only from explicit plan inputs or the final generated business plan text.");
+  dataSourceNotes.push(STRICT_CHART_SOURCE_NOTE);
 
   return {
     qualityWarnings: Array.from(new Set([
@@ -796,59 +798,62 @@ export const SECTION_CHART_MAP: Record<string, ChartType[]> = {
 };
 
 export function chartHasEvidence(type: ChartType, data: ChartDataPayload): boolean {
+  const hasStrictEvidencePolicy = data.dataSourceNotes?.includes(STRICT_CHART_SOURCE_NOTE) === true;
+  if (!hasStrictEvidencePolicy) return false;
+
   switch (type) {
     case 'financial':
-      return data.financialProjections.length >= 3;
+      return false;
     case 'market':
-      return data.marketSize.length > 0;
+      return false;
     case 'risk':
-      return data.riskMatrix.length > 0;
+      return false;
     case 'competitor':
-      return data.competitorComparison.length > 1;
+      return false;
     case 'kpi':
       return data.kpiMetrics.length > 0;
     case 'funding':
-      return data.fundingAllocation.length > 0;
+      return false;
     case 'revenue_streams':
-      return data.revenueStreams.length > 0;
+      return false;
     case 'unit_economics':
-      return data.unitEconomics.length > 0;
+      return false;
     case 'hiring':
-      return data.hiringTimeline.length > 0;
+      return false;
     case 'tech_stack':
-      return data.techStack.length > 0;
+      return false;
     case 'customer_journey':
-      return data.customerJourney.length > 0;
+      return false;
     case 'gtm_channels':
-      return data.goToMarketChannels.length > 0;
+      return false;
     case 'milestones':
       return data.milestones.length > 0;
     case 'compliance':
-      return data.complianceRoadmap.length > 0;
+      return false;
     case 'growth':
-      return data.growthMetrics.length > 0;
+      return false;
     case 'pricing':
-      return data.pricingTiers.length > 0;
+      return false;
     case 'timeline':
       return data.timeline.length > 0;
     case 'swot':
       return data.swotAnalysis.some((item) => item.items.length > 0);
     case 'customer_personas':
-      return data.customerPersonas.length > 0;
+      return false;
     case 'marketing_channels':
       return data.marketingChannels.length > 0;
     case 'process_flow':
-      return data.processFlow.length > 0;
+      return false;
     case 'customer_silhouettes':
-      return data.customerSilhouettes.length > 0;
+      return false;
     case 'value_proposition':
-      return data.valueProposition.length > 0;
+      return false;
     case 'inspirational_quote':
-      return Boolean(data.inspirationalQuote.quote?.trim());
+      return false;
     case 'research_grid':
-      return data.researchGrid.length > 0;
+      return false;
     case 'business_journey':
-      return data.businessJourney.length > 0;
+      return false;
     default:
       return false;
   }
