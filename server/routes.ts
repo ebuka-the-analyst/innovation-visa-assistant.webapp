@@ -4204,6 +4204,11 @@ ${generatedSections.join("\n\n---\n\n")}`;
         BorderStyle,
         PageBreak,
         ImageRun,
+        Table,
+        TableRow,
+        TableCell,
+        WidthType,
+        ShadingType,
       } = await import("docx");
       const sharp = await import("sharp");
       const chartGenerator = await import("./chartGenerator");
@@ -4248,6 +4253,184 @@ ${generatedSections.join("\n\n---\n\n")}`;
       }
 
       const usedCharts = new Set<string>();
+      type WordBlock =
+        | { kind: "heading"; level: number; text: string }
+        | { kind: "paragraph"; text: string }
+        | { kind: "bullet"; text: string }
+        | { kind: "table"; rows: string[][] }
+        | { kind: "divider" };
+
+      const cleanWordText = (value: string): string =>
+        sanitizeBusinessPlanOutputText(value)
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\*\*/g, "")
+          .replace(/[“”]/g, '"')
+          .replace(/[‘’]/g, "'")
+          .replace(/[–—]/g, "-")
+          .replace(/\s+/g, " ")
+          .trim();
+
+      const looksLikeMarkdownTableRow = (line: string): boolean => {
+        const trimmed = line.trim();
+        return trimmed.startsWith("|") && trimmed.endsWith("|") && trimmed.split("|").length >= 4;
+      };
+
+      const isMarkdownTableDivider = (line: string): boolean =>
+        /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
+
+      const parseTableRow = (line: string): string[] =>
+        line
+          .trim()
+          .replace(/^\|/, "")
+          .replace(/\|$/, "")
+          .split("|")
+          .map((cell) => cleanWordText(cell));
+
+      const isHeadingLine = (line: string): boolean =>
+        /^#{1,4}\s+/.test(line.trim());
+
+      const isBulletLine = (line: string): boolean =>
+        /^[-*]\s+/.test(line.trim());
+
+      const shouldSkipWordLine = (line: string): boolean => {
+        const trimmed = line.trim();
+        if (!trimmed) return false;
+        if (shouldSkipPlanArtifactLine(trimmed)) return true;
+        if (/^\[?table of contents\]?$/i.test(cleanWordText(trimmed))) return true;
+        if (/^\d+\.\s+\[[^\]]+\]\(#[^)]+\)$/i.test(trimmed)) return true;
+        return false;
+      };
+
+      const flushParagraph = (blocks: WordBlock[], paragraphParts: string[]) => {
+        const text = cleanWordText(paragraphParts.join(" "));
+        paragraphParts.length = 0;
+        if (text) blocks.push({ kind: "paragraph", text });
+      };
+
+      const parseWordBlocks = (markdown: string): WordBlock[] => {
+        const blocks: WordBlock[] = [];
+        const paragraphParts: string[] = [];
+        const lines = markdown.split("\n");
+        let i = 0;
+
+        while (i < lines.length) {
+          const rawLine = lines[i];
+          const trimmedLine = rawLine.trim();
+
+          if (!trimmedLine) {
+            flushParagraph(blocks, paragraphParts);
+            i++;
+            continue;
+          }
+
+          if (shouldSkipWordLine(trimmedLine)) {
+            flushParagraph(blocks, paragraphParts);
+            i++;
+            continue;
+          }
+
+          if (looksLikeMarkdownTableRow(trimmedLine)) {
+            flushParagraph(blocks, paragraphParts);
+            const rows: string[][] = [];
+            while (i < lines.length && looksLikeMarkdownTableRow(lines[i].trim())) {
+              if (!isMarkdownTableDivider(lines[i])) {
+                const row = parseTableRow(lines[i]);
+                if (row.some(Boolean)) rows.push(row);
+              }
+              i++;
+            }
+            if (rows.length >= 2) blocks.push({ kind: "table", rows });
+            continue;
+          }
+
+          if (trimmedLine === "---") {
+            flushParagraph(blocks, paragraphParts);
+            blocks.push({ kind: "divider" });
+            i++;
+            continue;
+          }
+
+          if (isHeadingLine(trimmedLine)) {
+            flushParagraph(blocks, paragraphParts);
+            const marker = trimmedLine.match(/^(#{1,4})\s+(.+)$/);
+            const level = marker?.[1]?.length || 2;
+            const text = cleanWordText(marker?.[2] || trimmedLine);
+            if (text) blocks.push({ kind: "heading", level, text });
+            i++;
+            continue;
+          }
+
+          if (isBulletLine(trimmedLine)) {
+            flushParagraph(blocks, paragraphParts);
+            const text = cleanWordText(trimmedLine.replace(/^[-*]\s+/, ""));
+            if (text) blocks.push({ kind: "bullet", text });
+            i++;
+            continue;
+          }
+
+          paragraphParts.push(trimmedLine);
+          i++;
+        }
+
+        flushParagraph(blocks, paragraphParts);
+        return blocks;
+      };
+
+      const createTextRuns = (value: string, size = 22): any[] => {
+        const runs: any[] = [];
+        const parts = value.split(/\*\*([^*]+)\*\*/g);
+        for (let i = 0; i < parts.length; i++) {
+          const text = cleanWordText(parts[i]);
+          if (!text) continue;
+          runs.push(new TextRun({ text, size, bold: i % 2 === 1 }));
+        }
+        return runs.length ? runs : [new TextRun({ text: cleanWordText(value), size })];
+      };
+
+      const addMarkdownTableToDoc = (rows: string[][]) => {
+        const columnCount = Math.min(Math.max(...rows.map((row) => row.length)), 5);
+        const normalizedRows = rows.map((row) =>
+          Array.from({ length: columnCount }, (_, index) => row[index] || ""),
+        );
+        const columnWidth = Math.floor(9000 / columnCount);
+
+        children.push(
+          new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            rows: normalizedRows.map(
+              (row, rowIndex) =>
+                new TableRow({
+                  tableHeader: rowIndex === 0,
+                  children: row.map(
+                    (cell) =>
+                      new TableCell({
+                        width: { size: columnWidth, type: WidthType.DXA },
+                        shading:
+                          rowIndex === 0
+                            ? { type: ShadingType.CLEAR, fill: "005EB8", color: "auto" }
+                            : undefined,
+                        children: [
+                          new Paragraph({
+                            children: [
+                              new TextRun({
+                                text: cleanWordText(cell),
+                                size: rowIndex === 0 ? 20 : 19,
+                                bold: rowIndex === 0,
+                                color: rowIndex === 0 ? "FFFFFF" : "111827",
+                              }),
+                            ],
+                            spacing: { before: 80, after: 80 },
+                          }),
+                        ],
+                      }),
+                  ),
+                }),
+            ),
+          }),
+          new Paragraph({ text: "", spacing: { after: 160 } }),
+        );
+      };
 
       const findChartsForSection = (
         sectionTitle: string,
@@ -4388,67 +4571,71 @@ ${generatedSections.join("\n\n---\n\n")}`;
         new Paragraph({ children: [new PageBreak()] }),
       );
 
-      const lines = content.split("\n");
       let lastH2Title = "";
       const seenMajorHeadings = new Set<string>();
+      const blocks = parseWordBlocks(content);
 
-      for (const line of lines) {
-        const trimmedLine = line.trim();
-        if (shouldSkipPlanArtifactLine(trimmedLine)) continue;
-
-        if (trimmedLine.startsWith("# ")) {
-          const normalizedTitle = normalizePlanHeadingForDedupe(trimmedLine.slice(2));
+      for (const block of blocks) {
+        if (block.kind === "heading") {
+          const normalizedTitle = normalizePlanHeadingForDedupe(block.text);
           if (normalizedTitle && seenMajorHeadings.has(normalizedTitle)) continue;
-          if (normalizedTitle) seenMajorHeadings.add(normalizedTitle);
-          children.push(
-            new Paragraph({
-              text: trimmedLine.slice(2),
-              heading: HeadingLevel.HEADING_1,
-              spacing: { before: 400, after: 200 },
-            }),
-          );
-        } else if (trimmedLine.startsWith("## ")) {
-          const sectionTitle = trimmedLine.slice(3);
-          const normalizedTitle = normalizePlanHeadingForDedupe(sectionTitle);
-          const normalizedLast = normalizePlanHeadingForDedupe(lastH2Title);
 
-          if (normalizedTitle && (normalizedTitle === normalizedLast || seenMajorHeadings.has(normalizedTitle))) {
+          if (block.level <= 2) {
+            const normalizedLast = normalizePlanHeadingForDedupe(lastH2Title);
+            if (normalizedTitle && normalizedTitle === normalizedLast) {
+              continue;
+            }
+            lastH2Title = block.text;
+            if (normalizedTitle) seenMajorHeadings.add(normalizedTitle);
+          }
+
+          if (block.level === 1) {
+            children.push(
+              new Paragraph({
+                text: block.text,
+                heading: HeadingLevel.HEADING_1,
+                spacing: { before: 400, after: 200 },
+              }),
+            );
             continue;
           }
 
-          lastH2Title = sectionTitle;
-          if (normalizedTitle) seenMajorHeadings.add(normalizedTitle);
           children.push(
             new Paragraph({
-              text: sectionTitle,
-              heading: HeadingLevel.HEADING_2,
-              spacing: { before: 300, after: 150 },
+              text: block.text,
+              heading:
+                block.level === 2
+                  ? HeadingLevel.HEADING_2
+                  : block.level === 3
+                    ? HeadingLevel.HEADING_3
+                    : HeadingLevel.HEADING_4,
+              spacing: {
+                before: block.level === 2 ? 300 : 180,
+                after: block.level === 2 ? 150 : 90,
+              },
             }),
           );
 
-          if (chartData) {
-            const chartsForSection = findChartsForSection(sectionTitle);
+          if (chartData && block.level <= 2) {
+            const chartsForSection = findChartsForSection(block.text);
             for (const chartType of chartsForSection) {
               await addChartToDoc(chartType);
             }
           }
-        } else if (trimmedLine.startsWith("#### ")) {
+        } else if (block.kind === "bullet") {
           children.push(
             new Paragraph({
-              text: trimmedLine.slice(5),
-              heading: HeadingLevel.HEADING_4,
-              spacing: { before: 150, after: 80 },
+              children: [
+                new TextRun({ text: "• ", size: 22 }),
+                ...createTextRuns(block.text),
+              ],
+              indent: { left: 360, hanging: 180 },
+              spacing: { after: 90 },
             }),
           );
-        } else if (trimmedLine.startsWith("### ")) {
-          children.push(
-            new Paragraph({
-              text: trimmedLine.slice(4),
-              heading: HeadingLevel.HEADING_3,
-              spacing: { before: 200, after: 100 },
-            }),
-          );
-        } else if (trimmedLine.startsWith("---")) {
+        } else if (block.kind === "table") {
+          addMarkdownTableToDoc(block.rows);
+        } else if (block.kind === "divider") {
           children.push(
             new Paragraph({
               border: {
@@ -4462,25 +4649,14 @@ ${generatedSections.join("\n\n---\n\n")}`;
               spacing: { before: 200, after: 200 },
             }),
           );
-        } else if (trimmedLine.length > 0) {
-          const runs: any[] = [];
-          const parts = trimmedLine.split(/\*\*([^*]+)\*\*/g);
-          for (let i = 0; i < parts.length; i++) {
-            if (i % 2 === 0) {
-              if (parts[i])
-                runs.push(new TextRun({ text: parts[i], size: 22 }));
-            } else {
-              if (parts[i])
-                runs.push(
-                  new TextRun({ text: parts[i], bold: true, size: 22 }),
-                );
-            }
-          }
-          if (runs.length > 0) {
-            children.push(
-              new Paragraph({ children: runs, spacing: { after: 120 } }),
-            );
-          }
+        } else if (block.kind === "paragraph") {
+          const runs = createTextRuns(block.text);
+          children.push(
+            new Paragraph({
+              children: runs,
+              spacing: { after: 120 },
+            }),
+          );
         }
       }
 
