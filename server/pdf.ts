@@ -844,6 +844,9 @@ export function generatePDFContent(plan: BusinessPlan): string {
       background-color: #f8fafc;
     }
     .table-wrapper {
+      display: flow-root;
+      clear: both;
+      width: 100%;
       overflow-x: auto;
       max-width: 100%;
       margin: 10px 0;
@@ -852,6 +855,14 @@ export function generatePDFContent(plan: BusinessPlan): string {
       min-width: 0;
       width: 100%;
       margin: 0;
+    }
+    .table-clear {
+      display: block;
+      clear: both;
+      width: 100%;
+      height: 0;
+      line-height: 0;
+      overflow: hidden;
     }
     .stacked-table {
       margin: 10px 0;
@@ -1060,9 +1071,20 @@ export function generatePDFContent(plan: BusinessPlan): string {
         break-inside: auto !important;
       }
       .table-wrapper {
+        display: flow-root !important;
+        clear: both !important;
+        width: 100% !important;
         margin: 8px 0 !important;
         page-break-inside: auto !important;
         break-inside: auto !important;
+      }
+      .table-clear {
+        display: block !important;
+        clear: both !important;
+        width: 100% !important;
+        height: 0 !important;
+        line-height: 0 !important;
+        overflow: hidden !important;
       }
       .stacked-table {
         margin: 8px 0 !important;
@@ -1984,6 +2006,46 @@ function looksLikeAsciiDiagramLine(line: string): boolean {
   return arrowOrBox;
 }
 
+function isTableEscapeBoundary(line: string): boolean {
+  const trimmed = line.trim();
+  return trimmed === '' ||
+    trimmed.startsWith('# ') ||
+    trimmed.startsWith('## ') ||
+    trimmed.startsWith('### ') ||
+    trimmed.startsWith('#### ') ||
+    trimmed === '---';
+}
+
+function isolateRawHtmlTable(tableHtml: string): string {
+  let normalized = tableHtml.trim()
+    .replace(/^\s*<div\s+class=["']table-wrapper["']>\s*/i, '')
+    .replace(/\s*<\/div>\s*$/i, '');
+
+  if (!/<\/table>/i.test(normalized)) {
+    normalized += '</table>';
+  }
+
+  return `<div class="table-wrapper">${normalized}</div><div class="table-clear"></div>\n`;
+}
+
+function wrapBareHtmlTables(html: string): string {
+  const protectedTables: string[] = [];
+  const tokenPrefix = '___BUSINESS_PLAN_TABLE_WRAPPER_';
+
+  const protectedHtml = html.replace(
+    /<div\s+class=["']table-wrapper["']>\s*<table\b[\s\S]*?<\/table>\s*<\/div>(?:\s*<div\s+class=["']table-clear["']><\/div>)?/gi,
+    (match) => {
+      const token = `${tokenPrefix}${protectedTables.length}___`;
+      protectedTables.push(match.includes('table-clear') ? match : `${match}<div class="table-clear"></div>`);
+      return token;
+    }
+  );
+
+  const wrappedHtml = protectedHtml.replace(/<table\b[\s\S]*?<\/table>/gi, (match) => isolateRawHtmlTable(match));
+
+  return wrappedHtml.replace(new RegExp(`${tokenPrefix}(\\d+)___`, 'g'), (_, index) => protectedTables[Number(index)] || '');
+}
+
 function formatContentWithCharts(markdown: string, chartData: ChartDataPayload | null, primaryColor: string, skipTitle: boolean = false, planId: string = '', secondaryColor: string = '#1e3a5f', tocStyleOverride?: number | null): string {
   const lines = sanitizeBusinessPlanOutputText(markdown).split('\n');
   let html = '';
@@ -2122,6 +2184,22 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
         inToc = false;
       }
       html += '<hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">\n';
+    } else if (/<table\b/i.test(line)) {
+      const tableLines: string[] = [line];
+      let hasTableClose = /<\/table>/i.test(line);
+
+      while (!hasTableClose && i + 1 < lines.length) {
+        const next = lines[i + 1].trim();
+        if (isTableEscapeBoundary(next)) {
+          break;
+        }
+
+        tableLines.push(next);
+        i++;
+        hasTableClose = /<\/table>/i.test(next);
+      }
+
+      html += isolateRawHtmlTable(tableLines.join('\n'));
     } else if (line.startsWith('|') && line.includes('|', 1)) {
       // ── Markdown table parser ──────────────────────────────────────────────
       // Collect all consecutive pipe-delimited rows (including separator)
@@ -2237,7 +2315,7 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
           t += `</tbody>`;
         }
 
-        t += `</table></div>\n`;
+        t += `</table></div><div class="table-clear"></div>\n`;
         html += t;
       }
     } else if (line.length > 0) {
@@ -2251,15 +2329,10 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
     tocItems = [];
   }
   
-  // Post-process: wrap any bare HTML <table> elements that the AI may have
-  // embedded directly in the content. Markdown tables are already wrapped.
-  // We detect bare tables by finding <table that is NOT immediately preceded by
-  // the table-wrapper marker we set on markdown tables.
-  html = html
-    .replace(/(?<!table-wrapper">)(<table(?:\s[^>]*)?>)/g,
-      '<div class="table-wrapper">$1')
-    .replace(/<\/table>(?!\s*<\/div>)/g,
-      '</table></div>');
+  // Post-process: isolate any complete bare HTML <table> blocks that may have
+  // arrived from AI-generated content. This keeps following sections from being
+  // swallowed into a final table cell when the source table markup is imperfect.
+  html = wrapBareHtmlTables(html);
 
   return html;
 }
