@@ -407,10 +407,11 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   
-  const { data: user } = useQuery<{ id: string; email: string; displayName?: string; firstName?: string; lastName?: string; subscriptionTier?: string; subscriptionStatus?: string }>({
+  const { data: user } = useQuery<{ id: string; email: string; displayName?: string; firstName?: string; lastName?: string; isAdmin?: boolean; subscriptionTier?: string; subscriptionStatus?: string }>({
     queryKey: ['/api/auth/user'],
     retry: false,
   });
+  const isAdminUser = user?.isAdmin === true;
   
   // Check if user already has an active paid subscription (skip payment for them)
   const userHasActiveSubscription = user?.subscriptionStatus === 'active' && 
@@ -2997,31 +2998,37 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
                 </h4>
                 
                 <div className="grid gap-3">
-                  {INDUSTRY_TEMPLATES[selectedIndustry as keyof typeof INDUSTRY_TEMPLATES]?.templates.map((template, index) => (
-                    <Card 
-                      key={template}
-                      className="p-4 cursor-pointer hover-elevate border-2 border-transparent hover:border-primary/50 transition-all"
-                      onClick={() => {
-                        handleLoadIndustryTemplate(selectedIndustry, index);
-                        setShowTemplateModal(false);
-                        setSelectedIndustry(null);
-                      }}
-                      data-testid={`template-${index}`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <Badge variant="outline" className="text-xs">
-                          #{index + 1}
-                        </Badge>
-                        <div className="flex-1">
-                          <h5 className="font-medium">{template}</h5>
-                          <p className="text-xs text-muted-foreground">
-                            Click to load this template with example data
-                          </p>
+                  {INDUSTRY_TEMPLATES[selectedIndustry as keyof typeof INDUSTRY_TEMPLATES]?.templates.map((template, index) => {
+                    if (template === "UK Visa Assistant - Benedict Umeh" && !isAdminUser) {
+                      return null;
+                    }
+
+                    return (
+                      <Card 
+                        key={template}
+                        className="p-4 cursor-pointer hover-elevate border-2 border-transparent hover:border-primary/50 transition-all"
+                        onClick={() => {
+                          handleLoadIndustryTemplate(selectedIndustry, index);
+                          setShowTemplateModal(false);
+                          setSelectedIndustry(null);
+                        }}
+                        data-testid={`template-${index}`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <Badge variant="outline" className="text-xs">
+                            #{index + 1}
+                          </Badge>
+                          <div className="flex-1">
+                            <h5 className="font-medium">{template}</h5>
+                            <p className="text-xs text-muted-foreground">
+                              Click to load this template with example data
+                            </p>
+                          </div>
+                          <Check className="w-5 h-5 text-green-500" />
                         </div>
-                        <Check className="w-5 h-5 text-green-500" />
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    );
+                  })}
                 </div>
               </div>
             )}
