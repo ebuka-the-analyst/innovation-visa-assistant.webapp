@@ -46,7 +46,7 @@ import {
   generateBackdatedPosts,
 } from "./blogGenerator";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
-import { generatePDFContent, generatePDFUrl } from "./pdf";
+import { generatePDFContent, generatePDFUrl, sanitizeBusinessPlanOutputText } from "./pdf";
 import { z } from "zod";
 import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
@@ -114,6 +114,26 @@ import {
 const uploadsDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+function shouldSkipPlanArtifactLine(line: string): boolean {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  if (/^`{1,3}\s*(?:text|plaintext|markdown|md)?\s*$/i.test(trimmed)) return true;
+  return /[┌┐└┘─│▼▲►◄]|-->|<--|=>|^\s*[|+\\/_-]{2,}/.test(trimmed);
+}
+
+function normalizePlanHeadingForDedupe(value: string): string {
+  return sanitizeBusinessPlanOutputText(value)
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\*\*/g, "")
+    .replace(/^#+\s*/, "")
+    .replace(/^\d+(?:\.\d+)*\.?\s*/, "")
+    .replace(/\s+-\s+/g, " ")
+    .replace(/[^\w&]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
 }
 
 const geminiAI = new GoogleGenAI({
@@ -3542,13 +3562,14 @@ ${generatedSections.join("\n\n---\n\n")}`;
       currentGenerationStage: "Reviewing plan against endorser-readiness benchmark...",
     });
 
-    generatedContent = sanitizeBusinessPlanClaims(generatedContent);
+    generatedContent = sanitizeBusinessPlanOutputText(sanitizeBusinessPlanClaims(generatedContent));
     // Generate chart data only after the plan exists, so charts can be backed by the final plan text.
     const { generateChartData } = await import("./chartGenerator");
     const chartDataObj = generateChartData(plan, generatedContent);
     const chartData = JSON.stringify(chartDataObj);
     const qualityReport = assessBusinessPlanQuality(plan, generatedContent, chartDataObj);
     generatedContent = `${generatedContent}\n\n---\n\n${formatQualityReportMarkdown(qualityReport)}`;
+    generatedContent = sanitizeBusinessPlanOutputText(generatedContent);
 
     await storage.updateBusinessPlan(planId, {
       status: "completed",
@@ -3611,7 +3632,7 @@ ${generatedSections.join("\n\n---\n\n")}`;
       res.send(pdfBuffer);
     });
 
-    const content = businessPlan.generatedContent;
+    const content = sanitizeBusinessPlanOutputText(businessPlan.generatedContent || "");
     const tierName =
       (businessPlan.tier || "free").charAt(0).toUpperCase() +
       (businessPlan.tier || "free").slice(1);
@@ -3643,6 +3664,7 @@ ${generatedSections.join("\n\n---\n\n")}`;
 
     for (const line of lines) {
       const trimmed = line.trim();
+      if (shouldSkipPlanArtifactLine(trimmed)) continue;
       if (!trimmed) {
         currentY += 10;
         continue;
@@ -4069,7 +4091,7 @@ ${generatedSections.join("\n\n---\n\n")}`;
       }
 
       // Generate a simple HTML preview for Word - remove duplicate titles
-      const content = businessPlan.generatedContent;
+      const content = sanitizeBusinessPlanOutputText(businessPlan.generatedContent || "");
 
       // Track which sections we've seen to avoid duplicates
       const seenSections = new Set<string>();
@@ -4109,6 +4131,7 @@ ${generatedSections.join("\n\n---\n\n")}`;
       .split("\n")
       .map((line) => {
         const trimmed = line.trim();
+        if (shouldSkipPlanArtifactLine(trimmed)) return "";
         // Skip numbered section headers that duplicate the ## headers and separators
         if (/^\d+\.\s+[A-Z][A-Z\s&]+$/.test(trimmed)) return "";
         if (
@@ -4120,8 +4143,12 @@ ${generatedSections.join("\n\n---\n\n")}`;
         if (trimmed === "---")
           return '<hr style="margin: 30px 0; border-top: 2px solid #005EB8;">';
         // Main section headers (## ) - render as blue h2
-        if (trimmed.startsWith("## "))
+        if (trimmed.startsWith("## ")) {
+          const normalizedTitle = normalizePlanHeadingForDedupe(trimmed.slice(3));
+          if (normalizedTitle && seenSections.has(normalizedTitle)) return "";
+          if (normalizedTitle) seenSections.add(normalizedTitle);
           return `<h2 class="section-title">${trimmed.slice(3)}</h2>`;
+        }
         // Main title (# ) - skip if it's the business name (already in header)
         if (trimmed.startsWith("# ")) return "";
         // Subsection headers
@@ -4181,7 +4208,7 @@ ${generatedSections.join("\n\n---\n\n")}`;
       const sharp = await import("sharp");
       const chartGenerator = await import("./chartGenerator");
 
-      const content = businessPlan.generatedContent;
+      const content = sanitizeBusinessPlanOutputText(businessPlan.generatedContent || "");
       const children: any[] = [];
 
       const svgToPng = async (
@@ -4346,11 +4373,16 @@ ${generatedSections.join("\n\n---\n\n")}`;
 
       const lines = content.split("\n");
       let lastH2Title = "";
+      const seenMajorHeadings = new Set<string>();
 
       for (const line of lines) {
         const trimmedLine = line.trim();
+        if (shouldSkipPlanArtifactLine(trimmedLine)) continue;
 
         if (trimmedLine.startsWith("# ")) {
+          const normalizedTitle = normalizePlanHeadingForDedupe(trimmedLine.slice(2));
+          if (normalizedTitle && seenMajorHeadings.has(normalizedTitle)) continue;
+          if (normalizedTitle) seenMajorHeadings.add(normalizedTitle);
           children.push(
             new Paragraph({
               text: trimmedLine.slice(2),
@@ -4360,20 +4392,15 @@ ${generatedSections.join("\n\n---\n\n")}`;
           );
         } else if (trimmedLine.startsWith("## ")) {
           const sectionTitle = trimmedLine.slice(3);
-          const normalizedTitle = sectionTitle
-            .replace(/^\d+\.\s*/, "")
-            .toLowerCase()
-            .trim();
-          const normalizedLast = lastH2Title
-            .replace(/^\d+\.\s*/, "")
-            .toLowerCase()
-            .trim();
+          const normalizedTitle = normalizePlanHeadingForDedupe(sectionTitle);
+          const normalizedLast = normalizePlanHeadingForDedupe(lastH2Title);
 
-          if (normalizedTitle === normalizedLast) {
+          if (normalizedTitle && (normalizedTitle === normalizedLast || seenMajorHeadings.has(normalizedTitle))) {
             continue;
           }
 
           lastH2Title = sectionTitle;
+          if (normalizedTitle) seenMajorHeadings.add(normalizedTitle);
           children.push(
             new Paragraph({
               text: sectionTitle,
