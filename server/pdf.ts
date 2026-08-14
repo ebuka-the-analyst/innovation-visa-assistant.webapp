@@ -1,5 +1,5 @@
 import type { BusinessPlan } from "@shared/schema";
-import { generateSVGChart, SECTION_CHART_MAP, type ChartDataPayload, type ChartType } from "./chartGenerator";
+import { chartHasEvidence, generateSVGChart, SECTION_CHART_MAP, type ChartDataPayload, type ChartType } from "./chartGenerator";
 
 // Font family mappings for Google Fonts
 const FONT_FAMILIES: Record<string, string> = {
@@ -957,11 +957,13 @@ export function generatePDFContent(plan: BusinessPlan): string {
       text-align: center;
       border-top: 3px solid ${primaryColor};
       break-inside: avoid;
+      overflow: visible;
     }
     .chart-container svg {
+      width: 100%;
       max-width: 100%;
-      max-height: 225px;
       height: auto;
+      overflow: visible;
     }
     .inline-chart {
       margin: 8px auto;
@@ -1985,6 +1987,9 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
           if (!usedCharts.has(chartType)) {
             usedCharts.add(chartType);
             try {
+              if (!chartHasEvidence(chartType, chartData)) {
+                continue;
+              }
               const svg = generateSVGChart(chartType, chartData);
               if (svg) {
                 html += `<div class="chart-container inline-chart">${svg}</div>\n`;
@@ -2179,34 +2184,6 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
   if (inToc) {
     html += generateTOCHTML(tocItems, planId, primaryColor, secondaryColor, tocStyleOverride) + '\n';
     tocItems = [];
-  }
-  
-  if (chartData) {
-    const remainingCharts: ChartType[] = [];
-    const allChartTypes: ChartType[] = ['kpi', 'funding', 'financial', 'market', 'revenue_streams', 'unit_economics', 
-      'customer_journey', 'competitor', 'gtm_channels', 'growth', 'hiring', 'tech_stack', 
-      'risk', 'compliance', 'milestones', 'timeline', 'pricing'];
-    
-    for (const chartType of allChartTypes) {
-      if (!usedCharts.has(chartType)) {
-        remainingCharts.push(chartType);
-      }
-    }
-    
-    if (remainingCharts.length > 0) {
-      html += `<div class="additional-visuals"><h2 style="color: ${primaryColor};">Additional Visual Analytics</h2>\n`;
-      for (const chartType of remainingCharts) {
-        try {
-          const svg = generateSVGChart(chartType, chartData);
-          if (svg) {
-            html += `<div class="chart-container inline-chart">${svg}</div>\n`;
-          }
-        } catch (e) {
-          console.error(`Failed to generate ${chartType} chart:`, e);
-        }
-      }
-      html += '</div>';
-    }
   }
   
   // Post-process: wrap any bare HTML <table> elements that the AI may have

@@ -147,9 +147,47 @@ export interface ChartDataPayload {
   }[];
 }
 
-export function generateChartData(plan: BusinessPlan): ChartDataPayload {
+export function generateChartData(plan: BusinessPlan, generatedContent: string = ""): ChartDataPayload {
   const qualityWarnings: string[] = [];
   const dataSourceNotes: string[] = [];
+  const parsedRevenues = parseThreeYearRevenue(plan.revenue || plan.monthlyProjections || "");
+
+  dataSourceNotes.push("Charts are generated only from explicit plan inputs or the final generated business plan text.");
+
+  return {
+    qualityWarnings: Array.from(new Set([
+      ...qualityWarnings,
+      "Assumption-based visual charts are disabled; unsupported charts are skipped instead of filled with default data.",
+    ])),
+    dataSourceNotes: Array.from(new Set(dataSourceNotes)),
+    financialProjections: [],
+    marketSize: [],
+    timeline: extractTimelineFromContent(generatedContent),
+    riskMatrix: [],
+    competitorComparison: [],
+    kpiMetrics: buildEvidenceBackedKpis(plan, parsedRevenues),
+    fundingAllocation: [],
+    revenueStreams: [],
+    unitEconomics: [],
+    hiringTimeline: [],
+    techStack: [],
+    customerJourney: [],
+    goToMarketChannels: [],
+    milestones: extractMilestonesFromContent(generatedContent),
+    complianceRoadmap: [],
+    growthMetrics: [],
+    pricingTiers: [],
+    swotAnalysis: extractSWOTFromContent(generatedContent),
+    customerPersonas: [],
+    marketingChannels: extractMarketingChannelsFromContent(generatedContent),
+    processFlow: [],
+    customerSilhouettes: [],
+    valueProposition: [],
+    inspirationalQuote: { quote: "", author: "", role: "" },
+    researchGrid: [],
+    businessJourney: [],
+  };
+
   const funding = plan.funding || 50000;
   const jobCreation = plan.jobCreation || 10;
   const cac = plan.customerAcquisitionCost || 500;
@@ -162,12 +200,12 @@ export function generateChartData(plan: BusinessPlan): ChartDataPayload {
     qualityWarnings.push("Unit economics chart uses fallback CAC/LTV values because complete unit-economics inputs were not provided.");
   }
 
-  const parsedRevenues = parseThreeYearRevenue(plan.revenue || plan.monthlyProjections || "");
-  let year1Revenue = parsedRevenues?.[0] || 0;
-  let year2Revenue = parsedRevenues?.[1] || 0;
-  let year3Revenue = parsedRevenues?.[2] || 0;
+  const legacyParsedRevenues = parseThreeYearRevenue(plan.revenue || plan.monthlyProjections || "");
+  let year1Revenue = legacyParsedRevenues?.[0] || 0;
+  let year2Revenue = legacyParsedRevenues?.[1] || 0;
+  let year3Revenue = legacyParsedRevenues?.[2] || 0;
 
-  if (parsedRevenues) {
+  if (legacyParsedRevenues) {
     dataSourceNotes.push("Financial projection chart is based on revenue figures found in the applicant's revenue/projection text.");
   } else {
     year1Revenue = Math.round(funding * 1.5);
@@ -182,11 +220,11 @@ export function generateChartData(plan: BusinessPlan): ChartDataPayload {
     { year: "Year 3", revenue: year3Revenue, costs: Math.round(year3Revenue * 0.55), profit: Math.round(year3Revenue * 0.45) },
   ];
 
-  const tamMatch = plan.marketSize?.match(/(\d+(?:\.\d+)?)\s*(billion|million|B|M)/i);
+  const tamMatch = plan.marketSize?.match(/(\d+(?:\.\d+)?)\s*(billion|million|B|M)/i) || null;
   let tamValue = 5000000000;
-  if (tamMatch) {
-    const num = parseFloat(tamMatch[1]);
-    const unit = tamMatch[2].toLowerCase();
+  if (tamMatch !== null) {
+    const num = parseFloat(tamMatch![1] || "0");
+    const unit = (tamMatch![2] || "").toLowerCase();
     if (unit.includes('b')) tamValue = num * 1000000000;
     else if (unit.includes('m')) tamValue = num * 1000000;
     dataSourceNotes.push("Market-size chart is based on the TAM figure found in the applicant's market-size text.");
@@ -396,36 +434,215 @@ export function generateChartData(plan: BusinessPlan): ChartDataPayload {
     { phase: "Growth", activities: ["Scaling", "Expansion", "Optimization"], icon: "growth" },
   ];
 
+  const evidencedSwotAnalysis = extractSWOTFromContent(generatedContent);
+  const evidencedMilestones = extractMilestonesFromContent(generatedContent);
+  const evidencedTimeline = extractTimelineFromContent(generatedContent);
+  const evidencedMarketingChannels = extractMarketingChannelsFromContent(generatedContent);
+  const evidencedKpiMetrics = buildEvidenceBackedKpis(plan, parsedRevenues);
+
   return {
     qualityWarnings: Array.from(new Set(qualityWarnings)),
     dataSourceNotes: Array.from(new Set(dataSourceNotes)),
-    financialProjections,
-    marketSize,
-    timeline,
-    riskMatrix,
-    competitorComparison,
-    kpiMetrics,
-    fundingAllocation,
-    revenueStreams,
-    unitEconomics,
-    hiringTimeline,
-    techStack,
-    customerJourney,
-    goToMarketChannels,
-    milestones,
-    complianceRoadmap,
-    growthMetrics,
-    pricingTiers,
-    swotAnalysis,
-    customerPersonas,
-    marketingChannels,
-    processFlow,
-    customerSilhouettes,
-    valueProposition,
-    inspirationalQuote,
-    researchGrid,
-    businessJourney,
+    financialProjections: [],
+    marketSize: [],
+    timeline: evidencedTimeline,
+    riskMatrix: [],
+    competitorComparison: [],
+    kpiMetrics: evidencedKpiMetrics,
+    fundingAllocation: [],
+    revenueStreams: [],
+    unitEconomics: [],
+    hiringTimeline: [],
+    techStack: [],
+    customerJourney: [],
+    goToMarketChannels: [],
+    milestones: evidencedMilestones,
+    complianceRoadmap: [],
+    growthMetrics: [],
+    pricingTiers: [],
+    swotAnalysis: evidencedSwotAnalysis,
+    customerPersonas: [],
+    marketingChannels: evidencedMarketingChannels,
+    processFlow: [],
+    customerSilhouettes: [],
+    valueProposition: [],
+    inspirationalQuote: { quote: "", author: "", role: "" },
+    researchGrid: [],
+    businessJourney: [],
   };
+}
+
+function buildEvidenceBackedKpis(
+  plan: BusinessPlan,
+  parsedRevenues: [number, number, number] | null,
+): ChartDataPayload["kpiMetrics"] {
+  const kpis: ChartDataPayload["kpiMetrics"] = [];
+
+  if (typeof plan.jobCreation === "number" && plan.jobCreation > 0) {
+    kpis.push({ label: "Jobs Created", value: `${plan.jobCreation}`, trend: "up", color: "#8B5CF6" });
+  }
+
+  if (typeof plan.funding === "number" && plan.funding > 0) {
+    kpis.push({ label: "Funding Required", value: formatPounds(plan.funding), trend: "stable", color: "#10B981" });
+  }
+
+  if (parsedRevenues) {
+    kpis.push({ label: "Year 3 Revenue", value: formatPounds(parsedRevenues[2]), trend: "up", color: "#3B82F6" });
+  }
+
+  if (plan.customerAcquisitionCost && plan.lifetimeValue) {
+    kpis.push({
+      label: "LTV/CAC Ratio",
+      value: `${(plan.lifetimeValue / plan.customerAcquisitionCost).toFixed(1)}x`,
+      trend: "up",
+      color: "#F59E0B",
+    });
+  }
+
+  return kpis;
+}
+
+function formatPounds(value: number): string {
+  if (value >= 1_000_000) return `£${(value / 1_000_000).toFixed(value % 1_000_000 === 0 ? 0 : 1)}M`;
+  if (value >= 1_000) return `£${Math.round(value / 1_000)}K`;
+  return `£${value}`;
+}
+
+function extractSWOTFromContent(content: string): ChartDataPayload["swotAnalysis"] {
+  const section = extractSection(content, /swot/i);
+  if (!section) return [];
+
+  const categories: ChartDataPayload["swotAnalysis"] = [
+    { category: "strengths", items: [] },
+    { category: "weaknesses", items: [] },
+    { category: "opportunities", items: [] },
+    { category: "threats", items: [] },
+  ];
+  let current: ChartDataPayload["swotAnalysis"][number] | null = null;
+
+  for (const rawLine of section.split("\n")) {
+    const line = rawLine.trim();
+    const category = categories.find((item) => new RegExp(item.category, "i").test(line));
+    if (category && /^#{1,4}\s|\*\*|:/.test(line)) {
+      current = category;
+      continue;
+    }
+
+    const bullet = line.match(/^[-*•]\s+(.+)$/);
+    if (bullet && current) {
+      current.items.push(cleanChartLabel(bullet[1]));
+    }
+  }
+
+  return categories.filter((item) => item.items.length > 0);
+}
+
+function extractMilestonesFromContent(content: string): ChartDataPayload["milestones"] {
+  const section = extractSection(content, /milestone|roadmap|timeline|implementation/i);
+  if (!section) return [];
+
+  const milestones: ChartDataPayload["milestones"] = [];
+  const monthPattern = /\b(?:M|month)\s*(\d{1,2})\b/i;
+
+  for (const rawLine of section.split("\n")) {
+    const line = rawLine.trim();
+    const monthMatch = line.match(monthPattern);
+    if (!monthMatch) continue;
+
+    const month = Number(monthMatch[1]);
+    const label = cleanChartLabel(
+      line
+        .replace(/^[-*•]\s+/, "")
+        .replace(/\|/g, " ")
+        .replace(monthPattern, "")
+        .replace(/[:–—-]+/g, " ")
+        .trim(),
+    );
+
+    if (month > 0 && label.length > 2) {
+      milestones.push({ milestone: label.slice(0, 36), month, status: "planned" });
+    }
+  }
+
+  return uniqueByLabel(milestones, (item) => `${item.month}:${item.milestone}`).slice(0, 8);
+}
+
+function extractTimelineFromContent(content: string): ChartDataPayload["timeline"] {
+  const milestones = extractMilestonesFromContent(content);
+  if (milestones.length < 2) return [];
+
+  return milestones.slice(0, 6).map((item, index, items) => {
+    const nextMonth = items[index + 1]?.month;
+    const duration = nextMonth && nextMonth > item.month ? nextMonth - item.month : 3;
+    return {
+      phase: item.milestone.slice(0, 24),
+      startMonth: item.month,
+      duration,
+      tasks: [],
+    };
+  });
+}
+
+function extractMarketingChannelsFromContent(content: string): ChartDataPayload["marketingChannels"] {
+  const section = extractSection(content, /marketing|go-to-market|channel/i);
+  if (!section) return [];
+
+  const rows: ChartDataPayload["marketingChannels"] = [];
+  const currencyPattern = /£\s*([\d,.]+)\s*(k|m|million|thousand)?/i;
+  const leadsPattern = /([\d,.]+)\s*(?:leads|lead|customers|users)/i;
+  const cacPattern = /CAC\s*:?\s*£?\s*([\d,.]+)\s*(k|m|million|thousand)?/i;
+
+  for (const rawLine of section.split("\n")) {
+    const line = rawLine.trim();
+    if (!line || /allocation|performance|budget/i.test(line) && !currencyPattern.test(line)) continue;
+
+    const budgetMatch = line.match(currencyPattern);
+    const leadsMatch = line.match(leadsPattern);
+    const cacMatch = line.match(cacPattern);
+    if (!budgetMatch || !leadsMatch || !cacMatch) continue;
+
+    const channel = cleanChartLabel(line.split("|")[0].replace(/^[-*•]\s+/, "").replace(/[:–—-].*$/, ""));
+    const budget = normaliseCurrencyNumber(budgetMatch[1], budgetMatch[2]);
+    const expectedLeads = Math.round(Number(leadsMatch[1].replace(/,/g, "")));
+    const cac = normaliseCurrencyNumber(cacMatch[1], cacMatch[2]);
+
+    if (channel.length > 1 && budget > 0 && expectedLeads > 0 && cac > 0) {
+      rows.push({ channel: channel.slice(0, 28), budget, expectedLeads, cac });
+    }
+  }
+
+  return uniqueByLabel(rows, (item) => item.channel).slice(0, 6);
+}
+
+function extractSection(content: string, headingPattern: RegExp): string {
+  const lines = content.split("\n");
+  let collecting = false;
+  const captured: string[] = [];
+
+  for (const line of lines) {
+    if (/^##\s+/.test(line)) {
+      if (collecting) break;
+      collecting = headingPattern.test(line);
+      continue;
+    }
+    if (collecting) captured.push(line);
+  }
+
+  return captured.join("\n").trim();
+}
+
+function cleanChartLabel(value: string): string {
+  return value.replace(/\*\*/g, "").replace(/\s+/g, " ").trim();
+}
+
+function uniqueByLabel<T>(items: T[], keyFn: (item: T) => string): T[] {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    const key = keyFn(item).toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 function parseThreeYearRevenue(text: string): [number, number, number] | null {
@@ -578,7 +795,68 @@ export const SECTION_CHART_MAP: Record<string, ChartType[]> = {
   "Elevator Pitch": ["process_flow"],
 };
 
+export function chartHasEvidence(type: ChartType, data: ChartDataPayload): boolean {
+  switch (type) {
+    case 'financial':
+      return data.financialProjections.length >= 3;
+    case 'market':
+      return data.marketSize.length > 0;
+    case 'risk':
+      return data.riskMatrix.length > 0;
+    case 'competitor':
+      return data.competitorComparison.length > 1;
+    case 'kpi':
+      return data.kpiMetrics.length > 0;
+    case 'funding':
+      return data.fundingAllocation.length > 0;
+    case 'revenue_streams':
+      return data.revenueStreams.length > 0;
+    case 'unit_economics':
+      return data.unitEconomics.length > 0;
+    case 'hiring':
+      return data.hiringTimeline.length > 0;
+    case 'tech_stack':
+      return data.techStack.length > 0;
+    case 'customer_journey':
+      return data.customerJourney.length > 0;
+    case 'gtm_channels':
+      return data.goToMarketChannels.length > 0;
+    case 'milestones':
+      return data.milestones.length > 0;
+    case 'compliance':
+      return data.complianceRoadmap.length > 0;
+    case 'growth':
+      return data.growthMetrics.length > 0;
+    case 'pricing':
+      return data.pricingTiers.length > 0;
+    case 'timeline':
+      return data.timeline.length > 0;
+    case 'swot':
+      return data.swotAnalysis.some((item) => item.items.length > 0);
+    case 'customer_personas':
+      return data.customerPersonas.length > 0;
+    case 'marketing_channels':
+      return data.marketingChannels.length > 0;
+    case 'process_flow':
+      return data.processFlow.length > 0;
+    case 'customer_silhouettes':
+      return data.customerSilhouettes.length > 0;
+    case 'value_proposition':
+      return data.valueProposition.length > 0;
+    case 'inspirational_quote':
+      return Boolean(data.inspirationalQuote.quote?.trim());
+    case 'research_grid':
+      return data.researchGrid.length > 0;
+    case 'business_journey':
+      return data.businessJourney.length > 0;
+    default:
+      return false;
+  }
+}
+
 export function generateSVGChart(type: ChartType, data: ChartDataPayload): string {
+  if (!chartHasEvidence(type, data)) return '';
+
   switch (type) {
     case 'financial':
       return generateFinancialChart(data.financialProjections);
