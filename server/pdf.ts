@@ -2159,6 +2159,47 @@ function wrapBareHtmlTables(html: string): string {
   return wrappedHtml.replace(new RegExp(`${tokenPrefix}(\\d+)___`, 'g'), (_, index) => protectedTables[Number(index)] || '');
 }
 
+function stripDanglingTableClosers(value: string): string {
+  return value
+    .replace(/\s*<\/td>\s*<\/tr>\s*(?:<\/tbody>\s*)?<\/table>\s*(?:<\/div>\s*)?(?:<div\s+class=["']table-clear["']><\/div>\s*)?$/i, '')
+    .replace(/\s*<\/td>\s*<\/tr>\s*(?:<\/tbody>\s*)?<\/table>\s*$/i, '')
+    .trim();
+}
+
+function repairRenderedTableWrapper(tableWrapperHtml: string): string {
+  const cellOpenPattern = /<td\b[^>]*>/gi;
+  let match: RegExpExecArray | null;
+
+  while ((match = cellOpenPattern.exec(tableWrapperHtml)) !== null) {
+    const cellContentStart = match.index + match[0].length;
+    const cellRemainder = tableWrapperHtml.slice(cellContentStart);
+    const leakedCellStart = findLeakedCellSectionStart(cellRemainder);
+
+    if (leakedCellStart < 0) {
+      continue;
+    }
+
+    const leakedStart = cellContentStart + leakedCellStart;
+    const tablePart = tableWrapperHtml.slice(0, leakedStart).trimEnd();
+    const leakedPart = stripDanglingTableClosers(tableWrapperHtml.slice(leakedStart));
+
+    if (!leakedPart) {
+      return tableWrapperHtml;
+    }
+
+    return `${tablePart}</td></tr></tbody></table></div><div class="table-clear"></div>\n${leakedPart}\n`;
+  }
+
+  return tableWrapperHtml;
+}
+
+function extractLeakedSectionsFromRenderedTables(html: string): string {
+  return html.replace(
+    /<div\s+class=["']table-wrapper["']>\s*<table\b[\s\S]*?<\/table>\s*<\/div>(?:\s*<div\s+class=["']table-clear["']><\/div>)?/gi,
+    (match) => repairRenderedTableWrapper(match)
+  );
+}
+
 function formatContentWithCharts(markdown: string, chartData: ChartDataPayload | null, primaryColor: string, skipTitle: boolean = false, planId: string = '', secondaryColor: string = '#1e3a5f', tocStyleOverride?: number | null): string {
   const lines = sanitizeBusinessPlanOutputText(markdown).split('\n');
   let html = '';
@@ -2522,6 +2563,7 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
   // arrived from AI-generated content. This keeps following sections from being
   // swallowed into a final table cell when the source table markup is imperfect.
   html = wrapBareHtmlTables(html);
+  html = extractLeakedSectionsFromRenderedTables(html);
 
   return html;
 }
