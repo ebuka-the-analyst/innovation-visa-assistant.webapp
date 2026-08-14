@@ -4525,63 +4525,171 @@ ${generatedSections.join("\n\n---\n\n")}`;
         return [];
       };
 
+      const formatWordNumber = (value: number): string =>
+        Number.isFinite(value) ? Math.round(value).toLocaleString("en-GB") : "0";
+
+      const formatWordCurrency = (value: number): string =>
+        `GBP ${formatWordNumber(value)}`;
+
+      const addWordChartTitle = (title: string, subtitle?: string) => {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: cleanWordText(title),
+                bold: true,
+                size: 28,
+                color: "005EB8",
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 180, after: subtitle ? 40 : 120 },
+          }),
+        );
+        if (subtitle) {
+          children.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: cleanWordText(subtitle),
+                  italics: true,
+                  size: 19,
+                  color: "6B7280",
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 120 },
+            }),
+          );
+        }
+      };
+
+      const addWordChartTable = (title: string, rows: string[][], subtitle?: string) => {
+        const safeRows = rows
+          .map((row) => row.map((cell) => cleanWordText(String(cell || ""))))
+          .filter((row) => row.some(Boolean));
+        if (safeRows.length < 2) return;
+        addWordChartTitle(title, subtitle);
+        addMarkdownTableToDoc(safeRows);
+      };
+
       const addChartToDoc = async (chartType: ChartType) => {
         if (!chartData || usedCharts.has(chartType)) return;
         usedCharts.add(chartType);
         if (!chartGenerator.chartHasEvidence(chartType, chartData)) return;
         try {
-          const svgString = chartGenerator.generateSVGChart(
-            chartType,
-            chartData,
-          );
-          if (!svgString) return;
-          const chartLabels = extractSvgTextLabels(svgString);
-          const [chartTitle, ...chartLabelItems] = chartLabels;
-          if (chartTitle) {
-            children.push(
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: chartTitle,
-                    bold: true,
-                    size: 28,
-                    color: "005EB8",
-                  }),
-                ],
-                alignment: AlignmentType.CENTER,
-                spacing: { before: 160, after: 120 },
-              }),
-            );
-          }
-          const pngBuffer = await svgToPng(stripSvgTextForWordImage(svgString), 520);
-          children.push(
-            new Paragraph({
-              children: [
-                new ImageRun({
-                  data: pngBuffer,
-                  transformation: { width: 520, height: 300 },
-                  type: "png",
-                }),
+          if (chartType === "financial") {
+            addWordChartTable(
+              "Financial projections",
+              [
+                ["Period", "Revenue", "Costs", "Profit"],
+                ...chartData.financialProjections.map((item) => [
+                  item.year,
+                  formatWordCurrency(item.revenue),
+                  formatWordCurrency(item.costs),
+                  formatWordCurrency(item.profit),
+                ]),
               ],
-              alignment: AlignmentType.CENTER,
-              spacing: { before: 200, after: 200 },
-            }),
-          );
-          const readableLabels = chartLabelItems.slice(0, 18).join(" | ");
-          if (readableLabels) {
-            children.push(
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: readableLabels,
-                    size: 20,
-                    color: "374151",
-                  }),
-                ],
-                alignment: AlignmentType.CENTER,
-                spacing: { before: 80, after: 220 },
-              }),
+              "Evidence-backed figures extracted from the generated plan.",
             );
+            return;
+          }
+
+          if (chartType === "market") {
+            addWordChartTable(
+              "Market size",
+              [
+                ["Segment", "Value", "Description"],
+                ...chartData.marketSize.map((item) => [
+                  item.label,
+                  formatWordNumber(item.value),
+                  item.description,
+                ]),
+              ],
+              "Only shown where explicit market figures are present.",
+            );
+            return;
+          }
+
+          if (chartType === "kpi") {
+            addWordChartTable(
+              "Key metrics",
+              [
+                ["Metric", "Value", "Trend"],
+                ...chartData.kpiMetrics.map((item) => [
+                  item.label,
+                  item.value,
+                  item.trend,
+                ]),
+              ],
+              "Summary metrics from explicit plan inputs or generated plan text.",
+            );
+            return;
+          }
+
+          if (chartType === "milestones") {
+            addWordChartTable(
+              "Key milestones",
+              [
+                ["Milestone", "Month", "Status"],
+                ...chartData.milestones.map((item) => [
+                  item.milestone,
+                  `Month ${formatWordNumber(item.month)}`,
+                  item.status.replace(/_/g, " "),
+                ]),
+              ],
+              "Milestones are included only when month-labelled evidence is available.",
+            );
+            return;
+          }
+
+          if (chartType === "timeline") {
+            addWordChartTable(
+              "Implementation timeline",
+              [
+                ["Phase", "Start", "Duration", "Tasks"],
+                ...chartData.timeline.map((item) => [
+                  item.phase,
+                  `Month ${formatWordNumber(item.startMonth)}`,
+                  `${formatWordNumber(item.duration)} months`,
+                  item.tasks.join(", "),
+                ]),
+              ],
+              "Timeline is generated from explicit month-labelled roadmap evidence.",
+            );
+            return;
+          }
+
+          if (chartType === "swot") {
+            addWordChartTable(
+              "SWOT analysis",
+              [
+                ["Category", "Evidence points"],
+                ...chartData.swotAnalysis.map((item) => [
+                  item.category,
+                  item.items.join(", "),
+                ]),
+              ],
+              "SWOT points are based on the generated SWOT section text.",
+            );
+            return;
+          }
+
+          if (chartType === "marketing_channels") {
+            addWordChartTable(
+              "Marketing channel allocation",
+              [
+                ["Channel", "Budget", "Expected leads", "CAC"],
+                ...chartData.marketingChannels.map((item) => [
+                  item.channel,
+                  formatWordCurrency(item.budget),
+                  formatWordNumber(item.expectedLeads),
+                  formatWordCurrency(item.cac),
+                ]),
+              ],
+              "Channel figures are included only when budget, lead, or CAC evidence is present.",
+            );
+            return;
           }
         } catch (e) {
           console.error(`Failed to add ${chartType} chart:`, e);
