@@ -155,11 +155,11 @@ const documentUpload = multer({
 // OpenAI-powered AI generation system (primary provider)
 const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
 
-async function callAI(prompt: string): Promise<string> {
+async function callAI(prompt: string, maxTokens = 4000): Promise<string> {
   const isLatestGptFamily = /^gpt-5/i.test(BUSINESS_PLAN_MODEL);
   const tokenLimitParam = isLatestGptFamily
-    ? { max_completion_tokens: 4000 }
-    : { max_tokens: 4000 };
+    ? { max_completion_tokens: maxTokens }
+    : { max_tokens: maxTokens };
   const samplingParam = isLatestGptFamily ? {} : { temperature: 0.7 };
 
   const response = await openaiClient.chat.completions.create({
@@ -3360,7 +3360,31 @@ Remember: Write FULL prose content for this section. No outlines or placeholders
       try {
         // Use the configured business-plan model for generation.
         const fullPrompt = `${sectionSystemPrompt}\n\n${sectionUserPrompt}`;
-        let sectionContent = await callAI(fullPrompt);
+        let sectionContent = "";
+        let lastSectionError: any = null;
+
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            sectionContent = await callAI(fullPrompt, 8000);
+            if (sectionContent.trim()) break;
+            throw new Error("OpenAI returned empty section content");
+          } catch (attemptError: any) {
+            lastSectionError = attemptError;
+            console.error(
+              `Section ${i + 1} attempt ${attempt} failed (${section.title}):`,
+              {
+                message: attemptError?.message,
+                status: attemptError?.status,
+                code: attemptError?.code,
+                type: attemptError?.type,
+              },
+            );
+          }
+        }
+
+        if (!sectionContent.trim()) {
+          throw lastSectionError || new Error("Business plan section generation failed");
+        }
 
         // Strip any leading section title from AI output (prevents duplicate headers)
         // Only removes lines that exactly match our section title pattern
@@ -3431,9 +3455,11 @@ Remember: Write FULL prose content for this section. No outlines or placeholders
           throw error;
         }
 
-        generatedSections.push(
-          `\n\n## ${section.title}\n\n[Generation failed for this section]`,
-        );
+        await storage.updateBusinessPlan(planId, {
+          status: "failed",
+          currentGenerationStage: `Generation failed while writing section ${i + 1}/${sections.length}: ${section.title}`,
+        });
+        throw error;
       }
     }
 
