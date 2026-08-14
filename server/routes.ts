@@ -4229,6 +4229,23 @@ ${generatedSections.join("\n\n---\n\n")}`;
           console.error("Failed to parse chart data:", e);
         }
       }
+      const evidenceChartTypes: ChartType[] = [
+        "financial",
+        "market",
+        "kpi",
+        "milestones",
+        "timeline",
+        "swot",
+        "marketing_channels",
+      ];
+      if (
+        !chartData ||
+        !evidenceChartTypes.some((chartType) =>
+          chartGenerator.chartHasEvidence(chartType, chartData as ChartDataPayload),
+        )
+      ) {
+        chartData = chartGenerator.generateChartData(businessPlan, content);
+      }
 
       const usedCharts = new Set<string>();
 
