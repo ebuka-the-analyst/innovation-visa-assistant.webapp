@@ -969,6 +969,10 @@ export function generatePDFContent(plan: BusinessPlan): string {
       font-weight: 600;
     }
     .chart-container {
+      display: block;
+      clear: both;
+      width: 100%;
+      max-width: 100%;
       background: #fafafa;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
@@ -986,6 +990,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
       overflow: visible;
     }
     .inline-chart {
+      width: 100%;
       margin: 8px auto;
       page-break-inside: avoid;
     }
@@ -1124,6 +1129,10 @@ export function generatePDFContent(plan: BusinessPlan): string {
         line-height: 1.28 !important;
       }
       .chart-container {
+        display: block !important;
+        clear: both !important;
+        width: 100% !important;
+        max-width: 100% !important;
         padding: 6px !important;
         margin: 8px 0 !important;
         box-shadow: none !important;
@@ -2008,12 +2017,51 @@ function looksLikeAsciiDiagramLine(line: string): boolean {
 
 function isTableEscapeBoundary(line: string): boolean {
   const trimmed = line.trim();
+  const textOnly = trimmed.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
   return trimmed === '' ||
     trimmed.startsWith('# ') ||
     trimmed.startsWith('## ') ||
     trimmed.startsWith('### ') ||
     trimmed.startsWith('#### ') ||
-    trimmed === '---';
+    trimmed === '---' ||
+    /^<h[1-4]\b/i.test(trimmed) ||
+    /^<\/?(section|article)\b/i.test(trimmed) ||
+    /^<div\b[^>]*(section|chapter|content-section|chart-container|inline-chart)/i.test(trimmed) ||
+    /^\d{1,2}(?:\.\d+)?\.?\s+[A-Z][A-Z0-9&/()' -]{8,}$/.test(textOnly);
+}
+
+function findLeakedSectionStart(html: string): number {
+  const patterns = [
+    /\n\s*#{1,4}\s+\S/,
+    /\n\s*<h[1-4]\b/i,
+    /\n\s*<\/?(section|article)\b/i,
+    /\n\s*<div\b[^>]*(section|chapter|content-section|chart-container|inline-chart)/i,
+    /\n\s*\d{1,2}(?:\.\d+)?\.?\s+[A-Z][A-Z0-9&/()' -]{8,}/,
+  ];
+
+  const matches = patterns
+    .map((pattern) => {
+      const match = html.match(pattern);
+      return match?.index ?? -1;
+    })
+    .filter((index) => index > 0);
+
+  return matches.length ? Math.min(...matches) : -1;
+}
+
+function looksLikeNumberedMajorHeading(line: string): boolean {
+  return /^\d{1,2}(?:\.\d+)?\.?\s+[A-Z][A-Z0-9&/()' -]{8,}$/.test(
+    line.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+  );
+}
+
+function forceCloseTableMarkup(tableHtml: string): string {
+  if (/<\/table>/i.test(tableHtml)) {
+    return tableHtml;
+  }
+
+  return `${tableHtml}</td></tr></tbody></table>`;
 }
 
 function isolateRawHtmlTable(tableHtml: string): string {
@@ -2021,11 +2069,23 @@ function isolateRawHtmlTable(tableHtml: string): string {
     .replace(/^\s*<div\s+class=["']table-wrapper["']>\s*/i, '')
     .replace(/\s*<\/div>\s*$/i, '');
 
-  if (!/<\/table>/i.test(normalized)) {
-    normalized += '</table>';
+  const tableStart = normalized.search(/<table\b/i);
+  const tableEnd = normalized.search(/<\/table>/i);
+  const leakedStart = findLeakedSectionStart(
+    tableStart >= 0 && tableEnd > tableStart
+      ? normalized.slice(tableStart, tableEnd)
+      : normalized
+  );
+  let leakedContent = '';
+
+  if (leakedStart > 0) {
+    leakedContent = normalized.slice(leakedStart).trim();
+    normalized = normalized.slice(0, leakedStart).trim();
   }
 
-  return `<div class="table-wrapper">${normalized}</div><div class="table-clear"></div>\n`;
+  normalized = forceCloseTableMarkup(normalized);
+
+  return `<div class="table-wrapper">${normalized}</div><div class="table-clear"></div>\n${leakedContent ? `${leakedContent}\n` : ''}`;
 }
 
 function wrapBareHtmlTables(html: string): string {
@@ -2143,6 +2203,36 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
       html += `<h4>${line.slice(5)}</h4>\n`;
     } else if (line.startsWith('### ')) {
       html += `<h3>${line.slice(4)}</h3>\n`;
+    } else if (looksLikeNumberedMajorHeading(line)) {
+      const normalizedTitle = normalizeHeadingForDedupe(line);
+      if (normalizedTitle && renderedMajorHeadings.has(normalizedTitle)) {
+        continue;
+      }
+      if (normalizedTitle) renderedMajorHeadings.add(normalizedTitle);
+      currentSection = line;
+      lastH2Title = line;
+      const sectionId = line.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      html += `<h2 id="${sectionId}">${line}</h2>\n`;
+
+      if (chartData) {
+        const chartsForSection = findChartsForSection(line);
+        for (const chartType of chartsForSection) {
+          if (!usedCharts.has(chartType)) {
+            usedCharts.add(chartType);
+            try {
+              if (!chartHasEvidence(chartType, chartData)) {
+                continue;
+              }
+              const svg = generateSVGChart(chartType, chartData);
+              if (svg) {
+                html += `<div class="chart-container inline-chart">${svg}</div>\n`;
+              }
+            } catch (e) {
+              console.error(`Failed to generate ${chartType} chart:`, e);
+            }
+          }
+        }
+      }
     } else if (line.startsWith('- ') || line.startsWith('* ')) {
       if (!html.endsWith('</ul>\n') && !html.includes('<ul>') || html.lastIndexOf('</ul>') > html.lastIndexOf('<ul>')) {
         html += '<ul>\n';
