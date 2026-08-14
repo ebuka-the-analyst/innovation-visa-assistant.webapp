@@ -1458,18 +1458,27 @@ function generateCustomerSilhouettesChart(data: { segment: string; percentage: n
   
   data.forEach((d, i) => {
     const x = padding + spacing * i + (spacing - barWidth) / 2;
-    const barHeight = (d.percentage / 100) * maxHeight;
+    const barHeight = Math.max((d.percentage / 100) * maxHeight, 34);
     const y = height - 60 - barHeight;
+    const centerX = x + barWidth / 2;
+    const headY = Math.max(y - 25, 78);
+    const torsoY = headY + 24;
+    const torsoHeight = 34;
+    const armY = torsoY + 18;
+    const legTopY = torsoY + torsoHeight;
+    const legBottomY = Math.min(legTopY + 28, height - 72);
     
     bars += `<rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" fill="${d.color}" rx="4"/>`;
     
-    bars += `<circle cx="${x + barWidth/2}" cy="${y - 25}" r="15" fill="${d.color}"/>`;
-    bars += `<rect x="${x + barWidth/2 - 12}" y="${y - 8}" width="24" height="30" fill="${d.color}" rx="4"/>`;
-    bars += `<line x1="${x + barWidth/2 - 15}" y1="${y + 25}" x2="${x + barWidth/2 - 10}" y2="${y + 50}" stroke="${d.color}" stroke-width="6" stroke-linecap="round"/>`;
-    bars += `<line x1="${x + barWidth/2 + 15}" y1="${y + 25}" x2="${x + barWidth/2 + 10}" y2="${y + 50}" stroke="${d.color}" stroke-width="6" stroke-linecap="round"/>`;
+    bars += `<circle cx="${centerX}" cy="${headY}" r="15" fill="${d.color}"/>`;
+    bars += `<rect x="${centerX - 13}" y="${torsoY}" width="26" height="${torsoHeight}" fill="${d.color}" rx="5"/>`;
+    bars += `<line x1="${centerX - 18}" y1="${armY}" x2="${centerX - 40}" y2="${armY}" stroke="${d.color}" stroke-width="8" stroke-linecap="round"/>`;
+    bars += `<line x1="${centerX + 18}" y1="${armY}" x2="${centerX + 40}" y2="${armY}" stroke="${d.color}" stroke-width="8" stroke-linecap="round"/>`;
+    bars += `<line x1="${centerX - 9}" y1="${legTopY}" x2="${centerX - 14}" y2="${legBottomY}" stroke="${d.color}" stroke-width="8" stroke-linecap="round"/>`;
+    bars += `<line x1="${centerX + 9}" y1="${legTopY}" x2="${centerX + 14}" y2="${legBottomY}" stroke="${d.color}" stroke-width="8" stroke-linecap="round"/>`;
     
-    bars += `<text x="${x + barWidth/2}" y="${height - 35}" text-anchor="middle" font-size="11" font-weight="bold" fill="#111827">${d.segment}</text>`;
-    bars += `<text x="${x + barWidth/2}" y="${height - 18}" text-anchor="middle" font-size="14" font-weight="bold" fill="${d.color}">${d.percentage}%</text>`;
+    bars += `<text x="${centerX}" y="${height - 35}" text-anchor="middle" font-size="11" font-weight="bold" fill="#111827">${d.segment}</text>`;
+    bars += `<text x="${centerX}" y="${height - 18}" text-anchor="middle" font-size="14" font-weight="bold" fill="${d.color}">${d.percentage}%</text>`;
   });
   
   return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
