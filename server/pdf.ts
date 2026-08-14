@@ -612,50 +612,55 @@ export function generatePDFContent(plan: BusinessPlan): string {
   <link rel="stylesheet" href="${fontImport}">
   <style>
     @page {
-      margin: 2.5cm;
+      margin: 1.25cm 1.35cm;
     }
     @page cover {
       margin: 0;
     }
     body {
       font-family: ${fontFamily};
-      line-height: 1.6;
+      font-size: 9.5pt;
+      line-height: 1.42;
       color: #1a1a1a;
       max-width: 210mm;
       margin: 0 auto;
-      padding: 20px;
+      padding: 0;
     }
     h1 {
-      font-size: 28pt;
+      font-size: 22pt;
       color: ${primaryColor};
-      border-bottom: 3px solid ${primaryColor};
-      padding-bottom: 10px;
-      margin-bottom: 30px;
+      border-bottom: 2px solid ${primaryColor};
+      padding-bottom: 6px;
+      margin: 0 0 14px;
+      break-after: avoid;
     }
     h2 {
-      font-size: 20pt;
+      font-size: 15pt;
       color: ${primaryColor};
-      margin-top: 40px;
-      margin-bottom: 15px;
+      margin-top: 18px;
+      margin-bottom: 8px;
+      break-after: avoid;
     }
     h3 {
-      font-size: 16pt;
+      font-size: 12pt;
       color: ${secondaryColor};
-      margin-top: 25px;
-      margin-bottom: 10px;
+      margin-top: 12px;
+      margin-bottom: 6px;
+      break-after: avoid;
     }
     h4 {
-      font-size: 13pt;
+      font-size: 10.5pt;
       color: #333;
-      margin-top: 20px;
-      margin-bottom: 8px;
+      margin-top: 10px;
+      margin-bottom: 5px;
       font-weight: 600;
+      break-after: avoid;
     }
     p {
-      font-size: 11pt;
+      font-size: 9.5pt;
       text-align: left;
-      margin-bottom: 12px;
-      line-height: 1.7;
+      margin: 0 0 6px;
+      line-height: 1.42;
     }
     .cover-page {
       position: relative;
@@ -673,8 +678,8 @@ export function generatePDFContent(plan: BusinessPlan): string {
       flex-direction: column;
       justify-content: center;
       padding: 0;
-      margin: -20px;
-      margin-bottom: 40px;
+      margin: 0;
+      margin-bottom: 0;
       box-sizing: border-box;
     }
     .cover-decoration-top {
@@ -801,14 +806,14 @@ export function generatePDFContent(plan: BusinessPlan): string {
     table {
       width: 100%;
       border-collapse: collapse;
-      margin: 20px 0;
-      font-size: 10pt;
+      margin: 10px 0;
+      font-size: 8.5pt;
       table-layout: fixed;
       word-break: break-word;
     }
     th, td {
       border: 1px solid #ddd;
-      padding: 10px 14px;
+      padding: 5px 7px;
       text-align: left;
       word-break: break-word;
       overflow-wrap: break-word;
@@ -824,7 +829,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
       color: white;
     }
     .financial-table td {
-      padding: 12px;
+      padding: 5px 7px;
     }
     .financial-table tr:nth-child(even) {
       background-color: #f8fafc;
@@ -832,7 +837,7 @@ export function generatePDFContent(plan: BusinessPlan): string {
     .table-wrapper {
       overflow-x: auto;
       max-width: 100%;
-      margin: 20px 0;
+      margin: 10px 0;
     }
     .table-wrapper table {
       min-width: 0;
@@ -845,9 +850,9 @@ export function generatePDFContent(plan: BusinessPlan): string {
     }
     .toc {
       background: #f8fafc;
-      padding: 20px 30px;
+      padding: 14px 18px;
       border-radius: 8px;
-      margin: 20px 0;
+      margin: 12px 0;
       page-break-after: always;
       page-break-inside: avoid;
       border-left: 4px solid ${primaryColor};
@@ -889,17 +894,18 @@ export function generatePDFContent(plan: BusinessPlan): string {
       color: ${primaryColor};
     }
     ul, ol {
-      margin: 15px 0;
-      padding-left: 30px;
+      margin: 8px 0;
+      padding-left: 22px;
     }
     li {
-      margin-bottom: 8px;
-      font-size: 11pt;
+      margin-bottom: 4px;
+      font-size: 9.5pt;
+      line-height: 1.38;
     }
     .section-break {
-      margin-top: 50px;
+      margin-top: 18px;
       border-top: 2px solid ${primaryColor};
-      padding-top: 30px;
+      padding-top: 12px;
     }
     strong {
       color: ${secondaryColor};
@@ -909,27 +915,29 @@ export function generatePDFContent(plan: BusinessPlan): string {
       background: #fafafa;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
-      padding: 20px;
-      margin: 25px 0;
+      padding: 8px;
+      margin: 10px 0;
       text-align: center;
       border-top: 3px solid ${primaryColor};
+      break-inside: avoid;
     }
     .chart-container svg {
       max-width: 100%;
+      max-height: 225px;
       height: auto;
     }
     .inline-chart {
-      margin: 20px auto;
+      margin: 8px auto;
       page-break-inside: avoid;
     }
     h2[id*="endorser-readiness-benchmark"] {
-      page-break-before: always;
+      page-break-before: auto;
     }
     h3 {
       color: ${secondaryColor};
-      font-size: 14pt;
-      margin-top: 24px;
-      margin-bottom: 10px;
+      font-size: 12pt;
+      margin-top: 12px;
+      margin-bottom: 6px;
     }
     .table-wrapper table td:last-child,
     .table-wrapper table th:last-child {
@@ -937,6 +945,128 @@ export function generatePDFContent(plan: BusinessPlan): string {
     }
     /* ── Per-plan visual style override (style ${effectiveStyle}) ── */
     ${getBodyStyleCSS(effectiveStyle, primaryColor, secondaryColor)}
+    /* Final print-density override: keep branded themes, but prevent bloated PDFs. */
+    @media print {
+      body {
+        font-size: 9.5pt !important;
+        line-height: 1.42 !important;
+        padding: 0 !important;
+      }
+      .content {
+        max-width: 100% !important;
+      }
+      h1 {
+        font-size: 22pt !important;
+        margin: 0 0 14px !important;
+        padding-bottom: 6px !important;
+        break-after: avoid !important;
+      }
+      h2 {
+        font-size: 15pt !important;
+        margin-top: 18px !important;
+        margin-bottom: 8px !important;
+        padding-top: 0 !important;
+        padding-bottom: 5px !important;
+        break-after: avoid !important;
+        page-break-before: auto !important;
+      }
+      h3 {
+        font-size: 12pt !important;
+        margin-top: 12px !important;
+        margin-bottom: 6px !important;
+        padding-top: 0 !important;
+        padding-bottom: 3px !important;
+        break-after: avoid !important;
+      }
+      h4 {
+        font-size: 10.5pt !important;
+        margin-top: 10px !important;
+        margin-bottom: 5px !important;
+        break-after: avoid !important;
+      }
+      p {
+        font-size: 9.5pt !important;
+        line-height: 1.42 !important;
+        margin: 0 0 6px !important;
+      }
+      ul, ol {
+        margin: 6px 0 8px !important;
+        padding-left: 20px !important;
+      }
+      li {
+        font-size: 9.25pt !important;
+        line-height: 1.36 !important;
+        margin-bottom: 3px !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+      }
+      blockquote {
+        margin: 8px 0 !important;
+        padding: 8px 12px !important;
+      }
+      table,
+      .table-wrapper table {
+        font-size: 8.25pt !important;
+        margin: 0 !important;
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+      }
+      .table-wrapper {
+        margin: 8px 0 !important;
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+      }
+      thead {
+        display: table-header-group;
+      }
+      tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      th, td {
+        padding: 4px 6px !important;
+        line-height: 1.28 !important;
+      }
+      .chart-container {
+        padding: 6px !important;
+        margin: 8px 0 !important;
+        box-shadow: none !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+      .chart-container::before {
+        margin-bottom: 6px !important;
+      }
+      .chart-container svg {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 210px !important;
+        height: auto !important;
+      }
+      .inline-chart {
+        margin: 6px auto !important;
+      }
+      .section-break {
+        margin-top: 14px !important;
+        padding-top: 10px !important;
+      }
+      hr {
+        margin: 12px 0 !important;
+      }
+      .toc {
+        padding: 12px 16px !important;
+        margin: 8px 0 !important;
+      }
+      .toc li {
+        font-size: 9pt !important;
+        line-height: 1.25 !important;
+        padding: 2px 0 !important;
+      }
+      .additional-visuals {
+        page-break-before: auto !important;
+        break-before: auto !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1915,12 +2045,12 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
         }
       } else {
         // Render as a proper HTML table
-        let t = `<div class="table-wrapper"><table style="width:100%;border-collapse:collapse;font-size:10.5pt;">`;
+        let t = `<div class="table-wrapper"><table style="width:100%;border-collapse:collapse;font-size:8.5pt;">`;
 
         if (headerCells.length > 0) {
           t += `<thead><tr>`;
           for (const cell of headerCells) {
-            t += `<th style="background:${primaryColor};color:#fff;padding:10px 14px;border:1px solid ${primaryColor};font-weight:600;word-break:break-word;white-space:normal;">${formatInline(cell)}</th>`;
+            t += `<th style="background:${primaryColor};color:#fff;padding:5px 7px;border:1px solid ${primaryColor};font-weight:600;word-break:break-word;white-space:normal;">${formatInline(cell)}</th>`;
           }
           t += `</tr></thead>`;
         }
@@ -1932,7 +2062,7 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
             const bg = ri % 2 === 0 ? '#ffffff' : '#f8fafc';
             t += `<tr style="background:${bg};">`;
             for (let ci = 0; ci < colCount; ci++) {
-              t += `<td style="padding:10px 14px;border:1px solid #e2e8f0;word-break:break-word;white-space:normal;">${formatInline(row[ci] || '')}</td>`;
+              t += `<td style="padding:5px 7px;border:1px solid #e2e8f0;word-break:break-word;white-space:normal;">${formatInline(row[ci] || '')}</td>`;
             }
             t += `</tr>`;
           });
@@ -1966,7 +2096,7 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
     }
     
     if (remainingCharts.length > 0) {
-      html += `<div style="page-break-before: always;"><h2 style="color: ${primaryColor};">Additional Visual Analytics</h2>\n`;
+      html += `<div class="additional-visuals"><h2 style="color: ${primaryColor};">Additional Visual Analytics</h2>\n`;
       for (const chartType of remainingCharts) {
         try {
           const svg = generateSVGChart(chartType, chartData);
