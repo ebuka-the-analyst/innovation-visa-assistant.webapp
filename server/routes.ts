@@ -17600,9 +17600,11 @@ Return a JSON object with:
       // Get notifications targeted to all or user's tier, excluding already read
       const notifications = await db.execute(sql`
         SELECT n.* FROM admin_notifications n
+        JOIN users u ON u.id = ${userId}
         LEFT JOIN user_notification_reads r ON n.id = r.notification_id AND r.user_id = ${userId}
         WHERE n.status = 'sent'
           AND (n.target_type = 'all' OR (n.target_type = 'tier' AND n.target_value = ${tier}))
+          AND COALESCE(n.sent_at, n.created_at) >= u.created_at
           AND (n.expires_at IS NULL OR n.expires_at > NOW())
           AND r.id IS NULL
         ORDER BY n.sent_at DESC
@@ -17648,10 +17650,12 @@ Return a JSON object with:
       const history = await db.execute(sql`
         SELECT n.*, (r.id IS NOT NULL) as is_read
         FROM admin_notifications n
+        JOIN users u ON u.id = ${userId}
         LEFT JOIN user_notification_reads r ON n.id = r.notification_id AND r.user_id = ${userId}
         LEFT JOIN user_notification_dismissals d ON n.id = d.notification_id AND d.user_id = ${userId}
         WHERE n.status = 'sent'
           AND (n.target_type = 'all' OR (n.target_type = 'tier' AND n.target_value = ${tier}))
+          AND COALESCE(n.sent_at, n.created_at) >= u.created_at
           AND (n.expires_at IS NULL OR n.expires_at > NOW())
           AND d.id IS NULL
         ORDER BY n.sent_at DESC
