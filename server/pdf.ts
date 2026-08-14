@@ -844,6 +844,43 @@ export function generatePDFContent(plan: BusinessPlan): string {
       width: 100%;
       margin: 0;
     }
+    .stacked-table {
+      margin: 10px 0;
+      display: grid;
+      gap: 8px;
+    }
+    .stacked-table-card {
+      border: 1px solid #dbe3ef;
+      border-left: 3px solid ${primaryColor};
+      border-radius: 6px;
+      background: #ffffff;
+      padding: 8px 10px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .stacked-table-title {
+      color: ${primaryColor};
+      font-size: 9.5pt;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    .stacked-table-field {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 8px;
+      padding: 4px 0;
+      border-top: 1px solid #edf2f7;
+    }
+    .stacked-table-label {
+      color: ${secondaryColor};
+      font-size: 8pt;
+      font-weight: 700;
+    }
+    .stacked-table-value {
+      font-size: 8.75pt;
+      line-height: 1.34;
+      overflow-wrap: anywhere;
+    }
     .content {
       max-width: 100%;
       overflow-x: hidden;
@@ -1015,6 +1052,32 @@ export function generatePDFContent(plan: BusinessPlan): string {
         margin: 8px 0 !important;
         page-break-inside: auto !important;
         break-inside: auto !important;
+      }
+      .stacked-table {
+        margin: 8px 0 !important;
+        gap: 6px !important;
+      }
+      .stacked-table-card {
+        padding: 6px 8px !important;
+        box-shadow: none !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+      .stacked-table-title {
+        font-size: 9pt !important;
+        margin-bottom: 3px !important;
+      }
+      .stacked-table-field {
+        grid-template-columns: 105px 1fr !important;
+        gap: 6px !important;
+        padding: 3px 0 !important;
+      }
+      .stacked-table-label {
+        font-size: 7.5pt !important;
+      }
+      .stacked-table-value {
+        font-size: 8.25pt !important;
+        line-height: 1.28 !important;
       }
       thead {
         display: table-header-group;
@@ -2037,12 +2100,47 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
       }
 
       const colCount = headerCells.length || bodyRows[0]?.length || 0;
+      const nonEmptyRows = bodyRows.filter(row => row.some(cell => cell.trim().length > 0));
+      const tableTextLengths: number[] = [];
+      nonEmptyRows.forEach(row => {
+        for (let ci = 0; ci < colCount; ci++) {
+          tableTextLengths.push(row[ci]?.trim().length || 0);
+        }
+      });
+      const maxCellLength = Math.max(0, ...tableTextLengths);
+      const averageRowTextLength = nonEmptyRows.length
+        ? nonEmptyRows.reduce((sum, row) => sum + row.join(' ').trim().length, 0) / nonEmptyRows.length
+        : 0;
+      const hasSparseLongRows = nonEmptyRows.some(row => {
+        const filledCells = Array.from({ length: colCount }, (_, ci) => row[ci]?.trim() || '').filter(Boolean);
+        return filledCells.length <= 2 && row.join(' ').length > 180;
+      });
+      const shouldRenderAsCards =
+        colCount >= 4 &&
+        (maxCellLength > 220 || averageRowTextLength > 360 || hasSparseLongRows);
 
       if (colCount === 0) {
         // Cannot parse — render as plain paragraphs
         for (const tl of tableLines) {
           html += `<p>${formatInline(tl)}</p>\n`;
         }
+      } else if (shouldRenderAsCards) {
+        html += '<div class="stacked-table">\n';
+        nonEmptyRows.forEach((row, ri) => {
+          const firstCell = row[0]?.trim() || `Item ${ri + 1}`;
+          html += '<div class="stacked-table-card">\n';
+          html += `<div class="stacked-table-title">${formatInline(firstCell)}</div>\n`;
+
+          for (let ci = 1; ci < colCount; ci++) {
+            const value = row[ci]?.trim();
+            if (!value) continue;
+            const label = headerCells[ci]?.trim() || `Column ${ci + 1}`;
+            html += `<div class="stacked-table-field"><div class="stacked-table-label">${formatInline(label)}</div><div class="stacked-table-value">${formatInline(value)}</div></div>\n`;
+          }
+
+          html += '</div>\n';
+        });
+        html += '</div>\n';
       } else {
         // Render as a proper HTML table
         let t = `<div class="table-wrapper"><table style="width:100%;border-collapse:collapse;font-size:8.5pt;">`;
