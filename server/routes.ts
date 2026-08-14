@@ -4288,6 +4288,32 @@ ${generatedSections.join("\n\n---\n\n")}`;
           .replace(/\s+/g, " ")
           .trim();
 
+      const stripSvgTextForWordImage = (svgString: string): string =>
+        svgString.replace(/<text\b[\s\S]*?<\/text>/gi, "");
+
+      const decodeSvgText = (value: string): string =>
+        value
+          .replace(/&amp;/g, "&")
+          .replace(/&lt;/g, "<")
+          .replace(/&gt;/g, ">")
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .replace(/&nbsp;/g, " ");
+
+      const extractSvgTextLabels = (svgString: string): string[] => {
+        const labels: string[] = [];
+        const seen = new Set<string>();
+        const textRegex = /<text\b[^>]*>([\s\S]*?)<\/text>/gi;
+        let match: RegExpExecArray | null;
+        while ((match = textRegex.exec(svgString)) !== null) {
+          const label = cleanWordText(decodeSvgText(match[1]));
+          if (!label || label.length < 2 || seen.has(label)) continue;
+          seen.add(label);
+          labels.push(label);
+        }
+        return labels;
+      };
+
       const looksLikeMarkdownTableRow = (line: string): boolean => {
         const trimmed = line.trim();
         return trimmed.startsWith("|") && trimmed.endsWith("|") && trimmed.split("|").length >= 4;
@@ -4509,7 +4535,25 @@ ${generatedSections.join("\n\n---\n\n")}`;
             chartData,
           );
           if (!svgString) return;
-          const pngBuffer = await svgToPng(svgString, 520);
+          const chartLabels = extractSvgTextLabels(svgString);
+          const [chartTitle, ...chartLabelItems] = chartLabels;
+          if (chartTitle) {
+            children.push(
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: chartTitle,
+                    bold: true,
+                    size: 28,
+                    color: "005EB8",
+                  }),
+                ],
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 160, after: 120 },
+              }),
+            );
+          }
+          const pngBuffer = await svgToPng(stripSvgTextForWordImage(svgString), 520);
           children.push(
             new Paragraph({
               children: [
@@ -4523,6 +4567,22 @@ ${generatedSections.join("\n\n---\n\n")}`;
               spacing: { before: 200, after: 200 },
             }),
           );
+          const readableLabels = chartLabelItems.slice(0, 18).join(" | ");
+          if (readableLabels) {
+            children.push(
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: readableLabels,
+                    size: 20,
+                    color: "374151",
+                  }),
+                ],
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 80, after: 220 },
+              }),
+            );
+          }
         } catch (e) {
           console.error(`Failed to add ${chartType} chart:`, e);
         }
