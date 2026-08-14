@@ -2050,6 +2050,52 @@ function findLeakedSectionStart(html: string): number {
   return matches.length ? Math.min(...matches) : -1;
 }
 
+function findLeakedCellSectionStart(value: string): number {
+  const patterns = [
+    /#{1,4}\s+\S/,
+    /<h[1-4]\b/i,
+    /<\/?(section|article)\b/i,
+    /<div\b[^>]*(section|chapter|content-section|chart-container|inline-chart)/i,
+    /\b\d{1,2}(?:\.\d+)?\.?\s+[A-Z][A-Z0-9&/()' -]{8,}(?=\s|$)/,
+  ];
+
+  const matches = patterns
+    .map((pattern) => {
+      const match = value.match(pattern);
+      return match?.index ?? -1;
+    })
+    .filter((index) => index >= 0);
+
+  return matches.length ? Math.min(...matches) : -1;
+}
+
+function splitLeakedSectionFromCell(value: string): { cell: string; leaked: string } {
+  const leakedStart = findLeakedCellSectionStart(value);
+  if (leakedStart < 0) {
+    return { cell: value, leaked: '' };
+  }
+
+  return {
+    cell: value.slice(0, leakedStart).trim(),
+    leaked: value.slice(leakedStart).trim(),
+  };
+}
+
+function splitLeakedSectionIntoLines(value: string): string[] {
+  const normalized = value
+    .replace(/^(#{1,4}\s+)/, '\n$1')
+    .replace(/(<h[1-4]\b)/i, '\n$1')
+    .replace(
+      /^(\d{1,2}(?:\.\d+)?\.?\s+[A-Z][A-Z0-9&/()' -]{8,})(\s+)(?=\S)/,
+      (_, heading: string) => `${heading.trim()}\n`
+    );
+
+  return normalized
+    .split('\n')
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
 function looksLikeNumberedMajorHeading(line: string): boolean {
   return /^\d{1,2}(?:\.\d+)?\.?\s+[A-Z][A-Z0-9&/()' -]{8,}$/.test(
     line.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
@@ -2071,11 +2117,18 @@ function isolateRawHtmlTable(tableHtml: string): string {
 
   const tableStart = normalized.search(/<table\b/i);
   const tableEnd = normalized.search(/<\/table>/i);
-  const leakedStart = findLeakedSectionStart(
+  const tableBody =
     tableStart >= 0 && tableEnd > tableStart
       ? normalized.slice(tableStart, tableEnd)
-      : normalized
-  );
+      : normalized;
+  const localLeakedStarts = [
+    findLeakedSectionStart(tableBody),
+    findLeakedCellSectionStart(tableBody),
+  ].filter((index) => index > 0);
+  const localLeakedStart = localLeakedStarts.length ? Math.min(...localLeakedStarts) : -1;
+  const leakedStart = localLeakedStart > 0 && tableStart > 0
+    ? tableStart + localLeakedStart
+    : localLeakedStart;
   let leakedContent = '';
 
   if (leakedStart > 0) {
@@ -2233,6 +2286,36 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
           }
         }
       }
+    } else if (/^<h[1-4]\b/i.test(line)) {
+      const headingTitle = line.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      const normalizedTitle = normalizeHeadingForDedupe(headingTitle);
+      if (normalizedTitle && renderedMajorHeadings.has(normalizedTitle)) {
+        continue;
+      }
+      if (normalizedTitle) renderedMajorHeadings.add(normalizedTitle);
+      currentSection = headingTitle;
+      lastH2Title = headingTitle;
+      html += `${line}\n`;
+
+      if (chartData) {
+        const chartsForSection = findChartsForSection(headingTitle);
+        for (const chartType of chartsForSection) {
+          if (!usedCharts.has(chartType)) {
+            usedCharts.add(chartType);
+            try {
+              if (!chartHasEvidence(chartType, chartData)) {
+                continue;
+              }
+              const svg = generateSVGChart(chartType, chartData);
+              if (svg) {
+                html += `<div class="chart-container inline-chart">${svg}</div>\n`;
+              }
+            } catch (e) {
+              console.error(`Failed to generate ${chartType} chart:`, e);
+            }
+          }
+        }
+      }
     } else if (line.startsWith('- ') || line.startsWith('* ')) {
       if (!html.endsWith('</ul>\n') && !html.includes('<ul>') || html.lastIndexOf('</ul>') > html.lastIndexOf('<ul>')) {
         html += '<ul>\n';
@@ -2326,6 +2409,15 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
 
       let headerCells: string[] = [];
       let bodyRows: string[][] = [];
+      const leakedTableContent: string[] = [];
+      const sanitizeTableCells = (cells: string[]): string[] =>
+        cells.map((cell) => {
+          const split = splitLeakedSectionFromCell(cell);
+          if (split.leaked) {
+            leakedTableContent.push(...splitLeakedSectionIntoLines(split.leaked));
+          }
+          return split.cell;
+        });
 
       if (sepIdx === 1) {
         headerCells = parseCells(tableLines[0]);
@@ -2336,6 +2428,9 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
       } else {
         bodyRows = tableLines.filter((_, j) => j !== sepIdx).map(parseCells);
       }
+
+      headerCells = sanitizeTableCells(headerCells);
+      bodyRows = bodyRows.map(sanitizeTableCells);
 
       const colCount = headerCells.length || bodyRows[0]?.length || 0;
       const nonEmptyRows = bodyRows.filter(row => row.some(cell => cell.trim().length > 0));
@@ -2407,6 +2502,10 @@ function formatContentWithCharts(markdown: string, chartData: ChartDataPayload |
 
         t += `</table></div><div class="table-clear"></div>\n`;
         html += t;
+      }
+
+      if (leakedTableContent.length > 0) {
+        lines.splice(i + 1, 0, ...leakedTableContent);
       }
     } else if (line.length > 0) {
       html += `<p>${formatInline(line)}</p>\n`;
