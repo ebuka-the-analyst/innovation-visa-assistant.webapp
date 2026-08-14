@@ -12,7 +12,6 @@ import sterlingAvatar from "@assets/generated_images/sterling_financial_agent_av
 import atlasAvatar from "@assets/generated_images/atlas_growth_agent_avatar.webp";
 import sageAvatar from "@assets/generated_images/sage_compliance_agent_avatar.webp";
 import { useCommercialCatalog, type PlanId } from "@/hooks/useCommercialCatalog";
-import { useVisualPdfExport } from "@/hooks/useVisualPdfExport";
 
 const getAgentForStage = (stageText: string) => {
   const stage = stageText.toLowerCase();
@@ -68,7 +67,6 @@ export default function GenerationProgress({ planId }: { planId?: string }) {
   const [sectionNumber, setSectionNumber] = useState<number>(0);
   const [businessName, setBusinessName] = useState<string>('Business Plan');
   const { toast } = useToast();
-  const { exportVisualPdf, isExporting: isPdfExporting } = useVisualPdfExport();
   const { getPlanById, getUpgradePlan, toolCounts } = useCommercialCatalog();
   const currentToolCount = toolCounts[tier as PlanId] ?? 0;
   const currentPlanName = getPlanById(tier)?.displayName ?? `${tier.charAt(0).toUpperCase()}${tier.slice(1)} Plan`;
@@ -78,7 +76,7 @@ export default function GenerationProgress({ planId }: { planId?: string }) {
   const basicUpgradeName = basicUpgradePlan?.displayName.replace(/\s+Plan$/i, "") ?? "Basic";
   const basicUpgradeToolCount = basicUpgradePlan ? toolCounts[basicUpgradePlan.id] : 0;
 
-  // PDF uses the visual HTML renderer so it matches "View Full Plan with Charts".
+  // PDF opens the stable print-ready HTML renderer so Chrome can save the full plan reliably.
   // Word remains a server-generated .docx download.
   const handleDownload = async (format: 'pdf' | 'word') => {
     if (!planId) {
@@ -91,22 +89,14 @@ export default function GenerationProgress({ planId }: { planId?: string }) {
     }
 
     if (format === 'pdf') {
-      const success = await exportVisualPdf({
-        planId,
-        businessName,
-        onProgress: (stage) =>
-          toast({
-            title: "Preparing PDF",
-            description: stage,
-          }),
-      });
-
+      const printUrl = `/api/view/html/${planId}?print=1`;
+      const opened = window.open(printUrl, '_blank', 'noopener,noreferrer');
+      if (!opened) {
+        window.location.href = printUrl;
+      }
       toast({
-        title: success ? "PDF Download Ready" : "PDF Export Failed",
-        description: success
-          ? "Your visual business plan PDF has been generated."
-          : "Please use View Full Plan and Print / Save as PDF if the browser blocks export.",
-        variant: success ? "default" : "destructive",
+        title: "Print-ready PDF view opened",
+        description: "Choose “Save as PDF” in the browser print dialog.",
       });
       return;
     }
@@ -415,12 +405,11 @@ export default function GenerationProgress({ planId }: { planId?: string }) {
                 <button
                   onClick={() => handleDownload('pdf')}
                   data-testid="button-download-pdf"
-                  disabled={isPdfExporting}
                   className="group flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 transition-colors duration-200 py-6 px-4"
                 >
                   <FileSpreadsheet className="w-10 h-10 text-emerald-600 group-hover:text-white transition-colors duration-200" />
                   <span className="text-base font-bold text-emerald-700 group-hover:text-white transition-colors duration-200">
-                    {isPdfExporting ? "Preparing PDF..." : "PDF"}
+                    PDF
                   </span>
                 </button>
 
