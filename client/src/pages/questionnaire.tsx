@@ -49,6 +49,7 @@ export default function Questionnaire() {
 
   // AI Interview requires Basic or higher tier
   const canAccessAiInterview = hasAccessToTier('basic');
+  const canAccessQuestionnaire = hasAccessToTier('basic');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -60,7 +61,7 @@ export default function Questionnaire() {
     // Only allow AI mode if user has access
     if (modeParam === 'ai' && canAccessAiInterview) {
       setMode('ai-interview');
-    } else if (modeParam === 'form') {
+    } else if (modeParam === 'form' && canAccessQuestionnaire) {
       setMode('form');
     }
     
@@ -109,7 +110,7 @@ export default function Questionnaire() {
         window.history.replaceState({}, '', '/questionnaire');
       })();
     }
-  }, [toast, canAccessAiInterview, userTier]);
+  }, [toast, canAccessAiInterview, canAccessQuestionnaire, userTier]);
 
   const handleSessionUpdate = (session: InterviewSession) => {
     setInterviewSession(session);
@@ -195,21 +196,41 @@ export default function Questionnaire() {
                 transition={{ delay: 0.2 }}
               >
                 <Card 
-                  className="p-6 h-full hover-elevate cursor-pointer border-2 border-transparent hover:border-primary/50 transition-all"
-                  onClick={() => setMode('form')}
+                  className={`p-6 h-full border-2 transition-all ${
+                    canAccessQuestionnaire
+                      ? "hover-elevate cursor-pointer border-transparent hover:border-primary/50"
+                      : "border-muted opacity-75"
+                  }`}
+                  onClick={() => {
+                    if (canAccessQuestionnaire) {
+                      setMode('form');
+                    }
+                  }}
                   data-testid="card-form-mode"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
-                      <FileText className="h-8 w-8 text-blue-500" />
+                    <div className={`p-3 rounded-xl ${canAccessQuestionnaire ? "bg-gradient-to-br from-blue-500/20 to-cyan-500/20" : "bg-red-500/10"}`}>
+                      {canAccessQuestionnaire ? (
+                        <FileText className="h-8 w-8 text-blue-500" />
+                      ) : (
+                        <Lock className="h-8 w-8 text-red-500" />
+                      )}
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <h3 className="text-xl font-bold">Traditional Form</h3>
                         <Badge variant="secondary">Classic</Badge>
+                        {!canAccessQuestionnaire && (
+                          <Badge className="bg-red-500 text-white">
+                            <Lock className="h-3 w-3 mr-1" />
+                            Paid Plan Required
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-muted-foreground mb-4">
-                        Fill out a comprehensive structured questionnaire at your own pace. Ideal if you prefer to review all questions upfront.
+                        {canAccessQuestionnaire
+                          ? "Fill out a comprehensive structured questionnaire at your own pace. Ideal if you prefer to review all questions upfront."
+                          : "Upgrade to a paid plan to use the business plan questionnaire and generate a complete application-ready plan."}
                       </p>
                       
                       <div className="space-y-3">
@@ -231,10 +252,19 @@ export default function Questionnaire() {
                         </div>
                       </div>
 
-                      <Button className="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white" data-testid="button-start-form">
-                        <FileText className="h-4 w-4 mr-2" />
-                        Use Traditional Form
-                      </Button>
+                      {canAccessQuestionnaire ? (
+                        <Button className="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white" data-testid="button-start-form">
+                          <FileText className="h-4 w-4 mr-2" />
+                          Use Traditional Form
+                        </Button>
+                      ) : (
+                        <Link href="/pricing">
+                          <Button className="w-full mt-6" data-testid="button-upgrade-form">
+                            <Lock className="h-4 w-4 mr-2" />
+                            Upgrade to Use Questionnaire
+                          </Button>
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </Card>
@@ -318,6 +348,28 @@ export default function Questionnaire() {
             </div>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (!canAccessQuestionnaire && !tierLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="p-8 max-w-md text-center">
+          <Lock className="h-12 w-12 mx-auto text-destructive mb-4" />
+          <h2 className="text-xl font-bold mb-2">Paid Plan Required</h2>
+          <p className="text-muted-foreground mb-6">
+            The business plan questionnaire is available on Basic and higher plans.
+          </p>
+          <div className="flex flex-col gap-3">
+            <Link href="/pricing">
+              <Button className="w-full" data-testid="button-upgrade-questionnaire">Upgrade to Unlock</Button>
+            </Link>
+            <Button variant="outline" onClick={() => setMode('select')} data-testid="button-go-back-questionnaire">
+              Go Back
+            </Button>
+          </div>
+        </Card>
       </div>
     );
   }
