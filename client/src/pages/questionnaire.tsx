@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -41,15 +42,33 @@ interface InterviewSession {
   totalXP: number;
 }
 
+interface CreditBalanceResponse {
+  totalCredits: number;
+}
+
 export default function Questionnaire() {
-  const { userTier, hasAccessToTier, isLoading: tierLoading } = useTierAccess();
+  const { userTier, hasAccessToTier, isLoading: tierLoading, isAuthenticated } = useTierAccess();
   const [mode, setMode] = useState<'select' | 'form' | 'ai-interview'>('select');
   const [interviewSession, setInterviewSession] = useState<InterviewSession | null>(null);
   const { toast } = useToast();
 
+  const { data: creditBalance, isLoading: creditBalanceLoading } = useQuery<CreditBalanceResponse>({
+    queryKey: ['/api/credits/balance'],
+    enabled: isAuthenticated,
+  });
+
   // AI Interview requires Basic or higher tier
   const canAccessAiInterview = hasAccessToTier('basic');
-  const canAccessQuestionnaire = hasAccessToTier('basic');
+
+  // Traditional Form requires BOTH a paid tier and at least one live business-plan credit.
+  // Use the same live balance endpoint as CreditBalanceDisplay so an exhausted paid account
+  // immediately returns to the locked state instead of remaining unlocked because of its tier.
+  const hasQuestionnaireTierAccess = hasAccessToTier('basic');
+  const hasQuestionnaireCredits = (creditBalance?.totalCredits ?? 0) > 0;
+  const canAccessQuestionnaire = hasQuestionnaireTierAccess && hasQuestionnaireCredits;
+  const isPaidUserOutOfCredits =
+    hasQuestionnaireTierAccess && !creditBalanceLoading && !hasQuestionnaireCredits;
+  const questionnaireAccessLoading = tierLoading || (isAuthenticated && creditBalanceLoading);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -87,6 +106,7 @@ export default function Questionnaire() {
           
           // Refetch user data to get the updated tier
           await queryClient.refetchQueries({ queryKey: ['/api/auth/user'] });
+          await queryClient.refetchQueries({ queryKey: ['/api/credits/balance'] });
           
           // Get fresh user data from cache after refetch
           const freshUserData = queryClient.getQueryData<{ subscriptionTier?: string }>(['/api/auth/user']);
@@ -220,17 +240,19 @@ export default function Questionnaire() {
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <h3 className="text-xl font-bold">Traditional Form</h3>
                         <Badge variant="secondary">Classic</Badge>
-                        {!canAccessQuestionnaire && (
+                        {!canAccessQuestionnaire && !questionnaireAccessLoading && (
                           <Badge className="bg-red-500 text-white">
                             <Lock className="h-3 w-3 mr-1" />
-                            Paid Plan Required
+                            {isPaidUserOutOfCredits ? "No Credits" : "Paid Plan Required"}
                           </Badge>
                         )}
                       </div>
                       <p className="text-muted-foreground mb-4">
                         {canAccessQuestionnaire
                           ? "Fill out a comprehensive structured questionnaire at your own pace. Ideal if you prefer to review all questions upfront."
-                          : "Upgrade to a paid plan to use the business plan questionnaire and generate a complete application-ready plan."}
+                          : isPaidUserOutOfCredits
+                            ? "You have used all of your business plan credits. Add credits to start another business plan."
+                            : "Upgrade to a paid plan to use the business plan questionnaire and generate a complete application-ready plan."}
                       </p>
                       
                       <div className="space-y-3">
@@ -257,6 +279,13 @@ export default function Questionnaire() {
                           <FileText className="h-4 w-4 mr-2" />
                           Use Traditional Form
                         </Button>
+                      ) : isPaidUserOutOfCredits ? (
+                        <Link href="/pricing">
+                          <Button className="w-full mt-6" data-testid="button-get-credits-form">
+                            <Lock className="h-4 w-4 mr-2" />
+                            Get Credits
+                          </Button>
+                        </Link>
                       ) : (
                         <Link href="/pricing">
                           <Button className="w-full mt-6" data-testid="button-upgrade-form">
@@ -352,18 +381,24 @@ export default function Questionnaire() {
     );
   }
 
-  if (!canAccessQuestionnaire && !tierLoading) {
+  if (!canAccessQuestionnaire && !questionnaireAccessLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="p-8 max-w-md text-center">
           <Lock className="h-12 w-12 mx-auto text-destructive mb-4" />
-          <h2 className="text-xl font-bold mb-2">Paid Plan Required</h2>
+          <h2 className="text-xl font-bold mb-2">
+            {isPaidUserOutOfCredits ? "Business Plan Credits Required" : "Paid Plan Required"}
+          </h2>
           <p className="text-muted-foreground mb-6">
-            The business plan questionnaire is available on Basic and higher plans.
+            {isPaidUserOutOfCredits
+              ? "You have used all of your business plan credits. Add credits to use the questionnaire again."
+              : "The business plan questionnaire is available on Basic and higher plans."}
           </p>
           <div className="flex flex-col gap-3">
             <Link href="/pricing">
-              <Button className="w-full" data-testid="button-upgrade-questionnaire">Upgrade to Unlock</Button>
+              <Button className="w-full" data-testid={isPaidUserOutOfCredits ? "button-get-credits-questionnaire" : "button-upgrade-questionnaire"}>
+                {isPaidUserOutOfCredits ? "Get Credits" : "Upgrade to Unlock"}
+              </Button>
             </Link>
             <Button variant="outline" onClick={() => setMode('select')} data-testid="button-go-back-questionnaire">
               Go Back
