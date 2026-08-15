@@ -1047,9 +1047,18 @@ Respond ONLY with valid JSON in this exact format:
           ? String(req.body.textElements).length
           : 0,
       });
-      const data = questionnaireSchema.parse(req.body);
       const user = req.user as any;
       const userId = user.id;
+      const userTier = String(user.subscriptionTier || "free").toLowerCase();
+
+      if (userTier === "free") {
+        return res.status(403).json({
+          success: false,
+          error: "Business plan questionnaire requires a paid plan.",
+        });
+      }
+
+      const data = questionnaireSchema.parse(req.body);
 
       console.log("[Questionnaire] Parsed theme data:", {
         themeId: data.themeId,
