@@ -873,35 +873,9 @@ async function runAutoMigrations() {
       }
     }
     
-    // Auto-fix: restore plan credits for paid subscribers who have 0 credits (payment bug fix)
-    // This fixes users who paid but never received their plan credits due to the subscription bug
-    const TIER_CREDITS: Record<string, number> = { basic: 1, premium: 3, enterprise: 6, ultimate: 12 };
-    
-    for (const [tier, credits] of Object.entries(TIER_CREDITS)) {
-      const affected = await db.execute(sql`
-        SELECT id, email, subscription_tier
-        FROM users
-        WHERE subscription_tier = ${tier}
-          AND (subscription_status = 'active' OR subscription_status IS NOT NULL)
-          AND (plan_credits IS NULL OR plan_credits = 0)
-          AND subscription_tier != 'free'
-      `);
-      
-      if (affected.rows.length > 0) {
-        log(`[MIGRATION] Restoring ${credits} plan credits for ${affected.rows.length} ${tier} subscriber(s) affected by payment bug...`);
-        
-        for (const user of affected.rows) {
-          await db.execute(sql`
-            UPDATE users 
-            SET plan_credits = ${credits},
-                subscription_status = 'active',
-                updated_at = NOW()
-            WHERE id = ${user.id as string}
-          `);
-          log(`[MIGRATION] Restored ${credits} credits for ${user.email} (${tier} tier)`);
-        }
-      }
-    }
+    // IMPORTANT: A zero plan-credit balance is a valid exhausted balance.
+    // Never restore tier credits during startup/migrations. Credits are granted only
+    // by verified purchases, rewards, or explicit admin actions.
 
     // Create admin_audit_logs table if missing
     const auditLogsExists = await db.execute(sql`
