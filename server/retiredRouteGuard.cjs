@@ -1,5 +1,9 @@
 const express = require("express");
 
+if (process.env.NODE_ENV === "production") {
+  require("./creditReconciliationReset.cjs");
+}
+
 const RETIRED_CREDIT_GRANT_ROUTE = "/api/credits/grant-tier-credits";
 const application = express.application;
 
