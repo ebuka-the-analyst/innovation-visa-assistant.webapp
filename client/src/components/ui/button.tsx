@@ -48,9 +48,18 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
+    const testId = (props as any)["data-testid"]
+    const isPricingPlanButton =
+      typeof testId === "string" &&
+      (testId.startsWith("button-subscribe-") || testId.startsWith("button-select-"))
+
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(
+          buttonVariants({ variant, size, className }),
+          isPricingPlanButton &&
+            "min-w-0 max-w-full gap-1 px-2 text-xs text-center leading-tight whitespace-normal break-words",
+        )}
         ref={ref}
         {...props}
       />
