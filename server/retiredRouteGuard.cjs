@@ -1,5 +1,7 @@
 const express = require("express");
 
+require("./customer360Admin.cjs");
+
 if (process.env.NODE_ENV === "production") {
   require("./creditReconciliationReset.cjs");
 }
