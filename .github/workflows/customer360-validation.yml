@@ -1,0 +1,33 @@
+name: Customer 360 Validation
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check Customer 360 server syntax
+        run: |
+          node --check server/customer360Admin.cjs
+          node --check server/retiredRouteGuard.cjs
+
+      - name: Strict TypeScript check
+        run: npm run check
+
+      - name: Production build
+        run: npm run build
