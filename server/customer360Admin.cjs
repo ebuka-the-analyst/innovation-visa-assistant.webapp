@@ -48,23 +48,76 @@ function iso(value) {
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
-function paymentAmount(row) {
-  if (row?.amount !== undefined && row?.amount !== null) return number(row.amount);
-  return 0;
-}
-
 function successfulPayment(row) {
   return ["succeeded", "completed", "paid"].includes(String(row?.status || "").toLowerCase());
 }
 
-function buildHealth({ user, plans, sessions, payments, credits }) {
+function paymentAmount(row) {
+  return number(row?.amount);
+}
+
+function paymentTier(row) {
+  const value = row?.tier || row?.subscription_tier || row?.plan_tier || null;
+  return value ? String(value).toLowerCase() : null;
+}
+
+function deriveTierHistory(user, payments) {
+  const currentTier = String(user.subscription_tier || "free").toLowerCase();
+  const successful = payments
+    .filter(successfulPayment)
+    .map((payment) => ({
+      tier: paymentTier(payment),
+      at: iso(payment.completed_at || payment.created_at),
+      type: payment.type || "payment",
+    }))
+    .filter((event) => event.tier && event.at)
+    .sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+
+  const observed = [];
+  for (const event of successful) {
+    const existing = observed.find((item) => item.tier === event.tier);
+    if (existing) {
+      existing.lastSeenAt = event.at;
+      existing.transactions += 1;
+    } else {
+      observed.push({
+        tier: event.tier,
+        firstSeenAt: event.at,
+        lastSeenAt: event.at,
+        transactions: 1,
+        source: "payment_history",
+      });
+    }
+  }
+
+  const recordedPrevious = user.previous_tier ? String(user.previous_tier).toLowerCase() : null;
+  let derivedPrevious = null;
+  for (let index = successful.length - 1; index >= 0; index -= 1) {
+    const tier = successful[index].tier;
+    if (tier && tier !== currentTier) {
+      derivedPrevious = tier;
+      break;
+    }
+  }
+
+  const previousTier = recordedPrevious || derivedPrevious || null;
+  const previousTierSource = recordedPrevious
+    ? "account_record"
+    : derivedPrevious
+      ? "payment_history"
+      : null;
+
+  return { currentTier, previousTier, previousTierSource, recordedPrevious, observed };
+}
+
+function buildHealth({ user, stats, credits }) {
   let score = 100;
   const flags = [];
   const paidTier = !["", "free"].includes(String(user.subscription_tier || "free").toLowerCase());
   const totalCredits = number(user.plan_credits) + number(user.bonus_credits);
-  const activeSessions = sessions.filter((session) => session.is_active).length;
-  const failedPlans = plans.filter((plan) => String(plan.status).toLowerCase() === "failed").length;
-  const failedPayments = payments.filter((payment) => ["failed", "past_due"].includes(String(payment.status || "").toLowerCase())).length;
+  const activeSessions = number(stats.active_sessions);
+  const failedPlans = number(stats.failed_plans);
+  const failedPayments = number(stats.failed_payments);
 
   if (user.is_banned) {
     score -= 50;
@@ -85,7 +138,7 @@ function buildHealth({ user, plans, sessions, payments, credits }) {
   if (paidTier && totalCredits === 0) {
     flags.push({ severity: "info", code: "no_credits", label: "No credits remaining" });
   }
-  if (paidTier && plans.length === 0) {
+  if (paidTier && number(stats.total_plans) === 0) {
     flags.push({ severity: "info", code: "no_plans", label: "Paid account has not created a business plan yet" });
   }
   if (failedPlans > 0) {
@@ -110,8 +163,7 @@ function buildHealth({ user, plans, sessions, payments, credits }) {
 
   const latestCreditBalance = credits[0]?.balance_after;
   if (latestCreditBalance !== undefined && latestCreditBalance !== null) {
-    const currentTotal = totalCredits;
-    if (number(latestCreditBalance) !== currentTotal) {
+    if (number(latestCreditBalance) !== totalCredits) {
       flags.push({ severity: "warning", code: "credit_ledger_mismatch", label: "Current credit balance differs from the latest ledger balance" });
       score -= 15;
     }
@@ -156,7 +208,7 @@ async function handleCustomer360(req, res) {
     const user = userResult.rows[0];
     const userId = user.id;
 
-    const [plans, toolUsage, toolEvents, sessions, pages, credits, paymentRows, activityRows, securityRows] = await Promise.all([
+    const [plans, toolUsage, toolEvents, sessions, pages, credits, paymentRows, activityRows, securityRows, statsRows] = await Promise.all([
       safeQuery(client, `
         SELECT id, business_name, industry, tier, status, current_generation_stage,
                CASE WHEN pdf_url IS NOT NULL AND pdf_url <> '' THEN true ELSE false END AS has_pdf,
@@ -227,26 +279,61 @@ async function handleCustomer360(req, res) {
         WHERE user_id = $1
         ORDER BY created_at DESC
         LIMIT 50`, [userId]),
+      safeQuery(client, `
+        SELECT
+          (SELECT COUNT(*) FROM business_plans WHERE user_id = $1)::integer AS total_plans,
+          (SELECT COUNT(*) FROM business_plans WHERE user_id = $1 AND LOWER(COALESCE(status, '')) = 'completed')::integer AS completed_plans,
+          (SELECT COUNT(*) FROM business_plans WHERE user_id = $1 AND LOWER(COALESCE(status, '')) = 'failed')::integer AS failed_plans,
+          (SELECT COUNT(*) FROM user_sessions WHERE user_id = $1)::integer AS total_sessions,
+          (SELECT COUNT(*) FROM user_sessions WHERE user_id = $1 AND is_active = true)::integer AS active_sessions,
+          (SELECT COALESCE(SUM(total_duration_seconds), 0) FROM user_sessions WHERE user_id = $1)::bigint AS total_session_seconds,
+          (SELECT COUNT(*) FROM page_views WHERE user_id = $1)::integer AS total_page_views,
+          (SELECT COALESCE(SUM(time_on_page_seconds), 0) FROM page_views WHERE user_id = $1)::bigint AS total_page_seconds,
+          (SELECT COALESCE(SUM(click_count), 0) FROM page_views WHERE user_id = $1)::bigint AS total_clicks,
+          (SELECT COUNT(DISTINCT tool_id) FROM activity_events WHERE user_id = $1 AND tool_id IS NOT NULL)::integer AS unique_tools,
+          (SELECT COUNT(*) FROM activity_events WHERE user_id = $1 AND tool_id IS NOT NULL)::integer AS total_tool_uses,
+          (SELECT COUNT(*) FROM credit_transactions WHERE user_id = $1)::integer AS total_credit_transactions,
+          (SELECT COALESCE(SUM(CASE WHEN credits_change > 0 THEN credits_change ELSE 0 END), 0) FROM credit_transactions WHERE user_id = $1)::bigint AS lifetime_granted,
+          (SELECT COALESCE(SUM(CASE WHEN credits_change < 0 THEN ABS(credits_change) ELSE 0 END), 0) FROM credit_transactions WHERE user_id = $1)::bigint AS lifetime_consumed,
+          (SELECT COUNT(*) FROM payment_transactions WHERE user_id = $1)::integer AS total_payments,
+          (SELECT COUNT(*) FROM payment_transactions WHERE user_id = $1 AND LOWER(COALESCE(status, '')) IN ('succeeded','completed','paid'))::integer AS successful_payments,
+          (SELECT COUNT(*) FROM payment_transactions WHERE user_id = $1 AND LOWER(COALESCE(status, '')) IN ('failed','past_due'))::integer AS failed_payments,
+          (SELECT COALESCE(SUM(CASE WHEN LOWER(COALESCE(status, '')) IN ('succeeded','completed','paid') THEN COALESCE(amount, 0) ELSE 0 END), 0) FROM payment_transactions WHERE user_id = $1)::bigint AS payment_total,
+          (SELECT MAX(created_at) FROM payment_transactions WHERE user_id = $1 AND LOWER(COALESCE(status, '')) IN ('succeeded','completed','paid')) AS last_successful_payment_at
+      `, [userId]),
     ]);
 
     const payments = paymentRows.map((row) => row.data || row).filter(Boolean);
     const activity = activityRows.map((row) => row.data || row).filter(Boolean);
     const security = securityRows.map((row) => row.data || row).filter(Boolean);
+    const fallbackSuccessfulPayments = payments.filter(successfulPayment);
+    const fallbackFailedPayments = payments.filter((payment) => ["failed", "past_due"].includes(String(payment.status || "").toLowerCase()));
+    const fallbackPaymentTotal = fallbackSuccessfulPayments.reduce((sum, payment) => sum + paymentAmount(payment), 0);
 
-    const lifetimeGranted = credits
-      .filter((tx) => number(tx.credits_change) > 0)
-      .reduce((sum, tx) => sum + number(tx.credits_change), 0);
-    const lifetimeConsumed = credits
-      .filter((tx) => number(tx.credits_change) < 0)
-      .reduce((sum, tx) => sum + Math.abs(number(tx.credits_change)), 0);
-    const successfulPayments = payments.filter(successfulPayment);
-    const failedPayments = payments.filter((payment) => ["failed", "past_due"].includes(String(payment.status || "").toLowerCase()));
-    const paymentTotal = successfulPayments.reduce((sum, payment) => sum + paymentAmount(payment), 0);
-    const activeSessions = sessions.filter((session) => session.is_active).length;
-    const totalSessionSeconds = sessions.reduce((sum, session) => sum + number(session.total_duration_seconds), 0);
-    const totalPageSeconds = pages.reduce((sum, page) => sum + number(page.time_on_page_seconds), 0);
-
-    const health = buildHealth({ user, plans, sessions, payments, credits });
+    const fallbackStats = {
+      total_plans: plans.length,
+      completed_plans: plans.filter((plan) => String(plan.status || "").toLowerCase() === "completed").length,
+      failed_plans: plans.filter((plan) => String(plan.status || "").toLowerCase() === "failed").length,
+      total_sessions: sessions.length,
+      active_sessions: sessions.filter((session) => session.is_active).length,
+      total_session_seconds: sessions.reduce((sum, session) => sum + number(session.total_duration_seconds), 0),
+      total_page_views: pages.length,
+      total_page_seconds: pages.reduce((sum, page) => sum + number(page.time_on_page_seconds), 0),
+      total_clicks: pages.reduce((sum, page) => sum + number(page.click_count), 0),
+      unique_tools: toolUsage.length,
+      total_tool_uses: toolUsage.reduce((sum, tool) => sum + number(tool.uses), 0),
+      total_credit_transactions: credits.length,
+      lifetime_granted: credits.filter((tx) => number(tx.credits_change) > 0).reduce((sum, tx) => sum + number(tx.credits_change), 0),
+      lifetime_consumed: credits.filter((tx) => number(tx.credits_change) < 0).reduce((sum, tx) => sum + Math.abs(number(tx.credits_change)), 0),
+      total_payments: payments.length,
+      successful_payments: fallbackSuccessfulPayments.length,
+      failed_payments: fallbackFailedPayments.length,
+      payment_total: fallbackPaymentTotal,
+      last_successful_payment_at: fallbackSuccessfulPayments[0]?.created_at || null,
+    };
+    const stats = statsRows[0] || fallbackStats;
+    const tierHistory = deriveTierHistory(user, payments);
+    const health = buildHealth({ user, stats, credits });
 
     const response = {
       generatedAt: new Date().toISOString(),
@@ -263,7 +350,10 @@ async function handleCustomer360(req, res) {
         onboardingCompletedAt: iso(user.onboarding_completed_at),
         subscriptionTier: user.subscription_tier || "free",
         subscriptionStatus: user.subscription_status || "inactive",
-        previousTier: user.previous_tier,
+        previousTier: tierHistory.previousTier,
+        previousTierRecorded: tierHistory.recordedPrevious,
+        previousTierSource: tierHistory.previousTierSource,
+        tierHistory: tierHistory.observed,
         tierUpgradedAt: iso(user.tier_upgraded_at),
         tierExpiresAt: iso(user.tier_expires_at),
         stripeCustomerId: user.stripe_customer_id,
@@ -280,16 +370,25 @@ async function handleCustomer360(req, res) {
         health,
         currentPage: sessions.find((session) => session.is_active)?.current_page || sessions[0]?.current_page || null,
         lastSeenAt: iso(sessions[0]?.last_seen_at || user.last_activity_at),
-        activeSessions,
-        totalSessions: sessions.length,
-        totalPlans: plans.length,
-        completedPlans: plans.filter((plan) => String(plan.status).toLowerCase() === "completed").length,
-        failedPlans: plans.filter((plan) => String(plan.status).toLowerCase() === "failed").length,
-        uniqueToolsUsed: toolUsage.length,
-        totalToolUses: toolUsage.reduce((sum, tool) => sum + number(tool.uses), 0),
-        pageViewsTracked: pages.length,
-        totalTrackedSessionSeconds: totalSessionSeconds,
-        totalTrackedPageSeconds: totalPageSeconds,
+        activeSessions: number(stats.active_sessions),
+        totalSessions: number(stats.total_sessions),
+        totalPlans: number(stats.total_plans),
+        completedPlans: number(stats.completed_plans),
+        failedPlans: number(stats.failed_plans),
+        uniqueToolsUsed: number(stats.unique_tools),
+        totalToolUses: number(stats.total_tool_uses),
+        pageViewsTracked: number(stats.total_page_views),
+        totalTrackedSessionSeconds: number(stats.total_session_seconds),
+        totalTrackedPageSeconds: number(stats.total_page_seconds),
+        totalClicks: number(stats.total_clicks),
+      },
+      coverage: {
+        plans: { returned: plans.length, total: number(stats.total_plans), limit: 100 },
+        tools: { returned: toolUsage.length, total: number(stats.unique_tools), limit: 200 },
+        sessions: { returned: sessions.length, total: number(stats.total_sessions), limit: 200 },
+        pages: { returned: pages.length, total: number(stats.total_page_views), limit: 300 },
+        credits: { returned: credits.length, total: number(stats.total_credit_transactions), limit: 200 },
+        payments: { returned: payments.length, total: number(stats.total_payments), limit: 100 },
       },
       plans: plans.map((plan) => ({
         id: plan.id,
@@ -309,8 +408,8 @@ async function handleCustomer360(req, res) {
         createdAt: iso(plan.created_at),
       })),
       tools: {
-        uniqueToolsUsed: toolUsage.length,
-        totalUses: toolUsage.reduce((sum, tool) => sum + number(tool.uses), 0),
+        uniqueToolsUsed: number(stats.unique_tools),
+        totalUses: number(stats.total_tool_uses),
         usage: toolUsage.map((tool) => ({
           toolId: tool.tool_id,
           category: tool.tool_category,
@@ -332,32 +431,40 @@ async function handleCustomer360(req, res) {
           occurredAt: iso(event.occurred_at),
         })),
       },
-      sessions: sessions.map((session) => ({
-        id: session.id,
-        startedAt: iso(session.session_started_at),
-        lastSeenAt: iso(session.last_seen_at),
-        endedAt: iso(session.session_ended_at),
-        isActive: Boolean(session.is_active),
-        userAgent: session.user_agent,
-        deviceType: session.device_type,
-        browserName: session.browser_name,
-        browserVersion: session.browser_version,
-        osName: session.os_name,
-        osVersion: session.os_version,
-        screenResolution: session.screen_resolution,
-        ipAddress: session.ip_address,
-        country: session.country,
-        countryCode: session.country_code,
-        region: session.region,
-        city: session.city,
-        connectionType: session.connection_type,
-        pageViewCount: number(session.page_view_count),
-        eventCount: number(session.event_count),
-        totalDurationSeconds: number(session.total_duration_seconds),
-        entryPage: session.entry_page,
-        currentPage: session.current_page,
-        exitPage: session.exit_page,
-      })),
+      sessions: sessions.map((session) => {
+        const locationParts = [session.city, session.region, session.country].filter(Boolean);
+        const locationLabel = locationParts.length
+          ? `${locationParts.join(", ")}${session.country_code && !String(locationParts.join(" ")).includes(String(session.country_code)) ? ` (${session.country_code})` : ""}`
+          : "Location not captured for this session";
+        return {
+          id: session.id,
+          startedAt: iso(session.session_started_at),
+          lastSeenAt: iso(session.last_seen_at),
+          endedAt: iso(session.session_ended_at),
+          isActive: Boolean(session.is_active),
+          userAgent: session.user_agent,
+          deviceType: session.device_type,
+          browserName: session.browser_name,
+          browserVersion: session.browser_version,
+          osName: session.os_name,
+          osVersion: session.os_version,
+          screenResolution: session.screen_resolution,
+          ipAddress: session.ip_address,
+          country: session.country,
+          countryCode: session.country_code,
+          region: session.region,
+          city: session.city,
+          locationCaptured: locationParts.length > 0,
+          locationLabel,
+          connectionType: session.connection_type,
+          pageViewCount: number(session.page_view_count),
+          eventCount: number(session.event_count),
+          totalDurationSeconds: number(session.total_duration_seconds),
+          entryPage: session.entry_page,
+          currentPage: session.current_page,
+          exitPage: session.exit_page,
+        };
+      }),
       pages: pages.map((page) => ({
         id: page.id,
         sessionId: page.session_id,
@@ -379,14 +486,16 @@ async function handleCustomer360(req, res) {
         bonusCredits: number(user.bonus_credits),
         totalCredits: number(user.plan_credits) + number(user.bonus_credits),
         creditsUsed: number(user.credits_used),
-        lifetimeGranted,
-        lifetimeConsumed,
+        lifetimeGranted: number(stats.lifetime_granted),
+        lifetimeConsumed: number(stats.lifetime_consumed),
         lastCreditRefresh: iso(user.last_credit_refresh),
         hasUltimateAssurance: Boolean(user.has_ultimate_assurance),
-        totalSpentPence: number(user.total_spent) || paymentTotal,
-        successfulPaymentCount: successfulPayments.length,
-        failedPaymentCount: failedPayments.length,
-        lastPaymentAt: iso(successfulPayments[0]?.created_at),
+        totalSpentPence: number(stats.payment_total) || number(user.total_spent),
+        successfulPaymentCount: number(stats.successful_payments),
+        failedPaymentCount: number(stats.failed_payments),
+        totalPaymentCount: number(stats.total_payments),
+        totalCreditTransactionCount: number(stats.total_credit_transactions),
+        lastPaymentAt: iso(stats.last_successful_payment_at || fallbackSuccessfulPayments[0]?.created_at),
         payments,
         creditTransactions: credits.map((tx) => ({
           id: tx.id,
