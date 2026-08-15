@@ -98,7 +98,7 @@
     "openid-client": "^6.8.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
-    "passport-local": "^1.0.38",
+    "passport-local": "^1.0.0",
     "pdf-parse": "^2.4.5",
     "pdfjs-dist": "^5.4.530",
     "pdfkit": "^0.17.2",
