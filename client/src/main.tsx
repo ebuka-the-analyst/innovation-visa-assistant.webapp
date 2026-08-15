@@ -7,5 +7,6 @@ import { initCustomer360AdminEnhancer } from "./components/admin/Customer360Enha
 
 initPerformanceMonitor();
 initCustomer360AdminEnhancer();
+document.getElementById("customer-360-admin-enhancer-root")?.style.setProperty("pointer-events", "auto", "important");
 
 createRoot(document.getElementById("root")!).render(<App />);
