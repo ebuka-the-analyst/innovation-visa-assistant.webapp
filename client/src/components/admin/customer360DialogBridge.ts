@@ -9,10 +9,41 @@ function findAccountDialog(): HTMLElement | null {
   );
 }
 
+function ensureAccountTitleSeparator(dialog: HTMLElement) {
+  const labelledBy = dialog.getAttribute("aria-labelledby");
+  const labelledTitle = labelledBy ? document.getElementById(labelledBy) : null;
+
+  const title =
+    labelledTitle &&
+    dialog.contains(labelledTitle) &&
+    ACCOUNT_VIEW_PATTERN.test(labelledTitle.textContent || "")
+      ? labelledTitle
+      : Array.from(
+          dialog.querySelectorAll<HTMLElement>(
+            'h1, h2, h3, h4, [data-slot="dialog-title"]',
+          ),
+        ).find((element) => ACCOUNT_VIEW_PATTERN.test(element.textContent || ""));
+
+  if (!title) return;
+
+  // Dialog textContent concatenates sibling elements without inserting spaces.
+  // Customer360Enhancer reads the Account View email from that text. Without a
+  // boundary, "user@gmail.com" + "Read-only support view" becomes
+  // "user@gmail.comRead-only..." and the email regex sees "comRead" as the TLD.
+  // A trailing text-node space is visually inert but creates a safe boundary.
+  if (!/\s$/.test(title.textContent || "")) {
+    title.appendChild(document.createTextNode(" "));
+  }
+}
+
 function attachRootToDialog() {
   const dialog = findAccountDialog();
+  if (!dialog) return;
+
+  ensureAccountTitleSeparator(dialog);
+
   const root = document.getElementById(ROOT_ID);
-  if (!dialog || !root || root.parentElement === dialog) return;
+  if (!root || root.parentElement === dialog) return;
 
   // Radix Dialog treats DOM outside DialogContent as an outside interaction.
   // Keep the Customer 360 root inside the existing DialogContent so pointer,
