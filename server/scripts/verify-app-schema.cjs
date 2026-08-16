@@ -29,6 +29,12 @@ async function main() {
       'app_schema_migrations',
       'business_plan_generation_jobs',
       'business_plan_generation_sections',
+      'business_plan_versions',
+      'business_plan_version_sections',
+      'business_plan_revisions',
+      'business_plan_revision_sections',
+      'business_plan_revision_jobs',
+      'business_plan_revision_events',
       'export_analytics',
       'conversion_funnel_events',
       'hourly_activity_aggregates',
@@ -55,6 +61,13 @@ async function main() {
       ['business_plan_generation_jobs', 'heartbeat_at'],
       ['business_plan_generation_sections', 'content_sha256'],
       ['business_plan_generation_sections', 'generator_version'],
+      ['business_plan_versions', 'content_sha256'],
+      ['business_plan_revisions', 'selected_section_indexes'],
+      ['business_plan_revisions', 'source_version_id'],
+      ['business_plan_revision_sections', 'revised_sha256'],
+      ['business_plan_revision_jobs', 'lease_token'],
+      ['business_plan_revision_jobs', 'lease_expires_at'],
+      ['business_plan_revision_events', 'event_type'],
       ['tool_case_contexts', 'revision'],
       ['tool_case_contexts', 'context_data'],
       ['tool_case_contexts', 'evidence_refs'],
@@ -85,6 +98,16 @@ async function main() {
       'ux_business_plan_generation_sections_plan_index',
       'idx_business_plan_generation_sections_plan',
       'ux_credit_transactions_generation_plan_once',
+      'ux_business_plan_versions_plan_number',
+      'ux_business_plan_versions_one_accepted',
+      'ux_business_plan_version_sections_version_index',
+      'ux_business_plan_revisions_plan_number',
+      'ux_business_plan_revisions_user_idempotency',
+      'ux_business_plan_revisions_one_active',
+      'ux_business_plan_revision_sections_revision_index',
+      'ux_business_plan_revision_jobs_revision',
+      'idx_business_plan_revision_jobs_claim',
+      'idx_business_plan_revision_events_revision',
       'ux_tool_case_context_events_user_revision',
       'idx_tool_case_context_events_user_created',
       'ux_tool_runs_user_tool_client_key',
@@ -103,6 +126,14 @@ async function main() {
     for (const index of requiredIndexes) if (!presentIndexes.has(index)) failures.push(`Missing required index: ${index}`);
 
     const requiredCascadeForeignKeys = [
+      ['business_plan_version_sections', 'version_id'],
+      ['business_plan_version_sections', 'plan_id'],
+      ['business_plan_revisions', 'plan_id'],
+      ['business_plan_revisions', 'user_id'],
+      ['business_plan_revision_sections', 'revision_id'],
+      ['business_plan_revision_jobs', 'revision_id'],
+      ['business_plan_revision_events', 'revision_id'],
+      ['business_plan_revision_events', 'plan_id'],
       ['tool_case_contexts', 'user_id'],
       ['tool_case_context_events', 'user_id'],
       ['tool_runs', 'user_id'],
@@ -172,6 +203,29 @@ async function main() {
        GROUP BY status ORDER BY status`,
     );
     observations.generationJobsByStatus = jobs.rows;
+
+    const revisionJobs = await client.query(
+      `SELECT status, COUNT(*)::int AS count
+       FROM business_plan_revision_jobs
+       GROUP BY status ORDER BY status`,
+    );
+    observations.revisionJobsByStatus = revisionJobs.rows;
+
+    const activeRevisionDuplicates = await client.query(
+      `SELECT plan_id, COUNT(*)::int AS count
+       FROM business_plan_revisions
+       WHERE status IN ('submitted', 'in_progress', 'ready_for_review')
+       GROUP BY plan_id HAVING COUNT(*) > 1`,
+    );
+    if (activeRevisionDuplicates.rowCount > 0) failures.push('More than one active revision exists for a plan');
+
+    const acceptedVersionDuplicates = await client.query(
+      `SELECT plan_id, COUNT(*)::int AS count
+       FROM business_plan_versions
+       WHERE status = 'accepted'
+       GROUP BY plan_id HAVING COUNT(*) > 1`,
+    );
+    if (acceptedVersionDuplicates.rowCount > 0) failures.push('More than one accepted version exists for a plan');
 
     const toolRuns = await client.query(
       `SELECT status, validation_state, COUNT(*)::int AS count

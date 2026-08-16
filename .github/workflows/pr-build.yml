@@ -63,5 +63,8 @@ jobs:
       - name: Smoke test financial model route
         run: node scripts/smoke-financial-model-route.cjs
 
+      - name: Validate business plan revision foundation
+        run: node scripts/validate-revision-foundation.cjs
+
       - name: Production build
         run: npm run build
