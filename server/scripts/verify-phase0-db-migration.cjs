@@ -111,6 +111,17 @@ async function getColumns(client, tableName) {
   return Object.fromEntries(result.rows.map((row) => [row.column_name, row]));
 }
 
+async function orphanUserCount(client, tableName) {
+  const result = await client.query(
+    `SELECT COUNT(*)::integer AS count
+       FROM ${tableName} child
+       LEFT JOIN users u ON u.id = child.user_id
+      WHERE child.user_id IS NOT NULL
+        AND u.id IS NULL`,
+  );
+  return Number(result.rows[0]?.count || 0);
+}
+
 async function verifyMigration() {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required for Phase-0 migration verification");
@@ -151,6 +162,19 @@ async function verifyMigration() {
       failures.push("seo_automation_plans.strategy_data must be NOT NULL");
     }
 
+    const latencyColumns = await getColumns(client, "api_latency_log");
+    if (latencyColumns.user_id?.is_nullable !== "YES") {
+      failures.push("api_latency_log.user_id must remain nullable so telemetry survives user deletion");
+    }
+
+    if ((await orphanUserCount(client, "api_latency_log")) !== 0) {
+      failures.push("api_latency_log still contains orphan user references after migration");
+    }
+
+    if ((await orphanUserCount(client, "coins_usage_log")) !== 0) {
+      failures.push("coins_usage_log contains orphan user references after migration");
+    }
+
     const indexResult = await client.query(
       `SELECT indexname
          FROM pg_indexes
@@ -163,20 +187,26 @@ async function verifyMigration() {
       if (!presentIndexes.has(indexName)) failures.push(`Missing required index: ${indexName}`);
     }
 
-    for (const constraintName of [
-      "api_latency_log_user_id_users_id_fk",
-      "coins_usage_log_user_id_users_id_fk",
-    ]) {
-      const result = await client.query(
-        `SELECT convalidated
-           FROM pg_constraint
-          WHERE conname = $1
-            AND connamespace = 'public'::regnamespace`,
-        [constraintName],
-      );
-      if (result.rowCount !== 1 || result.rows[0]?.convalidated !== true) {
-        failures.push(`Missing or unvalidated constraint: ${constraintName}`);
-      }
+    const latencyFk = await client.query(
+      `SELECT convalidated, confdeltype
+         FROM pg_constraint
+        WHERE conname = 'api_latency_log_user_id_users_id_fk'
+          AND conrelid = 'public.api_latency_log'::regclass`,
+    );
+    if (latencyFk.rowCount !== 1 || latencyFk.rows[0]?.convalidated !== true) {
+      failures.push("Missing or unvalidated constraint: api_latency_log_user_id_users_id_fk");
+    } else if (latencyFk.rows[0]?.confdeltype !== "n") {
+      failures.push("api_latency_log_user_id_users_id_fk must use ON DELETE SET NULL");
+    }
+
+    const coinsFk = await client.query(
+      `SELECT convalidated
+         FROM pg_constraint
+        WHERE conname = 'coins_usage_log_user_id_users_id_fk'
+          AND conrelid = 'public.coins_usage_log'::regclass`,
+    );
+    if (coinsFk.rowCount !== 1 || coinsFk.rows[0]?.convalidated !== true) {
+      failures.push("Missing or unvalidated constraint: coins_usage_log_user_id_users_id_fk");
     }
 
     const dismissalUnique = await client.query(
