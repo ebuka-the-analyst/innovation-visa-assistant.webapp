@@ -1,0 +1,48 @@
+name: Progress Tracker E2E
+
+on:
+  pull_request:
+    paths:
+      - "client/src/pages/progress.tsx"
+      - "client/src/components/FeatureNavigation.tsx"
+      - "client/src/__e2e__/progress-harness.tsx"
+      - "client/progress-e2e.html"
+      - "tests/e2e/progress-tracker.spec.ts"
+      - "playwright.config.ts"
+      - "scripts/validate-evidence-aware-progress-tracker.cjs"
+      - "scripts/validate-progress-tracker-plan-link.cjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/progress-tracker-e2e.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Progress Tracker browser tests
+        run: npm run test:e2e:progress
+
+      - name: Validate Progress Tracker semantics
+        run: |
+          node scripts/validate-progress-tracker-plan-link.cjs
+          node scripts/validate-evidence-aware-progress-tracker.cjs

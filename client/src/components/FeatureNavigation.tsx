@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 
 interface FeatureNavProps {
   currentPage: "progress" | "questionnaire" | "endorser-comparison" | "document-organizer" | "interview-prep" | "expert-booking" | "rejection-analysis" | "settlement-planning";
+  showJourneyStrip?: boolean;
 }
 
 const featureFlow = [
@@ -17,7 +18,7 @@ const featureFlow = [
   { key: "settlement-planning", label: "Settlement Plan", route: "/settlement-planning", phase: 5 },
 ];
 
-export default function FeatureNavigation({ currentPage }: FeatureNavProps) {
+export default function FeatureNavigation({ currentPage, showJourneyStrip = true }: FeatureNavProps) {
   const currentIndex = featureFlow.findIndex(f => f.key === currentPage);
   const currentPhase = featureFlow[currentIndex]?.phase || 1;
 
@@ -36,7 +37,7 @@ export default function FeatureNavigation({ currentPage }: FeatureNavProps) {
       </div>
 
       {/* Progress Steps - Scrollable container with visible scrollbar */}
-      <div className="overflow-x-auto pb-3 -mx-4 px-4 scrollbar-thin">
+      <div className={`${showJourneyStrip ? "block" : "hidden"} overflow-x-auto pb-3 -mx-4 px-4 scrollbar-thin`}>
         <div className="flex items-center gap-2 min-w-max">
           {featureFlow.map((feature, idx) => {
             const isCurrent = idx === currentIndex;
@@ -64,9 +65,9 @@ export default function FeatureNavigation({ currentPage }: FeatureNavProps) {
       </div>
 
       {/* Phase Indicator */}
-      <div className="text-xs text-muted-foreground">
+      <div className={showJourneyStrip ? "text-xs text-muted-foreground" : "hidden"}>
         Phase {currentPhase} of 5: {
-          currentPhase === 1 ? "Planning & Assessment" :
+          currentPhase === 1 ? "Preparation & Assessment" :
           currentPhase === 2 ? "Preparation" :
           currentPhase === 3 ? "Interview Ready" :
           currentPhase === 4 ? "Reapplication (if needed)" :

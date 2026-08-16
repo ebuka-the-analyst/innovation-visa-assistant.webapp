@@ -11,7 +11,8 @@
     "db:push": "drizzle-kit push",
     "db:preflight:app": "node server/scripts/preflight-app-schema.cjs",
     "db:migrate:app": "node server/scripts/run-app-migrations.cjs",
-    "db:verify:app": "node server/scripts/verify-app-schema.cjs"
+    "db:verify:app": "node server/scripts/verify-app-schema.cjs",
+    "test:e2e:progress": "playwright test tests/e2e/progress-tracker.spec.ts --project=chromium"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.71",
@@ -129,6 +130,8 @@
     "zod-validation-error": "^3.4.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.62.1",
     "@replit/vite-plugin-cartographer": "^0.4.4",
     "@replit/vite-plugin-dev-banner": "^0.1.1",
     "@replit/vite-plugin-runtime-error-modal": "^0.0.3",
