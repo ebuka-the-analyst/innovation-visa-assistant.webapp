@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { startBusinessPlanGenerationWorker } from "./services/businessPlanGenerationService";
 import { registerBusinessPlanRevisionRoutes } from "./businessPlanRevisionRoutes";
+import { registerAdminBusinessPlanRevisionRoutes } from "./adminBusinessPlanRevisionRoutes";
 import { startBusinessPlanRevisionWorker } from "./services/businessPlanRevisionService";
 import type { Express as ExpressType } from "express";
 import type { Server } from "http";
@@ -601,6 +602,7 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
   registerBusinessPlanRevisionRoutes(app);
+  registerAdminBusinessPlanRevisionRoutes(app);
   startBusinessPlanGenerationWorker();
   startBusinessPlanRevisionWorker();
 

@@ -165,6 +165,7 @@ const menuGroups = [
       { id: "plans-pending", label: "Pending Plans", icon: FilePlus, badge: "count" },
       { id: "plans-completed", label: "Completed Plans", icon: FileCheck, badge: null },
       { id: "plans-failed", label: "Failed Plans", icon: FileWarning, badge: null },
+      { id: "plans-revisions", label: "Revision Queue", icon: History, badge: null },
       { id: "plans-funnel", label: "Completion Funnel", icon: Filter, badge: null },
     ]
   },
