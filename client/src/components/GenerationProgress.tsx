@@ -12,6 +12,7 @@ import sterlingAvatar from "@assets/generated_images/sterling_financial_agent_av
 import atlasAvatar from "@assets/generated_images/atlas_growth_agent_avatar.webp";
 import sageAvatar from "@assets/generated_images/sage_compliance_agent_avatar.webp";
 import { useCommercialCatalog, type PlanId } from "@/hooks/useCommercialCatalog";
+import BusinessPlanRevisionDialog from "@/components/BusinessPlanRevisionDialog";
 
 const getAgentForStage = (stageText: string) => {
   const stage = stageText.toLowerCase();
@@ -550,21 +551,8 @@ export default function GenerationProgress({ planId }: { planId?: string }) {
 
               {/* Actions Section - Hide revision for free tier */}
               <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border">
-                {tier !== 'free' && (
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      toast({
-                        title: "Request Revision",
-                        description: "Our team will review your request within 24 hours.",
-                      });
-                      window.location.href = `mailto:support@innovatorfoundervisaassistant.co.uk?subject=Revision Request - Plan ${planId}`;
-                    }}
-                    data-testid="button-request-revision"
-                  >
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Request Revision
-                  </Button>
+                {tier !== 'free' && planId && (
+                  <BusinessPlanRevisionDialog planId={planId} />
                 )}
                 
                 <Link href="/dashboard" className={tier === 'free' ? 'col-span-2' : ''}>
