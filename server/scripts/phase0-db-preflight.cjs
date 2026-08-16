@@ -199,8 +199,33 @@ async function runPreflight() {
       report.tables.coins_usage_log = { exists: false };
     }
 
-    for (const tableName of ["backlink_targets", "user_notification_dismissals"]) {
-      report.tables[tableName] = { exists: await tableExists(client, tableName) };
+    report.tables.backlink_targets = {
+      exists: await tableExists(client, "backlink_targets"),
+    };
+
+    if (await tableExists(client, "user_notification_dismissals")) {
+      const duplicatePairs = await client.query(
+        `SELECT COUNT(*)::integer AS count
+           FROM (
+             SELECT user_id, notification_id
+               FROM user_notification_dismissals
+              GROUP BY user_id, notification_id
+             HAVING COUNT(*) > 1
+           ) duplicates`,
+      );
+      const duplicatePairCount = Number(duplicatePairs.rows[0]?.count || 0);
+      report.tables.user_notification_dismissals = {
+        exists: true,
+        rowCount: await rowCount(client, "user_notification_dismissals"),
+        duplicateUserNotificationPairs: duplicatePairCount,
+      };
+      if (duplicatePairCount > 0) {
+        report.blockers.push(
+          `user_notification_dismissals contains ${duplicatePairCount} duplicate (user_id, notification_id) pair(s); uniqueness cannot be enforced without an explicit deduplication decision.`,
+        );
+      }
+    } else {
+      report.tables.user_notification_dismissals = { exists: false };
     }
 
     await client.query("ROLLBACK");
