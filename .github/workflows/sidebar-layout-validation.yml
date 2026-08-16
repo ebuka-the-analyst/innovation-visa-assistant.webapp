@@ -1,0 +1,37 @@
+name: Sidebar Layout Validation
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify layout fix is wired
+        run: |
+          grep -q 'authenticated-layout-fix.css' client/index.html
+          grep -q 'width: 0 !important' client/public/authenticated-layout-fix.css
+          grep -q 'min-width: 0 !important' client/public/authenticated-layout-fix.css
+          grep -q 'overflow-x: hidden !important' client/public/authenticated-layout-fix.css
+
+      - name: Production build
+        run: npm run build
+
+      - name: Verify CSS ships in production bundle
+        run: |
+          test -f dist/public/authenticated-layout-fix.css
+          grep -q 'authenticated-layout-fix.css' dist/public/index.html
