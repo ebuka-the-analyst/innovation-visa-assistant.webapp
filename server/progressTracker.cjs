@@ -2,6 +2,7 @@ const express = require("express");
 const { Pool } = require("pg");
 
 const ROUTE = "/api/progress-tracker";
+const STORAGE_PREFIX = "journey:";
 const application = express.application;
 
 const JOURNEY_STEP_IDS = new Set([
@@ -55,6 +56,15 @@ function isAuthenticated(req) {
   return Boolean(req.isAuthenticated && req.isAuthenticated() && req.user && req.user.id);
 }
 
+function storageId(stepId) {
+  return `${STORAGE_PREFIX}${stepId}`;
+}
+
+function publicStepId(toolId) {
+  const value = String(toolId || "");
+  return value.startsWith(STORAGE_PREFIX) ? value.slice(STORAGE_PREFIX.length) : value;
+}
+
 function clampPercent(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return 0;
@@ -83,7 +93,7 @@ async function safeQuery(db, text, params = [], fallback = []) {
 
 function normaliseStoredRow(row) {
   return {
-    stepId: row.tool_id,
+    stepId: publicStepId(row.tool_id),
     completionPercent: clampPercent(row.completion_percent),
     status: row.status || "in_progress",
     progressData: safeJson(row.progress_data, {}),
@@ -99,24 +109,25 @@ async function handleGetProgress(req, res) {
 
     const userId = req.user.id;
     const db = getPool();
+    const journeyStorageIds = Array.from(JOURNEY_STEP_IDS, storageId);
 
     const [storedRows, planRows, documentRows, interviewRows, reviewRows] = await Promise.all([
       safeQuery(
         db,
-        `SELECT tool_id, progress_data, completion_percent, status, updated_at
+        `SELECT DISTINCT ON (tool_id)
+                tool_id, progress_data, completion_percent, status, updated_at
            FROM tool_progress
           WHERE user_id = $1
             AND tool_id = ANY($2::text[])
-          ORDER BY updated_at DESC`,
-        [userId, Array.from(JOURNEY_STEP_IDS)],
+          ORDER BY tool_id, updated_at DESC`,
+        [userId, journeyStorageIds],
       ),
       safeQuery(
         db,
         `SELECT id, business_name, status, pdf_url, created_at, updated_at
            FROM business_plans
           WHERE user_id = $1
-          ORDER BY created_at DESC
-          LIMIT 50`,
+          ORDER BY created_at DESC`,
         [userId],
       ),
       safeQuery(
@@ -132,8 +143,7 @@ async function handleGetProgress(req, res) {
         `SELECT id, status, session_type, created_at, completed_at
            FROM interview_sessions
           WHERE user_id = $1
-          ORDER BY created_at DESC
-          LIMIT 100`,
+          ORDER BY created_at DESC`,
         [userId],
       ),
       safeQuery(
@@ -141,8 +151,7 @@ async function handleGetProgress(req, res) {
         `SELECT id, document_name, document_type, status, overall_score, created_at, completed_at
            FROM document_reviews
           WHERE user_id = $1
-          ORDER BY created_at DESC
-          LIMIT 100`,
+          ORDER BY created_at DESC`,
         [userId],
       ),
     ]);
@@ -238,14 +247,20 @@ async function handleSaveStep(req, res) {
     const body = req.body && typeof req.body === "object" ? req.body : {};
     const completionPercent = clampPercent(body.completionPercent);
     const requestedStatus = String(body.status || "").toLowerCase();
+    const progressData = body.progressData && typeof body.progressData === "object"
+      ? body.progressData
+      : {};
+    const progressSource = String(progressData.source || "auto").toLowerCase();
+
+    if (progressSource === "manual" && stepId !== "endorser-comparison") {
+      return res.status(400).json({ error: "Manual completion is not available for this step" });
+    }
+
     const status = requestedStatus === "completed" || completionPercent >= 100
       ? "completed"
       : requestedStatus === "not_started" || completionPercent <= 0
         ? "not_started"
         : "in_progress";
-    const progressData = body.progressData && typeof body.progressData === "object"
-      ? body.progressData
-      : {};
 
     const serialised = JSON.stringify(progressData);
     if (serialised.length > 20000) {
@@ -254,12 +269,28 @@ async function handleSaveStep(req, res) {
 
     const userId = req.user.id;
     const db = getPool();
+    const toolId = storageId(stepId);
     const existing = await db.query(
-      `SELECT id FROM tool_progress WHERE user_id = $1 AND tool_id = $2 ORDER BY updated_at DESC LIMIT 1`,
-      [userId, stepId],
+      `SELECT id, progress_data, completion_percent, status, updated_at
+         FROM tool_progress
+        WHERE user_id = $1 AND tool_id = $2
+        ORDER BY updated_at DESC
+        LIMIT 1`,
+      [userId, toolId],
     );
 
-    if (existing.rows.length) {
+    const current = existing.rows[0] || null;
+    const currentData = safeJson(current?.progress_data, {});
+    if (current && currentData.source === "manual" && progressSource !== "manual") {
+      res.setHeader("Cache-Control", "no-store");
+      return res.json({
+        success: true,
+        preservedManualProgress: true,
+        progress: normaliseStoredRow({ ...current, tool_id: toolId }),
+      });
+    }
+
+    if (current) {
       await db.query(
         `UPDATE tool_progress
             SET progress_data = $1::jsonb,
@@ -267,13 +298,13 @@ async function handleSaveStep(req, res) {
                 status = $3,
                 updated_at = NOW()
           WHERE user_id = $4 AND tool_id = $5`,
-        [serialised, completionPercent, status, userId, stepId],
+        [serialised, completionPercent, status, userId, toolId],
       );
     } else {
       await db.query(
         `INSERT INTO tool_progress (user_id, tool_id, progress_data, completion_percent, status, created_at, updated_at)
          VALUES ($1, $2, $3::jsonb, $4, $5, NOW(), NOW())`,
-        [userId, stepId, serialised, completionPercent, status],
+        [userId, toolId, serialised, completionPercent, status],
       );
     }
 
