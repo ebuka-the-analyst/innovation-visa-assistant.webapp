@@ -62,6 +62,8 @@ A non-zero exit means the runtime migration system must remain enabled and the d
 
 Only after steps 0–3 succeed against the target database should a separate reviewable change remove `runAutoMigrations()` and the startup data-seeding/data-rewrite behaviour from `server/index.ts`.
 
+Before this PR is merged, keep the Drizzle source model aligned with the controlled database constraint: `api_latency_log.user_id` is nullable telemetry and its `references()` declaration in `shared/schema.ts` must specify `onDelete: "set null"`. This source-model alignment is not a prerequisite for executing the explicit SQL migration, but it is a merge gate so future generated schema changes do not drift from the production constraint.
+
 The one-time credit reconciliation script is no longer auto-loaded. If it ever needs to be re-run deliberately, invoke it directly in a production-configured operator environment:
 
 ```bash
