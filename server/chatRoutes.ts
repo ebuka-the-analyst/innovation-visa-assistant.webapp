@@ -1,7 +1,47 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { qwen, QWEN_MODELS } from "./qwenClient";
+import { isAuthenticated } from "./auth";
 
 const router = Router();
+
+const CHAT_RATE_LIMIT_WINDOW_MS = 60_000;
+const CHAT_RATE_LIMIT_MAX_REQUESTS = 10;
+const CHAT_MESSAGE_MAX_LENGTH = 4_000;
+
+type ChatRateLimitState = {
+  windowStartedAt: number;
+  count: number;
+};
+
+function chatRateLimit(req: Request, res: Response, next: NextFunction) {
+  const now = Date.now();
+  const session = req.session as typeof req.session & {
+    chatRateLimit?: ChatRateLimitState;
+  };
+  const current = session.chatRateLimit;
+
+  if (!current || now - current.windowStartedAt >= CHAT_RATE_LIMIT_WINDOW_MS) {
+    session.chatRateLimit = { windowStartedAt: now, count: 1 };
+    return next();
+  }
+
+  if (current.count >= CHAT_RATE_LIMIT_MAX_REQUESTS) {
+    const retryAfterSeconds = Math.max(
+      1,
+      Math.ceil(
+        (CHAT_RATE_LIMIT_WINDOW_MS - (now - current.windowStartedAt)) / 1000,
+      ),
+    );
+    res.setHeader("Retry-After", String(retryAfterSeconds));
+    return res.status(429).json({
+      error: "Too many chat requests. Please try again shortly.",
+    });
+  }
+
+  current.count += 1;
+  session.chatRateLimit = current;
+  return next();
+}
 
 const SYSTEM_PROMPT = `You are the Innovator Founder Visa Assistant, trained on official GOV.UK Innovator Founder visa guidance (November 2025) and Home Office internal guidance (Version 9.0, published November 11, 2025).
 
@@ -161,7 +201,7 @@ export async function chat(userMessage: string): Promise<string> {
   }
 }
 
-router.post("/chat", async (req: Request, res: Response) => {
+router.post("/chat", isAuthenticated, chatRateLimit, async (req: Request, res: Response) => {
   try {
     const { message } = req.body;
 
@@ -169,7 +209,18 @@ router.post("/chat", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Message is required" });
     }
 
-    const response = await chat(message);
+    const normalizedMessage = message.trim();
+    if (!normalizedMessage) {
+      return res.status(400).json({ error: "Message is required" });
+    }
+
+    if (normalizedMessage.length > CHAT_MESSAGE_MAX_LENGTH) {
+      return res.status(413).json({
+        error: `Message is too long. Maximum length is ${CHAT_MESSAGE_MAX_LENGTH} characters.`,
+      });
+    }
+
+    const response = await chat(normalizedMessage);
     res.json({ response });
   } catch (error) {
     console.error("Chat endpoint error:", error);
