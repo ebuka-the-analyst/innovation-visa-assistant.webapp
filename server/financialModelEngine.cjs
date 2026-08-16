@@ -25,36 +25,77 @@ let pool;
 
 function getPool() {
   if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is not configured');
-  if (!pool) pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 4, idleTimeoutMillis: 30_000, connectionTimeoutMillis: 10_000 });
+  if (!pool) {
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      max: 4,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 10_000,
+    });
+  }
   return pool;
 }
 
-function noStore(res) { res.setHeader('Cache-Control', 'no-store'); }
-function isAuthenticated(req) { return Boolean(req.isAuthenticated && req.isAuthenticated() && req.user && req.user.id); }
-function hashJson(value) { return crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex'); }
+function noStore(res) {
+  res.setHeader('Cache-Control', 'no-store');
+}
+
+function isAuthenticated(req) {
+  return Boolean(req.isAuthenticated && req.isAuthenticated() && req.user && req.user.id);
+}
+
+function hashJson(value) {
+  return crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex');
+}
+
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
 
 function parseCatalogValue(value) {
-  if (value && typeof value === 'object' && !Array.isArray(value)) return value;
+  if (isPlainObject(value)) return value;
   if (typeof value !== 'string') return null;
-  try { return JSON.parse(value); } catch { return null; }
+  try {
+    const parsed = JSON.parse(value);
+    return isPlainObject(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
 }
 
 async function enforceAccess(client, userId, toolId) {
   if (!supportedToolIds.has(toolId)) {
-    const error = new Error('Unsupported financial tool'); error.statusCode = 404; error.code = 'UNSUPPORTED_TOOL'; throw error;
+    const error = new Error('Unsupported financial tool');
+    error.statusCode = 404;
+    error.code = 'UNSUPPORTED_TOOL';
+    throw error;
   }
+
   const [userResult, catalogResult] = await Promise.all([
     client.query('SELECT subscription_tier FROM users WHERE id = $1 LIMIT 1', [userId]),
     client.query('SELECT value FROM system_settings WHERE key = $1 LIMIT 1', [COMMERCIAL_CATALOG_KEY]),
   ]);
-  if (!userResult.rows[0]) { const error = new Error('User not found'); error.statusCode = 404; error.code = 'USER_NOT_FOUND'; throw error; }
+  if (!userResult.rows[0]) {
+    const error = new Error('User not found');
+    error.statusCode = 404;
+    error.code = 'USER_NOT_FOUND';
+    throw error;
+  }
+
   const catalog = parseCatalogValue(catalogResult.rows[0]?.value);
   const configuredMinimum = catalog?.minimumPlanByTool?.[toolId];
-  const minimumPlanId = typeof configuredMinimum === 'string' && PLAN_RANK[configuredMinimum] !== undefined ? configuredMinimum : FALLBACK_MINIMUM_PLAN[toolId];
+  const minimumPlanId = typeof configuredMinimum === 'string' && PLAN_RANK[configuredMinimum] !== undefined
+    ? configuredMinimum
+    : FALLBACK_MINIMUM_PLAN[toolId];
   const rawUserPlan = String(userResult.rows[0].subscription_tier || 'free').toLowerCase();
   const userPlanId = PLAN_RANK[rawUserPlan] === undefined ? 'free' : rawUserPlan;
+
   if (PLAN_RANK[userPlanId] < PLAN_RANK[minimumPlanId]) {
-    const error = new Error('Your current plan does not include this tool'); error.statusCode = 403; error.code = 'TOOL_ACCESS_REQUIRED'; error.minimumPlanId = minimumPlanId; throw error;
+    const error = new Error('Your current plan does not include this tool');
+    error.statusCode = 403;
+    error.code = 'TOOL_ACCESS_REQUIRED';
+    error.minimumPlanId = minimumPlanId;
+    throw error;
   }
   return { userPlanId, minimumPlanId };
 }
@@ -63,32 +104,58 @@ async function findExistingRun(client, userId, toolId, clientRunKey) {
   if (!clientRunKey) return null;
   const result = await client.query(
     `SELECT id, result_payload, result_sha256, validation_state, policy_version, registry_version
-       FROM tool_runs WHERE user_id = $1 AND tool_id = $2 AND client_run_key = $3 LIMIT 1`,
+       FROM tool_runs
+      WHERE user_id = $1 AND tool_id = $2 AND client_run_key = $3
+      LIMIT 1`,
     [userId, toolId, clientRunKey],
   );
   return result.rows[0] || null;
 }
 
+function replayResponse(existing) {
+  return {
+    success: true,
+    idempotentReplay: true,
+    runId: existing.id,
+    validationState: existing.validation_state,
+    registryVersion: existing.registry_version,
+    policyVersion: existing.policy_version,
+    resultSha256: existing.result_sha256,
+    assessment: existing.result_payload,
+  };
+}
+
 async function handleAssess(req, res) {
-  if (!isAuthenticated(req)) return res.status(401).json({ error: 'Authentication required', code: 'AUTHENTICATION_REQUIRED' });
+  if (!isAuthenticated(req)) {
+    return res.status(401).json({ error: 'Authentication required', code: 'AUTHENTICATION_REQUIRED' });
+  }
+
   const db = getPool();
   const client = await db.connect();
+  let toolId = '';
+  let clientRunKey = null;
+
   try {
     const input = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
-    const toolId = String(input.toolId || '');
+    toolId = String(input.toolId || '');
     const access = await enforceAccess(client, req.user.id, toolId);
     const result = assessFinancialModel(input);
-    const clientRunKey = typeof input.clientRunKey === 'string' ? input.clientRunKey : null;
-    const inputSnapshot = { ...input }; delete inputSnapshot.clientRunKey;
+    clientRunKey = typeof input.clientRunKey === 'string' ? input.clientRunKey : null;
+    const inputSnapshot = { ...input };
+    delete inputSnapshot.clientRunKey;
     const resultHash = hashJson(result);
 
     await client.query('BEGIN');
-    const contextResult = await client.query('SELECT revision FROM tool_case_contexts WHERE user_id = $1', [req.user.id]);
+    const contextResult = await client.query(
+      'SELECT revision FROM tool_case_contexts WHERE user_id = $1',
+      [req.user.id],
+    );
     const caseContextRevision = contextResult.rows[0] ? Number(contextResult.rows[0].revision) : 0;
     const existing = await findExistingRun(client, req.user.id, toolId, clientRunKey);
     if (existing) {
-      await client.query('COMMIT'); noStore(res);
-      return res.json({ success: true, idempotentReplay: true, runId: existing.id, validationState: existing.validation_state, registryVersion: existing.registry_version, policyVersion: existing.policy_version, resultSha256: existing.result_sha256, assessment: existing.result_payload });
+      await client.query('COMMIT');
+      noStore(res);
+      return res.json(replayResponse(existing));
     }
 
     const insert = await client.query(
@@ -101,7 +168,8 @@ async function handleAssess(req, res) {
          gen_random_uuid()::varchar, $1, $2, $3, 'completed', 'server_engine', $4,
          $5, $6, $7::jsonb, $8::jsonb, $9::jsonb, $10, 'validated', $11::jsonb,
          NOW(), NOW(), NOW(), NOW()
-       ) RETURNING id`,
+       )
+       RETURNING id`,
       [
         req.user.id,
         toolId,
@@ -113,41 +181,113 @@ async function handleAssess(req, res) {
         JSON.stringify(result.evidenceInventory.evidenceRefs || []),
         JSON.stringify(result),
         resultHash,
-        JSON.stringify({ engine: 'deterministic-36-month-financial-model', schemaValidated: true, horizonMonths: result.horizonMonths, meaning: 'validated means the financial formulas and input schema were validated; forecasts remain assumptions, not guarantees' }),
+        JSON.stringify({
+          engine: 'deterministic-36-month-financial-model',
+          schemaValidated: true,
+          horizonMonths: result.horizonMonths,
+          meaning: 'validated means the financial formulas and input schema were validated; forecasts remain assumptions, not guarantees',
+        }),
       ],
     );
     const runId = insert.rows[0].id;
+
     await client.query(
       `INSERT INTO tool_run_events (id, run_id, user_id, event_type, payload, created_at)
        VALUES
-       (gen_random_uuid()::varchar, $1, $2, 'run_started', $3::jsonb, NOW()),
-       (gen_random_uuid()::varchar, $1, $2, 'financial_model_completed', $4::jsonb, NOW())`,
-      [runId, req.user.id, JSON.stringify({ executionMode: 'server_engine', modelVersion: FINANCIAL_MODEL_VERSION, caseContextRevision }), JSON.stringify({ resultSha256: resultHash, status: result.status, baseFundingGapGbp: result.scenarios.base.summary.fundingGapToStayNonNegativeGbp })],
+         (gen_random_uuid()::varchar, $1, $2, 'run_started', $3::jsonb, NOW()),
+         (gen_random_uuid()::varchar, $1, $2, 'financial_model_completed', $4::jsonb, NOW())`,
+      [
+        runId,
+        req.user.id,
+        JSON.stringify({
+          executionMode: 'server_engine',
+          modelVersion: FINANCIAL_MODEL_VERSION,
+          caseContextRevision,
+        }),
+        JSON.stringify({
+          resultSha256: resultHash,
+          status: result.status,
+          baseFundingGapGbp: result.scenarios.base.summary.fundingGapToStayNonNegativeGbp,
+        }),
+      ],
     );
-    await client.query('COMMIT'); noStore(res);
-    return res.status(201).json({ success: true, idempotentReplay: false, runId, toolAccess: access, validationState: 'validated', registryVersion: registry.registryVersion, policyVersion: FINANCIAL_MODEL_VERSION, resultSha256: resultHash, assessment: result });
+
+    await client.query('COMMIT');
+    noStore(res);
+    return res.status(201).json({
+      success: true,
+      idempotentReplay: false,
+      runId,
+      toolAccess: access,
+      validationState: 'validated',
+      registryVersion: registry.registryVersion,
+      policyVersion: FINANCIAL_MODEL_VERSION,
+      resultSha256: resultHash,
+      assessment: result,
+    });
   } catch (error) {
     try { await client.query('ROLLBACK'); } catch {}
+
     if (error instanceof ZodError) {
-      noStore(res); return res.status(400).json({ error: 'Financial model input is incomplete or invalid', code: 'INVALID_FINANCIAL_MODEL_INPUT', issues: error.issues.map((issue) => ({ path: issue.path.join('.'), message: issue.message })) });
+      noStore(res);
+      return res.status(400).json({
+        error: 'Financial model input is incomplete or invalid',
+        code: 'INVALID_FINANCIAL_MODEL_INPUT',
+        issues: error.issues.map((issue) => ({ path: issue.path.join('.'), message: issue.message })),
+      });
     }
+
+    if (error?.code === '23505' && clientRunKey) {
+      try {
+        const existing = await findExistingRun(client, req.user.id, toolId, clientRunKey);
+        if (existing) {
+          noStore(res);
+          return res.json(replayResponse(existing));
+        }
+      } catch (lookupError) {
+        console.error('[FINANCIAL MODEL] Idempotency recovery lookup failed:', lookupError);
+      }
+    }
+
     if (error?.statusCode) {
-      noStore(res); return res.status(error.statusCode).json({ error: error.message, code: error.code || 'FINANCIAL_MODEL_REQUEST_REJECTED', ...(error.minimumPlanId ? { minimumPlanId: error.minimumPlanId } : {}) });
+      noStore(res);
+      return res.status(error.statusCode).json({
+        error: error.message,
+        code: error.code || 'FINANCIAL_MODEL_REQUEST_REJECTED',
+        ...(error.minimumPlanId ? { minimumPlanId: error.minimumPlanId } : {}),
+      });
     }
-    console.error('[FINANCIAL MODEL] Assessment failed:', error); noStore(res);
-    return res.status(500).json({ error: 'Financial model could not be completed', code: 'FINANCIAL_MODEL_ERROR' });
-  } finally { client.release(); }
+
+    console.error('[FINANCIAL MODEL] Assessment failed:', error);
+    noStore(res);
+    return res.status(500).json({
+      error: 'Financial model could not be completed',
+      code: 'FINANCIAL_MODEL_ERROR',
+    });
+  } finally {
+    client.release();
+  }
 }
 
 function installRoute(app, originalPost) {
   if (app.__financialModelRouteInstalled) return;
-  Object.defineProperty(app, '__financialModelRouteInstalled', { value: true, enumerable: false });
+  Object.defineProperty(app, '__financialModelRouteInstalled', {
+    value: true,
+    enumerable: false,
+    configurable: false,
+    writable: false,
+  });
   originalPost.call(app, ROUTE, handleAssess);
 }
 
 if (!application.__financialModelHookInstalled) {
   const originalPost = application.post;
-  Object.defineProperty(application, '__financialModelHookInstalled', { value: true, enumerable: false });
+  Object.defineProperty(application, '__financialModelHookInstalled', {
+    value: true,
+    enumerable: false,
+    configurable: false,
+    writable: false,
+  });
   application.post = function financialModelPost(path, ...handlers) {
     const isRouteRegistration = typeof path === 'string' && path.startsWith('/') && handlers.length > 0;
     if (isRouteRegistration) installRoute(this, originalPost);
