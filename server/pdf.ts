@@ -902,8 +902,30 @@ export function generatePDFContent(plan: BusinessPlan): string {
       overflow-wrap: anywhere;
     }
     .content {
+      display: flow-root;
+      width: 100%;
       max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
       overflow-x: hidden;
+    }
+    .content > h1,
+    .content > h2,
+    .content > h3,
+    .content > h4,
+    .content > p,
+    .content > ul,
+    .content > ol,
+    .content > blockquote,
+    .content > .table-wrapper,
+    .content > .table-clear,
+    .content > .stacked-table,
+    .content > .chart-container {
+      clear: both;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
     .toc {
       background: #f8fafc;
@@ -1180,6 +1202,48 @@ export function generatePDFContent(plan: BusinessPlan): string {
   <div class="content">
     ${formatContentWithCharts(content, chartData, primaryColor, plan.useFullCoverImage || false, plan.id || '', secondaryColor, plan.tocStyle)}
   </div>
+  <script>
+    (() => {
+      const contentRoot = document.querySelector('.content');
+      if (!contentRoot) return;
+
+      // Historical plans may contain imperfect AI-authored table markup. Browsers can
+      // recover that markup by nesting the next section heading and its body inside a
+      // table cell. Move only the leaked section tail back into normal document flow.
+      const leakedHeadings = Array.from(
+        contentRoot.querySelectorAll('table h1, table h2'),
+      );
+
+      for (const heading of leakedHeadings) {
+        const cell = heading.closest('td, th');
+        const table = heading.closest('table');
+        if (!cell || !table) continue;
+
+        const tableWrapper = table.closest('.table-wrapper') || table;
+        const parent = tableWrapper.parentNode;
+        if (!parent) continue;
+
+        const fragment = document.createDocumentFragment();
+        let node = heading;
+        while (node) {
+          const next = node.nextSibling;
+          fragment.appendChild(node);
+          node = next;
+        }
+
+        parent.insertBefore(fragment, tableWrapper.nextSibling);
+      }
+
+      // Keep every top-level plan block aligned to one printable content width.
+      for (const element of Array.from(contentRoot.children)) {
+        if (!(element instanceof HTMLElement)) continue;
+        element.style.maxWidth = '100%';
+        element.style.minWidth = '0';
+        element.style.boxSizing = 'border-box';
+        element.style.clear = 'both';
+      }
+    })();
+  </script>
 </body>
 </html>
   `;
@@ -2172,7 +2236,11 @@ function repairRenderedTableWrapper(tableWrapperHtml: string): string {
 
   while ((match = cellOpenPattern.exec(tableWrapperHtml)) !== null) {
     const cellContentStart = match.index + match[0].length;
-    const cellRemainder = tableWrapperHtml.slice(cellContentStart);
+    const cellCloseIndex = tableWrapperHtml.indexOf('</td>', cellContentStart);
+    const cellRemainder = tableWrapperHtml.slice(
+      cellContentStart,
+      cellCloseIndex >= 0 ? cellCloseIndex : tableWrapperHtml.length,
+    );
     const leakedCellStart = findLeakedCellSectionStart(cellRemainder);
 
     if (leakedCellStart < 0) {
