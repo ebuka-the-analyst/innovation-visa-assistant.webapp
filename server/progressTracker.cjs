@@ -101,6 +101,59 @@ function normaliseStoredRow(row) {
   };
 }
 
+function meaningfulText(value, minLength = 8) {
+  const text = String(value ?? "").trim();
+  if (text.length < minLength) return false;
+  return !/^(?:none|n\/a|not applicable|not yet|no|0)$/i.test(text);
+}
+
+function affirmativeEvidenceText(value, minLength = 8) {
+  const text = String(value ?? "").trim();
+  if (!meaningfulText(text, minLength)) return false;
+  return !/(?:no customer interviews?|no interviews?|zero interviews?|not yet interviewed|no willingness to pay)/i.test(text);
+}
+
+function buildPlanEvidence(row) {
+  if (!row || String(row.status || "").toLowerCase() !== "completed") return null;
+
+  const financialChecks = [
+    ["monthly projections", meaningfulText(row.monthly_projections, 20)],
+    ["customer acquisition cost", Number(row.cac) > 0],
+    ["lifetime value", Number(row.ltv) > 0],
+    ["payback period", Number(row.payback_period) > 0],
+    ["funding sources", meaningfulText(row.funding_sources, 8)],
+    ["detailed costs", meaningfulText(row.detailed_costs, 20)],
+  ];
+  const financialCompleted = financialChecks.filter(([, passed]) => passed).length;
+
+  const marketChecks = [
+    ["competitor analysis", meaningfulText(row.competitors, 15)],
+    ["competitive differentiation", meaningfulText(row.competitive_differentiation, 15)],
+    ["market size", meaningfulText(row.market_size, 8)],
+    ["customer interviews", affirmativeEvidenceText(row.customer_interviews, 8)],
+    ["willingness-to-pay evidence", affirmativeEvidenceText(row.willingness_to_pay, 8)],
+  ];
+  const marketCompleted = marketChecks.filter(([, passed]) => passed).length;
+  const hasDemandSignal = Boolean(marketChecks[3][1] || marketChecks[4][1]);
+
+  return {
+    planId: row.id,
+    financial: {
+      satisfied: financialCompleted === financialChecks.length,
+      completedSignals: financialCompleted,
+      totalSignals: financialChecks.length,
+      missing: financialChecks.filter(([, passed]) => !passed).map(([label]) => label),
+    },
+    market: {
+      satisfied: marketCompleted >= 4 && hasDemandSignal,
+      percent: Math.round((marketCompleted / marketChecks.length) * 100),
+      completedSignals: marketCompleted,
+      totalSignals: marketChecks.length,
+      missing: marketChecks.filter(([, passed]) => !passed).map(([label]) => label),
+    },
+  };
+}
+
 async function handleGetProgress(req, res) {
   try {
     if (!isAuthenticated(req)) {
@@ -124,7 +177,9 @@ async function handleGetProgress(req, res) {
       ),
       safeQuery(
         db,
-        `SELECT id, business_name, status, pdf_url, created_at
+        `SELECT id, business_name, status, pdf_url, created_at,
+                monthly_projections, cac, ltv, payback_period, funding_sources, detailed_costs,
+                competitors, competitive_differentiation, customer_interviews, willingness_to_pay, market_size
            FROM business_plans
           WHERE user_id = $1
           ORDER BY created_at DESC`,
@@ -159,6 +214,8 @@ async function handleGetProgress(req, res) {
     const completedPlans = planRows.filter((row) => String(row.status || "").toLowerCase() === "completed");
     const activePlans = planRows.filter((row) => ["pending", "processing", "generating", "in_progress", "in-progress"].includes(String(row.status || "").toLowerCase()));
     const latestPlan = planRows[0] || null;
+    const latestCompletedPlan = completedPlans[0] || null;
+    const planEvidence = buildPlanEvidence(latestCompletedPlan);
 
     const uploadedRequiredNames = new Set(
       documentRows
@@ -193,9 +250,9 @@ async function handleGetProgress(req, res) {
                 status: latestPlan.status || "unknown",
                 pdfUrl: latestPlan.pdf_url || null,
                 createdAt: latestPlan.created_at || null,
-                updatedAt: latestPlan.updated_at || null,
               }
             : null,
+          evidence: planEvidence,
         },
         documents: {
           totalUploaded: documentRows.length,
