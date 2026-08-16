@@ -1,12 +1,18 @@
 {
   "schemaVersion": 1,
-  "registryVersion": "2026-08-16.3",
+  "registryVersion": "2026-08-16.4",
   "defaultRunnableStatus": "beta",
   "productionToolIds": [
     "app-req-checker",
+    "business-model-validator",
+    "criteria-scorer",
     "eligibility-validator",
+    "endorsement-readiness",
+    "innovation-score",
+    "innovation-validation",
     "jurisdiction-checker",
-    "points-calculator"
+    "points-calculator",
+    "viability-checker"
   ],
   "disabledListedToolIds": [
     "10-year-vision",
