@@ -1,0 +1,60 @@
+name: Evidence-aware Progress Tracker Builder
+
+on:
+  push:
+    branches:
+      - feature/evidence-aware-progress-tracker
+    paths:
+      - scripts/patch-evidence-aware-progress-tracker.cjs
+      - scripts/validate-evidence-aware-progress-tracker.cjs
+      - .github/workflows/evidence-aware-progress-tracker-builder.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-validate:
+    if: ${{ !contains(github.event.head_commit.message, 'Apply evidence-aware Progress Tracker') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/evidence-aware-progress-tracker
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Apply deterministic tracker patch
+        run: node scripts/patch-evidence-aware-progress-tracker.cjs
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Validate evidence-aware tracker
+        run: node scripts/validate-evidence-aware-progress-tracker.cjs
+
+      - name: Validate existing tracker schema contract
+        run: node scripts/validate-progress-tracker-plan-link.cjs
+
+      - name: Check tracker syntax
+        run: node --check server/progressTracker.cjs
+
+      - name: Production build
+        run: npm run build
+
+      - name: Commit validated tracker change
+        shell: bash
+        run: |
+          if git diff --quiet -- server/progressTracker.cjs client/src/pages/progress.tsx; then
+            echo "Evidence-aware tracker patch already applied"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/progressTracker.cjs client/src/pages/progress.tsx
+          git commit -m "Apply evidence-aware Progress Tracker"
+          git push origin HEAD:feature/evidence-aware-progress-tracker
