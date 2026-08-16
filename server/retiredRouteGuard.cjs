@@ -1,14 +1,13 @@
+require("./securityStartupGuard.cjs");
+
 const express = require("express");
 
 require("./customer360Admin.cjs");
 require("./customer360LocationContext.cjs");
 require("./progressTracker.cjs");
 
-if (process.env.NODE_ENV === "production") {
-  require("./creditReconciliationReset.cjs");
-}
-
 const RETIRED_CREDIT_GRANT_ROUTE = "/api/credits/grant-tier-credits";
+const RETIRED_DISPUTE_EVIDENCE_ROUTE = "/dispute-evidence";
 const application = express.application;
 
 if (!application.__legacyCreditGrantRouteGuardInstalled) {
@@ -33,5 +32,26 @@ if (!application.__legacyCreditGrantRouteGuardInstalled) {
     }
 
     return originalPost.call(this, path, ...handlers);
+  };
+}
+
+if (!application.__disputeEvidenceRouteGuardInstalled) {
+  const originalGet = application.get;
+
+  Object.defineProperty(application, "__disputeEvidenceRouteGuardInstalled", {
+    value: true,
+    enumerable: false,
+    configurable: false,
+    writable: false,
+  });
+
+  application.get = function guardedGet(path, ...handlers) {
+    // Express also uses app.get(name) to read settings, so only intercept
+    // actual route registration calls that include one or more handlers.
+    if (path === RETIRED_DISPUTE_EVIDENCE_ROUTE && handlers.length > 0) {
+      return originalGet.call(this, path, (_req, res) => res.sendStatus(404));
+    }
+
+    return originalGet.call(this, path, ...handlers);
   };
 }

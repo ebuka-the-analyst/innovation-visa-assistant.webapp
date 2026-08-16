@@ -3208,7 +3208,7 @@ export const apiLatencyLog = pgTable("api_latency_log", {
   statusCode: integer("status_code").notNull(),
   durationMs: integer("duration_ms").notNull(),
   
-  userId: varchar("user_id").references(() => users.id),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "set null" }),
   
   // Request details
   requestSize: integer("request_size"),
