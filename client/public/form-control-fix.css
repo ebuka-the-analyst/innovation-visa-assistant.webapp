@@ -1,0 +1,109 @@
+/*
+ * Global compact selection controls
+ *
+ * The responsive foundation intentionally gives text inputs/buttons a full
+ * touch-friendly height. Native checkbox/radio controls and Radix/shadcn
+ * selection controls must opt out or they become tall, stretched boxes.
+ */
+
+input[type="checkbox"],
+input[type="radio"] {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  display: inline-grid;
+  place-content: center;
+  flex: 0 0 auto;
+  width: 1.25rem !important;
+  min-width: 1.25rem !important;
+  max-width: 1.25rem !important;
+  height: 1.25rem !important;
+  min-height: 1.25rem !important;
+  max-height: 1.25rem !important;
+  margin: 0;
+  padding: 0;
+  border: 2px solid hsl(var(--primary));
+  background: hsl(var(--background));
+  vertical-align: middle;
+  cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 100ms ease;
+}
+
+/* Compact checked-circle treatment, matching the intended UI reference. */
+input[type="checkbox"] {
+  border-radius: 9999px;
+}
+
+input[type="checkbox"]::before {
+  content: "";
+  width: 0.34rem;
+  height: 0.62rem;
+  border: solid #16a34a;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transform-origin: center;
+  transition: transform 120ms ease-out;
+}
+
+input[type="checkbox"]:checked {
+  border-color: #16a34a;
+  background: color-mix(in srgb, #16a34a 8%, transparent);
+}
+
+input[type="checkbox"]:checked::before {
+  transform: rotate(45deg) scale(1);
+}
+
+input[type="radio"] {
+  border-radius: 9999px;
+}
+
+input[type="radio"]::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+  transform: scale(0);
+  transition: transform 120ms ease-out;
+}
+
+input[type="radio"]:checked::before {
+  transform: scale(1);
+}
+
+input[type="checkbox"]:hover:not(:disabled),
+input[type="radio"]:hover:not(:disabled) {
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
+}
+
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px hsl(var(--background)), 0 0 0 5px hsl(var(--ring));
+}
+
+input[type="checkbox"]:active:not(:disabled),
+input[type="radio"]:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+input[type="checkbox"]:disabled,
+input[type="radio"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Radix/shadcn selection primitives are buttons under the hood. They should
+   keep the size supplied by their component classes, not the global 44px
+   minimum button height. */
+button[role="checkbox"],
+button[role="radio"],
+button[role="switch"] {
+  min-height: 0 !important;
+}
+
+button[role="checkbox"],
+button[role="radio"] {
+  flex: 0 0 auto;
+}
