@@ -1,0 +1,46 @@
+name: Selection Controls and Diagnostics Validation
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify global form-control fix is wired
+        run: |
+          grep -q 'form-control-fix.css' client/index.html
+          grep -q 'input\[type="checkbox"\]' client/public/form-control-fix.css
+          grep -q 'button\[role="checkbox"\]' client/public/form-control-fix.css
+          grep -q 'min-height: 0 !important' client/public/form-control-fix.css
+
+      - name: Verify friendly diagnostics copy
+        run: |
+          grep -q "We couldn't find this business plan" client/src/pages/diagnostics.tsx
+          grep -q 'Back to Dashboard' client/src/pages/diagnostics.tsx
+          grep -q 'Generate a Business Plan' client/src/pages/diagnostics.tsx
+
+      - name: Type check
+        run: npm run check
+
+      - name: Production build
+        run: npm run build
+
+      - name: Verify global CSS ships in production bundle
+        run: |
+          test -f dist/public/form-control-fix.css
+          grep -q 'form-control-fix.css' dist/public/index.html
