@@ -75,5 +75,8 @@ jobs:
       - name: Validate progress tracker plan link
         run: node scripts/validate-progress-tracker-plan-link.cjs
 
+      - name: Validate evidence-aware Progress Tracker
+        run: node scripts/validate-evidence-aware-progress-tracker.cjs
+
       - name: Production build
         run: npm run build
