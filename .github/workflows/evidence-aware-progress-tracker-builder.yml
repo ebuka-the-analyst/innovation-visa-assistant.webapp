@@ -5,7 +5,7 @@ on:
     branches:
       - feature/evidence-aware-progress-tracker
     paths:
-      - scripts/patch-evidence-aware-progress-tracker.cjs
+      - scripts/patch-evidence-aware-progress-tracker-v2.cjs
       - scripts/validate-evidence-aware-progress-tracker.cjs
       - .github/workflows/evidence-aware-progress-tracker-builder.yml
 
@@ -29,7 +29,7 @@ jobs:
           node-version: '22'
 
       - name: Apply deterministic tracker patch
-        run: node scripts/patch-evidence-aware-progress-tracker.cjs
+        run: node scripts/patch-evidence-aware-progress-tracker-v2.cjs
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
