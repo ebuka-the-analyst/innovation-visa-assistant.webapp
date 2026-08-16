@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   patch:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Check out
@@ -19,7 +18,6 @@ jobs:
           ref: fix/recover-interrupted-generation
 
       - name: Patch generation worker recovery
-        shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -32,15 +30,6 @@ jobs:
               print('Generation recovery patch already present')
               raise SystemExit(0)
 
-          old_worker = '''      generateBusinessPlan(planId).catch((error) => {
-                console.error("Background generation error:", error);
-                storage.updateBusinessPlan(planId, {
-                  status: "failed",
-                  currentGenerationStage: "Generation failed",
-                });
-              });'''
-
-          # Be tolerant of indentation in the existing route block.
           worker_pattern = re.compile(
               r'\n\s*generateBusinessPlan\(planId\)\.catch\(\(error\) => \{\s*'
               r'console\.error\("Background generation error:", error\);\s*'
@@ -52,22 +41,15 @@ jobs:
           )
           text, worker_count = worker_pattern.subn('\n\n      startBusinessPlanGeneration(planId);', text, count=1)
           if worker_count != 1:
-              raise SystemExit(f'Expected to replace one detached generation block, replaced {worker_count}')
+              raise SystemExit(f'Expected one detached generation block, replaced {worker_count}')
 
-          register_marker = 'export async function registerRoutes(app: Express): Promise<Server> {\n'
-          if register_marker not in text:
-              raise SystemExit('registerRoutes marker not found')
-
+          marker = 'export async function registerRoutes(app: Express): Promise<Server> {\n'
           helper = '''export async function registerRoutes(app: Express): Promise<Server> {
-            // Business-plan generation currently runs inside this Node process. Track live
-            // workers so a plan left as `generating` after a process restart can be recovered
-            // without charging the user again or starting duplicate work in this process.
             const activeBusinessPlanGenerations = new Set<string>();
             const generationRecoveryNotBefore = Date.now() + 30_000;
 
             const startBusinessPlanGeneration = (planId: string): boolean => {
               if (activeBusinessPlanGenerations.has(planId)) return false;
-
               activeBusinessPlanGenerations.add(planId);
               void generateBusinessPlan(planId)
                 .catch(async (error) => {
@@ -77,27 +59,24 @@ jobs:
                     currentGenerationStage: "Generation failed",
                   });
                 })
-                .finally(() => {
-                  activeBusinessPlanGenerations.delete(planId);
-                });
-
+                .finally(() => activeBusinessPlanGenerations.delete(planId));
               return true;
             };
 '''
-          text = text.replace(register_marker, helper, 1)
+          if marker not in text:
+              raise SystemExit('registerRoutes marker not found')
+          text = text.replace(marker, helper, 1)
 
-          status_guard = '''      if (
+          guard = '''      if (
                 businessPlan.status === "generating" ||
                 businessPlan.status === "completed"
               ) {'''
-          status_guard_replacement = '''      if (
+          replacement = '''      if (
                 businessPlan.status === "generating" &&
                 !activeBusinessPlanGenerations.has(planId) &&
                 Date.now() >= generationRecoveryNotBefore
               ) {
-                console.warn(
-                  `[Generation Recovery] Restarting orphaned generation for plan ${planId}`,
-                );
+                console.warn(`[Generation Recovery] Restarting orphaned generation for plan ${planId}`);
                 startBusinessPlanGeneration(planId);
                 return res.json({
                   success: true,
@@ -111,11 +90,11 @@ jobs:
                 businessPlan.status === "generating" ||
                 businessPlan.status === "completed"
               ) {'''
-          if status_guard not in text:
-              raise SystemExit('generate/start status guard not found')
-          text = text.replace(status_guard, status_guard_replacement, 1)
+          if guard not in text:
+              raise SystemExit('generate/start guard not found')
+          text = text.replace(guard, replacement, 1)
 
-          response_marker = '''      res.json({
+          response = '''      res.json({
                 status: businessPlan.status,
                 generatedContent: businessPlan.generatedContent,
                 pdfUrl: businessPlan.pdfUrl,
@@ -128,9 +107,7 @@ jobs:
                 !activeBusinessPlanGenerations.has(planId) &&
                 Date.now() >= generationRecoveryNotBefore
               ) {
-                console.warn(
-                  `[Generation Recovery] Status poll found orphaned generation for plan ${planId}; restarting worker`,
-                );
+                console.warn(`[Generation Recovery] Status poll found orphaned generation for plan ${planId}; restarting worker`);
                 startBusinessPlanGeneration(planId);
               }
 
@@ -142,17 +119,15 @@ jobs:
                 businessName: businessPlan.businessName,
                 currentGenerationStage: businessPlan.currentGenerationStage,
               });'''
-          if response_marker not in text:
-              raise SystemExit('generate/status response marker not found')
-          text = text.replace(response_marker, response_replacement, 1)
+          if response not in text:
+              raise SystemExit('generate/status response not found')
+          text = text.replace(response, response_replacement, 1)
 
           path.write_text(text, encoding='utf-8')
           PY
 
       - name: Check diff
-        run: |
-          git diff --check
-          git diff -- server/routes.ts
+        run: git diff --check
 
       - name: Set up Node
         uses: actions/setup-node@v4
