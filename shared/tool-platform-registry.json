@@ -1,17 +1,26 @@
 {
   "schemaVersion": 1,
-  "registryVersion": "2026-08-16.4",
+  "registryVersion": "2026-08-16.5",
   "defaultRunnableStatus": "beta",
   "productionToolIds": [
     "app-req-checker",
+    "breakeven-calculator",
+    "budget-cost-analyzer",
     "business-model-validator",
+    "cac-calculator",
     "criteria-scorer",
     "eligibility-validator",
     "endorsement-readiness",
+    "financial-modeling",
+    "financial-projections",
+    "financial-resilience",
+    "income-calculator",
     "innovation-score",
     "innovation-validation",
     "jurisdiction-checker",
     "points-calculator",
+    "revenue-forecast",
+    "unit-economics",
     "viability-checker"
   ],
   "disabledListedToolIds": [
