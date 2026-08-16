@@ -1,0 +1,57 @@
+name: Progress Tracker Plan Link Builder
+
+on:
+  push:
+    branches:
+      - fix/progress-tracker-business-plan-link
+    paths:
+      - scripts/patch-progress-tracker-plan-link.cjs
+      - scripts/validate-progress-tracker-plan-link.cjs
+      - .github/workflows/progress-tracker-plan-link-builder.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-validate:
+    if: ${{ !contains(github.event.head_commit.message, 'Apply progress tracker plan-link fix') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/progress-tracker-business-plan-link
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Apply deterministic tracker patch
+        run: node scripts/patch-progress-tracker-plan-link.cjs
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Validate progress tracker schema contract
+        run: node scripts/validate-progress-tracker-plan-link.cjs
+
+      - name: Check tracker syntax
+        run: node --check server/progressTracker.cjs
+
+      - name: Production build
+        run: npm run build
+
+      - name: Commit validated tracker change
+        shell: bash
+        run: |
+          if git diff --quiet -- server/progressTracker.cjs; then
+            echo "Progress tracker patch already applied"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/progressTracker.cjs
+          git commit -m "Apply progress tracker plan-link fix"
+          git push origin HEAD:fix/progress-tracker-business-plan-link
