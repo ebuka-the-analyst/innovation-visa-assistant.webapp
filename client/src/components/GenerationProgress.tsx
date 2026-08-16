@@ -60,16 +60,17 @@ const tierPageTargets: Record<string, string> = {
 
 export default function GenerationProgress({ planId }: { planId?: string }) {
   const [status, setStatus] = useState<string>('pending');
-  const [currentStage, setCurrentStage] = useState<string>('Initializing...');
-  const [tier, setTier] = useState<string>('basic');
+  const [currentStage, setCurrentStage] = useState<string>('');
+  const [tier, setTier] = useState<string>('');
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [currentTipIndex, setCurrentTipIndex] = useState<number>(0);
   const [sectionNumber, setSectionNumber] = useState<number>(0);
   const [businessName, setBusinessName] = useState<string>('Business Plan');
+  const [hasLoadedStatus, setHasLoadedStatus] = useState<boolean>(false);
   const { toast } = useToast();
   const { getPlanById, getUpgradePlan, toolCounts } = useCommercialCatalog();
   const currentToolCount = toolCounts[tier as PlanId] ?? 0;
-  const currentPlanName = getPlanById(tier)?.displayName ?? `${tier.charAt(0).toUpperCase()}${tier.slice(1)} Plan`;
+  const currentPlanName = getPlanById(tier)?.displayName ?? (tier ? `${tier.charAt(0).toUpperCase()}${tier.slice(1)} Plan` : 'Business Plan');
   const currentPlanLabel = currentPlanName.replace(/\s+Plan$/i, "");
   const currentPlanFeatures = getPlanById(tier)?.features ?? [];
   const basicUpgradePlan = getUpgradePlan("basic");
@@ -176,22 +177,26 @@ export default function GenerationProgress({ planId }: { planId?: string }) {
       }
     };
 
-    verifyPaymentAndStart();
+    let pollInterval: ReturnType<typeof setInterval> | undefined;
 
-    const pollInterval = setInterval(async () => {
+    const pollStatus = async () => {
       try {
         const response = await fetch(`/api/generate/status/${planId}`);
+        if (!response.ok) {
+          throw new Error(`Generation status request failed (${response.status})`);
+        }
+
         const data = await response.json();
         setStatus(data.status);
-        
+
         if (data.tier) {
           setTier(data.tier);
         }
-        
+
         if (data.businessName) {
           setBusinessName(data.businessName);
         }
-        
+
         if (data.currentGenerationStage) {
           setCurrentStage(data.currentGenerationStage);
           const match = data.currentGenerationStage.match(/Section (\d+)/);
@@ -199,11 +204,20 @@ export default function GenerationProgress({ planId }: { planId?: string }) {
             setSectionNumber(parseInt(match[1]));
           }
         }
-        
+
+        const hasRealGenerationState =
+          Boolean(data.tier && data.currentGenerationStage) ||
+          (data.status === 'completed' && Boolean(data.tier));
+
+        if (hasRealGenerationState) {
+          setHasLoadedStatus(true);
+        }
+
         if (data.status === 'completed') {
-          clearInterval(pollInterval);
+          if (pollInterval) clearInterval(pollInterval);
         } else if (data.status === 'failed') {
-          clearInterval(pollInterval);
+          if (pollInterval) clearInterval(pollInterval);
+          setHasLoadedStatus(true);
           toast({
             title: "Generation Failed",
             description: "Something went wrong. Please contact support.",
@@ -213,9 +227,20 @@ export default function GenerationProgress({ planId }: { planId?: string }) {
       } catch (error) {
         console.error('Status poll error:', error);
       }
+    };
+
+    verifyPaymentAndStart();
+
+    // Fetch the real generation state immediately. Do not render invented progress while
+    // waiting for the first 2.5-second polling interval.
+    void pollStatus();
+    pollInterval = setInterval(() => {
+      void pollStatus();
     }, 2500);
 
-    return () => clearInterval(pollInterval);
+    return () => {
+      if (pollInterval) clearInterval(pollInterval);
+    };
   }, [planId, toast]);
 
   useEffect(() => {
@@ -234,17 +259,30 @@ export default function GenerationProgress({ planId }: { planId?: string }) {
     return () => clearInterval(tipRotation);
   }, []);
 
+  // Never show fabricated tier, section, page-count or percentage values while the real
+  // generation status is loading from the server.
+  if (!hasLoadedStatus) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <RefreshCw
+          className="h-8 w-8 animate-spin text-primary"
+          aria-label="Loading generation status"
+        />
+      </div>
+    );
+  }
+
   const agentInfo = getAgentForStage(currentStage);
-  const totalSections = tierSectionCounts[tier] || 8;
+  const totalSections = tierSectionCounts[tier] || 0;
   
   const calculateProgress = (): number => {
     if (status === 'completed') return 100;
     if (currentStage.includes('Finalizing') || currentStage.includes('PDF')) return 95;
-    if (sectionNumber > 0) {
+    if (sectionNumber > 0 && totalSections > 0) {
       return Math.min(90, Math.round((sectionNumber / totalSections) * 90) + 5);
     }
     if (currentStage.includes('Starting') || currentStage.includes('preparing')) return 5;
-    return 10;
+    return 0;
   };
   
   const progress = calculateProgress();
