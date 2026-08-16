@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": "2026-08-16.1",
+  "defaultRunnableStatus": "beta",
+  "productionToolIds": [],
+  "disabledListedToolIds": [
+    "10-year-vision",
+    "ai-risk-mitigator",
+    "ai-weakness-scanner",
+    "document-autopilot",
+    "ethics-auditor",
+    "founder-evolution",
+    "market-disruptor",
+    "pivot-simulator",
+    "revenue-innovator"
+  ],
+  "internalRunnableToolIds": [
+    "advisory-board-profiles",
+    "company-history",
+    "compensation-planning",
+    "cover-letter-builder",
+    "culture-framework",
+    "diversity-inclusion",
+    "founder-bio",
+    "leadership-development",
+    "market-entry-plan",
+    "min-investment-calc",
+    "performance-management",
+    "personal-statement",
+    "product-overview",
+    "quality-checklist",
+    "retention-strategy",
+    "role-designer",
+    "skills-matrix",
+    "succession-planning",
+    "team-assessment",
+    "team-bios"
+  ],
+  "policyBaseline": {
+    "jurisdiction": "UK",
+    "route": "Innovator Founder",
+    "version": "2026-08-16",
+    "sourcePolicy": "official-source-required"
+  }
+}
