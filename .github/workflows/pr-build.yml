@@ -34,6 +34,8 @@ jobs:
           node --check server/eligibilityEngine.cjs
           node --check server/ivsPolicy.cjs
           node --check server/ivsEngine.cjs
+          node --check server/financialModelPolicy.cjs
+          node --check server/financialModelEngine.cjs
           node --check server/scripts/preflight-app-schema.cjs
           node --check server/scripts/verify-app-schema.cjs
 
@@ -46,6 +48,9 @@ jobs:
       - name: Test IVS policy
         run: node scripts/test-ivs-policy.cjs
 
+      - name: Test financial model policy
+        run: node scripts/test-financial-model-policy.cjs
+
       - name: Smoke test tool platform routes
         run: node scripts/smoke-tool-platform-routes.cjs
 
@@ -54,6 +59,9 @@ jobs:
 
       - name: Smoke test IVS route
         run: node scripts/smoke-ivs-route.cjs
+
+      - name: Smoke test financial model route
+        run: node scripts/smoke-financial-model-route.cjs
 
       - name: Production build
         run: npm run build
