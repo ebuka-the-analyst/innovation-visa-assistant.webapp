@@ -32,5 +32,8 @@ jobs:
           node --check server/scripts/preflight-app-schema.cjs
           node --check server/scripts/verify-app-schema.cjs
 
+      - name: Smoke test tool platform routes
+        run: node scripts/smoke-tool-platform-routes.cjs
+
       - name: Production build
         run: npm run build
