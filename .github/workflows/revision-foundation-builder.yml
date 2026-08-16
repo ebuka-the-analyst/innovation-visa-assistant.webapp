@@ -1,0 +1,58 @@
+name: Revision Foundation Builder
+
+on:
+  push:
+    branches:
+      - feat/production-plan-revision-foundation
+    paths:
+      - scripts/patch-revision-runtime-wiring.cjs
+      - .github/workflows/revision-foundation-builder.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-validate:
+    if: ${{ !contains(github.event.head_commit.message, 'Apply revision runtime wiring') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/production-plan-revision-foundation
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Apply deterministic wiring patch
+        run: node scripts/patch-revision-runtime-wiring.cjs
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Validate revision foundation
+        run: node scripts/validate-revision-foundation.cjs
+
+      - name: Check migration and verifier syntax
+        run: |
+          node --check server/scripts/verify-app-schema.cjs
+          node --check server/scripts/run-app-migrations.cjs
+
+      - name: Production build
+        run: npm run build
+
+      - name: Commit validated source changes
+        shell: bash
+        run: |
+          if git diff --quiet -- server/index.ts shared/schema.ts server/scripts/verify-app-schema.cjs .github/workflows/pr-build.yml; then
+            echo "Runtime wiring already applied"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/index.ts shared/schema.ts server/scripts/verify-app-schema.cjs .github/workflows/pr-build.yml
+          git commit -m "Apply revision runtime wiring"
+          git push origin HEAD:feat/production-plan-revision-foundation
