@@ -25,3 +25,15 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: Upload source snapshot for controlled refactor
+        uses: actions/upload-artifact@v4
+        with:
+          name: durable-generation-source-snapshot
+          path: |
+            server/routes.ts
+            server/index.ts
+            server/db.ts
+            shared/schema.ts
+          if-no-files-found: error
+          retention-days: 1
