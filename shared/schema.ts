@@ -199,6 +199,122 @@ export const businessPlanGenerationSections = pgTable("business_plan_generation_
   index("idx_business_plan_generation_sections_plan").on(table.planId),
 ]);
 
+// Immutable business-plan versions. A revision is prepared as a candidate version and
+// only becomes the live business plan after an explicit owner acceptance.
+export const businessPlanVersions = pgTable("business_plan_versions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  planId: varchar("plan_id").notNull().references(() => businessPlans.id, { onDelete: "cascade" }),
+  versionNumber: integer("version_number").notNull(),
+  status: varchar("status", { length: 20 }).notNull().default('candidate'),
+  generatedContent: text("generated_content").notNull(),
+  chartData: text("chart_data"),
+  contentSha256: varchar("content_sha256", { length: 64 }).notNull(),
+  createdByUserId: varchar("created_by_user_id").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+}, (table) => [
+  uniqueIndex("ux_business_plan_versions_plan_number").on(table.planId, table.versionNumber),
+  uniqueIndex("ux_business_plan_versions_one_accepted").on(table.planId).where(sql`${table.status} = 'accepted'`),
+  index("idx_business_plan_versions_plan_created").on(table.planId, table.createdAt),
+]);
+
+export const businessPlanVersionSections = pgTable("business_plan_version_sections", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  versionId: varchar("version_id").notNull().references(() => businessPlanVersions.id, { onDelete: "cascade" }),
+  planId: varchar("plan_id").notNull().references(() => businessPlans.id, { onDelete: "cascade" }),
+  sectionIndex: integer("section_index").notNull(),
+  sectionTitle: text("section_title").notNull(),
+  content: text("content").notNull(),
+  contentSha256: varchar("content_sha256", { length: 64 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("ux_business_plan_version_sections_version_index").on(table.versionId, table.sectionIndex),
+  index("idx_business_plan_version_sections_plan").on(table.planId, table.versionId, table.sectionIndex),
+]);
+
+export const businessPlanRevisions = pgTable("business_plan_revisions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  planId: varchar("plan_id").notNull().references(() => businessPlans.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  revisionNumber: integer("revision_number").notNull(),
+  sourceVersionId: varchar("source_version_id").notNull().references(() => businessPlanVersions.id),
+  targetVersionId: varchar("target_version_id").references(() => businessPlanVersions.id),
+  requestType: varchar("request_type", { length: 40 }).notNull(),
+  instructions: text("instructions").notNull(),
+  selectedSectionIndexes: integer("selected_section_indexes").array().notNull(),
+  status: varchar("status", { length: 30 }).notNull().default('submitted'),
+  consistencyReport: jsonb("consistency_report"),
+  assignedAdminId: varchar("assigned_admin_id").references(() => users.id, { onDelete: "set null" }),
+  idempotencyKey: varchar("idempotency_key", { length: 100 }).notNull(),
+  lastError: text("last_error"),
+  submittedAt: timestamp("submitted_at", { withTimezone: true }).notNull().defaultNow(),
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+  cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("ux_business_plan_revisions_plan_number").on(table.planId, table.revisionNumber),
+  uniqueIndex("ux_business_plan_revisions_user_idempotency").on(table.userId, table.idempotencyKey),
+  uniqueIndex("ux_business_plan_revisions_one_active").on(table.planId).where(sql`${table.status} in ('submitted', 'in_progress', 'ready_for_review')`),
+  index("idx_business_plan_revisions_user_created").on(table.userId, table.submittedAt),
+  index("idx_business_plan_revisions_status_created").on(table.status, table.submittedAt),
+]);
+
+export const businessPlanRevisionSections = pgTable("business_plan_revision_sections", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  revisionId: varchar("revision_id").notNull().references(() => businessPlanRevisions.id, { onDelete: "cascade" }),
+  sectionIndex: integer("section_index").notNull(),
+  sectionTitle: text("section_title").notNull(),
+  originalContent: text("original_content").notNull(),
+  originalSha256: varchar("original_sha256", { length: 64 }).notNull(),
+  revisedContent: text("revised_content"),
+  revisedSha256: varchar("revised_sha256", { length: 64 }),
+  status: varchar("status", { length: 20 }).notNull().default('pending'),
+  changeSummary: text("change_summary"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("ux_business_plan_revision_sections_revision_index").on(table.revisionId, table.sectionIndex),
+  index("idx_business_plan_revision_sections_revision").on(table.revisionId, table.sectionIndex),
+]);
+
+export const businessPlanRevisionJobs = pgTable("business_plan_revision_jobs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  revisionId: varchar("revision_id").notNull().references(() => businessPlanRevisions.id, { onDelete: "cascade" }),
+  status: varchar("status", { length: 20 }).notNull().default('queued'),
+  claimCount: integer("claim_count").notNull().default(0),
+  failureCount: integer("failure_count").notNull().default(0),
+  leaseOwner: varchar("lease_owner", { length: 255 }),
+  leaseToken: varchar("lease_token", { length: 64 }),
+  leaseExpiresAt: timestamp("lease_expires_at", { withTimezone: true }),
+  heartbeatAt: timestamp("heartbeat_at", { withTimezone: true }),
+  availableAt: timestamp("available_at", { withTimezone: true }).notNull().defaultNow(),
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  failedAt: timestamp("failed_at", { withTimezone: true }),
+  lastError: text("last_error"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("ux_business_plan_revision_jobs_revision").on(table.revisionId),
+  index("idx_business_plan_revision_jobs_claim").on(table.status, table.availableAt, table.leaseExpiresAt),
+]);
+
+export const businessPlanRevisionEvents = pgTable("business_plan_revision_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  revisionId: varchar("revision_id").notNull().references(() => businessPlanRevisions.id, { onDelete: "cascade" }),
+  planId: varchar("plan_id").notNull().references(() => businessPlans.id, { onDelete: "cascade" }),
+  actorUserId: varchar("actor_user_id").references(() => users.id, { onDelete: "set null" }),
+  actorType: varchar("actor_type", { length: 20 }).notNull(),
+  eventType: varchar("event_type", { length: 60 }).notNull(),
+  payload: jsonb("payload"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  index("idx_business_plan_revision_events_revision").on(table.revisionId, table.createdAt),
+  index("idx_business_plan_revision_events_plan").on(table.planId, table.createdAt),
+]);
+
 // Google OAuth user upsert schema for Railway deployment
 export const upsertUserSchema = createInsertSchema(users).pick({
   email: true,
