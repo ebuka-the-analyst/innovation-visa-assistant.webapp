@@ -176,19 +176,45 @@ CREATE INDEX IF NOT EXISTS idx_api_latency_route ON api_latency_log(route);
 CREATE INDEX IF NOT EXISTS idx_api_latency_timestamp ON api_latency_log(timestamp);
 CREATE INDEX IF NOT EXISTS idx_api_latency_status ON api_latency_log(status_code);
 
+-- Latency telemetry is intentionally retained even when the related user has
+-- already been deleted. The user association is optional, so clear only broken
+-- references before enforcing the FK. No latency rows are deleted.
 DO $$
+DECLARE
+  orphan_count INTEGER;
 BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint
-     WHERE conname = 'api_latency_log_user_id_users_id_fk'
-       AND conrelid = 'public.api_latency_log'::regclass
-  ) THEN
-    ALTER TABLE api_latency_log
-      ADD CONSTRAINT api_latency_log_user_id_users_id_fk
-      FOREIGN KEY (user_id) REFERENCES users(id) NOT VALID;
+  SELECT COUNT(*)::integer
+    INTO orphan_count
+    FROM api_latency_log latency
+    LEFT JOIN users u ON u.id = latency.user_id
+   WHERE latency.user_id IS NOT NULL
+     AND u.id IS NULL;
+
+  IF orphan_count > 0 THEN
+    UPDATE api_latency_log latency
+       SET user_id = NULL
+     WHERE latency.user_id IS NOT NULL
+       AND NOT EXISTS (
+         SELECT 1
+           FROM users u
+          WHERE u.id = latency.user_id
+       );
+
+    RAISE NOTICE
+      'Preserved % api_latency_log row(s) and cleared only their orphaned user_id association',
+      orphan_count;
   END IF;
 END
 $$;
+
+-- Recreate the known Phase-0 FK definition so future user deletion preserves
+-- performance telemetry while removing the user association.
+ALTER TABLE api_latency_log
+  DROP CONSTRAINT IF EXISTS api_latency_log_user_id_users_id_fk;
+
+ALTER TABLE api_latency_log
+  ADD CONSTRAINT api_latency_log_user_id_users_id_fk
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL NOT VALID;
 
 ALTER TABLE api_latency_log VALIDATE CONSTRAINT api_latency_log_user_id_users_id_fk;
 
