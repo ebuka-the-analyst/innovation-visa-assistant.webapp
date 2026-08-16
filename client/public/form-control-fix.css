@@ -1,9 +1,9 @@
 /*
- * Global compact native selection controls
+ * Global compact selection controls
  *
- * The responsive foundation intentionally gives text inputs a full width and
- * 44px minimum touch height. Native checkbox/radio inputs must opt out of those
- * text-field rules or they become tall, stretched boxes.
+ * The responsive foundation intentionally gives text inputs/buttons a full
+ * touch-friendly height. Native checkbox/radio controls and Radix/shadcn
+ * selection controls must opt out or they become tall, stretched boxes.
  */
 
 input[type="checkbox"],
@@ -29,7 +29,7 @@ input[type="radio"] {
   transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease, transform 100ms ease;
 }
 
-/* Checkboxes use the compact checked-circle treatment used across the app. */
+/* Compact checked-circle treatment, matching the intended UI reference. */
 input[type="checkbox"] {
   border-radius: 9999px;
 }
@@ -54,7 +54,6 @@ input[type="checkbox"]:checked::before {
   transform: rotate(45deg) scale(1);
 }
 
-/* Radios remain circular with a compact inner selection dot. */
 input[type="radio"] {
   border-radius: 9999px;
 }
@@ -93,4 +92,18 @@ input[type="checkbox"]:disabled,
 input[type="radio"]:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+/* Radix/shadcn selection primitives are buttons under the hood. They should
+   keep the size supplied by their component classes, not the global 44px
+   minimum button height. */
+button[role="checkbox"],
+button[role="radio"],
+button[role="switch"] {
+  min-height: 0 !important;
+}
+
+button[role="checkbox"],
+button[role="radio"] {
+  flex: 0 0 auto;
 }
