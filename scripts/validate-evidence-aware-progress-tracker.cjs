@@ -13,7 +13,7 @@ const checks = [
   ['innovation is not auto-completed from plan', client.includes('separate innovation assessment has not been completed')],
   ['financial projections can be satisfied by structured plan evidence', client.includes('planFinancial?.satisfied')],
   ['market research can use structured plan evidence', client.includes('planMarket?.satisfied')],
-  ['phase headline is required-only', client.includes('phaseRequiredReadiness') && client.includes('% required readiness')],
+  ['phase headline is required-only', client.includes('const requiredPercent = phaseRequiredReadiness(phase);') && client.includes('Required readiness') && client.includes('{requiredPercent}%')],
   ['optional completion is displayed separately', client.includes('optional complete')],
   ['progress tracks use neutral empty background', client.includes('bg-slate-200 dark:bg-slate-800')],
   ['legacy all-step phase percentage removed', !client.includes('const percent = phaseProgress(phase)')],
