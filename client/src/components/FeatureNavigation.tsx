@@ -3,10 +3,11 @@ import { ChevronRight, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface FeatureNavProps {
-  currentPage: "questionnaire" | "endorser-comparison" | "document-organizer" | "interview-prep" | "expert-booking" | "rejection-analysis" | "settlement-planning";
+  currentPage: "progress" | "questionnaire" | "endorser-comparison" | "document-organizer" | "interview-prep" | "expert-booking" | "rejection-analysis" | "settlement-planning";
 }
 
 const featureFlow = [
+  { key: "progress", label: "Progress Tracker", route: "/progress", phase: 1 },
   { key: "questionnaire", label: "Business Plan", route: "/questionnaire", phase: 1 },
   { key: "endorser-comparison", label: "Choose Endorser", route: "/endorser-comparison", phase: 1 },
   { key: "document-organizer", label: "Organize Documents", route: "/document-organizer", phase: 2 },
