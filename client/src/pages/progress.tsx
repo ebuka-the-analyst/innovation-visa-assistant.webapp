@@ -494,17 +494,17 @@ function browserSignal(stepId: StepId, tracker?: TrackerResponse): StepSignal {
 
   if (stepId === "market-research") {
     const planMarket = database?.businessPlans.evidence?.market;
+    if (planMarket?.satisfied) {
+      return {
+        percent: 100,
+        status: "completed",
+        source: "plan",
+        detail: "The completed business plan contains " + planMarket.completedSignals + " of " + planMarket.totalSignals + " substantive market-validation signals, including a demand signal.",
+        completed: true,
+      };
+    }
     const data = readJson("market-research-state");
     if (!data || typeof data !== "object") {
-      if (planMarket?.satisfied) {
-        return {
-          percent: 100,
-          status: "completed",
-          source: "plan",
-          detail: "The completed business plan contains " + planMarket.completedSignals + " of " + planMarket.totalSignals + " substantive market-validation signals, including a demand signal.",
-          completed: true,
-        };
-      }
       if (planMarket && planMarket.completedSignals > 0) {
         return {
           percent: planMarket.percent,
