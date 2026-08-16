@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "registryVersion": "2026-08-16.2",
+  "registryVersion": "2026-08-16.3",
   "defaultRunnableStatus": "beta",
   "productionToolIds": [
     "app-req-checker",
@@ -45,6 +45,6 @@
     "jurisdiction": "UK",
     "route": "Innovator Founder",
     "version": "2026-08-03",
-    "sourcePolicy": "official-source-required"
+    "sourcePolicy": "official-source-required-with-conservative-conflict-handling"
   }
 }
