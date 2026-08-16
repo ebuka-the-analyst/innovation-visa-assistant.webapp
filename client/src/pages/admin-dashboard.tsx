@@ -29,6 +29,7 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/s
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { PromoCodeGenerator } from "@/components/admin/PromoCodeGenerator";
 import { PricingAccessManagement } from "@/components/admin/PricingAccessManagement";
+import { AdminRevisionQueue } from "@/components/admin/AdminRevisionQueue";
 import { 
   RealtimeMonitor, 
   HeatmapView, 
@@ -2068,14 +2069,14 @@ export default function AdminDashboard() {
   // Plans analytics
   const { data: plansAnalytics, isLoading: plansAnalyticsLoading } = useQuery<PlansAnalytics>({
     queryKey: ['/api/admin/analytics/plans'],
-    enabled: !!user?.isAdmin && activeSection.startsWith('plans'),
+    enabled: !!user?.isAdmin && activeSection.startsWith('plans') && activeSection !== 'plans-revisions',
     refetchInterval: REFRESH_INTERVAL,
   });
 
   // Plans data
   const { data: plansData, isLoading: plansLoading } = useQuery<{ plans: Plan[]; total: number; page: number; pageSize: number }>({
     queryKey: ['/api/admin/plans', { page: plansPage, pageSize: plansPageSize, search: plansSearch, ...planFilters }],
-    enabled: !!user?.isAdmin && activeSection.startsWith('plans'),
+    enabled: !!user?.isAdmin && activeSection.startsWith('plans') && activeSection !== 'plans-revisions',
   });
 
   // Tool analytics data
@@ -3503,6 +3504,7 @@ export default function AdminDashboard() {
       'plans-pending': 'Pending Plans',
       'plans-completed': 'Completed Plans',
       'plans-failed': 'Failed Plans',
+      'plans-revisions': 'Business Plan Revision Queue',
       'plans-funnel': 'Plan Completion Funnel',
       'revenue-overview': 'Revenue Dashboard',
       'revenue-mrr': 'MRR Analytics',
@@ -5647,8 +5649,13 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
+                {/* Business Plan Revision Queue */}
+                {activeSection === 'plans-revisions' && (
+                  <AdminRevisionQueue />
+                )}
+
                 {/* Plans Section */}
-                {activeSection.startsWith('plans') && (
+                {activeSection.startsWith('plans') && activeSection !== 'plans-revisions' && (
                   <div className="space-y-1.5">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
