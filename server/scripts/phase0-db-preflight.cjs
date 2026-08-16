@@ -37,16 +37,25 @@ async function referringForeignKeyCount(client, tableName) {
   return Number(result.rows[0]?.count || 0);
 }
 
-async function orphanUserCount(client, tableName) {
+async function orphanUserSummary(client, tableName) {
   const columns = await getColumns(client, tableName);
-  if (!columns.user_id) return 0;
+  if (!columns.user_id) {
+    return { count: 0, distinctUserCount: 0, userIdNullable: null };
+  }
+
   const result = await client.query(
-    `SELECT COUNT(*)::integer AS count
+    `SELECT COUNT(*)::integer AS count,
+            COUNT(DISTINCT child.user_id)::integer AS distinct_user_count
        FROM ${tableName} child
        LEFT JOIN users u ON u.id = child.user_id
       WHERE child.user_id IS NOT NULL AND u.id IS NULL`,
   );
-  return Number(result.rows[0]?.count || 0);
+
+  return {
+    count: Number(result.rows[0]?.count || 0),
+    distinctUserCount: Number(result.rows[0]?.distinct_user_count || 0),
+    userIdNullable: columns.user_id.is_nullable === "YES",
+  };
 }
 
 async function runPreflight() {
@@ -145,19 +154,49 @@ async function runPreflight() {
       report.tables.seo_automation_plans = { exists: false };
     }
 
-    for (const tableName of ["api_latency_log", "coins_usage_log"]) {
-      if (await tableExists(client, tableName)) {
-        const count = await rowCount(client, tableName);
-        const orphanCount = await orphanUserCount(client, tableName);
-        report.tables[tableName] = { exists: true, rowCount: count, orphanUserCount: orphanCount };
-        if (orphanCount > 0) {
+    if (await tableExists(client, "api_latency_log")) {
+      const count = await rowCount(client, "api_latency_log");
+      const orphanSummary = await orphanUserSummary(client, "api_latency_log");
+      report.tables.api_latency_log = {
+        exists: true,
+        rowCount: count,
+        orphanUserCount: orphanSummary.count,
+        distinctOrphanUserCount: orphanSummary.distinctUserCount,
+        userIdNullable: orphanSummary.userIdNullable,
+      };
+
+      if (orphanSummary.count > 0) {
+        if (orphanSummary.userIdNullable) {
+          report.warnings.push(
+            `api_latency_log contains ${orphanSummary.count} telemetry row(s) across ${orphanSummary.distinctUserCount} deleted/unknown user id(s). The controlled migration will preserve those rows, clear only the invalid user_id association to NULL, and enforce ON DELETE SET NULL for future user deletion.`,
+          );
+        } else {
           report.blockers.push(
-            `${tableName} contains ${orphanCount} row(s) whose user_id does not resolve to users.id; foreign-key validation would fail.`,
+            "api_latency_log contains orphan user references but user_id is not nullable; safe telemetry preservation requires a deliberate schema/data decision.",
           );
         }
-      } else {
-        report.tables[tableName] = { exists: false };
       }
+    } else {
+      report.tables.api_latency_log = { exists: false };
+    }
+
+    if (await tableExists(client, "coins_usage_log")) {
+      const count = await rowCount(client, "coins_usage_log");
+      const orphanSummary = await orphanUserSummary(client, "coins_usage_log");
+      report.tables.coins_usage_log = {
+        exists: true,
+        rowCount: count,
+        orphanUserCount: orphanSummary.count,
+        distinctOrphanUserCount: orphanSummary.distinctUserCount,
+        userIdNullable: orphanSummary.userIdNullable,
+      };
+      if (orphanSummary.count > 0) {
+        report.blockers.push(
+          `coins_usage_log contains ${orphanSummary.count} row(s) whose user_id does not resolve to users.id. This credit/coins ledger is not nullable and will not be auto-normalised.`,
+        );
+      }
+    } else {
+      report.tables.coins_usage_log = { exists: false };
     }
 
     for (const tableName of ["backlink_targets", "user_notification_dismissals"]) {
