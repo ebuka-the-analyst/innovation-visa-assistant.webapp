@@ -7,7 +7,7 @@ export default function Generation() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('plan_id');
+    const id = params.get("plan_id");
     if (id) {
       setPlanId(id);
     }
@@ -22,22 +22,27 @@ export default function Generation() {
   }
 
   return (
-    <div className="generation-page-viewport h-full min-h-0">
+    <div className="generation-page-viewport h-full min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain">
       <GenerationProgress planId={planId} />
       <ChatBot planId={planId} />
 
       <style>{`
         /*
-         * GenerationProgress lives inside AppLayout's already height-constrained main area.
-         * On laptop/desktop-height viewports, fit the active-generation dashboard into that
-         * available first viewport instead of asking for an additional full 100vh.
-         * Small/mobile screens keep the normal scrollable layout so content is never clipped.
+         * AppLayout already constrains this route to the available application viewport.
+         * Never force GenerationProgress itself to that fixed height: completed plans and
+         * shorter laptop viewports can legitimately need more vertical space. The route
+         * owns scrolling so every control/result remains reachable from top to bottom.
          */
+        .generation-page-viewport > div.min-h-screen {
+          height: auto !important;
+          min-height: 100% !important;
+          overflow-x: hidden !important;
+          overflow-y: visible !important;
+        }
+
         @media (min-width: 768px) and (max-height: 950px) {
           .generation-page-viewport > div.min-h-screen {
-            min-height: 100% !important;
-            height: 100%;
-            padding: 0.5rem !important;
+            padding: 0.75rem !important;
           }
 
           .generation-page-viewport > div.min-h-screen > div.relative.w-full.max-w-3xl {
@@ -54,14 +59,14 @@ export default function Generation() {
           }
 
           .generation-page-viewport > div.min-h-screen > div.relative.w-full.max-w-3xl > div:first-child > div:first-child > div:first-child {
-            width: 9.5rem !important;
-            height: 9.5rem !important;
+            width: 9rem !important;
+            height: 9rem !important;
             margin-bottom: 0.5rem !important;
           }
 
           .generation-page-viewport > div.min-h-screen > div.relative.w-full.max-w-3xl > div:first-child > div:first-child > div:first-child div[class*="w-28"] {
-            width: 5.5rem !important;
-            height: 5.5rem !important;
+            width: 5.25rem !important;
+            height: 5.25rem !important;
           }
 
           .generation-page-viewport > div.min-h-screen > div.relative.w-full.max-w-3xl > div:first-child > div:first-child > div:nth-child(2) {
@@ -118,19 +123,25 @@ export default function Generation() {
         }
 
         @media (min-width: 768px) and (max-height: 760px) {
+          .generation-page-viewport > div.min-h-screen {
+            align-items: flex-start !important;
+            padding-top: 0.5rem !important;
+            padding-bottom: 1rem !important;
+          }
+
           .generation-page-viewport > div.min-h-screen > div.relative.w-full.max-w-3xl > div:first-child {
             padding-top: 0.875rem !important;
             padding-bottom: 0.875rem !important;
           }
 
           .generation-page-viewport > div.min-h-screen > div.relative.w-full.max-w-3xl > div:first-child > div:first-child > div:first-child {
-            width: 8rem !important;
-            height: 8rem !important;
+            width: 7.5rem !important;
+            height: 7.5rem !important;
           }
 
           .generation-page-viewport > div.min-h-screen > div.relative.w-full.max-w-3xl > div:first-child > div:first-child > div:first-child div[class*="w-28"] {
-            width: 4.75rem !important;
-            height: 4.75rem !important;
+            width: 4.5rem !important;
+            height: 4.5rem !important;
           }
         }
       `}</style>
