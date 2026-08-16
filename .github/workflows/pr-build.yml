@@ -30,12 +30,16 @@ jobs:
         run: |
           node --check server/toolPlatform.cjs
           node --check server/eligibilityPolicy.cjs
+          node --check server/eligibilityPolicySafety.cjs
           node --check server/eligibilityEngine.cjs
           node --check server/scripts/preflight-app-schema.cjs
           node --check server/scripts/verify-app-schema.cjs
 
       - name: Test eligibility policy
         run: node scripts/test-eligibility-policy.cjs
+
+      - name: Test eligibility policy safety reconciliation
+        run: node scripts/test-eligibility-policy-safety.cjs
 
       - name: Smoke test tool platform routes
         run: node scripts/smoke-tool-platform-routes.cjs

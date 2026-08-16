@@ -4,8 +4,10 @@ const { Pool } = require('pg');
 const { ZodError } = require('zod');
 const registry = require('../shared/tool-platform-registry.json');
 const { POLICY_VERSION, assessEligibility } = require('./eligibilityPolicy.cjs');
+const { applyEligibilityPolicySafety } = require('./eligibilityPolicySafety.cjs');
 
 const ROUTE = '/api/eligibility/assess';
+const ENGINE_POLICY_VERSION = `${POLICY_VERSION}.safety-2026-08-16.1`;
 const COMMERCIAL_CATALOG_KEY = 'commercial.plan-catalog.v1';
 const SUPPORTED_TOOL_IDS = new Set([
   'points-calculator',
@@ -122,7 +124,9 @@ async function handleAssess(req, res) {
     const toolId = String(input.toolId || '');
     const access = await enforceToolAccess(client, req.user.id, toolId);
 
-    const result = assessEligibility(input);
+    const deterministicResult = assessEligibility(input);
+    const result = applyEligibilityPolicySafety(input, deterministicResult);
+    result.policyVersion = ENGINE_POLICY_VERSION;
     const clientRunKey = typeof input.clientRunKey === 'string' ? input.clientRunKey : null;
     const inputSnapshot = { ...input };
     delete inputSnapshot.clientRunKey;
@@ -169,15 +173,17 @@ async function handleAssess(req, res) {
         toolId,
         clientRunKey,
         registry.registryVersion,
-        POLICY_VERSION,
+        ENGINE_POLICY_VERSION,
         caseContextRevision,
         JSON.stringify(inputSnapshot),
         JSON.stringify(result),
         resultHash,
         JSON.stringify({
-          engine: 'deterministic-rule-engine',
+          engine: 'deterministic-rule-engine-with-conservative-source-reconciliation',
           schemaValidated: true,
-          policyVersion: POLICY_VERSION,
+          policyVersion: ENGINE_POLICY_VERSION,
+          baseRulesVersion: POLICY_VERSION,
+          ambiguityOverrides: result.policySafety?.ambiguityOverrides || [],
           ruleSources: result.sources.map((source) => source.id),
           note: 'validated means the server validated the input schema and deterministic rule calculation; it is not a Home Office eligibility guarantee',
         }),
@@ -196,13 +202,14 @@ async function handleAssess(req, res) {
         JSON.stringify({
           executionMode: 'server_engine',
           registryVersion: registry.registryVersion,
-          policyVersion: POLICY_VERSION,
+          policyVersion: ENGINE_POLICY_VERSION,
           caseContextRevision,
         }),
         JSON.stringify({
           resultSha256: resultHash,
           awardedPoints: result.points.awarded,
           assessmentStatus: result.status,
+          ambiguityOverrides: result.policySafety?.ambiguityOverrides || [],
           validationState: 'validated',
         }),
       ],
@@ -217,7 +224,7 @@ async function handleAssess(req, res) {
       toolAccess: access,
       validationState: 'validated',
       registryVersion: registry.registryVersion,
-      policyVersion: POLICY_VERSION,
+      policyVersion: ENGINE_POLICY_VERSION,
       resultSha256: resultHash,
       assessment: result,
     });
