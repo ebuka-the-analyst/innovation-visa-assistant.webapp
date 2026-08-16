@@ -1,0 +1,41 @@
+/*
+ * Authenticated application layout width fix
+ *
+ * The desktop sidebar occupies its own flex width. The content column also had
+ * Tailwind's w-full, which made it request 100% of the viewport in addition to
+ * the sidebar width. Keep the sidebar behaviour unchanged, but force the main
+ * application column to flex into the remaining space and allow its children
+ * to shrink normally.
+ */
+
+[data-slot="sidebar-wrapper"] > .flex.h-screen.w-full {
+  min-width: 0;
+  max-width: 100%;
+}
+
+[data-slot="sidebar-wrapper"] > .flex.h-screen.w-full > .flex.flex-col.flex-1.w-full {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 100%;
+}
+
+[data-slot="sidebar-wrapper"] > .flex.h-screen.w-full > .flex.flex-col.flex-1.w-full > header,
+[data-slot="sidebar-wrapper"] > .flex.h-screen.w-full > .flex.flex-col.flex-1.w-full > main {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* The page owns vertical scrolling. Horizontal overflow must stay inside
+   deliberately scrollable child controls rather than widening the page. */
+[data-slot="sidebar-wrapper"] > .flex.h-screen.w-full > .flex.flex-col.flex-1.w-full > main {
+  width: 100%;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+/* Defensive sizing for full-width authenticated page containers and grids. */
+[data-slot="sidebar-wrapper"] main .responsive-container,
+[data-slot="sidebar-wrapper"] main .responsive-container > * {
+  min-width: 0;
+  max-width: 100%;
+}
