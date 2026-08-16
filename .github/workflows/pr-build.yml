@@ -6,47 +6,22 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
-      - name: Check out implementation branch
+      - name: Check out
         uses: actions/checkout@v4
-        with:
-          ref: feat/durable-business-plan-generation
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Apply durable generation implementation
-        run: node scripts/apply-durable-generation-bundle.cjs
-
-      - name: Validate patch integrity
-        run: |
-          git diff --check
-          node --check server/scripts/preflight-app-schema.cjs
-          node --check server/scripts/run-app-migrations.cjs
-          node --check server/scripts/verify-app-schema.cjs
-
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
       - name: Production build
         run: npm run build
-
-      - name: Commit validated implementation
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add server shared migrations docs railway.json package.json
-          if git diff --cached --quiet; then
-            echo "No generated implementation changes to commit"
-            exit 0
-          fi
-          git commit -m "Implement durable resumable business plan generation"
-          git push origin HEAD:feat/durable-business-plan-generation
