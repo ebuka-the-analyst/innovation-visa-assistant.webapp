@@ -22,16 +22,16 @@ export default function Generation() {
   }
 
   return (
-    <div className="generation-page-viewport h-full min-h-0">
+    <div className="generation-page-viewport h-full min-h-0 overflow-visible">
       <GenerationProgress planId={planId} />
       <ChatBot planId={planId} />
 
       <style>{`
         /*
          * GenerationProgress lives inside AppLayout's already height-constrained main area.
-         * On laptop/desktop-height viewports, fit the active-generation dashboard into that
-         * available first viewport instead of asking for an additional full 100vh.
-         * Small/mobile screens keep the normal scrollable layout so content is never clipped.
+         * On laptop/desktop-height viewports, fit only the active-generation dashboard into
+         * the available first viewport. Once the completed result expands, it must return to
+         * normal document flow so every action remains reachable from top to bottom.
          */
         @media (min-width: 768px) and (max-height: 950px) {
           .generation-page-viewport > div.min-h-screen {
@@ -131,6 +131,35 @@ export default function Generation() {
           .generation-page-viewport > div.min-h-screen > div.relative.w-full.max-w-3xl > div:first-child > div:first-child > div:first-child div[class*="w-28"] {
             width: 4.75rem !important;
             height: 4.75rem !important;
+          }
+        }
+
+        /*
+         * The completed panel is much taller than the generation dashboard. It contains the
+         * full-plan action, downloads, sharing, revision/dashboard actions, quick actions and
+         * next steps. The former fixed 100% height plus overflow-hidden combination clipped
+         * those controls on laptop-height viewports. :has() lets us identify the completed
+         * state from its stable primary-action test id without coupling to transient status
+         * text or modifying the generation state machine.
+         */
+        .generation-page-viewport > div.min-h-screen:has([data-testid="button-view-full-plan"]) {
+          min-height: 100% !important;
+          height: auto !important;
+          align-items: flex-start !important;
+          overflow: visible !important;
+          padding-top: 1rem !important;
+          padding-bottom: 5rem !important;
+        }
+
+        .generation-page-viewport > div.min-h-screen:has([data-testid="button-view-full-plan"]) > div.relative.w-full.max-w-3xl {
+          margin-top: 0 !important;
+          margin-bottom: 0 !important;
+        }
+
+        @media (max-width: 767px) {
+          .generation-page-viewport > div.min-h-screen:has([data-testid="button-view-full-plan"]) {
+            padding-top: 0.75rem !important;
+            padding-bottom: 6rem !important;
           }
         }
       `}</style>
