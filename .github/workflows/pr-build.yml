@@ -23,5 +23,14 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
+      - name: Validate tool platform registry
+        run: node scripts/validate-tool-platform-registry.cjs
+
+      - name: Check tool platform runtime syntax
+        run: |
+          node --check server/toolPlatform.cjs
+          node --check server/scripts/preflight-app-schema.cjs
+          node --check server/scripts/verify-app-schema.cjs
+
       - name: Production build
         run: npm run build
