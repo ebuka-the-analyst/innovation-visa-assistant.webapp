@@ -713,27 +713,60 @@ export async function cancelQueuedRevisionForUser(planId: string, revisionId: st
     `));
     if (!revision) throw new RevisionServiceError(404, { error: "Revision not found" });
     if (revision.status === "cancelled") return { success: true, status: "cancelled", duplicate: true };
-    if (revision.status !== "submitted") {
-      throw new RevisionServiceError(409, { error: "Only a queued revision can be cancelled." });
+
+    if (revision.status === "submitted") {
+      const job = firstRow<any>(await tx.execute(sql`
+        SELECT status FROM business_plan_revision_jobs WHERE revision_id = ${revisionId} FOR UPDATE
+      `));
+      if (job && job.status !== "queued") {
+        throw new RevisionServiceError(409, { error: "Revision processing has already started." });
+      }
+      await tx.execute(sql`
+        UPDATE business_plan_revisions
+        SET status = 'cancelled', cancelled_at = NOW(), updated_at = NOW()
+        WHERE id = ${revisionId}
+      `);
+      await tx.execute(sql`
+        UPDATE business_plan_revision_jobs
+        SET status = 'cancelled', updated_at = NOW()
+        WHERE revision_id = ${revisionId} AND status = 'queued'
+      `);
+      await addEvent(tx, revisionId, planId, "customer", "revision_cancelled", userId, null);
+      return { success: true, status: "cancelled", duplicate: false };
     }
-    const job = firstRow<any>(await tx.execute(sql`
-      SELECT status FROM business_plan_revision_jobs WHERE revision_id = ${revisionId} FOR UPDATE
-    `));
-    if (job && job.status !== "queued") {
-      throw new RevisionServiceError(409, { error: "Revision processing has already started." });
+
+    if (revision.status === "ready_for_review") {
+      if (!revision.target_version_id) {
+        throw new RevisionServiceError(409, { error: "Revision candidate is unavailable." });
+      }
+      const target = firstRow<any>(await tx.execute(sql`
+        SELECT id, status
+        FROM business_plan_versions
+        WHERE id = ${revision.target_version_id} AND plan_id = ${planId}
+        FOR UPDATE
+      `));
+      if (!target || target.status !== 'candidate') {
+        throw new RevisionServiceError(409, { error: "Revision candidate is no longer discardable." });
+      }
+      await tx.execute(sql`
+        UPDATE business_plan_versions
+        SET status = 'superseded'
+        WHERE id = ${revision.target_version_id} AND status = 'candidate'
+      `);
+      await tx.execute(sql`
+        UPDATE business_plan_revisions
+        SET status = 'cancelled', cancelled_at = NOW(), updated_at = NOW()
+        WHERE id = ${revisionId}
+      `);
+      await addEvent(tx, revisionId, planId, "customer", "revision_candidate_discarded", userId, {
+        targetVersionId: revision.target_version_id,
+      });
+      return { success: true, status: "cancelled", duplicate: false };
     }
-    await tx.execute(sql`
-      UPDATE business_plan_revisions
-      SET status = 'cancelled', cancelled_at = NOW(), updated_at = NOW()
-      WHERE id = ${revisionId}
-    `);
-    await tx.execute(sql`
-      UPDATE business_plan_revision_jobs
-      SET status = 'cancelled', updated_at = NOW()
-      WHERE revision_id = ${revisionId} AND status = 'queued'
-    `);
-    await addEvent(tx, revisionId, planId, "customer", "revision_cancelled", userId, null);
-    return { success: true, status: "cancelled", duplicate: false };
+
+    throw new RevisionServiceError(409, {
+      error: "Only a queued or ready-for-review revision can be discarded.",
+    });
   });
 }
 
