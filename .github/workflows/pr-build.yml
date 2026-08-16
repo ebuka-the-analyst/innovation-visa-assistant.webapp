@@ -32,6 +32,8 @@ jobs:
           node --check server/eligibilityPolicy.cjs
           node --check server/eligibilityPolicySafety.cjs
           node --check server/eligibilityEngine.cjs
+          node --check server/ivsPolicy.cjs
+          node --check server/ivsEngine.cjs
           node --check server/scripts/preflight-app-schema.cjs
           node --check server/scripts/verify-app-schema.cjs
 
@@ -41,11 +43,17 @@ jobs:
       - name: Test eligibility policy safety reconciliation
         run: node scripts/test-eligibility-policy-safety.cjs
 
+      - name: Test IVS policy
+        run: node scripts/test-ivs-policy.cjs
+
       - name: Smoke test tool platform routes
         run: node scripts/smoke-tool-platform-routes.cjs
 
       - name: Smoke test eligibility route
         run: node scripts/smoke-eligibility-route.cjs
+
+      - name: Smoke test IVS route
+        run: node scripts/smoke-ivs-route.cjs
 
       - name: Production build
         run: npm run build
