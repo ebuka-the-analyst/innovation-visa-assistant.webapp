@@ -206,6 +206,8 @@ async function runReconciliation() {
   }
 }
 
-setTimeout(() => {
+if (require.main === module) {
   void runReconciliation();
-}, 5000);
+}
+
+module.exports = { runReconciliation };
