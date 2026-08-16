@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, jsonb, boolean, index, real } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, jsonb, boolean, index, uniqueIndex, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -154,6 +154,50 @@ export const businessPlans = pgTable("business_plans", {
   isDemoData: boolean("is_demo_data").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+// Durable business-plan generation queue. Work is leased from PostgreSQL so
+// deployments and replica restarts cannot orphan a plan in an in-memory task.
+export const businessPlanGenerationJobs = pgTable("business_plan_generation_jobs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  planId: varchar("plan_id").notNull().references(() => businessPlans.id, { onDelete: "cascade" }),
+  status: varchar("status", { length: 20 }).notNull().default('queued'),
+  claimCount: integer("claim_count").notNull().default(0),
+  failureCount: integer("failure_count").notNull().default(0),
+  currentSection: integer("current_section").notNull().default(0),
+  totalSections: integer("total_sections").notNull().default(0),
+  generatorVersion: varchar("generator_version", { length: 100 }).notNull(),
+  leaseOwner: varchar("lease_owner", { length: 255 }),
+  leaseToken: varchar("lease_token", { length: 64 }),
+  leaseExpiresAt: timestamp("lease_expires_at", { withTimezone: true }),
+  heartbeatAt: timestamp("heartbeat_at", { withTimezone: true }),
+  availableAt: timestamp("available_at", { withTimezone: true }).notNull().defaultNow(),
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  failedAt: timestamp("failed_at", { withTimezone: true }),
+  lastError: text("last_error"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("ux_business_plan_generation_jobs_plan").on(table.planId),
+  index("idx_business_plan_generation_jobs_claim").on(table.status, table.availableAt, table.leaseExpiresAt),
+]);
+
+// Section-level checkpoints allow a replacement worker to resume at the first
+// missing section instead of regenerating a completed plan from the beginning.
+export const businessPlanGenerationSections = pgTable("business_plan_generation_sections", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  planId: varchar("plan_id").notNull().references(() => businessPlans.id, { onDelete: "cascade" }),
+  sectionIndex: integer("section_index").notNull(),
+  sectionTitle: text("section_title").notNull(),
+  content: text("content").notNull(),
+  contentSha256: varchar("content_sha256", { length: 64 }).notNull(),
+  generatorVersion: varchar("generator_version", { length: 100 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("ux_business_plan_generation_sections_plan_index").on(table.planId, table.sectionIndex),
+  index("idx_business_plan_generation_sections_plan").on(table.planId),
+]);
 
 // Google OAuth user upsert schema for Railway deployment
 export const upsertUserSchema = createInsertSchema(users).pick({
