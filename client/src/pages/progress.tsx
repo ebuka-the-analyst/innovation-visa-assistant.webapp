@@ -51,7 +51,7 @@ type StepId =
   | "final-review"
   | "compliance-check";
 
-type ProgressSource = "database" | "synced" | "browser" | "manual" | "none";
+type ProgressSource = "database" | "plan" | "synced" | "browser" | "manual" | "none";
 
 interface JourneyStep {
   id: StepId;
@@ -92,7 +92,11 @@ interface TrackerResponse {
         status: string;
         pdfUrl?: string | null;
         createdAt?: string | null;
-        updatedAt?: string | null;
+      };
+      evidence: null | {
+        planId: string;
+        financial: { satisfied: boolean; completedSignals: number; totalSignals: number; missing: string[] };
+        market: { satisfied: boolean; percent: number; completedSignals: number; totalSignals: number; missing: string[] };
       };
     };
     documents: {
@@ -383,7 +387,17 @@ function browserSignal(stepId: StepId, tracker?: TrackerResponse): StepSignal {
 
   if (stepId === "innovation-score") {
     const data = readJson("innovation-score-state");
-    if (!data) return { percent: 0, status: "not-started", source: "none", detail: "No saved innovation assessment found." };
+    if (!data) {
+      if ((database?.businessPlans.completed || 0) > 0) {
+        return {
+          percent: 0,
+          status: "not-started",
+          source: "plan",
+          detail: "Innovation evidence exists in the completed business plan, but the separate innovation assessment has not been completed.",
+        };
+      }
+      return { percent: 0, status: "not-started", source: "none", detail: "No saved innovation assessment found." };
+    }
     const percent = clampPercent(data.overallCompletion ?? data.completionPercent ?? data.progress ?? 0);
     const complete = percent >= 100;
     return {
@@ -441,8 +455,28 @@ function browserSignal(stepId: StepId, tracker?: TrackerResponse): StepSignal {
   }
 
   if (stepId === "financial-projections") {
+    const planFinancial = database?.businessPlans.evidence?.financial;
+    if (planFinancial?.satisfied) {
+      return {
+        percent: 100,
+        status: "completed",
+        source: "plan",
+        detail: "The completed business plan contains all " + planFinancial.totalSignals + " structured financial-model signals required by the tracker.",
+        completed: true,
+      };
+    }
+
     const data = readJson("financialProjectionsProgress");
     if (!data || typeof data !== "object") {
+      if (planFinancial && planFinancial.completedSignals > 0) {
+        const percent = Math.round((planFinancial.completedSignals / planFinancial.totalSignals) * 100);
+        return {
+          percent,
+          status: statusFromPercent(percent),
+          source: "plan",
+          detail: planFinancial.completedSignals + " of " + planFinancial.totalSignals + " financial-model signals are present in the completed business plan. Missing: " + planFinancial.missing.join(", ") + ".",
+        };
+      }
       return { percent: 0, status: "not-started", source: "none", detail: "No saved financial projection model found." };
     }
     const inputs = [data.initial, data.monthly, data.revenue];
@@ -459,8 +493,26 @@ function browserSignal(stepId: StepId, tracker?: TrackerResponse): StepSignal {
   }
 
   if (stepId === "market-research") {
+    const planMarket = database?.businessPlans.evidence?.market;
     const data = readJson("market-research-state");
     if (!data || typeof data !== "object") {
+      if (planMarket?.satisfied) {
+        return {
+          percent: 100,
+          status: "completed",
+          source: "plan",
+          detail: "The completed business plan contains " + planMarket.completedSignals + " of " + planMarket.totalSignals + " substantive market-validation signals, including a demand signal.",
+          completed: true,
+        };
+      }
+      if (planMarket && planMarket.completedSignals > 0) {
+        return {
+          percent: planMarket.percent,
+          status: statusFromPercent(planMarket.percent),
+          source: "plan",
+          detail: planMarket.completedSignals + " of " + planMarket.totalSignals + " market-validation signals are present in the completed business plan. Missing: " + planMarket.missing.join(", ") + ".",
+        };
+      }
       return { percent: 0, status: "not-started", source: "none", detail: "No saved market research workspace found." };
     }
     const activities = Array.isArray(data.activities) ? data.activities : [];
@@ -668,6 +720,7 @@ function statusBadgeClass(status: StepStatus): string {
 
 function sourceLabel(source: ProgressSource): string {
   if (source === "database") return "Verified from production records";
+  if (source === "plan") return "Evidence found in completed business plan";
   if (source === "synced") return "Synced to your account";
   if (source === "browser") return "Detected from saved tool data";
   if (source === "manual") return "Confirmed by you";
@@ -817,10 +870,13 @@ export default function ProgressTracker() {
   const nextRequiredStep = requiredSteps.find((step) => step.status !== "completed") || null;
   const currentPhase = PHASES.find((phase) => phase.steps.some((step) => step.required && stepMap.get(step.id)?.status !== "completed")) || PHASES[PHASES.length - 1];
 
-  const phaseProgress = useCallback((phase: JourneyPhase) => {
-    const phaseSteps = phase.steps.map((step) => stepMap.get(step.id)).filter(Boolean) as ResolvedStep[];
-    if (!phaseSteps.length) return 0;
-    return Math.round(phaseSteps.reduce((sum, step) => sum + (step.status === "completed" ? 100 : step.percent), 0) / phaseSteps.length);
+  const phaseRequiredReadiness = useCallback((phase: JourneyPhase) => {
+    const required = phase.steps
+      .filter((step) => step.required)
+      .map((step) => stepMap.get(step.id))
+      .filter(Boolean) as ResolvedStep[];
+    if (!required.length) return 100;
+    return Math.round(required.reduce((sum, step) => sum + (step.status === "completed" ? 100 : step.percent), 0) / required.length);
   }, [stepMap]);
 
   const refreshEverything = async () => {
@@ -880,7 +936,7 @@ export default function ProgressTracker() {
             <CardContent className="p-5">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Overall journey</div>
               <div className="mt-2 text-3xl font-bold">{overallProgress}%</div>
-              <Progress value={overallProgress} className="mt-3 h-2" />
+              <Progress value={overallProgress} className="mt-3 h-2 bg-slate-200 dark:bg-slate-800" />
               <p className="mt-2 text-xs text-muted-foreground">All required and optional journey steps.</p>
             </CardContent>
           </Card>
@@ -888,7 +944,7 @@ export default function ProgressTracker() {
             <CardContent className="p-5">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Required readiness</div>
               <div className="mt-2 text-3xl font-bold">{requiredReadiness}%</div>
-              <Progress value={requiredReadiness} className="mt-3 h-2" />
+              <Progress value={requiredReadiness} className="mt-3 h-2 bg-slate-200 dark:bg-slate-800" />
               <p className="mt-2 text-xs text-muted-foreground">{requiredCompleted} of {requiredSteps.length} required milestones complete.</p>
             </CardContent>
           </Card>
@@ -937,10 +993,12 @@ export default function ProgressTracker() {
 
         <div className="space-y-5">
           {PHASES.map((phase) => {
-            const percent = phaseProgress(phase);
             const phaseSteps = phase.steps.map((step) => stepMap.get(step.id)!).filter(Boolean);
             const phaseRequired = phaseSteps.filter((step) => step.required);
+            const phaseOptional = phaseSteps.filter((step) => !step.required);
+            const requiredPercent = phaseRequiredReadiness(phase);
             const phaseRequiredComplete = phaseRequired.filter((step) => step.status === "completed").length;
+            const phaseOptionalComplete = phaseOptional.filter((step) => step.status === "completed").length;
             return (
               <Card key={phase.id}>
                 <CardHeader className="pb-3">
@@ -950,9 +1008,12 @@ export default function ProgressTracker() {
                       <CardDescription className="mt-1">{phase.description}</CardDescription>
                     </div>
                     <div className="min-w-[170px] text-right">
-                      <div className="text-sm font-bold">{percent}% phase progress</div>
-                      <Progress value={percent} className="mt-2 h-2" />
-                      <div className="mt-1 text-[11px] text-muted-foreground">{phaseRequiredComplete}/{phaseRequired.length} required complete</div>
+                      <div className="text-sm font-bold">{requiredPercent}% required readiness</div>
+                      <Progress value={requiredPercent} className="mt-2 h-2 bg-slate-200 dark:bg-slate-800" />
+                      <div className="mt-1 text-[11px] text-muted-foreground">
+                        {phaseRequiredComplete}/{phaseRequired.length} required complete
+                        {phaseOptional.length ? " · " + phaseOptionalComplete + "/" + phaseOptional.length + " optional complete" : ""}
+                      </div>
                     </div>
                   </div>
                 </CardHeader>
@@ -979,7 +1040,7 @@ export default function ProgressTracker() {
                                   <span className="font-medium">{sourceLabel(step.source)}</span>
                                   <span className="font-semibold">{step.status === "completed" ? 100 : step.percent}%</span>
                                 </div>
-                                <Progress value={step.status === "completed" ? 100 : step.percent} className="h-1.5" />
+                                <Progress value={step.status === "completed" ? 100 : step.percent} className="h-1.5 bg-slate-200 dark:bg-slate-800" />
                                 <p className="mt-1.5 text-xs text-muted-foreground">{step.detail}</p>
                                 {step.updatedAt && step.source !== "database" && <p className="mt-1 text-[11px] text-muted-foreground">Account progress updated {formatDate(step.updatedAt)}</p>}
                               </div>
@@ -1035,6 +1096,7 @@ export default function ProgressTracker() {
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <p><strong className="text-foreground">Production records</strong> are used for generated business plans, required document uploads, interview sessions and final document reviews.</p>
+              <p><strong className="text-foreground">Business-plan evidence</strong> can satisfy a milestone only when the stored structured fields meet that milestone's explicit evidence rules. It does not automatically complete separate diagnostics such as Innovation Score.</p>
               <p><strong className="text-foreground">Saved tool data</strong> is interpreted using each tool's real data structure rather than a single generic completion flag.</p>
               <p><strong className="text-foreground">Account sync</strong> migrates compatible browser-only progress into the existing server-side progress store, so it can be recovered on another device after it has been synced.</p>
               <p><strong className="text-foreground">Readiness</strong> requires every required milestone to be complete. Optional tasks improve preparation but never block the next required step.</p>
