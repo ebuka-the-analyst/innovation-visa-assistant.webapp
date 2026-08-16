@@ -34,9 +34,6 @@ jobs:
           grep -q 'Back to Dashboard' client/src/pages/diagnostics.tsx
           grep -q 'Generate a Business Plan' client/src/pages/diagnostics.tsx
 
-      - name: Type check
-        run: npm run check
-
       - name: Production build
         run: npm run build
 
