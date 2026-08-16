@@ -25,6 +25,7 @@ async function main() {
       'cover_designs',
       'blog_posts',
       'floating_feedback',
+      'system_settings',
     ];
 
     const tableResult = await client.query(
@@ -64,8 +65,19 @@ async function main() {
          WHERE table_schema = 'public' AND table_name = 'users'`,
       );
       const names = new Set(userColumns.rows.map((row) => row.column_name));
-      for (const column of ['id', 'plan_credits', 'bonus_credits']) {
+      for (const column of ['id', 'plan_credits', 'bonus_credits', 'subscription_tier']) {
         if (!names.has(column)) blockers.push(`users.${column} is required`);
+      }
+    }
+
+    if (existingTables.has('system_settings')) {
+      const settingColumns = await client.query(
+        `SELECT column_name FROM information_schema.columns
+         WHERE table_schema = 'public' AND table_name = 'system_settings'`,
+      );
+      const names = new Set(settingColumns.rows.map((row) => row.column_name));
+      for (const column of ['key', 'value']) {
+        if (!names.has(column)) blockers.push(`system_settings.${column} is required`);
       }
     }
 
@@ -105,6 +117,37 @@ async function main() {
          AND table_name IN ('business_plan_generation_jobs', 'business_plan_generation_sections', 'app_schema_migrations')`,
     );
     observations.alreadyPresentGenerationTables = generationTables.rows.map((row) => row.table_name).sort();
+
+    const toolPlatformExpectations = {
+      tool_case_contexts: ['user_id', 'revision', 'context_data', 'evidence_refs'],
+      tool_case_context_events: ['id', 'user_id', 'revision', 'new_sha256'],
+      tool_runs: ['id', 'user_id', 'tool_id', 'status', 'registry_version', 'input_snapshot'],
+      tool_run_events: ['id', 'run_id', 'user_id', 'event_type', 'payload'],
+    };
+    const existingToolTablesResult = await client.query(
+      `SELECT table_name FROM information_schema.tables
+       WHERE table_schema = 'public' AND table_name = ANY($1::text[])`,
+      [Object.keys(toolPlatformExpectations)],
+    );
+    const existingToolTables = existingToolTablesResult.rows.map((row) => row.table_name).sort();
+    observations.alreadyPresentToolPlatformTables = existingToolTables;
+
+    for (const table of existingToolTables) {
+      const columns = await client.query(
+        `SELECT column_name FROM information_schema.columns
+         WHERE table_schema = 'public' AND table_name = $1`,
+        [table],
+      );
+      const names = new Set(columns.rows.map((row) => row.column_name));
+      const missing = toolPlatformExpectations[table].filter((column) => !names.has(column));
+      if (missing.length > 0) {
+        blockers.push(
+          `Existing ${table} conflicts with the production tool-platform migration; missing columns: ${missing.join(', ')}`,
+        );
+      } else {
+        warnings.push(`${table} already exists and will be verified after migration`);
+      }
+    }
 
     const oldRuntimeObjects = [
       ['cover_designs', 'logo_element'],
