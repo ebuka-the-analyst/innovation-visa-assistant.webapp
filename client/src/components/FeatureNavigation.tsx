@@ -3,10 +3,11 @@ import { ChevronRight, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface FeatureNavProps {
-  currentPage: "questionnaire" | "endorser-comparison" | "document-organizer" | "interview-prep" | "expert-booking" | "rejection-analysis" | "settlement-planning";
+  currentPage: "progress" | "questionnaire" | "endorser-comparison" | "document-organizer" | "interview-prep" | "expert-booking" | "rejection-analysis" | "settlement-planning";
 }
 
 const featureFlow = [
+  { key: "progress", label: "Progress Tracker", route: "/progress", phase: 1 },
   { key: "questionnaire", label: "Business Plan", route: "/questionnaire", phase: 1 },
   { key: "endorser-comparison", label: "Choose Endorser", route: "/endorser-comparison", phase: 1 },
   { key: "document-organizer", label: "Organize Documents", route: "/document-organizer", phase: 2 },
@@ -37,24 +38,28 @@ export default function FeatureNavigation({ currentPage }: FeatureNavProps) {
       {/* Progress Steps - Scrollable container with visible scrollbar */}
       <div className="overflow-x-auto pb-3 -mx-4 px-4 scrollbar-thin">
         <div className="flex items-center gap-2 min-w-max">
-          {featureFlow.map((feature, idx) => (
-            <div key={feature.key} className="flex items-center gap-2 flex-shrink-0">
-              <Link href={feature.route}>
-                <Button
-                  variant={idx === currentIndex ? "default" : idx < currentIndex ? "outline" : "ghost"}
-                  size="sm"
-                  className="whitespace-nowrap text-xs"
-                  data-testid={`button-nav-${feature.key}`}
-                >
-                  {idx < currentIndex && "✓ "}
-                  {feature.label}
-                </Button>
-              </Link>
-              {idx < featureFlow.length - 1 && (
-                <ChevronRight className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-              )}
-            </div>
-          ))}
+          {featureFlow.map((feature, idx) => {
+            const isCurrent = idx === currentIndex;
+            const isPriorJourneyStep = idx < currentIndex && feature.key !== "progress";
+            return (
+              <div key={feature.key} className="flex items-center gap-2 flex-shrink-0">
+                <Link href={feature.route}>
+                  <Button
+                    variant={isCurrent ? "default" : isPriorJourneyStep ? "outline" : "ghost"}
+                    size="sm"
+                    className="whitespace-nowrap text-xs"
+                    data-testid={`button-nav-${feature.key}`}
+                  >
+                    {isPriorJourneyStep && "✓ "}
+                    {feature.label}
+                  </Button>
+                </Link>
+                {idx < featureFlow.length - 1 && (
+                  <ChevronRight className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 

@@ -2,6 +2,7 @@ const express = require("express");
 
 require("./customer360Admin.cjs");
 require("./customer360LocationContext.cjs");
+require("./progressTracker.cjs");
 
 if (process.env.NODE_ENV === "production") {
   require("./creditReconciliationReset.cjs");
