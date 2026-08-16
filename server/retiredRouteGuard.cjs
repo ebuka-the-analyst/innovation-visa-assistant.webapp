@@ -6,6 +6,7 @@ require("./customer360Admin.cjs");
 require("./customer360LocationContext.cjs");
 require("./progressTracker.cjs");
 require("./toolPlatform.cjs");
+require("./eligibilityEngine.cjs");
 
 const RETIRED_CREDIT_GRANT_ROUTE = "/api/credits/grant-tier-credits";
 const RETIRED_DISPUTE_EVIDENCE_ROUTE = "/dispute-evidence";
