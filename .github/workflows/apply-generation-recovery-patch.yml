@@ -1,0 +1,178 @@
+name: Apply generation recovery patch
+
+on:
+  push:
+    branches:
+      - fix/recover-interrupted-generation
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          ref: fix/recover-interrupted-generation
+
+      - name: Patch generation worker recovery
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('server/routes.ts')
+          text = path.read_text(encoding='utf-8')
+
+          if 'activeBusinessPlanGenerations' in text:
+              print('Generation recovery patch already present')
+              raise SystemExit(0)
+
+          old_worker = '''      generateBusinessPlan(planId).catch((error) => {
+                console.error("Background generation error:", error);
+                storage.updateBusinessPlan(planId, {
+                  status: "failed",
+                  currentGenerationStage: "Generation failed",
+                });
+              });'''
+
+          # Be tolerant of indentation in the existing route block.
+          worker_pattern = re.compile(
+              r'\n\s*generateBusinessPlan\(planId\)\.catch\(\(error\) => \{\s*'
+              r'console\.error\("Background generation error:", error\);\s*'
+              r'storage\.updateBusinessPlan\(planId, \{\s*'
+              r'status: "failed",\s*'
+              r'currentGenerationStage: "Generation failed",\s*'
+              r'\}\);\s*'
+              r'\}\);'
+          )
+          text, worker_count = worker_pattern.subn('\n\n      startBusinessPlanGeneration(planId);', text, count=1)
+          if worker_count != 1:
+              raise SystemExit(f'Expected to replace one detached generation block, replaced {worker_count}')
+
+          register_marker = 'export async function registerRoutes(app: Express): Promise<Server> {\n'
+          if register_marker not in text:
+              raise SystemExit('registerRoutes marker not found')
+
+          helper = '''export async function registerRoutes(app: Express): Promise<Server> {
+            // Business-plan generation currently runs inside this Node process. Track live
+            // workers so a plan left as `generating` after a process restart can be recovered
+            // without charging the user again or starting duplicate work in this process.
+            const activeBusinessPlanGenerations = new Set<string>();
+            const generationRecoveryNotBefore = Date.now() + 30_000;
+
+            const startBusinessPlanGeneration = (planId: string): boolean => {
+              if (activeBusinessPlanGenerations.has(planId)) return false;
+
+              activeBusinessPlanGenerations.add(planId);
+              void generateBusinessPlan(planId)
+                .catch(async (error) => {
+                  console.error("Background generation error:", error);
+                  await storage.updateBusinessPlan(planId, {
+                    status: "failed",
+                    currentGenerationStage: "Generation failed",
+                  });
+                })
+                .finally(() => {
+                  activeBusinessPlanGenerations.delete(planId);
+                });
+
+              return true;
+            };
+'''
+          text = text.replace(register_marker, helper, 1)
+
+          status_guard = '''      if (
+                businessPlan.status === "generating" ||
+                businessPlan.status === "completed"
+              ) {'''
+          status_guard_replacement = '''      if (
+                businessPlan.status === "generating" &&
+                !activeBusinessPlanGenerations.has(planId) &&
+                Date.now() >= generationRecoveryNotBefore
+              ) {
+                console.warn(
+                  `[Generation Recovery] Restarting orphaned generation for plan ${planId}`,
+                );
+                startBusinessPlanGeneration(planId);
+                return res.json({
+                  success: true,
+                  message: "Interrupted generation resumed",
+                  status: "generating",
+                  recovered: true,
+                });
+              }
+
+              if (
+                businessPlan.status === "generating" ||
+                businessPlan.status === "completed"
+              ) {'''
+          if status_guard not in text:
+              raise SystemExit('generate/start status guard not found')
+          text = text.replace(status_guard, status_guard_replacement, 1)
+
+          response_marker = '''      res.json({
+                status: businessPlan.status,
+                generatedContent: businessPlan.generatedContent,
+                pdfUrl: businessPlan.pdfUrl,
+                tier: businessPlan.tier,
+                businessName: businessPlan.businessName,
+                currentGenerationStage: businessPlan.currentGenerationStage,
+              });'''
+          response_replacement = '''      if (
+                businessPlan.status === "generating" &&
+                !activeBusinessPlanGenerations.has(planId) &&
+                Date.now() >= generationRecoveryNotBefore
+              ) {
+                console.warn(
+                  `[Generation Recovery] Status poll found orphaned generation for plan ${planId}; restarting worker`,
+                );
+                startBusinessPlanGeneration(planId);
+              }
+
+              res.json({
+                status: businessPlan.status,
+                generatedContent: businessPlan.generatedContent,
+                pdfUrl: businessPlan.pdfUrl,
+                tier: businessPlan.tier,
+                businessName: businessPlan.businessName,
+                currentGenerationStage: businessPlan.currentGenerationStage,
+              });'''
+          if response_marker not in text:
+              raise SystemExit('generate/status response marker not found')
+          text = text.replace(response_marker, response_replacement, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Check diff
+        run: |
+          git diff --check
+          git diff -- server/routes.ts
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Production build
+        run: npm run build
+
+      - name: Commit validated patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/routes.ts
+          if git diff --cached --quiet; then
+            echo "No source changes to commit"
+            exit 0
+          fi
+          git commit -m "Fix interrupted business plan generation recovery"
+          git push origin HEAD:fix/recover-interrupted-generation
