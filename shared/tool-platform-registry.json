@@ -1,8 +1,13 @@
 {
   "schemaVersion": 1,
-  "registryVersion": "2026-08-16.1",
+  "registryVersion": "2026-08-16.2",
   "defaultRunnableStatus": "beta",
-  "productionToolIds": [],
+  "productionToolIds": [
+    "app-req-checker",
+    "eligibility-validator",
+    "jurisdiction-checker",
+    "points-calculator"
+  ],
   "disabledListedToolIds": [
     "10-year-vision",
     "ai-risk-mitigator",
@@ -39,7 +44,7 @@
   "policyBaseline": {
     "jurisdiction": "UK",
     "route": "Innovator Founder",
-    "version": "2026-08-16",
+    "version": "2026-08-03",
     "sourcePolicy": "official-source-required"
   }
 }
