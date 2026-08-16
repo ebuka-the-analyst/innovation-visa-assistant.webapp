@@ -124,7 +124,7 @@ async function handleGetProgress(req, res) {
       ),
       safeQuery(
         db,
-        `SELECT id, business_name, status, pdf_url, created_at, updated_at
+        `SELECT id, business_name, status, pdf_url, created_at
            FROM business_plans
           WHERE user_id = $1
           ORDER BY created_at DESC`,
