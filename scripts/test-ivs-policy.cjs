@@ -110,7 +110,6 @@ function strongInput() {
   const text = JSON.stringify(assessIVS(strongInput())).toLowerCase();
   assert.equal(text.includes('success probability'), false);
   assert.equal(text.includes('guaranteed'), false);
-  assert.equal(text.includes('minimum runway is assumed'), false, 'wording should state no minimum runway is assumed without claiming one');
   assert.ok(text.includes('no home office minimum runway is assumed'));
 }
 
