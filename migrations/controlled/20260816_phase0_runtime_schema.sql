@@ -378,3 +378,31 @@ CREATE TABLE IF NOT EXISTS user_notification_dismissals (
   CONSTRAINT user_notification_dismissals_user_notification_unique
     UNIQUE (user_id, notification_id)
 );
+
+-- Existing runtime-created copies may already have the same uniqueness rule under
+-- an automatically generated constraint name. Detect by constrained columns rather
+-- than by name so we do not create duplicate unique constraints.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+      FROM pg_constraint c
+      JOIN pg_class t ON t.oid = c.conrelid
+      JOIN pg_namespace n ON n.oid = t.relnamespace
+     WHERE n.nspname = 'public'
+       AND t.relname = 'user_notification_dismissals'
+       AND c.contype = 'u'
+       AND (
+         SELECT array_agg(a.attname ORDER BY key_position.ordinality)
+           FROM unnest(c.conkey) WITH ORDINALITY AS key_position(attnum, ordinality)
+           JOIN pg_attribute a
+             ON a.attrelid = c.conrelid
+            AND a.attnum = key_position.attnum
+       ) = ARRAY['user_id', 'notification_id']::name[]
+  ) THEN
+    ALTER TABLE user_notification_dismissals
+      ADD CONSTRAINT user_notification_dismissals_user_notification_unique
+      UNIQUE (user_id, notification_id);
+  END IF;
+END
+$$;
