@@ -47,12 +47,15 @@ jobs:
       - name: Commit validated source changes
         shell: bash
         run: |
-          if git diff --quiet -- server/index.ts shared/schema.ts server/scripts/verify-app-schema.cjs .github/workflows/pr-build.yml; then
+          # The deterministic helper also prepares the permanent PR-workflow guard.
+          # Do not push workflow-file changes from this temporary builder token.
+          git restore .github/workflows/pr-build.yml
+          if git diff --quiet -- server/index.ts shared/schema.ts server/scripts/verify-app-schema.cjs; then
             echo "Runtime wiring already applied"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add server/index.ts shared/schema.ts server/scripts/verify-app-schema.cjs .github/workflows/pr-build.yml
+          git add server/index.ts shared/schema.ts server/scripts/verify-app-schema.cjs
           git commit -m "Apply revision runtime wiring"
           git push origin HEAD:feat/production-plan-revision-foundation
