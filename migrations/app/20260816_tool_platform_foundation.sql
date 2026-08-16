@@ -13,6 +13,21 @@ CREATE TABLE IF NOT EXISTS tool_case_contexts (
   CONSTRAINT ck_tool_case_contexts_evidence_array CHECK (jsonb_typeof(evidence_refs) = 'array')
 );
 
+CREATE TABLE IF NOT EXISTS tool_case_context_events (
+  id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::varchar,
+  user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  revision INTEGER NOT NULL,
+  previous_sha256 VARCHAR(64),
+  new_sha256 VARCHAR(64) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT ck_tool_case_context_events_revision CHECK (revision > 0)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_tool_case_context_events_user_revision
+  ON tool_case_context_events(user_id, revision);
+CREATE INDEX IF NOT EXISTS idx_tool_case_context_events_user_created
+  ON tool_case_context_events(user_id, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS tool_runs (
   id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::varchar,
   user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
