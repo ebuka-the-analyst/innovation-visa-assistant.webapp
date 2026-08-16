@@ -32,6 +32,10 @@ async function main() {
       'export_analytics',
       'conversion_funnel_events',
       'hourly_activity_aggregates',
+      'tool_case_contexts',
+      'tool_case_context_events',
+      'tool_runs',
+      'tool_run_events',
     ];
     const tables = await client.query(
       `SELECT table_name FROM information_schema.tables
@@ -51,6 +55,20 @@ async function main() {
       ['business_plan_generation_jobs', 'heartbeat_at'],
       ['business_plan_generation_sections', 'content_sha256'],
       ['business_plan_generation_sections', 'generator_version'],
+      ['tool_case_contexts', 'revision'],
+      ['tool_case_contexts', 'context_data'],
+      ['tool_case_contexts', 'evidence_refs'],
+      ['tool_case_context_events', 'new_sha256'],
+      ['tool_runs', 'tool_id'],
+      ['tool_runs', 'registry_version'],
+      ['tool_runs', 'policy_version'],
+      ['tool_runs', 'case_context_revision'],
+      ['tool_runs', 'input_snapshot'],
+      ['tool_runs', 'evidence_refs'],
+      ['tool_runs', 'result_sha256'],
+      ['tool_runs', 'validation_state'],
+      ['tool_run_events', 'event_type'],
+      ['tool_run_events', 'payload'],
     ];
     for (const [table, column] of requiredColumns) {
       const result = await client.query(
@@ -67,6 +85,14 @@ async function main() {
       'ux_business_plan_generation_sections_plan_index',
       'idx_business_plan_generation_sections_plan',
       'ux_credit_transactions_generation_plan_once',
+      'ux_tool_case_context_events_user_revision',
+      'idx_tool_case_context_events_user_created',
+      'ux_tool_runs_user_tool_client_key',
+      'idx_tool_runs_user_created',
+      'idx_tool_runs_user_tool_created',
+      'idx_tool_runs_status_created',
+      'idx_tool_run_events_run_created',
+      'idx_tool_run_events_user_created',
     ];
     const indexes = await client.query(
       `SELECT indexname FROM pg_indexes
@@ -75,6 +101,31 @@ async function main() {
     );
     const presentIndexes = new Set(indexes.rows.map((row) => row.indexname));
     for (const index of requiredIndexes) if (!presentIndexes.has(index)) failures.push(`Missing required index: ${index}`);
+
+    const requiredCascadeForeignKeys = [
+      ['tool_case_contexts', 'user_id'],
+      ['tool_case_context_events', 'user_id'],
+      ['tool_runs', 'user_id'],
+      ['tool_run_events', 'run_id'],
+      ['tool_run_events', 'user_id'],
+    ];
+    for (const [table, column] of requiredCascadeForeignKeys) {
+      const fk = await client.query(
+        `SELECT 1
+           FROM pg_constraint c
+           JOIN pg_class t ON t.oid = c.conrelid
+           JOIN pg_namespace n ON n.oid = t.relnamespace
+           JOIN unnest(c.conkey) WITH ORDINALITY AS key(attnum, ord) ON true
+           JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = key.attnum
+          WHERE n.nspname = 'public'
+            AND t.relname = $1
+            AND c.contype = 'f'
+            AND a.attname = $2
+            AND c.confdeltype = 'c'`,
+        [table, column],
+      );
+      if (fk.rowCount < 1) failures.push(`Missing ON DELETE CASCADE foreign key: ${table}.${column}`);
+    }
 
     const duplicateCharges = await client.query(
       `SELECT reference_id, COUNT(*)::int AS count
@@ -121,6 +172,17 @@ async function main() {
        GROUP BY status ORDER BY status`,
     );
     observations.generationJobsByStatus = jobs.rows;
+
+    const toolRuns = await client.query(
+      `SELECT status, validation_state, COUNT(*)::int AS count
+         FROM tool_runs
+        GROUP BY status, validation_state
+        ORDER BY status, validation_state`,
+    );
+    observations.toolRunsByStatus = toolRuns.rows;
+
+    const caseContexts = await client.query('SELECT COUNT(*)::int AS count FROM tool_case_contexts');
+    observations.toolCaseContextCount = caseContexts.rows[0]?.count || 0;
 
     await client.query('ROLLBACK');
     console.log(JSON.stringify({ ok: failures.length === 0, failures, observations }, null, 2));
