@@ -1,3 +1,5 @@
+require("./securityStartupGuard.cjs");
+
 const express = require("express");
 
 require("./customer360Admin.cjs");
