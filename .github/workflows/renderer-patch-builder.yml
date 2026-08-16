@@ -1,0 +1,51 @@
+name: Renderer Patch Builder
+
+on:
+  push:
+    branches:
+      - fix/business-plan-renderer-full-width
+    paths:
+      - scripts/patch-business-plan-renderer.cjs
+      - .github/workflows/renderer-patch-builder.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-validate:
+    if: ${{ !contains(github.event.head_commit.message, 'Apply business plan renderer full-width repair') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/business-plan-renderer-full-width
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Apply deterministic renderer patch
+        run: node scripts/patch-business-plan-renderer.cjs
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Production build
+        run: npm run build
+
+      - name: Commit validated renderer change
+        shell: bash
+        run: |
+          if git diff --quiet -- server/pdf.ts; then
+            echo "Renderer already patched"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/pdf.ts
+          git commit -m "Apply business plan renderer full-width repair"
+          git push origin HEAD:fix/business-plan-renderer-full-width
