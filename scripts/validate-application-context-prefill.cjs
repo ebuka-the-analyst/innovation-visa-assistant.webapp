@@ -108,9 +108,8 @@ requireMarker(draftClient, "writeChain = writeChain.then", "Questionnaire draft 
 requireMarker(main, 'import { initQuestionnaireDraftSync } from "./lib/questionnaireDraftSync";', "Questionnaire draft hydration is not bootstrapped");
 requireMarker(main, "await initQuestionnaireDraftSync();", "Questionnaire draft must hydrate before React reads the local auto-save");
 
-requireMarker(routes, 'app.get("/api/business-plans"', "Saved-plan picker source route is missing");
-requireMarker(routes, "if (!req.isAuthenticated() || !req.user)", "Saved-plan picker source must require authentication");
-requireMarker(routes, "storage.getUserBusinessPlans(req.user.id)", "Saved-plan picker source must be scoped to the authenticated user");
+requireMarker(routes, 'app.get("/api/business-plans", isAuthenticated', "Saved-plan picker source route must use the established authentication middleware");
+requireMarker(routes, "storage.getUserBusinessPlans(user.id)", "Saved-plan picker source must be scoped to the authenticated user");
 
 requireMarker(fieldEnhancer, 'fetch("/api/ai/questionnaire-enhance"', "Field enhancer must continue to use the established AI enhancement route");
 requireMarker(fieldEnhancer, "SpeechRecognitionAPI", "Field enhancer must retain speech input support");
