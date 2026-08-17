@@ -90,7 +90,7 @@ function Badge({ className, variant, children, ...props }: BadgeProps) {
 
   return (
     <div
-      className={cn(badgeVariants({ variant }), statusClass, className)}
+      className={cn(badgeVariants({ variant }), className, statusClass)}
       {...props}
     >
       {children}
