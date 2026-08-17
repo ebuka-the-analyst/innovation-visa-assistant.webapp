@@ -3,8 +3,8 @@ import { documentReviews } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { qwen, QWEN_MODELS } from "../qwenClient";
 
-const MAX_DOCUMENT_CHARS = 180_000;
-const CHUNK_TARGET_CHARS = 14_000;
+const MAX_DOCUMENT_CHARS = 600_000;
+const CHUNK_TARGET_CHARS = 18_000;
 
 const DOCUMENT_REVIEW_PROMPT = `You are reviewing the QUALITY AND PREPARATION of a UK Innovator Founder application document.
 
