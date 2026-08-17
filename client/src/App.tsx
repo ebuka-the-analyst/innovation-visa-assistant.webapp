@@ -7,6 +7,7 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/comp
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ContextualDocumentNotice } from "@/components/ContextualDocumentNotice";
 import ThemeToggle from "@/components/ThemeToggle";
 import { VoicePermissionProvider } from "@/contexts/VoicePermissionContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -141,7 +142,6 @@ const SIDEBAR_HIDDEN_ROUTES = ["/", "/uk", "/login", "/signup", "/verify-email",
 const SIDEBAR_HIDDEN_PREFIXES = ["/blog/"];
 const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard"];
 
-// Optimized loading skeleton
 function PageLoadingSkeleton() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
@@ -254,8 +254,8 @@ function HeaderNavTabs() {
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} /> {/* UK landing as main homepage until global launch */}
-      <Route path="/v2" component={GlobalLanding} /> {/* Hidden V2 - Global landing with globe for future launch */}
+      <Route path="/" component={Home} />
+      <Route path="/v2" component={GlobalLanding} />
       <Route path="/uk" component={Home} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
@@ -292,8 +292,6 @@ function Router() {
       <Route path="/admin/blog" component={BlogDashboard} />
       <Route path="/admin/seo-strategy" component={SeoStrategy} />
       <Route path="/partner-dashboard" component={PartnerDashboard} />
-      
-      {/* OMNI Routes */}
       <Route path="/oracle-supervisor" component={EntitledOracleSupervisor} />
       <Route path="/founder-autopilot" component={EntitledFounderAutopilot} />
       <Route path="/neural-twin" component={EntitledNeuralTwin} />
@@ -330,18 +328,13 @@ function Router() {
       <Route path="/progress" component={Progress} />
       <Route path="/support" component={Support} />
       <Route path="/documents" component={Documents} />
-      
-      {/* SEO Landing Pages */}
       <Route path="/guide/ultimate-uk-innovator-founder-visa-guide" component={UltimateGuide} />
       <Route path="/about" component={AboutPage} />
       <Route path="/endorsing-bodies" component={EndorsingBodiesPage} />
       <Route path="/eligibility" component={EligibilityPage} />
       <Route path="/business-plan-template" component={BusinessPlanTemplatePage} />
-      
-      {/* Blog */}
       <Route path="/blog" component={BlogPage} />
       <Route path="/blog/:slug" component={BlogPostPage} />
-      
       <Route component={NotFound} />
     </Switch>
   );
@@ -373,7 +366,6 @@ function UnifiedHeader() {
   return (
     <header className="flex items-center gap-2 md:gap-4 px-2 md:px-4 py-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
       <AnimatedSidebarTrigger />
-      
       <Link href="/">
         <div className="isolate z-[9999] mix-blend-normal bg-transparent cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-header-logo">
           <div className="logo-container overflow-hidden flex items-center">
@@ -382,23 +374,16 @@ function UnifiedHeader() {
           </div>
         </div>
       </Link>
-      
       <div className="h-6 w-px bg-border mx-1 hidden md:block" />
-      
       <HeaderNavTabs />
-      
       <div className="flex-1" />
-      
       {user && (
         <span className="hidden lg:block text-sm text-muted-foreground">
           {user.firstName || user.displayName || user.email}
         </span>
       )}
-      
       {user && <NotificationBell />}
-      
       <ThemeToggle />
-      
       {user && (
         <Button
           variant="outline"
@@ -453,7 +438,6 @@ function AppLayout() {
     );
   }
 
-  // Admin pages have their own sidebar layout
   if (isCustomLayoutRoute) {
     return (
       <ProtectedRoute>
@@ -472,6 +456,7 @@ function AppLayout() {
           <div className="flex flex-col flex-1 w-full">
             <UnifiedHeader />
             <main className="flex-1 overflow-auto">
+              <ContextualDocumentNotice />
               <Suspense fallback={<PageLoadingSkeleton />}>
                 <Router />
               </Suspense>
@@ -483,20 +468,16 @@ function AppLayout() {
   );
 }
 
-// Google Analytics + Page Tracking component
 function AnalyticsProvider({ children }: { children: React.ReactNode }) {
-  useInitGA(); // Initialize Google Analytics on app load
-  useAnalytics(); // Track page views on route changes
-  useScrollTracking(); // Track scroll depth for engagement metrics
+  useInitGA();
+  useAnalytics();
+  useScrollTracking();
   return <>{children}</>;
 }
 
-// Wrapper to conditionally show country-specific widgets (not on global landing)
 function CountryWidgets() {
   const [location] = useLocation();
-  // Only show ToolsChronographWheel on country pages, not on global landing
-  // ChatBot shows everywhere
-  const isGlobalLanding = location === "/v2"; // Only /v2 is global landing now
+  const isGlobalLanding = location === "/v2";
   
   return (
     <Suspense fallback={null}>

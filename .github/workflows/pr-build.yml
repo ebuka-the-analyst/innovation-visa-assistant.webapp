@@ -83,5 +83,8 @@ jobs:
       - name: Validate evidence-aware Progress Tracker
         run: node scripts/validate-evidence-aware-progress-tracker.cjs
 
+      - name: Validate application document workspace
+        run: node scripts/validate-application-document-workspace.cjs
+
       - name: Production build
         run: npm run build
