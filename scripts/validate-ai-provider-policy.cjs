@@ -27,7 +27,7 @@ const retiredOperationalPatterns = [
   new RegExp('QW' + 'EN_API_KEY', 'i'),
   new RegExp('QW' + 'EN_MODELS', 'i'),
   new RegExp('\\b' + retiredName + '\\s*\\.', 'i'),
-  new RegExp('["\\'`]' + retiredName + '-', 'i'),
+  new RegExp("[\\\"'`]" + retiredName + '-', 'i'),
   new RegExp('dash' + 'scope', 'i'),
   new RegExp('ali' + 'yuncs', 'i'),
 ];
