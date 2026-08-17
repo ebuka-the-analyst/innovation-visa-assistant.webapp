@@ -87,5 +87,8 @@ jobs:
       - name: Validate application document workspace
         run: node scripts/validate-application-document-workspace.cjs
 
+      - name: Validate founder portfolio account sync
+        run: node scripts/validate-founder-portfolio-sync.cjs
+
       - name: Production build
         run: npm run build
