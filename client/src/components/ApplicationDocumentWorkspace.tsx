@@ -35,6 +35,12 @@ type ArtefactStatus = "ready" | "in-progress" | "not-started";
 type TrackerSnapshot = {
   storedProgress?: Array<{ stepId: string; completionPercent?: number; status?: string }>;
   authoritative?: {
+    businessPlans?: {
+      evidence?: {
+        financial?: { satisfied?: boolean };
+        market?: { satisfied?: boolean };
+      } | null;
+    };
     documents?: { completionPercent?: number; requiredUploaded?: number; requiredTotal?: number };
     interviews?: { completed?: number; total?: number };
     documentReviews?: { completed?: number; total?: number };
@@ -100,6 +106,16 @@ async function getTracker(): Promise<TrackerSnapshot> {
   return response.json();
 }
 
+async function getBusinessPlans(): Promise<BusinessPlan[]> {
+  const response = await apiRequest("GET", "/api/dashboard/plans");
+  return response.json();
+}
+
+async function getUploadedDocuments(): Promise<UserDocument[]> {
+  const response = await apiRequest("GET", "/api/documents");
+  return response.json();
+}
+
 export function ApplicationDocumentWorkspace({
   businessPlans,
   uploadedDocuments,
@@ -125,13 +141,16 @@ export function ApplicationDocumentWorkspace({
   const hasAnyPlan = businessPlans.length > 0;
   const financialReady = hasRun(...FINANCIAL_TOOL_IDS);
   const ivsReady = hasRun(...IVS_TOOL_IDS);
-  const marketReady = hasRun("market-research") || completedPlan;
+  const marketReady = hasRun("market-research") || Boolean(tracker?.authoritative?.businessPlans?.evidence?.market?.satisfied);
   const pitchReady = hasRun("pitch-coach");
   const complianceReady = hasRun("compliance-checker");
   const eligibilityReady = hasRun("eligibility-validator", "app-req-checker", "points-calculator", "jurisdiction-checker");
   const uploadedEvidence = uploadedDocuments.length > 0;
-  const founderEvidence = uploadedDocuments.some((doc) => ["education", "employment"].includes(doc.category));
-  const tractionEvidence = uploadedDocuments.some((doc) => ["endorsement", "other"].includes(doc.category)) || hasRun("market-research");
+  const founderEvidence = uploadedDocuments.some(
+    (doc) => ["education", "employment"].includes(doc.category) && doc.status === "verified",
+  );
+  const founderEvidenceStarted = uploadedDocuments.some((doc) => ["education", "employment"].includes(doc.category));
+  const tractionEvidenceStarted = uploadedDocuments.some((doc) => ["endorsement", "other"].includes(doc.category));
   const interviewsReady = Number(tracker?.authoritative?.interviews?.completed || 0) > 0;
   const reviewReady = Number(tracker?.authoritative?.documentReviews?.completed || 0) > 0;
   const requiredDocumentsComplete = Number(tracker?.authoritative?.documents?.completionPercent || 0) >= 100;
@@ -149,7 +168,7 @@ export function ApplicationDocumentWorkspace({
       category: "Business & Strategy",
       title: "Business Plan",
       description: "The live generated plan, including its accepted revisions and exportable PDF.",
-      href: completedPlan ? "/documents#generated-business-plans" : "/questionnaire",
+      href: completedPlan ? "/documents" : "/questionnaire",
       icon: FileText,
       status: completedPlan ? "ready" : hasAnyPlan ? "in-progress" : "not-started",
       source: completedPlan ? "Generated business plan" : "Business Plan workflow",
@@ -161,8 +180,8 @@ export function ApplicationDocumentWorkspace({
       description: "Market size, customer evidence and demand signals used across the application.",
       href: "/tools/market-research",
       icon: BarChart3,
-      status: marketReady ? "ready" : "not-started",
-      source: hasRun("market-research") ? "Saved Market Research run" : completedPlan ? "Completed business plan evidence" : "Market Research tool",
+      status: marketReady ? "ready" : completedPlan ? "in-progress" : "not-started",
+      source: marketReady ? "Structured market evidence" : completedPlan ? "Plan exists; market evidence still needs verification" : "Market Research tool",
     },
     {
       id: "competitor-analysis",
@@ -171,8 +190,8 @@ export function ApplicationDocumentWorkspace({
       description: "Named competitors, differentiation and defensibility evidence.",
       href: "/tools/market-research",
       icon: Target,
-      status: marketReady ? "ready" : "not-started",
-      source: marketReady ? "Market and plan evidence" : "Market Research tool",
+      status: marketReady ? "ready" : completedPlan ? "in-progress" : "not-started",
+      source: marketReady ? "Structured market evidence" : "Market Research tool",
     },
     {
       id: "financial-model",
@@ -228,7 +247,7 @@ export function ApplicationDocumentWorkspace({
       id: "evidence-register",
       category: "Evidence",
       title: "Evidence Register",
-      description: "A live index connecting uploaded evidence, saved assessments and application milestones.",
+      description: "A live index connecting uploaded evidence, saved assessments and application milestones without treating an upload alone as proof.",
       href: "/progress",
       icon: ListChecks,
       status: evidenceRegisterStatus,
@@ -241,8 +260,8 @@ export function ApplicationDocumentWorkspace({
       description: "Qualifications, employment history, founder achievements and delivery capability evidence.",
       href: "/founder-portfolio",
       icon: UserRoundCheck,
-      status: founderEvidence || completedPlan ? "ready" : uploadedEvidence ? "in-progress" : "not-started",
-      source: founderEvidence ? "Uploaded founder evidence" : completedPlan ? "Completed business plan profile" : "Founder Portfolio",
+      status: founderEvidence ? "ready" : founderEvidenceStarted || completedPlan ? "in-progress" : "not-started",
+      source: founderEvidence ? "Verified founder documents" : founderEvidenceStarted ? "Uploaded documents require verification" : completedPlan ? "Founder profile exists; external evidence still required" : "Founder Portfolio",
     },
     {
       id: "customer-validation",
@@ -251,18 +270,18 @@ export function ApplicationDocumentWorkspace({
       description: "Customer interviews, willingness-to-pay, pilots and other real demand evidence.",
       href: "/commercial-validation",
       icon: MessageSquareText,
-      status: marketReady || tractionEvidence ? "ready" : "not-started",
-      source: marketReady || tractionEvidence ? "Saved market / traction evidence" : "Commercial Validation",
+      status: marketReady ? "ready" : completedPlan ? "in-progress" : "not-started",
+      source: marketReady ? "Structured demand evidence" : completedPlan ? "Plan claims require supporting customer evidence" : "Commercial Validation",
     },
     {
       id: "traction",
       category: "Evidence",
       title: "LOIs, Contracts & Traction Evidence",
-      description: "External proof such as signed LOIs, contracts, pilot metrics and transaction evidence.",
+      description: "External proof such as signed LOIs, contracts, pilot metrics and transaction evidence. Uploaded files are not automatically counted as verified evidence.",
       href: "/traction-evidence",
       icon: Handshake,
-      status: tractionEvidence ? "ready" : uploadedEvidence ? "in-progress" : "not-started",
-      source: tractionEvidence ? "Saved/uploaded traction evidence" : "Traction Evidence",
+      status: tractionEvidenceStarted ? "in-progress" : "not-started",
+      source: tractionEvidenceStarted ? "Uploaded candidates require evidence mapping/verification" : "Traction Evidence",
     },
     {
       id: "master-dossier",
@@ -272,7 +291,7 @@ export function ApplicationDocumentWorkspace({
       href: "/progress",
       icon: FolderKanban,
       status: dossierReady ? "ready" : dossierStarted ? "in-progress" : "not-started",
-      source: dossierReady ? "Core endorsement components available" : "Built progressively from your workspace",
+      source: dossierReady ? "Core platform-generated components available" : "Built progressively from your workspace",
     },
     {
       id: "pitch-material",
@@ -338,7 +357,7 @@ export function ApplicationDocumentWorkspace({
       id: "read-me",
       category: "Final Pack",
       title: "Read Me First",
-      description: "Explains what is platform-generated, what must come from a real external source and what remains missing.",
+      description: "Explains what is platform-generated, what must come from a genuine external source and what remains missing.",
       href: "/progress",
       icon: FileText,
       status: "ready",
@@ -359,7 +378,7 @@ export function ApplicationDocumentWorkspace({
               Application Document Workspace
             </CardTitle>
             <CardDescription className="mt-1 max-w-3xl">
-              Platform-generated outputs are organised here by purpose. The same information also remains available inside the tool or workflow that created it, so My Documents is the master library rather than a duplicate file dump.
+              Platform-generated outputs are organised here by purpose. The same information remains available inside the tool or workflow that created it, so My Documents is the master library rather than a duplicate file dump.
             </CardDescription>
           </div>
           <Badge variant="outline" className="w-fit">
@@ -409,5 +428,26 @@ export function ApplicationDocumentWorkspace({
         })}
       </CardContent>
     </Card>
+  );
+}
+
+export function ApplicationDocumentWorkspaceContainer() {
+  const { data: businessPlans = [] } = useQuery<BusinessPlan[]>({
+    queryKey: ["/api/dashboard/plans"],
+    queryFn: getBusinessPlans,
+    retry: false,
+    staleTime: 15_000,
+  });
+  const { data: uploadedDocuments = [] } = useQuery<UserDocument[]>({
+    queryKey: ["/api/documents"],
+    queryFn: getUploadedDocuments,
+    retry: false,
+    staleTime: 15_000,
+  });
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 pt-6 md:px-6">
+      <ApplicationDocumentWorkspace businessPlans={businessPlans} uploadedDocuments={uploadedDocuments} />
+    </div>
   );
 }
