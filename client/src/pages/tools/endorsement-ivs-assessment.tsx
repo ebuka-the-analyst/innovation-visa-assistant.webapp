@@ -17,6 +17,7 @@ import {
   useApplicationContextPrefill,
   useToolRunHistory,
   type ApplicationBusinessPlan,
+  type ApplicationFinancialModelPrefill,
 } from "@/hooks/useToolPlatform";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -112,7 +113,7 @@ type FormState = {
   competitorDifferentiation: string;
   replicationBarriers: string;
   innovationCoreToBusiness: boolean;
-  innovationDeliveryModel: "primarily_in_house" | "mixed" | "primarily_outsourced";
+  innovationDeliveryModel: "" | "primarily_in_house" | "mixed" | "primarily_outsourced";
   internalInnovationOwnership: string;
   founderCapability: string;
   fundingAvailableGbp: string;
@@ -190,6 +191,7 @@ type AutofillSummary = {
   restoredPreviousReview: boolean;
   previousReviewSkippedForDifferentBusiness: boolean;
   availableDocumentCount: number;
+  reusedFinancialModel: boolean;
 };
 
 const EVIDENCE_OPTIONS: Array<{ value: EvidenceType; label: string }> = [
@@ -232,8 +234,8 @@ function initialForm(): FormState {
     uniqueSellingProposition: "",
     competitorDifferentiation: "",
     replicationBarriers: "",
-    innovationCoreToBusiness: true,
-    innovationDeliveryModel: "primarily_in_house",
+    innovationCoreToBusiness: false,
+    innovationDeliveryModel: "",
     internalInnovationOwnership: "",
     founderCapability: "",
     fundingAvailableGbp: "",
@@ -280,6 +282,12 @@ function buildBusinessPlanPrefill(plan: ApplicationBusinessPlan): Partial<FormSt
       ["Business vision", plan.vision],
     ], 5000),
     marketNeed: limited(text(plan.problem), 4000),
+    targetCustomers: joined([
+      ["Market sizing / customer segments", plan.marketSize],
+      ["Customer discovery segments", plan.customerInterviews],
+      ["Existing customers / users", plan.existingCustomers],
+      ["Willingness-to-pay segments", plan.willingnessToPay],
+    ], 2500),
     uniqueSellingProposition: limited(text(plan.uniqueness), 3000),
     competitorDifferentiation: joined([
       ["Named competitors / alternatives", plan.competitors],
@@ -290,6 +298,12 @@ function buildBusinessPlanPrefill(plan: ApplicationBusinessPlan): Partial<FormSt
       ["Data architecture", plan.dataArchitecture],
       ["AI / technical methodology", plan.aiMethodology],
       ["Technology stack", plan.techStack],
+    ], 3000),
+    internalInnovationOwnership: joined([
+      ["Existing IP / ownership statements", plan.patentStatus],
+      ["Founder delivery projects", plan.relevantProjects],
+      ["Architecture decisions", plan.dataArchitecture],
+      ["Technical methodology", plan.aiMethodology],
     ], 3000),
     founderCapability: joined([
       ["Relevant experience", plan.experience],
@@ -337,6 +351,21 @@ function buildBusinessPlanPrefill(plan: ApplicationBusinessPlan): Partial<FormSt
       ["Customer interviews", plan.customerInterviews],
       ["Willingness-to-pay evidence", plan.willingnessToPay],
     ], 3500),
+  };
+}
+
+function buildFinancialModelPrefill(financialModel: ApplicationFinancialModelPrefill | null): Partial<FormState> {
+  if (!financialModel) return {};
+  return {
+    minimumSetupCostGbp: Number.isFinite(financialModel.oneTimeSetupCostGbp)
+      ? String(financialModel.oneTimeSetupCostGbp)
+      : "",
+    monthlyOperatingCostGbp: Number.isFinite(financialModel.monthlyOperatingCostGbp)
+      ? String(financialModel.monthlyOperatingCostGbp)
+      : "",
+    forecastMonthlyRevenueGbp: Number.isFinite(financialModel.startingMonthlyRevenueGbp)
+      ? String(financialModel.startingMonthlyRevenueGbp)
+      : "",
   };
 }
 
@@ -491,12 +520,13 @@ export default function EndorsementIVSAssessment() {
 
     const plan = data.businessPlan;
     const planPrefill = plan ? buildBusinessPlanPrefill(plan) : {};
+    const financialPrefill = buildFinancialModelPrefill(data.relatedToolData?.financialModel || null);
     const previousSnapshot = data.previousToolRun?.inputSnapshot || null;
     const previousMatches = previousSnapshot ? previousReviewMatchesPlan(previousSnapshot, plan) : false;
     const previousPrefill = previousSnapshot && previousMatches
       ? buildPreviousReviewPrefill(previousSnapshot)
       : {};
-    const combinedPrefill: Partial<FormState> = { ...planPrefill, ...previousPrefill };
+    const combinedPrefill: Partial<FormState> = { ...planPrefill, ...financialPrefill, ...previousPrefill };
 
     setForm((current) => mergeIntoUntouchedForm(current, combinedPrefill));
     autofillAppliedForTool.current = toolId;
@@ -506,6 +536,7 @@ export default function EndorsementIVSAssessment() {
       restoredPreviousReview: Boolean(previousSnapshot && previousMatches),
       previousReviewSkippedForDifferentBusiness: Boolean(previousSnapshot && plan && !previousMatches),
       availableDocumentCount: data.documents.length,
+      reusedFinancialModel: Object.values(financialPrefill).some(meaningfulCandidateValue),
     });
   }, [applicationPrefill.data, toolId]);
 
@@ -517,14 +548,20 @@ export default function EndorsementIVSAssessment() {
     mutationFn: async (): Promise<AssessmentResponse> => {
       if (!runKey.current) runKey.current = crypto.randomUUID();
       const numberValue = (value: string, label: string, integer = false) => {
-        const parsed = Number(value || 0);
+        const cleaned = value.trim();
+        if (!cleaned) throw new Error(`Enter a valid ${label}.`);
+        const parsed = Number(cleaned);
         if (!Number.isFinite(parsed) || parsed < 0 || (integer && !Number.isInteger(parsed))) throw new Error(`Enter a valid ${label}.`);
         return parsed;
       };
+      if (!form.innovationDeliveryModel) {
+        throw new Error("Select how the core innovation is delivered.");
+      }
       const cleanEvidence = form.evidenceItems.filter((item) => item.title.trim() || item.summary.trim());
       const response = await apiRequest("POST", "/api/endorsement/ivs-assess", {
         ...form,
         toolId,
+        innovationDeliveryModel: form.innovationDeliveryModel,
         fundingAvailableGbp: numberValue(form.fundingAvailableGbp, "funding amount"),
         minimumSetupCostGbp: numberValue(form.minimumSetupCostGbp, "minimum setup cost"),
         monthlyOperatingCostGbp: numberValue(form.monthlyOperatingCostGbp, "monthly operating cost"),
@@ -585,6 +622,9 @@ export default function EndorsementIVSAssessment() {
                   : `Relevant fields were filled from ${autofillSummary.businessName ? `${autofillSummary.businessName}'s` : "your"} completed business plan.`}
                 {" "}Only fields with a reliable saved source are reused; unsupported answers remain for you to confirm.
               </p>
+              {autofillSummary.reusedFinancialModel && (
+                <p>Exact setup-cost, operating-cost and starting-revenue inputs were also reused from your latest completed financial tool for this same business.</p>
+              )}
               {autofillSummary.availableDocumentCount > 0 && (
                 <p>
                   {autofillSummary.availableDocumentCount} uploaded document{autofillSummary.availableDocumentCount === 1 ? " is" : "s are"} available in your account. They are not automatically counted as evidence until their contents are mapped to a specific claim.
@@ -618,7 +658,7 @@ export default function EndorsementIVSAssessment() {
             <TextField label="Differentiation from named competitors" value={form.competitorDifferentiation} onChange={(v) => update("competitorDifferentiation", v)} placeholder="Compare against real alternatives, not generic claims." />
             <TextField label="Barriers to replication" value={form.replicationBarriers} onChange={(v) => update("replicationBarriers", v)} placeholder="IP, proprietary data, R&D, know-how, integrations, network effects or other barriers." />
             <label className="flex items-start gap-3 rounded-lg border p-3 cursor-pointer"><Checkbox checked={form.innovationCoreToBusiness} onCheckedChange={(v) => update("innovationCoreToBusiness", v === true)} /><span><span className="block text-sm font-medium">Innovation is core to the business proposition</span><span className="block text-xs text-muted-foreground mt-1">The business would materially change if the innovation were removed.</span></span></label>
-            <div className="space-y-2"><Label>How is the core innovation delivered?</Label><Select value={form.innovationDeliveryModel} onValueChange={(v: FormState["innovationDeliveryModel"]) => update("innovationDeliveryModel", v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="primarily_in_house">Primarily within the founding business</SelectItem><SelectItem value="mixed">Mixed internal and specialist external delivery</SelectItem><SelectItem value="primarily_outsourced">Primarily outsourced to a third party</SelectItem></SelectContent></Select></div>
+            <div className="space-y-2"><Label>How is the core innovation delivered?</Label><Select value={form.innovationDeliveryModel} onValueChange={(v: FormState["innovationDeliveryModel"]) => update("innovationDeliveryModel", v)}><SelectTrigger><SelectValue placeholder="Select delivery model" /></SelectTrigger><SelectContent><SelectItem value="primarily_in_house">Primarily within the founding business</SelectItem><SelectItem value="mixed">Mixed internal and specialist external delivery</SelectItem><SelectItem value="primarily_outsourced">Primarily outsourced to a third party</SelectItem></SelectContent></Select></div>
             <TextField label="Internal ownership of the innovation" value={form.internalInnovationOwnership} onChange={(v) => update("internalInnovationOwnership", v)} placeholder="Who owns product, R&D, architecture, technical decisions and implementation?" />
           </FieldCard>
 
