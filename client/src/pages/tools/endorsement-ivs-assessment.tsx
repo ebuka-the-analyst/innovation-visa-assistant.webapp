@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "wouter";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -19,6 +19,7 @@ import {
   type ApplicationBusinessPlan,
   type ApplicationFinancialModelPrefill,
 } from "@/hooks/useToolPlatform";
+import { FieldEnhancer } from "@/components/FieldEnhancer";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 
 const SUPPORTED_TOOLS = new Set([
   "endorsement-readiness",
@@ -129,6 +129,10 @@ type FormState = {
   scalingOperations: string;
   projectionsResearchBasis: string;
   evidenceItems: EvidenceItem[];
+};
+
+type SavedBusinessPlan = ApplicationBusinessPlan & {
+  isDemoData?: boolean;
 };
 
 type CheckResult = {
@@ -481,11 +485,36 @@ function FieldCard({ title, description, children }: { title: string; descriptio
   );
 }
 
-function TextField({ label, value, onChange, placeholder, rows = 3 }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string; rows?: number }) {
+function safeFieldName(label: string): string {
+  return `ivs-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`;
+}
+
+function TextField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  rows = 3,
+  fieldName,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  rows?: number;
+  fieldName?: string;
+}) {
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
-      <Textarea value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} rows={rows} />
+      <FieldEnhancer
+        fieldName={fieldName || safeFieldName(label)}
+        fieldLabel={label}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className={rows <= 2 ? "min-h-[100px]" : "min-h-[150px]"}
+      />
     </div>
   );
 }
@@ -509,10 +538,38 @@ export default function EndorsementIVSAssessment() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [result, setResult] = useState<AssessmentResponse | null>(null);
   const [autofillSummary, setAutofillSummary] = useState<AutofillSummary | null>(null);
+  const [selectedBusinessPlanId, setSelectedBusinessPlanId] = useState("");
   const runKey = useRef<string | null>(null);
   const autofillAppliedForTool = useRef<string | null>(null);
   const history = useToolRunHistory(toolId, true);
   const applicationPrefill = useApplicationContextPrefill(toolId, true);
+  const savedPlansQuery = useQuery<SavedBusinessPlan[]>({
+    queryKey: ["/api/business-plans", "ivs-plan-picker"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/business-plans");
+      return response.json();
+    },
+    staleTime: 30_000,
+    retry: false,
+  });
+
+  const savedBusinessPlans = useMemo(() => {
+    return (savedPlansQuery.data || [])
+      .filter((plan) => plan && plan.id && text(plan.businessName) && String(plan.status || "").toLowerCase() === "completed" && !plan.isDemoData)
+      .sort((left, right) => {
+        const rightTime = right.createdAt ? Date.parse(right.createdAt) : 0;
+        const leftTime = left.createdAt ? Date.parse(left.createdAt) : 0;
+        return rightTime - leftTime;
+      });
+  }, [savedPlansQuery.data]);
+
+  useEffect(() => {
+    const currentPlanId = applicationPrefill.data?.businessPlan?.id;
+    if (!currentPlanId || selectedBusinessPlanId) return;
+    if (savedBusinessPlans.some((plan) => plan.id === currentPlanId)) {
+      setSelectedBusinessPlanId(currentPlanId);
+    }
+  }, [applicationPrefill.data?.businessPlan?.id, savedBusinessPlans, selectedBusinessPlanId]);
 
   useEffect(() => {
     const data = applicationPrefill.data;
@@ -542,6 +599,36 @@ export default function EndorsementIVSAssessment() {
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const loadSelectedBusinessPlan = () => {
+    const selectedPlan = savedBusinessPlans.find((plan) => plan.id === selectedBusinessPlanId);
+    if (!selectedPlan) return;
+
+    const data = applicationPrefill.data;
+    const isCurrentContextPlan = Boolean(data?.businessPlan?.id && data.businessPlan.id === selectedPlan.id);
+    const planPrefill = buildBusinessPlanPrefill(selectedPlan);
+    const financialPrefill = isCurrentContextPlan
+      ? buildFinancialModelPrefill(data?.relatedToolData?.financialModel || null)
+      : {};
+    const previousSnapshot = isCurrentContextPlan ? data?.previousToolRun?.inputSnapshot || null : null;
+    const previousMatches = previousSnapshot ? previousReviewMatchesPlan(previousSnapshot, selectedPlan) : false;
+    const previousPrefill = previousSnapshot && previousMatches
+      ? buildPreviousReviewPrefill(previousSnapshot)
+      : {};
+    const combinedPrefill: Partial<FormState> = { ...planPrefill, ...financialPrefill, ...previousPrefill };
+
+    setForm(mergeIntoUntouchedForm(initialForm(), combinedPrefill));
+    setResult(null);
+    runKey.current = null;
+    setAutofillSummary({
+      businessName: selectedPlan.businessName,
+      reusableFieldCount: Object.values(combinedPrefill).filter(meaningfulCandidateValue).length,
+      restoredPreviousReview: Boolean(previousSnapshot && previousMatches),
+      previousReviewSkippedForDifferentBusiness: false,
+      availableDocumentCount: data?.documents.length || 0,
+      reusedFinancialModel: Object.values(financialPrefill).some(meaningfulCandidateValue),
+    });
   };
 
   const mutation = useMutation({
@@ -610,6 +697,37 @@ export default function EndorsementIVSAssessment() {
             It measures declared evidence coverage against official endorsement principles and identifies gaps, red flags and assessor questions. Only an authorised endorsing body can decide whether a business is Innovative, Viable and Scalable.
           </AlertDescription>
         </Alert>
+
+        <Card className="border-primary/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Load saved business plan</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Choose one of your completed business plans to repopulate this working assessment. Loading a plan replaces the current form values but does not change the saved business plan itself.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-3 md:flex-row md:items-end">
+              <div className="flex-1 space-y-2">
+                <Label>Saved business plan</Label>
+                <Select value={selectedBusinessPlanId} onValueChange={setSelectedBusinessPlanId} disabled={savedPlansQuery.isLoading || savedBusinessPlans.length === 0}>
+                  <SelectTrigger data-testid="select-ivs-business-plan"><SelectValue placeholder={savedPlansQuery.isLoading ? "Loading saved plans..." : "Select a completed business plan"} /></SelectTrigger>
+                  <SelectContent>
+                    {savedBusinessPlans.map((plan) => (
+                      <SelectItem key={plan.id} value={plan.id}>
+                        {plan.businessName}{plan.industry ? ` · ${plan.industry}` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="button" variant="outline" onClick={loadSelectedBusinessPlan} disabled={!selectedBusinessPlanId || savedPlansQuery.isLoading} data-testid="btn-load-ivs-business-plan">
+                <RefreshCcw className="h-4 w-4 mr-2" />Load this business plan
+              </Button>
+            </div>
+            {savedPlansQuery.isError && <p className="mt-3 text-sm text-destructive">Saved business plans could not be loaded. Your current assessment is unaffected.</p>}
+            {!savedPlansQuery.isLoading && !savedPlansQuery.isError && savedBusinessPlans.length === 0 && <p className="mt-3 text-sm text-muted-foreground">No completed saved business plans are available yet.</p>}
+          </CardContent>
+        </Card>
 
         {autofillSummary && autofillSummary.reusableFieldCount > 0 && (
           <Alert className="border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/20">
@@ -685,12 +803,12 @@ export default function EndorsementIVSAssessment() {
             <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground"><FileSearch className="h-8 w-8 mx-auto mb-2" />Add evidence such as competitor analysis, prototype, customer interviews, financial model, founder CV and expansion plans.</div>
           ) : (
             <div className="space-y-3">{form.evidenceItems.map((item, index) => (
-              <Card key={item.id}><CardContent className="p-4 space-y-3"><div className="flex items-center justify-between"><div className="font-medium text-sm">Evidence {index + 1}</div><Button size="icon" variant="ghost" onClick={() => update("evidenceItems", form.evidenceItems.filter((entry) => entry.id !== item.id))}><Trash2 className="h-4 w-4" /></Button></div><div className="grid gap-3 md:grid-cols-2"><div className="space-y-2"><Label>Evidence type</Label><Select value={item.type} onValueChange={(value: EvidenceType) => update("evidenceItems", form.evidenceItems.map((entry) => entry.id === item.id ? { ...entry, type: value } : entry))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{EVIDENCE_OPTIONS.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label>Title</Label><Input value={item.title} onChange={(e) => update("evidenceItems", form.evidenceItems.map((entry) => entry.id === item.id ? { ...entry, title: e.target.value } : entry))} placeholder="e.g. Competitor feature matrix" /></div></div><TextField label="What this evidence proves" value={item.summary} onChange={(value) => update("evidenceItems", form.evidenceItems.map((entry) => entry.id === item.id ? { ...entry, summary: value } : entry))} rows={2} /><div className="space-y-2"><Label>Stable reference (optional)</Label><Input value={item.reference} onChange={(e) => update("evidenceItems", form.evidenceItems.map((entry) => entry.id === item.id ? { ...entry, reference: e.target.value } : entry))} placeholder="document:abc123 or file/path" /><p className="text-xs text-muted-foreground">Use a document ID/path, not confidential content.</p></div></CardContent></Card>
+              <Card key={item.id}><CardContent className="p-4 space-y-3"><div className="flex items-center justify-between"><div className="font-medium text-sm">Evidence {index + 1}</div><Button size="icon" variant="ghost" onClick={() => update("evidenceItems", form.evidenceItems.filter((entry) => entry.id !== item.id))}><Trash2 className="h-4 w-4" /></Button></div><div className="grid gap-3 md:grid-cols-2"><div className="space-y-2"><Label>Evidence type</Label><Select value={item.type} onValueChange={(value: EvidenceType) => update("evidenceItems", form.evidenceItems.map((entry) => entry.id === item.id ? { ...entry, type: value } : entry))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{EVIDENCE_OPTIONS.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select></div><div className="space-y-2"><Label>Title</Label><Input value={item.title} onChange={(e) => update("evidenceItems", form.evidenceItems.map((entry) => entry.id === item.id ? { ...entry, title: e.target.value } : entry))} placeholder="e.g. Competitor feature matrix" /></div></div><TextField fieldName={`ivs-evidence-${index + 1}-summary`} label="What this evidence proves" value={item.summary} onChange={(value) => update("evidenceItems", form.evidenceItems.map((entry) => entry.id === item.id ? { ...entry, summary: value } : entry))} rows={2} /><div className="space-y-2"><Label>Stable reference (optional)</Label><Input value={item.reference} onChange={(e) => update("evidenceItems", form.evidenceItems.map((entry) => entry.id === item.id ? { ...entry, reference: e.target.value } : entry))} placeholder="document:abc123 or file/path" /><p className="text-xs text-muted-foreground">Use a document ID/path, not confidential content.</p></div></CardContent></Card>
             ))}</div>
           )}
         </FieldCard>
 
-        <Card className="border-2 border-primary/20"><CardContent className="p-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><div><div className="font-semibold">Run endorser-readiness assessment</div><p className="text-sm text-muted-foreground">Server-side, durable and versioned. The result shows evidence coverage, not a fabricated visa success percentage.</p>{mutation.error && <p className="text-sm text-destructive mt-2">{mutation.error.message}</p>}</div><div className="flex gap-2"><Button variant="outline" onClick={() => { setForm(initialForm()); setResult(null); setAutofillSummary(null); runKey.current = null; }} disabled={mutation.isPending}><RefreshCcw className="h-4 w-4 mr-2" />Reset</Button><Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>{mutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-2" />}{mutation.isPending ? "Assessing..." : "Assess readiness"}</Button></div></CardContent></Card>
+        <Card className="border-2 border-primary/20"><CardContent className="p-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><div><div className="font-semibold">Run endorser-readiness assessment</div><p className="text-sm text-muted-foreground">Server-side, durable and versioned. The result shows evidence coverage, not a fabricated visa success percentage.</p>{mutation.error && <p className="text-sm text-destructive mt-2">{mutation.error.message}</p>}</div><div className="flex gap-2"><Button variant="outline" onClick={() => { setForm(initialForm()); setResult(null); setAutofillSummary(null); runKey.current = null; }} disabled={mutation.isPending} data-testid="btn-clear-ivs-form"><RefreshCcw className="h-4 w-4 mr-2" />Clear form</Button><Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>{mutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-2" />}{mutation.isPending ? "Assessing..." : "Assess readiness"}</Button></div></CardContent></Card>
 
         {result && (
           <section id="ivs-results" className="scroll-mt-4 space-y-5">
