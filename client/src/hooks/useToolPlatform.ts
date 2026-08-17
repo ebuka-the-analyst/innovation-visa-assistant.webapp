@@ -24,9 +24,9 @@ export interface ApplicationBusinessPlan {
   uniqueness: string;
   technology: string;
   experience: string;
-  funding: number | null;
+  funding: number;
   revenue: string;
-  jobCreation: number | null;
+  jobCreation: number;
   expansion: string;
   vision: string;
   innovationStage: string;
@@ -44,9 +44,9 @@ export interface ApplicationBusinessPlan {
   founderAchievements: string;
   relevantProjects: string;
   monthlyProjections: string;
-  customerAcquisitionCost: number | null;
-  lifetimeValue: number | null;
-  paybackPeriod: number | null;
+  customerAcquisitionCost: number;
+  lifetimeValue: number;
+  paybackPeriod: number;
   fundingSources: string;
   detailedCosts: string;
   competitors: string;
@@ -57,7 +57,7 @@ export interface ApplicationBusinessPlan {
   marketSize: string;
   regulatoryRequirements: string;
   complianceTimeline: string;
-  complianceBudget: number | null;
+  complianceBudget: number;
   hiringPlan: string;
   specificRegions: string;
   internationalPlan: string | null;
