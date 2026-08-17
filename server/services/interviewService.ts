@@ -1,7 +1,10 @@
+import OpenAI from "openai";
 import { db } from "../db";
 import { interviewSessions } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
-import { qwen, QWEN_MODELS } from "../qwenClient";
+import { BUSINESS_PLAN_MODEL } from "../aiModelConfig";
+
+const managedInterviewAI = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
 
 const INTERVIEW_QUESTIONS: Record<string, string[]> = {
   endorser_pitch: [
@@ -42,7 +45,7 @@ const INTERVIEW_QUESTIONS: Record<string, string[]> = {
   ]
 };
 
-const FEEDBACK_PROMPT = `You are an expert interview coach evaluating responses for UK Innovator Founder Visa interviews. 
+const FEEDBACK_PROMPT = `You are an expert interview coach evaluating responses for UK Innovator Founder Visa interviews.
 Analyze the candidate's response and provide constructive feedback.
 
 EVALUATION CRITERIA:
@@ -64,21 +67,25 @@ RESPONSE FORMAT (JSON):
 
 Be encouraging but honest. Focus on visa-specific requirements.`;
 
+function parseJsonResponse(value: string): any {
+  const cleaned = value.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+  return JSON.parse(cleaned);
+}
+
 async function getAIResponse(systemPrompt: string, userPrompt: string): Promise<any> {
-  console.log("[InterviewService] Calling Qwen");
-  const response = await qwen.chat.completions.create({
-    model: QWEN_MODELS.plus,
+  console.log("[InterviewService] Calling managed AI provider");
+  const response: any = await managedInterviewAI.chat.completions.create({
+    model: BUSINESS_PLAN_MODEL as any,
     messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt }
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
     ],
-    response_format: { type: 'json_object' },
+    response_format: { type: "json_object" },
     max_tokens: 1000,
-    temperature: 0.7
-  });
-  const content = response.choices[0]?.message?.content;
-  if (!content) throw new Error("No response from Qwen");
-  return JSON.parse(content);
+  } as any);
+  const content = String(response.choices?.[0]?.message?.content || "").trim();
+  if (!content) throw new Error("Managed AI provider returned no interview feedback");
+  return parseJsonResponse(content);
 }
 
 export interface CreateSessionInput {
@@ -88,11 +95,7 @@ export interface CreateSessionInput {
 
 export async function createInterviewSession(input: CreateSessionInput) {
   const questions = INTERVIEW_QUESTIONS[input.sessionType] || INTERVIEW_QUESTIONS.endorser_pitch;
-  
-  const selectedQuestions = questions
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 5);
-
+  const selectedQuestions = questions.sort(() => Math.random() - 0.5).slice(0, 5);
   const [session] = await db.insert(interviewSessions).values({
     userId: input.userId,
     sessionType: input.sessionType,
@@ -100,37 +103,24 @@ export async function createInterviewSession(input: CreateSessionInput) {
     questionsAsked: selectedQuestions,
     responsesGiven: []
   }).returning();
-
   return session;
 }
 
 export async function submitResponse(sessionId: string, questionIndex: number, response: string) {
   const [session] = await db.select().from(interviewSessions).where(eq(interviewSessions.id, sessionId));
   if (!session) throw new Error('Session not found');
-
   const questions = session.questionsAsked as string[];
   const responses = (session.responsesGiven as any[] || []);
-  
-  responses[questionIndex] = {
-    question: questions[questionIndex],
-    response,
-    submittedAt: new Date().toISOString()
-  };
-
-  await db.update(interviewSessions)
-    .set({ responsesGiven: responses })
-    .where(eq(interviewSessions.id, sessionId));
-
+  responses[questionIndex] = { question: questions[questionIndex], response, submittedAt: new Date().toISOString() };
+  await db.update(interviewSessions).set({ responsesGiven: responses }).where(eq(interviewSessions.id, sessionId));
   return { success: true, questionIndex };
 }
 
 export async function completeInterviewSession(sessionId: string) {
   const [session] = await db.select().from(interviewSessions).where(eq(interviewSessions.id, sessionId));
   if (!session) throw new Error('Session not found');
-
   const questions = session.questionsAsked as string[];
   const responses = session.responsesGiven as any[];
-  
   let totalConfidence = 0;
   let totalClarity = 0;
   let totalContent = 0;
@@ -140,36 +130,25 @@ export async function completeInterviewSession(sessionId: string) {
 
   for (let i = 0; i < responses.length; i++) {
     if (!responses[i]?.response) continue;
-
     try {
       const userPrompt = `Interview Type: ${session.sessionType}\nQuestion: ${questions[i]}\n\nCandidate's Response:\n${responses[i].response}`;
       const feedback = await getAIResponse(FEEDBACK_PROMPT, userPrompt);
-      
       totalConfidence += feedback.confidenceScore || 0;
       totalClarity += feedback.clarityScore || 0;
       totalContent += feedback.contentScore || 0;
-      
       if (feedback.strengths) allStrengths.push(...feedback.strengths);
       if (feedback.improvements) allImprovements.push(...feedback.improvements);
-      
-      detailedFeedback.push({
-        questionIndex: i,
-        question: questions[i],
-        response: responses[i].response,
-        ...feedback
-      });
+      detailedFeedback.push({ questionIndex: i, question: questions[i], response: responses[i].response, ...feedback });
     } catch (error) {
       console.error(`Failed to analyze response ${i}:`, error);
     }
   }
 
   const answeredCount = responses.filter(r => r?.response).length || 1;
-  
   const avgConfidence = Math.round(totalConfidence / answeredCount);
   const avgClarity = Math.round(totalClarity / answeredCount);
   const avgContent = Math.round(totalContent / answeredCount);
   const overallScore = Math.round((avgConfidence + avgClarity + avgContent) / 3);
-
   const uniqueStrengths = Array.from(new Set(allStrengths)).slice(0, 5);
   const uniqueImprovements = Array.from(new Set(allImprovements)).slice(0, 5);
 
@@ -188,7 +167,6 @@ export async function completeInterviewSession(sessionId: string) {
     })
     .where(eq(interviewSessions.id, sessionId))
     .returning();
-
   return updated;
 }
 
@@ -198,35 +176,17 @@ export async function getInterviewSession(sessionId: string) {
 }
 
 export async function getUserInterviewSessions(userId: string) {
-  return db.select()
-    .from(interviewSessions)
-    .where(eq(interviewSessions.userId, userId))
-    .orderBy(desc(interviewSessions.createdAt));
+  return db.select().from(interviewSessions).where(eq(interviewSessions.userId, userId)).orderBy(desc(interviewSessions.createdAt));
 }
 
 export async function getInterviewStats(userId: string) {
   const sessions = await getUserInterviewSessions(userId);
   const completed = sessions.filter(s => s.status === 'completed');
-
   if (completed.length === 0) {
-    return {
-      totalSessions: sessions.length,
-      completedSessions: 0,
-      averageScore: 0,
-      bestScore: 0,
-      totalPracticeTime: 0
-    };
+    return { totalSessions: sessions.length, completedSessions: 0, averageScore: 0, bestScore: 0, totalPracticeTime: 0 };
   }
-
   const avgScore = completed.reduce((sum, s) => sum + (s.overallScore || 0), 0) / completed.length;
   const bestScore = Math.max(...completed.map(s => s.overallScore || 0));
   const totalTime = completed.reduce((sum, s) => sum + (s.duration || 0), 0);
-
-  return {
-    totalSessions: sessions.length,
-    completedSessions: completed.length,
-    averageScore: Math.round(avgScore),
-    bestScore,
-    totalPracticeTime: totalTime
-  };
+  return { totalSessions: sessions.length, completedSessions: completed.length, averageScore: Math.round(avgScore), bestScore, totalPracticeTime: totalTime };
 }

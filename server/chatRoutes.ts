@@ -1,7 +1,9 @@
 import { Router, Request, Response } from "express";
-import { qwen, QWEN_MODELS } from "./qwenClient";
+import OpenAI from "openai";
+import { BUSINESS_PLAN_MODEL } from "./aiModelConfig";
 
 const router = Router();
+const managedAI = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
 
 const SYSTEM_PROMPT = `You are the Innovator Founder Visa Assistant, trained on official GOV.UK Innovator Founder visa guidance (November 2025) and Home Office internal guidance (Version 9.0, published November 11, 2025).
 
@@ -138,8 +140,8 @@ RECOMMENDATION: Verify directly with Home Office before applying.
 
 export async function chat(userMessage: string): Promise<string> {
   try {
-    const response = await qwen.chat.completions.create({
-      model: QWEN_MODELS.plus,
+    const response: any = await managedAI.chat.completions.create({
+      model: BUSINESS_PLAN_MODEL as any,
       messages: [
         {
           role: "system",
@@ -150,11 +152,10 @@ export async function chat(userMessage: string): Promise<string> {
           content: userMessage,
         },
       ],
-      temperature: 0.7,
       max_tokens: 1500,
-    });
+    } as any);
 
-    return response.choices[0].message.content || "No response generated";
+    return response.choices?.[0]?.message?.content || "No response generated";
   } catch (error) {
     console.error("Chat error:", error);
     throw new Error("Failed to generate response");

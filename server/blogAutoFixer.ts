@@ -1,20 +1,8 @@
-/**
- * BLOG AUTO-FIXER
- *
- * When a post fails the quad-AI consensus gate, this module:
- *  1. Reads every flag raised by all active verifiers
- *  2. Sends the original article + flags to Qwen with surgical correction instructions
- *  3. Qwen fixes ONLY the flagged issues, preserving everything else
- *  4. Re-runs the full quad-AI verification on the corrected content
- *  5. Returns the fixed content + new verification result (caller decides publish/queue)
- */
-
-// Qwen removed — using Gemini + OpenAI fallback (Qwen account in arrears)
+import OpenAI from "openai";
 import { verifyBlogPost } from "./blogMultiVerifier.js";
+import { BUSINESS_PLAN_MODEL } from "./aiModelConfig";
 
-// ============================================================================
-// SAME FACT REFERENCE USED BY THE VERIFIERS
-// ============================================================================
+const managedAI = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
 
 const FACT_REFERENCE = `
 VERIFIED UK INNOVATOR FOUNDER VISA FACTS (Official - January 2026):
@@ -63,10 +51,6 @@ WHAT YOU MUST NOT CLAIM:
 - Guarantees of visa approval
 `.trim();
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
 export interface AutoFixFlag {
   marker: string;
   claim: string;
@@ -81,18 +65,13 @@ export interface AutoFixResult {
   autoPublished: boolean;
 }
 
-// ============================================================================
-// MAIN AUTO-FIX FUNCTION
-// ============================================================================
-
 export async function autoFixBlogPost(
   title: string,
   originalContent: string,
   allFlags: AutoFixFlag[],
 ): Promise<AutoFixResult> {
-  // Filter to actionable flags only (ignore SYSTEM errors from AI outages)
   const actionableFlags = allFlags.filter(
-    (f) => f.claim && !f.claim.startsWith("SYSTEM") && f.issue,
+    (flag) => flag.claim && !flag.claim.startsWith("SYSTEM") && flag.issue,
   );
 
   console.log(
@@ -102,13 +81,12 @@ export async function autoFixBlogPost(
   let fixedContent = originalContent;
 
   if (actionableFlags.length > 0) {
-    // Build a numbered list of corrections Qwen must make
     const flagList = actionableFlags
       .map(
-        (f, i) =>
-          `${i + 1}. [${f.severity.toUpperCase()} — raised by ${f.marker}]\n` +
-          `   Flagged text: "${f.claim}"\n` +
-          `   Problem: ${f.issue}`,
+        (flag, index) =>
+          `${index + 1}. [${flag.severity.toUpperCase()} — raised by ${flag.marker}]\n` +
+          `   Flagged text: "${flag.claim}"\n` +
+          `   Problem: ${flag.issue}`,
       )
       .join("\n\n");
 
@@ -140,81 +118,32 @@ CORRECTION RULES:
 
 Return ONLY the corrected HTML (no JSON, no explanation, no markdown fences — just the HTML starting with the first tag).`;
 
-    const fixerSystemText = "You are a UK immigration content editor. Return ONLY the corrected HTML article. No JSON, no explanation, no markdown. Just the corrected HTML.";
-
-    let corrected: string | null = null;
-
-    // OpenAI primary (gpt-4o then gpt-4o-mini), Gemini as fallback
-    const oaiFixModels = ["gpt-4o", "gpt-4o-mini"];
-    for (const model of oaiFixModels) {
-      if (corrected) break;
-      try {
-        const oaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
-          body: JSON.stringify({
-            model,
-            messages: [{ role: "system", content: fixerSystemText }, { role: "user", content: prompt }],
-            max_tokens: 6000,
-            temperature: 0.1,
-          }),
-        });
-        const oaiData = await oaiRes.json() as any;
-        const oaiText = oaiData.choices?.[0]?.message?.content?.trim() || "";
-        if (oaiText.length > 500) corrected = oaiText;
-      } catch (err) {
-        console.error(`[AutoFixer] OpenAI ${model} failed:`, err);
+    try {
+      const completion: any = await managedAI.chat.completions.create({
+        model: BUSINESS_PLAN_MODEL as any,
+        messages: [
+          {
+            role: "system",
+            content: "You are a UK immigration content editor. Return ONLY the corrected HTML article. No JSON, no explanation, no markdown. Just the corrected HTML.",
+          },
+          { role: "user", content: prompt },
+        ],
+        max_tokens: 8_000,
+      } as any);
+      const corrected = String(completion.choices?.[0]?.message?.content || "").trim();
+      if (corrected.length > 500) {
+        fixedContent = corrected;
+        console.log(`[AutoFixer] Managed AI correction complete. Content length: ${fixedContent.length} chars`);
+      } else {
+        console.warn("[AutoFixer] Managed AI returned insufficient correction content — keeping original content for re-verification");
       }
-    }
-
-    // Gemini fallback if OpenAI exhausted
-    if (!corrected) {
-      const GEMINI_KEYS = [
-        process.env.GEMINI_API_KEY,
-        process.env.GEMINI_API_KEY_2,
-        process.env.GEMINI_API_KEY_3,
-        process.env.GEMINI_API_KEY_4,
-      ].filter(Boolean) as string[];
-      const FIXER_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
-      outerFix:
-      for (const model of FIXER_MODELS) {
-        for (const key of GEMINI_KEYS) {
-          try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-            const res = await fetch(url, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                system_instruction: { parts: [{ text: fixerSystemText }] },
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { temperature: 0.1, maxOutputTokens: 8192 },
-              }),
-            });
-            const data = await res.json() as any;
-            if (!res.ok) {
-              if (res.status === 404) continue outerFix;
-              continue;
-            }
-            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
-            if (text.length > 500) { corrected = text; break outerFix; }
-          } catch { continue; }
-        }
-      }
-    }
-
-    if (corrected) {
-      fixedContent = corrected;
-      console.log(`[AutoFixer] Correction complete. Content length: ${fixedContent.length} chars`);
-    } else {
-      console.warn("[AutoFixer] All AI writers failed — keeping original content for re-verification");
+    } catch (error) {
+      console.error("[AutoFixer] Managed AI correction failed:", error);
     }
   } else {
-    console.log(
-      "[AutoFixer] No actionable flags — proceeding straight to re-verification",
-    );
+    console.log("[AutoFixer] No actionable flags — proceeding straight to re-verification");
   }
 
-  // Re-run the full quad-AI verification on the (possibly corrected) content
   const verificationResult = await verifyBlogPost(title, fixedContent);
 
   console.log(
