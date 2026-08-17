@@ -1,4 +1,4 @@
-import express, { type Express } from "express";
+import express, { type Express, type Response } from "express";
 import fs from "fs";
 import path from "path";
 import { createServer as createViteServer, createLogger } from "vite";
@@ -67,7 +67,7 @@ export async function setupVite(app: Express, server: Server) {
   });
 }
 
-function setApplicationShellHeaders(res: express.Response) {
+function setApplicationShellHeaders(res: Response) {
   // Never allow an old HTML shell to outlive the hashed asset manifest from the
   // deployment that created it. Browsers/proxies must request the current shell.
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
