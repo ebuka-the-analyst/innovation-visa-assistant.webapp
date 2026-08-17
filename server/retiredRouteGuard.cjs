@@ -6,6 +6,7 @@ require("./customer360Admin.cjs");
 require("./customer360LocationContext.cjs");
 require("./progressTracker.cjs");
 require("./toolPlatform.cjs");
+require("./applicationContextPrefill.cjs");
 require("./eligibilityEngine.cjs");
 require("./ivsEngine.cjs");
 require("./financialModelEngine.cjs");
