@@ -102,7 +102,9 @@ jobs:
         run: node scripts/validate-large-final-document-review.cjs
 
       - name: Prepare managed AI routing
-        run: node scripts/prepare-managed-ai-routing.cjs
+        run: |
+          node scripts/prepare-managed-ai-routing.cjs
+          node scripts/prepare-managed-ai-routing-extra.cjs
 
       - name: Validate managed AI provider policy
         run: node scripts/validate-ai-provider-policy.cjs
