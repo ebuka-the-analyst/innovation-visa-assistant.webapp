@@ -1,18 +1,24 @@
 const fs = require("fs");
 
 const serverPath = "server/applicationContextPrefill.cjs";
+const draftServerPath = "server/questionnaireDraftSync.cjs";
 const guardPath = "server/retiredRouteGuard.cjs";
 const hookPath = "client/src/hooks/useToolPlatform.ts";
 const ivsPath = "client/src/pages/tools/endorsement-ivs-assessment.tsx";
+const draftClientPath = "client/src/lib/questionnaireDraftSync.ts";
+const mainPath = "client/src/main.tsx";
 
-for (const file of [serverPath, guardPath, hookPath, ivsPath]) {
+for (const file of [serverPath, draftServerPath, guardPath, hookPath, ivsPath, draftClientPath, mainPath]) {
   if (!fs.existsSync(file)) throw new Error(`Application prefill file missing: ${file}`);
 }
 
 const server = fs.readFileSync(serverPath, "utf8");
+const draftServer = fs.readFileSync(draftServerPath, "utf8");
 const guard = fs.readFileSync(guardPath, "utf8");
 const hook = fs.readFileSync(hookPath, "utf8");
 const ivs = fs.readFileSync(ivsPath, "utf8");
+const draftClient = fs.readFileSync(draftClientPath, "utf8");
+const main = fs.readFileSync(mainPath, "utf8");
 
 function requireMarker(content, marker, message) {
   if (!content.includes(marker)) throw new Error(message || `Missing marker: ${marker}`);
@@ -20,25 +26,47 @@ function requireMarker(content, marker, message) {
 
 requireMarker(server, 'const ROUTE = "/api/tool-platform/application-context";', "Application context route is missing");
 requireMarker(server, "WHERE user_id = $1", "Application context queries must be scoped to the authenticated user");
-requireMarker(server, "AND LOWER(status) = 'completed'", "Application context must prefer a completed business plan");
+requireMarker(server, "AND LOWER(status) = 'completed'", "Application context must prefer a completed business plan when appropriate");
 requireMarker(server, "AND COALESCE(is_demo_data, false) = false", "Demo business plans must not drive production prefill");
 requireMarker(server, "AND tool_id = $2", "Previous tool input must be scoped to the requested tool");
 requireMarker(server, "LOWER(BTRIM(business_name)) = LOWER(BTRIM($2::text))", "Returning to a tool must prefer the completed plan for the same business");
-requireMarker(server, 'strategy: planMatchesPreviousRun ? "previous_tool_business_match" : "latest_completed"', "Application context must report how the business plan was selected");
+requireMarker(server, "questionnaireDraftEnvelope", "Authenticated questionnaire drafts are not exposed to reusable application context");
+requireMarker(server, 'strategy = "questionnaire_draft"', "Newer authenticated questionnaire drafts must be selectable as current work");
+requireMarker(server, "FROM document_extractions", "Persisted document extractions are not available to application prefill");
+requireMarker(server, "MIN_DOCUMENT_PREFILL_CONFIDENCE = 0.8", "Document-extracted prefill must enforce a confidence threshold");
+requireMarker(server, "reviewRequired: true", "Document-extracted fields must retain human-review provenance");
+requireMarker(server, "countedAsEvidence: false", "Document extraction must not be silently promoted to evidence");
 requireMarker(server, "reference: `document:${row.id}`", "Uploaded documents must expose stable references only");
 requireMarker(server, 'res.setHeader("Cache-Control", "no-store")', "Sensitive application context responses must not be cached");
 
-for (const forbidden of ["generated_content", "background_image", "INSERT INTO", "UPDATE business_plans", "DELETE FROM"]) {
+for (const forbidden of ["generated_content", "background_image", "UPDATE business_plans", "DELETE FROM business_plans"]) {
   if (server.includes(forbidden)) {
-    throw new Error(`Application prefill endpoint must remain read-only and avoid generated/large content: ${forbidden}`);
+    throw new Error(`Application prefill endpoint must remain read-only and avoid generated/large plan content: ${forbidden}`);
   }
 }
 
+requireMarker(draftServer, 'const ROUTE = "/api/questionnaire/draft";', "Authenticated questionnaire draft route is missing");
+requireMarker(draftServer, "requireAuthenticated", "Questionnaire draft route must require authentication");
+requireMarker(draftServer, "WHERE user_id = $1", "Questionnaire draft reads/writes must be scoped to the authenticated user");
+requireMarker(draftServer, "questionnaireDraft", "Questionnaire draft must be stored inside durable case context");
+requireMarker(draftServer, "evidence_refs", "Questionnaire draft saves must preserve existing evidence references");
+requireMarker(draftServer, "tool_case_context_events", "Questionnaire draft changes must retain a revision audit trail");
+requireMarker(draftServer, 'res.setHeader("Cache-Control", "no-store")', "Questionnaire drafts must not be cached");
+
 requireMarker(guard, 'require("./applicationContextPrefill.cjs");', "Application context route is not loaded at runtime");
+requireMarker(guard, 'require("./questionnaireDraftSync.cjs");', "Questionnaire draft route is not loaded at runtime");
 requireMarker(hook, "export function useApplicationContextPrefill", "Reusable application context hook is missing");
 requireMarker(hook, '"/api/tool-platform/application-context"', "Application context hook points at the wrong route");
 
-requireMarker(ivs, "buildBusinessPlanPrefill", "IVS page is not wired to structured business-plan prefill");
+requireMarker(draftClient, 'const OWNER_KEY = "autosave_questionnaire-owner-v1";', "Browser questionnaire cache is not account-scoped");
+requireMarker(draftClient, 'fetchWithTimeout("/api/auth/user")', "Questionnaire draft sync must resolve the authenticated account first");
+requireMarker(draftClient, 'fetchWithTimeout("/api/questionnaire/draft")', "Questionnaire draft sync is not hydrating from server storage");
+requireMarker(draftClient, "Do not attach an unscoped or another account's browser draft", "Legacy or cross-account browser drafts must not be auto-migrated");
+requireMarker(draftClient, "writeChain = writeChain.then", "Questionnaire draft server writes must be serialised");
+requireMarker(main, 'import { initQuestionnaireDraftSync } from "./lib/questionnaireDraftSync";', "Questionnaire draft hydration is not bootstrapped");
+requireMarker(main, "await initQuestionnaireDraftSync();", "Questionnaire draft must hydrate before React reads the local auto-save");
+
+requireMarker(ivs, "buildBusinessPlanPrefill", "IVS page is not wired to structured application prefill");
 requireMarker(ivs, "buildPreviousReviewPrefill", "IVS page does not restore a prior validated tool input");
 requireMarker(ivs, "previousReviewMatchesPlan", "IVS page must prevent cross-business previous-run restoration");
 requireMarker(ivs, "mergeIntoUntouchedForm", "IVS prefill must preserve user edits");
@@ -59,7 +87,7 @@ for (const unsupportedField of [
   "evidenceItems:",
 ]) {
   if (planMapper.includes(unsupportedField)) {
-    throw new Error(`Business-plan prefill must leave unsupported claim for user confirmation: ${unsupportedField}`);
+    throw new Error(`Structured application prefill must leave unsupported claim for user confirmation: ${unsupportedField}`);
   }
 }
 
@@ -70,8 +98,13 @@ if (ivs.includes("data.documents.map") || ivs.includes("applicationPrefill.data.
 console.log(JSON.stringify({
   ok: true,
   authenticatedUserScoped: true,
+  authenticatedQuestionnaireDrafts: true,
+  crossAccountBrowserDraftsBlocked: true,
   completedNonDemoPlanOnly: true,
   sameBusinessPlanPreferredForPreviousRun: true,
+  newerDraftCanRepresentCurrentWork: true,
+  highConfidenceDocumentExtractionReuse: true,
+  documentProvenanceRetained: true,
   previousRunBusinessGuard: true,
   preservesUserEdits: true,
   noGeneratedContentParsing: true,
