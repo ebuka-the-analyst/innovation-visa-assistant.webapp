@@ -28,6 +28,7 @@ jobs:
 
       - name: Check production runtime syntax
         run: |
+          node --check server/aiGatewayPreload.cjs
           node --check server/founderPortfolio.cjs
           node --check server/progressTracker.cjs
           node --check server/toolPlatform.cjs
@@ -99,6 +100,12 @@ jobs:
 
       - name: Validate large Final Document Review
         run: node scripts/validate-large-final-document-review.cjs
+
+      - name: Prepare managed AI routing
+        run: node scripts/prepare-managed-ai-routing.cjs
+
+      - name: Validate managed AI provider policy
+        run: node scripts/validate-ai-provider-policy.cjs
 
       - name: Production build
         run: npm run build
