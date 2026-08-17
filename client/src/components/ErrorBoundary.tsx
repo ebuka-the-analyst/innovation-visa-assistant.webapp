@@ -3,6 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, RefreshCw, Home, Bug } from "lucide-react";
 import { errorLogger } from "@/lib/errorLogger";
+import {
+  clearDeploymentAssetReloadAttempt,
+  isDeploymentAssetError,
+  recoverFromDeploymentAssetError,
+} from "@/lib/deploymentAssetRecovery";
 
 interface Props {
   children: ReactNode;
@@ -27,22 +32,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    const msg = error.message || '';
-    const isChunkError =
-      msg.includes('dynamically imported module') ||
-      msg.includes('Failed to fetch') ||
-      msg.includes('Loading chunk') ||
-      msg.includes('Loading CSS chunk') ||
-      msg.includes('importing a module script failed');
-
-    if (isChunkError) {
-      // Stale chunk after deployment — reload once to get fresh assets
-      const reloadKey = 'chunk-reload-attempted';
-      if (!sessionStorage.getItem(reloadKey)) {
-        sessionStorage.setItem(reloadKey, '1');
-        window.location.reload();
-      }
-      // If we already tried, just render null (no UI, no log spam)
+    if (recoverFromDeploymentAssetError(error)) {
       return;
     }
 
@@ -55,13 +45,14 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   handleRetry = () => {
-    // For chunk loading errors (after deployments), do a full page reload
-    const errorMessage = this.state.error?.message || '';
-    if (errorMessage.includes('fetch') || errorMessage.includes('module') || errorMessage.includes('chunk')) {
+    // Deployment chunk failures need a fresh application shell, not just a React rerender.
+    if (isDeploymentAssetError(this.state.error)) {
+      clearDeploymentAssetReloadAttempt();
       window.location.reload();
-    } else {
-      this.setState({ hasError: false, error: null, errorInfo: "" });
+      return;
     }
+
+    this.setState({ hasError: false, error: null, errorInfo: "" });
   };
 
   handleGoHome = () => {
