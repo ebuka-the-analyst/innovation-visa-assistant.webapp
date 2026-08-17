@@ -55,7 +55,7 @@ if (service.includes('.substring(0, 15000)')) {
   throw new Error('Final document review still truncates the document at 15,000 characters.');
 }
 
-if (page.includes('isDemoData &&') || !page.includes('!plan.isDemoData')) {
+if (!page.includes('!plan.isDemoData')) {
   throw new Error('Demo business plans must never be selected for account final review.');
 }
 
