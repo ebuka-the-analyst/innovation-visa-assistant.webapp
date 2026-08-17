@@ -67,6 +67,15 @@ export async function setupVite(app: Express, server: Server) {
   });
 }
 
+function setApplicationShellHeaders(res: express.Response) {
+  // Never allow an old HTML shell to outlive the hashed asset manifest from the
+  // deployment that created it. Browsers/proxies must request the current shell.
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+}
+
 export function serveStatic(app: Express) {
   const distPath = path.resolve(import.meta.dirname, "public");
 
@@ -76,10 +85,29 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  app.use(express.static(distPath, {
+    setHeaders: (res, filePath) => {
+      const normalisedPath = filePath.split(path.sep).join("/");
+      if (normalisedPath.endsWith("/index.html")) {
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
+        res.setHeader("Surrogate-Control", "no-store");
+        return;
+      }
 
-  // fall through to index.html if the file doesn't exist
+      // Vite fingerprints production assets. A fingerprinted URL is safe to cache
+      // for a long time because a content change produces a new filename.
+      if (normalisedPath.includes("/assets/")) {
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      }
+    },
+  }));
+
+  // Fall through to index.html for client-side routes. This response must also be
+  // uncached so a deep link cannot resurrect asset references from an old release.
   app.use("*", (_req, res) => {
+    setApplicationShellHeaders(res);
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
