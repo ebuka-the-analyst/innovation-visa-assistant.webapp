@@ -23,6 +23,8 @@ requireMarker(server, "WHERE user_id = $1", "Application context queries must be
 requireMarker(server, "AND LOWER(status) = 'completed'", "Application context must prefer a completed business plan");
 requireMarker(server, "AND COALESCE(is_demo_data, false) = false", "Demo business plans must not drive production prefill");
 requireMarker(server, "AND tool_id = $2", "Previous tool input must be scoped to the requested tool");
+requireMarker(server, "LOWER(BTRIM(business_name)) = LOWER(BTRIM($2::text))", "Returning to a tool must prefer the completed plan for the same business");
+requireMarker(server, 'strategy: planMatchesPreviousRun ? "previous_tool_business_match" : "latest_completed"', "Application context must report how the business plan was selected");
 requireMarker(server, "reference: `document:${row.id}`", "Uploaded documents must expose stable references only");
 requireMarker(server, 'res.setHeader("Cache-Control", "no-store")', "Sensitive application context responses must not be cached");
 
@@ -69,6 +71,7 @@ console.log(JSON.stringify({
   ok: true,
   authenticatedUserScoped: true,
   completedNonDemoPlanOnly: true,
+  sameBusinessPlanPreferredForPreviousRun: true,
   previousRunBusinessGuard: true,
   preservesUserEdits: true,
   noGeneratedContentParsing: true,
