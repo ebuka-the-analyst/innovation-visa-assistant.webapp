@@ -22,6 +22,17 @@ const JOURNEY_STEP_IDS = new Set([
   "compliance-check",
 ]);
 
+const TRACKED_TOOL_IDS = [
+  "innovation-score",
+  "eligibility-validator",
+  "financial-projections",
+  "market-research",
+  "pitch-coach",
+  "cover-letter-builder",
+  "evidence-collection",
+  "compliance-checker",
+];
+
 const REQUIRED_DOCUMENTS = [
   "Passport Copy",
   "Proof of Identity",
@@ -154,6 +165,26 @@ function buildPlanEvidence(row) {
   };
 }
 
+function buildToolRunEvidence(rows) {
+  const latestByTool = {};
+  for (const row of rows) {
+    const toolId = String(row.tool_id || "");
+    if (!toolId || latestByTool[toolId]) continue;
+    latestByTool[toolId] = {
+      id: row.id,
+      toolId,
+      status: row.status,
+      validationState: row.validation_state || null,
+      completedAt: row.completed_at || null,
+      updatedAt: row.updated_at || null,
+    };
+  }
+  return {
+    completedToolIds: Object.keys(latestByTool),
+    latestByTool,
+  };
+}
+
 async function handleGetProgress(req, res) {
   try {
     if (!isAuthenticated(req)) {
@@ -164,7 +195,7 @@ async function handleGetProgress(req, res) {
     const db = getPool();
     const journeyStorageIds = Array.from(JOURNEY_STEP_IDS, storageId);
 
-    const [storedRows, planRows, documentRows, interviewRows, reviewRows] = await Promise.all([
+    const [storedRows, planRows, documentRows, interviewRows, reviewRows, toolRunRows] = await Promise.all([
       safeQuery(
         db,
         `SELECT DISTINCT ON (tool_id)
@@ -209,6 +240,17 @@ async function handleGetProgress(req, res) {
           ORDER BY created_at DESC`,
         [userId],
       ),
+      safeQuery(
+        db,
+        `SELECT DISTINCT ON (tool_id)
+                id, tool_id, status, validation_state, completed_at, updated_at
+           FROM tool_runs
+          WHERE user_id = $1
+            AND status = 'completed'
+            AND tool_id = ANY($2::text[])
+          ORDER BY tool_id, completed_at DESC NULLS LAST, updated_at DESC`,
+        [userId, TRACKED_TOOL_IDS],
+      ),
     ]);
 
     const completedPlans = planRows.filter((row) => String(row.status || "").toLowerCase() === "completed");
@@ -216,15 +258,30 @@ async function handleGetProgress(req, res) {
     const latestPlan = planRows[0] || null;
     const latestCompletedPlan = completedPlans[0] || null;
     const planEvidence = buildPlanEvidence(latestCompletedPlan);
+    const toolRunEvidence = buildToolRunEvidence(toolRunRows);
+    const completedToolIds = new Set(toolRunEvidence.completedToolIds);
 
     const uploadedRequiredNames = new Set(
       documentRows
         .filter((row) => REQUIRED_DOCUMENTS.includes(String(row.name || "")))
         .map((row) => String(row.name)),
     );
+
+    const satisfiedRequiredNames = new Set(uploadedRequiredNames);
+    const generatedRequiredNames = new Set();
+    if (latestCompletedPlan) {
+      satisfiedRequiredNames.add("Business Plan");
+      generatedRequiredNames.add("Business Plan");
+    }
+    if (planEvidence?.financial?.satisfied || completedToolIds.has("financial-projections")) {
+      satisfiedRequiredNames.add("Financial Projections");
+      generatedRequiredNames.add("Financial Projections");
+    }
+
     const requiredUploaded = uploadedRequiredNames.size;
+    const requiredSatisfied = satisfiedRequiredNames.size;
     const documentCompletionPercent = REQUIRED_DOCUMENTS.length
-      ? Math.round((requiredUploaded / REQUIRED_DOCUMENTS.length) * 100)
+      ? Math.round((requiredSatisfied / REQUIRED_DOCUMENTS.length) * 100)
       : 0;
 
     const completedInterviews = interviewRows.filter((row) => ["completed", "reviewed"].includes(String(row.status || "").toLowerCase()));
@@ -254,12 +311,16 @@ async function handleGetProgress(req, res) {
             : null,
           evidence: planEvidence,
         },
+        toolRuns: toolRunEvidence,
         documents: {
           totalUploaded: documentRows.length,
           requiredUploaded,
+          requiredSatisfied,
           requiredTotal: REQUIRED_DOCUMENTS.length,
           completionPercent: documentCompletionPercent,
-          missingRequired: REQUIRED_DOCUMENTS.filter((name) => !uploadedRequiredNames.has(name)),
+          uploadedRequiredNames: Array.from(uploadedRequiredNames),
+          generatedRequiredNames: Array.from(generatedRequiredNames),
+          missingRequired: REQUIRED_DOCUMENTS.filter((name) => !satisfiedRequiredNames.has(name)),
         },
         interviews: {
           total: interviewRows.length,
