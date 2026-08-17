@@ -44,15 +44,41 @@ function badgeText(node: React.ReactNode): string {
 function semanticStatusClass(children: React.ReactNode): string {
   const label = badgeText(children)
 
-  if (["ready", "completed", "complete", "required complete"].includes(label)) {
+  const isReady =
+    label === "ready" ||
+    label.startsWith("ready ") ||
+    label === "completed" ||
+    label.startsWith("completed ") ||
+    label === "complete" ||
+    label.endsWith(" complete")
+
+  if (isReady) {
     return "border-emerald-200 bg-emerald-100 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
   }
 
-  if (["in progress", "in-progress", "pending", "processing"].includes(label)) {
+  const isInProgress =
+    label === "in progress" ||
+    label.startsWith("in progress ") ||
+    label === "in-progress" ||
+    label === "pending" ||
+    label.startsWith("pending ") ||
+    label === "processing" ||
+    label.startsWith("processing ")
+
+  if (isInProgress) {
     return "border-amber-200 bg-amber-100 text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300"
   }
 
-  if (["not started", "not-started", "incomplete", "blocked", "failed"].includes(label)) {
+  const isNotStarted =
+    label === "not started" ||
+    label.startsWith("not started ") ||
+    label === "not-started" ||
+    label === "incomplete" ||
+    label === "blocked" ||
+    label === "failed" ||
+    label.startsWith("failed ")
+
+  if (isNotStarted) {
     return "border-red-200 bg-red-100 text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
   }
 
