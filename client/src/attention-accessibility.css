@@ -1,0 +1,45 @@
+/* ADHD-friendly interaction layer.
+   Keep status meaning consistent, focus states obvious, and attention animations finite. */
+
+:where(a, button, input, select, textarea, [role="button"]):focus-visible {
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 3px;
+}
+
+/* Repeating attention animations can become distracting during long application tasks.
+   Let them attract attention briefly, then settle. Loading spinners are intentionally unaffected. */
+.animate-ping,
+.animate-ping-slow,
+.animate-ping-slow-red,
+.animate-blink-2s {
+  animation-iteration-count: 2 !important;
+}
+
+/* Shared semantic status hooks for application surfaces that expose data-app-status. */
+[data-app-status="ready"],
+[data-app-status="completed"] {
+  --app-status-border: rgb(167 243 208);
+  --app-status-bg: rgb(236 253 245);
+  --app-status-text: rgb(6 95 70);
+}
+
+[data-app-status="in-progress"] {
+  --app-status-border: rgb(253 230 138);
+  --app-status-bg: rgb(255 251 235);
+  --app-status-text: rgb(146 64 14);
+}
+
+[data-app-status="not-started"] {
+  --app-status-border: rgb(254 202 202);
+  --app-status-bg: rgb(254 242 242);
+  --app-status-text: rgb(153 27 27);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ping,
+  .animate-ping-slow,
+  .animate-ping-slow-red,
+  .animate-blink-2s {
+    animation: none !important;
+  }
+}
