@@ -33,6 +33,17 @@ const TRACKED_TOOL_IDS = [
   "compliance-checker",
 ];
 
+const TOOL_RUN_TO_STEP = {
+  "innovation-score": "innovation-score",
+  "eligibility-validator": "eligibility",
+  "financial-projections": "financial-projections",
+  "market-research": "market-research",
+  "pitch-coach": "pitch-coach",
+  "cover-letter-builder": "cover-letter",
+  "evidence-collection": "evidence-prep",
+  "compliance-checker": "compliance-check",
+};
+
 const REQUIRED_DOCUMENTS = [
   "Passport Copy",
   "Proof of Identity",
@@ -185,6 +196,36 @@ function buildToolRunEvidence(rows) {
   };
 }
 
+function mergeJourneyProgress(storedRows, toolRunRows) {
+  const byStep = new Map();
+  for (const row of storedRows) {
+    const normalised = normaliseStoredRow(row);
+    byStep.set(normalised.stepId, normalised);
+  }
+
+  for (const run of toolRunRows) {
+    const stepId = TOOL_RUN_TO_STEP[String(run.tool_id || "")];
+    if (!stepId) continue;
+    const existing = byStep.get(stepId);
+    if (existing?.progressData?.source === "manual") continue;
+    byStep.set(stepId, {
+      stepId,
+      completionPercent: 100,
+      status: "completed",
+      progressData: {
+        source: "tool-run",
+        toolId: run.tool_id,
+        runId: run.id,
+        validationState: run.validation_state || null,
+        detail: `Completed ${run.tool_id} run found in the account's durable tool history.`,
+      },
+      updatedAt: run.completed_at || run.updated_at || null,
+    });
+  }
+
+  return Array.from(byStep.values());
+}
+
 async function handleGetProgress(req, res) {
   try {
     if (!isAuthenticated(req)) {
@@ -260,6 +301,7 @@ async function handleGetProgress(req, res) {
     const planEvidence = buildPlanEvidence(latestCompletedPlan);
     const toolRunEvidence = buildToolRunEvidence(toolRunRows);
     const completedToolIds = new Set(toolRunEvidence.completedToolIds);
+    const journeyProgress = mergeJourneyProgress(storedRows, toolRunRows);
 
     const uploadedRequiredNames = new Set(
       documentRows
@@ -294,7 +336,7 @@ async function handleGetProgress(req, res) {
     res.setHeader("Cache-Control", "no-store");
     return res.json({
       generatedAt: new Date().toISOString(),
-      storedProgress: storedRows.map(normaliseStoredRow),
+      storedProgress: journeyProgress,
       authoritative: {
         businessPlans: {
           total: planRows.length,
