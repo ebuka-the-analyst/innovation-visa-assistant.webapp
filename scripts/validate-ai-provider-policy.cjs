@@ -32,26 +32,25 @@ const retiredOperationalPatterns = [
   new RegExp('ali' + 'yuncs', 'i'),
 ];
 
+const runtimeViolations = new Set();
 for (const relative of walk('server')) {
   const source = read(relative);
   for (const pattern of retiredOperationalPatterns) {
-    if (pattern.test(source)) {
-      throw new Error(`Retired provider runtime usage found in: ${relative}`);
-    }
+    if (pattern.test(source)) runtimeViolations.add(`Retired provider runtime usage: ${relative}`);
   }
 
   if (relative !== 'server/aiProviderGateway.ts') {
-    if (/api\.openai\.com/i.test(source)) {
-      throw new Error(`Direct OpenAI endpoint bypasses managed gateway in: ${relative}`);
-    }
-    if (/new\s+Anthropic\s*\(/.test(source)) {
-      throw new Error(`Direct Anthropic client bypasses managed gateway in: ${relative}`);
-    }
+    if (/api\.openai\.com/i.test(source)) runtimeViolations.add(`Direct OpenAI endpoint bypass: ${relative}`);
+    if (/new\s+Anthropic\s*\(/.test(source)) runtimeViolations.add(`Direct Anthropic client bypass: ${relative}`);
   }
 
   if (/generativelanguage\.googleapis\.com/i.test(source) || /@google\/genai/i.test(source) || /new\s+GoogleGenAI\s*\(/.test(source)) {
-    throw new Error(`Direct Google generative-AI client bypasses managed gateway in: ${relative}`);
+    runtimeViolations.add(`Direct Google generative-AI bypass: ${relative}`);
   }
+}
+
+if (runtimeViolations.size) {
+  throw new Error(`Unmanaged AI runtime calls remain:\n${[...runtimeViolations].sort().map((value) => `- ${value}`).join('\n')}`);
 }
 
 const config = read('server/aiModelConfig.ts');
