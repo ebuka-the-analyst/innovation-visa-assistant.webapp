@@ -29,6 +29,7 @@ jobs:
       - name: Check production runtime syntax
         run: |
           node --check server/founderPortfolio.cjs
+          node --check server/progressTracker.cjs
           node --check server/toolPlatform.cjs
           node --check server/applicationContextPrefill.cjs
           node --check server/questionnaireDraftSync.cjs
