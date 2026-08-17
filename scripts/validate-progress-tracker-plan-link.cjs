@@ -7,6 +7,7 @@ function fail(message) {
 
 const schema = fs.readFileSync('shared/schema.ts', 'utf8');
 const tracker = fs.readFileSync('server/progressTracker.cjs', 'utf8');
+const client = fs.readFileSync('client/src/pages/progress.tsx', 'utf8');
 
 const schemaStartMarker = 'export const businessPlans = pgTable("business_plans", {';
 const schemaStart = schema.indexOf(schemaStartMarker);
@@ -56,6 +57,19 @@ if (!tracker.includes('const completedPlans = planRows.filter')) {
 }
 if (!tracker.includes('String(row.status || "").toLowerCase() === "completed"')) {
   fail('Completed-plan reconciliation must recognise the completed status');
+}
+
+if (!client.includes('tracker?.authoritative.businessPlans.evidence?.planId')) {
+  fail('Completed questionnaire review must use the authoritative completed-plan ID');
+}
+if (!client.includes('`/api/view/html/${encodeURIComponent(questionnaireReviewPlanId)}`')) {
+  fail('Completed questionnaire review must use the authenticated existing-plan HTML view');
+}
+if (!client.includes('isQuestionnaireReviewUnavailable')) {
+  fail('Completed questionnaire review must fail closed when its authoritative plan ID is unavailable');
+}
+if (client.includes('<Link href={step.href} aria-label={`${actionLabel} ${step.title}`}>')) {
+  fail('Progress step actions must not blindly reuse the new-workflow href after a step is complete');
 }
 
 if (process.exitCode) {

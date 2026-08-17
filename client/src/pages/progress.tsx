@@ -1125,6 +1125,14 @@ export default function ProgressTracker() {
                       const isManualCompleted = step.source === "manual" && step.status === "completed";
                       const actionLabel = step.status === "completed" ? "Review" : step.status === "in-progress" ? "Continue" : "Start";
                       const progressValue = step.status === "completed" ? 100 : step.percent;
+                      const questionnaireReviewPlanId = step.id === "questionnaire" && step.status === "completed"
+                        ? tracker?.authoritative.businessPlans.evidence?.planId || null
+                        : null;
+                      const questionnaireReviewHref = questionnaireReviewPlanId
+                        ? `/api/view/html/${encodeURIComponent(questionnaireReviewPlanId)}`
+                        : null;
+                      const isQuestionnaireReviewUnavailable = step.id === "questionnaire" && step.status === "completed" && !questionnaireReviewHref;
+                      const actionHref = questionnaireReviewHref || step.href;
                       return (
                         <div
                           key={step.id}
@@ -1188,9 +1196,19 @@ export default function ProgressTracker() {
                                   {isManualCompleted ? "Reset confirmation" : "Confirm completed"}
                                 </Button>
                               )}
-                              <Button asChild size="sm" variant={step.status === "completed" ? "outline" : "default"} className={`flex-1 gap-1.5 sm:flex-none ${step.status === "completed" ? "" : "bg-emerald-800 text-white hover:bg-emerald-900 focus-visible:ring-emerald-700"}`}>
-                                <Link href={step.href} aria-label={`${actionLabel} ${step.title}`}>{actionLabel}<ArrowRight className="h-3.5 w-3.5" /></Link>
-                              </Button>
+                              {isQuestionnaireReviewUnavailable ? (
+                                <Button size="sm" variant="outline" className="flex-1 gap-1.5 sm:flex-none" disabled aria-label="Review Complete Business Questionnaire unavailable until progress is refreshed">
+                                  Review unavailable
+                                </Button>
+                              ) : (
+                                <Button asChild size="sm" variant={step.status === "completed" ? "outline" : "default"} className={`flex-1 gap-1.5 sm:flex-none ${step.status === "completed" ? "" : "bg-emerald-800 text-white hover:bg-emerald-900 focus-visible:ring-emerald-700"}`}>
+                                  {questionnaireReviewHref ? (
+                                    <a href={actionHref} aria-label={`${actionLabel} ${step.title}`}>{actionLabel}<ArrowRight className="h-3.5 w-3.5" /></a>
+                                  ) : (
+                                    <Link href={actionHref} aria-label={`${actionLabel} ${step.title}`}>{actionLabel}<ArrowRight className="h-3.5 w-3.5" /></Link>
+                                  )}
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </div>
