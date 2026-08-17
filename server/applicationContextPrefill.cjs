@@ -7,6 +7,18 @@ const MAX_EXTRACTIONS = 10;
 const MIN_DOCUMENT_PREFILL_CONFIDENCE = 0.8;
 const application = express.application;
 
+const FINANCIAL_TOOL_IDS = Object.freeze([
+  "financial-projections",
+  "budget-cost-analyzer",
+  "breakeven-calculator",
+  "financial-modeling",
+  "income-calculator",
+  "cac-calculator",
+  "unit-economics",
+  "revenue-forecast",
+  "financial-resilience",
+]);
+
 const DOCUMENT_FIELD_TO_PLAN_FIELD = {
   businessName: "businessName",
   industry: "industry",
@@ -125,6 +137,11 @@ function parseNumber(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function nonNegativeNumber(value) {
+  const parsed = parseNumber(value);
+  return parsed !== null && parsed >= 0 ? parsed : null;
+}
+
 function normaliseConfidence(value) {
   const numeric = typeof value === "number" ? value : Number(value);
   if (!Number.isFinite(numeric)) return null;
@@ -197,6 +214,41 @@ function mapBusinessPlan(row) {
     targetEndorser: row.target_endorser,
     contactPointsStrategy: row.contact_points_strategy,
     supportingEvidence: row.supporting_evidence,
+  };
+}
+
+function mapFinancialToolRun(row) {
+  if (!row) return null;
+  const snapshot = normaliseJsonObject(row.input_snapshot);
+  const businessName = text(snapshot.businessName);
+  if (!businessName) return null;
+
+  const oneTimeSetupCostGbp = nonNegativeNumber(snapshot.oneTimeSetupCostGbp);
+  const startingMonthlyRevenueGbp = nonNegativeNumber(snapshot.startingMonthlyRevenueGbp);
+  const operatingParts = [
+    snapshot.fixedOperatingCostsMonthlyGbp,
+    snapshot.payrollMonthlyGbp,
+    snapshot.marketingMonthlyGbp,
+    snapshot.otherOperatingCostsMonthlyGbp,
+  ].map(nonNegativeNumber);
+  const monthlyOperatingCostGbp = operatingParts.every((value) => value !== null)
+    ? operatingParts.reduce((sum, value) => sum + value, 0)
+    : null;
+
+  const hasReusableNumber = [oneTimeSetupCostGbp, startingMonthlyRevenueGbp, monthlyOperatingCostGbp]
+    .some((value) => value !== null);
+  if (!hasReusableNumber) return null;
+
+  return {
+    runId: row.id,
+    toolId: row.tool_id,
+    businessName,
+    completedAt: row.completed_at,
+    oneTimeSetupCostGbp,
+    monthlyOperatingCostGbp,
+    startingMonthlyRevenueGbp,
+    assumptionsNarrative: text(snapshot.assumptionsNarrative) || null,
+    source: "completed_financial_tool_run",
   };
 }
 
@@ -553,6 +605,22 @@ async function handleGetApplicationContext(req, res) {
       strategy = "document_extraction";
     }
 
+    let relatedFinancialModel = null;
+    if (reusablePlan?.businessName) {
+      const financialRunResult = await db.query(
+        `SELECT id, tool_id, input_snapshot, completed_at, created_at
+           FROM tool_runs
+          WHERE user_id = $1
+            AND status = 'completed'
+            AND tool_id = ANY($2::text[])
+            AND LOWER(BTRIM(input_snapshot->>'businessName')) = LOWER(BTRIM($3::text))
+          ORDER BY completed_at DESC NULLS LAST, created_at DESC
+          LIMIT 1`,
+        [userId, FINANCIAL_TOOL_IDS, reusablePlan.businessName],
+      );
+      relatedFinancialModel = mapFinancialToolRun(financialRunResult.rows[0] || null);
+    }
+
     noStore(res);
     return res.json({
       generatedAt: new Date().toISOString(),
@@ -565,6 +633,9 @@ async function handleGetApplicationContext(req, res) {
         questionnaireDraftFieldCount,
         supplementedByDocumentExtraction: mergedWithExtraction.mergedFieldCount > 0 || strategy === "document_extraction",
         documentExtractedFieldCount: extraction.provenance.length,
+      },
+      relatedToolData: {
+        financialModel: relatedFinancialModel,
       },
       documentPrefillProvenance: extraction.provenance,
       caseContext: contextRow
