@@ -16,7 +16,7 @@ export interface ToolCaseContext {
 export interface ApplicationBusinessPlan {
   id: string;
   status: string;
-  createdAt: string;
+  createdAt: string | null;
   completedPlanCount: number;
   businessName: string;
   industry: string;
@@ -24,9 +24,9 @@ export interface ApplicationBusinessPlan {
   uniqueness: string;
   technology: string;
   experience: string;
-  funding: number;
+  funding: number | null;
   revenue: string;
-  jobCreation: number;
+  jobCreation: number | null;
   expansion: string;
   vision: string;
   innovationStage: string;
@@ -44,9 +44,9 @@ export interface ApplicationBusinessPlan {
   founderAchievements: string;
   relevantProjects: string;
   monthlyProjections: string;
-  customerAcquisitionCost: number;
-  lifetimeValue: number;
-  paybackPeriod: number;
+  customerAcquisitionCost: number | null;
+  lifetimeValue: number | null;
+  paybackPeriod: number | null;
   fundingSources: string;
   detailedCosts: string;
   competitors: string;
@@ -57,7 +57,7 @@ export interface ApplicationBusinessPlan {
   marketSize: string;
   regulatoryRequirements: string;
   complianceTimeline: string;
-  complianceBudget: number;
+  complianceBudget: number | null;
   hiringPlan: string;
   specificRegions: string;
   internationalPlan: string | null;
@@ -76,10 +76,30 @@ export interface ApplicationDocumentReference {
   reference: string;
 }
 
+export interface DocumentPrefillProvenance {
+  extractionId: string;
+  sourceField: string;
+  planField: string;
+  confidence: number;
+  documentRefs: string[];
+  extractedAt: string | null;
+  reviewRequired: true;
+  countedAsEvidence: false;
+}
+
 export interface ApplicationContextPrefill {
   generatedAt: string;
   toolId: string | null;
   businessPlan: ApplicationBusinessPlan | null;
+  businessPlanSelection: {
+    strategy: "previous_tool_business_match" | "latest_completed" | "questionnaire_draft" | "document_extraction" | "none";
+    matchedPreviousToolRun: boolean;
+    supplementedByQuestionnaireDraft: boolean;
+    questionnaireDraftFieldCount: number;
+    supplementedByDocumentExtraction: boolean;
+    documentExtractedFieldCount: number;
+  };
+  documentPrefillProvenance: DocumentPrefillProvenance[];
   caseContext: ToolCaseContext;
   previousToolRun: {
     id: string;
