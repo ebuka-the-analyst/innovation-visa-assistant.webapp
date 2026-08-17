@@ -8,7 +8,7 @@ const REQUEST_TIMEOUT_MS = 2500;
 let pollTimer: number | null = null;
 let activeUserId: string | null = null;
 let lastObservedDraft = "__uninitialised__";
-let writeInFlight: Promise<void> | null = null;
+let writeChain: Promise<void> = Promise.resolve();
 
 interface AuthUser {
   id?: string;
@@ -121,14 +121,20 @@ async function getServerDraft(): Promise<DraftResponse | null> {
 async function putServerDraft(draftData: Record<string, unknown>, keepalive = false): Promise<void> {
   if (!activeUserId) return;
   const body = JSON.stringify({ draftData });
-  const response = await fetch("/api/questionnaire/draft", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    cache: "no-store",
-    keepalive,
-    body,
-  });
+  const response = keepalive
+    ? await fetch("/api/questionnaire/draft", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        cache: "no-store",
+        keepalive: true,
+        body,
+      })
+    : await fetchWithTimeout("/api/questionnaire/draft", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body,
+      });
   if (!response.ok) throw new Error(`Draft save failed with ${response.status}`);
   const data = await response.json() as DraftResponse;
   const canonical = canonicalDraft(draftData);
@@ -141,12 +147,14 @@ async function putServerDraft(draftData: Record<string, unknown>, keepalive = fa
 
 async function deleteServerDraft(keepalive = false): Promise<void> {
   if (!activeUserId) return;
-  const response = await fetch("/api/questionnaire/draft", {
-    method: "DELETE",
-    credentials: "include",
-    cache: "no-store",
-    keepalive,
-  });
+  const response = keepalive
+    ? await fetch("/api/questionnaire/draft", {
+        method: "DELETE",
+        credentials: "include",
+        cache: "no-store",
+        keepalive: true,
+      })
+    : await fetchWithTimeout("/api/questionnaire/draft", { method: "DELETE" });
   if (!response.ok && response.status !== 404) throw new Error(`Draft clear failed with ${response.status}`);
   writeMeta({ userId: activeUserId, lastSyncedDraft: "", serverUpdatedAt: null });
 }
@@ -159,9 +167,7 @@ function queueWrite(task: () => Promise<void>) {
       console.warn("[Questionnaire draft sync] Server sync failed; local draft remains available.", error);
     }
   };
-  writeInFlight = (writeInFlight || Promise.resolve()).then(run, run).finally(() => {
-    writeInFlight = null;
-  });
+  writeChain = writeChain.then(run, run);
 }
 
 function flushCurrentDraft(keepalive = false) {
