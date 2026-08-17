@@ -167,6 +167,31 @@ update('server/blogGenerator.ts', (source) => {
   return next;
 });
 
+update('server/eligibility-service.ts', (source) => {
+  let next = source;
+  next = next.replace(
+    'import { qwen, QWEN_MODELS } from "./qwenClient";',
+    'import OpenAI from "openai";\nimport { BUSINESS_PLAN_MODEL } from "./aiModelConfig";',
+  );
+
+  if (!next.includes('const managedEligibilityAI = new OpenAI')) {
+    const anchor = 'import crypto from "crypto";';
+    if (!next.includes(anchor)) throw new Error('Could not locate eligibility-service import anchor');
+    next = next.replace(anchor, `${anchor}\n\nconst managedEligibilityAI = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });`);
+  }
+
+  const startMarker = 'async function getAIResponse(systemPrompt: string, userPrompt: string): Promise<any> {';
+  const endMarker = '\n\ninterface ConceptBrief {';
+  if (next.includes(startMarker) && next.includes('[EligibilityService] Calling Qwen')) {
+    const start = next.indexOf(startMarker);
+    const end = next.indexOf(endMarker, start);
+    if (end === -1) throw new Error('Could not locate eligibility-service managed AI transform end');
+    const replacement = `async function getAIResponse(systemPrompt: string, userPrompt: string): Promise<any> {\n  console.log("[EligibilityService] Calling managed AI provider");\n  const response: any = await managedEligibilityAI.chat.completions.create({\n    model: BUSINESS_PLAN_MODEL as any,\n    messages: [\n      { role: "system", content: systemPrompt },\n      { role: "user", content: userPrompt },\n    ],\n    response_format: { type: "json_object" },\n    max_tokens: 2000,\n  } as any);\n  let content = String(response.choices?.[0]?.message?.content || "").trim();\n  if (!content) throw new Error("Managed AI provider returned no eligibility analysis");\n  content = content.replace(/^\`\`\`(?:json)?\\s*/i, "").replace(/\\s*\`\`\`$/i, "").trim();\n  return JSON.parse(content);\n}`;
+    next = next.slice(0, start) + replacement + next.slice(end);
+  }
+  return next;
+});
+
 update('client/src/App.tsx', (source) => {
   let next = source;
   if (!next.includes('const AdminAIProviders = lazy(')) {
