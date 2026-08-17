@@ -7,8 +7,22 @@ const hookPath = "client/src/hooks/useToolPlatform.ts";
 const ivsPath = "client/src/pages/tools/endorsement-ivs-assessment.tsx";
 const draftClientPath = "client/src/lib/questionnaireDraftSync.ts";
 const mainPath = "client/src/main.tsx";
+const extractionMigrationPath = "migrations/app/20260817_application_context_document_extractions.sql";
+const schemaVerifierPath = "server/scripts/verify-application-context-schema.cjs";
+const railwayPath = "railway.json";
 
-for (const file of [serverPath, draftServerPath, guardPath, hookPath, ivsPath, draftClientPath, mainPath]) {
+for (const file of [
+  serverPath,
+  draftServerPath,
+  guardPath,
+  hookPath,
+  ivsPath,
+  draftClientPath,
+  mainPath,
+  extractionMigrationPath,
+  schemaVerifierPath,
+  railwayPath,
+]) {
   if (!fs.existsSync(file)) throw new Error(`Application prefill file missing: ${file}`);
 }
 
@@ -19,6 +33,9 @@ const hook = fs.readFileSync(hookPath, "utf8");
 const ivs = fs.readFileSync(ivsPath, "utf8");
 const draftClient = fs.readFileSync(draftClientPath, "utf8");
 const main = fs.readFileSync(mainPath, "utf8");
+const extractionMigration = fs.readFileSync(extractionMigrationPath, "utf8");
+const schemaVerifier = fs.readFileSync(schemaVerifierPath, "utf8");
+const railway = fs.readFileSync(railwayPath, "utf8");
 
 function requireMarker(content, marker, message) {
   if (!content.includes(marker)) throw new Error(message || `Missing marker: ${marker}`);
@@ -44,6 +61,19 @@ for (const forbidden of ["generated_content", "background_image", "UPDATE busine
     throw new Error(`Application prefill endpoint must remain read-only and avoid generated/large plan content: ${forbidden}`);
   }
 }
+
+requireMarker(extractionMigration, "CREATE TABLE IF NOT EXISTS document_extractions", "Document extraction runtime dependency must be an explicit app migration");
+requireMarker(extractionMigration, "ALTER TABLE document_extractions ADD COLUMN IF NOT EXISTS", "Document extraction migration must reconcile legacy copies additively");
+requireMarker(extractionMigration, "CREATE INDEX IF NOT EXISTS idx_extraction_user", "Document extraction user lookup must be indexed");
+if (/DROP\s+TABLE|DELETE\s+FROM\s+document_extractions/i.test(extractionMigration)) {
+  throw new Error("Document extraction migration must remain additive and data-preserving");
+}
+
+for (const requiredTable of ["business_plans", "tool_case_contexts", "tool_runs", "user_documents", "document_extractions"]) {
+  requireMarker(schemaVerifier, `${requiredTable}:`, `Deployment verification must check ${requiredTable}`);
+}
+requireMarker(schemaVerifier, "BEGIN READ ONLY", "Application context schema verification must remain read-only");
+requireMarker(railway, "node server/scripts/run-app-migrations.cjs && node server/scripts/verify-application-context-schema.cjs", "Railway must verify application-context schema after migrations and before start");
 
 requireMarker(draftServer, 'const ROUTE = "/api/questionnaire/draft";', "Authenticated questionnaire draft route is missing");
 requireMarker(draftServer, "requireAuthenticated", "Questionnaire draft route must require authentication");
@@ -104,6 +134,8 @@ console.log(JSON.stringify({
   sameBusinessPlanPreferredForPreviousRun: true,
   newerDraftCanRepresentCurrentWork: true,
   highConfidenceDocumentExtractionReuse: true,
+  documentExtractionSchemaMigrated: true,
+  documentExtractionSchemaVerifiedBeforeStart: true,
   documentProvenanceRetained: true,
   previousRunBusinessGuard: true,
   preservesUserEdits: true,
