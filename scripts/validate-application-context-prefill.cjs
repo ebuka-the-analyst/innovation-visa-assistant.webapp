@@ -55,6 +55,11 @@ requireMarker(server, "reviewRequired: true", "Document-extracted fields must re
 requireMarker(server, "countedAsEvidence: false", "Document extraction must not be silently promoted to evidence");
 requireMarker(server, "reference: `document:${row.id}`", "Uploaded documents must expose stable references only");
 requireMarker(server, 'res.setHeader("Cache-Control", "no-store")', "Sensitive application context responses must not be cached");
+requireMarker(server, "const FINANCIAL_TOOL_IDS", "Related financial tools must be explicitly allow-listed");
+requireMarker(server, "AND tool_id = ANY($2::text[])", "Related financial context must be restricted to financial tools");
+requireMarker(server, "LOWER(BTRIM(input_snapshot->>'businessName')) = LOWER(BTRIM($3::text))", "Financial reuse must be scoped to the same business");
+requireMarker(server, "mapFinancialToolRun", "Completed financial tool inputs must be mapped structurally");
+requireMarker(server, "relatedToolData", "Application context must expose related reusable tool data");
 
 for (const forbidden of ["generated_content", "background_image", "UPDATE business_plans", "DELETE FROM business_plans"]) {
   if (server.includes(forbidden)) {
@@ -87,6 +92,7 @@ requireMarker(guard, 'require("./applicationContextPrefill.cjs");', "Application
 requireMarker(guard, 'require("./questionnaireDraftSync.cjs");', "Questionnaire draft route is not loaded at runtime");
 requireMarker(hook, "export function useApplicationContextPrefill", "Reusable application context hook is missing");
 requireMarker(hook, '"/api/tool-platform/application-context"', "Application context hook points at the wrong route");
+requireMarker(hook, "ApplicationFinancialModelPrefill", "Client application context must type related financial data");
 
 requireMarker(draftClient, 'const OWNER_KEY = "autosave_questionnaire-owner-v1";', "Browser questionnaire cache is not account-scoped");
 requireMarker(draftClient, 'fetchWithTimeout("/api/auth/user")', "Questionnaire draft sync must resolve the authenticated account first");
@@ -97,28 +103,44 @@ requireMarker(main, 'import { initQuestionnaireDraftSync } from "./lib/questionn
 requireMarker(main, "await initQuestionnaireDraftSync();", "Questionnaire draft must hydrate before React reads the local auto-save");
 
 requireMarker(ivs, "buildBusinessPlanPrefill", "IVS page is not wired to structured application prefill");
+requireMarker(ivs, "buildFinancialModelPrefill", "IVS page is not wired to same-business financial-tool prefill");
 requireMarker(ivs, "buildPreviousReviewPrefill", "IVS page does not restore a prior validated tool input");
 requireMarker(ivs, "previousReviewMatchesPlan", "IVS page must prevent cross-business previous-run restoration");
 requireMarker(ivs, "mergeIntoUntouchedForm", "IVS prefill must preserve user edits");
 requireMarker(ivs, "They are not automatically counted as evidence", "IVS page must explain why uploaded files are not silently credited as evidence");
+requireMarker(ivs, "targetCustomers: joined([", "Target-customer prefill must reuse structured customer research rather than leave a repeat question blank");
+requireMarker(ivs, "internalInnovationOwnership: joined([", "Innovation-ownership prefill must reuse existing ownership and technical statements");
+requireMarker(ivs, "innovationCoreToBusiness: false", "Innovation must not default to a positive assessment claim");
+requireMarker(ivs, 'innovationDeliveryModel: ""', "Innovation delivery must require explicit confirmation");
+requireMarker(ivs, 'placeholder="Select delivery model"', "Innovation delivery selection must visibly request confirmation");
+requireMarker(ivs, "if (!cleaned) throw new Error", "Blank financial inputs must not be silently converted to zero");
+requireMarker(ivs, 'throw new Error("Select how the core innovation is delivered.")', "Assessment must reject an unconfirmed innovation delivery model");
 
 const planMapperStart = ivs.indexOf("function buildBusinessPlanPrefill");
-const previousMapperStart = ivs.indexOf("function validEvidenceItems", planMapperStart);
-if (planMapperStart === -1 || previousMapperStart === -1) {
-  throw new Error("Could not isolate IVS business-plan prefill mapper");
+const financialMapperStart = ivs.indexOf("function buildFinancialModelPrefill", planMapperStart);
+const previousMapperStart = ivs.indexOf("function validEvidenceItems", financialMapperStart);
+if (planMapperStart === -1 || financialMapperStart === -1 || previousMapperStart === -1) {
+  throw new Error("Could not isolate IVS prefill mappers");
 }
-const planMapper = ivs.slice(planMapperStart, previousMapperStart);
+const planMapper = ivs.slice(planMapperStart, financialMapperStart);
+const financialMapper = ivs.slice(financialMapperStart, previousMapperStart);
 for (const unsupportedField of [
-  "targetCustomers:",
-  "internalInnovationOwnership:",
   "minimumSetupCostGbp:",
   "monthlyOperatingCostGbp:",
   "forecastMonthlyRevenueGbp:",
   "evidenceItems:",
 ]) {
   if (planMapper.includes(unsupportedField)) {
-    throw new Error(`Structured application prefill must leave unsupported claim for user confirmation: ${unsupportedField}`);
+    throw new Error(`Business-plan prefill must leave unsupported claim for a direct source: ${unsupportedField}`);
   }
+}
+for (const requiredField of ["minimumSetupCostGbp:", "monthlyOperatingCostGbp:", "forecastMonthlyRevenueGbp:"]) {
+  if (!financialMapper.includes(requiredField)) {
+    throw new Error(`Completed financial-tool prefill is missing direct numeric field: ${requiredField}`);
+  }
+}
+if (financialMapper.includes("evidenceItems:")) {
+  throw new Error("Financial tool reuse must not auto-promote its input into evidence");
 }
 
 if (ivs.includes("data.documents.map") || ivs.includes("applicationPrefill.data.documents.map")) {
@@ -137,6 +159,11 @@ console.log(JSON.stringify({
   documentExtractionSchemaMigrated: true,
   documentExtractionSchemaVerifiedBeforeStart: true,
   documentProvenanceRetained: true,
+  customerSegmentReuseWithoutInference: true,
+  innovationOwnershipReuseWithoutDeliveryInference: true,
+  sameBusinessFinancialToolReuse: true,
+  noPositiveInnovationDefaults: true,
+  blankFinancialInputsRejected: true,
   previousRunBusinessGuard: true,
   preservesUserEdits: true,
   noGeneratedContentParsing: true,
