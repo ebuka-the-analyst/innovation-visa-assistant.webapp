@@ -94,5 +94,8 @@ jobs:
       - name: Validate account-synced Pitch Coach
         run: node scripts/validate-pitch-coach-v2.cjs
 
+      - name: Validate account-synced Final Document Review
+        run: node scripts/validate-account-synced-final-document-review.cjs
+
       - name: Production build
         run: npm run build

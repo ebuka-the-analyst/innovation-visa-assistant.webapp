@@ -1,33 +1,48 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  ChevronRight,
+  Clock3,
+  FileCheck2,
+  FileText,
+  History,
+  Lightbulb,
+  Loader2,
+  RefreshCw,
+  ShieldCheck,
+  Sparkles,
+  Upload,
+  XCircle,
+} from "lucide-react";
+import type { BusinessPlan } from "@shared/schema";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  FileText, Upload, Sparkles, Loader2, CheckCircle, XCircle, Clock,
-  TrendingUp, Lightbulb, Scale, Target, AlertTriangle, ChevronRight,
-  RefreshCw, Crown
-} from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { SEOHead } from "@/components/SEOHead";
 
 interface DocumentReview {
   id: string;
+  userId?: string;
+  documentId?: string | null;
   documentName: string;
   documentType: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   createdAt: string;
   completedAt: string | null;
   overallScore: number | null;
@@ -49,153 +64,151 @@ interface ReviewStats {
   averageScalability: number;
 }
 
-const documentTypes = [
-  { value: 'business_plan', label: 'Business Plan' },
-  { value: 'personal_statement', label: 'Personal Statement' },
-  { value: 'evidence', label: 'Evidence Document' },
-  { value: 'financial', label: 'Financial Document' },
-  { value: 'other', label: 'Other' }
-];
-
-function ScoreCircle({ score, label, color }: { score: number; label: string; color: string }) {
-  return (
-    <div className="text-center">
-      <div className={`w-16 h-16 rounded-full flex items-center justify-center border-4 ${color} mx-auto mb-2`}>
-        <span className="text-xl font-bold">{score}</span>
-      </div>
-      <p className="text-xs text-muted-foreground">{label}</p>
-    </div>
-  );
+interface ReviewResponse {
+  reviews: DocumentReview[];
+  stats: ReviewStats;
 }
 
-function ReviewResultDialog({ review, open, onOpenChange }: { 
-  review: DocumentReview | null; 
-  open: boolean; 
+const MANUAL_DOCUMENT_TYPES = [
+  { value: "business_plan", label: "Business Plan" },
+  { value: "personal_statement", label: "Personal Statement" },
+  { value: "evidence", label: "Evidence Document" },
+  { value: "financial", label: "Financial Document" },
+  { value: "other", label: "Other" },
+];
+
+function formatDate(value?: string | null): string {
+  if (!value) return "Not recorded";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Not recorded";
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function wordCount(value?: string | null): number {
+  return String(value || "").trim().split(/\s+/).filter(Boolean).length;
+}
+
+function scoreClass(score: number | null | undefined): string {
+  const value = Number(score || 0);
+  if (value >= 80) return "border-green-300 bg-green-50 text-green-800 dark:bg-green-950/30 dark:text-green-300";
+  if (value >= 60) return "border-amber-300 bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-300";
+  return "border-red-300 bg-red-50 text-red-800 dark:bg-red-950/30 dark:text-red-300";
+}
+
+function reviewStatusBadge(status: DocumentReview["status"]) {
+  if (status === "completed") {
+    return <Badge className="border border-green-200 bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-950/40 dark:text-green-300"><CheckCircle2 className="mr-1 h-3.5 w-3.5" />Completed</Badge>;
+  }
+  if (status === "failed") {
+    return <Badge className="border border-red-200 bg-red-100 text-red-800 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-300"><XCircle className="mr-1 h-3.5 w-3.5" />Failed</Badge>;
+  }
+  return <Badge className="border border-amber-200 bg-amber-100 text-amber-800 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300"><Clock3 className="mr-1 h-3.5 w-3.5" />{status === "processing" ? "Reviewing" : "Queued"}</Badge>;
+}
+
+function ReviewResultsDialog({
+  review,
+  open,
+  onOpenChange,
+}: {
+  review: DocumentReview | null;
+  open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  if (!review || review.status !== 'completed') return null;
+  if (!review || review.status !== "completed") return null;
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'border-green-500 text-green-600';
-    if (score >= 60) return 'border-amber-500 text-amber-600';
-    return 'border-red-500 text-red-600';
-  };
-
-  const getPriorityColor = (priority: string) => {
-    if (priority === 'high') return 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300';
-    if (priority === 'medium') return 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300';
-    return 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300';
-  };
+  const suggestions = Array.isArray(review.suggestions) ? review.suggestions : [];
+  const strengths = Array.isArray(review.strengthsFound) ? review.strengthsFound : [];
+  const weaknesses = Array.isArray(review.weaknessesFound) ? review.weaknessesFound : [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden">
+      <DialogContent className="max-h-[88vh] max-w-4xl overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            AI Review Results: {review.documentName}
+            <FileCheck2 className="h-5 w-5 text-primary" />
+            Final review: {review.documentName}
           </DialogTitle>
           <DialogDescription>
-            Reviewed on {new Date(review.completedAt!).toLocaleDateString()}
+            Completed {formatDate(review.completedAt)}. Scores assess document preparation quality; they are not a visa-success probability and do not verify external evidence.
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[65vh] pr-4">
-          <div className="space-y-6">
-            <div className="grid grid-cols-5 gap-4">
-              <ScoreCircle 
-                score={review.overallScore || 0} 
-                label="Overall" 
-                color={getScoreColor(review.overallScore || 0)} 
-              />
-              <ScoreCircle 
-                score={review.innovationScore || 0} 
-                label="Innovation" 
-                color={getScoreColor(review.innovationScore || 0)} 
-              />
-              <ScoreCircle 
-                score={review.viabilityScore || 0} 
-                label="Viability" 
-                color={getScoreColor(review.viabilityScore || 0)} 
-              />
-              <ScoreCircle 
-                score={review.scalabilityScore || 0} 
-                label="Scalability" 
-                color={getScoreColor(review.scalabilityScore || 0)} 
-              />
-              <ScoreCircle 
-                score={review.endorserAlignment || 0} 
-                label="Endorser Fit" 
-                color={getScoreColor(review.endorserAlignment || 0)} 
-              />
+        <ScrollArea className="max-h-[67vh] pr-4">
+          <div className="space-y-6 py-1">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              {[
+                ["Overall", review.overallScore],
+                ["Innovation", review.innovationScore],
+                ["Viability", review.viabilityScore],
+                ["Scalability", review.scalabilityScore],
+                ["Endorser fit", review.endorserAlignment],
+              ].map(([label, score]) => (
+                <div key={String(label)} className={`rounded-lg border p-4 text-center ${scoreClass(Number(score || 0))}`}>
+                  <div className="text-2xl font-bold">{Number(score || 0)}</div>
+                  <div className="mt-1 text-xs font-medium">{label}</div>
+                </div>
+              ))}
             </div>
 
-            {review.strengthsFound && review.strengthsFound.length > 0 && (
-              <div>
-                <h4 className="font-medium text-green-600 flex items-center gap-2 mb-2">
-                  <CheckCircle className="w-4 h-4" />
-                  Strengths
-                </h4>
-                <ul className="space-y-2">
-                  {review.strengthsFound.map((strength, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm">
-                      <span className="w-5 h-5 rounded-full bg-green-100 dark:bg-green-950 flex items-center justify-center shrink-0 text-xs text-green-600">
-                        {i + 1}
-                      </span>
-                      {strength}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {review.weaknessesFound && review.weaknessesFound.length > 0 && (
-              <div>
-                <h4 className="font-medium text-amber-600 flex items-center gap-2 mb-2">
-                  <AlertTriangle className="w-4 h-4" />
-                  Areas for Improvement
-                </h4>
-                <ul className="space-y-2">
-                  {review.weaknessesFound.map((weakness, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm">
-                      <span className="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-950 flex items-center justify-center shrink-0 text-xs text-amber-600">
-                        {i + 1}
-                      </span>
-                      {weakness}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {review.suggestions && review.suggestions.length > 0 && (
-              <div>
-                <h4 className="font-medium text-blue-600 flex items-center gap-2 mb-2">
-                  <Lightbulb className="w-4 h-4" />
-                  Suggestions
-                </h4>
+            <section>
+              <h3 className="mb-3 flex items-center gap-2 font-semibold text-green-700 dark:text-green-300">
+                <CheckCircle2 className="h-4 w-4" /> Strengths
+              </h3>
+              {strengths.length ? (
                 <div className="space-y-2">
-                  {review.suggestions.map((item, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm">
-                      <Badge variant="outline" className={`shrink-0 ${getPriorityColor(item.priority)}`}>
-                        {item.priority}
-                      </Badge>
-                      <span>{item.suggestion}</span>
+                  {strengths.map((item, index) => (
+                    <div key={`${index}-${item}`} className="rounded-md border border-green-100 bg-green-50/50 p-3 text-sm leading-relaxed dark:border-green-900 dark:bg-green-950/20">
+                      {item}
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : <p className="text-sm text-muted-foreground">No strengths were returned by the review.</p>}
+            </section>
+
+            <section>
+              <h3 className="mb-3 flex items-center gap-2 font-semibold text-amber-700 dark:text-amber-300">
+                <AlertTriangle className="h-4 w-4" /> Weaknesses to address
+              </h3>
+              {weaknesses.length ? (
+                <div className="space-y-2">
+                  {weaknesses.map((item, index) => (
+                    <div key={`${index}-${item}`} className="rounded-md border border-amber-100 bg-amber-50/50 p-3 text-sm leading-relaxed dark:border-amber-900 dark:bg-amber-950/20">
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              ) : <p className="text-sm text-muted-foreground">No weaknesses were returned by the review.</p>}
+            </section>
+
+            <section>
+              <h3 className="mb-3 flex items-center gap-2 font-semibold text-blue-700 dark:text-blue-300">
+                <Lightbulb className="h-4 w-4" /> Improvement actions
+              </h3>
+              {suggestions.length ? (
+                <div className="space-y-2">
+                  {suggestions.map((item, index) => (
+                    <div key={`${index}-${item.suggestion}`} className="flex items-start gap-3 rounded-md border p-3">
+                      <Badge variant="outline" className="shrink-0 capitalize">{item.priority || "medium"}</Badge>
+                      <p className="text-sm leading-relaxed">{item.suggestion}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : <p className="text-sm text-muted-foreground">No improvement actions were returned by the review.</p>}
+            </section>
           </div>
         </ScrollArea>
 
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
+        <div className="flex flex-col gap-2 border-t pt-4 sm:flex-row sm:justify-end">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
           <Button asChild>
-            <Link href="/template-library">
-              Browse Templates <ChevronRight className="w-4 h-4 ml-1" />
+            <Link href="/tools/compliance-checker">
+              Continue to Compliance Check <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -204,93 +217,34 @@ function ReviewResultDialog({ review, open, onOpenChange }: {
   );
 }
 
-function ReviewCard({ review, onViewResults }: { review: DocumentReview; onViewResults: () => void }) {
-  const statusConfig = {
-    pending: { icon: Clock, color: 'text-gray-500', bg: 'bg-gray-100 dark:bg-gray-800', label: 'Pending' },
-    processing: { icon: Loader2, color: 'text-blue-500', bg: 'bg-blue-100 dark:bg-blue-900', label: 'Processing' },
-    completed: { icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-100 dark:bg-green-900', label: 'Completed' },
-    failed: { icon: XCircle, color: 'text-red-500', bg: 'bg-red-100 dark:bg-red-900', label: 'Failed' }
-  };
-
-  const config = statusConfig[review.status];
-  const StatusIcon = config.icon;
-
+function HistoryCard({ review, onOpen }: { review: DocumentReview; onOpen: () => void }) {
   return (
-    <Card className="hover-elevate" data-testid={`review-card-${review.id}`}>
+    <Card className="border-border">
       <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3 min-w-0">
-            <div className={`p-2 rounded-lg ${config.bg}`}>
-              <StatusIcon className={`w-5 h-5 ${config.color} ${review.status === 'processing' ? 'animate-spin' : ''}`} />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="truncate font-semibold">{review.documentName}</h3>
+              {reviewStatusBadge(review.status)}
             </div>
-            <div className="min-w-0">
-              <h3 className="font-medium truncate">{review.documentName}</h3>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant="secondary" className="text-xs capitalize">
-                  {review.documentType.replace('_', ' ')}
-                </Badge>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(review.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {review.documentType.replaceAll("_", " ")} • created {formatDate(review.createdAt)}
+            </p>
           </div>
-
-          {review.status === 'completed' && review.overallScore !== null && (
-            <div className="text-right shrink-0">
-              <div className={`text-lg font-bold ${
-                review.overallScore >= 80 ? 'text-green-500' :
-                review.overallScore >= 60 ? 'text-amber-500' : 'text-red-500'
-              }`}>
-                {review.overallScore}
+          <div className="flex items-center gap-3">
+            {review.status === "completed" && (
+              <div className={`rounded-md border px-3 py-2 text-center ${scoreClass(review.overallScore)}`}>
+                <div className="text-lg font-bold leading-none">{review.overallScore ?? 0}</div>
+                <div className="mt-1 text-[10px] font-medium">Overall</div>
               </div>
-              <p className="text-xs text-muted-foreground">Score</p>
-            </div>
-          )}
+            )}
+            {review.status === "completed" && (
+              <Button variant="outline" onClick={onOpen}>
+                View results <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
-
-        {review.status === 'completed' && (
-          <div className="mt-4 pt-4 border-t">
-            <div className="grid grid-cols-4 gap-2 mb-3">
-              <div className="text-center">
-                <div className="text-sm font-medium">{review.innovationScore}</div>
-                <p className="text-xs text-muted-foreground">Innovation</p>
-              </div>
-              <div className="text-center">
-                <div className="text-sm font-medium">{review.viabilityScore}</div>
-                <p className="text-xs text-muted-foreground">Viability</p>
-              </div>
-              <div className="text-center">
-                <div className="text-sm font-medium">{review.scalabilityScore}</div>
-                <p className="text-xs text-muted-foreground">Scalability</p>
-              </div>
-              <div className="text-center">
-                <div className="text-sm font-medium">{review.endorserAlignment}</div>
-                <p className="text-xs text-muted-foreground">Endorser</p>
-              </div>
-            </div>
-            <Button className="w-full" onClick={onViewResults} data-testid={`button-view-results-${review.id}`}>
-              View Full Results <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-          </div>
-        )}
-
-        {review.status === 'processing' && (
-          <div className="mt-4">
-            <Progress value={33} className="h-2" />
-            <p className="text-xs text-muted-foreground mt-1 text-center">AI analyzing your document...</p>
-          </div>
-        )}
-
-        {review.status === 'failed' && (
-          <div className="mt-4">
-            <Alert variant="destructive">
-              <AlertDescription className="text-sm">
-                Review failed. Please try again or contact support.
-              </AlertDescription>
-            </Alert>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
@@ -299,50 +253,141 @@ function ReviewCard({ review, onViewResults }: { review: DocumentReview; onViewR
 export default function DocumentReview() {
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
-  const [documentName, setDocumentName] = useState("");
-  const [documentType, setDocumentType] = useState<string>("");
-  const [documentContent, setDocumentContent] = useState("");
+  const [activeTab, setActiveTab] = useState("final");
+  const [selectedPlanId, setSelectedPlanId] = useState("");
   const [selectedReview, setSelectedReview] = useState<DocumentReview | null>(null);
-  const [showResults, setShowResults] = useState(false);
+  const [resultsOpen, setResultsOpen] = useState(false);
+  const [manualName, setManualName] = useState("");
+  const [manualType, setManualType] = useState("");
+  const [manualContent, setManualContent] = useState("");
+  const lastCompletedCountRef = useRef(0);
 
-  const { data: reviewData, isLoading, refetch } = useQuery<{ reviews: DocumentReview[]; stats: ReviewStats }>({
-    queryKey: ['/api/document-reviews'],
-    enabled: !!user,
-    refetchInterval: 5000
+  const plansQuery = useQuery<BusinessPlan[]>({
+    queryKey: ["/api/dashboard/plans"],
+    enabled: Boolean(user),
   });
 
-  const createReviewMutation = useMutation({
+  const reviewsQuery = useQuery<ReviewResponse>({
+    queryKey: ["/api/document-reviews"],
+    enabled: Boolean(user),
+    refetchInterval: 4000,
+  });
+
+  const ownCompletedPlans = useMemo(() => {
+    const userId = String((user as any)?.id || "");
+    return (plansQuery.data || [])
+      .filter((plan) =>
+        plan.status === "completed" &&
+        !plan.isDemoData &&
+        String(plan.userId || "") === userId &&
+        String(plan.generatedContent || "").trim().length >= 100,
+      )
+      .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+  }, [plansQuery.data, user]);
+
+  useEffect(() => {
+    if (!selectedPlanId && ownCompletedPlans[0]?.id) {
+      setSelectedPlanId(ownCompletedPlans[0].id);
+    }
+  }, [ownCompletedPlans, selectedPlanId]);
+
+  const selectedPlan = ownCompletedPlans.find((plan) => plan.id === selectedPlanId) || ownCompletedPlans[0] || null;
+  const reviews = useMemo(
+    () => [...(reviewsQuery.data?.reviews || [])].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+    [reviewsQuery.data?.reviews],
+  );
+
+  const planReviews = useMemo(
+    () => selectedPlan ? reviews.filter((review) => review.documentId === selectedPlan.id && review.documentType === "business_plan") : [],
+    [reviews, selectedPlan],
+  );
+  const latestPlanReview = planReviews[0] || null;
+  const activePlanReview = planReviews.find((review) => review.status === "pending" || review.status === "processing") || null;
+  const completedPlanReview = planReviews.find((review) => review.status === "completed") || null;
+  const latestFailedPlanReview = planReviews.find((review) => review.status === "failed") || null;
+
+  useEffect(() => {
+    const completedCount = reviews.filter((review) => review.status === "completed").length;
+    if (completedCount > lastCompletedCountRef.current) {
+      void queryClient.invalidateQueries({ queryKey: ["/api/progress-tracker"] });
+    }
+    lastCompletedCountRef.current = completedCount;
+  }, [reviews]);
+
+  const finalReviewMutation = useMutation({
+    mutationFn: async (plan: BusinessPlan) => {
+      const content = String(plan.generatedContent || "").trim();
+      if (content.length < 100) throw new Error("The completed business plan does not contain enough generated content to review.");
+      const response = await apiRequest("POST", "/api/document-reviews", {
+        documentName: `${plan.businessName || "Business Plan"} – Final Business Plan`,
+        documentType: "business_plan",
+        documentContent: content,
+        documentId: plan.id,
+      });
+      return response.json() as Promise<DocumentReview>;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/document-reviews"] });
+      toast({
+        title: "Final review started",
+        description: "The complete saved business plan is being reviewed. This page will update automatically.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Could not start final review", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const manualReviewMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/document-reviews", {
-        documentName,
-        documentType,
-        documentContent
+        documentName: manualName.trim(),
+        documentType: manualType,
+        documentContent: manualContent.trim(),
       });
-      return response.json();
+      return response.json() as Promise<DocumentReview>;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/document-reviews'] });
-      toast({ title: "Review started!", description: "AI is analyzing your document..." });
-      setDocumentName("");
-      setDocumentType("");
-      setDocumentContent("");
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/document-reviews"] });
+      setManualName("");
+      setManualType("");
+      setManualContent("");
+      toast({ title: "Review started", description: "Your document is being analysed." });
     },
-    onError: () => {
-      toast({ title: "Failed to start review", variant: "destructive" });
-    }
+    onError: (error: Error) => {
+      toast({ title: "Could not start review", description: error.message, variant: "destructive" });
+    },
   });
 
-  if (authLoading || isLoading) {
+  const openResults = (review: DocumentReview) => {
+    setSelectedReview(review);
+    setResultsOpen(true);
+  };
+
+  const handleFinalReview = () => {
+    if (!selectedPlan) return;
+    if (activePlanReview) {
+      toast({ title: "Review already in progress", description: "There is no need to submit the same business plan twice." });
+      return;
+    }
+    if (completedPlanReview) {
+      openResults(completedPlanReview);
+      return;
+    }
+    finalReviewMutation.mutate(selectedPlan);
+  };
+
+  const manualCanSubmit = manualName.trim().length > 0 && manualType.length > 0 && manualContent.trim().length >= 100;
+  const isLoading = authLoading || plansQuery.isLoading || reviewsQuery.isLoading;
+  const finalStatus = completedPlanReview ? "completed" : activePlanReview ? "active" : latestFailedPlanReview ? "failed" : selectedPlan ? "ready" : "missing";
+
+  if (isLoading) {
     return (
-      <div className="container mx-auto py-8 px-4 max-w-5xl">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-muted rounded w-1/3" />
-          <div className="grid grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-24 bg-muted rounded" />
-            ))}
-          </div>
-          <div className="h-64 bg-muted rounded" />
+      <div className="mx-auto max-w-6xl px-4 py-8">
+        <div className="space-y-4 animate-pulse">
+          <div className="h-10 w-72 rounded bg-muted" />
+          <div className="h-28 rounded-xl bg-muted" />
+          <div className="h-80 rounded-xl bg-muted" />
         </div>
       </div>
     );
@@ -350,218 +395,301 @@ export default function DocumentReview() {
 
   if (!user) {
     return (
-      <>
-        <SEOHead
-          title="AI Document Review | UK Innovator Founder Visa Assistant"
-          description="Get AI-powered feedback on your UK Innovator Founder Visa application documents."
-        />
-        <div className="container mx-auto py-8 px-4 max-w-2xl text-center">
-          <Sparkles className="w-16 h-16 mx-auto text-primary mb-4" />
-          <h1 className="text-lg font-bold mb-4">Sign In for AI Document Review</h1>
-          <p className="text-muted-foreground mb-6">
-            Get expert AI feedback on your visa application documents.
-          </p>
-          <div className="flex justify-center gap-4">
-            <Button asChild>
-              <Link href="/login" data-testid="link-login">Sign In</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/signup" data-testid="link-signup">Create Account</Link>
-            </Button>
-          </div>
-        </div>
-      </>
+      <div className="mx-auto max-w-xl px-4 py-16 text-center">
+        <FileCheck2 className="mx-auto mb-4 h-12 w-12 text-primary" />
+        <h1 className="text-2xl font-bold">Sign in to run your final document review</h1>
+        <p className="mt-3 text-muted-foreground">Your final review is linked to the business plan and evidence in your own account.</p>
+        <Button asChild className="mt-6"><Link href="/login">Sign in</Link></Button>
+      </div>
     );
   }
-
-  const reviews = reviewData?.reviews || [];
-  const stats = reviewData?.stats || {
-    totalReviews: 0,
-    completedReviews: 0,
-    averageScore: 0,
-    averageInnovation: 0,
-    averageViability: 0,
-    averageScalability: 0
-  };
-
-  const canSubmit = documentName.trim() && documentType && documentContent.trim().length >= 100;
 
   return (
     <>
       <SEOHead
-        title="AI Document Review | UK Innovator Founder Visa Assistant"
-        description="Get AI-powered professional feedback on your UK Innovator Founder Visa application documents. Improve your innovation, viability, and scalability scores."
+        title="Final Document Review | UK Innovator Founder Visa Assistant"
+        description="Run an account-synced final quality review of your saved Innovator Founder business plan and supporting application material."
       />
 
-      <div className="container mx-auto py-8 px-4 max-w-5xl">
-        <div className="mb-8">
-          <h1 className="text-xl font-bold mb-2 flex items-center gap-3" data-testid="heading-document-review">
-            <Sparkles className="w-8 h-8 text-primary" />
-            AI Document Review
-          </h1>
-          <p className="text-muted-foreground">
-            Get expert AI feedback to strengthen your visa application documents
+      <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 md:px-6">
+        <header>
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <Badge variant="outline">Account-synced</Badge>
+            <Badge variant="outline">Whole-document review</Badge>
+            <Badge variant="outline">Phase 5</Badge>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Final Document Review</h1>
+          <p className="mt-2 max-w-4xl text-muted-foreground">
+            You should not have to copy and paste a business plan the platform already created. The recommended review below uses the latest completed, non-demo business plan saved in your account and links the completed review back to Progress Tracker.
           </p>
+        </header>
+
+        <div className="grid gap-3 md:grid-cols-3">
+          <Card className={selectedPlan ? "border-green-200" : "border-red-200"}>
+            <CardContent className="flex items-start gap-3 p-4">
+              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${selectedPlan ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>1</div>
+              <div>
+                <div className="font-semibold">Select source</div>
+                <div className="mt-1 text-xs text-muted-foreground">{selectedPlan ? "Completed business plan found" : "Completed business plan required"}</div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className={completedPlanReview ? "border-green-200" : activePlanReview ? "border-amber-200" : "border-border"}>
+            <CardContent className="flex items-start gap-3 p-4">
+              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${completedPlanReview ? "bg-green-100 text-green-700" : activePlanReview ? "bg-amber-100 text-amber-700" : "bg-muted"}`}>2</div>
+              <div>
+                <div className="font-semibold">Run final review</div>
+                <div className="mt-1 text-xs text-muted-foreground">{completedPlanReview ? "Review completed" : activePlanReview ? "AI review in progress" : "One action when ready"}</div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className={completedPlanReview ? "border-blue-200" : "border-border"}>
+            <CardContent className="flex items-start gap-3 p-4">
+              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${completedPlanReview ? "bg-blue-100 text-blue-700" : "bg-muted"}`}>3</div>
+              <div>
+                <div className="font-semibold">Continue to compliance</div>
+                <div className="mt-1 text-xs text-muted-foreground">Final required check after review</div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-xl font-bold text-primary" data-testid="text-total-reviews">{stats.totalReviews}</div>
-              <p className="text-sm text-muted-foreground">Total Reviews</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-xl font-bold text-green-500" data-testid="text-avg-score">{stats.averageScore || '-'}</div>
-              <p className="text-sm text-muted-foreground">Avg Score</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-xl font-bold text-blue-500" data-testid="text-avg-innovation">{stats.averageInnovation || '-'}</div>
-              <p className="text-sm text-muted-foreground">Avg Innovation</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-xl font-bold text-purple-500" data-testid="text-avg-viability">{stats.averageViability || '-'}</div>
-              <p className="text-sm text-muted-foreground">Avg Viability</p>
-            </CardContent>
-          </Card>
-        </div>
+        {completedPlanReview && (
+          <Alert className="border-green-300 bg-green-50/70 dark:border-green-900 dark:bg-green-950/20">
+            <CheckCircle2 className="h-4 w-4 text-green-700" />
+            <AlertTitle>Final Document Review milestone completed</AlertTitle>
+            <AlertDescription className="mt-1">
+              The completed review is now part of your account history and Progress Tracker can count this milestone. Review the weaknesses below before relying on the pack, then continue to the Compliance Check.
+            </AlertDescription>
+          </Alert>
+        )}
 
-        <Tabs defaultValue="new" className="space-y-6" data-testid="tabs-document-review">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="new">New Review</TabsTrigger>
-            <TabsTrigger value="history">Review History ({reviews.length})</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
+          <TabsList className="grid h-auto w-full grid-cols-3">
+            <TabsTrigger value="final"><FileCheck2 className="mr-2 h-4 w-4" />Final Review</TabsTrigger>
+            <TabsTrigger value="history"><History className="mr-2 h-4 w-4" />History ({reviews.length})</TabsTrigger>
+            <TabsTrigger value="manual"><Upload className="mr-2 h-4 w-4" />Other Document</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="new" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Upload className="w-5 h-5" />
-                  Submit Document for Review
-                </CardTitle>
-                <CardDescription>
-                  Paste your document content below for AI-powered analysis
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="doc-name">Document Name</Label>
-                    <Input
-                      id="doc-name"
-                      value={documentName}
-                      onChange={(e) => setDocumentName(e.target.value)}
-                      placeholder="e.g., Business Plan v2"
-                      data-testid="input-document-name"
-                    />
+          <TabsContent value="final" className="space-y-5">
+            {!selectedPlan ? (
+              <Card className="border-red-200">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-3">
+                    <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+                    <div>
+                      <h2 className="font-semibold">No completed account-owned business plan is available</h2>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Demo plans are deliberately excluded. Complete your own generated business plan first so the final review is tied to the correct application.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <Button asChild><Link href="/questionnaire">Generate / complete plan</Link></Button>
+                        <Button variant="outline" asChild><Link href="/documents">Open My Documents</Link></Button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="doc-type">Document Type</Label>
-                    <Select value={documentType} onValueChange={setDocumentType}>
-                      <SelectTrigger id="doc-type" data-testid="select-document-type">
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {documentTypes.map(type => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className={completedPlanReview ? "border-green-300" : activePlanReview ? "border-amber-300" : latestFailedPlanReview ? "border-red-300" : "border-primary/25"}>
+                <CardHeader>
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-primary" />
+                        Recommended source: saved Business Plan
+                      </CardTitle>
+                      <CardDescription className="mt-2">
+                        The full generated text is supplied directly from your account. You do not need to paste it into a blank box.
+                      </CardDescription>
+                    </div>
+                    <div>
+                      {finalStatus === "completed" && reviewStatusBadge("completed")}
+                      {finalStatus === "active" && reviewStatusBadge(activePlanReview?.status || "processing")}
+                      {finalStatus === "failed" && reviewStatusBadge("failed")}
+                      {finalStatus === "ready" && <Badge className="border border-blue-200 bg-blue-100 text-blue-800 hover:bg-blue-100">Ready to review</Badge>}
+                    </div>
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="doc-content">Document Content</Label>
-                  <Textarea
-                    id="doc-content"
-                    value={documentContent}
-                    onChange={(e) => setDocumentContent(e.target.value)}
-                    placeholder="Paste your document content here (minimum 100 characters)..."
-                    className="min-h-[300px] font-mono text-sm"
-                    data-testid="textarea-document-content"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {documentContent.length} characters (minimum 100 required)
-                  </p>
-                </div>
-
-                <Button 
-                  className="w-full" 
-                  onClick={() => createReviewMutation.mutate()}
-                  disabled={!canSubmit || createReviewMutation.isPending}
-                  data-testid="button-submit-review"
-                >
-                  {createReviewMutation.isPending ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Starting Review...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Submit for AI Review
-                    </>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  {ownCompletedPlans.length > 1 && (
+                    <div className="max-w-xl">
+                      <Label htmlFor="plan-source">Business plan version</Label>
+                      <Select value={selectedPlan.id} onValueChange={setSelectedPlanId}>
+                        <SelectTrigger id="plan-source"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {ownCompletedPlans.map((plan) => (
+                            <SelectItem key={plan.id} value={plan.id}>
+                              {plan.businessName || "Business Plan"} • {formatDate(plan.createdAt)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   )}
-                </Button>
-              </CardContent>
-            </Card>
 
-            <Alert className="bg-gradient-to-r from-primary/5 to-primary/10">
-              <Lightbulb className="w-4 h-4" />
-              <AlertDescription>
-                <strong>Tip:</strong> For best results, include complete sections like Executive Summary, 
-                Innovation Description, Market Analysis, and Financial Projections.
-              </AlertDescription>
-            </Alert>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="rounded-lg border p-4">
+                      <div className="text-xs text-muted-foreground">Business</div>
+                      <div className="mt-1 font-semibold">{selectedPlan.businessName || "Business Plan"}</div>
+                    </div>
+                    <div className="rounded-lg border p-4">
+                      <div className="text-xs text-muted-foreground">Plan status</div>
+                      <div className="mt-1 font-semibold capitalize">{selectedPlan.status}</div>
+                    </div>
+                    <div className="rounded-lg border p-4">
+                      <div className="text-xs text-muted-foreground">Generated content</div>
+                      <div className="mt-1 font-semibold">{wordCount(selectedPlan.generatedContent).toLocaleString("en-GB")} words</div>
+                    </div>
+                    <div className="rounded-lg border p-4">
+                      <div className="text-xs text-muted-foreground">Created</div>
+                      <div className="mt-1 font-semibold">{formatDate(selectedPlan.createdAt)}</div>
+                    </div>
+                  </div>
+
+                  <Alert className="border-blue-200 bg-blue-50/60 dark:border-blue-900 dark:bg-blue-950/20">
+                    <ShieldCheck className="h-4 w-4" />
+                    <AlertDescription>
+                      This is a document-quality review. AI-generated text, scores and suggestions are not independent proof of customers, revenue, funding, contracts, qualifications, patents or other external evidence. Those claims still need genuine supporting records.
+                    </AlertDescription>
+                  </Alert>
+
+                  {activePlanReview && (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-900 dark:bg-amber-950/20">
+                      <div className="flex items-center gap-2 font-semibold text-amber-800 dark:text-amber-300">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Reviewing the full business plan
+                      </div>
+                      <p className="mt-2 text-sm text-muted-foreground">This page checks for completion automatically. Do not submit the same plan again.</p>
+                      <Progress value={55} className="mt-3" />
+                    </div>
+                  )}
+
+                  {latestFailedPlanReview && !activePlanReview && !completedPlanReview && (
+                    <Alert variant="destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertTitle>The previous review failed</AlertTitle>
+                      <AlertDescription>You can retry the same saved plan without copying its content manually.</AlertDescription>
+                    </Alert>
+                  )}
+
+                  {completedPlanReview ? (
+                    <div className="flex flex-col gap-3 rounded-lg border border-green-200 bg-green-50/50 p-4 dark:border-green-900 dark:bg-green-950/20 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <div className="flex items-center gap-2 font-semibold text-green-800 dark:text-green-300">
+                          <CheckCircle2 className="h-5 w-5" /> Review completed
+                        </div>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Overall document-preparation score: <strong>{completedPlanReview.overallScore ?? 0}/100</strong>. Open the results to see strengths, weaknesses and improvement actions.
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 flex-wrap gap-2">
+                        <Button variant="outline" onClick={() => openResults(completedPlanReview)}>View full results</Button>
+                        <Button asChild>
+                          <Link href="/tools/compliance-checker">Continue to Compliance Check <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      size="lg"
+                      className="w-full sm:w-auto"
+                      onClick={handleFinalReview}
+                      disabled={Boolean(activePlanReview) || finalReviewMutation.isPending}
+                      data-testid="button-run-account-final-review"
+                    >
+                      {finalReviewMutation.isPending || activePlanReview ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                      {activePlanReview ? "Review in progress" : latestFailedPlanReview ? "Retry final review" : "Review my latest business plan"}
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {latestPlanReview && latestPlanReview.status === "completed" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">What happens next?</CardTitle>
+                  <CardDescription>Keep the final phase simple: review weaknesses, then run the remaining compliance check.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-3 md:grid-cols-2">
+                  <button type="button" onClick={() => openResults(latestPlanReview)} className="rounded-lg border p-4 text-left transition-colors hover:bg-muted/40">
+                    <div className="flex items-center gap-2 font-semibold"><Lightbulb className="h-4 w-4" />1. Review weaknesses</div>
+                    <p className="mt-2 text-sm text-muted-foreground">Check that every proposed improvement remains consistent with the underlying evidence and business-plan facts.</p>
+                  </button>
+                  <Link href="/tools/compliance-checker" className="rounded-lg border border-blue-200 p-4 transition-colors hover:bg-blue-50/50 dark:border-blue-900 dark:hover:bg-blue-950/20">
+                    <div className="flex items-center gap-2 font-semibold"><ShieldCheck className="h-4 w-4" />2. Compliance Check</div>
+                    <p className="mt-2 text-sm text-muted-foreground">Complete the remaining required compliance milestone and return to Progress Tracker.</p>
+                  </Link>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-medium">Your Reviews</h3>
-              <Button variant="outline" size="sm" onClick={() => refetch()} data-testid="button-refresh">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Refresh
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-lg font-semibold">Review history</h2>
+                <p className="text-sm text-muted-foreground">All document reviews saved to this account.</p>
+              </div>
+              <Button variant="outline" onClick={() => reviewsQuery.refetch()} disabled={reviewsQuery.isFetching}>
+                <RefreshCw className={`mr-2 h-4 w-4 ${reviewsQuery.isFetching ? "animate-spin" : ""}`} />Refresh
               </Button>
             </div>
 
             {reviews.length === 0 ? (
-              <Card className="p-12 text-center">
-                <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Reviews Yet</h3>
-                <p className="text-muted-foreground mb-4">
-                  Submit your first document to get AI-powered feedback
-                </p>
-              </Card>
-            ) : (
-              <div className="grid gap-4">
-                {reviews.map(review => (
-                  <ReviewCard
-                    key={review.id}
-                    review={review}
-                    onViewResults={() => {
-                      setSelectedReview(review);
-                      setShowResults(true);
-                    }}
-                  />
-                ))}
-              </div>
-            )}
+              <Card><CardContent className="p-8 text-center text-muted-foreground">No document reviews have been created yet.</CardContent></Card>
+            ) : reviews.map((review) => (
+              <HistoryCard key={review.id} review={review} onOpen={() => openResults(review)} />
+            ))}
+          </TabsContent>
+
+          <TabsContent value="manual" className="space-y-5">
+            <Alert>
+              <Upload className="h-4 w-4" />
+              <AlertTitle>Manual review is a fallback, not the default</AlertTitle>
+              <AlertDescription>
+                Use this only for a different document that is not already available as the completed business plan in your account. The Final Review tab is the recommended route for the Progress Tracker milestone.
+              </AlertDescription>
+            </Alert>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Review another document</CardTitle>
+                <CardDescription>Paste at least 100 characters from a separate document.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <Label htmlFor="manual-document-name">Document name</Label>
+                    <Input id="manual-document-name" value={manualName} onChange={(event) => setManualName(event.target.value)} placeholder="e.g. Founder personal statement" />
+                  </div>
+                  <div>
+                    <Label htmlFor="manual-document-type">Document type</Label>
+                    <Select value={manualType} onValueChange={setManualType}>
+                      <SelectTrigger id="manual-document-type"><SelectValue placeholder="Select type" /></SelectTrigger>
+                      <SelectContent>
+                        {MANUAL_DOCUMENT_TYPES.map((type) => <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="manual-document-content">Document content</Label>
+                  <Textarea id="manual-document-content" rows={14} value={manualContent} onChange={(event) => setManualContent(event.target.value)} placeholder="Paste the separate document content here..." />
+                  <p className="mt-1 text-xs text-muted-foreground">{manualContent.trim().length.toLocaleString("en-GB")} characters</p>
+                </div>
+                <Button onClick={() => manualReviewMutation.mutate()} disabled={!manualCanSubmit || manualReviewMutation.isPending}>
+                  {manualReviewMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileCheck2 className="mr-2 h-4 w-4" />}
+                  Start review
+                </Button>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
-
-        <ReviewResultDialog
-          review={selectedReview}
-          open={showResults}
-          onOpenChange={setShowResults}
-        />
       </div>
+
+      <ReviewResultsDialog review={selectedReview} open={resultsOpen} onOpenChange={setResultsOpen} />
     </>
   );
 }
