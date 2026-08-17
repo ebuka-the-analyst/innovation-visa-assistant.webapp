@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { FileText, Files, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ApplicationDocumentWorkspaceContainer } from "@/components/ApplicationDocumentWorkspace";
 
 const FINANCIAL_TOOLS = new Set([
   "financial-projections",
@@ -135,9 +136,13 @@ function noticeForLocation(location: string): Notice | null {
 
 export function ContextualDocumentNotice() {
   const [location] = useLocation();
-  const notice = noticeForLocation(location);
 
-  if (!notice || location === "/documents") return null;
+  if (location === "/documents") {
+    return <ApplicationDocumentWorkspaceContainer />;
+  }
+
+  const notice = noticeForLocation(location);
+  if (!notice) return null;
 
   return (
     <div className="border-b bg-muted/30 px-4 py-2.5 md:px-6" data-testid="contextual-document-notice">
