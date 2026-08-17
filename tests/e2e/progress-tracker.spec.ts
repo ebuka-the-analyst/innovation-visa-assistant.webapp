@@ -80,6 +80,14 @@ async function mockTrackerApi(page: Page, options?: { failTracker?: boolean }) {
       return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ success: true }) });
     }
 
+    if (url.pathname === "/api/view/html/plan-test-1") {
+      return route.fulfill({
+        status: 200,
+        contentType: "text/html",
+        body: "<!doctype html><html><body><h1>Existing completed plan review</h1></body></html>",
+      });
+    }
+
     return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({}) });
   });
 }
@@ -130,6 +138,20 @@ test("keeps completed evidence visible without falsely completing Innovation Sco
   await expect(page.getByTestId("progress-step-business-plan")).toContainText("Completed");
   await expect(page.getByTestId("progress-step-financial-projections")).toContainText("Completed");
   await expect(page.getByTestId("progress-step-market-research")).toContainText("Completed");
+});
+
+test("completed questionnaire Review opens the existing plan instead of the new-plan credit flow", async ({ page }) => {
+  await mockTrackerApi(page);
+  await page.goto("/progress-e2e.html");
+
+  const reviewLink = page.getByRole("link", { name: "Review Complete Business Questionnaire" });
+  await expect(reviewLink).toHaveAttribute("href", "/api/view/html/plan-test-1");
+  await expect(reviewLink).not.toHaveAttribute("href", "/questionnaire");
+
+  await reviewLink.click();
+  await expect(page).toHaveURL(/\/api\/view\/html\/plan-test-1$/);
+  await expect(page.getByRole("heading", { name: "Existing completed plan review" })).toBeVisible();
+  await expect(page.getByText("Get Credits")).toHaveCount(0);
 });
 
 test("phase accordions are keyboard operable", async ({ page }) => {
