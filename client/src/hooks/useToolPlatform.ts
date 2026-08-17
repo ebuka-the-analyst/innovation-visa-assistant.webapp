@@ -13,6 +13,104 @@ export interface ToolCaseContext {
   updatedAt: string | null;
 }
 
+export interface ApplicationBusinessPlan {
+  id: string;
+  status: string;
+  createdAt: string | null;
+  completedPlanCount: number;
+  businessName: string;
+  industry: string;
+  problem: string;
+  uniqueness: string;
+  technology: string;
+  experience: string;
+  funding: number;
+  revenue: string;
+  jobCreation: number;
+  expansion: string;
+  vision: string;
+  innovationStage: string;
+  productStatus: string;
+  existingCustomers: string | null;
+  betaTesters: string | null;
+  tractionEvidence: string | null;
+  techStack: string;
+  dataArchitecture: string;
+  aiMethodology: string;
+  complianceDesign: string;
+  patentStatus: string;
+  founderEducation: string;
+  founderWorkHistory: string;
+  founderAchievements: string;
+  relevantProjects: string;
+  monthlyProjections: string;
+  customerAcquisitionCost: number;
+  lifetimeValue: number;
+  paybackPeriod: number;
+  fundingSources: string;
+  detailedCosts: string;
+  competitors: string;
+  competitiveDifferentiation: string;
+  customerInterviews: string;
+  lettersOfIntent: string | null;
+  willingnessToPay: string;
+  marketSize: string;
+  regulatoryRequirements: string;
+  complianceTimeline: string;
+  complianceBudget: number;
+  hiringPlan: string;
+  specificRegions: string;
+  internationalPlan: string | null;
+  targetEndorser: string;
+  contactPointsStrategy: string;
+  supportingEvidence: string | null;
+}
+
+export interface ApplicationDocumentReference {
+  id: string;
+  name: string;
+  category: string | null;
+  status: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+  reference: string;
+}
+
+export interface DocumentPrefillProvenance {
+  extractionId: string;
+  sourceField: string;
+  planField: string;
+  confidence: number;
+  documentRefs: string[];
+  extractedAt: string | null;
+  reviewRequired: true;
+  countedAsEvidence: false;
+}
+
+export interface ApplicationContextPrefill {
+  generatedAt: string;
+  toolId: string | null;
+  businessPlan: ApplicationBusinessPlan | null;
+  businessPlanSelection: {
+    strategy: "previous_tool_business_match" | "latest_completed" | "questionnaire_draft" | "document_extraction" | "none";
+    matchedPreviousToolRun: boolean;
+    supplementedByQuestionnaireDraft: boolean;
+    questionnaireDraftFieldCount: number;
+    supplementedByDocumentExtraction: boolean;
+    documentExtractedFieldCount: number;
+  };
+  documentPrefillProvenance: DocumentPrefillProvenance[];
+  caseContext: ToolCaseContext;
+  previousToolRun: {
+    id: string;
+    inputSnapshot: Record<string, unknown>;
+    evidenceRefs: string[];
+    completedAt: string | null;
+    createdAt: string | null;
+  } | null;
+  documents: ApplicationDocumentReference[];
+}
+
 export interface ToolRegistrySnapshot {
   schemaVersion: number;
   registryVersion: string;
@@ -78,6 +176,19 @@ export function useToolCaseContext(enabled = true) {
   return useQuery<ToolCaseContext>({
     queryKey: ["/api/tool-platform/context"],
     queryFn: () => jsonRequest("GET", "/api/tool-platform/context"),
+    enabled,
+    retry: false,
+    staleTime: 15_000,
+  });
+}
+
+export function useApplicationContextPrefill(toolId?: string, enabled = true) {
+  const query = new URLSearchParams();
+  if (toolId) query.set("toolId", toolId);
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  return useQuery<ApplicationContextPrefill>({
+    queryKey: ["/api/tool-platform/application-context", toolId || "none"],
+    queryFn: () => jsonRequest("GET", `/api/tool-platform/application-context${suffix}`),
     enabled,
     retry: false,
     staleTime: 15_000,

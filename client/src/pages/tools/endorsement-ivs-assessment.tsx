@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -13,7 +13,11 @@ import {
   Trash2,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToolRunHistory } from "@/hooks/useToolPlatform";
+import {
+  useApplicationContextPrefill,
+  useToolRunHistory,
+  type ApplicationBusinessPlan,
+} from "@/hooks/useToolPlatform";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -180,6 +184,14 @@ type AssessmentResponse = {
   assessment: Assessment;
 };
 
+type AutofillSummary = {
+  businessName: string | null;
+  reusableFieldCount: number;
+  restoredPreviousReview: boolean;
+  previousReviewSkippedForDifferentBusiness: boolean;
+  availableDocumentCount: number;
+};
+
 const EVIDENCE_OPTIONS: Array<{ value: EvidenceType; label: string }> = [
   ["competitor_analysis", "Competitor analysis"],
   ["market_research", "Market research"],
@@ -204,6 +216,8 @@ const EVIDENCE_OPTIONS: Array<{ value: EvidenceType; label: string }> = [
   ["partnership_evidence", "Partnership evidence"],
   ["other", "Other evidence"],
 ].map(([value, label]) => ({ value: value as EvidenceType, label }));
+
+const EVIDENCE_TYPES = new Set(EVIDENCE_OPTIONS.map((option) => option.value));
 
 function blankEvidence(): EvidenceItem {
   return { id: crypto.randomUUID(), type: "other", title: "", summary: "", reference: "" };
@@ -236,6 +250,194 @@ function initialForm(): FormState {
     projectionsResearchBasis: "",
     evidenceItems: [],
   };
+}
+
+function text(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function limited(value: string, maxLength: number): string {
+  const cleaned = value.trim();
+  return cleaned.length <= maxLength ? cleaned : cleaned.slice(0, maxLength).trimEnd();
+}
+
+function joined(parts: Array<[string, unknown]>, maxLength: number): string {
+  const value = parts
+    .map(([label, raw]) => [label, text(raw)] as const)
+    .filter(([, raw]) => raw.length > 0)
+    .map(([label, raw]) => `${label}: ${raw}`)
+    .join("\n\n");
+  return limited(value, maxLength);
+}
+
+function buildBusinessPlanPrefill(plan: ApplicationBusinessPlan): Partial<FormState> {
+  return {
+    businessName: limited(text(plan.businessName), 160),
+    businessSummary: joined([
+      ["Industry", plan.industry],
+      ["Product / technology", plan.technology],
+      ["Current product status", plan.productStatus],
+      ["Business vision", plan.vision],
+    ], 5000),
+    marketNeed: limited(text(plan.problem), 4000),
+    uniqueSellingProposition: limited(text(plan.uniqueness), 3000),
+    competitorDifferentiation: joined([
+      ["Named competitors / alternatives", plan.competitors],
+      ["Competitive differentiation", plan.competitiveDifferentiation],
+    ], 3000),
+    replicationBarriers: joined([
+      ["IP / patent status", plan.patentStatus],
+      ["Data architecture", plan.dataArchitecture],
+      ["AI / technical methodology", plan.aiMethodology],
+      ["Technology stack", plan.techStack],
+    ], 3000),
+    founderCapability: joined([
+      ["Relevant experience", plan.experience],
+      ["Education", plan.founderEducation],
+      ["Work history", plan.founderWorkHistory],
+      ["Achievements", plan.founderAchievements],
+      ["Relevant projects", plan.relevantProjects],
+    ], 3500),
+    fundingAvailableGbp: Number.isFinite(plan.funding) ? String(Math.max(0, plan.funding)) : "",
+    financialAssumptions: joined([
+      ["Monthly projections", plan.monthlyProjections],
+      ["Funding sources", plan.fundingSources],
+      ["Detailed costs", plan.detailedCosts],
+      ["Customer acquisition cost", Number.isFinite(plan.customerAcquisitionCost) ? `£${plan.customerAcquisitionCost}` : ""],
+      ["Lifetime value", Number.isFinite(plan.lifetimeValue) ? `£${plan.lifetimeValue}` : ""],
+      ["Payback period", Number.isFinite(plan.paybackPeriod) ? String(plan.paybackPeriod) : ""],
+    ], 4000),
+    demandEvidenceSummary: joined([
+      ["Existing customers", plan.existingCustomers],
+      ["Beta testers", plan.betaTesters],
+      ["Traction evidence", plan.tractionEvidence],
+      ["Customer interviews", plan.customerInterviews],
+      ["Letters of intent", plan.lettersOfIntent],
+      ["Willingness-to-pay evidence", plan.willingnessToPay],
+    ], 3500),
+    growthPlan: joined([
+      ["Expansion strategy", plan.expansion],
+      ["Business vision", plan.vision],
+      ["Hiring plan", plan.hiringPlan],
+    ], 4000),
+    skilledJobsPlannedThreeYears: Number.isFinite(plan.jobCreation) ? String(Math.max(0, plan.jobCreation)) : "0",
+    nationalGrowthPlan: joined([
+      ["Target UK regions", plan.specificRegions],
+      ["Expansion strategy", plan.expansion],
+    ], 3000),
+    internationalGrowthPlan: limited(text(plan.internationalPlan), 3000),
+    scalingOperations: joined([
+      ["Hiring plan", plan.hiringPlan],
+      ["Technology stack", plan.techStack],
+      ["Data architecture", plan.dataArchitecture],
+      ["Compliance design", plan.complianceDesign],
+    ], 3000),
+    projectionsResearchBasis: joined([
+      ["Market-size research", plan.marketSize],
+      ["Customer interviews", plan.customerInterviews],
+      ["Willingness-to-pay evidence", plan.willingnessToPay],
+    ], 3500),
+  };
+}
+
+function validEvidenceItems(value: unknown): EvidenceItem[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((raw) => {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return [];
+    const item = raw as Record<string, unknown>;
+    const type = typeof item.type === "string" && EVIDENCE_TYPES.has(item.type as EvidenceType)
+      ? item.type as EvidenceType
+      : null;
+    if (!type || typeof item.id !== "string" || typeof item.title !== "string" || typeof item.summary !== "string") return [];
+    return [{
+      id: item.id,
+      type,
+      title: item.title,
+      summary: item.summary,
+      reference: typeof item.reference === "string" ? item.reference : "",
+    }];
+  });
+}
+
+function buildPreviousReviewPrefill(snapshot: Record<string, unknown>): Partial<FormState> {
+  const result: Partial<FormState> = {};
+  const target = result as Record<string, unknown>;
+  const stringKeys = [
+    "businessName",
+    "businessSummary",
+    "marketNeed",
+    "targetCustomers",
+    "uniqueSellingProposition",
+    "competitorDifferentiation",
+    "replicationBarriers",
+    "internalInnovationOwnership",
+    "founderCapability",
+    "financialAssumptions",
+    "demandEvidenceSummary",
+    "growthPlan",
+    "nationalGrowthPlan",
+    "internationalGrowthPlan",
+    "scalingOperations",
+    "projectionsResearchBasis",
+  ];
+  for (const key of stringKeys) {
+    if (typeof snapshot[key] === "string") target[key] = snapshot[key];
+  }
+
+  for (const key of [
+    "fundingAvailableGbp",
+    "minimumSetupCostGbp",
+    "monthlyOperatingCostGbp",
+    "forecastMonthlyRevenueGbp",
+    "skilledJobsPlannedThreeYears",
+  ]) {
+    const value = snapshot[key];
+    if (typeof value === "number" && Number.isFinite(value)) target[key] = String(value);
+    if (typeof value === "string" && value.trim()) target[key] = value;
+  }
+
+  if (typeof snapshot.innovationCoreToBusiness === "boolean") {
+    result.innovationCoreToBusiness = snapshot.innovationCoreToBusiness;
+  }
+  if (["primarily_in_house", "mixed", "primarily_outsourced"].includes(String(snapshot.innovationDeliveryModel || ""))) {
+    result.innovationDeliveryModel = snapshot.innovationDeliveryModel as FormState["innovationDeliveryModel"];
+  }
+
+  const evidenceItems = validEvidenceItems(snapshot.evidenceItems);
+  if (evidenceItems.length > 0) result.evidenceItems = evidenceItems;
+  return result;
+}
+
+function previousReviewMatchesPlan(snapshot: Record<string, unknown>, plan: ApplicationBusinessPlan | null): boolean {
+  if (!plan) return true;
+  const previousName = text(snapshot.businessName).toLocaleLowerCase("en-GB");
+  const planName = text(plan.businessName).toLocaleLowerCase("en-GB");
+  return Boolean(previousName && planName && previousName === planName);
+}
+
+function meaningfulCandidateValue(value: unknown): boolean {
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === "string") return value.trim().length > 0;
+  return value !== undefined && value !== null;
+}
+
+function mergeIntoUntouchedForm(current: FormState, candidate: Partial<FormState>): FormState {
+  const baseline = initialForm();
+  const next = { ...current };
+  const nextRecord = next as unknown as Record<string, unknown>;
+  const currentRecord = current as unknown as Record<string, unknown>;
+  const baselineRecord = baseline as unknown as Record<string, unknown>;
+
+  for (const [key, value] of Object.entries(candidate)) {
+    if (!meaningfulCandidateValue(value)) continue;
+    const currentValue = currentRecord[key];
+    const baselineValue = baselineRecord[key];
+    const untouched = Array.isArray(currentValue)
+      ? currentValue.length === 0
+      : currentValue === baselineValue || (typeof currentValue === "string" && currentValue.trim() === "");
+    if (untouched) nextRecord[key] = value;
+  }
+  return next;
 }
 
 function FieldCard({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
@@ -277,8 +479,35 @@ export default function EndorsementIVSAssessment() {
   const copy = TOOL_COPY[toolId] || TOOL_COPY["endorsement-readiness"];
   const [form, setForm] = useState<FormState>(initialForm);
   const [result, setResult] = useState<AssessmentResponse | null>(null);
+  const [autofillSummary, setAutofillSummary] = useState<AutofillSummary | null>(null);
   const runKey = useRef<string | null>(null);
+  const autofillAppliedForTool = useRef<string | null>(null);
   const history = useToolRunHistory(toolId, true);
+  const applicationPrefill = useApplicationContextPrefill(toolId, true);
+
+  useEffect(() => {
+    const data = applicationPrefill.data;
+    if (!data || autofillAppliedForTool.current === toolId) return;
+
+    const plan = data.businessPlan;
+    const planPrefill = plan ? buildBusinessPlanPrefill(plan) : {};
+    const previousSnapshot = data.previousToolRun?.inputSnapshot || null;
+    const previousMatches = previousSnapshot ? previousReviewMatchesPlan(previousSnapshot, plan) : false;
+    const previousPrefill = previousSnapshot && previousMatches
+      ? buildPreviousReviewPrefill(previousSnapshot)
+      : {};
+    const combinedPrefill: Partial<FormState> = { ...planPrefill, ...previousPrefill };
+
+    setForm((current) => mergeIntoUntouchedForm(current, combinedPrefill));
+    autofillAppliedForTool.current = toolId;
+    setAutofillSummary({
+      businessName: plan?.businessName || null,
+      reusableFieldCount: Object.values(combinedPrefill).filter(meaningfulCandidateValue).length,
+      restoredPreviousReview: Boolean(previousSnapshot && previousMatches),
+      previousReviewSkippedForDifferentBusiness: Boolean(previousSnapshot && plan && !previousMatches),
+      availableDocumentCount: data.documents.length,
+    });
+  }, [applicationPrefill.data, toolId]);
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -345,6 +574,37 @@ export default function EndorsementIVSAssessment() {
           </AlertDescription>
         </Alert>
 
+        {autofillSummary && autofillSummary.reusableFieldCount > 0 && (
+          <Alert className="border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/20">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <AlertTitle>Application data reused automatically</AlertTitle>
+            <AlertDescription className="space-y-1">
+              <p>
+                {autofillSummary.restoredPreviousReview
+                  ? "Your most recent saved review was restored, with remaining gaps filled from your saved application data."
+                  : `Relevant fields were filled from ${autofillSummary.businessName ? `${autofillSummary.businessName}'s` : "your"} completed business plan.`}
+                {" "}Only fields with a reliable saved source are reused; unsupported answers remain for you to confirm.
+              </p>
+              {autofillSummary.availableDocumentCount > 0 && (
+                <p>
+                  {autofillSummary.availableDocumentCount} uploaded document{autofillSummary.availableDocumentCount === 1 ? " is" : "s are"} available in your account. They are not automatically counted as evidence until their contents are mapped to a specific claim.
+                </p>
+              )}
+              {autofillSummary.previousReviewSkippedForDifferentBusiness && (
+                <p>A previous review for a different business was deliberately not restored.</p>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {applicationPrefill.isError && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Automatic application reuse is temporarily unavailable</AlertTitle>
+            <AlertDescription>You can still complete and run the assessment manually. No saved application data has been overwritten.</AlertDescription>
+          </Alert>
+        )}
+
         <div className="grid gap-5 xl:grid-cols-2">
           <FieldCard title="1. Business and market foundation">
             <div className="space-y-2"><Label>Business name</Label><Input value={form.businessName} onChange={(e) => update("businessName", e.target.value)} placeholder="Business name" /></div>
@@ -390,7 +650,7 @@ export default function EndorsementIVSAssessment() {
           )}
         </FieldCard>
 
-        <Card className="border-2 border-primary/20"><CardContent className="p-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><div><div className="font-semibold">Run endorser-readiness assessment</div><p className="text-sm text-muted-foreground">Server-side, durable and versioned. The result shows evidence coverage, not a fabricated visa success percentage.</p>{mutation.error && <p className="text-sm text-destructive mt-2">{mutation.error.message}</p>}</div><div className="flex gap-2"><Button variant="outline" onClick={() => { setForm(initialForm()); setResult(null); runKey.current = null; }} disabled={mutation.isPending}><RefreshCcw className="h-4 w-4 mr-2" />Reset</Button><Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>{mutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-2" />}{mutation.isPending ? "Assessing..." : "Assess readiness"}</Button></div></CardContent></Card>
+        <Card className="border-2 border-primary/20"><CardContent className="p-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><div><div className="font-semibold">Run endorser-readiness assessment</div><p className="text-sm text-muted-foreground">Server-side, durable and versioned. The result shows evidence coverage, not a fabricated visa success percentage.</p>{mutation.error && <p className="text-sm text-destructive mt-2">{mutation.error.message}</p>}</div><div className="flex gap-2"><Button variant="outline" onClick={() => { setForm(initialForm()); setResult(null); setAutofillSummary(null); runKey.current = null; }} disabled={mutation.isPending}><RefreshCcw className="h-4 w-4 mr-2" />Reset</Button><Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>{mutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-2" />}{mutation.isPending ? "Assessing..." : "Assess readiness"}</Button></div></CardContent></Card>
 
         {result && (
           <section id="ivs-results" className="scroll-mt-4 space-y-5">

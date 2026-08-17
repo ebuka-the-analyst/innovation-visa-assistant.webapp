@@ -2,6 +2,7 @@ process.env.NODE_ENV = 'test';
 
 const express = require('express');
 require('../server/toolPlatform.cjs');
+require('../server/applicationContextPrefill.cjs');
 
 const app = express();
 app.get('/__tool_platform_smoke_trigger__', (_req, res) => res.sendStatus(204));
@@ -16,6 +17,7 @@ for (const layer of app._router?.stack || []) {
 const requiredRoutes = [
   'GET /api/tool-platform/registry',
   'GET /api/tool-platform/context',
+  'GET /api/tool-platform/application-context',
   'PUT /api/tool-platform/context',
   'POST /api/tool-platform/runs',
   'GET /api/tool-platform/runs',
