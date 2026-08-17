@@ -49,6 +49,10 @@ function normaliseStringArray(value) {
   return value.filter((item) => typeof item === "string");
 }
 
+function normaliseBusinessName(value) {
+  return typeof value === "string" ? value.trim().replace(/\s+/g, " ").toLowerCase() : "";
+}
+
 function validateToolId(value) {
   if (value === undefined || value === null || value === "") return null;
   if (typeof value !== "string") return null;
@@ -135,29 +139,6 @@ async function handleGetApplicationContext(req, res) {
     const db = getPool();
     const userId = req.user.id;
 
-    const planPromise = db.query(
-      `SELECT id, status, created_at,
-              business_name, industry, problem, uniqueness, technology, experience,
-              funding, revenue, job_creation, expansion, vision,
-              innovation_stage, product_status, existing_customers, beta_testers, traction_evidence,
-              tech_stack, data_architecture, ai_methodology, compliance_design, patent_status,
-              founder_education, founder_work_history, founder_achievements, relevant_projects,
-              monthly_projections, cac, ltv, payback_period, funding_sources, detailed_costs,
-              competitors, competitive_differentiation,
-              customer_interviews, letters_of_intent, willingness_to_pay, market_size,
-              regulatory_requirements, compliance_timeline, compliance_budget,
-              hiring_plan, specific_regions, international_plan,
-              target_endorser, contact_points_strategy, supporting_evidence,
-              COUNT(*) OVER() AS completed_plan_count
-         FROM business_plans
-        WHERE user_id = $1
-          AND LOWER(status) = 'completed'
-          AND COALESCE(is_demo_data, false) = false
-        ORDER BY created_at DESC
-        LIMIT 1`,
-      [userId],
-    );
-
     const contextPromise = db.query(
       `SELECT revision, context_data, evidence_refs, created_at, updated_at
          FROM tool_case_contexts
@@ -188,16 +169,59 @@ async function handleGetApplicationContext(req, res) {
       [userId, MAX_DOCUMENTS],
     );
 
-    const [planResult, contextResult, previousRunResult, documentsResult] = await Promise.all([
-      planPromise,
+    const [contextResult, previousRunResult, documentsResult] = await Promise.all([
       contextPromise,
       previousRunPromise,
       documentsPromise,
     ]);
 
-    const planRow = planResult.rows[0] || null;
     const contextRow = contextResult.rows[0] || null;
     const previousRunRow = previousRunResult.rows[0] || null;
+    const previousInputSnapshot = previousRunRow
+      ? normaliseJsonObject(previousRunRow.input_snapshot)
+      : {};
+    const previousBusinessName = typeof previousInputSnapshot.businessName === "string"
+      ? previousInputSnapshot.businessName.trim() || null
+      : null;
+
+    // When a user returns to an IVS tool after creating another business plan, keep the
+    // restored review attached to the business it was originally completed for. If no
+    // matching completed plan exists, fall back to the user's latest completed plan and
+    // let the client-side cross-business guard suppress the stale previous review.
+    const planResult = await db.query(
+      `SELECT id, status, created_at,
+              business_name, industry, problem, uniqueness, technology, experience,
+              funding, revenue, job_creation, expansion, vision,
+              innovation_stage, product_status, existing_customers, beta_testers, traction_evidence,
+              tech_stack, data_architecture, ai_methodology, compliance_design, patent_status,
+              founder_education, founder_work_history, founder_achievements, relevant_projects,
+              monthly_projections, cac, ltv, payback_period, funding_sources, detailed_costs,
+              competitors, competitive_differentiation,
+              customer_interviews, letters_of_intent, willingness_to_pay, market_size,
+              regulatory_requirements, compliance_timeline, compliance_budget,
+              hiring_plan, specific_regions, international_plan,
+              target_endorser, contact_points_strategy, supporting_evidence,
+              COUNT(*) OVER() AS completed_plan_count
+         FROM business_plans
+        WHERE user_id = $1
+          AND LOWER(status) = 'completed'
+          AND COALESCE(is_demo_data, false) = false
+        ORDER BY CASE
+                   WHEN $2::text IS NOT NULL
+                    AND LOWER(BTRIM(business_name)) = LOWER(BTRIM($2::text)) THEN 0
+                   ELSE 1
+                 END,
+                 created_at DESC
+        LIMIT 1`,
+      [userId, previousBusinessName],
+    );
+
+    const planRow = planResult.rows[0] || null;
+    const planMatchesPreviousRun = Boolean(
+      previousBusinessName
+      && planRow
+      && normaliseBusinessName(planRow.business_name) === normaliseBusinessName(previousBusinessName),
+    );
     const documents = documentsResult.rows.map((row) => ({
       id: row.id,
       name: row.name,
@@ -213,6 +237,10 @@ async function handleGetApplicationContext(req, res) {
       generatedAt: new Date().toISOString(),
       toolId,
       businessPlan: mapBusinessPlan(planRow),
+      businessPlanSelection: {
+        strategy: planMatchesPreviousRun ? "previous_tool_business_match" : "latest_completed",
+        matchedPreviousToolRun: planMatchesPreviousRun,
+      },
       caseContext: contextRow
         ? {
             revision: Number(contextRow.revision || 0),
@@ -231,7 +259,7 @@ async function handleGetApplicationContext(req, res) {
       previousToolRun: previousRunRow
         ? {
             id: previousRunRow.id,
-            inputSnapshot: normaliseJsonObject(previousRunRow.input_snapshot),
+            inputSnapshot: previousInputSnapshot,
             evidenceRefs: normaliseStringArray(previousRunRow.evidence_refs),
             completedAt: previousRunRow.completed_at,
             createdAt: previousRunRow.created_at,
