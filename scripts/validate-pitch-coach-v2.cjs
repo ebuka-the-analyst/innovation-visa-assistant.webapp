@@ -19,7 +19,7 @@ const requiredSnippets = [
   'buildQa(sourcePlan)',
   'Preparation can be completed for you; practice cannot be invented.',
   'externalEvidenceVerifiedByThisTool: false',
-  'practiceSessions: []',
+  'setPracticeSessions([])',
   'actualSeconds: 0',
   'confidence: 0',
   'preparationCompleteness',
