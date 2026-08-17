@@ -66,6 +66,18 @@ export interface ApplicationBusinessPlan {
   supportingEvidence: string | null;
 }
 
+export interface ApplicationFinancialModelPrefill {
+  runId: string;
+  toolId: string;
+  businessName: string;
+  completedAt: string | null;
+  oneTimeSetupCostGbp: number | null;
+  monthlyOperatingCostGbp: number | null;
+  startingMonthlyRevenueGbp: number | null;
+  assumptionsNarrative: string | null;
+  source: "completed_financial_tool_run";
+}
+
 export interface ApplicationDocumentReference {
   id: string;
   name: string;
@@ -98,6 +110,9 @@ export interface ApplicationContextPrefill {
     questionnaireDraftFieldCount: number;
     supplementedByDocumentExtraction: boolean;
     documentExtractedFieldCount: number;
+  };
+  relatedToolData: {
+    financialModel: ApplicationFinancialModelPrefill | null;
   };
   documentPrefillProvenance: DocumentPrefillProvenance[];
   caseContext: ToolCaseContext;
