@@ -7,6 +7,11 @@ const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const workspace = read('client/src/components/ApplicationDocumentWorkspace.tsx');
 const notice = read('client/src/components/ContextualDocumentNotice.tsx');
 const app = read('client/src/App.tsx');
+const toolRoutes = read('client/src/lib/toolRoutes.ts');
+const badge = read('client/src/components/ui/badge.tsx');
+const button = read('client/src/components/ui/button.tsx');
+const main = read('client/src/main.tsx');
+const attentionCss = read('client/src/attention-accessibility.css');
 
 const requiredCategories = [
   'Business & Strategy',
@@ -93,4 +98,78 @@ if (!workspace.includes('finalPackReady = dossierReady && requiredDocumentsCompl
   throw new Error('Final Pack readiness is not tied to the required preparation checks.');
 }
 
-console.log('Application document workspace validation passed.');
+if (!workspace.includes('/api/view/html/${encodeURIComponent(String(latestCompletedPlan.id))}')) {
+  throw new Error('Ready Business Plan must open the generated plan rather than linking back to My Documents.');
+}
+
+if (workspace.includes('href: completedPlan ? "/documents"')) {
+  throw new Error('Business Plan Open action still contains a no-op My Documents link.');
+}
+
+for (const label of ['return "Open"', 'return "Continue"', 'return "Start"']) {
+  if (!workspace.includes(label)) {
+    throw new Error(`Missing ADHD-friendly workspace action label: ${label}`);
+  }
+}
+
+if (!workspace.includes('aria-label={`${label} ${artefact.title}`}')) {
+  throw new Error('Workspace actions must expose clear accessible action labels.');
+}
+
+if (!workspace.includes('data-app-status={artefact.status}')) {
+  throw new Error('Workspace cards do not expose semantic status hooks.');
+}
+
+const toolLinks = [...workspace.matchAll(/href:\s*"\/tools\/([a-z0-9-]+)"/g)].map((match) => match[1]);
+for (const toolId of new Set(toolLinks)) {
+  if (!toolRoutes.includes(`'${toolId}': lazy(`)) {
+    throw new Error(`Workspace action points to an unmapped tool route: ${toolId}`);
+  }
+}
+
+for (const route of [
+  '/questionnaire',
+  '/progress',
+  '/founder-portfolio',
+  '/commercial-validation',
+  '/traction-evidence',
+  '/endorser-comparison',
+  '/interview-prep',
+  '/document-review',
+]) {
+  if (!app.includes(`<Route path="${route}"`)) {
+    throw new Error(`Workspace action points to an unmapped application route: ${route}`);
+  }
+}
+
+if (!badge.includes('bg-emerald-100') || !badge.includes('bg-red-100') || !badge.includes('bg-amber-100')) {
+  throw new Error('Shared badges do not provide green, red and amber semantic status colours.');
+}
+
+if (!badge.includes('label.startsWith("ready ")') || !badge.includes('label.startsWith("not started ")')) {
+  throw new Error('Shared badge status colouring is not applied broadly enough across the application.');
+}
+
+if (badge.includes('hover-elevate')) {
+  throw new Error('Non-interactive status badges should not use attention-grabbing hover elevation.');
+}
+
+if (!button.includes('focus-visible:ring-2') || !button.includes('focus-visible:ring-offset-2')) {
+  throw new Error('Buttons do not have a sufficiently visible keyboard focus state.');
+}
+
+if (!main.includes('import "./attention-accessibility.css"')) {
+  throw new Error('ADHD-friendly attention accessibility styles are not loaded.');
+}
+
+for (const selector of ['.animate-ping', '.animate-ping-slow', '.animate-blink-2s']) {
+  if (!attentionCss.includes(selector)) {
+    throw new Error(`Attention animation is not bounded by ADHD-friendly CSS: ${selector}`);
+  }
+}
+
+if (!attentionCss.includes('animation-iteration-count: 2 !important')) {
+  throw new Error('Attention animations must settle after a short finite sequence.');
+}
+
+console.log('Application document workspace, navigation and ADHD accessibility validation passed.');
