@@ -5,13 +5,10 @@ const root = process.cwd();
 const read = (relative) => fs.readFileSync(path.join(root, relative), 'utf8');
 const exists = (relative) => fs.existsSync(path.join(root, relative));
 
-const bannedProvider = 'q' + 'wen';
-const bannedEnv = 'QW' + 'EN_API_KEY';
-const bannedHostA = 'dash' + 'scope';
-const bannedHostB = 'ali' + 'yuncs';
+const retiredName = 'q' + 'wen';
 
-if (exists('server/' + bannedProvider + 'Client.ts')) {
-  throw new Error('Forbidden AI provider client still exists.');
+if (exists('server/' + retiredName + 'Client.ts')) {
+  throw new Error('Retired AI provider client still exists.');
 }
 
 function walk(relative) {
@@ -25,12 +22,35 @@ function walk(relative) {
   return output;
 }
 
+const retiredOperationalPatterns = [
+  new RegExp(retiredName + 'Client', 'i'),
+  new RegExp('QW' + 'EN_API_KEY', 'i'),
+  new RegExp('QW' + 'EN_MODELS', 'i'),
+  new RegExp('\\b' + retiredName + '\\s*\\.', 'i'),
+  new RegExp('["\\'`]' + retiredName + '-', 'i'),
+  new RegExp('dash' + 'scope', 'i'),
+  new RegExp('ali' + 'yuncs', 'i'),
+];
+
 for (const relative of walk('server')) {
-  const source = read(relative).toLowerCase();
-  for (const token of [bannedProvider, bannedEnv.toLowerCase(), bannedHostA, bannedHostB]) {
-    if (source.includes(token)) {
-      throw new Error(`Forbidden provider reference found in runtime source: ${relative}`);
+  const source = read(relative);
+  for (const pattern of retiredOperationalPatterns) {
+    if (pattern.test(source)) {
+      throw new Error(`Retired provider runtime usage found in: ${relative}`);
     }
+  }
+
+  if (relative !== 'server/aiProviderGateway.ts') {
+    if (/api\.openai\.com/i.test(source)) {
+      throw new Error(`Direct OpenAI endpoint bypasses managed gateway in: ${relative}`);
+    }
+    if (/new\s+Anthropic\s*\(/.test(source)) {
+      throw new Error(`Direct Anthropic client bypasses managed gateway in: ${relative}`);
+    }
+  }
+
+  if (/generativelanguage\.googleapis\.com/i.test(source) || /@google\/genai/i.test(source) || /new\s+GoogleGenAI\s*\(/.test(source)) {
+    throw new Error(`Direct Google generative-AI client bypasses managed gateway in: ${relative}`);
   }
 }
 
@@ -71,9 +91,6 @@ if (!packageJson.includes('prepare-managed-ai-routing.cjs')) {
 }
 
 const routes = read('server/routes.ts');
-if (routes.includes('new GoogleGenAI') || routes.includes('@google/genai')) {
-  throw new Error('Legacy Google text-generation client remains active after managed routing preparation.');
-}
 if (!routes.includes('managedLegacyTextAI')) {
   throw new Error('Legacy text-generation paths were not routed through the managed OpenAI-compatible gateway.');
 }
@@ -103,9 +120,14 @@ if (!migration.includes('ai_provider_settings') || !migration.includes("'openai'
   throw new Error('AI provider settings migration is incomplete.');
 }
 
-const review = read('server/services/documentReviewService.ts').toLowerCase();
-if (!review.includes('calling managed ai provider') || review.includes(bannedProvider)) {
+const review = read('server/services/documentReviewService.ts');
+if (!review.includes('Calling managed AI provider') || retiredOperationalPatterns.some((pattern) => pattern.test(review))) {
   throw new Error('Final Document Review is not fully migrated to the managed provider layer.');
+}
+
+const verifier = read('server/blogMultiVerifier.ts');
+if (!verifier.includes('dual-pass managed verification') || retiredOperationalPatterns.some((pattern) => pattern.test(verifier))) {
+  throw new Error('Blog verification is not fully migrated to the managed provider layer.');
 }
 
 console.log('Managed AI provider policy validation passed.');
