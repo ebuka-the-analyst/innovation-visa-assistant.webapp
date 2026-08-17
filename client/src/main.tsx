@@ -4,8 +4,11 @@ import "./index.css";
 import "./lib/errorLogger";
 import { initPerformanceMonitor } from "./lib/performanceMonitor";
 import { initQuestionnaireDraftSync } from "./lib/questionnaireDraftSync";
+import { armDeploymentAssetRecovery } from "./lib/deploymentAssetRecovery";
 import { initCustomer360AdminEnhancer } from "./components/admin/Customer360Enhancer";
 import { initCustomer360DialogBridge } from "./components/admin/customer360DialogBridge";
+
+armDeploymentAssetRecovery();
 
 async function bootstrap() {
   initPerformanceMonitor();
