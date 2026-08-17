@@ -1,10 +1,12 @@
+import OpenAI from "openai";
 import { db } from "../db";
 import { documentReviews } from "@shared/schema";
 import { eq } from "drizzle-orm";
-import { qwen, QWEN_MODELS } from "../qwenClient";
+import { BUSINESS_PLAN_MODEL } from "../aiModelConfig";
 
 const MAX_DOCUMENT_CHARS = 600_000;
 const CHUNK_TARGET_CHARS = 18_000;
+const managedAI = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
 
 const DOCUMENT_REVIEW_PROMPT = `You are reviewing the QUALITY AND PREPARATION of a UK Innovator Founder application document.
 
@@ -156,21 +158,29 @@ function normalizeAnalysis(value: unknown): NormalizedAnalysis {
   };
 }
 
+function parseJsonResponse(value: string): unknown {
+  const trimmed = value.trim();
+  const unfenced = trimmed
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/, "")
+    .trim();
+  return JSON.parse(unfenced);
+}
+
 async function getAIResponse(systemPrompt: string, userPrompt: string, maxTokens = 2_000): Promise<unknown> {
-  console.log("[DocumentReviewService] Calling Qwen");
-  const response = await qwen.chat.completions.create({
-    model: QWEN_MODELS.plus,
+  console.log("[DocumentReviewService] Calling managed AI provider");
+  const response: any = await managedAI.chat.completions.create({
+    model: BUSINESS_PLAN_MODEL as any,
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ],
     response_format: { type: "json_object" },
     max_tokens: maxTokens,
-    temperature: 0.35,
-  });
-  const content = response.choices[0]?.message?.content;
-  if (!content) throw new Error("No response from Qwen");
-  return JSON.parse(content);
+  } as any);
+  const content = response.choices?.[0]?.message?.content;
+  if (!content) throw new Error("Managed AI provider returned no document review content");
+  return parseJsonResponse(content);
 }
 
 function splitDocumentIntoChunks(content: string, targetChars = CHUNK_TARGET_CHARS): string[] {
@@ -338,7 +348,7 @@ export async function processDocumentReview(reviewId: string) {
         strengthsFound: analysis.strengths,
         weaknessesFound: analysis.weaknesses,
         suggestions: analysis.suggestions,
-        aiProvider: "qwen",
+        aiProvider: "managed",
       })
       .where(eq(documentReviews.id, reviewId));
 
