@@ -1,10 +1,12 @@
 const fs = require("fs");
 
 const serverPath = "server/applicationContextPrefill.cjs";
+const routesPath = "server/routes.ts";
 const draftServerPath = "server/questionnaireDraftSync.cjs";
 const guardPath = "server/retiredRouteGuard.cjs";
 const hookPath = "client/src/hooks/useToolPlatform.ts";
 const ivsPath = "client/src/pages/tools/endorsement-ivs-assessment.tsx";
+const fieldEnhancerPath = "client/src/components/FieldEnhancer.tsx";
 const draftClientPath = "client/src/lib/questionnaireDraftSync.ts";
 const mainPath = "client/src/main.tsx";
 const extractionMigrationPath = "migrations/app/20260817_application_context_document_extractions.sql";
@@ -13,10 +15,12 @@ const railwayPath = "railway.json";
 
 for (const file of [
   serverPath,
+  routesPath,
   draftServerPath,
   guardPath,
   hookPath,
   ivsPath,
+  fieldEnhancerPath,
   draftClientPath,
   mainPath,
   extractionMigrationPath,
@@ -27,10 +31,12 @@ for (const file of [
 }
 
 const server = fs.readFileSync(serverPath, "utf8");
+const routes = fs.readFileSync(routesPath, "utf8");
 const draftServer = fs.readFileSync(draftServerPath, "utf8");
 const guard = fs.readFileSync(guardPath, "utf8");
 const hook = fs.readFileSync(hookPath, "utf8");
 const ivs = fs.readFileSync(ivsPath, "utf8");
+const fieldEnhancer = fs.readFileSync(fieldEnhancerPath, "utf8");
 const draftClient = fs.readFileSync(draftClientPath, "utf8");
 const main = fs.readFileSync(mainPath, "utf8");
 const extractionMigration = fs.readFileSync(extractionMigrationPath, "utf8");
@@ -102,6 +108,14 @@ requireMarker(draftClient, "writeChain = writeChain.then", "Questionnaire draft 
 requireMarker(main, 'import { initQuestionnaireDraftSync } from "./lib/questionnaireDraftSync";', "Questionnaire draft hydration is not bootstrapped");
 requireMarker(main, "await initQuestionnaireDraftSync();", "Questionnaire draft must hydrate before React reads the local auto-save");
 
+requireMarker(routes, 'app.get("/api/business-plans", isAuthenticated', "Saved-plan picker source route must use the established authentication middleware");
+requireMarker(routes, "storage.getUserBusinessPlans(user.id)", "Saved-plan picker source must be scoped to the authenticated user");
+
+requireMarker(fieldEnhancer, 'fetch("/api/ai/questionnaire-enhance"', "Field enhancer must continue to use the established AI enhancement route");
+requireMarker(fieldEnhancer, "SpeechRecognitionAPI", "Field enhancer must retain speech input support");
+requireMarker(fieldEnhancer, "Enhance with AI", "Field enhancer must expose the AI enhancement action");
+requireMarker(fieldEnhancer, "Add more words", "Field enhancer must expose the controlled expansion action");
+
 requireMarker(ivs, "buildBusinessPlanPrefill", "IVS page is not wired to structured application prefill");
 requireMarker(ivs, "buildFinancialModelPrefill", "IVS page is not wired to same-business financial-tool prefill");
 requireMarker(ivs, "buildPreviousReviewPrefill", "IVS page does not restore a prior validated tool input");
@@ -115,6 +129,19 @@ requireMarker(ivs, 'innovationDeliveryModel: ""', "Innovation delivery must requ
 requireMarker(ivs, 'placeholder="Select delivery model"', "Innovation delivery selection must visibly request confirmation");
 requireMarker(ivs, "if (!cleaned) throw new Error", "Blank financial inputs must not be silently converted to zero");
 requireMarker(ivs, 'throw new Error("Select how the core innovation is delivered.")', "Assessment must reject an unconfirmed innovation delivery model");
+requireMarker(ivs, "useQuery<SavedBusinessPlan[]>", "IVS page must load the user's saved business plans for explicit recovery");
+requireMarker(ivs, 'apiRequest("GET", "/api/business-plans")', "IVS saved-plan picker must use the authenticated business-plan source");
+requireMarker(ivs, 'String(plan.status || "").toLowerCase() === "completed"', "IVS saved-plan picker must only present completed plans");
+requireMarker(ivs, "!plan.isDemoData", "IVS saved-plan picker must exclude demo plans");
+requireMarker(ivs, "selectedBusinessPlanId", "IVS saved-plan picker must keep an explicit plan selection");
+requireMarker(ivs, "loadSelectedBusinessPlan", "IVS page must support explicit reload from the selected saved plan");
+requireMarker(ivs, "data.businessPlan.id === selectedPlan.id", "Previous-review and financial reuse must remain tied to the exact current plan");
+requireMarker(ivs, "setForm(mergeIntoUntouchedForm(initialForm(), combinedPrefill))", "Explicit plan load must replace the working form without changing the saved plan");
+requireMarker(ivs, "Load this business plan", "IVS page must expose a visible recovery action");
+requireMarker(ivs, "Clear form", "IVS page must distinguish clearing the working form from reloading saved data");
+requireMarker(ivs, 'import { FieldEnhancer } from "@/components/FieldEnhancer";', "IVS long-answer fields must reuse the established enhancement component");
+requireMarker(ivs, "<FieldEnhancer", "IVS text fields must expose speech, enhance and expand actions");
+requireMarker(ivs, "safeFieldName", "IVS field enhancer IDs must be stable and field-specific");
 
 const planMapperStart = ivs.indexOf("function buildBusinessPlanPrefill");
 const financialMapperStart = ivs.indexOf("function buildFinancialModelPrefill", planMapperStart);
@@ -162,6 +189,12 @@ console.log(JSON.stringify({
   customerSegmentReuseWithoutInference: true,
   innovationOwnershipReuseWithoutDeliveryInference: true,
   sameBusinessFinancialToolReuse: true,
+  savedPlanRecoveryPicker: true,
+  savedPlanPickerAccountScoped: true,
+  savedPlanPickerCompletedNonDemoOnly: true,
+  exactPlanGuardForReviewedData: true,
+  fieldEnhancerReused: true,
+  speechEnhancementAvailable: true,
   noPositiveInnovationDefaults: true,
   blankFinancialInputsRejected: true,
   previousRunBusinessGuard: true,
