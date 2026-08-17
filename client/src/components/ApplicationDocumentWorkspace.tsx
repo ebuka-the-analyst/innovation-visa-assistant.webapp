@@ -1,10 +1,12 @@
 import { useMemo } from "react";
 import { Link } from "wouter";
 import {
+  ArrowRight,
   BarChart3,
   Brain,
   BriefcaseBusiness,
   CheckCircle2,
+  Circle,
   CircleDashed,
   FileCheck2,
   FileSpreadsheet,
@@ -82,7 +84,10 @@ const IVS_TOOL_IDS = [
 function statusBadge(status: ArtefactStatus) {
   if (status === "ready") {
     return (
-      <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+      <Badge
+        variant="outline"
+        className="border-emerald-200 bg-emerald-100 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
+      >
         <CheckCircle2 className="mr-1 h-3 w-3" />
         Ready
       </Badge>
@@ -91,14 +96,41 @@ function statusBadge(status: ArtefactStatus) {
 
   if (status === "in-progress") {
     return (
-      <Badge variant="secondary">
+      <Badge
+        variant="outline"
+        className="border-amber-200 bg-amber-100 text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300"
+      >
         <CircleDashed className="mr-1 h-3 w-3" />
         In progress
       </Badge>
     );
   }
 
-  return <Badge variant="outline">Not started</Badge>;
+  return (
+    <Badge
+      variant="outline"
+      className="border-red-200 bg-red-100 text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+    >
+      <Circle className="mr-1 h-3 w-3" />
+      Not started
+    </Badge>
+  );
+}
+
+function cardStatusClass(status: ArtefactStatus) {
+  if (status === "ready") {
+    return "border-emerald-200/90 dark:border-emerald-900/80";
+  }
+  if (status === "in-progress") {
+    return "border-amber-200/90 dark:border-amber-900/80";
+  }
+  return "border-red-200/90 dark:border-red-900/80";
+}
+
+function actionLabel(status: ArtefactStatus) {
+  if (status === "ready") return "Open";
+  if (status === "in-progress") return "Continue";
+  return "Start";
 }
 
 async function getTracker(): Promise<TrackerSnapshot> {
@@ -137,8 +169,13 @@ export function ApplicationDocumentWorkspace({
   );
 
   const hasRun = (...toolIds: string[]) => toolIds.some((toolId) => completedRuns.has(toolId));
-  const completedPlan = businessPlans.some((plan) => plan.status === "completed");
+  const latestCompletedPlan = businessPlans.find((plan) => plan.status === "completed") || null;
+  const completedPlan = Boolean(latestCompletedPlan);
   const hasAnyPlan = businessPlans.length > 0;
+  const businessPlanHref = latestCompletedPlan?.id
+    ? `/api/view/html/${encodeURIComponent(String(latestCompletedPlan.id))}`
+    : "/questionnaire";
+
   const financialReady = hasRun(...FINANCIAL_TOOL_IDS);
   const ivsReady = hasRun(...IVS_TOOL_IDS);
   const marketReady = hasRun("market-research") || Boolean(tracker?.authoritative?.businessPlans?.evidence?.market?.satisfied);
@@ -168,7 +205,7 @@ export function ApplicationDocumentWorkspace({
       category: "Business & Strategy",
       title: "Business Plan",
       description: "The live generated plan, including its accepted revisions and exportable PDF.",
-      href: completedPlan ? "/documents" : "/questionnaire",
+      href: businessPlanHref,
       icon: FileText,
       status: completedPlan ? "ready" : hasAnyPlan ? "in-progress" : "not-started",
       source: completedPlan ? "Generated business plan" : "Business Plan workflow",
@@ -367,61 +404,99 @@ export function ApplicationDocumentWorkspace({
 
   const groups = [...new Set(artefacts.map((artefact) => artefact.category))];
   const readyCount = artefacts.filter((artefact) => artefact.status === "ready").length;
+  const inProgressCount = artefacts.filter((artefact) => artefact.status === "in-progress").length;
+  const notStartedCount = artefacts.filter((artefact) => artefact.status === "not-started").length;
 
   return (
     <Card id="application-workspace" className="mb-8 border-primary/20">
       <CardHeader>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
             <CardTitle className="flex items-center gap-2">
               <Files className="h-5 w-5 text-primary" />
               Application Document Workspace
             </CardTitle>
-            <CardDescription className="mt-1 max-w-3xl">
+            <CardDescription className="mt-1 max-w-3xl leading-relaxed">
               Platform-generated outputs are organised here by purpose. The same information remains available inside the tool or workflow that created it, so My Documents is the master library rather than a duplicate file dump.
             </CardDescription>
           </div>
-          <Badge variant="outline" className="w-fit">
-            {readyCount} of {artefacts.length} available
-          </Badge>
+          <div className="flex shrink-0 flex-wrap gap-2" aria-label="Document workspace status summary">
+            <Badge variant="outline" className="border-emerald-200 bg-emerald-100 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">
+              {readyCount} ready
+            </Badge>
+            <Badge variant="outline" className="border-amber-200 bg-amber-100 text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
+              {inProgressCount} in progress
+            </Badge>
+            <Badge variant="outline" className="border-red-200 bg-red-100 text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+              {notStartedCount} not started
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-7">
         {groups.map((group) => {
           const groupId = group.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+          const groupArtefacts = artefacts.filter((item) => item.category === group);
+          const groupReady = groupArtefacts.filter((item) => item.status === "ready").length;
+
           return (
-            <section key={group} id={groupId} className="scroll-mt-24">
+            <section key={group} id={groupId} className="scroll-mt-24" aria-labelledby={`${groupId}-heading`}>
               <div className="mb-3 flex items-center justify-between gap-3">
-                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{group}</h3>
-                <span className="text-xs text-muted-foreground">
-                  {artefacts.filter((item) => item.category === group && item.status === "ready").length}/
-                  {artefacts.filter((item) => item.category === group).length} ready
+                <h3 id={`${groupId}-heading`} className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  {group}
+                </h3>
+                <span className="text-xs font-medium text-muted-foreground">
+                  {groupReady}/{groupArtefacts.length} ready
                 </span>
               </div>
+
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                {artefacts
-                  .filter((artefact) => artefact.category === group)
-                  .map((artefact) => {
-                    const Icon = artefact.icon;
-                    return (
-                      <div key={artefact.id} className="flex min-h-[170px] flex-col rounded-lg border bg-card p-4" data-testid={`application-artefact-${artefact.id}`}>
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10">
-                            <Icon className="h-4 w-4 text-primary" />
-                          </div>
-                          {statusBadge(artefact.status)}
+                {groupArtefacts.map((artefact) => {
+                  const Icon = artefact.icon;
+                  const label = actionLabel(artefact.status);
+                  const isServerDocument = artefact.href.startsWith("/api/");
+
+                  return (
+                    <article
+                      key={artefact.id}
+                      className={`flex min-h-[176px] flex-col rounded-lg border bg-card p-4 ${cardStatusClass(artefact.status)}`}
+                      data-testid={`application-artefact-${artefact.id}`}
+                      data-app-status={artefact.status}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10">
+                          <Icon className="h-4 w-4 text-primary" />
                         </div>
-                        <h4 className="mt-3 font-semibold">{artefact.title}</h4>
-                        <p className="mt-1 flex-1 text-sm text-muted-foreground">{artefact.description}</p>
-                        <div className="mt-4 flex items-end justify-between gap-3">
-                          <span className="text-[11px] leading-tight text-muted-foreground">{artefact.source}</span>
-                          <Button asChild size="sm" variant={artefact.status === "ready" ? "outline" : "default"}>
-                            <Link href={artefact.href}>{artefact.status === "ready" ? "Open" : "Continue"}</Link>
-                          </Button>
-                        </div>
+                        {statusBadge(artefact.status)}
                       </div>
-                    );
-                  })}
+
+                      <h4 className="mt-3 font-semibold">{artefact.title}</h4>
+                      <p className="mt-1 flex-1 text-sm leading-relaxed text-muted-foreground">{artefact.description}</p>
+
+                      <div className="mt-4 flex items-end justify-between gap-3">
+                        <span className="max-w-[70%] text-[11px] leading-snug text-muted-foreground">{artefact.source}</span>
+                        <Button
+                          asChild
+                          size="sm"
+                          variant={artefact.status === "ready" ? "outline" : "default"}
+                          className="shrink-0"
+                        >
+                          {isServerDocument ? (
+                            <a href={artefact.href} aria-label={`${label} ${artefact.title}`}>
+                              {label}
+                              <ArrowRight className="h-3.5 w-3.5" />
+                            </a>
+                          ) : (
+                            <Link href={artefact.href} aria-label={`${label} ${artefact.title}`}>
+                              {label}
+                              <ArrowRight className="h-3.5 w-3.5" />
+                            </Link>
+                          )}
+                        </Button>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             </section>
           );
