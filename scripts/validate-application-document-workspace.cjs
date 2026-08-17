@@ -12,6 +12,7 @@ const badge = read('client/src/components/ui/badge.tsx');
 const button = read('client/src/components/ui/button.tsx');
 const main = read('client/src/main.tsx');
 const attentionCss = read('client/src/attention-accessibility.css');
+const contextualNavigation = read('client/src/lib/contextualNavigation.ts');
 
 const requiredCategories = [
   'Business & Strategy',
@@ -99,7 +100,7 @@ if (!workspace.includes('finalPackReady = dossierReady && requiredDocumentsCompl
 }
 
 if (!workspace.includes('/api/view/html/${encodeURIComponent(String(latestCompletedPlan.id))}')) {
-  throw new Error('Ready Business Plan must open the generated plan rather than linking back to My Documents.');
+  throw new Error('Ready Business Plan must retain a generated-plan source URL.');
 }
 
 if (workspace.includes('href: completedPlan ? "/documents"')) {
@@ -172,4 +173,28 @@ if (!attentionCss.includes('animation-iteration-count: 2 !important')) {
   throw new Error('Attention animations must settle after a short finite sequence.');
 }
 
-console.log('Application document workspace, navigation and ADHD accessibility validation passed.');
+if (!main.includes('initContextualNavigation();')) {
+  throw new Error('Contextual same-tab navigation is not initialised before the app renders.');
+}
+
+if (!contextualNavigation.includes('application-artefact-market-research') || !contextualNavigation.includes('/tools/market-research?tab=research')) {
+  throw new Error('Market Research workspace action does not open the Research Plan tab directly.');
+}
+
+if (!contextualNavigation.includes('application-artefact-competitor-analysis') || !contextualNavigation.includes('/tools/market-research?tab=competitors')) {
+  throw new Error('Competitor Analysis workspace action does not open the Competitors tab directly.');
+}
+
+if (!contextualNavigation.includes('url.pathname.startsWith("/api/view/html/")') || !contextualNavigation.includes('contextual-business-plan-preview') || !contextualNavigation.includes('frame.srcdoc = html')) {
+  throw new Error('Business Plan must open inside My Documents rather than replacing the web app.');
+}
+
+if (!contextualNavigation.includes("anchor.target = \"_self\"")) {
+  throw new Error('Normal same-origin application links are not kept in the current browser tab.');
+}
+
+if (!contextualNavigation.includes("'[role=\"tab\"]'") || !contextualNavigation.includes('window.history.replaceState')) {
+  throw new Error('Current sub-tabs are not persisted into the URL for contextual reopening.');
+}
+
+console.log('Application document workspace, contextual navigation and ADHD accessibility validation passed.');
