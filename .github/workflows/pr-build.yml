@@ -29,6 +29,7 @@ jobs:
       - name: Check production runtime syntax
         run: |
           node --check server/toolPlatform.cjs
+          node --check server/applicationContextPrefill.cjs
           node --check server/eligibilityPolicy.cjs
           node --check server/eligibilityPolicySafety.cjs
           node --check server/eligibilityEngine.cjs
@@ -62,6 +63,9 @@ jobs:
 
       - name: Smoke test financial model route
         run: node scripts/smoke-financial-model-route.cjs
+
+      - name: Validate application context autofill
+        run: node scripts/validate-application-context-prefill.cjs
 
       - name: Validate business plan revision foundation
         run: node scripts/validate-revision-foundation.cjs
