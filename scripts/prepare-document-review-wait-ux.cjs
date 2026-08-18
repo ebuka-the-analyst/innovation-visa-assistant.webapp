@@ -32,4 +32,9 @@ if (source.includes(oldFailedBlock)) {
 }
 
 fs.writeFileSync(target, source, 'utf8');
+
+// The waiting UX and the backend reliability safeguards ship together so a user
+// is only asked to wait for a review that can reliably produce visible output.
+require('./prepare-document-review-ai-reliability.cjs');
+
 console.log('[document-review-ux] waiting-time UX prepared');
