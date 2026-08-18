@@ -176,7 +176,7 @@ export function ApplicationDocumentWorkspace({
     ? `/api/view/html/${encodeURIComponent(String(latestCompletedPlan.id))}`
     : "/questionnaire";
 
-  const financialReady = hasRun(...FINANCIAL_TOOL_IDS);
+  const financialReady = hasRun(...FINANCIAL_TOOL_IDS) || Boolean(tracker?.authoritative?.businessPlans?.evidence?.financial?.satisfied);
   const ivsReady = hasRun(...IVS_TOOL_IDS);
   const marketReady = hasRun("market-research") || Boolean(tracker?.authoritative?.businessPlans?.evidence?.market?.satisfied);
   const pitchReady = hasRun("pitch-coach");
