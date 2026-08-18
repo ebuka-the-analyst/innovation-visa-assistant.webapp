@@ -75,4 +75,7 @@ update('server/seoStrategyEngine.ts', (source) => {
   return next;
 });
 
+// Keep the Final Document Review waiting experience transparent in both dev and production builds.
+require('./prepare-document-review-wait-ux.cjs');
+
 console.log('[managed-ai-extra] provider-specific bypass cleanup complete');
