@@ -24,7 +24,7 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Audit hardcoded values
-        run: node scripts/audit-hardcoded-values.cjs
+        run: node scripts/audit-hardcoded-runtime-summary.cjs
 
       - name: Validate tool platform registry
         run: node scripts/validate-tool-platform-registry.cjs
