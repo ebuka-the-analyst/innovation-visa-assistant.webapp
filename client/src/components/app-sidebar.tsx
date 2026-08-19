@@ -213,7 +213,7 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
       ],
     },
     {
-      label: "Premium Features",
+      label: "Expert Support",
       icon: Sparkles,
       items: [
         { title: "Expert Booking", url: "/expert-booking", icon: Users, description: "Expert consultation" },
