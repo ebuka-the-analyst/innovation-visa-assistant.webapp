@@ -9,13 +9,12 @@ source = source.replace(
   `  text = replaceOnce(\n    text,\n    '\"UK Visa Assistant - Benedict Umeh\"',\n    '\"VisaFlow - Immigration Guidance\"',\n    'replace named questionnaire example',\n  );`,
   `  text = text.replaceAll(\"\\\"UK Visa Assistant - Benedict Umeh\\\"\", \"\\\"VisaFlow - Immigration Guidance\\\"\");`,
 );
-source = source.replace(
-  `  text = removeSection(text, '  // Get session summary', '  // Submit answer and get AI feedback', 'fabricated interview session endpoint', true);\n  text = text.replace('  // Submit answer and get AI feedback', sessionReplacement + '  // Submit answer and get AI feedback');`,
-  `  text = removeSection(text, '  // Get session summary', '  app.post(\\n    \"/api/ai-interview/submit-answer\"', 'fabricated interview session endpoint', true);\n  text = text.replace('  app.post(\\n    \"/api/ai-interview/submit-answer\"', sessionReplacement + '  // Submit answer and get AI feedback\\n  app.post(\\n    \"/api/ai-interview/submit-answer\"');`,
-);
 source = source
   .split('\n')
   .map((line) => {
+    if (line.includes("text = removeSection(text, '  // Get session summary'")) {
+      return `  text = text.replace(/\\n\\s*\\/\\/ Get session summary[\\s\\S]*?(?=\\n\\s*\\/\\/ Submit answer and get AI feedback)/, '\\n');`;
+    }
     if (line.includes('if (/benedict9211@gmail')) return '  if (false) {';
     if (line.includes('/benedict9211@gmail') && !line.includes('if (')) {
       return `${line}\n  /BENEDICT_PREFILL_DATA/,\n  /handleOwnerPrefill/,`;
