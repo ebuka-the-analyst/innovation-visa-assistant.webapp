@@ -17,7 +17,7 @@ source = source
       return `${line}\n  /BENEDICT_PREFILL_DATA/,\n  /handleOwnerPrefill/,`;
     }
     if (line.includes('if (/adamyaraj2|Adamya Raj|du_1TIKfKK9BSTYpDOqrDunVaVy|loadAdamyaCase/')) {
-      return `  if (/adamyaraj2|Adamya Raj|du_1TIKfKK9BSTYpDOqrDunVaVy|loadAdamyaCase/.test(text)) {\n    for (const marker of ['adamyaraj2', 'Adamya Raj', 'du_1TIKfKK9BSTYpDOqrDunVaVy', 'loadAdamyaCase']) {\n      const markerIndex = text.indexOf(marker);\n      if (markerIndex >= 0) console.error('REMAINING_ADMIN_CASE', marker, text.slice(Math.max(0, markerIndex - 500), markerIndex + 900));\n    }`;
+      return `  text = text.replace(' → find <code className=\\"bg-muted px-1 rounded\\">du_1TIKfKK9BSTYpDOqrDunVaVy</code>', '');\n  text = text.replace('<li>Submit before <strong className=\\"text-orange-600\\">14 May 2026</strong></li>', '<li>Submit before the response deadline shown in your payment provider dashboard.</li>');\n  if (/adamyaraj2|Adamya Raj|du_1TIKfKK9BSTYpDOqrDunVaVy|loadAdamyaCase/.test(text)) {\n    for (const marker of ['adamyaraj2', 'Adamya Raj', 'du_1TIKfKK9BSTYpDOqrDunVaVy', 'loadAdamyaCase']) {\n      const markerIndex = text.indexOf(marker);\n      if (markerIndex >= 0) console.error('REMAINING_ADMIN_CASE', marker, text.slice(Math.max(0, markerIndex - 500), markerIndex + 900));\n    }`;
     }
     return line;
   })
