@@ -209,14 +209,14 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
         { title: "Endorser Comparison", url: "/endorser-comparison", icon: Award, description: "Endorser analysis" },
         { title: "Investment Requirements", url: "/endorser-investment", icon: DollarSign, description: "Investment by route" },
         { title: "Document Organizer", url: "/document-organizer", icon: FileText, description: "Document management" },
-        { title: "Expert Booking", url: "/expert-booking", icon: Users, description: "Expert consultation" },
+        { title: "Premium Features", url: "/premium-features", icon: Sparkles, description: "Achievements & more" },
       ],
     },
     {
       label: "Premium Features",
       icon: Sparkles,
       items: [
-        { title: "Premium Features", url: "/premium-features", icon: Sparkles, description: "Achievements & more" },
+        { title: "Expert Booking", url: "/expert-booking", icon: Users, description: "Expert consultation" },
       ],
     },
     {
