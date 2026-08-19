@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { isAuthenticated } from "./auth";
 import { storage } from "./storage";
 import { generatePDFContent } from "./pdf";
+import { registerExpertBookingRoutes } from "./expertBookingRoutes";
 import {
   RevisionServiceError,
   acceptRevisionForUser,
@@ -41,6 +42,11 @@ function sendRevisionError(res: Response, error: unknown) {
 }
 
 export function registerBusinessPlanRevisionRoutes(app: Express): void {
+  // This bootstrap is already invoked by server/index.ts after the core route set.
+  // Register Expert Support here as a small, isolated route module rather than
+  // expanding the legacy monolithic server/routes.ts further.
+  registerExpertBookingRoutes(app);
+
   app.get(
     "/api/business-plans/:planId/revisions",
     isAuthenticated,
