@@ -22,6 +22,9 @@ source = source
     if (line.includes('if (/adamyaraj2|Adamya Raj|du_1TIKfKK9BSTYpDOqrDunVaVy|loadAdamyaCase/')) {
       return `  text = text.replace(' → find <code className=\\"bg-muted px-1 rounded\\">du_1TIKfKK9BSTYpDOqrDunVaVy</code>', '');\n  text = text.replace('<li>Submit before <strong className=\\"text-orange-600\\">14 May 2026</strong></li>', '<li>Submit before the response deadline shown in your payment provider dashboard.</li>');\n  if (/adamyaraj2|Adamya Raj|du_1TIKfKK9BSTYpDOqrDunVaVy|loadAdamyaCase/.test(text)) {\n    for (const marker of ['adamyaraj2', 'Adamya Raj', 'du_1TIKfKK9BSTYpDOqrDunVaVy', 'loadAdamyaCase']) {\n      const markerIndex = text.indexOf(marker);\n      if (markerIndex >= 0) console.error('REMAINING_ADMIN_CASE', marker, text.slice(Math.max(0, markerIndex - 500), markerIndex + 900));\n    }`;
     }
+    if (line.includes('if (pattern.test(source)) throw new Error')) {
+      return `    if (pattern.test(source)) {\n      const found = source.match(pattern);\n      const foundIndex = found?.index ?? -1;\n      console.error('REMAINING_SENSITIVE_CONTEXT', path.relative(root, full), String(pattern), foundIndex >= 0 ? source.slice(Math.max(0, foundIndex - 600), foundIndex + 1200) : 'no context');\n      throw new Error(\`Forbidden hardcoded sensitive value remains in \${path.relative(root, full)}: \${pattern}\`);\n    }`;
+    }
     return line;
   })
   .join('\n');
