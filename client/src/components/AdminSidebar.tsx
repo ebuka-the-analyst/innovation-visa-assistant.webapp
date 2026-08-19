@@ -282,6 +282,7 @@ const menuGroups = [
     label: "Admin Settings",
     items: [
       { id: "settings-general", label: "General Settings", icon: Settings, badge: null },
+      { id: "settings-ai-providers", label: "AI Providers", icon: Cpu, badge: null },
       { id: "settings-access", label: "Access Control", icon: Lock, badge: null },
       { id: "settings-maintenance", label: "Maintenance", icon: Wrench, badge: null },
     ]
@@ -290,6 +291,7 @@ const menuGroups = [
 
 export function AdminSidebar({ activeSection, onSectionChange, stats, hideDemoUsers, onHideDemoUsersChange }: AdminSidebarProps) {
   const [expandedGroups, setExpandedGroups] = useState<string[]>(["Dashboard", "User Intelligence", "Plan Lifecycle"]);
+  const [, setAdminLocation] = useLocation();
 
   useEffect(() => {
     const activeGroup = menuGroups.find((group) => group.items.some((item) => item.id === activeSection));
@@ -368,6 +370,10 @@ export function AdminSidebar({ activeSection, onSectionChange, stats, hideDemoUs
                       <SidebarMenuItem key={item.id} className="py-0">
                         <SidebarMenuButton
                           onClick={() => {
+                            if (item.id === "settings-ai-providers") {
+                              setAdminLocation("/admin/ai-providers");
+                              return;
+                            }
                             if (item.id === "lawyer-manage-network") {
                               window.location.assign("/expert-booking?tab=manage-network");
                               return;
