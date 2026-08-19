@@ -25,7 +25,9 @@ jobs:
 
       - name: Apply one-shot hardcode remediation
         if: ${{ hashFiles('scripts/remediate-unsafe-hardcodes.cjs') != '' }}
-        run: node scripts/remediate-unsafe-hardcodes.cjs
+        run: |
+          node scripts/fix-remediation-escaping.cjs
+          node scripts/remediate-unsafe-hardcodes.cjs
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
@@ -132,6 +134,7 @@ jobs:
         if: ${{ hashFiles('scripts/remediate-unsafe-hardcodes.cjs') != '' }}
         run: |
           rm -f scripts/remediate-unsafe-hardcodes.cjs
+          rm -f scripts/fix-remediation-escaping.cjs
           rm -f .github/workflows/one-shot-hardcode-remediation.yml
           rm -f .remediation-trigger
           git show origin/main:.github/workflows/pr-build.yml > .github/workflows/pr-build.yml
