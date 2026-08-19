@@ -12,6 +12,9 @@ source = source.replace(
 source = source
   .split('\n')
   .map((line) => {
+    if (line.includes("text = removeConstFunction(text, 'const handleOwnerPrefill")) {
+      return `${line}\n  text = text.replace(/\\n\\s*let filled = 0;[\\s\\S]*?(?=\\n\\s*\\/\\/ Auto-fill from documents states)/, '\\n');`;
+    }
     if (line.includes("text = removeSection(text, '  // Get session summary'")) {
       return `  text = text.replace(/\\n\\s*\\/\\/ Get session summary[\\s\\S]*?(?=\\n\\s*\\/\\/ Submit answer and get AI feedback)/, '\\n');`;
     }
