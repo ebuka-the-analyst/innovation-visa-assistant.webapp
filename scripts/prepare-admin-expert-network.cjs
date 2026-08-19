@@ -81,6 +81,10 @@ update('client/src/pages/expert-booking.tsx', (source) => {
     '{user?.isAdmin && <TabsContent value="manage"><AdminNetworkManager toast={toast} /></TabsContent>}',
     '',
   );
+  next = next.replace(
+    '{user?.isAdmin && <Button className="mt-5" onClick={() => setActiveTab("manage")}><Plus className="h-4 w-4 mr-2" /> Configure first expert</Button>}',
+    '{user?.isAdmin && <Button className="mt-5" onClick={() => window.location.assign("/admin/expert-network")}><Plus className="h-4 w-4 mr-2" /> Configure first expert</Button>}',
+  );
 
   if (!next.includes('export function AdminNetworkManager(')) {
     const anchor = 'function AdminNetworkManager({ toast }: { toast: ReturnType<typeof useToast>["toast"] }) {';
