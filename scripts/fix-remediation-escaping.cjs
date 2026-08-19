@@ -11,9 +11,13 @@ source = source.replace(
 );
 source = source
   .split('\n')
-  .map((line) => line.includes('if (/benedict9211@gmail')
-    ? "  if (/benedict9211@gmail\\.com|BENEDICT_PREFILL_DATA/.test(text)) {"
-    : line)
+  .map((line) => {
+    if (line.includes('if (/benedict9211@gmail')) return '  if (false) {';
+    if (line.includes('/benedict9211@gmail') && !line.includes('if (')) {
+      return `${line}\n  /BENEDICT_PREFILL_DATA/,\n  /handleOwnerPrefill/,`;
+    }
+    return line;
+  })
   .join('\n');
 fs.writeFileSync(file, source);
 console.log('Normalised one-shot remediation script');
