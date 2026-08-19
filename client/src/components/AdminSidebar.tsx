@@ -260,6 +260,7 @@ const menuGroups = [
       { id: "lawyer-queue", label: "Review Queue", icon: ClipboardCheck, badge: "pending" },
       { id: "lawyer-documents", label: "Document Review", icon: FileSearch, badge: null },
       { id: "lawyer-team", label: "Lawyer Team", icon: UserCog, badge: null },
+      { id: "lawyer-manage-network", label: "Manage Network", icon: Users, badge: null },
       { id: "lawyer-comments", label: "Comments & Notes", icon: MessageSquare, badge: null },
       { id: "lawyer-completed", label: "Completed Reviews", icon: CheckSquare, badge: null },
     ]
@@ -366,7 +367,13 @@ export function AdminSidebar({ activeSection, onSectionChange, stats, hideDemoUs
                     {group.items.map((item) => (
                       <SidebarMenuItem key={item.id} className="py-0">
                         <SidebarMenuButton
-                          onClick={() => onSectionChange(item.id)}
+                          onClick={() => {
+                            if (item.id === "lawyer-manage-network") {
+                              window.location.assign("/expert-booking?tab=manage-network");
+                              return;
+                            }
+                            onSectionChange(item.id);
+                          }}
                           isActive={activeSection === item.id}
                           className="w-full justify-between h-7 min-h-0 px-2"
                           data-testid={`sidebar-${item.id}`}
