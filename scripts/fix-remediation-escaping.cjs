@@ -9,6 +9,10 @@ source = source.replace(
   `  text = replaceOnce(\n    text,\n    '\"UK Visa Assistant - Benedict Umeh\"',\n    '\"VisaFlow - Immigration Guidance\"',\n    'replace named questionnaire example',\n  );`,
   `  text = text.replaceAll(\"\\\"UK Visa Assistant - Benedict Umeh\\\"\", \"\\\"VisaFlow - Immigration Guidance\\\"\");`,
 );
+source = source.replace(
+  '// 2) Remove owner-specific questionnaire prefill and personal identity gate.',
+  `// 1b) Retire the completed one-off account-specific credit reconciliation script.\nconst reconciliationResetPath = path.join(root, 'server/creditReconciliationReset.cjs');\nif (fs.existsSync(reconciliationResetPath)) {\n  fs.unlinkSync(reconciliationResetPath);\n  changed.push('server/creditReconciliationReset.cjs (deleted)');\n}\n\n// 2) Remove owner-specific questionnaire prefill and personal identity gate.`,
+);
 source = source
   .split('\n')
   .map((line) => {
