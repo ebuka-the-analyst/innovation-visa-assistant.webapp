@@ -9,5 +9,6 @@ source = source.replace(
   `  text = replaceOnce(\n    text,\n    '\"UK Visa Assistant - Benedict Umeh\"',\n    '\"VisaFlow - Immigration Guidance\"',\n    'replace named questionnaire example',\n  );`,
   `  text = text.replaceAll(\"\\\"UK Visa Assistant - Benedict Umeh\\\"\", \"\\\"VisaFlow - Immigration Guidance\\\"\");`,
 );
+source = source.replace('|\\bisOwner\\b', '');
 fs.writeFileSync(file, source);
 console.log('Normalised one-shot remediation script');
