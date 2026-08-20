@@ -185,25 +185,37 @@ const weekdayOptions = [
   { value: 0, label: "Sun" },
 ];
 
+const bookingFormDefaults = {
+  timezone: import.meta.env.VITE_DEFAULT_TIMEZONE || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+  bookingNoticeHours: import.meta.env.VITE_DEFAULT_BOOKING_NOTICE_HOURS || "24",
+  bookingHorizonDays: import.meta.env.VITE_DEFAULT_BOOKING_HORIZON_DAYS || "60",
+  slotIntervalMinutes: import.meta.env.VITE_DEFAULT_SLOT_INTERVAL_MINUTES || "30",
+  bufferMinutes: import.meta.env.VITE_DEFAULT_BOOKING_BUFFER_MINUTES || "15",
+  durationMinutes: import.meta.env.VITE_DEFAULT_CONSULTATION_DURATION_MINUTES || "60",
+  weekdays: bookingFormDefaults.weekdays,
+  startTime: import.meta.env.VITE_DEFAULT_BOOKING_START_TIME || "09:00",
+  endTime: import.meta.env.VITE_DEFAULT_BOOKING_END_TIME || "17:00",
+};
+
 const defaultConfig: ConfigFormState = {
   publicTitle: "",
   publicBio: "",
-  timezone: "Europe/London",
+  timezone: bookingFormDefaults.timezone,
   consultationEnabled: false,
   featured: false,
   meetingMode: "video",
-  bookingNoticeHours: "24",
-  bookingHorizonDays: "60",
-  slotIntervalMinutes: "30",
-  bufferMinutes: "15",
+  bookingNoticeHours: bookingFormDefaults.bookingNoticeHours,
+  bookingHorizonDays: bookingFormDefaults.bookingHorizonDays,
+  slotIntervalMinutes: bookingFormDefaults.slotIntervalMinutes,
+  bufferMinutes: bookingFormDefaults.bufferMinutes,
   preparationNote: "",
   serviceName: "",
   serviceDescription: "",
-  durationMinutes: "60",
+  durationMinutes: bookingFormDefaults.durationMinutes,
   pricePounds: "",
-  weekdays: [1, 2, 3, 4, 5],
-  startTime: "09:00",
-  endTime: "17:00",
+  weekdays: bookingFormDefaults.weekdays,
+  startTime: bookingFormDefaults.startTime,
+  endTime: bookingFormDefaults.endTime,
 };
 
 function money(pence: number, currency = "GBP") {
@@ -452,7 +464,7 @@ export default function ExpertBooking() {
             <TabsList className="h-auto flex-wrap justify-start">
               <TabsTrigger value="book" className="gap-2"><CalendarDays className="h-4 w-4" /> Book Expert</TabsTrigger>
               <TabsTrigger value="mine" className="gap-2"><BriefcaseBusiness className="h-4 w-4" /> My Consultations</TabsTrigger>
-              {user?.isAdmin && <TabsTrigger value="manage" className="gap-2"><Settings2 className="h-4 w-4" /> Manage Network</TabsTrigger>}
+              
             </TabsList>
 
             <TabsContent value="book" className="space-y-6">
@@ -464,7 +476,7 @@ export default function ExpertBooking() {
                     <div className="h-14 w-14 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-4"><UserRoundCheck className="h-7 w-7 text-primary" /></div>
                     <h2 className="text-xl font-semibold">Expert consultations are being configured</h2>
                     <p className="mt-2 text-muted-foreground">Only professionals explicitly enabled by the administrator appear here. This prevents placeholder or unverified profiles from being shown to applicants.</p>
-                    {user?.isAdmin && <Button className="mt-5" onClick={() => setActiveTab("manage")}><Plus className="h-4 w-4 mr-2" /> Configure first expert</Button>}
+                    {user?.isAdmin && <Button className="mt-5" onClick={() => window.location.assign("/admin/expert-network")}><Plus className="h-4 w-4 mr-2" /> Configure first expert</Button>}
                   </CardContent>
                 </Card>
               ) : (
@@ -598,7 +610,7 @@ export default function ExpertBooking() {
               )}
             </TabsContent>
 
-            {user?.isAdmin && <TabsContent value="manage"><AdminNetworkManager toast={toast} /></TabsContent>}
+            
           </Tabs>
 
           <Card className="bg-muted/30">
@@ -641,7 +653,7 @@ function BookingCard({ booking, compact = false }: { booking: Booking; compact?:
   );
 }
 
-function AdminNetworkManager({ toast }: { toast: ReturnType<typeof useToast>["toast"] }) {
+export function AdminNetworkManager({ toast }: { toast: ReturnType<typeof useToast>["toast"] }) {
   const [selectedExpertId, setSelectedExpertId] = useState("");
   const [config, setConfig] = useState<ConfigFormState>(defaultConfig);
   const [createMode, setCreateMode] = useState(false);

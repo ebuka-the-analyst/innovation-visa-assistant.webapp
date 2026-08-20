@@ -623,18 +623,21 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
   const [dispNotes, setDispNotes] = useState('');
   const [dispResolution, setDispResolution] = useState('');
   const [dispEvidence, setDispEvidence] = useState('');
-  const [dispDeadline, setDispDeadline] = useState('2026-05-14');
+  const [dispDeadline, setDispDeadline] = useState('');
   const [dispAdminName, setDispAdminName] = useState('support@innovatorfoundervisaassistant.co.uk');
-
   const loadAdamyaCase = () => {
-    setDispCustomerEmail('adamyaraj2@gmail.com');
-    setDispDisputeId('du_1TIKfKK9BSTYpDOqrDunVaVy');
-    setDispAmount('£110');
-    setDispReason('Product unacceptable');
-    setDispStatus('open');
-    setDispDeadline('2026-05-14');
-    setDispNotes('Customer Adamya Raj (adamyaraj2@gmail.com) paid for the Ultimate plan on ~25 March 2026. A server-side technical bug prevented the 12 plan credits from being allocated and the Ultimate tier from fully propagating — even though the payment was successfully received by Stripe. On 26 March 2026 at ~10:11 AM, the customer emailed support@innovatorfoundervisaassistant.co.uk with subject line "Urgent help needed" reporting: (1) no business plan generated, (2) unable to access Ultimate tier features, (3) VIP support not responding. We investigated, identified the credits allocation bug, applied the fix, and sent a full resolution confirmation email. The chargeback was filed AFTER this resolution email was sent and received — constituting a bad-faith dispute. The customer did not reply to the resolution email to indicate any remaining problem before filing.');
-    setDispResolution('RESOLVED — Bug identified: credits allocation failure during that subscription period. Fix applied by admin. Resolution email sent from support@innovatorfoundervisaassistant.co.uk to adamyaraj2@gmail.com confirming: "Your Ultimate tier is now fully active with all 12 plan credits. You can now generate your 80-page business plan in full, access all 109 tools, use all four AI agents, and access VIP document review." Customer was invited to reply for further help. No further response received. Chargeback du_1TIKfKK9BSTYpDOqrDunVaVy was filed after this resolution — bad-faith dispute.');
+    setDispCustomerEmail('');
+    setDispDisputeId('');
+    setDispAmount('');
+    setDispReason('');
+    setDispStatus('');
+    setDispDeadline('');
+    setDispNotes('');
+    setDispResolution('');
+    toast({
+      title: "Hard-coded dispute preset removed",
+      description: "Search current support records and enter the live Stripe dispute details instead.",
+    });
   };
 
   const openDisputePack = () => {
@@ -738,8 +741,8 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <span className="text-xs text-muted-foreground">Quick:</span>
               <Button size="sm" variant="outline" className="text-xs h-7"
-                onClick={() => { setSearchEmail('adamyaraj2@gmail.com'); setQueryEmail('adamyaraj2@gmail.com'); }}>
-                Adamya Raj (£110 dispute)
+                onClick={() => { setSearchEmail(''); setQueryEmail(''); }}>
+                Search current support records
               </Button>
               {queryEmail && (
                 <Button size="sm" variant="default" className="text-xs h-7 bg-[#005EB8] text-white"
@@ -1193,9 +1196,9 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
             <div className="flex gap-3 items-start">
               <AlertCircle className="h-4 w-4 text-orange-600 mt-0.5 shrink-0" />
               <div>
-                <p className="font-semibold text-orange-700 dark:text-orange-400 text-sm">Active Case: Adamya Raj — £110 Chargeback</p>
+                <p className="font-semibold text-orange-700 dark:text-orange-400 text-sm">No hard-coded dispute selected</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  <span className="font-mono">du_1TIKfKK9BSTYpDOqrDunVaVy</span> · adamyaraj2@gmail.com · Respond by <strong className="text-orange-600">14 May 2026</strong>
+                  Use Support Search to load the current customer record and response deadline.
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Respond via <a href="https://dashboard.stripe.com/disputes" target="_blank" rel="noopener noreferrer" className="text-primary underline">Stripe Dashboard → Disputes</a>
@@ -1249,7 +1252,7 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Amount Disputed</Label>
-              <Input placeholder="e.g. £110" value={dispAmount} onChange={(e) => setDispAmount(e.target.value)} data-testid="input-dispute-amount" />
+              <Input placeholder="e.g. " value={dispAmount} onChange={(e) => setDispAmount(e.target.value)} data-testid="input-dispute-amount" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Response Deadline</Label>
@@ -1328,9 +1331,9 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
             <li><strong>Fill in the form above</strong> — especially evidence gathered from Railway</li>
             <li><strong>Click "Export Dispute Pack"</strong> — opens a 5-page professional document in a new tab</li>
             <li><strong>Print to PDF</strong> — in your browser use Ctrl+P / Cmd+P → Save as PDF</li>
-            <li>Go to <a href="https://dashboard.stripe.com/disputes" target="_blank" rel="noopener noreferrer" className="text-primary underline font-medium">dashboard.stripe.com/disputes</a> → find <code className="bg-muted px-1 rounded">du_1TIKfKK9BSTYpDOqrDunVaVy</code></li>
+            <li>Go to <a href="https://dashboard.stripe.com/disputes" target="_blank" rel="noopener noreferrer" className="text-primary underline font-medium">dashboard.stripe.com/disputes</a> → find <code className="bg-muted px-1 rounded"></code></li>
             <li>Click <strong>"Respond"</strong> and upload: (a) the dispute pack PDF, (b) any screenshots of usage, (c) your Terms of Service</li>
-            <li>Submit before <strong className="text-orange-600">14 May 2026</strong></li>
+            <li>Submit before <strong className="text-orange-600"></strong></li>
           </ol>
         </CardContent>
       </Card>

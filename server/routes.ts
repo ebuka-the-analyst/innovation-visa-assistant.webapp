@@ -79,7 +79,6 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import OpenAI from "openai";
-import { GoogleGenAI } from "@google/genai";
 import {
   registerObjectStorageRoutes,
   ObjectStorageService,
@@ -140,9 +139,18 @@ function normalizePlanHeadingForDedupe(value: string): string {
     .toLowerCase();
 }
 
-const geminiAI = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_2 || "",
-});
+const managedLegacyTextAI = {
+  models: {
+    generateContent: async ({ contents }: { contents: unknown }) => {
+      const completion = await openaiClient.chat.completions.create({
+        model: BUSINESS_PLAN_MODEL as any,
+        messages: [{ role: "user", content: typeof contents === "string" ? contents : JSON.stringify(contents) }],
+        max_tokens: 4000,
+      } as any);
+      return { text: completion.choices[0]?.message?.content || "" };
+    },
+  },
+};
 
 const documentStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -8533,10 +8541,6 @@ EXAMPLES OF GOOD RESPONSES:
             ? "Configured"
             : "Not configured",
         },
-        qwen: {
-          apiKey: process.env.QWEN_API_KEY ? "Configured" : "Not configured",
-          model: "qwen-plus",
-        },
         google: {
           clientId: process.env.GOOGLE_CLIENT_ID
             ? "Configured"
@@ -13965,39 +13969,11 @@ OUTPUT FORMAT:
       }
     },
   );
-
-  // Get session summary
-  app.get(
-    "/api/ai-interview/session/:sessionId",
-    isAuthenticated,
-    async (req, res) => {
-      try {
-        const { sessionId } = req.params;
-
-        // Return session data (in production this would fetch from database)
-        res.json({
-          session: {
-            id: sessionId,
-            status: "active",
-            currentAgent: "nova",
-            currentSection: 1,
-            totalQuestionsAnswered: 0,
-            totalQuestions: 475,
-            innovationScore: 0,
-            viabilityScore: 0,
-            scalabilityScore: 0,
-            overallReadiness: 0,
-            approvalProbability: 30,
-            currentStreak: 0,
-            totalXP: 0,
-          },
-        });
-      } catch (error) {
-        console.error("Get session error:", error);
-        res.status(500).json({ error: "Failed to get session" });
-      }
-    },
-  );
+  app.get('/api/ai-interview/session/:sessionId', isAuthenticated, async (_req, res) => {
+    return res.status(501).json({
+      error: 'Interview session retrieval is not implemented. No fabricated session data is returned.',
+    });
+  });
 
   // ============================================
   // 2040-GRADE AI FEATURES API ENDPOINTS
@@ -14069,7 +14045,7 @@ Focus specifically on UK Innovator Founder Visa requirements and Home Office cri
           );
           const score = scoreMatch
             ? parseInt(scoreMatch[1] || scoreMatch[2])
-            : Math.floor(Math.random() * 25) + 65;
+            : 0;
 
           return {
             analysis: responseText,
@@ -14139,7 +14115,7 @@ Focus specifically on UK Innovator Founder Visa requirements and Home Office cri
       } else {
         res.json({
           analysis: `Based on ${criterion} analysis, your application shows potential. Focus on demonstrating clear evidence of ${criterion} to satisfy Home Office requirements. Consider providing specific examples, metrics, and UK market relevance.`,
-          score: Math.floor(Math.random() * 25) + 65,
+          score: 0,
           suggestions: [
             `Strengthen your ${criterion} evidence`,
             `Include specific UK market data`,
@@ -17731,58 +17707,11 @@ IMPORTANT RULES:
 - Always include the website URL naturally at the end or within the CTA.
 - Output ONLY the post itself — no preamble, no explanation, no title, no markdown formatting headers. Just the raw post text ready to copy-paste.`;
 
-        // Try Gemini keys in sequence
-        const geminiKeys = [
-          process.env.GEMINI_API_KEY,
-          process.env.GEMINI_API_KEY_2,
-          process.env.GEMINI_API_KEY_3,
-          process.env.GEMINI_API_KEY_4,
-        ].filter(Boolean) as string[];
-
         let content: string | null = null;
-
-        for (const key of geminiKeys) {
-          try {
-            const { GoogleGenAI } = await import("@google/genai");
-            const ai = new GoogleGenAI({ apiKey: key });
-            const response = await ai.models.generateContent({
-              model: "gemini-2.5-flash",
-              contents: prompt,
-              config: { maxOutputTokens: 1200, temperature: 0.85 },
-            });
-            const text = response.text?.trim();
-            if (text && isLongEnough(text)) {
-              content = text;
-              break;
-            }
-          } catch (err: any) {
-            if (
-              err?.status === 429 ||
-              err?.message?.includes("429") ||
-              err?.message?.includes("quota")
-            ) {
-              continue; // Try next key
-            }
-            throw err;
-          }
-        }
-
-        // Fallback to OpenAI if all Gemini keys rate-limited
-        if (!content && process.env.OPENAI_API_KEY) {
-          try {
-            const completion = await openaiClient.chat.completions.create({
-              model: "gpt-4o",
-              messages: [{ role: "user", content: prompt }],
-              max_tokens: 1200,
-              temperature: 0.85,
-            });
-            const openAiText =
-              completion.choices[0]?.message?.content?.trim() || null;
-            content =
-              openAiText && isLongEnough(openAiText) ? openAiText : null;
-          } catch (_) {
-            // OpenAI also failed
-          }
+        try {
+          content = await callAI(prompt, 1200);
+        } catch (managedAIError) {
+          console.error("Managed AI social generation failed:", managedAIError);
         }
 
         if (!content) {
@@ -21357,11 +21286,6 @@ IMPORTANT RULES:
         status: result.claudeScore !== null ? "ok" : "unavailable",
         score: result.claudeScore,
       },
-      {
-        name: "Qwen",
-        status: result.qwenScore !== null ? "ok" : "unavailable",
-        score: result.qwenScore,
-      },
     ];
 
     // Attach any error messages from the details object
@@ -21736,7 +21660,7 @@ IMPORTANT RULES:
   <h3 style="margin:20px 0 8px; color:#1a1a2e; font-size:11pt;">Exhibit A — Email Thread Extract (Key Evidence)</h3>
   <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:4px; padding:16px; font-family:monospace; font-size:8.5pt; line-height:1.7; white-space:pre-wrap;">
 From: support@innovatorfoundervisaassistant.co.uk
-To: adamyaraj2@gmail.com
+To: 
 Subject: Re: Fwd: Urgent help needed
 
 Dear Adamya,
@@ -22809,7 +22733,7 @@ Include a realistic mix across all these categories:
 
 Return ONLY the JSON array. No markdown. No explanation.`;
 
-      const aiResult = await geminiAI.models.generateContent({
+      const aiResult = await managedLegacyTextAI.models.generateContent({
         model: "gemini-2.5-flash",
         contents: prompt,
       });
@@ -22926,7 +22850,7 @@ Return ONLY the final submission content. Do not include labels, markdown fences
       let content = "";
 
       try {
-        const aiContent = await geminiAI.models.generateContent({
+        const aiContent = await managedLegacyTextAI.models.generateContent({
           model: "gemini-2.5-flash",
           contents: prompt,
         });

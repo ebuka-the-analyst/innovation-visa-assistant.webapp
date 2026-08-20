@@ -375,7 +375,7 @@ export function AdminSidebar({ activeSection, onSectionChange, stats, hideDemoUs
                               return;
                             }
                             if (item.id === "lawyer-manage-network") {
-                              window.location.assign("/expert-booking?tab=manage-network");
+                              setAdminLocation("/admin/expert-network");
                               return;
                             }
                             onSectionChange(item.id);

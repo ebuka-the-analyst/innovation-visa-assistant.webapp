@@ -45,15 +45,15 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
-  
-  // Use SESSION_SECRET from environment, or generate a warning with fallback
+  // SESSION_SECRET is security-critical. Refuse to start rather than silently
+  // falling back to a predictable value.
   const sessionSecret = process.env.SESSION_SECRET;
   if (!sessionSecret) {
-    console.warn("[Auth] WARNING: SESSION_SECRET not set. Using fallback secret. Set SESSION_SECRET in production!");
+    throw new Error('[Auth] SESSION_SECRET is required. Refusing to start with an insecure fallback.');
   }
   
   return session({
-    secret: sessionSecret || 'ukivfa-fallback-session-secret-change-in-production',
+    secret: sessionSecret,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,

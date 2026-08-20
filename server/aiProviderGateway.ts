@@ -195,8 +195,53 @@ async function callChatWithProvider(setting: ProviderSetting, body: any): Promis
       payload.max_completion_tokens = payload.max_tokens;
       delete payload.max_tokens;
     }
-    if (/^gpt-5/i.test(model)) delete payload.temperature;
-    const result: any = await client.chat.completions.create(payload);
+    const isGpt5Family = /^gpt-5/i.test(model);
+    if (isGpt5Family) {
+      delete payload.temperature;
+      // GPT-5.6 defaults to medium reasoning. Use low reasoning for ordinary
+      // Chat Completions unless the caller deliberately selected another effort.
+      if (payload.reasoning_effort == null) payload.reasoning_effort = "low";
+    }
+
+    const hasAssistantOutput = (completion: any): boolean => {
+      const choice = completion?.choices?.[0];
+      const text = normaliseTextContent(choice?.message?.content).trim();
+      const toolCalls = Array.isArray(choice?.message?.tool_calls) ? choice.message.tool_calls : [];
+      return Boolean(text || toolCalls.length);
+    };
+
+    let result: any = await client.chat.completions.create(payload);
+
+    // A reasoning model can return HTTP 200 but consume its whole completion budget
+    // on reasoning, leaving message.content empty. Treat that as an incomplete
+    // provider result, retry once with reasoning disabled and a safe output floor,
+    // then surface a recoverable provider error so configured fallback can run.
+    if (!hasAssistantOutput(result)) {
+      const finishReason = String(result?.choices?.[0]?.finish_reason || "unknown");
+      const reasoningTokens = Number(result?.usage?.completion_tokens_details?.reasoning_tokens || 0);
+      console.warn(
+        `[AI Gateway] Empty OpenAI chat completion from ${model}; finish_reason=${finishReason}; reasoning_tokens=${reasoningTokens}. Retrying with visible-output safeguards.`,
+      );
+
+      if (isGpt5Family) {
+        const retryPayload: any = {
+          ...payload,
+          reasoning_effort: "none",
+          max_completion_tokens: Math.max(Number(payload.max_completion_tokens || 0), 4_000),
+        };
+        result = await client.chat.completions.create(retryPayload);
+      }
+
+      if (!hasAssistantOutput(result)) {
+        const retryFinishReason = String(result?.choices?.[0]?.finish_reason || finishReason || "unknown");
+        const error: any = new Error(
+          `AI provider returned an empty completion (finish_reason=${retryFinishReason})`,
+        );
+        error.status = 503;
+        throw error;
+      }
+    }
+
     result.provider = "openai";
     return result;
   }

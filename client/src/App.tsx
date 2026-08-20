@@ -108,6 +108,8 @@ const News = lazy(() => import("@/pages/news"));
 const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
 const BlogDashboard = lazy(() => import("@/pages/admin/BlogDashboard"));
 const SeoStrategy = lazy(() => import("@/pages/admin/SeoStrategy"));
+const AdminAIProviders = lazy(() => import("@/pages/admin/AIProviders"));
+const AdminExpertNetwork = lazy(() => import("@/pages/admin/ExpertNetwork"));
 const PartnerDashboard = lazy(() => import("@/pages/partner-dashboard"));
 
 // OMNI - Advanced AI Features
@@ -140,7 +142,7 @@ const BlogPostPage = lazy(() => import("@/pages/blog-post"));
 
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/uk", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide", "/blog"];
 const SIDEBAR_HIDDEN_PREFIXES = ["/blog/"];
-const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard"];
+const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard", "/admin/ai-providers", "/admin/expert-network"];
 
 function PageLoadingSkeleton() {
   return (
@@ -287,6 +289,8 @@ function Router() {
       <Route path="/endorser-investment" component={EndorserInvestmentRequirements} />
       <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/handoff" component={Handoff} />
+      <Route path="/admin/ai-providers" component={AdminAIProviders} />
+      <Route path="/admin/expert-network" component={AdminExpertNetwork} />
       <Route path="/admin-dashboard" component={AdminDashboard} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/blog" component={BlogDashboard} />
