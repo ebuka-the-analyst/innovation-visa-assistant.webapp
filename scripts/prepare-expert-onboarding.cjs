@@ -58,3 +58,4 @@ update('server/index.ts', (source) => {
 });
 
 console.log('[expert-onboarding] route preparation complete');
+require('./prepare-expert-photo-upload.cjs');
