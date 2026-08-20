@@ -23,6 +23,9 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
+      - name: Validate critical hardcodes
+        run: node scripts/check-critical-hardcodes.cjs
+
       - name: Validate tool platform registry
         run: node scripts/validate-tool-platform-registry.cjs
 

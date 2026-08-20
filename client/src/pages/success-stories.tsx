@@ -280,6 +280,7 @@ export default function SuccessStories() {
   });
 
   const accessibleCount = allStories.filter(s => s.isAccessible).length;
+  const endorserCount = new Set(allStories.map(s => s.endorserBody).filter(Boolean)).size;
 
   return (
     <>
@@ -320,8 +321,8 @@ export default function SuccessStories() {
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-xl font-bold text-purple-500">100%</div>
-              <p className="text-sm text-muted-foreground">Approved</p>
+              <div className="text-xl font-bold text-purple-500">{endorserCount}</div>
+              <p className="text-sm text-muted-foreground">Endorsing Bodies</p>
             </CardContent>
           </Card>
         </div>

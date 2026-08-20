@@ -185,25 +185,37 @@ const weekdayOptions = [
   { value: 0, label: "Sun" },
 ];
 
+const bookingFormDefaults = {
+  timezone: import.meta.env.VITE_DEFAULT_TIMEZONE || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+  bookingNoticeHours: import.meta.env.VITE_DEFAULT_BOOKING_NOTICE_HOURS || "24",
+  bookingHorizonDays: import.meta.env.VITE_DEFAULT_BOOKING_HORIZON_DAYS || "60",
+  slotIntervalMinutes: import.meta.env.VITE_DEFAULT_SLOT_INTERVAL_MINUTES || "30",
+  bufferMinutes: import.meta.env.VITE_DEFAULT_BOOKING_BUFFER_MINUTES || "15",
+  durationMinutes: import.meta.env.VITE_DEFAULT_CONSULTATION_DURATION_MINUTES || "60",
+  weekdays: bookingFormDefaults.weekdays,
+  startTime: import.meta.env.VITE_DEFAULT_BOOKING_START_TIME || "09:00",
+  endTime: import.meta.env.VITE_DEFAULT_BOOKING_END_TIME || "17:00",
+};
+
 const defaultConfig: ConfigFormState = {
   publicTitle: "",
   publicBio: "",
-  timezone: "Europe/London",
+  timezone: bookingFormDefaults.timezone,
   consultationEnabled: false,
   featured: false,
   meetingMode: "video",
-  bookingNoticeHours: "24",
-  bookingHorizonDays: "60",
-  slotIntervalMinutes: "30",
-  bufferMinutes: "15",
+  bookingNoticeHours: bookingFormDefaults.bookingNoticeHours,
+  bookingHorizonDays: bookingFormDefaults.bookingHorizonDays,
+  slotIntervalMinutes: bookingFormDefaults.slotIntervalMinutes,
+  bufferMinutes: bookingFormDefaults.bufferMinutes,
   preparationNote: "",
   serviceName: "",
   serviceDescription: "",
-  durationMinutes: "60",
+  durationMinutes: bookingFormDefaults.durationMinutes,
   pricePounds: "",
-  weekdays: [1, 2, 3, 4, 5],
-  startTime: "09:00",
-  endTime: "17:00",
+  weekdays: bookingFormDefaults.weekdays,
+  startTime: bookingFormDefaults.startTime,
+  endTime: bookingFormDefaults.endTime,
 };
 
 function money(pence: number, currency = "GBP") {

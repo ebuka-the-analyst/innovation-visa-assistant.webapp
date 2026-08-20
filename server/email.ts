@@ -253,14 +253,17 @@ export function getTokenExpiry(): Date {
 }
 
 // Always use production URL for email links since emails go to real users
-const BASE_URL = process.env.BASE_URL || 'https://innovatorfoundervisaassistant.co.uk';
+const BASE_URL = process.env.BASE_URL;
+if (!BASE_URL && process.env.NODE_ENV === 'production') {
+  throw new Error('[Email] BASE_URL is required in production.');
+}
 
 export async function sendPasswordResetEmail(
   email: string,
   firstName: string,
   token: string
 ): Promise<{ success: boolean; error?: string }> {
-  const resetUrl = `${BASE_URL}/reset-password?token=${token}`;
+  const resetUrl = `${BASE_URL || "http://localhost:5000"}/reset-password?token=${token}`;
 
   const html = `
     <!DOCTYPE html>
@@ -347,7 +350,7 @@ export async function sendVerificationEmail(
   firstName: string,
   token: string
 ): Promise<{ success: boolean; error?: string }> {
-  const verificationUrl = `${BASE_URL}/verify-email?token=${token}`;
+  const verificationUrl = `${BASE_URL || "http://localhost:5000"}/verify-email?token=${token}`;
 
   const html = `
     <!DOCTYPE html>
@@ -556,7 +559,7 @@ export async function sendPaymentReceiptEmail(
         
         <!-- Access Your Tools CTA -->
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${BASE_URL}/tools-hub" style="display: inline-block; background: linear-gradient(135deg, #ffa536 0%, #ff8c00 100%); color: white; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(255,165,54,0.4);">
+          <a href="${BASE_URL || "http://localhost:5000"}/tools-hub" style="display: inline-block; background: linear-gradient(135deg, #ffa536 0%, #ff8c00 100%); color: white; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(255,165,54,0.4);">
             Access Your Tools Now
           </a>
         </div>
@@ -565,7 +568,7 @@ export async function sendPaymentReceiptEmail(
         <div style="background: #fff3e0; border-left: 4px solid #ffa536; padding: 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
           <h4 style="margin: 0 0 12px 0; color: #e65100; font-size: 16px;">Quick Start Tips:</h4>
           <ol style="margin: 0; padding-left: 20px; color: #555; font-size: 14px;">
-            <li style="margin-bottom: 8px;">Visit the <a href="${BASE_URL}/tools-hub" style="color: #11b6e9;">Tools Hub</a> to explore the tools included in your plan</li>
+            <li style="margin-bottom: 8px;">Visit the <a href="${BASE_URL || "http://localhost:5000"}/tools-hub" style="color: #11b6e9;">Tools Hub</a> to explore the tools included in your plan</li>
             <li style="margin-bottom: 8px;">Open your dashboard to review your application progress and available next steps</li>
             <li style="margin-bottom: 8px;">Start with any included tool that matches the stage of your visa journey</li>
           </ol>
@@ -595,8 +598,8 @@ export async function sendPaymentReceiptEmail(
           </p>
           <p style="font-size: 11px; color: #bbb;">
             © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant. All rights reserved.<br>
-            <a href="${BASE_URL}/privacy" style="color: #999;">Privacy Policy</a> | 
-            <a href="${BASE_URL}/terms" style="color: #999;">Terms of Service</a>
+            <a href="${BASE_URL || "http://localhost:5000"}/privacy" style="color: #999;">Privacy Policy</a> | 
+            <a href="${BASE_URL || "http://localhost:5000"}/terms" style="color: #999;">Terms of Service</a>
           </p>
         </div>
       </div>
@@ -619,9 +622,9 @@ export async function sendWelcomeEmail(
   email: string,
   firstName: string
 ): Promise<{ success: boolean; error?: string }> {
-  const dashboardUrl = `${BASE_URL}/dashboard`;
-  const toolsUrl = `${BASE_URL}/tools-hub`;
-  const pricingUrl = `${BASE_URL}/pricing`;
+  const dashboardUrl = `${BASE_URL || "http://localhost:5000"}/dashboard`;
+  const toolsUrl = `${BASE_URL || "http://localhost:5000"}/tools-hub`;
+  const pricingUrl = `${BASE_URL || "http://localhost:5000"}/pricing`;
 
   const html = `
     <!DOCTYPE html>
@@ -704,8 +707,8 @@ export async function sendAdminVerificationSuccessEmail(
   email: string,
   firstName: string
 ): Promise<{ success: boolean; error?: string }> {
-  const dashboardUrl = `${BASE_URL}/dashboard`;
-  const toolsUrl = `${BASE_URL}/tools-hub`;
+  const dashboardUrl = `${BASE_URL || "http://localhost:5000"}/dashboard`;
+  const toolsUrl = `${BASE_URL || "http://localhost:5000"}/tools-hub`;
 
   const html = `
     <!DOCTYPE html>
@@ -797,7 +800,7 @@ export async function sendPlanCompletionEmail(
   planName: string,
   planId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const viewPlanUrl = `${BASE_URL}/dashboard?plan=${planId}`;
+  const viewPlanUrl = `${BASE_URL || "http://localhost:5000"}/dashboard?plan=${planId}`;
 
   const html = `
     <!DOCTYPE html>
@@ -874,7 +877,7 @@ export async function sendUpgradeReminderEmail(
   currentTier: string,
   daysActive: number
 ): Promise<{ success: boolean; error?: string }> {
-  const pricingUrl = `${BASE_URL}/pricing`;
+  const pricingUrl = `${BASE_URL || "http://localhost:5000"}/pricing`;
   const { catalog: commercialCatalog } = await getCommercialCatalog();
   const toolCounts = getToolCounts(commercialCatalog);
   const currentPlan = commercialCatalog.plans.find((plan) => plan.id === currentTier)
@@ -978,7 +981,7 @@ export async function sendWeeklyProgressEmail(
     nextSteps: string[];
   }
 ): Promise<{ success: boolean; error?: string }> {
-  const dashboardUrl = `${BASE_URL}/dashboard`;
+  const dashboardUrl = `${BASE_URL || "http://localhost:5000"}/dashboard`;
 
   const scoreColor = stats.readinessScore >= 70 ? '#4caf50' : 
                     stats.readinessScore >= 40 ? '#ffa536' : '#f44336';
@@ -1073,7 +1076,7 @@ export async function sendDeadlineReminderEmail(
     actionUrl?: string;
   }
 ): Promise<{ success: boolean; error?: string }> {
-  const actionUrl = deadline.actionUrl || `${BASE_URL}/progress`;
+  const actionUrl = deadline.actionUrl || `${BASE_URL || "http://localhost:5000"}/progress`;
   const urgencyColor = deadline.daysRemaining <= 3 ? '#f44336' : 
                        deadline.daysRemaining <= 7 ? '#ff9800' : '#ffa536';
   const urgencyLevel = deadline.daysRemaining <= 3 ? 'Urgent' : 
@@ -1244,8 +1247,8 @@ export async function sendSupportNotificationEmail(
           </div>
           
           <p style="font-size: 14px; color: #666;">
-            In the meantime, you may find helpful information in our <a href="${BASE_URL}/faq" style="color: #11b6e9;">FAQ</a> or 
-            <a href="${BASE_URL}/guide" style="color: #11b6e9;">Ultimate Guide</a>.
+            In the meantime, you may find helpful information in our <a href="${BASE_URL || "http://localhost:5000"}/faq" style="color: #11b6e9;">FAQ</a> or 
+            <a href="${BASE_URL || "http://localhost:5000"}/guide" style="color: #11b6e9;">Ultimate Guide</a>.
           </p>
           
           <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
@@ -1279,7 +1282,7 @@ export async function sendReferralSignupNotification(
   refereeName: string,
   referralCode: string
 ) {
-  const dashboardUrl = `${BASE_URL}/referral-dashboard`;
+  const dashboardUrl = `${BASE_URL || "http://localhost:5000"}/referral-dashboard`;
   
   const html = `
     <!DOCTYPE html>
@@ -1355,7 +1358,7 @@ export async function sendReferralPurchaseNotification(
   rewardAmount: number,
   rewardType: string
 ) {
-  const dashboardUrl = `${BASE_URL}/referral-dashboard`;
+  const dashboardUrl = `${BASE_URL || "http://localhost:5000"}/referral-dashboard`;
   
   const rewardText = rewardType === 'percentage' 
     ? `${rewardAmount}% commission` 
@@ -1435,7 +1438,7 @@ export async function sendRewardApprovalNotification(
   status: 'approved' | 'rejected',
   notes?: string
 ) {
-  const dashboardUrl = `${BASE_URL}/referral-dashboard`;
+  const dashboardUrl = `${BASE_URL || "http://localhost:5000"}/referral-dashboard`;
   
   const isApproved = status === 'approved';
   const statusColor = isApproved ? '#2e7d32' : '#c62828';
@@ -1702,7 +1705,7 @@ export async function sendReferralRewardEmail(
           <p style="font-size: 14px; color: #718096; line-height: 1.6;">
             This reward has been added to your account balance. You can request a payout once your balance reaches £20 or more.
           </p>
-          <a href="${BASE_URL}/referral-dashboard" style="display: inline-block; background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; margin-top: 20px;">
+          <a href="${BASE_URL || "http://localhost:5000"}/referral-dashboard" style="display: inline-block; background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; margin-top: 20px;">
             View Your Dashboard
           </a>
         </div>
@@ -1755,7 +1758,7 @@ export async function sendPromoCodeRewardEmail(
           <p style="font-size: 14px; color: #718096; line-height: 1.6;">
             This commission has been added to your account balance. Keep sharing your promo code to earn more!
           </p>
-          <a href="${BASE_URL}/referral-dashboard" style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; margin-top: 20px;">
+          <a href="${BASE_URL || "http://localhost:5000"}/referral-dashboard" style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; margin-top: 20px;">
             View Your Dashboard
           </a>
         </div>

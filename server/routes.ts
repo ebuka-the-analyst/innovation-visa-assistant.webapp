@@ -13965,39 +13965,11 @@ OUTPUT FORMAT:
       }
     },
   );
-
-  // Get session summary
-  app.get(
-    "/api/ai-interview/session/:sessionId",
-    isAuthenticated,
-    async (req, res) => {
-      try {
-        const { sessionId } = req.params;
-
-        // Return session data (in production this would fetch from database)
-        res.json({
-          session: {
-            id: sessionId,
-            status: "active",
-            currentAgent: "nova",
-            currentSection: 1,
-            totalQuestionsAnswered: 0,
-            totalQuestions: 475,
-            innovationScore: 0,
-            viabilityScore: 0,
-            scalabilityScore: 0,
-            overallReadiness: 0,
-            approvalProbability: 30,
-            currentStreak: 0,
-            totalXP: 0,
-          },
-        });
-      } catch (error) {
-        console.error("Get session error:", error);
-        res.status(500).json({ error: "Failed to get session" });
-      }
-    },
-  );
+  app.get('/api/ai-interview/session/:sessionId', isAuthenticated, async (_req, res) => {
+    return res.status(501).json({
+      error: 'Interview session retrieval is not implemented. No fabricated session data is returned.',
+    });
+  });
 
   // ============================================
   // 2040-GRADE AI FEATURES API ENDPOINTS
@@ -14069,7 +14041,7 @@ Focus specifically on UK Innovator Founder Visa requirements and Home Office cri
           );
           const score = scoreMatch
             ? parseInt(scoreMatch[1] || scoreMatch[2])
-            : Math.floor(Math.random() * 25) + 65;
+            : 0;
 
           return {
             analysis: responseText,
@@ -14139,7 +14111,7 @@ Focus specifically on UK Innovator Founder Visa requirements and Home Office cri
       } else {
         res.json({
           analysis: `Based on ${criterion} analysis, your application shows potential. Focus on demonstrating clear evidence of ${criterion} to satisfy Home Office requirements. Consider providing specific examples, metrics, and UK market relevance.`,
-          score: Math.floor(Math.random() * 25) + 65,
+          score: 0,
           suggestions: [
             `Strengthen your ${criterion} evidence`,
             `Include specific UK market data`,
@@ -21736,7 +21708,7 @@ IMPORTANT RULES:
   <h3 style="margin:20px 0 8px; color:#1a1a2e; font-size:11pt;">Exhibit A — Email Thread Extract (Key Evidence)</h3>
   <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:4px; padding:16px; font-family:monospace; font-size:8.5pt; line-height:1.7; white-space:pre-wrap;">
 From: support@innovatorfoundervisaassistant.co.uk
-To: adamyaraj2@gmail.com
+To: 
 Subject: Re: Fwd: Urgent help needed
 
 Dear Adamya,
