@@ -97,3 +97,4 @@ update('client/src/pages/expert-booking.tsx', (source) => {
 
 console.log('[admin-expert-network] admin network route preparation complete');
 require('./prepare-expert-onboarding.cjs');
+require('./prepare-expert-notification-system.cjs');
