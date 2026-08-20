@@ -1,8 +1,9 @@
 import { Component, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, RefreshCw, Home, Bug } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertTriangle, RefreshCw, LayoutDashboard, Bug, ShieldCheck } from "lucide-react";
 import { errorLogger } from "@/lib/errorLogger";
+import logoLightImg from "@assets/official_logo.webp";
 import {
   clearDeploymentAssetReloadAttempt,
   isDeploymentAssetError,
@@ -19,12 +20,24 @@ interface State {
   hasError: boolean;
   error: Error | null;
   errorInfo: string;
+  errorReference: string;
+}
+
+function createErrorReference() {
+  const time = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).slice(2, 7).toUpperCase();
+  return `IFVA-${time}-${random}`;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null, errorInfo: "" };
+    this.state = {
+      hasError: false,
+      error: null,
+      errorInfo: "",
+      errorReference: createErrorReference(),
+    };
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
@@ -39,30 +52,29 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error("ErrorBoundary caught an error:", error, errorInfo);
     this.setState({ errorInfo: errorInfo.componentStack || "" });
     errorLogger.logCritical(
-      `React Error Boundary: ${error.message}`,
+      `[${this.state.errorReference}] React Error Boundary: ${error.message}`,
       `${error.stack}\n\nComponent Stack:${errorInfo.componentStack}`
     );
   }
 
   handleRetry = () => {
-    // Deployment chunk failures need a fresh application shell, not just a React rerender.
     if (isDeploymentAssetError(this.state.error)) {
       clearDeploymentAssetReloadAttempt();
       window.location.reload();
       return;
     }
 
-    this.setState({ hasError: false, error: null, errorInfo: "" });
+    window.location.reload();
   };
 
-  handleGoHome = () => {
-    window.location.href = "/";
+  handleGoDashboard = () => {
+    window.location.href = "/dashboard";
   };
 
   handleReportBug = () => {
-    const subject = encodeURIComponent("Bug Report: Application Error");
+    const subject = encodeURIComponent(`Platform issue ${this.state.errorReference}`);
     const body = encodeURIComponent(
-      `Error: ${this.state.error?.message}\n\nPage: ${window.location.href}\n\nTimestamp: ${new Date().toISOString()}\n\nPlease describe what you were doing when this error occurred:\n\n`
+      `Reference: ${this.state.errorReference}\nPage: ${window.location.href}\nTimestamp: ${new Date().toISOString()}\n\nPlease tell us what you were trying to do when the issue appeared:\n\n`
     );
     window.location.href = `mailto:support@innovatorfoundervisaassistant.co.uk?subject=${subject}&body=${body}`;
   };
@@ -74,46 +86,65 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-accent/5 to-primary/5">
-          <Card className="max-w-lg w-full">
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
-                <AlertTriangle className="w-8 h-8 text-destructive" />
+        <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-slate-50">
+          <Card className="max-w-xl w-full overflow-hidden border-slate-200 shadow-xl shadow-slate-200/60">
+            <div className="h-1.5 bg-emerald-600" />
+            <CardContent className="p-7 sm:p-10">
+              <div className="flex justify-center mb-7">
+                <img
+                  src={logoLightImg}
+                  alt="Innovator Founder Visa Assistant"
+                  className="h-14 w-auto object-contain"
+                />
               </div>
-              <CardTitle className="text-2xl">Something went wrong</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-center text-muted-foreground">
-                We encountered an unexpected error. Don't worry - your progress has been auto-saved.
-              </p>
-              
-              {this.state.error && (
-                <div className="bg-muted/50 rounded-lg p-3 text-sm">
-                  <p className="font-medium text-destructive mb-1">Error Details:</p>
-                  <p className="text-muted-foreground font-mono text-xs break-all">
-                    {this.state.error.message}
-                  </p>
+
+              <div className="mx-auto mb-5 w-14 h-14 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center">
+                <AlertTriangle className="w-7 h-7 text-amber-600" />
+              </div>
+
+              <div className="text-center space-y-3">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">
+                  We couldn&apos;t load this page
+                </h1>
+                <p className="text-slate-600 leading-7 max-w-md mx-auto">
+                  Something interrupted this part of the platform. Your account and any work that was already saved are unaffected.
+                </p>
+              </div>
+
+              <div className="mt-6 rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3 flex gap-3 items-start">
+                <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-emerald-950">Your information remains protected</p>
+                  <p className="text-sm text-emerald-800 mt-0.5">Reload the page to try again, or return to your dashboard.</p>
                 </div>
-              )}
+              </div>
 
-              <div className="flex flex-col gap-2 pt-4">
-                <Button onClick={this.handleRetry} className="w-full gap-2">
+              <div className="flex flex-col gap-2.5 mt-7">
+                <Button onClick={this.handleRetry} className="w-full gap-2 h-11 bg-emerald-600 hover:bg-emerald-700">
                   <RefreshCw className="w-4 h-4" />
-                  Try Again
+                  Reload this page
                 </Button>
-                <Button variant="outline" onClick={this.handleGoHome} className="w-full gap-2">
-                  <Home className="w-4 h-4" />
-                  Go to Homepage
+                <Button variant="outline" onClick={this.handleGoDashboard} className="w-full gap-2 h-11">
+                  <LayoutDashboard className="w-4 h-4" />
+                  Return to Dashboard
                 </Button>
-                <Button variant="ghost" onClick={this.handleReportBug} className="w-full gap-2 text-muted-foreground">
+                <Button variant="ghost" onClick={this.handleReportBug} className="w-full gap-2 text-slate-600">
                   <Bug className="w-4 h-4" />
-                  Report This Issue
+                  Contact Support
                 </Button>
               </div>
 
-              <p className="text-xs text-center text-muted-foreground pt-2">
-                If this problem persists, please contact our support team.
-              </p>
+              <div className="mt-6 pt-5 border-t border-slate-100 text-center">
+                <p className="text-xs text-slate-500">
+                  Support reference <span className="font-mono font-medium text-slate-700">{this.state.errorReference}</span>
+                </p>
+                {import.meta.env.DEV && this.state.error && (
+                  <details className="mt-4 text-left rounded-lg bg-slate-100 p-3 text-xs text-slate-700">
+                    <summary className="cursor-pointer font-semibold">Development error details</summary>
+                    <pre className="mt-2 whitespace-pre-wrap break-all font-mono">{this.state.error.message}</pre>
+                  </details>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -126,23 +157,26 @@ export class ErrorBoundary extends Component<Props, State> {
 
 export function ToolErrorFallback({ toolName }: { toolName?: string }) {
   return (
-    <div className="min-h-[60vh] flex items-center justify-center p-4">
-      <Card className="max-w-md w-full">
-        <CardHeader className="text-center">
-          <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-2" />
-          <CardTitle>Tool Loading Error</CardTitle>
-        </CardHeader>
-        <CardContent className="text-center space-y-4">
-          <p className="text-muted-foreground">
-            {toolName ? `The "${toolName}" tool` : "This tool"} failed to load properly.
-          </p>
-          <div className="flex gap-2 justify-center">
-            <Button onClick={() => window.location.reload()} size="sm" className="gap-2">
+    <div className="min-h-[60vh] flex items-center justify-center p-4 bg-slate-50">
+      <Card className="max-w-md w-full border-slate-200">
+        <CardContent className="p-7 text-center space-y-5">
+          <img src={logoLightImg} alt="Innovator Founder Visa Assistant" className="h-11 w-auto mx-auto" />
+          <div className="mx-auto w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center">
+            <AlertTriangle className="w-6 h-6 text-amber-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-950">This tool needs to be reloaded</h2>
+            <p className="text-slate-600 mt-2">
+              {toolName ? `${toolName} could not be loaded just now.` : "This tool could not be loaded just now."} Please reload the page or return to your dashboard.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 justify-center">
+            <Button onClick={() => window.location.reload()} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
               <RefreshCw className="w-4 h-4" />
               Reload Page
             </Button>
-            <Button variant="outline" onClick={() => window.history.back()} size="sm">
-              Go Back
+            <Button variant="outline" onClick={() => { window.location.href = "/dashboard"; }}>
+              Dashboard
             </Button>
           </div>
         </CardContent>
