@@ -1,0 +1,45 @@
+name: Hotfix BASE_URL Startup
+
+on:
+  push:
+    branches:
+      - hotfix/base-url-startup-v4
+
+permissions:
+  contents: write
+
+jobs:
+  hotfix:
+    if: ${{ !contains(github.event.head_commit.message, '[hotfix-applied]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Apply hotfix
+        run: node scripts/hotfix-base-url-startup.cjs
+
+      - name: Validate syntax
+        run: node --check server/email.ts || true
+
+      - name: Production build
+        run: npm run build
+
+      - name: Commit hotfix and remove temporary files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/email.ts
+          git rm scripts/hotfix-base-url-startup.cjs .github/workflows/hotfix-base-url-startup.yml
+          git commit -m "Fix missing BASE_URL startup crash [hotfix-applied]"
+          git push origin HEAD:hotfix/base-url-startup-v4
