@@ -6,7 +6,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -14,9 +14,6 @@ jobs:
     steps:
       - name: Check out
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -26,48 +23,8 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Reset generated files before deterministic remediation
-        run: |
-          git checkout origin/main -- \
-            client/src/App.tsx \
-            client/src/components/AdminSidebar.tsx \
-            client/src/components/QuestionnaireForm.tsx \
-            client/src/pages/admin-dashboard.tsx \
-            client/src/pages/document-review.tsx \
-            client/src/pages/expert-booking.tsx \
-            client/src/pages/success-stories.tsx \
-            client/src/pages/visa-prefill-dashboard.tsx \
-            shared/tools-data.ts \
-            server/aiProviderGateway.ts \
-            server/auth.ts \
-            server/blogGenerator.ts \
-            server/eligibility-service.ts \
-            server/email.ts \
-            server/index.ts \
-            server/routes.ts \
-            server/seoStrategyEngine.ts \
-            server/services/documentReviewService.ts
-
-      - name: Apply hardcoded-value remediation
-        run: |
-          node scripts/remediate-hardcoded-values.cjs
-          node scripts/remediate-static-copy.cjs
-
       - name: Validate critical hardcodes
         run: node scripts/check-critical-hardcodes.cjs
-
-      - name: Commit deterministic remediation before build preparation
-        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        run: |
-          if git diff --quiet && git diff --cached --quiet; then
-            echo "No deterministic remediation changes to commit."
-          else
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add client/src server shared scripts
-            git commit -m "Normalise hardcoded-value remediation [skip-remediation]"
-            git push origin HEAD:${{ github.head_ref }}
-          fi
 
       - name: Validate tool platform registry
         run: node scripts/validate-tool-platform-registry.cjs
