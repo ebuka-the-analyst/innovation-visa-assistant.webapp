@@ -213,7 +213,7 @@ export default function VisaPrefillDashboard() {
             id="visaStatus"
             value={founderData.personal.currentVisaStatus}
             onChange={(e) => updateField("personal.currentVisaStatus", e.target.value)}
-            placeholder="e.g., Post-Study Work (PSW) Visa"
+            placeholder="Enter your current immigration permission"
             data-testid="input-visa-status"
           />
         </div>
@@ -233,7 +233,7 @@ export default function VisaPrefillDashboard() {
             id="ukEntry"
             value={founderData.personal.ukEntryDate}
             onChange={(e) => updateField("personal.ukEntryDate", e.target.value)}
-            placeholder="e.g., 28 September 2022"
+            placeholder="Enter your UK entry date"
             data-testid="input-uk-entry"
           />
         </div>
@@ -259,7 +259,7 @@ export default function VisaPrefillDashboard() {
             id="city"
             value={founderData.personal.city}
             onChange={(e) => updateField("personal.city", e.target.value)}
-            placeholder="e.g., Leeds"
+            placeholder="Enter your city"
             data-testid="input-city"
           />
         </div>
@@ -269,7 +269,7 @@ export default function VisaPrefillDashboard() {
             id="postcode"
             value={founderData.personal.postcode}
             onChange={(e) => updateField("personal.postcode", e.target.value)}
-            placeholder="e.g., LS4 2NT"
+            placeholder="Enter your postcode"
             data-testid="input-postcode"
           />
         </div>
@@ -342,7 +342,7 @@ export default function VisaPrefillDashboard() {
             data-testid="input-savings"
           />
           <p className="text-xs text-muted-foreground">
-            Minimum requirement: £1,270 (maintenance funds for 28 days)
+            Check the current maintenance-funds requirement in the eligibility assessment and official GOV.UK guidance before relying on a figure.
           </p>
         </div>
         <div className="space-y-2">
