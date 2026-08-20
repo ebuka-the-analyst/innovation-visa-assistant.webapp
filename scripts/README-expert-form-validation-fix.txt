@@ -1,0 +1,1 @@
+Expert onboarding validation hotfix: repairs the build-time multi-service server schema transform, returns field-level validation errors, and renders a client validation summary before submission. This file exists only to mark the hotfix revision and may be removed later.
