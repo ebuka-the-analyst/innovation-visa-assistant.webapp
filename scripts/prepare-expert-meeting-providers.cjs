@@ -41,7 +41,7 @@ update('client/src/pages/expert-booking.tsx', (source) => {
   let next = source;
 
   const interfaceAnchor = '  meetingMode?: string;\n  adminNotes?: string | null;';
-  if (!next.includes('meetingProvider?: string | null;')) {
+  if (!next.includes('meetingProvider?:')) {
     if (!next.includes(interfaceAnchor)) throw new Error('Could not locate AdminBooking meeting fields');
     next = next.replace(interfaceAnchor, `  meetingMode?: string;\n  meetingProvider?: "custom" | "google_meet" | "microsoft_teams" | null;\n  providerEventId?: string | null;\n  providerEventUrl?: string | null;\n  providerSyncStatus?: string | null;\n  providerLastError?: string | null;\n  adminNotes?: string | null;`);
   }
