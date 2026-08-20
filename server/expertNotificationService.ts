@@ -99,8 +99,6 @@ async function loadAdmins(queryable: Queryable = pool) {
 
 async function insertInAppNotification(queryable: Queryable, input: {
   recipientUserId: string;
-  bookingId?: string | null;
-  eventType: string;
   type: string;
   title: string;
   message: string;
@@ -110,18 +108,16 @@ async function insertInAppNotification(queryable: Queryable, input: {
 }) {
   if (!input.recipientUserId) return;
   await queryable.query(`
-    INSERT INTO expert_booking_notifications (
-      recipient_user_id, booking_id, event_type, type, title, message,
-      action_url, action_text, dedupe_key
-    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-    ON CONFLICT (dedupe_key) DO NOTHING
+    INSERT INTO admin_notifications (
+      title, message, type, target_type, target_value, status,
+      sent_at, recipient_count, action_url, action_text, source_key, created_at, updated_at
+    ) VALUES ($1,$2,$3,'user',$4,'sent',NOW(),1,$5,$6,$7,NOW(),NOW())
+    ON CONFLICT (source_key) WHERE source_key IS NOT NULL DO NOTHING
   `, [
-    input.recipientUserId,
-    input.bookingId || null,
-    input.eventType,
-    input.type,
     input.title,
     input.message,
+    input.type,
+    input.recipientUserId,
     input.actionUrl || null,
     input.actionText || null,
     input.dedupeKey,
@@ -172,7 +168,6 @@ function eventCopy(event: ExpertBookingEvent, detail: any, metadata: EventMetada
   const amount = formatMoney(Number(detail.amountPence || 0), detail.currency);
   const reason = String(metadata.cancellationReason ?? detail.cancellationReason ?? "").trim();
   const meetingUrl = String(metadata.meetingUrl ?? detail.meetingUrl ?? "").trim();
-
   const common = {
     expertName,
     clientName,
@@ -200,7 +195,7 @@ function eventCopy(event: ExpertBookingEvent, detail: any, metadata: EventMetada
       return {
         ...common,
         type: "info",
-        userTitle: meetingUrl ? "Meeting details added" : "Meeting details updated",
+        userTitle: meetingUrl ? "Meeting link is ready" : "Meeting details updated",
         userMessage: meetingUrl ? `The meeting link for your ${common.serviceName} on ${when} is now available.` : `The meeting details for your ${common.serviceName} on ${when} were updated.`,
         userSubject: "Meeting details updated for your expert consultation",
         userHeading: "Your consultation meeting details were updated",
@@ -275,20 +270,21 @@ export async function queueExpertBookingEvent(
   const detail = await loadBookingDetail(bookingId, queryable);
   if (!detail) return false;
   const copy = eventCopy(event, detail, metadata);
-  const fingerprint = stableFingerprint(event === "meeting_updated" ? { meetingUrl: copy.meetingUrl } : event === "cancelled" ? { reason: copy.reason } : {});
+  const fingerprint = stableFingerprint(
+    event === "meeting_updated" ? { meetingUrl: copy.meetingUrl }
+      : event === "cancelled" ? { reason: copy.reason }
+        : {},
+  );
   const eventKey = `${event}:${bookingId}:${fingerprint}`;
-  const actionUrl = "/expert-booking?tab=mine";
 
   await insertInAppNotification(queryable, {
     recipientUserId: detail.userId,
-    bookingId,
-    eventType: event,
     type: copy.type,
     title: copy.userTitle,
     message: copy.userMessage,
-    actionUrl,
+    actionUrl: "/expert-booking?tab=mine",
     actionText: "View consultation",
-    dedupeKey: `${eventKey}:user:${detail.userId}`,
+    dedupeKey: `expert:${eventKey}:user:${detail.userId}`,
   });
 
   const meetingLine = copy.meetingUrl
@@ -352,14 +348,12 @@ export async function queueExpertBookingEvent(
   for (const admin of admins) {
     await insertInAppNotification(queryable, {
       recipientUserId: admin.id,
-      bookingId,
-      eventType: event,
       type: copy.type,
       title: copy.adminTitle,
       message: copy.adminMessage,
       actionUrl: "/admin/expert-network#consultation-operations",
       actionText: "Open booking operations",
-      dedupeKey: `${eventKey}:admin:${admin.id}`,
+      dedupeKey: `expert:${eventKey}:admin:${admin.id}`,
     });
     if (admin.email) {
       await enqueueEmail(queryable, {
@@ -402,7 +396,7 @@ export async function queueExpertProfileEmail(input: {
     subject: input.subject,
     dedupeKey: `${eventKey}:email:expert:${input.expertEmail.toLowerCase()}`,
     emailType: "expert_network",
-    html: `<h2>${escapeHtml(input.subject)}</h2><p>${escapeHtml(input.message)}</p><p>Sign in to Expert Support or contact the platform team if you need help.</p>`,
+    html: `<h2>${escapeHtml(input.subject)}</h2><p>${escapeHtml(input.message)}</p><p>Contact the platform team if you need help with your Expert Support profile.</p>`,
   });
   kickExpertNotificationWorker();
 }
@@ -419,13 +413,12 @@ export async function queueAdminExpertNetworkAlert(input: {
   for (const admin of admins) {
     await insertInAppNotification(queryable, {
       recipientUserId: admin.id,
-      eventType: input.eventType,
       type: "info",
       title: input.title,
       message: input.message,
       actionUrl: input.actionUrl || "/admin/expert-network",
       actionText: "Open Expert Network",
-      dedupeKey: `${eventKey}:admin:${admin.id}`,
+      dedupeKey: `expert:${eventKey}:admin:${admin.id}`,
     });
     if (admin.email) {
       await enqueueEmail(queryable, {
@@ -441,34 +434,6 @@ export async function queueAdminExpertNetworkAlert(input: {
     }
   }
   kickExpertNotificationWorker();
-}
-
-export async function listExpertNotifications(userId: string) {
-  return rows<any>(await pool.query(`
-    SELECT id, title, message, type, action_url, action_text, created_at
-    FROM expert_booking_notifications
-    WHERE recipient_user_id = $1 AND read_at IS NULL
-    ORDER BY created_at DESC
-    LIMIT 100
-  `, [userId]));
-}
-
-export async function markExpertNotificationRead(userId: string, notificationId: string) {
-  const updated = rows<any>(await pool.query(`
-    UPDATE expert_booking_notifications
-    SET read_at = COALESCE(read_at, NOW())
-    WHERE id = $1 AND recipient_user_id = $2
-    RETURNING id
-  `, [notificationId, userId]));
-  return updated.length > 0;
-}
-
-export async function markAllExpertNotificationsRead(userId: string) {
-  await pool.query(`
-    UPDATE expert_booking_notifications
-    SET read_at = COALESCE(read_at, NOW())
-    WHERE recipient_user_id = $1 AND read_at IS NULL
-  `, [userId]);
 }
 
 let processing = false;
