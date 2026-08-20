@@ -60,3 +60,5 @@ update('server/index.ts', (source) => {
 console.log('[expert-onboarding] route preparation complete');
 require('./prepare-expert-photo-upload.cjs');
 require('./prepare-expert-multiple-services.cjs');
+require('./prepare-expert-form-validation-fix.cjs');
+require('./validate-expert-onboarding-multiservice.cjs');
