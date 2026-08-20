@@ -118,5 +118,10 @@ jobs:
       - name: Validate account-synced final route checklist
         run: node scripts/validate-compliance-checker-v2.cjs
 
+      - name: Validate Expert Support notifications
+        run: |
+          node scripts/prepare-admin-expert-network.cjs
+          node scripts/validate-expert-notification-system.cjs
+
       - name: Production build
         run: npm run build
