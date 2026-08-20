@@ -79,6 +79,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 import {
   registerObjectStorageRoutes,
   ObjectStorageService,
@@ -139,18 +140,9 @@ function normalizePlanHeadingForDedupe(value: string): string {
     .toLowerCase();
 }
 
-const managedLegacyTextAI = {
-  models: {
-    generateContent: async ({ contents }: { contents: unknown }) => {
-      const completion = await openaiClient.chat.completions.create({
-        model: BUSINESS_PLAN_MODEL as any,
-        messages: [{ role: "user", content: typeof contents === "string" ? contents : JSON.stringify(contents) }],
-        max_tokens: 4000,
-      } as any);
-      return { text: completion.choices[0]?.message?.content || "" };
-    },
-  },
-};
+const geminiAI = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_2 || "",
+});
 
 const documentStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -8540,6 +8532,10 @@ EXAMPLES OF GOOD RESPONSES:
           secretKey: process.env.STRIPE_SECRET_KEY
             ? "Configured"
             : "Not configured",
+        },
+        qwen: {
+          apiKey: process.env.QWEN_API_KEY ? "Configured" : "Not configured",
+          model: "qwen-plus",
         },
         google: {
           clientId: process.env.GOOGLE_CLIENT_ID
@@ -17707,11 +17703,58 @@ IMPORTANT RULES:
 - Always include the website URL naturally at the end or within the CTA.
 - Output ONLY the post itself — no preamble, no explanation, no title, no markdown formatting headers. Just the raw post text ready to copy-paste.`;
 
+        // Try Gemini keys in sequence
+        const geminiKeys = [
+          process.env.GEMINI_API_KEY,
+          process.env.GEMINI_API_KEY_2,
+          process.env.GEMINI_API_KEY_3,
+          process.env.GEMINI_API_KEY_4,
+        ].filter(Boolean) as string[];
+
         let content: string | null = null;
-        try {
-          content = await callAI(prompt, 1200);
-        } catch (managedAIError) {
-          console.error("Managed AI social generation failed:", managedAIError);
+
+        for (const key of geminiKeys) {
+          try {
+            const { GoogleGenAI } = await import("@google/genai");
+            const ai = new GoogleGenAI({ apiKey: key });
+            const response = await ai.models.generateContent({
+              model: "gemini-2.5-flash",
+              contents: prompt,
+              config: { maxOutputTokens: 1200, temperature: 0.85 },
+            });
+            const text = response.text?.trim();
+            if (text && isLongEnough(text)) {
+              content = text;
+              break;
+            }
+          } catch (err: any) {
+            if (
+              err?.status === 429 ||
+              err?.message?.includes("429") ||
+              err?.message?.includes("quota")
+            ) {
+              continue; // Try next key
+            }
+            throw err;
+          }
+        }
+
+        // Fallback to OpenAI if all Gemini keys rate-limited
+        if (!content && process.env.OPENAI_API_KEY) {
+          try {
+            const completion = await openaiClient.chat.completions.create({
+              model: "gpt-4o",
+              messages: [{ role: "user", content: prompt }],
+              max_tokens: 1200,
+              temperature: 0.85,
+            });
+            const openAiText =
+              completion.choices[0]?.message?.content?.trim() || null;
+            content =
+              openAiText && isLongEnough(openAiText) ? openAiText : null;
+          } catch (_) {
+            // OpenAI also failed
+          }
         }
 
         if (!content) {
@@ -21286,6 +21329,11 @@ IMPORTANT RULES:
         status: result.claudeScore !== null ? "ok" : "unavailable",
         score: result.claudeScore,
       },
+      {
+        name: "Qwen",
+        status: result.qwenScore !== null ? "ok" : "unavailable",
+        score: result.qwenScore,
+      },
     ];
 
     // Attach any error messages from the details object
@@ -22733,7 +22781,7 @@ Include a realistic mix across all these categories:
 
 Return ONLY the JSON array. No markdown. No explanation.`;
 
-      const aiResult = await managedLegacyTextAI.models.generateContent({
+      const aiResult = await geminiAI.models.generateContent({
         model: "gemini-2.5-flash",
         contents: prompt,
       });
@@ -22850,7 +22898,7 @@ Return ONLY the final submission content. Do not include labels, markdown fences
       let content = "";
 
       try {
-        const aiContent = await managedLegacyTextAI.models.generateContent({
+        const aiContent = await geminiAI.models.generateContent({
           model: "gemini-2.5-flash",
           contents: prompt,
         });

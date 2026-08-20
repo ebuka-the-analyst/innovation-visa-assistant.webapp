@@ -10,10 +10,15 @@
  * Based on the 20-prompt SEO framework, adapted for multi-model verification.
  */
 
+import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
-import { BUSINESS_PLAN_MODEL } from "./aiModelConfig";
+import { GoogleGenAI } from "@google/genai";
 
-const managedSEOAI = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const gemini = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_2 || "",
+});
 
 export interface SEOBusinessContext {
   businessName: string;
@@ -441,17 +446,42 @@ Return as structured JSON:
 }`;
 }
 
-async function callManagedSEO(prompt: string, role: string): Promise<Record<string, unknown>> {
-  const response: any = await managedSEOAI.chat.completions.create({
-    model: BUSINESS_PLAN_MODEL as any,
-    messages: [
-      { role: "system", content: role + " Respond with valid JSON only, with no markdown or surrounding explanation." },
-      { role: "user", content: prompt },
-    ],
-    response_format: { type: "json_object" },
-    max_tokens: 8000,
-  } as any);
-  return safeParseJSON(String(response.choices?.[0]?.message?.content || "{}"));
+async function callQwen(prompt: string): Promise<string> {
+  const response = await fetch(
+    "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.QWEN_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "qwen-plus",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a PhD-level SEO strategist and content specialist. Always respond with valid JSON only — no markdown, no explanations, just the JSON object.",
+          },
+          { role: "user", content: prompt },
+        ],
+        max_tokens: 8000,
+        temperature: 0.3,
+        response_format: { type: "json_object" },
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Qwen API error: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const data = (await response.json()) as {
+    choices?: { message?: { content?: string } }[];
+  };
+  return data.choices?.[0]?.message?.content || "{}";
 }
 
 function safeParseJSON(raw: string): Record<string, unknown> {
@@ -481,18 +511,65 @@ export async function generateSEOStrategy(
 ): Promise<SEOStrategyResult> {
   const startTime = Date.now();
   console.log(
-    `[SEO Engine] Starting managed multi-pass SEO analysis for: ${ctx.businessName}`,
+    `[SEO Engine] Starting quad-model SEO analysis for: ${ctx.businessName}`,
   );
 
   // Run all 4 models in parallel
-  // Four specialised analysis passes, all routed through the centrally managed provider policy.
-  // Four specialised analysis passes, all routed through the centrally managed provider policy.
-  const [geminiResult, openaiResult, claudeResult, qwenResult] = await Promise.allSettled([
-    callManagedSEO(buildGeminiPrompt(ctx), "Act as the local SEO and Google Business Profile specialist."),
-    callManagedSEO(buildOpenAIPrompt(ctx), "Act as the technical SEO, keyword and CRO specialist."),
-    callManagedSEO(buildClaudePrompt(ctx), "Act as the content, entity and authority-building specialist."),
-    callManagedSEO(buildQwenPrompt(ctx), "Act as the production-content and publishing specialist."),
-  ]);
+  const [geminiResult, openaiResult, claudeResult, qwenResult] =
+    await Promise.allSettled([
+      // Gemini: Local SEO + GBP
+      (async () => {
+        const result = await gemini.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: buildGeminiPrompt(ctx),
+          config: {
+            temperature: 0.3,
+            maxOutputTokens: 8192,
+            responseMimeType: "application/json",
+          },
+        });
+        return safeParseJSON(result.text ?? "{}");
+      })(),
+
+      // OpenAI: Technical SEO + Keywords
+      (async () => {
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a PhD-level technical SEO and keyword strategist. Respond with valid JSON only — no markdown, no explanations.",
+            },
+            { role: "user", content: buildOpenAIPrompt(ctx) },
+          ],
+          max_tokens: 8000,
+          temperature: 0.3,
+          response_format: { type: "json_object" },
+        });
+        return safeParseJSON(response.choices[0].message.content || "{}");
+      })(),
+
+      // Claude: Content + Entity + Authority
+      (async () => {
+        const response = await anthropic.messages.create({
+          model: "claude-opus-4-5",
+          max_tokens: 16000,
+          temperature: 0.3 as number,
+          system:
+            "You are a PhD-level SEO content strategist and entity optimisation specialist. Respond with valid JSON only — no markdown, no explanations outside the JSON structure.",
+          messages: [{ role: "user", content: buildClaudePrompt(ctx) }],
+        });
+        const content = response.content[0];
+        return safeParseJSON(content.type === "text" ? content.text : "{}");
+      })(),
+
+      // Qwen: Content Production
+      (async () => {
+        const raw = await callQwen(buildQwenPrompt(ctx));
+        return safeParseJSON(raw);
+      })(),
+    ]);
 
   const geminiData =
     geminiResult.status === "fulfilled" ? geminiResult.value : {};
@@ -503,16 +580,16 @@ export async function generateSEOStrategy(
   const qwenData = qwenResult.status === "fulfilled" ? qwenResult.value : {};
 
   if (geminiResult.status === "rejected")
-    console.error("[SEO Engine] Local SEO pass failed:", geminiResult.reason);
+    console.error("[SEO Engine] Gemini failed:", geminiResult.reason);
   if (openaiResult.status === "rejected")
-    console.error("[SEO Engine] Technical SEO pass failed:", openaiResult.reason);
+    console.error("[SEO Engine] OpenAI failed:", openaiResult.reason);
   if (claudeResult.status === "rejected")
-    console.error("[SEO Engine] Authority pass failed:", claudeResult.reason);
+    console.error("[SEO Engine] Claude failed:", claudeResult.reason);
   if (qwenResult.status === "rejected")
-    console.error("[SEO Engine] Content-production pass failed:", qwenResult.reason);
+    console.error("[SEO Engine] Qwen failed:", qwenResult.reason);
 
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-  console.log(`[SEO Engine] Managed analysis passes completed in ${elapsed}s`);
+  console.log(`[SEO Engine] All models completed in ${elapsed}s`);
 
   // Score aggregation
   const scores = {

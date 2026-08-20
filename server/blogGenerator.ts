@@ -18,8 +18,6 @@
  */
 
 // Qwen removed — using Gemini as primary writer (Qwen account in arrears)
-import OpenAI from "openai";
-import { BUSINESS_PLAN_MODEL } from "./aiModelConfig";
 import { db } from "./db";
 import { blogPosts } from "@shared/schema";
 import { sql as drizzleSql } from "drizzle-orm";
@@ -1057,110 +1055,392 @@ Return ONLY valid JSON.`;
 
   const systemInstruction = `You are a UK immigration information writer who creates accurate, helpful content. You NEVER fabricate case studies, statistics, or quotes. You ONLY use verified facts. You always include proper disclaimers. Your content is factual, practical, and trustworthy. Always respond with valid JSON only.`;
 
-  // Managed AI writer: provider and model are selected centrally in Admin.
-  try {
-    const managedBlogAI = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
-    const response: any = await managedBlogAI.chat.completions.create({
-      model: BUSINESS_PLAN_MODEL as any,
-      messages: [
-        { role: "system", content: systemInstruction },
-        { role: "user", content: prompt },
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 8000,
-    } as any);
+  // ── OpenAI REST API (primary writer) ─────────────────────────────────────
+  // Tries gpt-4o first, then gpt-4o-mini. Falls through to Gemini if all fail.
+  const OPENAI_GEN_MODELS = ["gpt-4o", "gpt-4o-mini"];
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 
-    let raw = String(response.choices?.[0]?.message?.content || "").trim();
-    if (raw.startsWith("```")) raw = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-    const objectStart = raw.indexOf("{");
-    const objectEnd = raw.lastIndexOf("}");
-    if (objectStart < 0 || objectEnd < objectStart) throw new Error("Managed AI blog response did not contain valid JSON");
-    const parsed = JSON.parse(raw.slice(objectStart, objectEnd + 1));
+  if (OPENAI_API_KEY) {
+    for (const oaiModel of OPENAI_GEN_MODELS) {
+      try {
+        console.log(`[Blog Generator] Trying OpenAI ${oaiModel}…`);
+        const oaiRes = await fetch(
+          "https://api.openai.com/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${OPENAI_API_KEY}`,
+            },
+            body: JSON.stringify({
+              model: oaiModel,
+              messages: [
+                { role: "system", content: systemInstruction },
+                { role: "user", content: prompt },
+              ],
+              response_format: { type: "json_object" },
+              max_tokens: 8000,
+              temperature: 0.3,
+            }),
+          },
+        );
+        const oaiData = (await oaiRes.json()) as any;
+        if (!oaiRes.ok) {
+          console.warn(
+            `[Blog Generator] OpenAI ${oaiModel} HTTP ${oaiRes.status}: ${oaiData?.error?.message}`,
+          );
+          continue;
+        }
+        const oaiContent = oaiData.choices?.[0]?.message?.content;
+        if (!oaiContent) {
+          console.warn(`[Blog Generator] OpenAI ${oaiModel} empty content`);
+          continue;
+        }
 
-    let finalContent = correctContent(String(parsed.content || ""));
-    const contentHasDisclaimer =
-      finalContent.includes("disclaimer-box") ||
-      finalContent.includes("Important Notice") ||
-      finalContent.includes("does not constitute");
-    if (!contentHasDisclaimer) {
-      finalContent += "\n<div class=\"disclaimer-box bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 my-6\"><p class=\"text-sm\"><strong>Important Notice:</strong> This article provides general information only and does not constitute immigration or legal advice. Requirements and fees may change. Always verify current information on <a href=\"https://www.gov.uk/innovator-founder-visa\" target=\"_blank\" rel=\"noopener\" class=\"text-primary underline\">GOV.UK</a> and consider consulting a qualified immigration adviser for your specific circumstances.</p></div>";
-    }
+        const parsed = JSON.parse(oaiContent);
+        let finalContent = correctContent(parsed.content || "");
 
-    const hasInternalLinks = finalContent.includes("href=\"/");
-    if (!hasInternalLinks) {
-      const links = "\n<h3>Helpful Resources</h3><p>Explore <a href=\"/tools\" class=\"text-primary hover:underline\">our visa preparation tools</a>, use our <a href=\"/business-plan\" class=\"text-primary hover:underline\">Business Plan Generator</a>, or check our <a href=\"/faq\" class=\"text-primary hover:underline\">frequently asked questions</a>.</p>";
-      const disclaimerIndex = finalContent.indexOf("<div class=\"disclaimer-box");
-      finalContent = disclaimerIndex > 0
-        ? finalContent.slice(0, disclaimerIndex) + links + finalContent.slice(disclaimerIndex)
-        : finalContent + links;
-    }
+        // Ensure disclaimer
+        const contentHasDisclaimerNow =
+          finalContent.includes("disclaimer-box") ||
+          finalContent.includes("Important Notice:");
+        if (!contentHasDisclaimerNow) {
+          finalContent += `\n<div class="disclaimer-box bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 my-6"><p class="text-sm"><strong>Important Notice:</strong> This article provides general information only and does not constitute immigration or legal advice. Requirements and fees may change. Always verify current information on <a href="https://www.gov.uk/innovator-founder-visa" target="_blank" rel="noopener" class="text-primary underline">GOV.UK</a> and consider consulting a qualified immigration adviser for your specific circumstances.</p></div>`;
+        }
 
-    const validationResult = validateBlogContent({
-      title: parsed.title,
-      excerpt: parsed.excerpt,
-      content: finalContent,
-      category,
-      tags: parsed.tags || [],
-      metaTitle: parsed.metaTitle,
-      metaDescription: parsed.metaDescription,
-    });
-    console.log("[Blog Generator] Validation Report:");
-    console.log(generateValidationReport(validationResult));
+        // Validate
+        const validationResult = validateBlogContent({
+          title: parsed.title,
+          excerpt: parsed.excerpt,
+          content: finalContent,
+          category,
+          tags: parsed.tags || [],
+          metaTitle: parsed.metaTitle,
+          metaDescription: parsed.metaDescription,
+        });
+        console.log("[Blog Generator] Validation Report:");
+        console.log(generateValidationReport(validationResult));
 
-    const dateSlug = new Date().toISOString().split("T")[0];
-    const uniqueSlug = slugify(parsed.title) + "-" + dateSlug + "-" + Math.random().toString(36).substring(2, 6);
+        const dateSlug = new Date().toISOString().split("T")[0];
+        const uniqueSlug = `${slugify(parsed.title)}-${dateSlug}-${Math.random().toString(36).substring(2, 6)}`;
 
-    let verificationResult = null;
-    let verificationStatus = "pending";
-    let isPublished = false;
-    let postStatus = "draft";
-    try {
-      console.log("[Blog Generator] Running dual-pass managed verification...");
-      verificationResult = await verifyBlogPost(parsed.title, finalContent);
-      if (verificationResult.passed) {
-        verificationStatus = "passed";
-        isPublished = true;
-        postStatus = "published";
-      } else {
-        verificationStatus = "human_review";
+        let verificationResult = null;
+        let verificationStatus = "pending";
+        let isPublished = false;
+        let postStatus = "draft";
+        try {
+          console.log(
+            `[Blog Generator] Running triple-AI verification (OpenAI ${oaiModel})…`,
+          );
+          verificationResult = await verifyBlogPost(parsed.title, finalContent);
+          if (verificationResult.passed) {
+            verificationStatus = "passed";
+            isPublished = true;
+            postStatus = "published";
+            console.log(
+              `[Blog Generator] ✓ Verification PASSED — Composite: ${verificationResult.compositeScore}/100. Auto-publishing.`,
+            );
+          } else {
+            verificationStatus = "human_review";
+            console.warn(
+              `[Blog Generator] ✗ Verification FAILED — Composite: ${verificationResult.compositeScore}/100. Sending to human review.`,
+            );
+          }
+        } catch (verifyError) {
+          console.error("[Blog Generator] Verification error:", verifyError);
+          verificationStatus = "human_review";
+        }
+
+        return {
+          title: parsed.title,
+          slug: uniqueSlug,
+          excerpt: parsed.excerpt,
+          content: finalContent,
+          category,
+          tags: parsed.tags || [],
+          metaTitle: parsed.metaTitle || parsed.title,
+          metaDescription: parsed.metaDescription || parsed.excerpt,
+          metaKeywords: parsed.metaKeywords || parsed.tags || [],
+          featuredImage: buildCoverImageUrl(parsed.title || topic, category),
+          readingTime: parsed.readingTime || 8,
+          author: "UK Visa Expert Team",
+          authorBio:
+            "Our team provides accurate, verified information about the UK Innovator Founder Visa process. All content is multi-AI verified by OpenAI and Gemini for factual accuracy against official GOV.UK sources.",
+          aiVerificationScore: verificationResult?.compositeScore ?? null,
+          geminiScore: verificationResult?.geminiScore ?? null,
+          openaiScore: verificationResult?.openaiScore ?? null,
+          verificationStatus,
+          verificationDetails: verificationResult?.details ?? null,
+          verifiedAt: verificationResult?.verifiedAt ?? null,
+          verificationExpiresAt:
+            verificationResult?.verificationExpiresAt ?? null,
+          humanReviewRequired: verificationResult?.requiresHumanReview ?? true,
+          contradictionFlags: verificationResult?.contradictionFlags ?? 0,
+          sourcesCited: verificationResult?.sourcesCited ?? 0,
+          contentHash:
+            verificationResult?.contentHash ?? computeContentHash(finalContent),
+          isPublished,
+          postStatus,
+        };
+      } catch (error: any) {
+        console.error(
+          `[Blog Generator] OpenAI ${oaiModel} failed:`,
+          error?.message || error,
+        );
       }
-    } catch (verifyError) {
-      console.error("[Blog Generator] Managed verification error:", verifyError);
-      verificationStatus = "human_review";
     }
-
-    return {
-      title: parsed.title,
-      slug: uniqueSlug,
-      excerpt: parsed.excerpt,
-      content: finalContent,
-      category,
-      tags: parsed.tags || [],
-      metaTitle: parsed.metaTitle || parsed.title,
-      metaDescription: parsed.metaDescription || parsed.excerpt,
-      metaKeywords: parsed.metaKeywords || parsed.tags || [],
-      featuredImage: buildCoverImageUrl(parsed.title || topic, category),
-      readingTime: parsed.readingTime || 8,
-      author: "UK Visa Expert Team",
-      authorBio: "Our team provides accurate, verified information about the UK Innovator Founder Visa process. Content is checked through the platform managed AI verification policy against official sources.",
-      aiVerificationScore: verificationResult?.compositeScore ?? null,
-      geminiScore: verificationResult?.geminiScore ?? null,
-      openaiScore: verificationResult?.openaiScore ?? null,
-      verificationStatus,
-      verificationDetails: verificationResult?.details ?? null,
-      verifiedAt: verificationResult?.verifiedAt ?? null,
-      verificationExpiresAt: verificationResult?.verificationExpiresAt ?? null,
-      humanReviewRequired: verificationResult?.requiresHumanReview ?? true,
-      contradictionFlags: verificationResult?.contradictionFlags ?? 0,
-      sourcesCited: verificationResult?.sourcesCited ?? 0,
-      contentHash: verificationResult?.contentHash ?? computeContentHash(finalContent),
-      isPublished,
-      postStatus,
-    };
-  } catch (error: any) {
-    console.error("[Blog Generator] Managed AI generation failed:", error?.message || error);
-    throw new Error("Failed to generate blog content through the managed AI provider: " + (error?.message || "unknown error"));
   }
+
+  // ── Gemini REST API (fallback writer) ────────────────────────────────────
+  // Tries all 4 API keys × 3 models. Only used if OpenAI is unavailable.
+  const GEMINI_API_KEYS = [
+    process.env.GEMINI_API_KEY,
+    process.env.GEMINI_API_KEY_2,
+    process.env.GEMINI_API_KEY_3,
+    process.env.GEMINI_API_KEY_4,
+  ].filter(Boolean) as string[];
+
+  const GEMINI_GENERATION_MODELS = [
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-lite",
+  ];
+
+  const geminiBody = {
+    system_instruction: { parts: [{ text: systemInstruction }] },
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.3,
+      maxOutputTokens: 8192,
+      responseMimeType: "application/json",
+    },
+  };
+
+  outer: for (const geminiModel of GEMINI_GENERATION_MODELS) {
+    for (const apiKey of GEMINI_API_KEYS) {
+      try {
+        console.log(`[Blog Generator] Generating via Gemini (${geminiModel})…`);
+
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
+
+        const geminiRes = await fetch(geminiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(geminiBody),
+        });
+
+        const geminiRaw = await geminiRes.text();
+        let geminiData: any;
+        try {
+          geminiData = JSON.parse(geminiRaw);
+        } catch {
+          console.warn(
+            `[Blog Generator] Gemini ${geminiModel} JSON parse error`,
+          );
+          continue; // next key
+        }
+
+        if (!geminiRes.ok) {
+          const errMsg =
+            geminiData?.error?.message || geminiRaw.substring(0, 150);
+          const status = geminiRes.status;
+          console.warn(
+            `[Blog Generator] Gemini ${geminiModel} HTTP ${status}: ${errMsg.substring(0, 120)}`,
+          );
+          if (status === 429 || status === 403) continue; // rotate to next key
+          if (status === 404) continue outer; // model doesn't exist — try next model
+          continue; // other error — try next key
+        }
+
+        const content =
+          geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        if (!content) {
+          console.warn(
+            `[Blog Generator] Gemini ${geminiModel} returned empty content`,
+          );
+          continue; // next key
+        }
+
+        const parsed = JSON.parse(content);
+
+        // MANDATORY CONTENT REQUIREMENTS CHECK
+        const contentHasDisclaimer =
+          parsed.content.includes("disclaimer-box") ||
+          parsed.content.includes("Important Notice") ||
+          parsed.content.includes("does not constitute");
+        const contentHasInternalLinks =
+          parsed.content.includes('href="/') ||
+          parsed.content.includes('href="/tools') ||
+          parsed.content.includes('href="/business-plan');
+
+        // Apply auto-corrections FIRST (fix typos before validation)
+        let finalContent = correctContent(parsed.content);
+
+        // Check if corrections added required elements
+        const contentHasDisclaimerNow =
+          finalContent.includes("disclaimer-box") ||
+          finalContent.includes("Important Notice") ||
+          finalContent.includes("does not constitute");
+
+        // Auto-fix: Add disclaimer if still missing
+        if (!contentHasDisclaimerNow) {
+          finalContent += `
+<div class="disclaimer-box bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4 my-6">
+<p class="text-sm"><strong>Important Notice:</strong> This article provides general information only and does not constitute immigration or legal advice. Requirements and fees may change. Always verify current information on <a href="https://www.gov.uk/innovator-founder-visa" target="_blank" rel="noopener" class="text-primary underline">GOV.UK</a> and consider consulting a qualified immigration adviser for your specific circumstances.</p>
+</div>`;
+        }
+
+        // Auto-fix: Add internal links section if missing
+        if (!contentHasInternalLinks) {
+          const linksSection = `
+<h3>Helpful Resources</h3>
+<p>Ready to start your UK visa journey? Explore <a href="/tools" class="text-primary hover:underline">our visa preparation tools</a>, use our <a href="/business-plan" class="text-primary hover:underline">Business Plan Generator</a>, or check our <a href="/faq" class="text-primary hover:underline">frequently asked questions</a>.</p>`;
+          // Insert before disclaimer
+          const disclaimerIndex = finalContent.indexOf(
+            '<div class="disclaimer-box',
+          );
+          if (disclaimerIndex > 0) {
+            finalContent =
+              finalContent.slice(0, disclaimerIndex) +
+              linksSection +
+              finalContent.slice(disclaimerIndex);
+          } else {
+            finalContent += linksSection;
+          }
+        }
+
+        // Validate the content
+        const validationResult = validateBlogContent({
+          title: parsed.title,
+          excerpt: parsed.excerpt,
+          content: finalContent,
+          category,
+          tags: parsed.tags || [],
+          metaTitle: parsed.metaTitle,
+          metaDescription: parsed.metaDescription,
+        });
+
+        // Log validation report
+        console.log("[Blog Generator] Validation Report:");
+        console.log(generateValidationReport(validationResult));
+
+        // Log any remaining issues (auto-correction already applied)
+        const criticalCount = validationResult.issues.filter(
+          (i) => i.type === "critical",
+        ).length;
+        if (criticalCount > 0) {
+          console.warn(
+            `[Blog Generator] ${criticalCount} issues remain after auto-correction. Proceeding with corrected content.`,
+          );
+        }
+
+        // Final content is already corrected above
+        const correctedContent = finalContent;
+
+        // Add unique slug with date
+        const dateSlug = new Date().toISOString().split("T")[0];
+        const baseSlug = slugify(parsed.title);
+        const uniqueSlug = `${baseSlug}-${dateSlug}-${Math.random().toString(36).substring(2, 6)}`;
+
+        // Final check: if still has critical issues on last attempt, log but proceed with corrected content
+        if (criticalCount > 0) {
+          console.warn(
+            `[Blog Generator] Content published with ${criticalCount} warnings after max retries. Sending to triple-AI verification.`,
+          );
+        }
+
+        // ──────────────────────────────────────────────────────────────────────
+        // TRIPLE-AI VERIFICATION: Gemini + OpenAI independently mark the article
+        // ──────────────────────────────────────────────────────────────────────
+        let verificationResult = null;
+        let verificationStatus = "pending";
+        let isPublished = false;
+        let postStatus = "draft";
+
+        try {
+          console.log(
+            "[Blog Generator] Running triple-AI verification (Gemini + OpenAI)...",
+          );
+          verificationResult = await verifyBlogPost(
+            parsed.title,
+            correctedContent,
+          );
+
+          if (verificationResult.passed) {
+            verificationStatus = "passed";
+            isPublished = true;
+            postStatus = "published";
+            console.log(
+              `[Blog Generator] ✓ Verification PASSED — Composite: ${verificationResult.compositeScore}/100. Auto-publishing.`,
+            );
+          } else {
+            verificationStatus = "human_review";
+            isPublished = false;
+            postStatus = "draft";
+            console.warn(
+              `[Blog Generator] ✗ Verification FAILED — Composite: ${verificationResult.compositeScore}/100. Sending to human review queue.`,
+            );
+            console.warn(
+              `[Blog Generator] Reason: ${verificationResult.details.consensusReason}`,
+            );
+          }
+        } catch (verifyError) {
+          console.error(
+            "[Blog Generator] Triple-AI verification error:",
+            verifyError,
+          );
+          // If verification itself fails (API error), mark pending for human review
+          verificationStatus = "human_review";
+          isPublished = false;
+          postStatus = "draft";
+        }
+
+        return {
+          title: parsed.title,
+          slug: uniqueSlug,
+          excerpt: parsed.excerpt,
+          content: correctedContent,
+          category,
+          tags: parsed.tags || [],
+          metaTitle: parsed.metaTitle || parsed.title,
+          metaDescription: parsed.metaDescription || parsed.excerpt,
+          metaKeywords: parsed.metaKeywords || parsed.tags || [],
+          featuredImage: buildCoverImageUrl(parsed.title || topic, category),
+          readingTime: parsed.readingTime || 8,
+          author: "UK Visa Expert Team",
+          authorBio:
+            "Our team provides accurate, verified information about the UK Innovator Founder Visa process. All content is multi-AI verified by Gemini and OpenAI for factual accuracy against official GOV.UK sources.",
+          // Triple-AI verification
+          aiVerificationScore: verificationResult?.compositeScore ?? null,
+          geminiScore: verificationResult?.geminiScore ?? null,
+          openaiScore: verificationResult?.openaiScore ?? null,
+          verificationStatus,
+          verificationDetails: verificationResult?.details ?? null,
+          verifiedAt: verificationResult?.verifiedAt ?? null,
+          verificationExpiresAt:
+            verificationResult?.verificationExpiresAt ?? null,
+          humanReviewRequired: verificationResult?.requiresHumanReview ?? true,
+          contradictionFlags: verificationResult?.contradictionFlags ?? 0,
+          sourcesCited: verificationResult?.sourcesCited ?? 0,
+          contentHash:
+            verificationResult?.contentHash ??
+            computeContentHash(correctedContent),
+          isPublished,
+          postStatus,
+        };
+      } catch (error: any) {
+        console.error(
+          `[Blog Generator] Gemini ${geminiModel} (key …${apiKey.slice(-6)}) failed:`,
+          error?.message || error,
+        );
+        // Continue to next key/model
+      }
+    } // end for apiKey
+  } // end for geminiModel
+
+  throw new Error(
+    "Failed to generate blog content — all AI writers exhausted (OpenAI + Gemini fallback)",
+  );
 }
 
 export async function generateMultiplePosts(count: number = 5): Promise<

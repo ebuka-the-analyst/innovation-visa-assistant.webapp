@@ -35,7 +35,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { SEOHead } from "@/components/SEOHead";
-import { DocumentReviewWaitStatus } from "@/components/DocumentReviewWaitStatus";
 
 interface DocumentReview {
   id: string;
@@ -556,19 +555,21 @@ export default function DocumentReview() {
                   </Alert>
 
                   {activePlanReview && (
-                    <DocumentReviewWaitStatus
-                      review={{ status: activePlanReview.status as "pending" | "processing", createdAt: activePlanReview.createdAt }}
-                      documentContent={String(selectedPlan.generatedContent || "")}
-                    />
+                    <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-900 dark:bg-amber-950/20">
+                      <div className="flex items-center gap-2 font-semibold text-amber-800 dark:text-amber-300">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Reviewing the full business plan
+                      </div>
+                      <p className="mt-2 text-sm text-muted-foreground">This page checks for completion automatically. Do not submit the same plan again.</p>
+                      <Progress value={55} className="mt-3" />
+                    </div>
                   )}
 
                   {latestFailedPlanReview && !activePlanReview && !completedPlanReview && (
-                    <Alert variant="destructive" data-testid="document-review-failed-state">
+                    <Alert variant="destructive">
                       <AlertTriangle className="h-4 w-4" />
-                      <AlertTitle>The previous review attempt has ended</AlertTitle>
-                      <AlertDescription>
-                        This attempt is not still running. It was submitted {formatDate(latestFailedPlanReview.createdAt)} and ended unsuccessfully. Retry the same saved plan below; you do not need to copy or paste its content again.
-                      </AlertDescription>
+                      <AlertTitle>The previous review failed</AlertTitle>
+                      <AlertDescription>You can retry the same saved plan without copying its content manually.</AlertDescription>
                     </Alert>
                   )}
 

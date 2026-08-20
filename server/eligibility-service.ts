@@ -1,25 +1,22 @@
-import OpenAI from "openai";
-import { BUSINESS_PLAN_MODEL } from "./aiModelConfig";
+import { qwen, QWEN_MODELS } from "./qwenClient";
 import { storage } from "./storage";
 import { InsertEligibilityAssessment, IndustryProfile } from "@shared/schema";
 import crypto from "crypto";
 
-const managedEligibilityAI = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
-
 async function getAIResponse(systemPrompt: string, userPrompt: string): Promise<any> {
-  console.log("[EligibilityService] Calling managed AI provider");
-  const response: any = await managedEligibilityAI.chat.completions.create({
-    model: BUSINESS_PLAN_MODEL as any,
+  console.log("[EligibilityService] Calling Qwen");
+  const response = await qwen.chat.completions.create({
+    model: QWEN_MODELS.plus,
     messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt }
     ],
-    response_format: { type: "json_object" },
+    response_format: { type: 'json_object' },
     max_tokens: 2000,
-  } as any);
-  let content = String(response.choices?.[0]?.message?.content || "").trim();
-  if (!content) throw new Error("Managed AI provider returned no eligibility analysis");
-  content = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+    temperature: 0.3
+  });
+  const content = response.choices[0]?.message?.content;
+  if (!content) throw new Error("No response from Qwen");
   return JSON.parse(content);
 }
 

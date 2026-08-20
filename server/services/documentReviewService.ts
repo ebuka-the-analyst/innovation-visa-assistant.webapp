@@ -176,11 +176,7 @@ async function getAIResponse(systemPrompt: string, userPrompt: string, maxTokens
       { role: "user", content: userPrompt },
     ],
     response_format: { type: "json_object" },
-    // GPT-5.6 defaults to medium reasoning, and reasoning tokens count against the
-    // completion budget. A small budget can therefore finish with no visible JSON.
-    // Keep review reasoning explicit and reserve enough output budget for the result.
-    reasoning_effort: "low",
-    max_tokens: Math.max(maxTokens, 4_000),
+    max_tokens: maxTokens,
   } as any);
   const content = response.choices?.[0]?.message?.content;
   if (!content) throw new Error("Managed AI provider returned no document review content");

@@ -4,7 +4,6 @@ import { startBusinessPlanGenerationWorker } from "./services/businessPlanGenera
 import { registerBusinessPlanRevisionRoutes } from "./businessPlanRevisionRoutes";
 import { registerAdminBusinessPlanRevisionRoutes } from "./adminBusinessPlanRevisionRoutes";
 import { startBusinessPlanRevisionWorker } from "./services/businessPlanRevisionService";
-import { registerAIProviderGatewayRoutes, registerAIProviderAdminRoutes } from "./aiProviderGateway";
 import type { Express as ExpressType } from "express";
 import type { Server } from "http";
 import path from "path";
@@ -602,8 +601,6 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
-  registerAIProviderGatewayRoutes(app);
-  registerAIProviderAdminRoutes(app);
   registerBusinessPlanRevisionRoutes(app);
   registerAdminBusinessPlanRevisionRoutes(app);
   startBusinessPlanGenerationWorker();
