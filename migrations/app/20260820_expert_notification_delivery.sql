@@ -1,26 +1,17 @@
 BEGIN;
 
-CREATE TABLE IF NOT EXISTS expert_booking_notifications (
-  id varchar PRIMARY KEY DEFAULT gen_random_uuid()::text,
-  recipient_user_id varchar NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  booking_id varchar REFERENCES expert_consultation_bookings(id) ON DELETE CASCADE,
-  event_type varchar(80) NOT NULL,
-  type varchar(30) NOT NULL DEFAULT 'info',
-  title varchar(255) NOT NULL,
-  message text NOT NULL,
-  action_url text,
-  action_text varchar(100),
-  dedupe_key varchar(255) NOT NULL,
-  read_at timestamptz,
-  created_at timestamptz NOT NULL DEFAULT NOW(),
-  CONSTRAINT ux_expert_booking_notifications_dedupe UNIQUE (dedupe_key)
-);
+-- Reuse the platform's existing admin_notifications + NotificationBell pipeline for
+-- recipient-specific Expert Support notifications. source_key makes event creation
+-- idempotent so webhook retries or repeated admin actions cannot duplicate alerts.
+ALTER TABLE admin_notifications
+  ADD COLUMN IF NOT EXISTS source_key varchar(255);
 
-CREATE INDEX IF NOT EXISTS idx_expert_booking_notifications_user_unread
-  ON expert_booking_notifications(recipient_user_id, read_at, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_expert_booking_notifications_booking
-  ON expert_booking_notifications(booking_id, created_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_admin_notifications_source_key
+  ON admin_notifications(source_key)
+  WHERE source_key IS NOT NULL;
 
+-- Email delivery is durable. Events are queued in PostgreSQL first, then a worker
+-- retries transient provider failures with backoff instead of relying on fire-and-forget.
 CREATE TABLE IF NOT EXISTS expert_email_outbox (
   id varchar PRIMARY KEY DEFAULT gen_random_uuid()::text,
   booking_id varchar REFERENCES expert_consultation_bookings(id) ON DELETE SET NULL,
