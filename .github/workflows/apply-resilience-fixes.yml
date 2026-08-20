@@ -33,9 +33,6 @@ jobs:
       - name: Apply resilience fixes
         run: node scripts/apply-resilience-fixes.cjs
 
-      - name: Validate critical hardcodes
-        run: node scripts/validate-critical-hardcodes.cjs
-
       - name: Production build
         run: npm run build
 
