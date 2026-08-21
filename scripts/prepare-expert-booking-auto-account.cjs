@@ -134,7 +134,7 @@ update("server/expertBookingPaymentWebhook.ts", (source) => {
   let next = source;
 
   if (!next.includes('from "./expertBookingAccountProvisioning"')) {
-    const anchor = 'import { sendEmail } from "./email";';
+    const anchor = 'import { getUncachableStripeClient } from "./stripeClient";';
     if (!next.includes(anchor)) throw new Error("Could not locate Expert Booking webhook import anchor");
     next = next.replace(anchor, `${anchor}\nimport { activateProvisionedExpertBookingAccount } from \"./expertBookingAccountProvisioning\";`);
   }
