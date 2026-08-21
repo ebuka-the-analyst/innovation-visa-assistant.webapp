@@ -10,6 +10,7 @@ function assert(condition, message) {
 }
 
 const app = read("client/src/App.tsx");
+const appSidebar = read("client/src/components/app-sidebar.tsx");
 const toolsHub = read("client/src/pages/tools-hub.tsx");
 const expertPage = read("client/src/pages/expert-booking.tsx");
 const publicUi = read("client/src/components/expert-booking/PublicExpertBooking.tsx");
@@ -19,8 +20,16 @@ const notificationService = read("server/expertNotificationService.ts");
 const webhook = read("server/expertBookingPaymentWebhook.ts");
 const migration = read("migrations/app/20260821_public_expert_booking.sql");
 
-assert(app.match(/SIDEBAR_HIDDEN_ROUTES[^\n]+"\/expert-booking"/), "Expert Booking must use the clean public layout");
+assert(!app.match(/SIDEBAR_HIDDEN_ROUTES[^\n]+"\/expert-booking"/), "Expert Booking must not use the standalone public layout");
+assert(app.includes('const OPEN_ACCESS_DASHBOARD_ROUTES = ["/expert-booking"]'), "Expert Booking must be marked as an open-access dashboard-shell route");
+assert(app.includes("<AppSidebar publicMode />"), "Logged-out Expert Booking must render the dashboard sidebar");
+assert(app.includes('href="/login?redirect=%2Fexpert-booking"'), "Logged-out dashboard header must expose a sign-in action");
+assert(appSidebar.includes("publicMode?: boolean"), "Sidebar must support an unauthenticated public mode");
+assert(appSidebar.includes('displayName: "Guest visitor"'), "Public sidebar must identify a guest rather than a fake demo account");
+assert(appSidebar.includes("demoMode || publicMode"), "Public sidebar footer must offer sign-in instead of logout");
+
 assert(expertPage.includes("export default PublicExpertBooking;"), "Modern public Expert Booking must be the rendered page");
+assert(!publicUi.includes('<header className="sticky top-0 z-40'), "Expert Booking must not render a duplicate standalone header inside the dashboard shell");
 assert(publicUi.includes("No account required"), "Guest booking UX must explicitly allow booking without an account");
 assert(publicUi.includes("/api/expert-booking/guest-bookings"), "Guest booking UI must use the public booking API");
 assert(publicUi.includes("scrollBy({ left: direction * 310"), "Availability must use the horizontal schedule slider");
@@ -28,7 +37,7 @@ assert(publicUi.includes("overflow-x-auto"), "Schedule slider must support touch
 
 assert(toolsHub.includes('id: "expert-booking"'), "Expert Booking must appear in Tools Hub");
 assert(toolsHub.includes('id: "blog"'), "Blog must appear in Tools Hub");
-assert(toolsHub.includes('OPEN_ACCESS_ROUTES'), "Free public tool routes must bypass account entitlements");
+assert(toolsHub.includes("OPEN_ACCESS_ROUTES"), "Free public tool routes must bypass account entitlements");
 assert(toolsHub.includes('tierFilter === "free" ? OPEN_ACCESS_TOOL_IDS.has(tool.id)'), "Free filter must show the two open-access tools");
 
 assert(serverIndex.includes('registerPublicExpertBookingRoutes(app);'), "Public Expert Booking server routes must be registered");
@@ -52,4 +61,4 @@ assert(
   "Webhook confirmation must use a guest-aware email/notification path",
 );
 
-console.log("Public Expert Booking access, guest checkout, free-tool and redesign validation passed.");
+console.log("Public Expert Booking guest dashboard shell, checkout, free-tool and redesign validation passed.");
