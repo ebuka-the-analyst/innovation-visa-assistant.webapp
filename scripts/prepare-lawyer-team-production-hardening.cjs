@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const target = path.join(process.cwd(), "client/src/components/admin/LawyerTeamManagement.tsx");
-let source = fs.readFileSync(target, "utf8");
+const source = fs.readFileSync(target, "utf8");
 let next = source;
 
 const queryOld = `  const { data: lawyers = [], isLoading, isFetching, refetch } = useQuery<Lawyer[]>({\n    queryKey: ["/api/admin/lawyers"],\n  });`;
@@ -19,8 +19,8 @@ if (next.includes(emptyBranch)) {
   next = next.replace(emptyBranch, resilientBranch);
 }
 
-const performanceOld = `value={\`${performance.approvalRate ?? 0}%\`}`;
-const performanceNew = `value={performance.completedReviews > 0 ? \`${performance.approvalRate ?? 0}%\` : "—"}`;
+const performanceOld = 'value={`${performance.approvalRate ?? 0}%`}';
+const performanceNew = 'value={performance.completedReviews > 0 ? `${performance.approvalRate ?? 0}%` : "—"}';
 if (next.includes(performanceOld)) {
   next = next.replace(performanceOld, performanceNew);
 }
@@ -31,7 +31,7 @@ if (!next.includes("lawyer-team-load-error")) {
 if (!next.includes("retry: 1")) {
   throw new Error("Could not install Lawyer Team query retry policy");
 }
-if (!next.includes('performance.completedReviews > 0 ?')) {
+if (!next.includes("performance.completedReviews > 0 ?")) {
   throw new Error("Could not harden empty Lawyer Team performance display");
 }
 
