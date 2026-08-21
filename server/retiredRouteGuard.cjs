@@ -13,6 +13,7 @@ require("./financialModelEngine.cjs");
 
 const RETIRED_CREDIT_GRANT_ROUTE = "/api/credits/grant-tier-credits";
 const RETIRED_DISPUTE_EVIDENCE_ROUTE = "/dispute-evidence";
+const CUSTOMER360_AUTH_READY_ROUTE = "/api/pricing";
 const application = express.application;
 
 if (!application.__legacyCreditGrantRouteGuardInstalled) {
@@ -55,6 +56,52 @@ if (!application.__disputeEvidenceRouteGuardInstalled) {
     // actual route registration calls that include one or more handlers.
     if (path === RETIRED_DISPUTE_EVIDENCE_ROUTE && handlers.length > 0) {
       return originalGet.call(this, path, (_req, res) => res.sendStatus(404));
+    }
+
+    return originalGet.call(this, path, ...handlers);
+  };
+}
+
+// Customer 360 needs the session and Passport middleware installed by setupAuth.
+// registerRoutes installs authentication before registering /api/pricing, so defer
+// loading the Customer 360 route hooks until that known auth-ready boundary.
+// This keeps the modules on the normal CommonJS preload path and avoids adding
+// runtime dynamic imports to the production server bundle.
+if (!application.__customer360DeferredBootstrapInstalled) {
+  const originalGet = application.get;
+
+  Object.defineProperty(application, "__customer360DeferredBootstrapInstalled", {
+    value: true,
+    enumerable: false,
+    configurable: false,
+    writable: false,
+  });
+
+  application.get = function customer360DeferredGet(path, ...handlers) {
+    const isRouteRegistration =
+      typeof path === "string" && path.startsWith("/") && handlers.length > 0;
+
+    if (
+      isRouteRegistration &&
+      path === CUSTOMER360_AUTH_READY_ROUTE &&
+      !application.__customer360DeferredModulesLoaded
+    ) {
+      Object.defineProperty(application, "__customer360DeferredModulesLoaded", {
+        value: true,
+        enumerable: false,
+        configurable: false,
+        writable: false,
+      });
+
+      // Location enrichment must wrap the Customer 360 response before the
+      // Customer 360 GET route itself is registered.
+      require("./customer360LocationContext.cjs");
+      require("./customer360Admin.cjs");
+
+      // The requires above replace application.get with the Customer 360
+      // wrappers. Re-enter through the newest wrapper so it can register the
+      // protected route, then continue registering /api/pricing.
+      return application.get.call(this, path, ...handlers);
     }
 
     return originalGet.call(this, path, ...handlers);
