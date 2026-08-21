@@ -53,7 +53,7 @@ update("client/src/App.tsx", (source) => {
     next = next.replace(layoutAnchor, `${layoutAnchor}\n  const isOpenAccessDashboardRoute = OPEN_ACCESS_DASHBOARD_ROUTES.includes(location);`);
   }
 
-  if (!next.includes("<AppSidebar publicMode />")) {
+  if (!next.includes("<AppSidebar publicMode")) {
     const publicAnchor = "  if (isPublicRoute) {";
     if (!next.includes(publicAnchor)) throw new Error("Could not locate AppLayout public branch");
     const openShell = `  if (isOpenAccessDashboardRoute) {\n    return (\n      <SidebarProvider>\n        <div className=\"flex h-screen w-full\">\n          <AppSidebar publicMode />\n          <div className=\"flex flex-col flex-1 w-full min-w-0\">\n            <UnifiedHeader />\n            <main className=\"flex-1 overflow-auto\">\n              <Suspense fallback={<PageLoadingSkeleton />}>\n                <Router />\n              </Suspense>\n            </main>\n          </div>\n        </div>\n      </SidebarProvider>\n    );\n  }\n\n`;
@@ -85,7 +85,7 @@ update("client/src/components/app-sidebar.tsx", (source) => {
     "    enabled: !demoMode && !publicMode,",
   );
 
-  if (!next.includes('displayName: "Guest visitor"')) {
+  if (!next.includes("const publicUser = {")) {
     const demoAnchor = `  const demoUser = {\n    id: \"demo\",\n    email: \"demo@example.com\",\n    displayName: \"Demo User\",\n    isAdmin: false,\n  };`;
     if (!next.includes(demoAnchor)) throw new Error("Could not locate sidebar demo user");
     next = next.replace(demoAnchor, `${demoAnchor}\n\n  const publicUser = {\n    id: \"guest\",\n    email: \"No account required\",\n    displayName: \"Guest visitor\",\n    isAdmin: false,\n  };`);
