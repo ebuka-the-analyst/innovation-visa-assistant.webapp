@@ -126,5 +126,10 @@ jobs:
       - name: Validate Expert Support meeting providers
         run: node scripts/validate-expert-meeting-providers.cjs
 
+      - name: Validate Customer 360 admin authentication order
+        run: |
+          node scripts/prepare-customer360-auth-order.cjs
+          node scripts/validate-customer360-auth-order.cjs
+
       - name: Production build
         run: npm run build
