@@ -126,4 +126,5 @@ for (const relativePath of [
 }
 
 execFileSync(process.execPath, ["--check", "scripts/prepare-public-expert-booking.cjs"], { cwd: root, stdio: "inherit" });
+require("./validate-public-expert-booking.cjs");
 console.log("[public-expert-booking] public access, guest checkout and modern booking UI prepared");
