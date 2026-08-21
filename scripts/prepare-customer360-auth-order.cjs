@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { execFileSync } = require("child_process");
 
 function read(relativePath) {
   return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
@@ -37,6 +38,17 @@ if (!retired.includes('require("./customer360LocationContext.cjs");') || !retire
 }
 if (index.includes('await import("./customer360Admin.cjs");') || index.includes('await import("./customer360LocationContext.cjs");')) {
   throw new Error("Customer 360 runtime dynamic imports must not be present in server/index.ts");
+}
+
+for (const relativePath of [
+  "server/retiredRouteGuard.cjs",
+  "server/customer360LocationContext.cjs",
+  "server/customer360Admin.cjs",
+]) {
+  execFileSync(process.execPath, ["--check", relativePath], {
+    cwd: process.cwd(),
+    stdio: "inherit",
+  });
 }
 
 console.log("[customer360-auth-order] deferred CommonJS bootstrap ready after authentication");
