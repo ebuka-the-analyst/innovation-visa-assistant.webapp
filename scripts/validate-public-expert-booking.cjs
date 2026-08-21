@@ -46,6 +46,10 @@ assert(migration.includes("ux_expert_booking_guest_idempotency"), "Guest idempot
 assert(notificationService.includes('COALESCE(u.email, b.customer_email) AS "userEmail"'), "Lifecycle emails must support guest customers");
 assert(notificationService.includes("LEFT JOIN users u ON u.id = b.user_id"), "Guest lifecycle notifications must not require a users row");
 assert(webhook.includes('const guestSession = userId === "guest" && !booking?.userId;'), "Stripe webhook must accept validated guest bookings");
-assert(webhook.includes('COALESCE(u.email, b.customer_email) AS "userEmail"'), "Webhook confirmation emails must support guests");
+assert(
+  webhook.includes('COALESCE(u.email, b.customer_email) AS "userEmail"')
+    || webhook.includes('queueExpertBookingEvent("confirmed"'),
+  "Webhook confirmation must use a guest-aware email/notification path",
+);
 
 console.log("Public Expert Booking access, guest checkout, free-tool and redesign validation passed.");
