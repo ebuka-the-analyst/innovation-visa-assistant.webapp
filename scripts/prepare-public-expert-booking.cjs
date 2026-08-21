@@ -30,11 +30,76 @@ update("server/index.ts", (source) => {
 });
 
 update("client/src/App.tsx", (source) => {
-  if (source.includes('"/expert-booking"') && source.match(/SIDEBAR_HIDDEN_ROUTES[^\n]+expert-booking/)) return source;
-  const match = source.match(/const SIDEBAR_HIDDEN_ROUTES = \[([^\]]*)\];/);
-  if (!match) throw new Error("Could not locate public route list");
-  const current = match[1].trim();
-  return source.replace(match[0], `const SIDEBAR_HIDDEN_ROUTES = [${current}${current ? ", " : ""}"/expert-booking"];`);
+  let next = source;
+
+  const hiddenMatch = next.match(/const SIDEBAR_HIDDEN_ROUTES = \[([^\]]*)\];/);
+  if (!hiddenMatch) throw new Error("Could not locate public route list");
+  const hiddenEntries = hiddenMatch[1]
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .filter((entry) => entry !== '"/expert-booking"');
+  next = next.replace(hiddenMatch[0], `const SIDEBAR_HIDDEN_ROUTES = [${hiddenEntries.join(", ")}];`);
+
+  if (!next.includes("OPEN_ACCESS_DASHBOARD_ROUTES")) {
+    const customAnchor = next.match(/const CUSTOM_LAYOUT_ROUTES = \[[^\]]*\];/);
+    if (!customAnchor) throw new Error("Could not locate custom layout routes");
+    next = next.replace(customAnchor[0], `${customAnchor[0]}\nconst OPEN_ACCESS_DASHBOARD_ROUTES = ["/expert-booking"];`);
+  }
+
+  if (!next.includes("const isOpenAccessDashboardRoute = OPEN_ACCESS_DASHBOARD_ROUTES.includes(location);")) {
+    const layoutAnchor = "  const isCustomLayoutRoute = CUSTOM_LAYOUT_ROUTES.includes(location);";
+    if (!next.includes(layoutAnchor)) throw new Error("Could not locate AppLayout route flags");
+    next = next.replace(layoutAnchor, `${layoutAnchor}\n  const isOpenAccessDashboardRoute = OPEN_ACCESS_DASHBOARD_ROUTES.includes(location);`);
+  }
+
+  if (!next.includes("<AppSidebar publicMode />")) {
+    const publicAnchor = "  if (isPublicRoute) {";
+    if (!next.includes(publicAnchor)) throw new Error("Could not locate AppLayout public branch");
+    const openShell = `  if (isOpenAccessDashboardRoute) {\n    return (\n      <SidebarProvider>\n        <div className=\"flex h-screen w-full\">\n          <AppSidebar publicMode />\n          <div className=\"flex flex-col flex-1 w-full min-w-0\">\n            <UnifiedHeader />\n            <main className=\"flex-1 overflow-auto\">\n              <Suspense fallback={<PageLoadingSkeleton />}>\n                <Router />\n              </Suspense>\n            </main>\n          </div>\n        </div>\n      </SidebarProvider>\n    );\n  }\n\n`;
+    next = next.replace(publicAnchor, `${openShell}${publicAnchor}`);
+  }
+
+  if (!next.includes('href="/login?redirect=%2Fexpert-booking"')) {
+    const logoutBlock = `      {user && (\n        <Button\n          variant=\"outline\"\n          size=\"sm\"\n          onClick={() => logoutMutation.mutate()}\n          disabled={logoutMutation.isPending}\n          data-testid=\"button-header-logout\"\n        >\n          <LogOut className=\"h-4 w-4 mr-1\" />\n          <span className=\"hidden sm:inline\">Logout</span>\n        </Button>\n      )}`;
+    if (!next.includes(logoutBlock)) throw new Error("Could not locate header logout control");
+    next = next.replace(logoutBlock, `${logoutBlock}\n      {!user && (\n        <Link href=\"/login?redirect=%2Fexpert-booking\">\n          <Button variant=\"outline\" size=\"sm\" data-testid=\"button-header-signin\">Sign in</Button>\n        </Link>\n      )}`);
+  }
+
+  return next;
+});
+
+update("client/src/components/app-sidebar.tsx", (source) => {
+  let next = source;
+
+  next = next.replace(
+    "interface AppSidebarProps {\n  demoMode?: boolean;\n}",
+    "interface AppSidebarProps {\n  demoMode?: boolean;\n  publicMode?: boolean;\n}",
+  );
+  next = next.replace(
+    "export function AppSidebar({ demoMode = false }: AppSidebarProps) {",
+    "export function AppSidebar({ demoMode = false, publicMode = false }: AppSidebarProps) {",
+  );
+  next = next.replace(
+    "    enabled: !demoMode,",
+    "    enabled: !demoMode && !publicMode,",
+  );
+
+  if (!next.includes('displayName: "Guest visitor"')) {
+    const demoAnchor = `  const demoUser = {\n    id: \"demo\",\n    email: \"demo@example.com\",\n    displayName: \"Demo User\",\n    isAdmin: false,\n  };`;
+    if (!next.includes(demoAnchor)) throw new Error("Could not locate sidebar demo user");
+    next = next.replace(demoAnchor, `${demoAnchor}\n\n  const publicUser = {\n    id: \"guest\",\n    email: \"No account required\",\n    displayName: \"Guest visitor\",\n    isAdmin: false,\n  };`);
+  }
+
+  next = next.replace(
+    "  const currentUser = demoMode ? demoUser : user;\n\n  if (!currentUser && !demoMode) return null;",
+    "  const currentUser = publicMode ? publicUser : demoMode ? demoUser : user;\n\n  if (!currentUser && !demoMode && !publicMode) return null;",
+  );
+  next = next.replace(
+    "          {demoMode ? (",
+    "          {demoMode || publicMode ? (",
+  );
+  return next;
 });
 
 update("client/src/pages/expert-booking.tsx", (source) => {
@@ -53,6 +118,13 @@ update("client/src/pages/expert-booking.tsx", (source) => {
   if (!next.includes("export default PublicExpertBooking;")) {
     throw new Error("Public Expert Booking was not installed as the default page");
   }
+  return next;
+});
+
+update("client/src/components/expert-booking/PublicExpertBooking.tsx", (source) => {
+  let next = source;
+  next = next.replace('className="min-h-screen bg-[#f7f9fc] text-slate-950"', 'className="min-h-full bg-[#f7f9fc] text-slate-950"');
+  next = next.replace(/\n      <header className="sticky top-0 z-40 border-b border-slate-200\/80 bg-white\/95 backdrop-blur">[\s\S]*?<\/header>\n/, "\n");
   return next;
 });
 
@@ -127,4 +199,4 @@ for (const relativePath of [
 
 execFileSync(process.execPath, ["--check", "scripts/prepare-public-expert-booking.cjs"], { cwd: root, stdio: "inherit" });
 require("./validate-public-expert-booking.cjs");
-console.log("[public-expert-booking] public access, guest checkout and modern booking UI prepared");
+console.log("[public-expert-booking] public access, dashboard-shell guest UX and modern booking UI prepared");
