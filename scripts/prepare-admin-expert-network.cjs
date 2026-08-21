@@ -102,4 +102,5 @@ require('./prepare-public-expert-booking.cjs');
 require('./prepare-expert-booking-auto-account.cjs');
 require('./validate-expert-booking-auto-account.cjs');
 require('./prepare-lawyer-team-management.cjs');
+require('./prepare-lawyer-team-production-hardening.cjs');
 require('./validate-lawyer-team-management.cjs');
