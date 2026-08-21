@@ -101,3 +101,5 @@ require('./prepare-expert-notification-system.cjs');
 require('./prepare-public-expert-booking.cjs');
 require('./prepare-expert-booking-auto-account.cjs');
 require('./validate-expert-booking-auto-account.cjs');
+require('./prepare-lawyer-team-management.cjs');
+require('./validate-lawyer-team-management.cjs');
