@@ -100,3 +100,4 @@ require('./prepare-expert-onboarding.cjs');
 require('./prepare-expert-notification-system.cjs');
 require('./prepare-public-expert-booking.cjs');
 require('./prepare-expert-booking-auto-account.cjs');
+require('./validate-expert-booking-auto-account.cjs');
