@@ -145,7 +145,9 @@ update("server/expertBookingPaymentWebhook.ts", (source) => {
   );
 
   if (!next.includes("await activateProvisionedExpertBookingAccount(bookingId);")) {
-    const anchor = `  if (shouldNotify) void sendConfirmedBookingEmail(bookingId);`;
+    const queueAnchor = `  if (shouldNotify) await queueExpertBookingEvent(\"confirmed\", bookingId);`;
+    const emailAnchor = `  if (shouldNotify) void sendConfirmedBookingEmail(bookingId);`;
+    const anchor = next.includes(queueAnchor) ? queueAnchor : emailAnchor;
     if (!next.includes(anchor)) throw new Error("Could not locate webhook notification anchor");
     next = next.replace(anchor, `  try {\n    await activateProvisionedExpertBookingAccount(bookingId);\n  } catch (error) {\n    console.error(\"[Expert Booking Webhook] Account activation failed\", error);\n  }\n\n${anchor}`);
   }
