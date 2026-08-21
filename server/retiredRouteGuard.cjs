@@ -2,8 +2,6 @@ require("./securityStartupGuard.cjs");
 
 const express = require("express");
 
-require("./customer360Admin.cjs");
-require("./customer360LocationContext.cjs");
 require("./founderPortfolio.cjs");
 require("./progressTracker.cjs");
 require("./toolPlatform.cjs");
