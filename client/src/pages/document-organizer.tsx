@@ -1,11 +1,15 @@
-import { Card } from "@/components/ui/card";
+import { useMemo, useRef, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { AlertCircle, Download, FileText, Loader2, Package, RefreshCw, Trash2, Upload } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { CheckCircle2, Circle, Upload, Download, AlertCircle, Loader2, Trash2, Package, FileText } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 import FeatureNavigation from "@/components/FeatureNavigation";
 
 interface UserDocument {
@@ -24,423 +28,118 @@ interface UserDocument {
   updatedAt: string;
 }
 
-const documentCategories = [
-  {
-    category: "Personal & Legal",
-    categoryKey: "personal_legal",
-    documents: [
-      { name: "Passport Copy", required: true, extensions: "PDF, JPG" },
-      { name: "Proof of Identity", required: true, extensions: "PDF, JPG" },
-      { name: "Criminal Records Check", required: true, extensions: "PDF" }
-    ]
-  },
-  {
-    category: "Business Documentation",
-    categoryKey: "business",
-    documents: [
-      { name: "Business Registration", required: true, extensions: "PDF" },
-      { name: "Memorandum of Association", required: true, extensions: "PDF" },
-      { name: "Business Plan", required: true, extensions: "PDF, DOCX" },
-      { name: "Financial Projections", required: true, extensions: "XLS, XLSX, PDF" }
-    ]
-  },
-  {
-    category: "Financial Evidence",
-    categoryKey: "financial",
-    documents: [
-      { name: "Bank Statements (3 months)", required: true, extensions: "PDF" },
-      { name: "Investment Evidence", required: true, extensions: "PDF" },
-      { name: "Funding Source Documentation", required: false, extensions: "PDF" },
-      { name: "Tax Returns", required: false, extensions: "PDF" }
-    ]
-  },
-  {
-    category: "Innovation & IP",
-    categoryKey: "innovation",
-    documents: [
-      { name: "Patent/IP Documentation", required: false, extensions: "PDF" },
-      { name: "Technical Specifications", required: false, extensions: "PDF, DOCX" },
-      { name: "Market Research", required: false, extensions: "PDF" }
-    ]
-  },
-  {
-    category: "Team & Credentials",
-    categoryKey: "team",
-    documents: [
-      { name: "CV/Resume", required: true, extensions: "PDF, DOCX" },
-      { name: "Education Certificates", required: false, extensions: "PDF, JPG" },
-      { name: "Professional Licenses", required: false, extensions: "PDF, JPG" }
-    ]
-  }
+const evidenceCategories = [
+  { value: "personal_legal", label: "Personal / identity" },
+  { value: "business", label: "Business" },
+  { value: "financial", label: "Financial" },
+  { value: "innovation", label: "Innovation / IP" },
+  { value: "team", label: "Team / credentials" },
+  { value: "market", label: "Market / traction" },
+  { value: "other", label: "Other" },
 ];
+
+function formatSize(bytes: number) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "Size unavailable";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 export default function DocumentOrganizer() {
   const { toast } = useToast();
-  const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("other");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  // Fetch existing documents from the backend
-  const { data: documents = [], isLoading, refetch } = useQuery<UserDocument[]>({
-    queryKey: ['/api/documents'],
-  });
+  const { data: documents = [], isLoading, isError, refetch } = useQuery<UserDocument[]>({ queryKey: ["/api/documents"] });
 
-  // Upload mutation
   const uploadMutation = useMutation({
-    mutationFn: async ({ file, name, category }: { file: File; name: string; category: string }) => {
+    mutationFn: async () => {
+      if (!selectedFile || !name.trim()) throw new Error("Choose a file and give it a clear evidence name.");
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('name', name);
-      formData.append('category', category);
-      formData.append('description', `Uploaded document: ${name}`);
-
-      const response = await fetch('/api/documents/upload', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
-
+      formData.append("file", selectedFile);
+      formData.append("name", name.trim());
+      formData.append("category", category);
+      formData.append("description", `Evidence document: ${name.trim()}`);
+      const response = await fetch("/api/documents/upload", { method: "POST", body: formData, credentials: "include" });
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Upload failed');
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body?.error || `Upload failed (${response.status}).`);
       }
-
       return response.json();
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
-      await queryClient.refetchQueries({ queryKey: ['/api/documents'], type: 'active' });
-      toast({
-        title: "Document uploaded",
-        description: "Your document has been saved successfully.",
-      });
+      await queryClient.invalidateQueries({ queryKey: ["/api/documents"] });
+      setName("");
+      setCategory("other");
+      setSelectedFile(null);
+      if (fileRef.current) fileRef.current.value = "";
+      toast({ title: "Evidence uploaded", description: "The document is now stored in your evidence library." });
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Upload failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-    onSettled: () => {
-      setUploadingDoc(null);
-    },
+    onError: (error: Error) => toast({ title: "Upload failed", description: error.message, variant: "destructive" }),
   });
 
-  // Delete mutation with optimistic update
   const deleteMutation = useMutation({
-    mutationFn: async (docId: string) => {
-      const response = await fetch(`/api/documents/${docId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/documents/${encodeURIComponent(id)}`, { method: "DELETE", credentials: "include" });
       if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.error || "Delete failed");
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body?.error || `Delete failed (${response.status}).`);
       }
-      return { id: docId };
+      return id;
     },
-    onMutate: async (docId: string) => {
-      await queryClient.cancelQueries({ queryKey: ['/api/documents'] });
-      const previousDocuments = queryClient.getQueryData<UserDocument[]>(['/api/documents']);
-      queryClient.setQueryData<UserDocument[]>(['/api/documents'], (old) => 
-        old ? old.filter((doc) => doc.id !== docId) : []
-      );
-      return { previousDocuments };
-    },
-    onError: (error: Error, _id, context) => {
-      if (context?.previousDocuments) {
-        queryClient.setQueryData(['/api/documents'], context.previousDocuments);
-      }
-      toast({
-        title: "Delete failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Document deleted",
-        description: "The document has been removed.",
-      });
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
-    },
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ["/api/documents"] }); toast({ title: "Document removed" }); },
+    onError: (error: Error) => toast({ title: "Delete failed", description: error.message, variant: "destructive" }),
   });
 
-  const handleFileUpload = (docName: string, categoryKey: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setUploadingDoc(docName);
-      uploadMutation.mutate({ file, name: docName, category: categoryKey });
+  const grouped = useMemo(() => {
+    const map = new Map<string, UserDocument[]>();
+    for (const doc of documents) {
+      const key = doc.category || "other";
+      map.set(key, [...(map.get(key) || []), doc]);
     }
-    // Reset input so same file can be re-uploaded
-    e.target.value = '';
-  };
+    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
+  }, [documents]);
 
-  // Find if a document exists for a given name
-  const getUploadedDoc = (docName: string): UserDocument | undefined => {
-    return documents.find(d => d.name === docName);
-  };
-
-  const requiredDocuments = documentCategories.flatMap(cat =>
-    cat.documents.filter(doc => doc.required).map(doc => doc.name)
-  );
-
-  const requiredUploadedCount = documents.filter(doc => requiredDocuments.includes(doc.name)).length;
-  const completionPercentage = Math.round((requiredUploadedCount / requiredDocuments.length) * 100);
-
-  // Download checklist as PDF
-  const handleDownloadChecklist = () => {
-    const checklist = documentCategories.map(cat => {
-      const docs = cat.documents.map(doc => {
-        const uploaded = getUploadedDoc(doc.name);
-        return `${uploaded ? '✓' : '☐'} ${doc.name}${doc.required ? ' (Required)' : ''} - ${doc.extensions}`;
-      }).join('\n');
-      return `\n${cat.category}\n${'─'.repeat(30)}\n${docs}`;
-    }).join('\n\n');
-
-    const content = `UK INNOVATOR FOUNDER VISA - DOCUMENT CHECKLIST
-Generated: ${new Date().toLocaleDateString('en-GB')}
-
-Application Completeness: ${completionPercentage}%
-Required Documents: ${requiredUploadedCount}/${requiredDocuments.length} uploaded
-Total Documents: ${documents.length} uploaded
-
-${checklist}
-
-────────────────────────────────────────
-Notes:
-- All required documents must be submitted
-- PDF format preferred for most documents
-- Ensure all documents are in English or include certified translations
-- Bank statements must be from the last 3 months
-────────────────────────────────────────
-`;
-
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'visa_document_checklist.txt';
-    a.click();
-    URL.revokeObjectURL(url);
-
-    toast({
-      title: "Checklist downloaded",
-      description: "Your document checklist has been saved.",
-    });
-  };
-
-  // Export package - download all documents as a list with links
-  const handleExportPackage = async () => {
-    if (documents.length === 0) {
-      toast({
-        title: "No documents to export",
-        description: "Please upload some documents first.",
-        variant: "destructive",
-      });
+  const exportManifest = () => {
+    if (!documents.length) {
+      toast({ title: "No documents to export", description: "Upload evidence first.", variant: "destructive" });
       return;
     }
-
-    // Create a manifest file with download links for all documents
-    const manifest = documents.map((doc, idx) => 
-      `${idx + 1}. ${doc.name}\n   Category: ${doc.category}\n   Type: ${doc.fileType}\n   Size: ${(doc.fileSize / 1024).toFixed(1)} KB\n   Uploaded: ${new Date(doc.createdAt).toLocaleDateString('en-GB')}\n   File: ${window.location.origin}${doc.fileUrl}`
-    ).join('\n\n');
-
-    const content = `UK INNOVATOR FOUNDER VISA - DOCUMENT PACKAGE
-Generated: ${new Date().toLocaleDateString('en-GB')} at ${new Date().toLocaleTimeString('en-GB')}
-
-Application Completeness: ${completionPercentage}%
-Total Documents: ${documents.length}
-
-────────────────────────────────────────
-DOCUMENT LIST
-────────────────────────────────────────
-
-${manifest}
-
-────────────────────────────────────────
-IMPORTANT NOTES
-────────────────────────────────────────
-- Download all documents from the links above
-- Organize them in folders by category before submission
-- Verify all files open correctly
-- Ensure translations are certified if not in English
-────────────────────────────────────────
-`;
-
-    const blob = new Blob([content], { type: 'text/plain' });
+    const lines = documents.map((doc, index) => [
+      `${index + 1}. ${doc.name}`,
+      `Category: ${doc.category || "other"}`,
+      `Uploaded: ${new Date(doc.createdAt).toLocaleDateString("en-GB")}`,
+      `File: ${new URL(doc.fileUrl, window.location.origin).toString()}`,
+    ].join("\n"));
+    const content = `APPLICATION EVIDENCE MANIFEST\nGenerated: ${new Date().toLocaleString("en-GB")}\n\n${lines.join("\n\n")}\n\nImportant: This manifest lists what you have uploaded. It does not state that any document is legally required, sufficient or accepted by an endorsing body or the Home Office.`;
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'visa_document_package.txt';
-    a.click();
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "application_evidence_manifest.txt";
+    anchor.click();
     URL.revokeObjectURL(url);
-
-    toast({
-      title: "Package exported",
-      description: `Manifest with ${documents.length} document links saved. Open the file to access download links.`,
-    });
+    toast({ title: "Manifest exported", description: `${documents.length} document reference${documents.length === 1 ? "" : "s"} included.` });
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  if (isLoading) return <div className="flex min-h-[50vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
   return (
     <div className="min-h-screen">
-      
-      <div className="responsive-container py-16">
-        <div className="max-w-4xl mx-auto">
+      <div className="responsive-container py-12">
+        <div className="mx-auto max-w-5xl">
           <FeatureNavigation currentPage="document-organizer" />
-          <div className="mb-12">
-            <h1 className="font-serif text-xl font-bold mb-4">Document Manager & Evidence Organizer</h1>
-            <p className="text-lg text-muted-foreground">
-              Intelligent document tracking and submission management. Captures all required evidence, identifies gaps, and prepares lawyer-ready packages—preventing costly rejections before they happen.
-            </p>
-          </div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><span className="rounded-full bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-700 dark:text-red-300">DOCUMENT ORGANIZER</span><h1 className="mt-3 text-xl font-bold">Application Evidence Library</h1><p className="mt-2 max-w-3xl text-muted-foreground">Upload, categorise and retrieve the documents that actually belong to your case. The platform does not label a generic checklist as universally required.</p></div><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={() => refetch()} disabled={isLoading}><RefreshCw className="mr-2 h-4 w-4" />Refresh</Button><Button variant="outline" onClick={exportManifest} disabled={!documents.length}><Package className="mr-2 h-4 w-4" />Export Manifest</Button></div></div>
 
-          <div className="mb-8 p-6 bg-primary/10 rounded-lg border border-primary/20">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-lg">Application Completeness</h3>
-              <span className="text-lg font-bold text-primary">{completionPercentage}%</span>
-            </div>
-            <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-              <div
-                className="bg-primary h-full transition-all"
-                style={{ width: `${completionPercentage}%` }}
-              />
-            </div>
-            <p className="text-sm text-muted-foreground mt-3">
-              {requiredUploadedCount} of {requiredDocuments.length} required documents uploaded • {documents.length} total documents saved
-            </p>
-          </div>
+          <Alert className="mt-6 border-amber-500/30 bg-amber-500/5"><AlertCircle className="h-4 w-4 text-amber-600" /><AlertDescription><strong>Evidence, not a legal checklist:</strong> the documents you need depend on your route, application, endorsing body and circumstances. Verify the actual document requirements from your current official guidance, application form, endorsement process and any requests you receive.</AlertDescription></Alert>
 
-          <div className="space-y-8">
-            {documentCategories.map(category => (
-              <Card key={category.category} className="p-6">
-                <h3 className="font-semibold text-lg mb-4">{category.category}</h3>
-                <div className="space-y-4">
-                  {category.documents.map(doc => {
-                    const uploadedDoc = getUploadedDoc(doc.name);
-                    const isUploading = uploadingDoc === doc.name;
-                    return (
-                      <div key={doc.name} className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
-                        <div className="flex-shrink-0 mt-1">
-                          {uploadedDoc ? (
-                            <CheckCircle2 className="w-6 h-6 text-green-600" />
-                          ) : (
-                            <Circle className="w-6 h-6 text-muted-foreground" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <span className="font-medium">{doc.name}</span>
-                            {doc.required && <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">Required</span>}
-                          </div>
-                          <p className="text-sm text-muted-foreground">{doc.extensions}</p>
-                          {uploadedDoc && (
-                            <div className="mt-2 text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
-                              <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded">
-                                Uploaded
-                              </span>
-                              <span>{formatFileSize(uploadedDoc.fileSize)}</span>
-                              <span>•</span>
-                              <span>{new Date(uploadedDoc.createdAt).toLocaleDateString('en-GB')}</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-shrink-0 flex items-center gap-2">
-                          {uploadedDoc && (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => window.open(uploadedDoc.fileUrl, '_blank')}
-                                title="Download"
-                                data-testid={`button-download-${doc.name.replace(/\s+/g, '-').toLowerCase()}`}
-                              >
-                                <Download className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  if (confirm(`Delete ${doc.name}?`)) {
-                                    deleteMutation.mutate(uploadedDoc.id);
-                                  }
-                                }}
-                                disabled={deleteMutation.isPending}
-                                title="Delete"
-                                data-testid={`button-delete-${doc.name.replace(/\s+/g, '-').toLowerCase()}`}
-                              >
-                                <Trash2 className="w-4 h-4 text-destructive" />
-                              </Button>
-                            </>
-                          )}
-                          <label className="flex-shrink-0">
-                            <Input
-                              type="file"
-                              className="hidden"
-                              accept={doc.extensions.split(", ").map(ext => `.${ext.toLowerCase()}`).join(",")}
-                              onChange={(e) => handleFileUpload(doc.name, category.categoryKey, e)}
-                              disabled={isUploading}
-                              data-testid={`input-file-${doc.name.replace(/\s+/g, '-').toLowerCase()}`}
-                            />
-                            <Button
-                              variant={uploadedDoc ? "outline" : "default"}
-                              size="sm"
-                              onClick={(e) => e.currentTarget.parentElement?.querySelector('input')?.click()}
-                              disabled={isUploading}
-                              data-testid={`button-upload-${doc.name.replace(/\s+/g, '-').toLowerCase()}`}
-                            >
-                              {isUploading ? (
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              ) : (
-                                <Upload className="w-4 h-4 mr-2" />
-                              )}
-                              {uploadedDoc ? "Replace" : "Upload"}
-                            </Button>
-                          </label>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </Card>
-            ))}
-          </div>
+          <Card className="mt-6"><CardContent className="p-6"><h2 className="font-semibold">Upload evidence</h2><div className="mt-4 grid gap-4 md:grid-cols-[1fr_220px]"><div className="space-y-2"><Label htmlFor="evidence-name">Evidence name</Label><Input id="evidence-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Customer LOI - Acme Ltd" /></div><div className="space-y-2"><Label>Category</Label><Select value={category} onValueChange={setCategory}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{evidenceCategories.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}</SelectContent></Select></div></div><div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center"><Input ref={fileRef} type="file" onChange={(event) => setSelectedFile(event.target.files?.[0] || null)} /><Button onClick={() => uploadMutation.mutate()} disabled={uploadMutation.isPending || !selectedFile || !name.trim()} data-testid="button-upload-evidence"><Upload className="mr-2 h-4 w-4" />{uploadMutation.isPending ? "Uploading..." : "Upload"}</Button></div>{selectedFile && <p className="mt-2 text-xs text-muted-foreground">Selected: {selectedFile.name} · {formatSize(selectedFile.size)}</p>}</CardContent></Card>
 
-          <div className="mt-12 flex flex-wrap gap-4">
-            <Button 
-              className="gap-2"
-              onClick={handleDownloadChecklist}
-              data-testid="button-download-checklist"
-            >
-              <FileText className="w-4 h-4" />
-              Download Checklist
-            </Button>
-            <Button 
-              variant="outline" 
-              className="gap-2"
-              onClick={handleExportPackage}
-              disabled={documents.length === 0}
-              data-testid="button-export-package"
-            >
-              <Package className="w-4 h-4" />
-              Export Package ({documents.length} docs)
-            </Button>
-          </div>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3"><Card><CardContent className="p-4 text-center"><div className="text-2xl font-bold">{documents.length}</div><p className="text-xs text-muted-foreground">Documents stored</p></CardContent></Card><Card><CardContent className="p-4 text-center"><div className="text-2xl font-bold">{grouped.length}</div><p className="text-xs text-muted-foreground">Categories represented</p></CardContent></Card><Card><CardContent className="p-4 text-center"><div className="text-2xl font-bold">{documents.filter((doc) => doc.status === "verified" || doc.status === "complete").length}</div><p className="text-xs text-muted-foreground">Marked verified/complete</p></CardContent></Card></div>
+
+          {isError ? <Card className="mt-6 border-red-500/30 p-8 text-center"><p className="font-semibold">Documents could not be loaded</p><Button className="mt-4" variant="outline" onClick={() => refetch()}>Retry</Button></Card> : !documents.length ? <Card className="mt-6 p-10 text-center"><FileText className="mx-auto h-10 w-10 text-muted-foreground" /><h2 className="mt-3 font-semibold">No evidence uploaded yet</h2><p className="mt-1 text-sm text-muted-foreground">Add documents when you have real evidence to organise. No missing-document percentage is invented.</p></Card> : <div className="mt-6 space-y-6">{grouped.map(([group, docs]) => <section key={group}><div className="mb-3 flex items-center justify-between"><h2 className="font-semibold capitalize">{group.replaceAll("_", " ")}</h2><Badge variant="outline">{docs.length}</Badge></div><div className="grid gap-3">{docs.map((doc) => <Card key={doc.id}><CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between"><div className="min-w-0"><p className="truncate font-semibold">{doc.name}</p><p className="mt-1 text-xs text-muted-foreground">{doc.fileType || "File"} · {formatSize(doc.fileSize)} · uploaded {new Date(doc.createdAt).toLocaleDateString("en-GB")}</p>{doc.notes && <p className="mt-2 text-sm text-muted-foreground">{doc.notes}</p>}</div><div className="flex gap-2"><Button asChild size="sm" variant="outline"><a href={doc.fileUrl} target="_blank" rel="noopener noreferrer"><Download className="mr-2 h-4 w-4" />Open</a></Button><Button size="sm" variant="outline" onClick={() => deleteMutation.mutate(doc.id)} disabled={deleteMutation.isPending}><Trash2 className="mr-2 h-4 w-4" />Delete</Button></div></CardContent></Card>)}</div></section>)}</div>}
         </div>
       </div>
     </div>
