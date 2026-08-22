@@ -1,384 +1,95 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { AlertCircle, CheckCircle2, ExternalLink, Loader2, PoundSterling, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { DollarSign, TrendingUp, Target, AlertCircle, CheckCircle, Clock, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useApplicationContextPrefill } from "@/hooks/useToolPlatform";
+
+type NewsArticle = {
+  id: string;
+  title: string;
+  description?: string | null;
+  sourceName?: string | null;
+  url?: string | null;
+  publishedAt?: string | null;
+  isActive?: boolean;
+};
+
+function formatGbp(value: unknown) {
+  const number = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(number) || number <= 0) return "Not recorded";
+  return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(number);
+}
+
+function isOfficial(article: NewsArticle) {
+  const source = String(article.sourceName || "").toLowerCase();
+  if (/gov\.uk|home office|uk visas and immigration|ukvi/.test(source)) return true;
+  try {
+    const host = new URL(String(article.url || "")).hostname.toLowerCase();
+    return host === "gov.uk" || host.endsWith(".gov.uk");
+  } catch {
+    return false;
+  }
+}
 
 export default function EndorserInvestmentRequirements() {
+  const [, setLocation] = useLocation();
+  const contextQuery = useApplicationContextPrefill("investment-requirements");
+  const data = contextQuery.data;
+  const plan = data?.businessPlan;
+  const financialModel = data?.relatedToolData.financialModel;
+
+  const newsQuery = useQuery<NewsArticle[]>({
+    queryKey: ["/api/news", "financial-requirements"],
+    queryFn: async () => {
+      const response = await fetch("/api/news?limit=100");
+      if (!response.ok) throw new Error("Official-source feed unavailable.");
+      const body = await response.json();
+      return Array.isArray(body) ? body : [];
+    },
+    retry: 1,
+    staleTime: 5 * 60_000,
+  });
+
+  const financeUpdates = useMemo(() => (newsQuery.data || []).filter((article) => {
+    const text = `${article.title} ${article.description || ""}`.toLowerCase();
+    return article.isActive !== false && isOfficial(article) && /fund|financial|maintenance|saving|investment|fee|money/.test(text);
+  }).slice(0, 8), [newsQuery.data]);
+
+  if (contextQuery.isLoading) return <div className="flex min-h-[50vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  if (contextQuery.isError) return <div className="responsive-container py-16"><Card className="mx-auto max-w-2xl border-red-500/30 p-8 text-center"><AlertCircle className="mx-auto h-8 w-8 text-red-600" /><h1 className="mt-3 text-xl font-bold">Financial context could not be loaded</h1><p className="mt-2 text-sm text-muted-foreground">No funding requirement has been assumed.</p><Button className="mt-5" variant="outline" onClick={() => contextQuery.refetch()}><RefreshCw className="mr-2 h-4 w-4" />Retry</Button></Card></div>;
+
+  const evidenceItems = [
+    { label: "Funding amount in business plan", value: plan ? formatGbp(plan.funding) : "No saved plan" },
+    { label: "Funding sources", value: plan?.fundingSources || "Not recorded" },
+    { label: "Detailed cost assumptions", value: plan?.detailedCosts || "Not recorded" },
+    { label: "Monthly projections", value: plan?.monthlyProjections || "Not recorded" },
+    { label: "Linked financial model", value: financialModel ? `${financialModel.toolId.replaceAll("-", " ")} · completed` : "No completed financial tool run linked" },
+    { label: "Uploaded supporting documents", value: `${data?.documents.length || 0} document${data?.documents.length === 1 ? "" : "s"} in application context` },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
-      <div className="responsive-container max-w-6xl">
-        {/* Header */}
-        <div className="mb-12">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 bg-primary/10 rounded-lg">
-              <DollarSign className="h-6 w-6 text-primary" />
-            </div>
-            <h1 className="text-xl font-bold">Innovator Founder Visa - Financial Requirements</h1>
-          </div>
-          <p className="text-lg text-muted-foreground">
-            Official guidance from Home Office (Version 9.0, November 11, 2025)
-          </p>
+    <div className="min-h-screen">
+      <div className="responsive-container py-12">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><span className="rounded-full bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-700 dark:text-red-300">FINANCIAL EVIDENCE</span><h1 className="mt-3 text-xl font-bold">Funding & Financial Requirements Planner</h1><p className="mt-2 max-w-3xl text-muted-foreground">Prepare the financial evidence behind your business plan and separately verify the current immigration financial requirements from official sources.</p></div><Button variant="outline" onClick={() => void Promise.allSettled([contextQuery.refetch(), newsQuery.refetch()])} disabled={contextQuery.isFetching || newsQuery.isFetching}><RefreshCw className={`mr-2 h-4 w-4 ${(contextQuery.isFetching || newsQuery.isFetching) ? "animate-spin" : ""}`} />Refresh</Button></div>
+
+          <Alert className="mt-6 border-amber-500/30 bg-amber-500/5"><AlertCircle className="h-4 w-4 text-amber-600" /><AlertDescription><strong>No embedded legal figures:</strong> this page no longer hardcodes maintenance amounts, team-funding thresholds, points, visa duration, endorsement-letter validity or fees. Those rules can change and may depend on your circumstances. Use the current Immigration Rules/GOV.UK guidance when you are ready to apply.</AlertDescription></Alert>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{evidenceItems.map((item) => <Card key={item.label}><CardContent className="p-5"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{item.label}</p><p className="mt-2 break-words text-sm font-semibold">{item.value}</p></CardContent></Card>)}</div>
+
+          <Card className="mt-6"><CardHeader><CardTitle className="flex items-center gap-2"><PoundSterling className="h-5 w-5 text-red-600" />Business funding evidence to prepare</CardTitle></CardHeader><CardContent className="space-y-3">{[
+            "Explain what funding the business actually needs and how the amount follows from your cost and growth assumptions.",
+            "Identify the source of funds and keep traceable documents that support the source and availability of those funds.",
+            "Keep projections internally consistent with pricing, customer acquisition, staffing, technology and operating costs.",
+            "Separate business-finance assumptions from any personal immigration maintenance requirement that applies to you.",
+            "If there are multiple founders, verify the current rules and the relevant endorsing body's current policy instead of assuming one threshold applies to everyone.",
+          ].map((item) => <div key={item} className="flex items-start gap-3 rounded-lg border p-4"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" /><p className="text-sm leading-6">{item}</p></div>)}<div className="flex flex-wrap gap-2 pt-2"><Button variant="outline" onClick={() => setLocation("/tools-hub")}>Open Financial Tools</Button><Button variant="outline" onClick={() => setLocation("/documents")}>Manage Evidence</Button></div></CardContent></Card>
+
+          <Card className="mt-6"><CardHeader><CardTitle>Current official-source financial updates</CardTitle></CardHeader><CardContent>{newsQuery.isError ? <p className="text-sm text-muted-foreground">The official-source feed could not be loaded. No cached financial requirements are substituted.</p> : financeUpdates.length ? <div className="space-y-3">{financeUpdates.map((article) => <a key={article.id} href={article.url || undefined} target="_blank" rel="noopener noreferrer" className="block rounded-lg border p-4 hover:bg-muted/40"><p className="text-sm font-medium">{article.title}</p><p className="mt-1 text-xs text-muted-foreground">{article.sourceName || "Official source"}{article.publishedAt ? ` · ${new Date(article.publishedAt).toLocaleDateString("en-GB")}` : ""}</p></a>)}</div> : <p className="text-sm text-muted-foreground">No relevant official-source update is currently stored in the platform feed.</p>}<div className="mt-4 flex flex-wrap gap-2"><a href="https://www.gov.uk/innovator-founder-visa" target="_blank" rel="noopener noreferrer"><Button variant="outline">GOV.UK route guidance <ExternalLink className="ml-2 h-4 w-4" /></Button></a><a href="https://www.gov.uk/guidance/immigration-rules" target="_blank" rel="noopener noreferrer"><Button variant="outline">Immigration Rules <ExternalLink className="ml-2 h-4 w-4" /></Button></a></div></CardContent></Card>
         </div>
-
-        {/* Official Source Alert */}
-        <Alert className="mb-8 border-green-500/20 bg-green-500/5">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription>
-            <strong>Official Sources:</strong> GOV.UK Innovator Founder visa page + Home Office guidance (Version 9.0, published November 11, 2025)
-          </AlertDescription>
-        </Alert>
-
-        {/* Key Requirements */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Individual: Business Funding</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold">No Fixed Minimum</div>
-              <p className="text-xs text-muted-foreground mt-1">"Appropriate" for your business</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Team: Per Applicant</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold">£50,000</div>
-              <p className="text-xs text-muted-foreground mt-1">Each co-founder (new business)</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Personal Savings</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold">£1,270</div>
-              <p className="text-xs text-muted-foreground mt-1">28 consecutive days</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Visa Duration</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold">3 Years</div>
-              <p className="text-xs text-muted-foreground mt-1">Then apply for settlement</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Critical Alert - Team Funding */}
-        <Alert className="mb-8 border-orange-500/20 bg-orange-50 dark:bg-orange-950/20">
-          <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-          <AlertDescription className="dark:text-orange-100">
-            <strong>Team Applicants:</strong> If co-founders are applying for endorsement as co-directors of the same company under "New Business" criteria, each applicant must independently demonstrate they have £50,000 available to invest (per Home Office guidance). These are NOT linked applications - each person needs separate endorsement.
-          </AlertDescription>
-        </Alert>
-
-        {/* Business Funding Section - Individual */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Business Funding Requirements - Individual Applicants</CardTitle>
-            <CardDescription>For single founder businesses</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex gap-4">
-                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold">No Fixed Minimum Amount</h4>
-                  <p className="text-sm text-muted-foreground">Home Office guidance confirms no set minimum investment for individual applicants</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold">"Appropriate" Funding Standard</h4>
-                  <p className="text-sm text-muted-foreground">Endorsing bodies assess whether funding is "appropriate" and "sufficient" for YOUR specific business plan</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold">Flexible by Business Needs</h4>
-                  <p className="text-sm text-muted-foreground">Could be £15k, £50k, £150k+ depending on your business stage, runway, and hiring plans</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <AlertCircle className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold">Legitimacy Check</h4>
-                  <p className="text-sm text-muted-foreground">Endorsers confirm "no concerns over legitimacy of sources of funds or modes of transfer" and funds are not "beneficiary of illicit or unsatisfactorily explained wealth"</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <AlertCircle className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold">Establishment Exception</h4>
-                  <p className="text-sm text-muted-foreground">No business funds needed if business already established and endorsed for earlier visa</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Team Funding Section */}
-        <Card className="mb-8 border-orange-500/30 bg-orange-50 dark:bg-orange-950/20">
-          <CardHeader>
-            <CardTitle>Business Funding Requirements - Team Applicants</CardTitle>
-            <CardDescription>For multiple co-founders</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-white dark:bg-card p-4 rounded-lg border-l-4 border-orange-600 dark:border-orange-400">
-              <p className="font-semibold text-sm mb-2">£50,000 per Co-Founder (New Business only)</p>
-              <p className="text-sm text-muted-foreground">Each co-founder applying under "New Business" criteria must independently demonstrate £50,000 available to invest</p>
-            </div>
-            <div className="space-y-3 text-sm">
-              <p><strong>Key Points:</strong></p>
-              <ul className="space-y-2">
-                <li className="flex gap-2">
-                  <span className="text-orange-600 font-bold flex-shrink-0">•</span>
-                  <span>Each person needs SEPARATE endorsement from an approved endorsing body</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-orange-600 font-bold flex-shrink-0">•</span>
-                  <span>These are NOT linked team applications - each is independently assessed</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-orange-600 font-bold flex-shrink-0">•</span>
-                  <span>Each co-founder must score 70 points individually (not shared)</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-orange-600 font-bold flex-shrink-0">•</span>
-                  <span>All other requirements (English B2, personal savings £1,270) apply per person</span>
-                </li>
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Personal Savings */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Personal Savings Requirement: £1,270</CardTitle>
-            <CardDescription>Mandatory for ALL applicants - 28 consecutive days</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-accent/20 p-4 rounded-lg">
-              <p className="text-sm"><strong>This £1,270 is SEPARATE from business funding.</strong> It's for supporting yourself personally in the UK.</p>
-            </div>
-            <div className="space-y-3">
-              <div className="flex gap-3">
-                <span className="text-primary font-bold flex-shrink-0">•</span>
-                <span className="text-sm">Must have been in YOUR bank account for 28 consecutive days before applying</span>
-              </div>
-              <div className="flex gap-3">
-                <span className="text-primary font-bold flex-shrink-0">•</span>
-                <span className="text-sm">Exception: Already lived in UK for 1+ year when extending/switching</span>
-              </div>
-              <div className="flex gap-3">
-                <span className="text-primary font-bold flex-shrink-0">•</span>
-                <span className="text-sm">Cannot use business investment funds to meet this requirement</span>
-              </div>
-              <div className="flex gap-3">
-                <span className="text-primary font-bold flex-shrink-0">•</span>
-                <span className="text-sm">Cannot use money earned illegally in the UK</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Endorsement Letter Requirements */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Endorsement Letter Requirements</CardTitle>
-            <CardDescription>What your endorsing body must confirm</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3 text-sm">
-              <p><strong>Endorsement Letter Must:</strong></p>
-              <ul className="space-y-2">
-                <li className="flex gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Be dated no more than 3 months before application</span>
-                </li>
-                <li className="flex gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Include name, reference number, contact details of endorsing body</span>
-                </li>
-                <li className="flex gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Confirm applicant is "fit and proper person" under Innovator Founder rules</span>
-                </li>
-                <li className="flex gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Confirm "no concerns over legitimacy of sources of funds"</span>
-                </li>
-                <li className="flex gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Confirm no reason to believe applicant benefits from "illicit or unsatisfactorily explained wealth"</span>
-                </li>
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Points Scoring */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Points Scoring Requirement</CardTitle>
-            <CardDescription>Total 70 points required (Home Office guidance)</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="border rounded-lg p-3">
-                <p className="text-xs font-semibold text-muted-foreground mb-2">NEW BUSINESS</p>
-                <div className="space-y-1 text-sm">
-                  <div className="flex justify-between"><span>Business plan</span><span className="font-bold">30 pts</span></div>
-                  <div className="flex justify-between"><span>Innovative, viable, scalable</span><span className="font-bold">20 pts</span></div>
-                  <div className="border-t pt-1 mt-1 flex justify-between font-semibold"><span>Subtotal (50 required)</span><span>50 pts</span></div>
-                </div>
-              </div>
-              <div className="border rounded-lg p-3">
-                <p className="text-xs font-semibold text-muted-foreground mb-2">SAME BUSINESS</p>
-                <div className="space-y-1 text-sm">
-                  <div className="flex justify-between"><span>Previous visa in route</span><span className="font-bold">10 pts</span></div>
-                  <div className="flex justify-between"><span>Active & sustainable</span><span className="font-bold">20 pts</span></div>
-                  <div className="flex justify-between"><span>Day-to-day management</span><span className="font-bold">20 pts</span></div>
-                  <div className="border-t pt-1 mt-1 flex justify-between font-semibold"><span>Subtotal (50 required)</span><span>50 pts</span></div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-muted p-3 rounded-lg text-sm">
-              <p className="font-semibold mb-2">MANDATORY (All Applicants)</p>
-              <div className="space-y-1">
-                <div className="flex justify-between"><span>English Language (B2)</span><span className="font-bold">10 pts</span></div>
-                <div className="flex justify-between"><span>Financial requirement</span><span className="font-bold">10 pts</span></div>
-                <div className="border-t pt-1 mt-1 flex justify-between font-semibold"><span>Total Needed</span><span className="text-lg">70 pts</span></div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Dependants */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Dependants - Additional Funds Required</CardTitle>
-            <CardDescription>Partner and children living costs</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="border rounded-lg p-4">
-                  <div className="text-lg font-bold text-primary mb-1">£285</div>
-                  <p className="text-sm font-semibold">Per Partner</p>
-                  <p className="text-xs text-muted-foreground">On top of £1,270</p>
-                </div>
-                <div className="border rounded-lg p-4">
-                  <div className="text-lg font-bold text-primary mb-1">£315</div>
-                  <p className="text-sm font-semibold">First Child</p>
-                  <p className="text-xs text-muted-foreground">On top of £1,270</p>
-                </div>
-                <div className="border rounded-lg p-4">
-                  <div className="text-lg font-bold text-primary mb-1">£200</div>
-                  <p className="text-sm font-semibold">Each Additional Child</p>
-                  <p className="text-xs text-muted-foreground">On top of £1,270</p>
-                </div>
-              </div>
-              <div className="bg-muted p-4 rounded-lg">
-                <p className="text-sm"><strong>Example:</strong> Partner + 1 child = £1,270 + £285 + £315 = £1,870 total</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* What You Can/Cannot Do */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-green-600">Can Do ✓</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm">
-                <li className="flex gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Set up one or multiple businesses</span>
-                </li>
-                <li className="flex gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Work for your business (director/self-employed)</span>
-                </li>
-                <li className="flex gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Work outside business (RQF Level 3+ required)</span>
-                </li>
-                <li className="flex gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Bring dependants (partner/children)</span>
-                </li>
-                <li className="flex gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Travel abroad and return to UK</span>
-                </li>
-                <li className="flex gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Apply for settlement after 3 years</span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-red-600">Cannot Do ✗</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm">
-                <li className="flex gap-2">
-                  <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
-                  <span>Access public funds / most benefits</span>
-                </li>
-                <li className="flex gap-2">
-                  <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
-                  <span>Work as professional sportsperson</span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Processing Timeline */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Application Processing Timeline</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex gap-4">
-              <Clock className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold">Typical Decision Time: 3 Weeks</p>
-                <p className="text-sm text-muted-foreground mt-1">Once you've applied online, proved identity, and provided documents</p>
-              </div>
-            </div>
-            <div className="bg-accent/20 p-4 rounded text-sm space-y-2">
-              <p><strong>Decision may take longer if:</strong></p>
-              <ul className="space-y-1">
-                <li>• Family member needs appointment but you don't</li>
-                <li>• Documents need verification</li>
-                <li>• You need to attend interview</li>
-                <li>• Special circumstances (criminal conviction, etc.)</li>
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
