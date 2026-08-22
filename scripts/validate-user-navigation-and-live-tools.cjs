@@ -10,6 +10,7 @@ function assert(condition, message) {
 }
 
 const sidebar = read("client/src/components/app-sidebar.tsx");
+const disclaimer = read("client/src/components/VisaAssistantDisclaimer.tsx");
 const app = read("client/src/App.tsx");
 const routes = read("server/routes.ts");
 const newsService = read("server/newsService.ts");
@@ -25,9 +26,12 @@ const settlement = read("client/src/pages/settlement-planning.tsx");
 const diagnostics = read("client/src/pages/diagnostics.tsx");
 const featuresDashboard = read("client/src/pages/features-dashboard.tsx");
 
-assert(!sidebar.includes("#005EB8"), "Legacy blue sidebar group styling must be removed");
-assert(sidebar.includes("bg-red-500/10 border border-red-500/20"), "Sidebar group headers must use red styling");
-assert(sidebar.includes("border-l-2 border-red-500"), "Active sidebar items must use a red indicator");
+assert(sidebar.includes("#005EB8"), "User sidebar group styling must remain blue");
+assert(sidebar.includes('bg-[#005EB8]/20'), "Sidebar group headers must use the blue background");
+assert(sidebar.includes("border-l-2 border-primary"), "Active sidebar items must retain the primary/blue indicator");
+assert(!sidebar.includes("bg-red-500/10 border border-red-500/20"), "Red sidebar group override must not be active");
+assert(disclaimer.includes("backgroundColor: '#DC2626'"), "Top disclaimer banner must be red");
+assert(!disclaimer.includes("backgroundColor: '#005EB8'"), "Top disclaimer banner must not remain blue");
 
 const sidebarUrls = [...sidebar.matchAll(/url:\s*"([^\"]+)"/g)].map((match) => match[1]);
 const uniqueUrls = [...new Set(sidebarUrls)];
@@ -41,15 +45,17 @@ for (const url of [...new Set(journeyUrls)]) {
   assert(app.includes(`<Route path="${url}"`), `Features Dashboard destination has no matching route: ${url}`);
 }
 
-assert(!routes.includes('from "./newsService"'), "Legacy news route must not shadow the richer live feed");
-assert(!routes.includes("const news = await getLatestNews();"), "Legacy /api/news handler must be removed");
+assert(routes.includes('import { getLatestNews } from "./newsService";'), "Live news service must be wired into routes");
+assert(!routes.includes("const news = await getLatestNews();"), "Legacy shadow /api/news handler must be removed");
 assert(routes.includes("// NEWS FEED SYSTEM - Live UK Immigration News"), "Live news route marker is missing");
-assert(routes.includes("news = await storage.getLatestNews(parseInt(limit as string));"), "Live /api/news must read the stored news feed");
+assert(routes.includes("news = await getLatestNews(parseInt(limit as string));"), "Live /api/news must use the fallback-enabled news service");
 assert(routes.includes('app.post("/api/news/fetch", requireAdmin'), "Admin news refresh route must remain available");
 
 assert(!newsService.includes("official-1"), "News service must not contain a hardcoded regulatory catalogue");
 assert(!newsService.includes("2025-11-25"), "News service must not contain stale embedded policy dates");
-assert(newsService.includes("storage.getLatestNews"), "News service compatibility layer must read persisted news");
+assert(newsService.includes("storage.getLatestNews"), "News service must continue reading persisted news");
+assert(newsService.includes("https://www.gov.uk/api/search.json"), "News service must have a live GOV.UK fallback");
+assert(newsService.includes("Promise.allSettled"), "News service must tolerate either stored-feed or GOV.UK failures");
 assert(!newsTicker.includes("INITIAL_NEWS_ITEMS"), "News ticker must not ship fixed regulatory headlines");
 assert(newsTicker.includes('fetch("/api/news?limit=30")'), "News ticker must use the live news endpoint");
 assert(newsTicker.includes("setNewsItems([])"), "News ticker must fail closed instead of keeping stale fallback claims");
@@ -117,6 +123,8 @@ assert(diagnostics.includes("errors.length > 0"), "Diagnostics must expose API f
 
 console.log(JSON.stringify({
   ok: true,
+  sidebarColor: "blue",
+  disclaimerColor: "red",
   sidebarDestinationsChecked: uniqueUrls.length,
   journeyDestinationsChecked: [...new Set(journeyUrls)].length,
   liveDataToolsChecked: [
