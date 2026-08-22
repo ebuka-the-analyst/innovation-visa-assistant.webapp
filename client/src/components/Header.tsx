@@ -84,14 +84,14 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl">
       {/* Disclaimer Bar */}
       {!disclaimerDismissed && (
-        <div className="w-full text-sm py-2 px-3 flex items-center justify-between md:justify-center gap-2 md:gap-4 border-b border-border/40" style={{ backgroundColor: '#005EB8' }}>
-          <span className="line-clamp-2 md:line-clamp-1 text-black dark:text-white">
+        <div className="w-full text-sm py-2 px-3 flex items-center justify-between md:justify-center gap-2 md:gap-4 border-b border-red-700/40" style={{ backgroundColor: '#DC2626' }}>
+          <span className="line-clamp-2 md:line-clamp-1 text-white">
             <strong>UK Innovator Founder Visa Assistant Disclaimer:</strong> Trained on GOV.UK guidance. This doesn't substitute legal advice. Always verify with official sources.{' '}
             <a href="/ai-transparency" className="underline hover:opacity-80">Learn more</a>
           </span>
           <button
             onClick={() => setDisclaimerDismissed(true)}
-            className="text-black dark:text-white hover:opacity-75 transition-opacity flex-shrink-0"
+            className="text-white hover:opacity-75 transition-opacity flex-shrink-0"
             data-testid="button-dismiss-disclaimer"
           >
             <X className="h-3 w-3" />

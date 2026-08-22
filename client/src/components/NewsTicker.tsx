@@ -91,8 +91,8 @@ export default function NewsTicker() {
   return (
     <>
       <div className="flex items-center gap-1 border-b bg-background px-2 py-2" data-testid="live-news-ticker">
-        <div className="flex-shrink-0 rounded bg-red-600 px-1">
-          <Button variant="ghost" size="icon" onClick={() => scrollBy(-320)} className="h-6 w-6 hover:bg-red-700" disabled={!newsItems.length} data-testid="button-ticker-backward">
+        <div className="flex-shrink-0 rounded bg-[#005EB8] px-1">
+          <Button variant="ghost" size="icon" onClick={() => scrollBy(-320)} className="h-6 w-6 hover:bg-[#004B93]" disabled={!newsItems.length} data-testid="button-ticker-backward">
             <ChevronLeft className="h-3 w-3 text-white" />
           </Button>
         </div>
@@ -113,8 +113,8 @@ export default function NewsTicker() {
           )}
         </div>
 
-        <div className="flex-shrink-0 rounded bg-red-600 px-1">
-          <Button variant="ghost" size="icon" onClick={() => scrollBy(320)} className="h-6 w-6 hover:bg-red-700" disabled={!newsItems.length} data-testid="button-ticker-forward">
+        <div className="flex-shrink-0 rounded bg-[#005EB8] px-1">
+          <Button variant="ghost" size="icon" onClick={() => scrollBy(320)} className="h-6 w-6 hover:bg-[#004B93]" disabled={!newsItems.length} data-testid="button-ticker-forward">
             <ChevronRight className="h-3 w-3 text-white" />
           </Button>
         </div>
