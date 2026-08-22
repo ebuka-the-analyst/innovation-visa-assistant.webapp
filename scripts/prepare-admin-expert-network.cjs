@@ -105,6 +105,5 @@ require('./prepare-lawyer-team-management.cjs');
 require('./prepare-lawyer-team-production-hardening.cjs');
 require('./validate-lawyer-team-management.cjs');
 require('./prepare-live-news-feed.cjs');
-require('./prepare-user-sidebar-red.cjs');
 require('./prepare-interview-tab-navigation.cjs');
 require('./validate-user-navigation-and-live-tools.cjs');
