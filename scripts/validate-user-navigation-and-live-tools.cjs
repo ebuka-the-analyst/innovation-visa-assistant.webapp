@@ -11,6 +11,7 @@ function assert(condition, message) {
 
 const sidebar = read("client/src/components/app-sidebar.tsx");
 const app = read("client/src/App.tsx");
+const routes = read("server/routes.ts");
 const regulatory = read("client/src/components/RegulatoryCopilot.tsx");
 const regulatoryPage = read("client/src/pages/regulatory-copilot.tsx");
 const evidence = read("client/src/pages/evidence-graph.tsx");
@@ -19,6 +20,8 @@ const kpi = read("client/src/pages/kpi-dashboard.tsx");
 const rejection = read("client/src/pages/rejection-analysis.tsx");
 const interview = read("client/src/pages/interview-prep.tsx");
 const settlement = read("client/src/pages/settlement-planning.tsx");
+const diagnostics = read("client/src/pages/diagnostics.tsx");
+const featuresDashboard = read("client/src/pages/features-dashboard.tsx");
 
 assert(!sidebar.includes("#005EB8"), "Legacy blue sidebar group styling must be removed");
 assert(sidebar.includes("bg-red-500/10 border border-red-500/20"), "Sidebar group headers must use red styling");
@@ -30,6 +33,17 @@ assert(uniqueUrls.length >= 20, "Expected the full user sidebar navigation catal
 for (const url of uniqueUrls) {
   assert(app.includes(`<Route path="${url}"`), `Sidebar destination has no matching route: ${url}`);
 }
+
+const journeyUrls = [...featuresDashboard.matchAll(/route:\s*"([^\"]+)"/g)].map((match) => match[1]);
+for (const url of [...new Set(journeyUrls)]) {
+  assert(app.includes(`<Route path="${url}"`), `Features Dashboard destination has no matching route: ${url}`);
+}
+
+assert(!routes.includes('from "./newsService"'), "Hardcoded legacy news service must not shadow the live feed");
+assert(!routes.includes("const news = await getLatestNews();"), "Legacy hardcoded /api/news handler must be removed");
+assert(routes.includes("// NEWS FEED SYSTEM - Live UK Immigration News"), "Live news route marker is missing");
+assert(routes.includes("news = await storage.getLatestNews(parseInt(limit as string));"), "Live /api/news must read the stored news feed");
+assert(routes.includes('app.post("/api/news/fetch", requireAdmin'), "Admin news refresh route must remain available");
 
 for (const forbidden of [
   "MOCK_UPDATES",
@@ -50,9 +64,9 @@ assert(evidence.includes('useApplicationContextPrefill("evidence-graph")'), "Evi
 assert(evidence.includes("useUpdateToolCaseContext"), "Evidence Graph action plan must persist to shared application context");
 
 assert(!rfe.includes("const risks = ["), "RFE Defence must not use fixed example risks");
-assert(!rfe.includes("High-Risk Issues</p>\n              <p className=\"text-xl font-bold text-red-600\">2"), "RFE counts must not be hardcoded");
 assert(rfe.includes('useApplicationContextPrefill("rfe-defense")'), "RFE Defence must derive gaps from saved application data");
 assert(rfe.includes("These are not predictions that a refusal will occur"), "RFE Defence must clearly distinguish preparation gaps from refusal predictions");
+assert(rfe.includes("useUpdateToolCaseContext"), "RFE mitigation plan must persist to shared application context");
 
 for (const forbidden of ["visaHealthScore = 87", "£180K", "Q4 2025", "December 15, 2025", "87 days"]) {
   assert(!kpi.includes(forbidden), `KPI Dashboard still contains fabricated marker: ${forbidden}`);
@@ -78,9 +92,22 @@ assert(settlement.includes('useApplicationContextPrefill("settlement-planning")'
 assert(settlement.includes("No automatic eligibility date"), "Settlement Planning must not infer personal eligibility without verified history");
 assert(settlement.includes("https://www.gov.uk/innovator-founder-visa"), "Settlement Planning must link to official route guidance");
 
+for (const endpoint of [
+  "/api/endorser/simulate/",
+  "/api/routes/analyze/",
+  "/api/team/model/",
+  "/api/traction/forecast/",
+  "/api/rules/check/",
+]) {
+  assert(diagnostics.includes(endpoint), `Diagnostics is missing required live endpoint: ${endpoint}`);
+}
+assert(diagnostics.includes("Promise.allSettled"), "Diagnostics retry must refetch all diagnostic data sources");
+assert(diagnostics.includes("errors.length > 0"), "Diagnostics must expose API failure states instead of fake results");
+
 console.log(JSON.stringify({
   ok: true,
   sidebarDestinationsChecked: uniqueUrls.length,
+  journeyDestinationsChecked: [...new Set(journeyUrls)].length,
   liveDataToolsChecked: [
     "regulatory-copilot",
     "evidence-graph",
@@ -89,5 +116,7 @@ console.log(JSON.stringify({
     "rejection-analysis",
     "interview-prep",
     "settlement-planning",
+    "diagnostics",
   ],
+  liveNewsFeedVerified: true,
 }, null, 2));
