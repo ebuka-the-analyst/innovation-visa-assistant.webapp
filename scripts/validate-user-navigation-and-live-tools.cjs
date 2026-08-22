@@ -12,6 +12,8 @@ function assert(condition, message) {
 const sidebar = read("client/src/components/app-sidebar.tsx");
 const app = read("client/src/App.tsx");
 const routes = read("server/routes.ts");
+const newsService = read("server/newsService.ts");
+const newsTicker = read("client/src/components/NewsTicker.tsx");
 const regulatory = read("client/src/components/RegulatoryCopilot.tsx");
 const regulatoryPage = read("client/src/pages/regulatory-copilot.tsx");
 const evidence = read("client/src/pages/evidence-graph.tsx");
@@ -39,11 +41,18 @@ for (const url of [...new Set(journeyUrls)]) {
   assert(app.includes(`<Route path="${url}"`), `Features Dashboard destination has no matching route: ${url}`);
 }
 
-assert(!routes.includes('from "./newsService"'), "Hardcoded legacy news service must not shadow the live feed");
-assert(!routes.includes("const news = await getLatestNews();"), "Legacy hardcoded /api/news handler must be removed");
+assert(!routes.includes('from "./newsService"'), "Legacy news route must not shadow the richer live feed");
+assert(!routes.includes("const news = await getLatestNews();"), "Legacy /api/news handler must be removed");
 assert(routes.includes("// NEWS FEED SYSTEM - Live UK Immigration News"), "Live news route marker is missing");
 assert(routes.includes("news = await storage.getLatestNews(parseInt(limit as string));"), "Live /api/news must read the stored news feed");
 assert(routes.includes('app.post("/api/news/fetch", requireAdmin'), "Admin news refresh route must remain available");
+
+assert(!newsService.includes("official-1"), "News service must not contain a hardcoded regulatory catalogue");
+assert(!newsService.includes("2025-11-25"), "News service must not contain stale embedded policy dates");
+assert(newsService.includes("storage.getLatestNews"), "News service compatibility layer must read persisted news");
+assert(!newsTicker.includes("INITIAL_NEWS_ITEMS"), "News ticker must not ship fixed regulatory headlines");
+assert(newsTicker.includes('fetch("/api/news?limit=30")'), "News ticker must use the live news endpoint");
+assert(newsTicker.includes("setNewsItems([])"), "News ticker must fail closed instead of keeping stale fallback claims");
 
 for (const forbidden of [
   "MOCK_UPDATES",
@@ -84,6 +93,8 @@ assert(!interview.includes("const endorserTips ="), "Interview Prep must not use
 assert(interview.includes('useApplicationContextPrefill("interview-prep")'), "Interview Prep must personalise scenarios from saved plan context");
 assert(interview.includes("Record for Playback"), "Interview recording must remain usable without fake transcription success");
 assert(interview.includes("if (!response.ok)"), "Interview coaching must handle failed AI requests");
+assert(interview.includes('value={activeTab} onValueChange={setActiveTab}'), "Interview Prep tabs must be explicitly controlled");
+assert(!interview.includes("document.querySelector<HTMLButtonElement>"), "Interview Prep must not use DOM-query tab navigation");
 
 for (const forbidden of ["const settlementSteps =", "const taxPlanning =", "const expansionStrategies =", "Year 4:", "Eligible to apply for British Citizenship"]) {
   assert(!settlement.includes(forbidden), `Settlement Planning still contains fixed eligibility/planning marker: ${forbidden}`);
@@ -117,6 +128,7 @@ console.log(JSON.stringify({
     "interview-prep",
     "settlement-planning",
     "diagnostics",
+    "news-ticker",
   ],
   liveNewsFeedVerified: true,
 }, null, 2));
