@@ -21,12 +21,11 @@ export default function RegulatoryCopilotPage() {
   return (
     <ToolAccessGuard requiredTier="basic" toolName="Regulatory Copilot">
       <SEOHead
-        title="Regulatory Copilot - UK Immigration Law Monitoring | UK Innovator Founder Visa Assistant"
-        description="Real-time UK immigration law monitoring and compliance alerts. Stay updated with Home Office requirements."
-        canonical="/tools/regulatory-copilot"
+        title="Regulatory Copilot | UK Innovator Founder Visa Assistant"
+        description="Official-source UK immigration updates combined with readiness signals from your saved application data."
+        canonical="/regulatory-copilot"
       />
-      
-      <div className="container max-w-6xl mx-auto py-8 px-4">
+      <div className="container mx-auto max-w-6xl px-4 py-8">
         <Suspense fallback={<LoadingFallback />}>
           <RegulatoryCopilot />
         </Suspense>

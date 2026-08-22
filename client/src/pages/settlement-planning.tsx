@@ -1,309 +1,44 @@
+import { useLocation } from "wouter";
+import { AlertCircle, ExternalLink, Globe, Loader2, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, TrendingUp, Home, Globe } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-
-
-const settlementSteps = [
-  {
-    year: "Year 1",
-    title: "Visa Grant & Business Launch",
-    milestones: [
-      "Receive Innovator Founder Visa approval",
-      "Establish UK business operations",
-      "Meet initial job creation targets",
-      "Begin financial projections tracking",
-      "Establish tax residency in UK"
-    ]
-  },
-  {
-    year: "Year 2",
-    title: "Growth & Compliance",
-    milestones: [
-      "Demonstrate revenue growth",
-      "Create additional jobs as planned",
-      "Maintain compliance reporting",
-      "Build UK tax history",
-      "Strengthen corporate structure"
-    ]
-  },
-  {
-    year: "Year 3",
-    title: "ILR Preparation",
-    milestones: [
-      "Prepare ILR (Indefinite Leave to Remain) application",
-      "Document 3 years of business success",
-      "Show job creation achievement",
-      "Demonstrate financial viability",
-      "Plan for permanent UK settlement"
-    ]
-  },
-  {
-    year: "Year 3+",
-    title: "Post-Settlement Options",
-    milestones: [
-      "Apply for British Citizenship (1 year after ILR)",
-      "Explore international expansion",
-      "Scale business operations",
-      "Mentor new visa applicants",
-      "Build long-term UK business legacy"
-    ]
-  }
-];
-
-const taxPlanning = [
-  {
-    area: "Corporate Structure",
-    items: [
-      "Limited Company vs Sole Proprietor",
-      "Tax-efficient dividend strategy",
-      "Director loan account management",
-      "R&D tax credits for innovative businesses"
-    ]
-  },
-  {
-    area: "Tax Optimization",
-    items: [
-      "Self-assessment tax planning",
-      "VAT registration considerations",
-      "Personal vs corporate tax rates",
-      "Pension contributions for tax relief"
-    ]
-  },
-  {
-    area: "Compliance",
-    items: [
-      "Annual accounts filing",
-      "Tax return deadlines",
-      "National Insurance contributions",
-      "Employment tax obligations"
-    ]
-  }
-];
-
-const expansionStrategies = [
-  {
-    strategy: "European Expansion",
-    description: "Establish subsidiaries in EU markets",
-    timeline: "Year 2-3",
-    requirements: ["EU market research", "Regulatory compliance", "Team expansion"]
-  },
-  {
-    strategy: "US Market Entry",
-    description: "Enter North American markets",
-    timeline: "Year 2+",
-    requirements: ["US market validation", "Local partnerships", "Series A funding"]
-  },
-  {
-    strategy: "Asia-Pacific Growth",
-    description: "Expand to high-growth Asian markets",
-    timeline: "Year 3+",
-    requirements: ["Market analysis", "Local team hiring", "Distribution partnerships"]
-  }
-];
+import { useApplicationContextPrefill } from "@/hooks/useToolPlatform";
 
 export default function SettlementPlanning() {
-  const { toast } = useToast();
-  
-  const downloadExpansionChecklist = () => {
-    const checklist = [
-      "1. Ensure UK entity remains your primary business hub",
-      "2. Maintain UK tax residency obligations",
-      "3. Document international operations for ILR",
-      "4. Create subsidiaries rather than relocating",
-      "5. Keep UK job creation commitments",
-      "6. Plan international expansion after ILR grant",
-    ];
-    
-    const content = "UK Innovator Founder - International Expansion Checklist\n\n" + checklist.join("\n");
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'expansion-checklist.txt';
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Checklist Downloaded",
-      description: "Your international expansion checklist has been downloaded.",
-    });
-  };
-  
+  const [, setLocation] = useLocation();
+  const contextQuery = useApplicationContextPrefill("settlement-planning");
+  const data = contextQuery.data;
+  const plan = data?.businessPlan;
+
+  if (contextQuery.isLoading) return <div className="flex min-h-[50vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  if (contextQuery.isError) return <div className="responsive-container py-16"><Card className="mx-auto max-w-2xl border-red-500/30 p-8 text-center"><AlertCircle className="mx-auto h-8 w-8 text-red-600" /><h1 className="mt-3 text-xl font-bold">Planning data could not be loaded</h1><p className="mt-2 text-sm text-muted-foreground">No immigration timeline has been guessed.</p><Button className="mt-5" variant="outline" onClick={() => contextQuery.refetch()}><RefreshCw className="mr-2 h-4 w-4" /> Retry</Button></Card></div>;
+
   return (
     <div className="min-h-screen">
-      
-      <div className="responsive-container py-16">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-12">
-            <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">POST-VISA ROADMAP</span>
-            <h1 className="font-serif text-xl font-bold mb-4 mt-3">Settlement Planning & ILR Strategy</h1>
-            <p className="text-lg text-muted-foreground">
-              Long-term planning from Innovator Founder Visa through ILR (Indefinite Leave to Remain) and British Citizenship. Includes tax optimization, international expansion strategy, and post-settlement pathways.
-            </p>
-          </div>
+      <div className="responsive-container py-12">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-8"><span className="rounded-full bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-700 dark:text-red-300">LONG-TERM PLANNING</span><h1 className="mt-3 text-xl font-bold">Settlement & Long-Term Business Planning</h1><p className="mt-2 text-muted-foreground">A planning workspace for business evidence you may need over time. It does not calculate ILR or citizenship eligibility without your actual immigration history and current official rules.</p></div>
 
-          <Tabs defaultValue="roadmap" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="roadmap">ILR Roadmap</TabsTrigger>
-              <TabsTrigger value="tax">Tax Planning</TabsTrigger>
-              <TabsTrigger value="expansion">Expansion</TabsTrigger>
-              <TabsTrigger value="citizenship">Citizenship</TabsTrigger>
-            </TabsList>
+          <Card className="mb-6 border-amber-500/20 bg-amber-500/5 p-5"><div className="flex items-start gap-3"><AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" /><div><p className="font-semibold">No automatic eligibility date</p><p className="mt-1 text-sm text-muted-foreground">This platform does not currently hold enough verified immigration-history data to tell you when you personally can apply for settlement or citizenship. Check the current GOV.UK rules and your own grant/absence history before relying on any timeline.</p><a href="https://www.gov.uk/innovator-founder-visa" target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-red-700 hover:underline dark:text-red-300">Open official Innovator Founder guidance <ExternalLink className="h-3.5 w-3.5" /></a></div></div></Card>
 
-            <TabsContent value="roadmap" className="space-y-6">
-              <div className="space-y-6">
-                {settlementSteps.map((step, idx) => (
-                  <Card key={step.year} className="p-8">
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                          <span className="font-bold text-primary">{idx + 1}</span>
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg mb-1">{step.year}: {step.title}</h3>
-                        <ul className="space-y-2">
-                          {step.milestones.map((milestone, midx) => (
-                            <li key={midx} className="flex gap-3 text-sm text-muted-foreground">
-                              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                              {milestone}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+          <Tabs defaultValue="business" className="space-y-5">
+            <TabsList className="grid w-full grid-cols-4"><TabsTrigger value="business">Business Evidence</TabsTrigger><TabsTrigger value="expansion">Expansion</TabsTrigger><TabsTrigger value="tax">Tax & Records</TabsTrigger><TabsTrigger value="immigration">Immigration Checks</TabsTrigger></TabsList>
 
-              <Card className="p-8 bg-primary/5 border-primary/20">
-                <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                  <Home className="w-5 h-5" />
-                  Path to Citizenship
-                </h3>
-                <ol className="space-y-3 text-sm">
-                  <li><span className="font-semibold">Year 3:</span> Apply for Indefinite Leave to Remain (ILR)</li>
-                  <li><span className="font-semibold">Year 4:</span> Eligible to apply for British Citizenship</li>
-                  <li><span className="font-semibold">Benefit:</span> Full rights to live, work, and study in the UK</li>
-                </ol>
-              </Card>
-            </TabsContent>
+            <TabsContent value="business"><Card className="p-6"><h2 className="font-semibold">Saved business evidence to keep current</h2>{plan ? <div className="mt-4 grid gap-3 sm:grid-cols-2"><PlanSignal label="Business" value={plan.businessName || "Not recorded"} /><PlanSignal label="Revenue / trading narrative" value={plan.revenue || "Not recorded"} /><PlanSignal label="Hiring plan" value={plan.hiringPlan || "Not recorded"} /><PlanSignal label="Job-creation figure in plan" value={plan.jobCreation ? String(plan.jobCreation) : "Not recorded"} /><PlanSignal label="Traction evidence" value={plan.tractionEvidence || "Not recorded"} /><PlanSignal label="Contact-point strategy" value={plan.contactPointsStrategy || "Not recorded"} /></div> : <div className="mt-4 text-sm text-muted-foreground">No saved plan is available. The workspace will not create business-achievement history for you.</div>}<div className="mt-5 flex flex-wrap gap-2"><Button variant="outline" onClick={() => setLocation("/kpi-dashboard")}>Open KPI Dashboard</Button><Button variant="outline" onClick={() => setLocation("/documents")}>Manage Evidence</Button></div></Card></TabsContent>
 
-            <TabsContent value="tax" className="space-y-6">
-              <div className="grid md:grid-cols-3 gap-6">
-                {taxPlanning.map(category => (
-                  <Card key={category.area} className="p-6">
-                    <h3 className="font-semibold text-lg mb-4">{category.area}</h3>
-                    <ul className="space-y-2">
-                      {category.items.map((item, idx) => (
-                        <li key={idx} className="flex gap-2 text-sm text-muted-foreground">
-                          <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </Card>
-                ))}
-              </div>
+            <TabsContent value="expansion"><Card className="p-6"><div className="flex items-center gap-2"><Globe className="h-5 w-5 text-red-600" /><h2 className="font-semibold">Expansion currently described in your plan</h2></div>{plan ? <div className="mt-4 space-y-3"><PlanSignal label="Expansion strategy" value={plan.expansion || "Not recorded"} /><PlanSignal label="Specific regions" value={plan.specificRegions || "Not recorded"} /><PlanSignal label="International plan" value={plan.internationalPlan || "Not recorded"} /></div> : <p className="mt-4 text-sm text-muted-foreground">No business-plan expansion data is available.</p>}<p className="mt-4 text-sm text-muted-foreground">Before acting on international expansion, separately check tax, corporate, regulatory and immigration consequences for the countries involved. This tool does not assume that a particular subsidiary structure or timing is appropriate.</p></Card></TabsContent>
 
-              <Card className="p-8 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30">
-                <p className="text-sm text-amber-900 dark:text-amber-100">
-                  <strong>Recommendation:</strong> Consult with a UK tax advisor to optimize your personal and corporate tax structure. This can save significantly over time.
-                </p>
-              </Card>
-            </TabsContent>
+            <TabsContent value="tax"><Card className="p-6"><h2 className="font-semibold">Tax and corporate recordkeeping</h2><p className="mt-2 text-sm text-muted-foreground">Keep contemporaneous company accounts, payroll/employment records, contracts and evidence that supports the business claims you make. Tax treatment depends on your actual circumstances, so this page does not recommend dividends, pensions, VAT registration or a company structure.</p><div className="mt-4 flex flex-wrap gap-2"><a href="https://www.gov.uk/browse/tax" target="_blank" rel="noopener noreferrer"><Button variant="outline">GOV.UK tax guidance <ExternalLink className="ml-2 h-3.5 w-3.5" /></Button></a><a href="https://www.gov.uk/government/organisations/companies-house" target="_blank" rel="noopener noreferrer"><Button variant="outline">Companies House guidance <ExternalLink className="ml-2 h-3.5 w-3.5" /></Button></a></div></Card></TabsContent>
 
-            <TabsContent value="expansion" className="space-y-6">
-              <div className="grid md:grid-cols-3 gap-6">
-                {expansionStrategies.map(strategy => (
-                  <Card key={strategy.strategy} className="p-6 hover-elevate">
-                    <h3 className="font-semibold text-lg mb-2">{strategy.strategy}</h3>
-                    <p className="text-sm text-muted-foreground mb-4">{strategy.description}</p>
-                    <div className="mb-4 p-3 bg-muted rounded">
-                      <p className="text-xs font-semibold mb-1">Timeline</p>
-                      <p className="text-sm">{strategy.timeline}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs font-semibold">Requirements:</p>
-                      <ul className="text-xs space-y-1 text-muted-foreground">
-                        {strategy.requirements.map((req, idx) => (
-                          <li key={idx} className="flex gap-2">
-                            <span className="text-primary">•</span> {req}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-
-              <Card className="p-8">
-                <div className="flex items-start gap-4">
-                  <Globe className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2">Scale Strategically</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Your Innovator Founder Visa startup has proven you can innovate and create value. Use this foundation to expand internationally while maintaining your UK presence and fulfilling ILR requirements.
-                    </p>
-                    <Button 
-                      className="gap-2"
-                      onClick={downloadExpansionChecklist}
-                      data-testid="button-download-expansion-checklist"
-                    >
-                      <TrendingUp className="w-4 h-4" />
-                      Download Expansion Checklist
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="citizenship" className="space-y-6">
-              <Card className="p-8">
-                <h3 className="font-semibold text-2xl mb-6">British Citizenship</h3>
-
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold text-lg mb-3">Eligibility Requirements</h4>
-                    <ul className="space-y-2 text-sm">
-                      <li className="flex gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                        12+ months with Indefinite Leave to Remain (ILR)
-                      </li>
-                      <li className="flex gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                        Passed the Life in the UK test
-                      </li>
-                      <li className="flex gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                        English language requirement met
-                      </li>
-                      <li className="flex gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                        Good character test passed
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="p-6 bg-green-50 border border-green-200 rounded-lg">
-                    <h4 className="font-semibold text-green-900 mb-3">Benefits of UK Citizenship</h4>
-                    <ul className="text-sm space-y-2 text-green-900">
-                      <li>• Full voting and political rights</li>
-                      <li>• Passport for unrestricted travel</li>
-                      <li>• Right to remain in UK indefinitely</li>
-                      <li>• Access to all public services</li>
-                      <li>• No visa sponsorship needed for employment</li>
-                      <li>• Eligibility for government benefits and pensions</li>
-                    </ul>
-                  </div>
-                </div>
-              </Card>
-            </TabsContent>
+            <TabsContent value="immigration"><Card className="p-6"><h2 className="font-semibold">Items that need personal verification</h2><div className="mt-4 space-y-3">{["Your exact immigration route and grant dates", "Absences and residence history", "Current settlement requirements for your route", "Any endorsement/contact-point requirements that apply to you", "English/Life in the UK or other requirements applicable at the date of application", "Citizenship residence and good-character requirements if you later consider naturalisation"].map((item) => <div key={item} className="flex items-start gap-3 rounded-lg border p-3"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" /><span className="text-sm">{item}</span></div>)}</div><p className="mt-4 text-xs text-muted-foreground">These are prompts, not a statement that you meet or fail any requirement.</p></Card></TabsContent>
           </Tabs>
         </div>
       </div>
     </div>
   );
+}
+
+function PlanSignal({ label, value }: { label: string; value: string }) {
+  return <div className="rounded-lg border p-4"><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 break-words text-sm font-medium">{value}</p></div>;
 }
