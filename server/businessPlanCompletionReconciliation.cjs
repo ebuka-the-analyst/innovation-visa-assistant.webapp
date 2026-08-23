@@ -1,67 +1,112 @@
+const express = require("express");
 const { Pool } = require("pg");
 
+const ROUTE = "/api/progress-tracker";
 const LOG_PREFIX = "[BUSINESS PLAN RECONCILIATION]";
+const application = express.application;
 
-function hasDatabaseUrl() {
-  return typeof process.env.DATABASE_URL === "string" && process.env.DATABASE_URL.trim().length > 0;
+let pool;
+
+function getPool() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL is not configured");
+  }
+
+  if (!pool) {
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      max: 1,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 5_000,
+    });
+  }
+
+  return pool;
 }
 
-async function reconcileCompletedBusinessPlans() {
-  if (!hasDatabaseUrl()) {
-    if (process.env.NODE_ENV === "production") {
-      console.warn(`${LOG_PREFIX} DATABASE_URL is not configured; skipping reconciliation.`);
-    }
+function isAuthenticated(req) {
+  return Boolean(
+    req.isAuthenticated &&
+      req.isAuthenticated() &&
+      req.user &&
+      req.user.id,
+  );
+}
+
+async function reconcileCompletedBusinessPlansForUser(userId) {
+  const db = getPool();
+  const result = await db.query(
+    `UPDATE business_plans AS bp
+        SET status = 'completed'
+      WHERE bp.user_id = $1
+        AND LOWER(COALESCE(bp.status, '')) <> 'completed'
+        AND (
+          EXISTS (
+            SELECT 1
+              FROM business_plan_versions AS bpv
+             WHERE bpv.plan_id = bp.id
+               AND LOWER(COALESCE(bpv.status, '')) = 'accepted'
+          )
+          OR (
+            EXISTS (
+              SELECT 1
+                FROM business_plan_generation_jobs AS bpgj
+               WHERE bpgj.plan_id = bp.id
+                 AND LOWER(COALESCE(bpgj.status, '')) = 'completed'
+            )
+            AND (
+              NULLIF(BTRIM(COALESCE(bp.generated_content, '')), '') IS NOT NULL
+              OR NULLIF(BTRIM(COALESCE(bp.pdf_url, '')), '') IS NOT NULL
+            )
+          )
+        )
+     RETURNING bp.id`,
+    [userId],
+  );
+
+  if (result.rowCount > 0) {
+    console.info(
+      `${LOG_PREFIX} Restored ${result.rowCount} durably completed plan record${result.rowCount === 1 ? "" : "s"} for the authenticated account.`,
+    );
+  }
+}
+
+async function reconcileBeforeProgress(req, _res, next) {
+  if (!isAuthenticated(req)) {
+    next();
     return;
   }
 
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    max: 1,
-    idleTimeoutMillis: 10_000,
-    connectionTimeoutMillis: 10_000,
-  });
-
   try {
-    const result = await pool.query(`
-      UPDATE business_plans AS bp
-         SET status = 'completed'
-       WHERE LOWER(COALESCE(bp.status, '')) <> 'completed'
-         AND bp.user_id IS NOT NULL
-         AND (
-           EXISTS (
-             SELECT 1
-               FROM business_plan_versions AS bpv
-              WHERE bpv.plan_id = bp.id
-                AND LOWER(COALESCE(bpv.status, '')) = 'accepted'
-           )
-           OR (
-             EXISTS (
-               SELECT 1
-                 FROM business_plan_generation_jobs AS bpgj
-                WHERE bpgj.plan_id = bp.id
-                  AND LOWER(COALESCE(bpgj.status, '')) = 'completed'
-             )
-             AND (
-               NULLIF(BTRIM(COALESCE(bp.generated_content, '')), '') IS NOT NULL
-               OR NULLIF(BTRIM(COALESCE(bp.pdf_url, '')), '') IS NOT NULL
-             )
-           )
-         )
-      RETURNING bp.id
-    `);
-
-    if (result.rowCount > 0) {
-      console.info(`${LOG_PREFIX} Restored ${result.rowCount} durably completed plan record${result.rowCount === 1 ? "" : "s"} to completed status.`);
-    }
+    await reconcileCompletedBusinessPlansForUser(req.user.id);
   } catch (error) {
-    // Older/local schemas may not have the durable generation/version tables yet.
-    // Do not stop the application; the schema migration/preflight remains authoritative.
-    console.warn(`${LOG_PREFIX} Reconciliation skipped: ${error?.message || error}`);
-  } finally {
-    await pool.end().catch(() => undefined);
+    // Reconciliation must never make Progress Tracker unavailable. Older/local
+    // schemas may not yet contain the durable generation/version tables.
+    console.warn(`${LOG_PREFIX} Request reconciliation skipped: ${error?.message || error}`);
   }
+
+  next();
 }
 
-// Run once per application process. The query is idempotent and only repairs records
-// backed by durable server-side proof of a successfully generated/accepted plan.
-void reconcileCompletedBusinessPlans();
+if (!application.__businessPlanCompletionRequestHookInstalled) {
+  const originalGet = application.get;
+
+  Object.defineProperty(application, "__businessPlanCompletionRequestHookInstalled", {
+    value: true,
+    enumerable: false,
+    configurable: false,
+    writable: false,
+  });
+
+  application.get = function businessPlanCompletionGet(path, ...handlers) {
+    const isProgressRoute =
+      path === ROUTE &&
+      handlers.length > 0;
+
+    if (isProgressRoute) {
+      return originalGet.call(this, path, reconcileBeforeProgress, ...handlers);
+    }
+
+    return originalGet.call(this, path, ...handlers);
+  };
+}
