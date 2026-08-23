@@ -4,7 +4,6 @@ import { FileText, Files, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ApplicationDocumentWorkspaceContainer } from "@/components/ApplicationDocumentWorkspace";
 import { apiRequest } from "@/lib/queryClient";
-import type { BusinessPlan } from "@shared/schema";
 
 const FINANCIAL_TOOLS = new Set([
   "financial-projections",
@@ -33,12 +32,27 @@ type Notice = {
   libraryAnchor: string;
 };
 
-async function getBusinessPlans(): Promise<BusinessPlan[]> {
-  const response = await apiRequest("GET", "/api/dashboard/plans");
+type BusinessPlanStatus = {
+  total: number;
+  completed: number;
+  active: number;
+  state: "completed" | "in_progress" | "recorded" | "none";
+  hasCompletedPlan: boolean;
+  latest: null | {
+    id: string;
+    businessName: string;
+    status: string;
+    pdfUrl?: string | null;
+    createdAt?: string | null;
+  };
+};
+
+async function getBusinessPlanStatus(): Promise<BusinessPlanStatus> {
+  const response = await apiRequest("GET", "/api/business-plan/status");
   return response.json();
 }
 
-function businessPlanNotice(plans: BusinessPlan[], isLoading: boolean): Notice {
+function businessPlanNotice(status: BusinessPlanStatus | undefined, isLoading: boolean): Notice {
   if (isLoading) {
     return {
       title: "Business Plan",
@@ -47,11 +61,7 @@ function businessPlanNotice(plans: BusinessPlan[], isLoading: boolean): Notice {
     };
   }
 
-  const completedPlan = plans.find(
-    (plan) => String(plan.status || "").toLowerCase() === "completed",
-  );
-
-  if (completedPlan) {
+  if (status?.hasCompletedPlan) {
     return {
       title: "Business Plan ready",
       description: "Your completed generated business plan is available and is also filed under Business & Strategy in My Documents.",
@@ -59,7 +69,7 @@ function businessPlanNotice(plans: BusinessPlan[], isLoading: boolean): Notice {
     };
   }
 
-  if (plans.length > 0) {
+  if ((status?.total || 0) > 0) {
     return {
       title: "Business Plan in progress",
       description: "A business plan record exists for your account but has not yet reached completed status. Continue the workflow to finish it.",
@@ -86,7 +96,7 @@ function noticeForLocation(location: string): Notice | null {
   if (location === "/progress") {
     return {
       title: "Progress Tracker connects the whole evidence pack",
-      description: "Milestones are linked to the real plan, assessments, financial model and uploaded evidence. My Documents remains the master library.",
+      description: "Milestones are linked to durable plan, assessment, financial and document records. My Documents remains the master library.",
       libraryAnchor: "application-workspace",
     };
   }
@@ -173,9 +183,9 @@ function noticeForLocation(location: string): Notice | null {
 export function ContextualDocumentNotice() {
   const [location] = useLocation();
   const isBusinessPlanRoute = ["/questionnaire", "/generation"].includes(location);
-  const { data: businessPlans = [], isLoading: businessPlansLoading } = useQuery<BusinessPlan[]>({
-    queryKey: ["/api/dashboard/plans"],
-    queryFn: getBusinessPlans,
+  const { data: businessPlanStatus, isLoading: businessPlanStatusLoading } = useQuery<BusinessPlanStatus>({
+    queryKey: ["/api/business-plan/status"],
+    queryFn: getBusinessPlanStatus,
     enabled: isBusinessPlanRoute,
     staleTime: 10_000,
   });
@@ -185,7 +195,7 @@ export function ContextualDocumentNotice() {
   }
 
   const notice = isBusinessPlanRoute
-    ? businessPlanNotice(businessPlans, businessPlansLoading)
+    ? businessPlanNotice(businessPlanStatus, businessPlanStatusLoading)
     : noticeForLocation(location);
   if (!notice) return null;
 
