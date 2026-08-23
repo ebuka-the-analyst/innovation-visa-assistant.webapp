@@ -1,7 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { FileText, Files, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ApplicationDocumentWorkspaceContainer } from "@/components/ApplicationDocumentWorkspace";
+import { apiRequest } from "@/lib/queryClient";
+import type { BusinessPlan } from "@shared/schema";
 
 const FINANCIAL_TOOLS = new Set([
   "financial-projections",
@@ -30,6 +33,47 @@ type Notice = {
   libraryAnchor: string;
 };
 
+async function getBusinessPlans(): Promise<BusinessPlan[]> {
+  const response = await apiRequest("GET", "/api/dashboard/plans");
+  return response.json();
+}
+
+function businessPlanNotice(plans: BusinessPlan[], isLoading: boolean): Notice {
+  if (isLoading) {
+    return {
+      title: "Business Plan",
+      description: "Checking your saved business plan status…",
+      libraryAnchor: "business-strategy",
+    };
+  }
+
+  const completedPlan = plans.find(
+    (plan) => String(plan.status || "").toLowerCase() === "completed",
+  );
+
+  if (completedPlan) {
+    return {
+      title: "Business Plan ready",
+      description: "Your completed generated business plan is available and is also filed under Business & Strategy in My Documents.",
+      libraryAnchor: "business-strategy",
+    };
+  }
+
+  if (plans.length > 0) {
+    return {
+      title: "Business Plan in progress",
+      description: "A business plan record exists for your account but has not yet reached completed status. Continue the workflow to finish it.",
+      libraryAnchor: "business-strategy",
+    };
+  }
+
+  return {
+    title: "Business Plan workspace",
+    description: "Complete the questionnaire to create your business plan. Generated outputs will be filed under Business & Strategy in My Documents.",
+    libraryAnchor: "business-strategy",
+  };
+}
+
 function noticeForLocation(location: string): Notice | null {
   if (location === "/dashboard") {
     return {
@@ -44,14 +88,6 @@ function noticeForLocation(location: string): Notice | null {
       title: "Progress Tracker connects the whole evidence pack",
       description: "Milestones are linked to the real plan, assessments, financial model and uploaded evidence. My Documents remains the master library.",
       libraryAnchor: "application-workspace",
-    };
-  }
-
-  if (["/questionnaire", "/generation"].includes(location)) {
-    return {
-      title: "Business Plan",
-      description: "The accepted generated plan is available here in context and is also filed under Business & Strategy in My Documents.",
-      libraryAnchor: "business-strategy",
     };
   }
 
@@ -136,12 +172,21 @@ function noticeForLocation(location: string): Notice | null {
 
 export function ContextualDocumentNotice() {
   const [location] = useLocation();
+  const isBusinessPlanRoute = ["/questionnaire", "/generation"].includes(location);
+  const { data: businessPlans = [], isLoading: businessPlansLoading } = useQuery<BusinessPlan[]>({
+    queryKey: ["/api/dashboard/plans"],
+    queryFn: getBusinessPlans,
+    enabled: isBusinessPlanRoute,
+    staleTime: 10_000,
+  });
 
   if (location === "/documents") {
     return <ApplicationDocumentWorkspaceContainer />;
   }
 
-  const notice = noticeForLocation(location);
+  const notice = isBusinessPlanRoute
+    ? businessPlanNotice(businessPlans, businessPlansLoading)
+    : noticeForLocation(location);
   if (!notice) return null;
 
   return (
