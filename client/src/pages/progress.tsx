@@ -334,6 +334,7 @@ export default function ProgressTracker() {
 
   const stepMap = useMemo(() => new Map(steps.map((step) => [step.id, step])), [steps]);
   const nextRequiredStep = steps.find((step) => step.required && step.milestone.status !== "completed") || null;
+  const NextRequiredIcon = nextRequiredStep?.icon || null;
   const currentPhase = PHASES.find((phase) => phase.steps.some((definition) => stepMap.get(definition.id)?.milestone.status !== "completed" && definition.required)) || PHASES[PHASES.length - 1];
   const currentPhaseNumber = PHASES.findIndex((phase) => phase.id === currentPhase.id) + 1;
   const currentPhaseName = currentPhase.title.replace(/^\d+\.\s*/, "");
@@ -405,7 +406,7 @@ export default function ProgressTracker() {
           </Alert>
         )}
 
-        {nextRequiredStep ? (
+        {nextRequiredStep && NextRequiredIcon ? (
           <Card className="mb-6 overflow-hidden border-primary/40 bg-primary/[0.035] shadow-sm" data-testid="next-required-step">
             <CardContent className="p-0">
               <div className="border-b border-primary/15 bg-primary/[0.055] px-5 py-3">
@@ -416,7 +417,7 @@ export default function ProgressTracker() {
               </div>
               <div className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 items-start gap-4">
-                  <div className="rounded-2xl bg-primary/10 p-3 text-primary"><nextRequiredStep.icon className="h-6 w-6" /></div>
+                  <div className="rounded-2xl bg-primary/10 p-3 text-primary"><NextRequiredIcon className="h-6 w-6" /></div>
                   <div className="min-w-0">
                     <h2 className="text-xl font-bold tracking-tight md:text-2xl">{nextRequiredStep.title}</h2>
                     <p className="mt-1 max-w-2xl text-sm text-muted-foreground md:text-base">{nextRequiredStep.description}</p>
@@ -451,7 +452,11 @@ export default function ProgressTracker() {
                   <div className="text-muted-foreground">{summary?.applicationReady ? "Required journey complete" : "Verified evidence required"}</div>
                 </div>
               </div>
-              <Progress value={summary?.requiredReadiness ?? 0} className="mt-4 h-3 bg-slate-200 dark:bg-slate-800" />
+              <Progress
+                value={summary?.requiredReadiness ?? 0}
+                className="mt-4 h-3 bg-slate-200 dark:bg-slate-800"
+                aria-label={`Required application readiness ${summary?.requiredReadiness ?? 0}%`}
+              />
               <p className="mt-3 text-xs text-muted-foreground">This is the primary readiness measure. Required completion is server-authoritative and cannot be awarded by a browser/localStorage flag.</p>
             </CardContent>
           </Card>
@@ -555,7 +560,11 @@ export default function ProgressTracker() {
                                 <p className="mt-1 text-sm text-muted-foreground">{step.description}</p>
                                 <div className="mt-3 max-w-2xl">
                                   <div className="mb-1 flex items-center justify-between gap-3 text-xs"><span className="font-medium text-muted-foreground">{sourceLabel(milestone.source)}</span><span className="font-semibold">{milestone.completionPercent}%</span></div>
-                                  <Progress value={milestone.completionPercent} className="h-1.5 bg-slate-200 dark:bg-slate-800" />
+                                  <Progress
+                                    value={milestone.completionPercent}
+                                    className="h-1.5 bg-slate-200 dark:bg-slate-800"
+                                    aria-label={`${step.title} completion ${milestone.completionPercent}%`}
+                                  />
                                   <AuditDetails milestone={milestone} />
                                 </div>
 
