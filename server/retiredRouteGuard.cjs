@@ -11,7 +11,7 @@ require("./financialModelEngine.cjs");
 
 const RETIRED_CREDIT_GRANT_ROUTE = "/api/credits/grant-tier-credits";
 const RETIRED_DISPUTE_EVIDENCE_ROUTE = "/dispute-evidence";
-const AUTH_READY_ROUTE = "/api/pricing";
+const CUSTOMER360_AUTH_READY_ROUTE = "/api/pricing";
 const application = express.application;
 
 if (!application.__legacyCreditGrantRouteGuardInstalled) {
@@ -75,7 +75,7 @@ if (!application.__authReadyExtensionsBootstrapInstalled) {
 
     if (
       isRouteRegistration &&
-      path === AUTH_READY_ROUTE &&
+      path === CUSTOMER360_AUTH_READY_ROUTE &&
       !application.__authReadyExtensionsLoaded
     ) {
       Object.defineProperty(application, "__authReadyExtensionsLoaded", {
@@ -98,9 +98,6 @@ if (!application.__authReadyExtensionsBootstrapInstalled) {
       require("./customer360LocationContext.cjs");
       require("./customer360Admin.cjs");
 
-      // Customer 360 replaces application.get when loaded. Re-enter through the
-      // newest wrapper so it can register its protected routes, then continue
-      // registering the /api/pricing route that marked authentication as ready.
       return application.get.call(this, path, ...handlers);
     }
 
