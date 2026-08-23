@@ -29,12 +29,10 @@ if (!application.__legacyCreditGrantRouteGuardInstalled) {
       return originalPost.call(this, path, (_req, res) => {
         return res.status(410).json({
           error: "Endpoint retired",
-          message:
-            "Credits are granted only through verified payment, promo, referral, or administrator flows.",
+          message: "Credits are granted only through verified payment, promo, referral, or administrator flows.",
         });
       });
     }
-
     return originalPost.call(this, path, ...handlers);
   };
 }
@@ -50,61 +48,56 @@ if (!application.__disputeEvidenceRouteGuardInstalled) {
   });
 
   application.get = function guardedGet(path, ...handlers) {
-    // Express also uses app.get(name) to read settings, so only intercept
-    // actual route registration calls that include one or more handlers.
     if (path === RETIRED_DISPUTE_EVIDENCE_ROUTE && handlers.length > 0) {
       return originalGet.call(this, path, (_req, res) => res.sendStatus(404));
     }
-
     return originalGet.call(this, path, ...handlers);
   };
 }
 
-// These route modules require the session and Passport middleware installed by
-// setupAuth. registerRoutes installs authentication before registering
-// /api/pricing, so defer loading them until that known auth-ready boundary.
-// This keeps the modules on the normal CommonJS preload path while ensuring
-// authenticated requests reach Passport before their route handlers run.
-if (!application.__customer360DeferredBootstrapInstalled) {
+// registerRoutes() installs session + Passport before it registers /api/pricing.
+// Use that existing auth-ready boundary once to register protected extension
+// routes explicitly. The individual Progress Tracker and questionnaire modules
+// no longer monkey-patch express.application or attempt to authenticate before
+// Passport is installed.
+if (!application.__authReadyExtensionsBootstrapInstalled) {
   const originalGet = application.get;
 
-  Object.defineProperty(application, "__customer360DeferredBootstrapInstalled", {
+  Object.defineProperty(application, "__authReadyExtensionsBootstrapInstalled", {
     value: true,
     enumerable: false,
     configurable: false,
     writable: false,
   });
 
-  application.get = function customer360DeferredGet(path, ...handlers) {
-    const isRouteRegistration =
-      typeof path === "string" && path.startsWith("/") && handlers.length > 0;
+  application.get = function authReadyExtensionsGet(path, ...handlers) {
+    const isRouteRegistration = typeof path === "string" && path.startsWith("/") && handlers.length > 0;
 
     if (
       isRouteRegistration &&
       path === CUSTOMER360_AUTH_READY_ROUTE &&
-      !application.__customer360DeferredModulesLoaded
+      !application.__authReadyExtensionsLoaded
     ) {
-      Object.defineProperty(application, "__customer360DeferredModulesLoaded", {
+      Object.defineProperty(application, "__authReadyExtensionsLoaded", {
         value: true,
         enumerable: false,
         configurable: false,
         writable: false,
       });
 
-      // Progress Tracker and questionnaire draft routes both depend on
-      // req.isAuthenticated()/req.user and therefore must be registered only
-      // after setupAuth has installed session + Passport middleware.
-      require("./progressTracker.cjs");
-      require("./questionnaireDraftSync.cjs");
+      const { registerBusinessPlanStatusRoutes } = require("./businessPlanStatus.cjs");
+      const { registerProgressTrackerRoutes } = require("./progressTracker.cjs");
+      const { registerQuestionnaireDraftRoutes } = require("./questionnaireDraftSync.cjs");
 
-      // Location enrichment must wrap the Customer 360 response before the
-      // Customer 360 GET route itself is registered.
+      registerBusinessPlanStatusRoutes(this);
+      registerProgressTrackerRoutes(this);
+      registerQuestionnaireDraftRoutes(this);
+
+      // Customer 360 still uses its historical wrapper internally. Keep it at
+      // the same post-auth boundary until that subsystem is migrated separately.
       require("./customer360LocationContext.cjs");
       require("./customer360Admin.cjs");
 
-      // The requires above replace application.get with their route wrappers.
-      // Re-enter through the newest wrapper so each deferred module can install
-      // its protected routes, then continue registering /api/pricing.
       return application.get.call(this, path, ...handlers);
     }
 

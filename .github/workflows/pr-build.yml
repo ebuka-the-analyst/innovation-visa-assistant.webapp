@@ -33,10 +33,12 @@ jobs:
         run: |
           node --check server/aiGatewayPreload.cjs
           node --check server/founderPortfolio.cjs
+          node --check server/businessPlanStatus.cjs
+          node --check server/businessPlanCompletionReconciliation.cjs
           node --check server/progressTracker.cjs
+          node --check server/questionnaireDraftSync.cjs
           node --check server/toolPlatform.cjs
           node --check server/applicationContextPrefill.cjs
-          node --check server/questionnaireDraftSync.cjs
           node --check server/eligibilityPolicy.cjs
           node --check server/eligibilityPolicySafety.cjs
           node --check server/eligibilityEngine.cjs
@@ -46,6 +48,9 @@ jobs:
           node --check server/financialModelEngine.cjs
           node --check server/scripts/preflight-app-schema.cjs
           node --check server/scripts/verify-app-schema.cjs
+
+      - name: Test readiness architecture contracts
+        run: npm run test:readiness-contract
 
       - name: Test eligibility policy
         run: node scripts/test-eligibility-policy.cjs

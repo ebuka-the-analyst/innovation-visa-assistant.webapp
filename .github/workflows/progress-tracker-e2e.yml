@@ -4,10 +4,17 @@ on:
   pull_request:
     paths:
       - "client/src/pages/progress.tsx"
+      - "client/src/components/ContextualDocumentNotice.tsx"
       - "client/src/components/FeatureNavigation.tsx"
       - "client/src/__e2e__/progress-harness.tsx"
       - "client/progress-e2e.html"
+      - "server/progressTracker.cjs"
+      - "server/questionnaireDraftSync.cjs"
+      - "server/businessPlanStatus.cjs"
+      - "server/businessPlanCompletionReconciliation.cjs"
+      - "server/retiredRouteGuard.cjs"
       - "tests/e2e/progress-tracker.spec.ts"
+      - "tests/readiness-contract.test.cjs"
       - "playwright.config.ts"
       - "scripts/validate-evidence-aware-progress-tracker.cjs"
       - "scripts/validate-progress-tracker-plan-link.cjs"
@@ -30,11 +37,14 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Run readiness architecture contracts
+        run: npm run test:readiness-contract
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
