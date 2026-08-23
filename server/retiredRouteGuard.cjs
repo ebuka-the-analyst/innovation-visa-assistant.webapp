@@ -3,10 +3,8 @@ require("./securityStartupGuard.cjs");
 const express = require("express");
 
 require("./founderPortfolio.cjs");
-require("./progressTracker.cjs");
 require("./toolPlatform.cjs");
 require("./applicationContextPrefill.cjs");
-require("./questionnaireDraftSync.cjs");
 require("./eligibilityEngine.cjs");
 require("./ivsEngine.cjs");
 require("./financialModelEngine.cjs");
@@ -62,11 +60,11 @@ if (!application.__disputeEvidenceRouteGuardInstalled) {
   };
 }
 
-// Customer 360 needs the session and Passport middleware installed by setupAuth.
-// registerRoutes installs authentication before registering /api/pricing, so defer
-// loading the Customer 360 route hooks until that known auth-ready boundary.
-// This keeps the modules on the normal CommonJS preload path and avoids adding
-// runtime dynamic imports to the production server bundle.
+// These route modules require the session and Passport middleware installed by
+// setupAuth. registerRoutes installs authentication before registering
+// /api/pricing, so defer loading them until that known auth-ready boundary.
+// This keeps the modules on the normal CommonJS preload path while ensuring
+// authenticated requests reach Passport before their route handlers run.
 if (!application.__customer360DeferredBootstrapInstalled) {
   const originalGet = application.get;
 
@@ -93,14 +91,20 @@ if (!application.__customer360DeferredBootstrapInstalled) {
         writable: false,
       });
 
+      // Progress Tracker and questionnaire draft routes both depend on
+      // req.isAuthenticated()/req.user and therefore must be registered only
+      // after setupAuth has installed session + Passport middleware.
+      require("./progressTracker.cjs");
+      require("./questionnaireDraftSync.cjs");
+
       // Location enrichment must wrap the Customer 360 response before the
       // Customer 360 GET route itself is registered.
       require("./customer360LocationContext.cjs");
       require("./customer360Admin.cjs");
 
-      // The requires above replace application.get with the Customer 360
-      // wrappers. Re-enter through the newest wrapper so it can register the
-      // protected route, then continue registering /api/pricing.
+      // The requires above replace application.get with their route wrappers.
+      // Re-enter through the newest wrapper so each deferred module can install
+      // its protected routes, then continue registering /api/pricing.
       return application.get.call(this, path, ...handlers);
     }
 
