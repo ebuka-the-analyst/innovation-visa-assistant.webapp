@@ -1,511 +1,323 @@
-import { useState, useCallback, useRef, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
-import { ToolUtilityBar } from "@/components/ToolUtilityBar";
-import { ToolAccessGuard } from "@/components/ToolAccessGuard";
-import { AiToolGuide, AiTraditionalToggle, type ToolConfig } from "@/components/AiToolGuide";
-import { useTierAccess } from "@/hooks/useTierAccess";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Users, Star, MapPin, Phone, Mail, Globe, Search, Heart, Filter, Save } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToolAccessGuard } from "@/components/ToolAccessGuard";
+import { BadgeCheck, CalendarCheck2, Heart, RefreshCw, Search, ShieldCheck, UserRoundSearch } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useWordExport } from "@/hooks/useWordExport";
 
-type Lawyer = {
+type ConsultationService = {
   id: string;
+  expertId: string;
   name: string;
-  firm: string;
-  location: string;
+  description?: string | null;
+  durationMinutes: number;
+  pricePence: number;
+  currency: string;
+};
+
+type ExpertProfile = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  profileImageUrl?: string | null;
+  oiscLevel?: string | null;
+  oiscRegistrationNumber?: string | null;
+  sraNumber?: string | null;
+  firmName?: string | null;
   specializations: string[];
-  rating: number;
-  reviewCount: number;
-  experience: number;
-  languages: string[];
-  consultationFee: number;
-  phone: string;
-  email: string;
-  website: string;
-  description: string;
+  yearsExperience?: number | null;
+  averageRating?: number | null;
+  totalReviewsCompleted?: number | null;
+  publicTitle?: string | null;
+  publicBio?: string | null;
+  featured?: boolean;
+  meetingMode?: "video" | "phone" | "either";
+  services: ConsultationService[];
 };
 
-const LAWYERS: Lawyer[] = [
-  {
-    id: "1",
-    name: "Sarah Mitchell",
-    firm: "Mitchell & Partners Immigration",
-    location: "London",
-    specializations: ["Innovator Founder Visa", "Start-up Visa", "Business Immigration"],
-    rating: 4.9,
-    reviewCount: 127,
-    experience: 15,
-    languages: ["English", "French"],
-    consultationFee: 150,
-    phone: "+44 20 1234 5678",
-    email: "sarah@mitchellimmigration.co.uk",
-    website: "mitchellimmigration.co.uk",
-    description: "Specialist in UK business immigration with extensive experience in Innovator Founder visas."
-  },
-  {
-    id: "2",
-    name: "James Chen",
-    firm: "Chen Legal",
-    location: "Manchester",
-    specializations: ["Innovator Founder Visa", "Skilled Worker", "Global Talent"],
-    rating: 4.8,
-    reviewCount: 89,
-    experience: 12,
-    languages: ["English", "Mandarin", "Cantonese"],
-    consultationFee: 120,
-    phone: "+44 161 234 5678",
-    email: "james@chenlegal.co.uk",
-    website: "chenlegal.co.uk",
-    description: "Experienced immigration lawyer helping entrepreneurs navigate the UK visa system."
-  },
-  {
-    id: "3",
-    name: "Priya Sharma",
-    firm: "Sharma Immigration Law",
-    location: "Birmingham",
-    specializations: ["Innovator Founder Visa", "Investor Visa", "Family Immigration"],
-    rating: 4.7,
-    reviewCount: 156,
-    experience: 18,
-    languages: ["English", "Hindi", "Punjabi"],
-    consultationFee: 100,
-    phone: "+44 121 234 5678",
-    email: "priya@sharmaimm.co.uk",
-    website: "sharmaimm.co.uk",
-    description: "Award-winning immigration lawyer with a track record of successful visa applications."
-  },
-  {
-    id: "4",
-    name: "Michael O'Brien",
-    firm: "O'Brien & Associates",
-    location: "London",
-    specializations: ["Innovator Founder Visa", "Sole Representative", "Business Immigration"],
-    rating: 4.6,
-    reviewCount: 203,
-    experience: 20,
-    languages: ["English", "Irish"],
-    consultationFee: 175,
-    phone: "+44 20 8765 4321",
-    email: "michael@obrienlaw.co.uk",
-    website: "obrienlaw.co.uk",
-    description: "Senior immigration partner with 20+ years of business visa expertise."
-  },
-  {
-    id: "5",
-    name: "Emma Williams",
-    firm: "Williams Legal Services",
-    location: "Edinburgh",
-    specializations: ["Innovator Founder Visa", "Start-up Visa", "Scale-up Visa"],
-    rating: 4.9,
-    reviewCount: 78,
-    experience: 10,
-    languages: ["English"],
-    consultationFee: 130,
-    phone: "+44 131 234 5678",
-    email: "emma@williamslegal.co.uk",
-    website: "williamslegal.co.uk",
-    description: "Tech-focused immigration lawyer helping startups establish in the UK."
-  },
-];
+const FAVORITES_KEY = "lawyer-finder-live-favorites-v1";
 
-const AI_TOOL_CONFIG: ToolConfig = {
-  toolId: 'lawyer-finder',
-  toolName: 'Lawyer Finder',
-  agent: 'sage',
-  greeting: "Hello! I'm Sage, your Legal & Compliance Specialist. I'll help you find the right immigration lawyer for your Innovator Founder visa application. Let me understand your needs to make personalized recommendations. Ready to start?",
-  questions: [
-    {
-      id: 'visa-type',
-      question: "Which visa type are you applying for? (Innovator Founder is most common for entrepreneurs)",
-      hint: "E.g., Innovator Founder Visa, Start-up Visa, Global Talent Visa",
-      fieldKey: 'visaType',
-      required: true
-    },
-    {
-      id: 'location-preference',
-      question: "Do you have a preferred location for your lawyer? (e.g., London, Manchester, or anywhere in UK)",
-      hint: "London has the most options, but regional lawyers can offer more personalized service",
-      fieldKey: 'locationPreference'
-    },
-    {
-      id: 'language-needs',
-      question: "Do you need a lawyer who speaks any language besides English?",
-      hint: "Many UK immigration lawyers speak multiple languages",
-      fieldKey: 'languageNeeds'
-    },
-    {
-      id: 'budget-range',
-      question: "What is your budget range for legal services? (typical consultation fees: £100-£200)",
-      hint: "Consider both initial consultation and full application support costs",
-      fieldKey: 'budgetRange'
-    },
-    {
-      id: 'specialization',
-      question: "Are there any specific areas of expertise you need? (e.g., tech startups, investor visas, family immigration)",
-      hint: "Some lawyers specialize in specific industries or visa types",
-      fieldKey: 'specialization'
-    },
-    {
-      id: 'urgency',
-      question: "How urgent is your visa application? Do you have any deadlines?",
-      hint: "This helps prioritize lawyers with faster turnaround times",
-      fieldKey: 'urgency'
-    }
-  ],
-  completionMessage: "Perfect! Based on your requirements, I'll filter the lawyer directory to show the most suitable matches. You can browse and save your favorites for comparison."
-};
+function money(pence: number, currency = "GBP") {
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: String(currency || "GBP").toUpperCase(),
+    minimumFractionDigits: pence % 100 === 0 ? 0 : 2,
+  }).format(pence / 100);
+}
+
+function expertName(expert: ExpertProfile) {
+  return `${expert.firstName || ""} ${expert.lastName || ""}`.trim();
+}
+
+function lowestFee(expert: ExpertProfile) {
+  if (!expert.services?.length) return Number.POSITIVE_INFINITY;
+  return Math.min(...expert.services.map((service) => Number(service.pricePence || 0)));
+}
+
+function registrationLabel(expert: ExpertProfile) {
+  const registrations = [
+    expert.sraNumber ? `SRA ${expert.sraNumber}` : null,
+    expert.oiscRegistrationNumber ? `IAA ${expert.oiscRegistrationNumber}` : null,
+  ].filter(Boolean);
+  return registrations.join(" · ");
+}
+
+function readFavorites(): string[] {
+  try {
+    const value = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
+    return Array.isArray(value) ? value.filter((item) => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
+}
 
 export default function LawyerFinder() {
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { generateWord } = useWordExport();
-  const { userTier } = useTierAccess();
-  
-  // Free users default to traditional mode, paid users can use AI mode
-  const isPaidUser = userTier !== 'free';
-  const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
-  const [showAutoSave, setShowAutoSave] = useState(false);
-  const hideIndicatorRef = useRef<NodeJS.Timeout | null>(null);
-
-  const [mode, setMode] = useState<'ai' | 'traditional'>(() => {
-    const saved = localStorage.getItem('lawyer-finder-mode');
-    // Free users always start in traditional mode
-    return (saved === 'ai' && isPaidUser) ? 'ai' : 'traditional';
-  });
-
-  // Force traditional mode for free users and clear localStorage
-  useEffect(() => {
-    if (!isPaidUser && mode === 'ai') {
-      setMode('traditional');
-      localStorage.setItem('lawyer-finder-mode', 'traditional');
-    }
-  }, [isPaidUser, mode]);
-
   const [searchTerm, setSearchTerm] = useState("");
-  const [locationFilter, setLocationFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("rating");
-  
-  const [favorites, setFavorites] = useState<string[]>(() => {
-    const saved = localStorage.getItem("lawyer-finder-state");
-    if (saved) {
-      try {
-        return JSON.parse(saved).favorites || [];
-      } catch { }
-    }
-    return [];
+  const [sortBy, setSortBy] = useState("recommended");
+  const [activeTab, setActiveTab] = useState("browse");
+  const [favorites, setFavorites] = useState<string[]>(readFavorites);
+
+  const expertsQuery = useQuery<ExpertProfile[]>({
+    queryKey: ["/api/expert-booking/experts"],
+    staleTime: 20_000,
+    retry: 1,
   });
 
-  const [activeTab, setActiveTab] = useState("browse");
+  const experts = expertsQuery.data || [];
+  const filteredExperts = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    return experts
+      .filter((expert) => {
+        if (!query) return true;
+        const searchable = [
+          expertName(expert),
+          expert.firmName,
+          expert.publicTitle,
+          expert.publicBio,
+          ...(expert.specializations || []),
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return searchable.includes(query);
+      })
+      .sort((a, b) => {
+        if (sortBy === "experience") return Number(b.yearsExperience || 0) - Number(a.yearsExperience || 0);
+        if (sortBy === "fee-low") return lowestFee(a) - lowestFee(b);
+        if (sortBy === "fee-high") return lowestFee(b) - lowestFee(a);
+        if (sortBy === "name") return expertName(a).localeCompare(expertName(b));
+        if (Boolean(a.featured) !== Boolean(b.featured)) return a.featured ? -1 : 1;
+        return expertName(a).localeCompare(expertName(b));
+      });
+  }, [experts, searchTerm, sortBy]);
 
-  useEffect(() => {
-    return () => {
-      if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
-      if (hideIndicatorRef.current) clearTimeout(hideIndicatorRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('lawyer-finder-mode', mode);
-  }, [mode]);
-
-  const handleAiComplete = (answers: Record<string, any>) => {
-    if (answers.locationPreference && answers.locationPreference !== 'anywhere') {
-      setLocationFilter(answers.locationPreference);
-    }
-    if (answers.specialization) {
-      setSearchTerm(answers.specialization);
-    }
-    setMode('traditional');
-  };
-
-  const triggerAutoSave = useCallback((newFavorites: string[]) => {
-    if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
-    autoSaveRef.current = setTimeout(() => {
-      localStorage.setItem("lawyer-finder-state", JSON.stringify({ favorites: newFavorites }));
-      setShowAutoSave(true);
-      if (hideIndicatorRef.current) clearTimeout(hideIndicatorRef.current);
-      hideIndicatorRef.current = setTimeout(() => setShowAutoSave(false), 2000);
-    }, 500);
-  }, []);
-
-  const toggleFavorite = (lawyerId: string) => {
-    const newFavorites = favorites.includes(lawyerId)
-      ? favorites.filter(id => id !== lawyerId)
-      : [...favorites, lawyerId];
-    setFavorites(newFavorites);
-    triggerAutoSave(newFavorites);
-    toast({
-      title: favorites.includes(lawyerId) ? "Removed from favorites" : "Added to favorites",
-      description: favorites.includes(lawyerId) ? "Lawyer removed from your list" : "Lawyer saved to your list"
-    });
-  };
-
-  const filteredLawyers = LAWYERS
-    .filter(lawyer => {
-      const matchesSearch = lawyer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lawyer.firm.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lawyer.specializations.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()));
-      const matchesLocation = locationFilter === "all" || lawyer.location === locationFilter;
-      return matchesSearch && matchesLocation;
-    })
-    .sort((a, b) => {
-      if (sortBy === "rating") return b.rating - a.rating;
-      if (sortBy === "experience") return b.experience - a.experience;
-      if (sortBy === "price-low") return a.consultationFee - b.consultationFee;
-      if (sortBy === "price-high") return b.consultationFee - a.consultationFee;
-      return 0;
-    });
-
-  const favoriteLawyers = LAWYERS.filter(l => favorites.includes(l.id));
-  const locations = Array.from(new Set(LAWYERS.map(l => l.location)));
-
-  const handleExportWord = () => {
-    const lawyersToExport = activeTab === "favorites" ? favoriteLawyers : filteredLawyers;
-    generateWord({
-      title: "Immigration Lawyer Directory",
-      subtitle: activeTab === "favorites" ? "Your Saved Lawyers" : "Search Results",
-      filename: "lawyer-finder",
-      sections: [
-        { type: "heading" as const, content: "Lawyer List", level: 1 as const },
-        ...lawyersToExport.map(lawyer => [
-          { type: "heading" as const, content: lawyer.name, level: 2 as const },
-          { type: "paragraph" as const, content: `Firm: ${lawyer.firm}` },
-          { type: "paragraph" as const, content: `Location: ${lawyer.location}` },
-          { type: "paragraph" as const, content: `Rating: ${lawyer.rating}/5 (${lawyer.reviewCount} reviews)` },
-          { type: "paragraph" as const, content: `Experience: ${lawyer.experience} years` },
-          { type: "paragraph" as const, content: `Consultation Fee: £${lawyer.consultationFee}` },
-          { type: "paragraph" as const, content: `Contact: ${lawyer.email} | ${lawyer.phone}` },
-          { type: "paragraph" as const, content: `Specializations: ${lawyer.specializations.join(", ")}` },
-          { type: "divider" as const },
-        ]).flat(),
-      ],
-    });
-    toast({ title: "Export Complete", description: "Lawyer list exported to Word document" });
-  };
-
-  const handleSave = () => {
-    localStorage.setItem("lawyer-finder-state", JSON.stringify({ favorites }));
-    toast({ title: "Saved", description: "Your favorites have been saved" });
-  };
-
-  const LawyerCard = ({ lawyer }: { lawyer: Lawyer }) => (
-    <Card className="hover-elevate" data-testid={`lawyer-card-${lawyer.id}`}>
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg">{lawyer.name}</CardTitle>
-            <CardDescription>{lawyer.firm}</CardDescription>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => toggleFavorite(lawyer.id)}
-            className={favorites.includes(lawyer.id) ? "text-red-500" : ""}
-            data-testid={`button-favorite-${lawyer.id}`}
-          >
-            <Heart className={`w-5 h-5 ${favorites.includes(lawyer.id) ? "fill-current" : ""}`} />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1">
-            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-            <span className="font-medium">{lawyer.rating}</span>
-            <span className="text-sm text-muted-foreground">({lawyer.reviewCount} reviews)</span>
-          </div>
-          <Badge variant="secondary">{lawyer.experience} years exp.</Badge>
-        </div>
-
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <MapPin className="w-4 h-4" />
-          <span>{lawyer.location}</span>
-        </div>
-
-        <p className="text-sm text-muted-foreground">{lawyer.description}</p>
-
-        <div className="flex flex-wrap gap-1">
-          {lawyer.specializations.map((spec, idx) => (
-            <Badge key={idx} variant="outline" className="text-xs">{spec}</Badge>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap gap-1">
-          {lawyer.languages.map((lang, idx) => (
-            <Badge key={idx} className="bg-primary/10 text-primary text-xs">{lang}</Badge>
-          ))}
-        </div>
-
-        <div className="pt-2 border-t space-y-2 text-sm">
-          <div className="flex items-center gap-2">
-            <Phone className="w-4 h-4 text-muted-foreground" />
-            <span>{lawyer.phone}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Mail className="w-4 h-4 text-muted-foreground" />
-            <span>{lawyer.email}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Globe className="w-4 h-4 text-muted-foreground" />
-            <span>{lawyer.website}</span>
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <div>
-          <span className="text-sm text-muted-foreground">Consultation from</span>
-          <div className="text-lg font-bold">£{lawyer.consultationFee}</div>
-        </div>
-        <Button data-testid={`button-contact-${lawyer.id}`}>
-          Contact Lawyer
-        </Button>
-      </CardFooter>
-    </Card>
+  const favoriteExperts = useMemo(
+    () => experts.filter((expert) => favorites.includes(expert.id)),
+    [experts, favorites],
   );
+
+  const toggleFavorite = (expertId: string) => {
+    setFavorites((current) => {
+      const next = current.includes(expertId)
+        ? current.filter((id) => id !== expertId)
+        : [...current, expertId];
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const openBooking = (expert: ExpertProfile) => {
+    setLocation(`/expert-booking?expertId=${encodeURIComponent(expert.id)}`);
+  };
+
+  const ExpertCard = ({ expert }: { expert: ExpertProfile }) => {
+    const name = expertName(expert);
+    const registration = registrationLabel(expert);
+    const firstService = expert.services?.[0];
+    const reviewCount = Number(expert.totalReviewsCompleted || 0);
+    const rating = Number(expert.averageRating || 0);
+
+    return (
+      <Card className="flex h-full flex-col" data-testid={`lawyer-card-${expert.id}`}>
+        <CardHeader>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex min-w-0 gap-3">
+              {expert.profileImageUrl ? (
+                <img src={expert.profileImageUrl} alt="" className="h-14 w-14 rounded-full border object-cover" />
+              ) : (
+                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
+                  {(expert.firstName?.[0] || "") + (expert.lastName?.[0] || "")}
+                </div>
+              )}
+              <div className="min-w-0">
+                <CardTitle className="truncate text-lg">{name || "Professional profile"}</CardTitle>
+                <CardDescription className="mt-1">{expert.publicTitle || expert.firmName || "Immigration professional"}</CardDescription>
+                {expert.firmName && expert.publicTitle && <p className="mt-1 text-xs text-muted-foreground">{expert.firmName}</p>}
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={favorites.includes(expert.id) ? `Remove ${name} from favourites` : `Save ${name} to favourites`}
+              onClick={() => toggleFavorite(expert.id)}
+              data-testid={`button-favorite-${expert.id}`}
+            >
+              <Heart className={`h-5 w-5 ${favorites.includes(expert.id) ? "fill-current text-red-500" : ""}`} />
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent className="flex-1 space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {expert.featured && <Badge variant="secondary">Featured</Badge>}
+            {registration && (
+              <Badge variant="outline" className="gap-1">
+                <BadgeCheck className="h-3.5 w-3.5" /> {registration}
+              </Badge>
+            )}
+            {Number(expert.yearsExperience || 0) > 0 && (
+              <Badge variant="outline">{expert.yearsExperience} years experience</Badge>
+            )}
+          </div>
+
+          {reviewCount > 0 && rating > 0 && (
+            <p className="text-sm text-muted-foreground">
+              Platform consultation rating: <span className="font-medium text-foreground">{rating.toFixed(1)}/5</span> from {reviewCount} completed {reviewCount === 1 ? "review" : "reviews"}.
+            </p>
+          )}
+
+          {expert.publicBio && <p className="text-sm leading-6 text-muted-foreground">{expert.publicBio}</p>}
+
+          {expert.specializations?.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {expert.specializations.map((specialization) => (
+                <Badge key={specialization} variant="outline" className="text-xs">{specialization}</Badge>
+              ))}
+            </div>
+          )}
+
+          {firstService ? (
+            <div className="rounded-lg border bg-muted/30 p-3 text-sm">
+              <div className="font-medium">{firstService.name}</div>
+              <div className="mt-1 text-muted-foreground">
+                {firstService.durationMinutes} min · {money(firstService.pricePence, firstService.currency)}
+                {expert.services.length > 1 ? ` · ${expert.services.length} consultation options` : ""}
+              </div>
+            </div>
+          ) : null}
+        </CardContent>
+
+        <CardFooter className="flex items-center justify-between gap-3 border-t pt-4">
+          <div className="text-xs leading-5 text-muted-foreground">Availability is confirmed in the live booking calendar.</div>
+          <Button onClick={() => openBooking(expert)} disabled={!expert.services?.length} className="shrink-0 gap-2" data-testid={`button-book-${expert.id}`}>
+            <CalendarCheck2 className="h-4 w-4" /> Book consultation
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  };
+
+  const renderGrid = (items: ExpertProfile[]) => {
+    if (expertsQuery.isLoading) {
+      return (
+        <div className="grid gap-5 md:grid-cols-2">
+          {[0, 1, 2, 3].map((item) => <Skeleton key={item} className="h-72 w-full rounded-xl" />)}
+        </div>
+      );
+    }
+
+    if (expertsQuery.isError) {
+      return (
+        <Card>
+          <CardContent className="flex flex-col items-center gap-4 p-10 text-center">
+            <RefreshCw className="h-8 w-8 text-muted-foreground" />
+            <div>
+              <h3 className="font-semibold">We could not load the professional network</h3>
+              <p className="mt-1 text-sm text-muted-foreground">No cached or demo profiles are being substituted.</p>
+            </div>
+            <Button variant="outline" onClick={() => expertsQuery.refetch()}>Retry</Button>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    if (!items.length) {
+      const hasNetwork = experts.length > 0;
+      return (
+        <Card>
+          <CardContent className="flex flex-col items-center gap-4 p-10 text-center">
+            <UserRoundSearch className="h-10 w-10 text-muted-foreground" />
+            <div>
+              <h3 className="font-semibold">{hasNetwork ? "No professionals match this search" : "No immigration professionals are currently available for booking"}</h3>
+              <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+                {hasNetwork
+                  ? "Try a different name, firm or specialisation."
+                  : "Only administrator-approved professionals with an enabled consultation profile and active service are shown here. Please check back later."}
+              </p>
+            </div>
+            {hasNetwork ? <Button variant="outline" onClick={() => setSearchTerm("")}>Clear search</Button> : <Button variant="outline" onClick={() => expertsQuery.refetch()}>Refresh</Button>}
+          </CardContent>
+        </Card>
+      );
+    }
+
+    return <div className="grid gap-5 md:grid-cols-2">{items.map((expert) => <ExpertCard key={expert.id} expert={expert} />)}</div>;
+  };
 
   return (
     <ToolAccessGuard requiredTier="free" toolName="Lawyer Finder & Booking">
       <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8">
-        <div className="responsive-container max-w-6xl">
-          <div className="mb-6">
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-              <div>
-                <h1 className="text-xl font-bold mb-2">Lawyer Finder & Booking</h1>
-                <p className="text-muted-foreground">Find and connect with experienced immigration lawyers</p>
+        <div className="responsive-container max-w-6xl space-y-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Lawyer Finder & Booking</h1>
+              <p className="mt-2 text-muted-foreground">Browse professionals who have completed platform onboarding and are currently enabled for consultation bookings.</p>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-lg border bg-background px-3 py-2 text-xs text-muted-foreground">
+              <ShieldCheck className="h-4 w-4 text-emerald-600" /> Live onboarding directory
+            </div>
+          </div>
+
+          <Card>
+            <CardContent className="grid gap-3 p-5 md:grid-cols-[1fr_220px]">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search by name, firm or specialisation..." className="pl-9" data-testid="input-lawyer-search" />
               </div>
-              <AiTraditionalToggle mode={mode} onModeChange={setMode} userTier={userTier} />
-            </div>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger data-testid="select-lawyer-sort"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recommended">Recommended</SelectItem>
+                  <SelectItem value="experience">Most experienced</SelectItem>
+                  <SelectItem value="fee-low">Fee: low to high</SelectItem>
+                  <SelectItem value="fee-high">Fee: high to low</SelectItem>
+                  <SelectItem value="name">Name A-Z</SelectItem>
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList>
+              <TabsTrigger value="browse">Browse all ({experts.length})</TabsTrigger>
+              <TabsTrigger value="favorites">My favourites ({favoriteExperts.length})</TabsTrigger>
+            </TabsList>
+            <TabsContent value="browse" className="mt-5">{renderGrid(filteredExperts)}</TabsContent>
+            <TabsContent value="favorites" className="mt-5">{renderGrid(favoriteExperts)}</TabsContent>
+          </Tabs>
+
+          <div className="rounded-xl border bg-background p-4 text-sm leading-6 text-muted-foreground">
+            <strong className="text-foreground">Important:</strong> Profiles are published only after platform onboarding approval, but users should independently verify a professional's regulatory status, scope of practice and engagement terms before instructing them. This platform does not provide legal advice.
           </div>
-
-          {mode === 'ai' ? (
-            <AiToolGuide 
-              config={AI_TOOL_CONFIG} 
-              onComplete={handleAiComplete}
-              onSwitchToTraditional={() => setMode('traditional')}
-              userTier={userTier}
-            />
-          ) : (
-          <>
-          <ToolUtilityBar
-            toolId="lawyer-finder"
-            toolName="Lawyer Finder & Booking"
-            onSave={handleSave}
-            onExportWord={handleExportWord}
-          />
-
-          {showAutoSave && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-              <Save className="w-4 h-4" />
-              <span>Auto-saved</span>
-            </div>
-          )}
-
-          <div className="mt-6">
-            <Card className="mb-6">
-              <CardContent className="pt-6">
-                <div className="flex flex-wrap gap-4">
-                  <div className="flex-1 min-w-[200px]">
-                    <Label className="sr-only">Search</Label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search by name, firm, or specialization..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                        data-testid="input-search"
-                      />
-                    </div>
-                  </div>
-                  <div className="w-40">
-                    <Label className="sr-only">Location</Label>
-                    <Select value={locationFilter} onValueChange={setLocationFilter}>
-                      <SelectTrigger data-testid="select-location">
-                        <MapPin className="w-4 h-4 mr-2" />
-                        <SelectValue placeholder="Location" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Locations</SelectItem>
-                        {locations.map(loc => (
-                          <SelectItem key={loc} value={loc}>{loc}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="w-40">
-                    <Label className="sr-only">Sort By</Label>
-                    <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger data-testid="select-sort">
-                        <Filter className="w-4 h-4 mr-2" />
-                        <SelectValue placeholder="Sort by" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="rating">Highest Rated</SelectItem>
-                        <SelectItem value="experience">Most Experienced</SelectItem>
-                        <SelectItem value="price-low">Price: Low to High</SelectItem>
-                        <SelectItem value="price-high">Price: High to Low</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="mb-4">
-                <TabsTrigger value="browse" data-testid="tab-browse">
-                  Browse All ({filteredLawyers.length})
-                </TabsTrigger>
-                <TabsTrigger value="favorites" data-testid="tab-favorites">
-                  My Favorites ({favorites.length})
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="browse">
-                {filteredLawyers.length > 0 ? (
-                  <div className="grid gap-6 md:grid-cols-2">
-                    {filteredLawyers.map(lawyer => (
-                      <LawyerCard key={lawyer.id} lawyer={lawyer} />
-                    ))}
-                  </div>
-                ) : (
-                  <Card>
-                    <CardContent className="py-12 text-center">
-                      <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="font-medium mb-2">No lawyers found</h3>
-                      <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-
-              <TabsContent value="favorites">
-                {favoriteLawyers.length > 0 ? (
-                  <div className="grid gap-6 md:grid-cols-2">
-                    {favoriteLawyers.map(lawyer => (
-                      <LawyerCard key={lawyer.id} lawyer={lawyer} />
-                    ))}
-                  </div>
-                ) : (
-                  <Card>
-                    <CardContent className="py-12 text-center">
-                      <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="font-medium mb-2">No favorites yet</h3>
-                      <p className="text-sm text-muted-foreground">Click the heart icon on a lawyer card to save them</p>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-            </Tabs>
-          </div>
-          </>
-          )}
         </div>
       </div>
     </ToolAccessGuard>
