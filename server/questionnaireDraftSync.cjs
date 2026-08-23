@@ -1,11 +1,9 @@
 const crypto = require("crypto");
-const express = require("express");
 const { Pool } = require("pg");
 
 const ROUTE = "/api/questionnaire/draft";
 const MAX_DRAFT_BYTES = 240_000;
 const DRAFT_SCHEMA_VERSION = 1;
-const application = express.application;
 
 let pool;
 
@@ -23,7 +21,7 @@ function getPool() {
 }
 
 function isAuthenticated(req) {
-  return Boolean(req.isAuthenticated && req.isAuthenticated() && req.user && req.user.id);
+  return Boolean(req?.isAuthenticated && req.isAuthenticated() && req.user?.id);
 }
 
 function requireAuthenticated(req, res) {
@@ -77,8 +75,6 @@ function sanitiseDraft(value) {
     error.code = "DRAFT_TOO_LARGE";
     throw error;
   }
-
-  // JSON round-trip strips prototypes and ensures the persisted payload is plain data only.
   return JSON.parse(JSON.stringify(value));
 }
 
@@ -148,10 +144,7 @@ async function handlePut(req, res) {
     const current = currentResult.rows[0] || null;
     const contextData = normaliseObject(current?.context_data);
     const evidenceRefs = Array.isArray(current?.evidence_refs) ? current.evidence_refs : [];
-    const previousHash = current
-      ? hashJson({ contextData, evidenceRefs })
-      : null;
-
+    const previousHash = current ? hashJson({ contextData, evidenceRefs }) : null;
     const nextContextData = {
       ...contextData,
       questionnaireDraft: {
@@ -175,9 +168,8 @@ async function handlePut(req, res) {
       [req.user.id, nextRevision, JSON.stringify(nextContextData), JSON.stringify(evidenceRefs)],
     );
     await client.query(
-      `INSERT INTO tool_case_context_events (
-         id, user_id, revision, previous_sha256, new_sha256, created_at
-       ) VALUES (gen_random_uuid()::varchar, $1, $2, $3, $4, NOW())`,
+      `INSERT INTO tool_case_context_events (id, user_id, revision, previous_sha256, new_sha256, created_at)
+       VALUES (gen_random_uuid()::varchar, $1, $2, $3, $4, NOW())`,
       [req.user.id, nextRevision, previousHash, newHash],
     );
     await client.query("COMMIT");
@@ -239,16 +231,13 @@ async function handleDelete(req, res) {
 
     await client.query(
       `UPDATE tool_case_contexts
-          SET revision = $2,
-              context_data = $3::jsonb,
-              updated_at = NOW()
+          SET revision = $2, context_data = $3::jsonb, updated_at = NOW()
         WHERE user_id = $1`,
       [req.user.id, nextRevision, JSON.stringify(nextContextData)],
     );
     await client.query(
-      `INSERT INTO tool_case_context_events (
-         id, user_id, revision, previous_sha256, new_sha256, created_at
-       ) VALUES (gen_random_uuid()::varchar, $1, $2, $3, $4, NOW())`,
+      `INSERT INTO tool_case_context_events (id, user_id, revision, previous_sha256, new_sha256, created_at)
+       VALUES (gen_random_uuid()::varchar, $1, $2, $3, $4, NOW())`,
       [req.user.id, nextRevision, previousHash, newHash],
     );
     await client.query("COMMIT");
@@ -265,7 +254,7 @@ async function handleDelete(req, res) {
   }
 }
 
-function installRoutes(app, originalGet, originalPut, originalDelete) {
+function registerQuestionnaireDraftRoutes(app) {
   if (app.__questionnaireDraftSyncRoutesInstalled) return;
   Object.defineProperty(app, "__questionnaireDraftSyncRoutesInstalled", {
     value: true,
@@ -273,38 +262,18 @@ function installRoutes(app, originalGet, originalPut, originalDelete) {
     configurable: false,
     writable: false,
   });
-  originalGet.call(app, ROUTE, handleGet);
-  originalPut.call(app, ROUTE, handlePut);
-  originalDelete.call(app, ROUTE, handleDelete);
+  app.get(ROUTE, handleGet);
+  app.put(ROUTE, handlePut);
+  app.delete(ROUTE, handleDelete);
 }
 
-if (!application.__questionnaireDraftSyncHookInstalled) {
-  const originalGet = application.get;
-  const originalPut = application.put;
-  const originalDelete = application.delete;
-
-  Object.defineProperty(application, "__questionnaireDraftSyncHookInstalled", {
-    value: true,
-    enumerable: false,
-    configurable: false,
-    writable: false,
-  });
-
-  application.get = function questionnaireDraftGet(path, ...handlers) {
-    const isRouteRegistration = typeof path === "string" && path.startsWith("/") && handlers.length > 0;
-    if (isRouteRegistration) installRoutes(this, originalGet, originalPut, originalDelete);
-    return originalGet.call(this, path, ...handlers);
-  };
-
-  application.put = function questionnaireDraftPut(path, ...handlers) {
-    const isRouteRegistration = typeof path === "string" && path.startsWith("/") && handlers.length > 0;
-    if (isRouteRegistration) installRoutes(this, originalGet, originalPut, originalDelete);
-    return originalPut.call(this, path, ...handlers);
-  };
-
-  application.delete = function questionnaireDraftDelete(path, ...handlers) {
-    const isRouteRegistration = typeof path === "string" && path.startsWith("/") && handlers.length > 0;
-    if (isRouteRegistration) installRoutes(this, originalGet, originalPut, originalDelete);
-    return originalDelete.call(this, path, ...handlers);
-  };
-}
+module.exports = {
+  ROUTE,
+  DRAFT_SCHEMA_VERSION,
+  sanitiseDraft,
+  draftEnvelope,
+  handleGet,
+  handlePut,
+  handleDelete,
+  registerQuestionnaireDraftRoutes,
+};
