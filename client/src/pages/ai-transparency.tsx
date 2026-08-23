@@ -1,27 +1,21 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Brain, 
-  Shield, 
-  Database, 
-  Lock, 
-  Code, 
-  Server, 
-  CheckCircle2, 
-  XCircle, 
+import {
   AlertTriangle,
+  Brain,
+  CheckCircle2,
+  Cloud,
+  Cpu,
+  Database,
   ExternalLink,
   FileText,
+  RefreshCw,
+  Server,
+  ShieldCheck,
   Users,
-  Cpu,
-  Cloud,
-  Eye,
-  Trash2,
-  Download
+  XCircle,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
 import { OISCDisclaimer } from "@/components/OISCDisclaimer";
 
 export default function AITransparencyPage() {
@@ -35,18 +29,19 @@ export default function AITransparencyPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold" data-testid="text-page-title">AI Transparency & Data Practices</h1>
-              <p className="text-muted-foreground">How our AI system works and how we handle your data</p>
+              <p className="text-muted-foreground">How our AI system works, what it can do and where its limits are</p>
             </div>
           </div>
+
           <div className="flex flex-wrap gap-2">
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">
-              <CheckCircle2 className="h-3 w-3 mr-1" /> GDPR Compliant
-            </Badge>
             <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800">
-              <Shield className="h-3 w-3 mr-1" /> ICO Registered
+              <Cpu className="h-3 w-3 mr-1" /> OpenAI + Anthropic
+            </Badge>
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">
+              <RefreshCw className="h-3 w-3 mr-1" /> Managed model routing
             </Badge>
             <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800">
-              <FileText className="h-3 w-3 mr-1" /> OISC Compliant
+              <ShieldCheck className="h-3 w-3 mr-1" /> General guidance only
             </Badge>
           </div>
         </div>
@@ -61,18 +56,21 @@ export default function AITransparencyPage() {
                 How Our AI System Works
               </CardTitle>
               <CardDescription>
-                A clear explanation of our AI architecture and capabilities
+                A managed multi-provider AI architecture designed for quality, resilience and controlled upgrades
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                 <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
-                  Key Fact: We Do NOT Train AI Models
+                  Current AI architecture: OpenAI GPT + Anthropic Claude
                 </h4>
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Our platform uses <strong>Qwen AI</strong>, a commercial AI service provided by Alibaba Cloud. 
-                  We do not train, fine-tune, or modify any AI models. We use Alibaba's pre-trained models 
-                  through their official API with carefully designed prompts.
+                <p className="text-sm text-blue-700 dark:text-blue-300 leading-6">
+                  The platform uses a centrally managed AI gateway that can route requests to <strong>OpenAI GPT</strong> and <strong>Anthropic Claude</strong> through their official APIs. 
+                  Model selection is controlled centrally so production can move to newer suitable models as they become available and are validated for the platform. 
+                  The exact provider or model used for a request can vary based on configuration, availability and fallback rules.
+                </p>
+                <p className="text-sm text-blue-700 dark:text-blue-300 leading-6 mt-2">
+                  <strong>Qwen / Alibaba Cloud is not part of the current AI provider configuration.</strong>
                 </p>
               </div>
 
@@ -80,28 +78,28 @@ export default function AITransparencyPage() {
                 <div className="border rounded-lg p-4">
                   <h4 className="font-semibold flex items-center gap-2 mb-3">
                     <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    What We DO
+                    What We Do
                   </h4>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Use Qwen AI API (commercial, pre-trained model by Alibaba Cloud)</span>
+                      <span>Use managed OpenAI and Anthropic API integrations rather than a single fixed model provider</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Design prompts based on official UK visa requirements</span>
+                      <span>Review and update production model configuration when newer suitable models are adopted</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Store your data securely in encrypted databases</span>
+                      <span>Use structured prompts and relevant official UK immigration and endorsement information</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Provide tools to help prepare your visa application</span>
+                      <span>Use fallback routing when an enabled provider is unavailable or returns a recoverable error</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Include OISC disclaimers on all outputs</span>
+                      <span>Present AI output as preparation support, not as a Home Office, endorsing body or adviser decision</span>
                     </li>
                   </ul>
                 </div>
@@ -109,28 +107,28 @@ export default function AITransparencyPage() {
                 <div className="border rounded-lg p-4">
                   <h4 className="font-semibold flex items-center gap-2 mb-3">
                     <XCircle className="h-4 w-4 text-red-500" />
-                    What We DO NOT Do
+                    What We Do Not Do
                   </h4>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start gap-2">
                       <XCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                      <span>Train or fine-tune AI models on user data</span>
+                      <span>Train our own foundation model on your application data</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <XCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                      <span>Share your personal data with third parties</span>
+                      <span>Guarantee that any AI response is complete, current or error-free</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <XCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                      <span>Provide regulated immigration advice</span>
+                      <span>Provide regulated immigration advice through the AI system</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <XCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                      <span>Store passport or financial documents</span>
+                      <span>Make the final decision on visa eligibility, endorsement or a Home Office application</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <XCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                      <span>Make automated decisions about your visa eligibility</span>
+                      <span>Claim that OpenAI or Anthropic endorses this platform</span>
                     </li>
                   </ul>
                 </div>
@@ -142,79 +140,99 @@ export default function AITransparencyPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Database className="h-5 w-5 text-primary" />
-                Data Sources & Training
+                AI Providers, Sources & User Data
               </CardTitle>
               <CardDescription>
-                Where our AI guidance comes from
+                What the AI uses and how provider processing fits into the service
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <h4 className="font-semibold">AI Model Provider</h4>
-                <div className="flex items-center gap-4 p-4 border rounded-lg bg-muted/30">
-                  <div className="p-3 rounded-lg bg-gradient-to-br from-blue-500 to-green-500">
-                    <Cloud className="h-6 w-6 text-white" />
+                <h4 className="font-semibold">Managed AI Providers</h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="p-4 border rounded-lg bg-muted/30">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/40">
+                        <Cloud className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold">OpenAI GPT</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Used through OpenAI's official API. The platform keeps the production model centrally managed so it can be updated without changing every individual AI feature.
+                        </p>
+                        <a
+                          href="https://platform.openai.com/docs"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-2"
+                        >
+                          OpenAI API documentation <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold">Qwen AI API (Alibaba Cloud)</p>
-                    <p className="text-sm text-muted-foreground">
-                      Commercial AI service developed by Alibaba Cloud on publicly available data. 
-                      We access this via their official Dashscope API.
-                    </p>
-                    <a 
-                      href="https://www.alibabacloud.com/help/en/model-studio/developer-reference/terms-of-service" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-1"
-                    >
-                      View Alibaba Cloud AI Terms <ExternalLink className="h-3 w-3" />
-                    </a>
+
+                  <div className="p-4 border rounded-lg bg-muted/30">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-950/40">
+                        <Cloud className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold">Anthropic Claude</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Supported through Anthropic's official API as a managed provider. Availability and priority depend on the platform's current provider configuration.
+                        </p>
+                        <a
+                          href="https://docs.anthropic.com/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-2"
+                        >
+                          Anthropic API documentation <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Provider names describe the services integrated with the platform. Exact model versions may change as newer models are evaluated and configured.
+                </p>
               </div>
 
               <Separator />
 
               <div className="space-y-4">
-                <h4 className="font-semibold">Our Prompt Knowledge Sources</h4>
+                <h4 className="font-semibold">Knowledge & Guidance Sources</h4>
                 <p className="text-sm text-muted-foreground">
-                  We craft AI prompts using information from these authoritative sources:
+                  AI prompts and platform content can draw on authoritative public information and information you provide. Important requirements should still be checked against the latest official source.
                 </p>
                 <div className="grid md:grid-cols-2 gap-3">
                   <div className="flex items-start gap-3 p-3 border rounded-lg">
                     <FileText className="h-5 w-5 text-primary mt-0.5" />
                     <div>
-                      <p className="font-medium text-sm">UK Government (gov.uk)</p>
-                      <p className="text-xs text-muted-foreground">
-                        Official Innovator Founder Visa requirements and guidance
-                      </p>
+                      <p className="font-medium text-sm">GOV.UK & Home Office</p>
+                      <p className="text-xs text-muted-foreground">Immigration Rules, Innovator Founder guidance and relevant caseworker guidance</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 p-3 border rounded-lg">
                     <FileText className="h-5 w-5 text-primary mt-0.5" />
                     <div>
-                      <p className="font-medium text-sm">Endorsing Body Criteria</p>
-                      <p className="text-xs text-muted-foreground">
-                        Published assessment criteria from UKES, Envestors, etc.
-                      </p>
+                      <p className="font-medium text-sm">Immigration Advice Authority (IAA)</p>
+                      <p className="text-xs text-muted-foreground">Public information about regulated immigration advice and adviser standards</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 p-3 border rounded-lg">
                     <FileText className="h-5 w-5 text-primary mt-0.5" />
                     <div>
-                      <p className="font-medium text-sm">Home Office Guidance</p>
-                      <p className="text-xs text-muted-foreground">
-                        Immigration rules and caseworker guidance documents
-                      </p>
+                      <p className="font-medium text-sm">Endorsing body information</p>
+                      <p className="text-xs text-muted-foreground">Published criteria and guidance from relevant endorsing bodies, where available</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 p-3 border rounded-lg">
-                    <FileText className="h-5 w-5 text-primary mt-0.5" />
+                    <Users className="h-5 w-5 text-primary mt-0.5" />
                     <div>
-                      <p className="font-medium text-sm">OISC Code of Standards</p>
-                      <p className="text-xs text-muted-foreground">
-                        Regulatory requirements for immigration advice
-                      </p>
+                      <p className="font-medium text-sm">Information you provide</p>
+                      <p className="text-xs text-muted-foreground">Business, market, financial and application context entered into platform tools</p>
                     </div>
                   </div>
                 </div>
@@ -223,29 +241,24 @@ export default function AITransparencyPage() {
               <Separator />
 
               <div className="space-y-4">
-                <h4 className="font-semibold">User-Provided Data</h4>
+                <h4 className="font-semibold">How AI Requests Use Your Information</h4>
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/20">
+                  <div className="flex gap-3">
+                    <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm text-amber-900 dark:text-amber-200 space-y-2">
+                      <p>
+                        When you use an AI-powered feature, relevant input may be sent to the configured OpenAI or Anthropic API so that the provider can generate a response. 
+                        That means it would be inaccurate to say that no third party ever processes information used by an AI feature.
+                      </p>
+                      <p>
+                        We do not use your application content to train our own foundation model. Provider processing, retention and account-level data controls are governed by the applicable provider terms and the platform's configured API account settings.
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 <p className="text-sm text-muted-foreground">
-                  When you use our tools, you provide information about your business plan. 
-                  This data is:
+                  Avoid entering information that is not necessary for the task. Where a platform feature stores your information, storage and deletion are governed by that feature, your account controls and the platform's applicable privacy terms.
                 </p>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-start gap-2">
-                    <Lock className="h-4 w-4 text-green-500 mt-0.5" />
-                    <span>Used only to generate personalized guidance for YOU</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Lock className="h-4 w-4 text-green-500 mt-0.5" />
-                    <span>Stored securely in encrypted PostgreSQL database</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Lock className="h-4 w-4 text-green-500 mt-0.5" />
-                    <span>Never used to train any AI models</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Lock className="h-4 w-4 text-green-500 mt-0.5" />
-                    <span>Deletable at any time via your account settings</span>
-                  </li>
-                </ul>
               </div>
             </CardContent>
           </Card>
@@ -253,161 +266,50 @@ export default function AITransparencyPage() {
           <Card data-testid="card-tech-stack">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Code className="h-5 w-5 text-primary" />
-                Technology Stack
+                <Server className="h-5 w-5 text-primary" />
+                Platform Architecture
               </CardTitle>
               <CardDescription>
-                The technologies powering our platform
+                A high-level view of the technologies used to deliver the service
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-6">
               <div className="grid md:grid-cols-3 gap-4">
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Frontend</h4>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-blue-500" />
-                      React + TypeScript
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-blue-500" />
-                      Vite (build tool)
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-blue-500" />
-                      Tailwind CSS + Shadcn UI
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-blue-500" />
-                      TanStack Query
-                    </li>
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-semibold text-sm mb-3">Application</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>React + TypeScript</li>
+                    <li>Node.js + Express</li>
+                    <li>PostgreSQL</li>
                   </ul>
                 </div>
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Backend</h4>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-green-500" />
-                      Node.js + Express
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-green-500" />
-                      PostgreSQL (Neon)
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-green-500" />
-                      Drizzle ORM
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-green-500" />
-                      Passport.js (Auth)
-                    </li>
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-semibold text-sm mb-3">AI services</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>OpenAI API</li>
+                    <li>Anthropic API</li>
+                    <li>Central provider routing and fallback</li>
                   </ul>
                 </div>
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Services</h4>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-purple-500" />
-                      Qwen AI API (Alibaba Cloud)
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-purple-500" />
-                      Stripe (Payments)
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-purple-500" />
-                      Cloudflare Turnstile
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-purple-500" />
-                      Railway (Hosting)
-                    </li>
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-semibold text-sm mb-3">Supporting services</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>Railway hosting</li>
+                    <li>Stripe where payment processing is used</li>
+                    <li>Other operational services as configured by the platform</li>
                   </ul>
                 </div>
               </div>
 
-              <div className="mt-6 p-4 bg-muted/30 rounded-lg">
+              <div className="p-4 bg-muted/30 rounded-lg">
                 <h4 className="font-semibold mb-2 flex items-center gap-2">
-                  <Server className="h-4 w-4" />
-                  Hosting & Data Location
+                  <ShieldCheck className="h-4 w-4" />
+                  Security and data-location wording
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  Our servers and databases are hosted in <strong>EU/UK regions</strong> to ensure 
-                  GDPR compliance. All data transfers are encrypted using TLS 1.3.
+                  We avoid making blanket statements such as "all data is in the UK" or naming a specific TLS version unless the current infrastructure configuration has been verified. 
+                  Security, data-location and subprocessor details should reflect the platform's actual deployed configuration and applicable privacy documentation.
                 </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card data-testid="card-your-rights">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
-                Your Data Rights (GDPR)
-              </CardTitle>
-              <CardDescription>
-                You have full control over your personal data
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="flex items-start gap-3 p-4 border rounded-lg">
-                  <Eye className="h-5 w-5 text-primary mt-0.5" />
-                  <div>
-                    <p className="font-medium">Right to Access</p>
-                    <p className="text-sm text-muted-foreground">
-                      Request a copy of all data we hold about you
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 p-4 border rounded-lg">
-                  <FileText className="h-5 w-5 text-primary mt-0.5" />
-                  <div>
-                    <p className="font-medium">Right to Rectification</p>
-                    <p className="text-sm text-muted-foreground">
-                      Correct any inaccurate personal data
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 p-4 border rounded-lg">
-                  <Trash2 className="h-5 w-5 text-primary mt-0.5" />
-                  <div>
-                    <p className="font-medium">Right to Erasure</p>
-                    <p className="text-sm text-muted-foreground">
-                      Delete your account and all associated data
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 p-4 border rounded-lg">
-                  <Download className="h-5 w-5 text-primary mt-0.5" />
-                  <div>
-                    <p className="font-medium">Right to Portability</p>
-                    <p className="text-sm text-muted-foreground">
-                      Export your data in a machine-readable format
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Button variant="outline" asChild>
-                  <Link href="/privacy">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Privacy Policy
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link href="/terms">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Terms of Service
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <a href="mailto:privacy@ukvisaassistant.com">
-                    Contact Data Protection
-                  </a>
-                </Button>
               </div>
             </CardContent>
           </Card>
@@ -416,63 +318,41 @@ export default function AITransparencyPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-amber-500" />
-                AI Limitations & Disclaimers
+                AI Limitations & Your Responsibility
               </CardTitle>
               <CardDescription>
-                Important information about what AI can and cannot do
+                Important points before relying on AI-generated material
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-                <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">
-                  AI-Generated Content Warning
-                </h4>
-                <ul className="space-y-2 text-sm text-amber-700 dark:text-amber-300">
-                  <li>AI responses may contain errors or inaccuracies</li>
-                  <li>Immigration rules change frequently - always verify with gov.uk</li>
-                  <li>AI cannot assess your individual circumstances like a qualified adviser</li>
-                  <li>Generated content should be reviewed by an OISC-registered professional</li>
-                </ul>
-              </div>
-
-              <div className="space-y-3">
-                <h4 className="font-semibold">The AI in this platform:</h4>
-                <div className="grid md:grid-cols-2 gap-3">
-                  <div className="p-3 border rounded-lg">
-                    <p className="font-medium text-green-600 dark:text-green-400 text-sm">CAN help you:</p>
-                    <ul className="text-sm text-muted-foreground mt-1 space-y-1">
-                      <li>Structure your business plan</li>
-                      <li>Identify gaps in your application</li>
-                      <li>Understand visa requirements</li>
-                      <li>Prepare for endorsement interviews</li>
-                    </ul>
-                  </div>
-                  <div className="p-3 border rounded-lg">
-                    <p className="font-medium text-red-600 dark:text-red-400 text-sm">CANNOT:</p>
-                    <ul className="text-sm text-muted-foreground mt-1 space-y-1">
-                      <li>Provide legal immigration advice</li>
-                      <li>Guarantee visa approval</li>
-                      <li>Replace professional legal counsel</li>
-                      <li>Make decisions on your behalf</li>
-                    </ul>
-                  </div>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <h4 className="font-semibold">AI can be wrong</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Even strong current models can misunderstand context, miss a rule change or generate an incorrect statement. Review important claims before using them.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <h4 className="font-semibold">Rules can change</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Immigration Rules, Home Office guidance and endorsing body requirements can change. Check current official sources before submission.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <h4 className="font-semibold">Your facts remain your responsibility</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Check names, dates, financial figures, market claims and evidence. Do not submit AI-generated facts that you cannot support.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <h4 className="font-semibold">Use regulated advice when needed</h4>
+                  <p className="text-sm text-muted-foreground">
+                    If you need advice specific to your immigration circumstances, use an appropriately regulated adviser or legal professional.
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
-
-          <div className="flex justify-center gap-4">
-            <Button asChild>
-              <Link href="/testing-validation">
-                View Testing & Validation
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/compliance-dashboard">
-                Compliance Dashboard
-              </Link>
-            </Button>
-          </div>
         </div>
       </div>
     </div>
