@@ -71,5 +71,4 @@ update("client/src/components/expert-booking/PublicExpertBooking.tsx", (source) 
   return next;
 });
 
-require("./validate-lawyer-finder-live-network.cjs");
 console.log("[lawyer-finder-live] live directory and approval-gated onboarding prepared");
