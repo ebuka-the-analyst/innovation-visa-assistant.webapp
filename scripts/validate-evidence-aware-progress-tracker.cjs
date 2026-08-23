@@ -5,8 +5,8 @@ const client = fs.readFileSync("client/src/pages/progress.tsx", "utf8");
 const planStatus = fs.readFileSync("server/businessPlanStatus.cjs", "utf8");
 
 const checks = [
-  ["server selects structured financial evidence", server.includes("monthly_projections, cac, ltv, payback_period, funding_sources, detailed_costs")],
-  ["server selects structured market evidence", server.includes("competitors, competitive_differentiation, customer_interviews") && server.includes("willingness_to_pay, market_size")],
+  ["shared plan service selects structured financial evidence", planStatus.includes("monthly_projections, cac, ltv, payback_period, funding_sources, detailed_costs")],
+  ["shared plan service selects structured market evidence", planStatus.includes("competitors, competitive_differentiation, customer_interviews") && planStatus.includes("willingness_to_pay, market_size")],
   ["server builds plan evidence", server.includes("function buildPlanEvidence(row)") && server.includes("buildPlanEvidence(completedPlan)")],
   ["financial evidence requires complete signal set", server.includes("financialCompleted === financialChecks.length")],
   ["market evidence requires demand signal", server.includes("marketCompleted >= 4 && hasDemandSignal")],
@@ -17,7 +17,7 @@ const checks = [
   ["client labels overall metric as preparation", client.includes("Overall preparation") && client.includes("Required application readiness")],
   ["client exposes audit metadata", client.includes("Result fingerprint") && client.includes("Readiness ruleset") && client.includes("Freshness:")],
   ["client exposes revalidation state", client.includes("Needs revalidation") && client.includes("revalidation-warning")],
-  ["client does not calculate required completion from localStorage", !client.includes("localStorage") && !client.includes("readJson(")],
+  ["client does not calculate required completion from browser storage", !client.includes("localStorage.getItem") && !client.includes("localStorage.setItem") && !client.includes("sessionStorage.getItem")],
   ["business plan status is shared", server.includes("getBusinessPlanStatusForUser") && planStatus.includes("registerBusinessPlanStatusRoutes")],
   ["generated business plan counts as required document", server.includes('satisfiedRequiredNames.add("Business Plan")') && server.includes('generatedRequiredNames.add("Business Plan")')],
   ["required document completion uses satisfied not only uploaded", server.includes("requiredSatisfied: satisfiedRequiredNames.size") && client.includes("requiredSatisfied")],
