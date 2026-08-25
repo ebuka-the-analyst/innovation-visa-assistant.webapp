@@ -16,6 +16,9 @@ type LiveNewsArticle = {
   aiSummary?: string | null;
 };
 
+const STRICT_TICKER_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 730;
+const STRICT_TICKER_FUTURE_SKEW_MS = 1000 * 60 * 60 * 24;
+
 function formatDate(value?: string | null) {
   if (!value) return "Date unavailable";
   const date = new Date(value);
@@ -26,7 +29,12 @@ function formatDate(value?: string | null) {
 
 function isStrictTickerArticle(article: LiveNewsArticle) {
   if (!article?.id || !/\binnovator[\s-]+founder\b/i.test(String(article.title || ""))) return false;
-  if (!article.publishedAt || Number.isNaN(new Date(article.publishedAt).getTime())) return false;
+  if (!article.publishedAt) return false;
+
+  const timestamp = new Date(article.publishedAt).getTime();
+  if (!Number.isFinite(timestamp)) return false;
+  const now = Date.now();
+  if (timestamp < now - STRICT_TICKER_MAX_AGE_MS || timestamp > now + STRICT_TICKER_FUTURE_SKEW_MS) return false;
 
   try {
     const hostname = new URL(String(article.url || "")).hostname.toLowerCase();
@@ -66,7 +74,7 @@ export default function NewsTicker() {
       if (!Array.isArray(payload)) throw new Error("News feed returned an invalid response");
 
       // Defence in depth: even if the API is accidentally broadened later, the
-      // homepage will only render directly named Innovator Founder GOV.UK items.
+      // homepage will only render current, directly named Innovator Founder GOV.UK items.
       setNewsItems(payload.filter(isStrictTickerArticle).map(toNewsItem));
       setLoadError(false);
     } catch (error) {
