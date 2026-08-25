@@ -13,7 +13,6 @@ export const organizationSchema = {
     "height": 630
   },
   "description": "Software platform providing AI-assisted business planning, preparation tools and selected official GOV.UK updates for UK Innovator Founder applicants. The platform does not provide regulated immigration advice or guarantee outcomes.",
-  "foundingDate": "2025",
   "address": {
     "@type": "PostalAddress",
     "addressCountry": "GB"
@@ -22,11 +21,7 @@ export const organizationSchema = {
     "@type": "ContactPoint",
     "contactType": "customer support",
     "availableLanguage": ["English"]
-  },
-  "sameAs": [
-    "https://twitter.com/innovatorvisa",
-    "https://linkedin.com/company/innovator-visa-assistant"
-  ]
+  }
 };
 
 export const softwareApplicationSchema = {
