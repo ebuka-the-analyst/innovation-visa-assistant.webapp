@@ -4,33 +4,33 @@ import { CheckCircle2, TrendingUp, FileText, Presentation, ShieldCheck, Search }
 const features = [
   {
     icon: Search,
-    title: "Instant Eligibility Check",
-    description: "Our AI analyzes your business against Home Office criteria and endorsing body requirements in minutes, giving you immediate feedback on your visa prospects."
+    title: "Eligibility Preparation Check",
+    description: "Compare your saved information with published route criteria and identify areas that may need more evidence or clarification."
   },
   {
     icon: FileText,
     title: "Business Plan Generator",
-    description: "Generate comprehensive 12-section business plans tailored to your chosen endorsing body's specific requirements and expectations."
+    description: "Generate structured business-plan drafts based on your questionnaire responses and the Innovator Founder criteria you need to address."
   },
   {
     icon: TrendingUp,
-    title: "Financial Modeling",
-    description: "Build Excel models with endorsing body-specific emphasis on R&D, scenarios, or revenue projections that demonstrate your business viability."
+    title: "Financial Modelling",
+    description: "Build scenario-based financial models from your assumptions and review how revenue, costs, staffing and funding interact."
   },
   {
     icon: CheckCircle2,
-    title: "Document Organization",
-    description: "Comprehensive checklist with endorsing body-specific requirements ensures you have complete submission packages with nothing missing."
+    title: "Document Organisation",
+    description: "Use checklists and evidence tracking to organise supporting documents and highlight potential gaps before independent review."
   },
   {
     icon: Presentation,
     title: "Pitch Deck Creation",
-    description: "Generate PowerPoint presentations optimized for your endorsing body's interview requirements and presentation guidelines."
+    description: "Create editable presentation drafts that help you explain your business clearly during preparation and interview practice."
   },
   {
     icon: ShieldCheck,
-    title: "Compliance Validation",
-    description: "Validate against Home Office criteria AND endorsing body-specific requirements to maximize your approval chances."
+    title: "Compliance-Focused Review",
+    description: "Review preparation materials against configured criteria and flag potential gaps. This does not certify legal compliance or guarantee an outcome."
   }
 ];
 
@@ -39,11 +39,9 @@ export default function CompetitorFeatures() {
     <section className="py-20 md:py-32 bg-background">
       <div className="responsive-container">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="font-serif text-xl font-bold mb-6">
-            Everything You Need to Succeed
-          </h2>
+          <h2 className="font-serif text-xl font-bold mb-6">Practical Tools for Application Preparation</h2>
           <p className="text-lg text-muted-foreground">
-            Complete toolkit for UK Innovator Founder Visa success
+            A toolkit for drafting, organising and reviewing evidence for the UK Innovator Founder route.
           </p>
         </div>
 
