@@ -4,7 +4,6 @@ export type StrictNewsCandidate = {
   publishedAt?: string | null;
 };
 
-export const STRICT_NEWS_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 730; // two years
 const MAX_FUTURE_SKEW_MS = 1000 * 60 * 60 * 24;
 
 function normaliseTitle(value: unknown): string {
@@ -31,26 +30,33 @@ export function strictNewsTimestamp(article: StrictNewsCandidate): number {
   return Number.isFinite(timestamp) ? timestamp : 0;
 }
 
+export function isCurrentCalendarYearTimestamp(timestamp: number, now = Date.now()): boolean {
+  if (!timestamp || !Number.isFinite(timestamp)) return false;
+  const currentYear = new Date(now).getUTCFullYear();
+  const yearStart = Date.UTC(currentYear, 0, 1, 0, 0, 0, 0);
+  return timestamp >= yearStart && timestamp <= now + MAX_FUTURE_SKEW_MS;
+}
+
 /**
- * Homepage ticker policy: only show directly named Innovator Founder items from
- * GOV.UK with an auditable, current timestamp. We intentionally do not infer
- * relevance from body text, generic visa words, country guidance, sponsor lists
- * or other immigration material.
+ * Homepage ticker policy: show only official GOV.UK updates from the current
+ * calendar year whose page title directly names the Innovator Founder route.
+ * `publishedAt` represents the GOV.UK page's update/change timestamp, not the
+ * page's original publication date. This lets long-lived official guidance that
+ * was genuinely updated this year appear without admitting generic immigration
+ * material.
  */
-export function isStrictInnovatorFounderNews(
+export function isCurrentYearInnovatorFounderUpdate(
   article: StrictNewsCandidate,
   now = Date.now(),
 ): boolean {
   if (!titleDirectlyReferencesInnovatorFounder(article)) return false;
   if (!isOfficialGovUkUrl(article?.url)) return false;
-
-  const timestamp = strictNewsTimestamp(article);
-  if (!timestamp) return false;
-  if (timestamp < now - STRICT_NEWS_MAX_AGE_MS) return false;
-  if (timestamp > now + MAX_FUTURE_SKEW_MS) return false;
-
-  return true;
+  return isCurrentCalendarYearTimestamp(strictNewsTimestamp(article), now);
 }
+
+// Compatibility name retained for existing callers. The semantics are now
+// stricter and current-year based rather than a rolling two-year publication age.
+export const isStrictInnovatorFounderNews = isCurrentYearInnovatorFounderUpdate;
 
 export function compareStrictInnovatorFounderNews(
   a: StrictNewsCandidate,
