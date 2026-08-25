@@ -24,7 +24,9 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Prepare public trust hardening
-        run: node scripts/prepare-platform-trust-hardening.cjs
+        run: |
+          node scripts/prepare-platform-trust-hardening.cjs
+          node scripts/prepare-server-public-seo.cjs
 
       - name: Validate critical hardcodes
         run: node scripts/check-critical-hardcodes.cjs
