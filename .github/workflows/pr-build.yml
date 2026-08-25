@@ -52,6 +52,9 @@ jobs:
       - name: Test readiness architecture contracts
         run: npm run test:readiness-contract
 
+      - name: Test strict Innovator Founder news relevance
+        run: npx tsx scripts/test-news-relevance.ts
+
       - name: Test eligibility policy
         run: node scripts/test-eligibility-policy.cjs
 

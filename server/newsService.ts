@@ -1,4 +1,7 @@
-import { storage } from "./storage";
+import {
+  compareStrictInnovatorFounderNews,
+  isStrictInnovatorFounderNews,
+} from "./newsRelevance";
 
 type NewsArticle = Record<string, any>;
 
@@ -16,121 +19,41 @@ let govUkCache: { expiresAt: number; items: NewsArticle[] } = {
   items: [],
 };
 
-const MAX_NEWS_AGE_MS = 1000 * 60 * 60 * 24 * 730; // two years
-
-function isOfficialGovernmentSource(article: any) {
-  const source = String(article?.sourceName || "").toLowerCase();
-  if (/gov\.uk|home office|uk visas and immigration|ukvi/.test(source)) return true;
-  try {
-    const hostname = new URL(String(article?.url || "")).hostname.toLowerCase();
-    return hostname === "gov.uk" || hostname.endsWith(".gov.uk");
-  } catch {
-    return false;
-  }
-}
-
-function articleTimestamp(article: NewsArticle): number {
-  const value = article?.publishedAt || article?.createdAt || article?.updatedAt;
-  const timestamp = value ? new Date(value).getTime() : 0;
-  return Number.isFinite(timestamp) ? timestamp : 0;
-}
-
-function articleText(article: NewsArticle): string {
-  return [
-    article?.title,
-    article?.description,
-    article?.aiSummary,
-    article?.content,
-    article?.category,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-}
-
-function immigrationRelevanceTier(article: NewsArticle): number {
-  const text = articleText(article);
-
-  // Tier 3: directly about the Innovator Founder route or its endorsement process.
-  if (
-    /\binnovator founder\b/.test(text) ||
-    /\binnovator visa\b/.test(text) ||
-    (/\bendorsement\b|\bendorsing bod(?:y|ies)\b/.test(text) && /\binnovator\b|\bfounder\b/.test(text))
-  ) {
-    return 3;
-  }
-
-  // Tier 2: changes that can directly affect a UK visa application or Immigration Rules.
-  if (
-    /\bimmigration rules\b/.test(text) ||
-    /\buk visas and immigration\b|\bukvi\b/.test(text) ||
-    /\bvisa application\b|\bvisa applications\b|\bvisa route\b|\bvisa routes\b/.test(text) ||
-    /\bevisa\b|\bentry clearance\b|\bleave to remain\b|\bindefinite leave\b/.test(text) ||
-    /\bbusiness immigration\b|\bskilled worker visa\b/.test(text)
-  ) {
-    return 2;
-  }
-
-  // Tier 1: broader UK immigration / visa material. This can fill the ticker only
-  // after stronger route-specific items, but unrelated government content is rejected.
-  if (/\bimmigration\b|\bvisa\b|\bvisas\b/.test(text)) {
-    return 1;
-  }
-
-  return 0;
-}
-
-function isRecentEnough(article: NewsArticle): boolean {
-  const timestamp = articleTimestamp(article);
-  if (!timestamp) return true;
-  return timestamp >= Date.now() - MAX_NEWS_AGE_MS;
-}
-
-function isRelevantImmigrationNews(article: NewsArticle): boolean {
-  return immigrationRelevanceTier(article) > 0 && isRecentEnough(article);
-}
-
-function compareRelevantNews(a: NewsArticle, b: NewsArticle): number {
-  const tierDifference = immigrationRelevanceTier(b) - immigrationRelevanceTier(a);
-  if (tierDifference !== 0) return tierDifference;
-  return articleTimestamp(b) - articleTimestamp(a);
-}
-
 function normaliseGovUkResult(item: GovUkSearchResult): NewsArticle | null {
   const title = String(item?.title || "").trim();
   const link = String(item?.link || "").trim();
   if (!title || !link) return null;
 
   const url = link.startsWith("http") ? link : `https://www.gov.uk${link}`;
-  const category = String(
-    item?.format || item?.content_store_document_type || "GOV.UK update",
-  )
-    .replace(/[-_]/g, " ")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  const publishedAt = item?.public_timestamp || null;
 
-  return {
+  const article: NewsArticle = {
     id: `govuk:${link}`,
     title,
     description: String(item?.description || "").trim() || null,
     content: null,
-    sourceName: "GOV.UK / Home Office",
-    category,
+    sourceName: "GOV.UK (Home Office / UKVI)",
+    category: "Innovator Founder",
     url,
-    publishedAt: item?.public_timestamp || null,
+    publishedAt,
     aiSummary: null,
   };
+
+  return isStrictInnovatorFounderNews(article) ? article : null;
 }
 
-async function fetchGovUkNews(limit = 30): Promise<NewsArticle[]> {
-  if (govUkCache.expiresAt > Date.now() && govUkCache.items.length) {
+async function fetchGovUkNews(limit = 20): Promise<NewsArticle[]> {
+  if (govUkCache.expiresAt > Date.now()) {
     return govUkCache.items.slice(0, limit);
   }
 
+  // Queries stay route-specific. Search ranking is never trusted on its own:
+  // every returned result must also pass the strict headline + GOV.UK + date gate.
   const queries = [
-    "innovator founder visa",
-    "innovator founder endorsement",
-    "immigration rules business visa",
-    "UK visa immigration rules",
+    "Innovator Founder",
+    "Innovator Founder visa",
+    "Innovator Founder endorsing bodies",
+    "Appendix Innovator Founder",
   ];
 
   try {
@@ -138,13 +61,12 @@ async function fetchGovUkNews(limit = 30): Promise<NewsArticle[]> {
       queries.map(async (query) => {
         const params = new URLSearchParams({
           q: query,
-          count: "20",
+          count: "30",
           order: "-public_timestamp",
         });
 
-        // GOV.UK supports repeated organisation filters as an OR group. Restricting
-        // results to these publishers prevents court cases, animal movement notices,
-        // pollution guidance and other unrelated GOV.UK matches entering the ticker.
+        // Restrict publisher discovery to the two authoritative government owners
+        // of this visa route. Relevance is then enforced again by headline.
         params.append("filter_organisations", "home-office");
         params.append("filter_organisations", "uk-visas-and-immigration");
 
@@ -155,6 +77,7 @@ async function fetchGovUkNews(limit = 30): Promise<NewsArticle[]> {
         if (!response.ok) {
           throw new Error(`GOV.UK Search API returned ${response.status}`);
         }
+
         const payload = (await response.json()) as { results?: GovUkSearchResult[] };
         return Array.isArray(payload?.results) ? payload.results : [];
       }),
@@ -163,65 +86,53 @@ async function fetchGovUkNews(limit = 30): Promise<NewsArticle[]> {
     const deduped = new Map<string, NewsArticle>();
     for (const raw of resultSets.flat()) {
       const article = normaliseGovUkResult(raw);
-      if (!article || !isRelevantImmigrationNews(article)) continue;
+      if (!article) continue;
       if (!deduped.has(article.url)) deduped.set(article.url, article);
     }
 
     const items = [...deduped.values()]
-      .sort(compareRelevantNews)
-      .slice(0, 50);
+      .filter(isStrictInnovatorFounderNews)
+      .sort(compareStrictInnovatorFounderNews)
+      .slice(0, 30);
 
     govUkCache = {
-      expiresAt: Date.now() + 15 * 60 * 1000,
+      expiresAt: Date.now() + 10 * 60 * 1000,
       items,
     };
 
     return items.slice(0, limit);
   } catch (error) {
-    console.error("GOV.UK immigration news fallback failed:", error);
-    return govUkCache.items.filter(isRelevantImmigrationNews).slice(0, limit);
+    console.error("Strict GOV.UK Innovator Founder news fetch failed:", error);
+
+    // Accuracy takes precedence over filling the ticker. Only a previously
+    // validated official cache may be reused; otherwise the feed stays empty.
+    return govUkCache.items
+      .filter(isStrictInnovatorFounderNews)
+      .sort(compareStrictInnovatorFounderNews)
+      .slice(0, limit);
   }
 }
 
 /**
- * Returns only current immigration-relevant stored news plus official Home Office /
- * UKVI GOV.UK results. Innovator Founder-specific items are ranked ahead of broader
- * immigration updates, and unrelated government content is never used to fill space.
+ * Returns only current, directly named Innovator Founder updates discovered from
+ * GOV.UK and restricted to Home Office / UKVI publishers. We deliberately do not
+ * mix persisted, AI-summarised, general immigration or sponsor-list content into
+ * the homepage feed. If no strict item is available, the feed is empty.
  */
-export const getLatestNews = async (limit = 50) => {
-  const [persistedResult, govUkResult] = await Promise.allSettled([
-    storage.getLatestNews(Math.max(limit, 100)),
-    fetchGovUkNews(Math.min(Math.max(limit, 30), 50)),
-  ]);
-
-  const persisted = persistedResult.status === "fulfilled"
-    ? (persistedResult.value as NewsArticle[]).filter(isRelevantImmigrationNews)
-    : [];
-  const govUk = govUkResult.status === "fulfilled"
-    ? govUkResult.value.filter(isRelevantImmigrationNews)
-    : [];
-  const deduped = new Map<string, NewsArticle>();
-
-  for (const article of [...persisted, ...govUk]) {
-    const key = String(article?.url || article?.id || article?.title || "").trim();
-    if (key && !deduped.has(key)) deduped.set(key, article);
-  }
-
-  return [...deduped.values()]
-    .sort(compareRelevantNews)
-    .slice(0, limit);
+export const getLatestNews = async (limit = 30) => {
+  const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.min(30, Math.trunc(limit))) : 30;
+  return fetchGovUkNews(safeLimit);
 };
 
-export const getOfficialNews = async (limit = 50) => {
-  const news = await getLatestNews(limit);
-  return news.filter(isOfficialGovernmentSource);
+export const getOfficialNews = async (limit = 30) => {
+  return getLatestNews(limit);
 };
 
 /**
- * Historical name retained for compatibility. This does not fabricate breaking
- * news; it returns recent current official-source immigration items.
+ * Historical name retained for compatibility. This never fabricates breaking
+ * news; it returns the same strict official Innovator Founder feed.
  */
 export const generateBreakingNews = async (limit = 10) => {
-  const news = await getOfficialNews(Math.max(limit, 20));
+  const news = await getLatestNews(Math.max(limit, 10));
   return news.slice(0, limit);
 };
