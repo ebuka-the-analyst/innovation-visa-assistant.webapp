@@ -14,6 +14,7 @@ const header = read("client/src/components/Header.tsx");
 const app = read("client/src/App.tsx");
 const routes = read("server/routes.ts");
 const newsService = read("server/newsService.ts");
+const newsRelevance = read("server/newsRelevance.ts");
 const newsTicker = read("client/src/components/NewsTicker.tsx");
 const regulatory = read("client/src/components/RegulatoryCopilot.tsx");
 const regulatoryPage = read("client/src/pages/regulatory-copilot.tsx");
@@ -50,21 +51,29 @@ for (const url of [...new Set(journeyUrls)]) {
 assert(routes.includes('import { getLatestNews } from "./newsService";'), "Live news service must be wired into routes");
 assert(!routes.includes("const news = await getLatestNews();"), "Legacy shadow /api/news handler must be removed");
 assert(routes.includes("// NEWS FEED SYSTEM - Live UK Immigration News"), "Live news route marker is missing");
-assert(routes.includes("news = await getLatestNews(parseInt(limit as string));"), "Live /api/news must use the filtered fallback-enabled news service");
+assert(routes.includes("news = await getLatestNews(parseInt(limit as string));"), "Live /api/news must use the filtered news service");
 assert(routes.includes('app.post("/api/news/fetch", requireAdmin'), "Admin news refresh route must remain available");
 
 assert(!newsService.includes("official-1"), "News service must not contain a hardcoded regulatory catalogue");
 assert(!newsService.includes("2025-11-25"), "News service must not contain stale embedded policy dates");
-assert(newsService.includes("storage.getLatestNews"), "News service must continue reading persisted news");
-assert(newsService.includes("https://www.gov.uk/api/search.json"), "News service must have a live GOV.UK fallback");
-assert(newsService.includes('params.append("filter_organisations", "home-office")'), "GOV.UK fallback must be restricted to Home Office content");
-assert(newsService.includes('params.append("filter_organisations", "uk-visas-and-immigration")'), "GOV.UK fallback must include UKVI content");
-assert(newsService.includes("isRelevantImmigrationNews"), "News service must reject unrelated government content");
-assert(newsService.includes("immigrationRelevanceTier"), "News service must rank Innovator Founder updates ahead of broader immigration news");
-assert(newsService.includes("MAX_NEWS_AGE_MS"), "News service must stop very old pages dominating the ticker");
-assert(newsService.includes("Promise.allSettled"), "News service must tolerate either stored-feed or GOV.UK failures");
+assert(!newsService.includes("storage.getLatestNews"), "Homepage news must not mix persisted or AI-summarised items into the strict official feed");
+assert(newsService.includes("https://www.gov.uk/api/search.json"), "News service must use the live GOV.UK Search API");
+assert(newsService.includes('params.append("filter_organisations", "home-office")'), "GOV.UK discovery must be restricted to Home Office content");
+assert(newsService.includes('params.append("filter_organisations", "uk-visas-and-immigration")'), "GOV.UK discovery must include UKVI content");
+assert(newsService.includes('"Innovator Founder"'), "News service must use route-specific Innovator Founder discovery");
+assert(newsService.includes("isStrictInnovatorFounderNews"), "News service must enforce strict Innovator Founder relevance");
+assert(!newsService.includes("immigrationRelevanceTier"), "Broad immigration relevance tiers must not return to the homepage feed");
+assert(!newsService.includes('"immigration rules business visa"'), "Broad business-visa filler query must remain removed");
+assert(!newsService.includes('"UK visa immigration rules"'), "Broad UK-visa filler query must remain removed");
+assert(newsRelevance.includes("titleDirectlyReferencesInnovatorFounder"), "Strict news policy must require Innovator Founder in the headline");
+assert(newsRelevance.includes("isOfficialGovUkUrl"), "Strict news policy must require a GOV.UK URL");
+assert(newsRelevance.includes("STRICT_NEWS_MAX_AGE_MS"), "Strict news policy must enforce a freshness window");
+assert(newsRelevance.includes("if (!timestamp) return false"), "Strict news policy must reject undated items");
 assert(!newsTicker.includes("INITIAL_NEWS_ITEMS"), "News ticker must not ship fixed regulatory headlines");
-assert(newsTicker.includes('fetch("/api/news?limit=30")'), "News ticker must use the live news endpoint");
+assert(newsTicker.includes('fetch("/api/news?limit=20")'), "News ticker must use the strict live news endpoint");
+assert(newsTicker.includes("isStrictTickerArticle"), "News ticker must independently fail closed on irrelevant API items");
+assert(newsTicker.includes("STRICT_TICKER_MAX_AGE_MS"), "News ticker must mirror the server freshness gate");
+assert(newsTicker.includes("No new official Innovator Founder updates are available right now."), "Ticker must prefer an empty official state over unrelated filler");
 assert(newsTicker.includes("setNewsItems([])"), "News ticker must fail closed instead of keeping stale fallback claims");
 
 for (const forbidden of [
@@ -133,7 +142,7 @@ console.log(JSON.stringify({
   sidebarColor: "blue",
   disclaimerColor: "red",
   newsArrowsColor: "blue",
-  newsScope: "Innovator Founder and UK immigration only",
+  newsScope: "Official GOV.UK Innovator Founder headlines only",
   sidebarDestinationsChecked: uniqueUrls.length,
   journeyDestinationsChecked: [...new Set(journeyUrls)].length,
   liveDataToolsChecked: [
