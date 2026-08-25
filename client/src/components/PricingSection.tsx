@@ -13,14 +13,31 @@ const PLAN_PAGE_COPY: Record<PlanId, string> = {
   ultimate: "80+ page plan",
 };
 
+const PLAN_DESCRIPTION_COPY: Record<PlanId, string> = {
+  free: "Explore selected preparation tools",
+  basic: "Core business-plan preparation tools",
+  premium: "Expanded planning and analysis tools",
+  enterprise: "Broader preparation tools for complex ventures",
+  ultimate: "Extended preparation and review tools",
+};
+
+const PLAN_FEATURE_COPY: Record<PlanId, string[]> = {
+  free: ["Selected preparation tools", "Business-plan preview", "Account workspace"],
+  basic: ["Core business-plan generation", "PDF export", "Standard business analysis"],
+  premium: ["Expanded innovation analysis", "Viability and financial analysis", "Scalability planning"],
+  enterprise: ["Extended innovation analysis", "Comprehensive viability review", "Multi-market scalability planning"],
+  ultimate: ["Extended preparation workflows", "Broader analysis tools", "Additional review features"],
+};
+
 export default function PricingSection() {
   const { plans, toolCounts, formatPrice } = useCommercialCatalog();
   const tiers = plans
     .filter((plan) => plan.pricePence > 0)
     .slice(0, 3)
     .map((plan) => ({
-      ...plan,
+      id: plan.id,
       name: plan.displayName.replace(/\s+Plan$/i, ""),
+      description: PLAN_DESCRIPTION_COPY[plan.id],
       price: formatPrice(plan.pricePence),
       features: [
         ...(TIER_CREDITS[plan.id] > 0
@@ -28,10 +45,10 @@ export default function PricingSection() {
           : []),
         PLAN_PAGE_COPY[plan.id],
         `Access to ${toolCounts[plan.id]} tools`,
-        ...plan.features,
+        ...PLAN_FEATURE_COPY[plan.id],
       ].slice(0, 6).map((name) => ({ name, included: true })),
       cta: plan.ctaLabel,
-      popular: plan.id === "premium",
+      featured: plan.id === "premium",
     }));
 
   return (
@@ -48,15 +65,15 @@ export default function PricingSection() {
           {tiers.map((tier) => (
             <Card
               key={tier.id}
-              className={`relative p-8 transition-all duration-300 hover:-translate-y-2 ${tier.popular ? "scale-105 shadow-2xl border-primary bg-gradient-to-br from-card to-primary/5" : "hover:shadow-xl"}`}
-              style={{ transform: tier.popular ? "translateY(-12px)" : undefined }}
+              className={`relative p-8 transition-all duration-300 hover:-translate-y-2 ${tier.featured ? "scale-105 shadow-2xl border-primary bg-gradient-to-br from-card to-primary/5" : "hover:shadow-xl"}`}
+              style={{ transform: tier.featured ? "translateY(-12px)" : undefined }}
               data-testid={`card-pricing-${tier.id}`}
             >
-              {tier.popular && (
+              {tier.featured && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                   <div className="bg-gradient-to-r from-primary to-chart-3 text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-current" />
-                    Most Popular
+                    <Star className="w-4 h-4" />
+                    Featured Plan
                   </div>
                 </div>
               )}
@@ -84,7 +101,7 @@ export default function PricingSection() {
               </ul>
 
               <Link href="/pricing">
-                <Button className="w-full" variant={tier.popular ? "default" : "outline"} size="lg" data-testid={`button-select-${tier.id}`}>
+                <Button className="w-full" variant={tier.featured ? "default" : "outline"} size="lg" data-testid={`button-select-${tier.id}`}>
                   {tier.cta}
                 </Button>
               </Link>
