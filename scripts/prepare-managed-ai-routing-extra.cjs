@@ -75,6 +75,12 @@ update('server/seoStrategyEngine.ts', (source) => {
   return next;
 });
 
+// Keep public-facing client copy aligned with the same trust policy in production builds.
+require('./prepare-public-client-copy.cjs');
+
+// Keep public server-rendered SEO claims aligned with the same trust policy in production builds.
+require('./prepare-server-public-seo.cjs');
+
 // Keep the Final Document Review waiting experience transparent in both dev and production builds.
 require('./prepare-document-review-wait-ux.cjs');
 

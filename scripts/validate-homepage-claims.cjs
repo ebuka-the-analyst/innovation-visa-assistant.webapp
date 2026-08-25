@@ -62,9 +62,7 @@ const forbidden = [
 ];
 
 for (const phrase of forbidden) {
-  if (combined.includes(phrase)) {
-    throw new Error(`Homepage claim regression: forbidden phrase remains: ${phrase}`);
-  }
+  if (combined.includes(phrase)) throw new Error(`Homepage claim regression: forbidden phrase remains: ${phrase}`);
 }
 
 const required = [
@@ -72,23 +70,19 @@ const required = [
   "not visa approval probabilities",
   "does not provide regulated immigration advice",
   "What the Innovator Founder Rules Assess",
-  "We do not publish invented customer stories",
+  "Transparent, Evidence-Led Preparation",
   "Not Legal Advice",
   "not a regulated immigration adviser or decision-maker",
-  "Fictional preparation examples",
+  "FICTIONAL EXAMPLE",
   "Always check GOV.UK for the full and latest rules before applying",
+  "Official GOV.UK source",
+  "EXAMPLE ONLY",
+  "Example preparation score",
   "Featured Plan",
 ];
 
 for (const phrase of required) {
-  if (!combined.includes(phrase)) {
-    throw new Error(`Homepage claim regression: required safety wording missing: ${phrase}`);
-  }
+  if (!combined.includes(phrase)) throw new Error(`Homepage claim regression: required safety wording missing: ${phrase}`);
 }
 
-console.log(JSON.stringify({
-  ok: true,
-  filesChecked: files.length,
-  forbiddenClaimsChecked: forbidden.length,
-  requiredSafetyMarkersChecked: required.length,
-}, null, 2));
+console.log(JSON.stringify({ ok: true, filesChecked: files.length, forbiddenClaimsChecked: forbidden.length, requiredSafetyMarkersChecked: required.length }, null, 2));
