@@ -26,6 +26,7 @@ jobs:
       - name: Prepare public trust hardening
         run: |
           node scripts/prepare-platform-trust-hardening.cjs
+          node scripts/prepare-public-client-copy.cjs
           node scripts/prepare-server-public-seo.cjs
 
       - name: Validate critical hardcodes
