@@ -54,7 +54,11 @@ const forbidden = [
   "minimum 10 jobs over 2 years required",
   "Trained on GOV.UK guidance",
   "Money-Back Guarantee",
+  "Most Popular",
+  "The UK's leading",
   '"aggregateRating"',
+  '"sameAs"',
+  '"foundingDate"',
 ];
 
 for (const phrase of forbidden) {
@@ -73,6 +77,7 @@ const required = [
   "not a regulated immigration adviser or decision-maker",
   "Fictional preparation examples",
   "Always check GOV.UK for the full and latest rules before applying",
+  "Featured Plan",
 ];
 
 for (const phrase of required) {
