@@ -38,26 +38,18 @@ export default function PricingSection() {
     <section className="py-20 md:py-32 bg-gradient-to-b from-background to-accent/5" id="pricing">
       <div className="responsive-container">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="font-serif text-xl font-bold mb-6">
-            Simple, Transparent Pricing
-          </h2>
+          <h2 className="font-serif text-xl font-bold mb-6">Simple, Transparent Pricing</h2>
           <p className="text-lg text-muted-foreground">
-            Choose the plan that fits your needs. All plans include our AI-powered generation engine.
+            Choose the plan that fits your preparation needs. Current prices, credits, tool access and purchase terms are shown before checkout.
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto" style={{ perspective: "1000px" }}>
-          {tiers.map((tier, index) => (
+          {tiers.map((tier) => (
             <Card
               key={tier.id}
-              className={`relative p-8 transition-all duration-300 hover:-translate-y-2 ${
-                tier.popular
-                  ? "scale-105 shadow-2xl border-primary bg-gradient-to-br from-card to-primary/5"
-                  : "hover:shadow-xl"
-              }`}
-              style={{
-                transform: tier.popular ? "translateY(-12px)" : undefined,
-              }}
+              className={`relative p-8 transition-all duration-300 hover:-translate-y-2 ${tier.popular ? "scale-105 shadow-2xl border-primary bg-gradient-to-br from-card to-primary/5" : "hover:shadow-xl"}`}
+              style={{ transform: tier.popular ? "translateY(-12px)" : undefined }}
               data-testid={`card-pricing-${tier.id}`}
             >
               {tier.popular && (
@@ -86,20 +78,13 @@ export default function PricingSection() {
                     ) : (
                       <X className="w-5 h-5 text-muted-foreground/40 flex-shrink-0 mt-0.5" />
                     )}
-                    <span className={feature.included ? "text-foreground" : "text-muted-foreground/60"}>
-                      {feature.name}
-                    </span>
+                    <span className={feature.included ? "text-foreground" : "text-muted-foreground/60"}>{feature.name}</span>
                   </li>
                 ))}
               </ul>
 
               <Link href="/pricing">
-                <Button
-                  className="w-full"
-                  variant={tier.popular ? "default" : "outline"}
-                  size="lg"
-                  data-testid={`button-select-${tier.id}`}
-                >
+                <Button className="w-full" variant={tier.popular ? "default" : "outline"} size="lg" data-testid={`button-select-${tier.id}`}>
                   {tier.cta}
                 </Button>
               </Link>
@@ -107,26 +92,19 @@ export default function PricingSection() {
           ))}
         </div>
 
-        {/* Trust signals */}
         <div className="mt-16 text-center">
           <div className="flex flex-wrap justify-center gap-8 items-center text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-chart-3/20 flex items-center justify-center">
-                <Check className="w-5 h-5 text-chart-3" />
-              </div>
-              <span>Secure Payment via Stripe</span>
+              <div className="w-8 h-8 rounded-full bg-chart-3/20 flex items-center justify-center"><Check className="w-5 h-5 text-chart-3" /></div>
+              <span>Payments processed through Stripe</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-chart-3/20 flex items-center justify-center">
-                <Check className="w-5 h-5 text-chart-3" />
-              </div>
-              <span>Money-Back Guarantee</span>
+              <div className="w-8 h-8 rounded-full bg-chart-3/20 flex items-center justify-center"><Check className="w-5 h-5 text-chart-3" /></div>
+              <span>Purchase terms available before checkout</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-chart-3/20 flex items-center justify-center">
-                <Check className="w-5 h-5 text-chart-3" />
-              </div>
-              <span>SSL Encrypted</span>
+              <div className="w-8 h-8 rounded-full bg-chart-3/20 flex items-center justify-center"><Check className="w-5 h-5 text-chart-3" /></div>
+              <span>Secure HTTPS connection</span>
             </div>
           </div>
         </div>
