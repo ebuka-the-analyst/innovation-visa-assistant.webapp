@@ -1,5 +1,7 @@
 import { Card } from "@/components/ui/card";
-import { Lightbulb, BriefcaseBusiness, TrendingUp, BadgeCheck } from "lucide-react";
+import { BadgeCheck, BriefcaseBusiness, ExternalLink, Lightbulb, TrendingUp } from "lucide-react";
+
+const OFFICIAL_RULES_URL = "https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-innovator-founder";
 
 const routeCriteria = [
   {
@@ -7,28 +9,24 @@ const routeCriteria = [
     value: "Business Plan",
     label: "Founder Role",
     subtext: "New-business applicants need a business plan and must have generated or significantly contributed to its ideas, with an active day-to-day role in carrying it out.",
-    source: "Immigration Rules Appendix Innovator Founder"
   },
   {
     icon: Lightbulb,
     value: "Innovation",
     label: "Original Proposition",
     subtext: "The business plan should be genuine and original, meet new or existing market needs and/or create a competitive advantage.",
-    source: "Immigration Rules Appendix Innovator Founder"
   },
   {
     icon: BadgeCheck,
     value: "Viability",
     label: "Realistic & Achievable",
     subtext: "The venture should be realistic and achievable using the founder's available resources, skills, knowledge, experience and market awareness.",
-    source: "Immigration Rules Appendix Innovator Founder"
   },
   {
     icon: TrendingUp,
     value: "Scalability",
     label: "Structured Growth",
     subtext: "The rules look for structured planning and potential for job creation and growth into national and international markets.",
-    source: "Immigration Rules Appendix Innovator Founder"
   }
 ];
 
@@ -58,7 +56,16 @@ export default function StatsSection() {
                   <p className="text-sm font-semibold text-foreground">{stat.label}</p>
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">{stat.subtext}</p>
-                <p className="text-xs font-medium text-primary">{stat.source}</p>
+                <a
+                  href={OFFICIAL_RULES_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary underline underline-offset-2 hover:opacity-80"
+                  aria-label={`Open official GOV.UK Innovator Founder rules for ${stat.value}`}
+                >
+                  Official GOV.UK source
+                  <ExternalLink className="h-3 w-3" />
+                </a>
               </Card>
             );
           })}
