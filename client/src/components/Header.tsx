@@ -75,18 +75,23 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl">
       {!disclaimerDismissed && (
-        <div className="w-full text-sm py-2 px-3 flex items-center justify-between md:justify-center gap-2 md:gap-4 border-b border-red-700/40" style={{ backgroundColor: '#DC2626' }}>
-          <span className="line-clamp-2 md:line-clamp-1 text-white">
+        <div
+          className="relative w-full border-b border-red-700/40 px-3 py-2.5 sm:px-4"
+          style={{ backgroundColor: '#DC2626' }}
+          role="note"
+          aria-label="Important platform information"
+        >
+          <div className="mx-auto max-w-7xl px-7 sm:px-10 text-center text-xs sm:text-sm leading-5 text-white whitespace-normal break-words">
             <strong>Important:</strong> This is an AI-assisted preparation platform, not a regulated immigration adviser or decision-maker. Supported tools may reference official GOV.UK information, but requirements can change and should be checked before use.{' '}
-            <a href="/ai-transparency" className="underline hover:opacity-80">Learn more</a>
-          </span>
+            <a href="/ai-transparency" className="underline underline-offset-2 hover:opacity-80">Learn more</a>
+          </div>
           <button
             onClick={() => setDisclaimerDismissed(true)}
-            className="text-white hover:opacity-75 transition-opacity flex-shrink-0"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-white hover:bg-white/10 hover:opacity-90 transition-colors"
             data-testid="button-dismiss-disclaimer"
             aria-label="Dismiss information notice"
           >
-            <X className="h-3 w-3" />
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}
