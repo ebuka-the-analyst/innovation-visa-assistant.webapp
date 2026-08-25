@@ -15,7 +15,6 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [location, setLocation] = useLocation();
 
-  // Check if user is logged in
   const { data: user, isLoading: authLoading } = useQuery<{ id: string; email: string; isAdmin?: boolean }>({
     queryKey: ['/api/auth/user'],
     retry: false,
@@ -23,16 +22,13 @@ export default function Header() {
 
   const isAuthenticated = !!user;
 
-  // Logout — clear UI instantly, fire server call in background
   const [loggingOut, setLoggingOut] = useState(false);
   const handleLogout = () => {
     if (loggingOut) return;
     setLoggingOut(true);
-    // Wipe auth state immediately so the UI responds at once
     queryClient.setQueryData(['/api/auth/user'], null);
     queryClient.clear();
     setLocation('/');
-    // Destroy server session in background (non-blocking)
     fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
   };
   const logoutMutation = { mutate: handleLogout, isPending: loggingOut };
@@ -40,20 +36,18 @@ export default function Header() {
   useEffect(() => {
     let lastScrollY = window.scrollY;
     let ticking = false;
-    
+
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
-          
-          // Hysteresis: different thresholds for scrolling down vs up
-          // This prevents rapid toggling when scrolling slowly around the threshold
+
           if (!isScrolled && currentScrollY > 50) {
             setIsScrolled(true);
           } else if (isScrolled && currentScrollY < 20) {
             setIsScrolled(false);
           }
-          
+
           lastScrollY = currentScrollY;
           ticking = false;
         });
@@ -67,40 +61,37 @@ export default function Header() {
 
   const handleNavigation = (sectionId: string) => {
     setMobileMenuOpen(false);
-    
-    // If on home page, scroll to section
+
     if (location === "/") {
       const element = document.getElementById(sectionId);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
     } else {
-      // On other pages, navigate to home with anchor
       setLocation(`/#${sectionId}`);
     }
   };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-xl">
-      {/* Disclaimer Bar */}
       {!disclaimerDismissed && (
         <div className="w-full text-sm py-2 px-3 flex items-center justify-between md:justify-center gap-2 md:gap-4 border-b border-red-700/40" style={{ backgroundColor: '#DC2626' }}>
           <span className="line-clamp-2 md:line-clamp-1 text-white">
-            <strong>UK Innovator Founder Visa Assistant Disclaimer:</strong> Trained on GOV.UK guidance. This doesn't substitute legal advice. Always verify with official sources.{' '}
+            <strong>Important:</strong> This is an AI-assisted preparation platform, not a regulated immigration adviser or decision-maker. Supported tools may reference official GOV.UK information, but requirements can change and should be checked before use.{' '}
             <a href="/ai-transparency" className="underline hover:opacity-80">Learn more</a>
           </span>
           <button
             onClick={() => setDisclaimerDismissed(true)}
             className="text-white hover:opacity-75 transition-opacity flex-shrink-0"
             data-testid="button-dismiss-disclaimer"
+            aria-label="Dismiss information notice"
           >
             <X className="h-3 w-3" />
           </button>
         </div>
       )}
-      
+
       <nav className={`container mx-auto px-3 md:px-6 flex items-center justify-between border-b border-border/40 transition-[height] duration-200 ease-out will-change-[height] ${isScrolled ? 'h-14 md:h-16' : 'h-20 md:h-24'}`}>
-        {/* Logo */}
         <Link href="/">
           <div className="isolate z-[9999] mix-blend-normal bg-transparent cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-logo">
             <div className="logo-container overflow-hidden flex items-center">
@@ -110,7 +101,6 @@ export default function Header() {
           </div>
         </Link>
 
-        {/* Desktop Navigation */}
         <div className={`hidden md:flex items-center transition-all duration-300 ${isScrolled ? 'gap-4' : 'gap-8'}`}>
           <Link href="/features" className={`font-medium hover:text-primary transition-colors ${isScrolled ? 'text-xs' : 'text-sm'}`} data-testid="link-all-features">
             All Features
@@ -121,23 +111,14 @@ export default function Header() {
           <Link href="/blog" className={`font-medium hover:text-primary transition-colors ${isScrolled ? 'text-xs' : 'text-sm'}`} data-testid="link-blog">
             Blog
           </Link>
-          <button
-            onClick={() => handleNavigation('pricing')}
-            className={`font-medium hover:text-primary transition-colors ${isScrolled ? 'text-xs' : 'text-sm'}`}
-            data-testid="button-nav-pricing"
-          >
+          <button onClick={() => handleNavigation('pricing')} className={`font-medium hover:text-primary transition-colors ${isScrolled ? 'text-xs' : 'text-sm'}`} data-testid="button-nav-pricing">
             Pricing
           </button>
-          <button
-            onClick={() => handleNavigation('faq')}
-            className={`font-medium hover:text-primary transition-colors ${isScrolled ? 'text-xs' : 'text-sm'}`}
-            data-testid="button-nav-faq"
-          >
+          <button onClick={() => handleNavigation('faq')} className={`font-medium hover:text-primary transition-colors ${isScrolled ? 'text-xs' : 'text-sm'}`} data-testid="button-nav-faq">
             FAQ
           </button>
         </div>
 
-        {/* CTA Buttons & Theme Toggle */}
         <div className={`hidden md:flex items-center transition-all duration-300 ${isScrolled ? 'gap-1' : 'gap-2'}`}>
           <LanguageSelector />
           <ThemeToggle />
@@ -149,9 +130,9 @@ export default function Header() {
                   Dashboard
                 </Button>
               </Link>
-              <Button 
-                variant="outline" 
-                size={isScrolled ? "sm" : "default"} 
+              <Button
+                variant="outline"
+                size={isScrolled ? "sm" : "default"}
                 onClick={() => logoutMutation.mutate()}
                 disabled={logoutMutation.isPending}
                 data-testid="button-header-logout"
@@ -163,57 +144,27 @@ export default function Header() {
           ) : (
             <>
               <Link href="/login">
-                <Button variant="ghost" size={isScrolled ? "sm" : "default"} data-testid="button-header-signin">
-                  Sign In
-                </Button>
+                <Button variant="ghost" size={isScrolled ? "sm" : "default"} data-testid="button-header-signin">Sign In</Button>
               </Link>
               <Link href="/pricing">
-                <Button size={isScrolled ? "sm" : "default"} data-testid="button-header-cta">
-                  Get Started
-                </Button>
+                <Button size={isScrolled ? "sm" : "default"} data-testid="button-header-cta">Get Started</Button>
               </Link>
             </>
           )}
         </div>
 
-        {/* Mobile Menu Toggle */}
-        <button
-          className="md:hidden p-2"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          data-testid="button-mobile-menu"
-        >
+        <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} data-testid="button-mobile-menu" aria-label="Toggle navigation menu">
           {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </nav>
 
-      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl">
           <div className="container mx-auto px-4 py-6 flex flex-col gap-4">
-            <button
-              onClick={() => handleNavigation('features')}
-              className="text-left py-2 hover:text-primary transition-colors"
-              data-testid="button-mobile-nav-features"
-            >
-              Features
-            </button>
-            <Link href="/blog" className="block py-2 hover:text-primary transition-colors" data-testid="link-mobile-blog">
-              Blog
-            </Link>
-            <button
-              onClick={() => handleNavigation('pricing')}
-              className="text-left py-2 hover:text-primary transition-colors"
-              data-testid="button-mobile-nav-pricing"
-            >
-              Pricing
-            </button>
-            <button
-              onClick={() => handleNavigation('faq')}
-              className="text-left py-2 hover:text-primary transition-colors"
-              data-testid="button-mobile-nav-faq"
-            >
-              FAQ
-            </button>
+            <button onClick={() => handleNavigation('features')} className="text-left py-2 hover:text-primary transition-colors" data-testid="button-mobile-nav-features">Features</button>
+            <Link href="/blog" className="block py-2 hover:text-primary transition-colors" data-testid="link-mobile-blog">Blog</Link>
+            <button onClick={() => handleNavigation('pricing')} className="text-left py-2 hover:text-primary transition-colors" data-testid="button-mobile-nav-pricing">Pricing</button>
+            <button onClick={() => handleNavigation('faq')} className="text-left py-2 hover:text-primary transition-colors" data-testid="button-mobile-nav-faq">FAQ</button>
             <div className="flex flex-col gap-2 pt-4 border-t border-border">
               <div className="flex items-center gap-2">
                 <ThemeToggle />
@@ -227,13 +178,7 @@ export default function Header() {
                       Dashboard
                     </Button>
                   </Link>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start"
-                    onClick={() => logoutMutation.mutate()}
-                    disabled={logoutMutation.isPending}
-                    data-testid="button-mobile-logout"
-                  >
+                  <Button variant="outline" className="w-full justify-start" onClick={() => logoutMutation.mutate()} disabled={logoutMutation.isPending} data-testid="button-mobile-logout">
                     <LogOut className="h-4 w-4 mr-2" />
                     Log Out
                   </Button>
@@ -241,14 +186,10 @@ export default function Header() {
               ) : (
                 <>
                   <Link href="/login" className="w-full">
-                    <Button variant="ghost" className="w-full justify-start" data-testid="button-mobile-signin">
-                      Sign In
-                    </Button>
+                    <Button variant="ghost" className="w-full justify-start" data-testid="button-mobile-signin">Sign In</Button>
                   </Link>
                   <Link href="/pricing" className="w-full">
-                    <Button className="w-full" data-testid="button-mobile-cta">
-                      Get Started
-                    </Button>
+                    <Button className="w-full" data-testid="button-mobile-cta">Get Started</Button>
                   </Link>
                 </>
               )}
