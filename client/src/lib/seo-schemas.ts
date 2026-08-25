@@ -12,7 +12,7 @@ export const organizationSchema = {
     "width": 1200,
     "height": 630
   },
-  "description": "AI-powered platform providing professional-level tools for UK Innovator Founder Visa applications. Covers compliance, business planning, financial modelling, and endorsement preparation.",
+  "description": "Software platform providing AI-assisted business planning, preparation tools and selected official GOV.UK updates for UK Innovator Founder applicants. The platform does not provide regulated immigration advice or guarantee outcomes.",
   "foundingDate": "2025",
   "address": {
     "@type": "PostalAddress",
@@ -36,14 +36,7 @@ export const softwareApplicationSchema = {
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Web Browser",
   "url": BASE,
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.9",
-    "ratingCount": "157",
-    "bestRating": "5",
-    "worstRating": "1"
-  },
-  "description": "Comprehensive UK Innovator Founder Visa application toolkit for compliance, business planning, and endorsement success."
+  "description": "AI-assisted business-planning and application-preparation toolkit for the UK Innovator Founder route. It is not a regulated immigration adviser or visa decision-maker."
 };
 
 export const websiteSchema = {
@@ -51,7 +44,7 @@ export const websiteSchema = {
   "@type": "WebSite",
   "name": "UK Innovator Founder Visa Assistant",
   "url": BASE,
-  "description": "The UK's leading AI-powered platform for Innovator Founder Visa applications.",
+  "description": "AI-assisted planning, evidence organisation and official update tracking for UK Innovator Founder application preparation.",
   "potentialAction": {
     "@type": "SearchAction",
     "target": {
@@ -71,47 +64,47 @@ export const visaFAQSchema = {
       "name": "What is the UK Innovator Founder Visa?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The UK Innovator Founder Visa is for entrepreneurs who want to establish an innovative, viable, and scalable business in the UK. It requires endorsement from one of four Home Office-approved endorsing bodies: Envestors, Innovator International, UK Endorsing Services (UKES), or the Global Entrepreneurs Programme (invitation only)."
+        "text": "The Innovator Founder route is for people seeking to establish a UK business based on an innovative, viable and scalable business idea. An application must be supported by an authorised endorsing body and must meet the current Immigration Rules."
       }
     },
     {
       "@type": "Question",
-      "name": "How much does the UK Innovator Founder Visa cost?",
+      "name": "Is there a fixed minimum business investment requirement for a new Innovator Founder application?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The visa application fee is £1,191 whether applying from inside or outside the UK. You also need to show £1,270 in personal savings held for at least 28 consecutive days. There is no minimum business investment requirement for this visa route."
+        "text": "The current GOV.UK eligibility guidance does not state a universal fixed minimum business investment amount for every new Innovator Founder applicant. New-business applicants need to demonstrate sufficient funding for their business and where it comes from. Always check the current rules and guidance before applying."
       }
     },
     {
       "@type": "Question",
-      "name": "What are the Innovation, Viability, and Scalability criteria?",
+      "name": "What are the Innovation, Viability and Scalability criteria?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Innovation: Your business must be genuinely new or significantly different from existing UK market solutions. Viability: You must demonstrate the skills, knowledge, and experience to successfully run the business. Scalability: Your business must have clear potential for growth and job creation in the UK."
+        "text": "For a new business, the Immigration Rules require a genuine and original business plan that meets market needs and/or creates a competitive advantage, is realistic and achievable based on available resources and founder capability, and shows structured planning with potential for job creation and national and international growth."
       }
     },
     {
       "@type": "Question",
-      "name": "How long does the UK Innovator Founder Visa process take?",
+      "name": "How long does an Innovator Founder application take?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Standard processing typically takes 3–8 weeks from submission. A priority service costing £500 is available where processing is faster. Endorsement from an approved body typically takes 4–12 weeks depending on the body chosen."
+        "text": "Processing and endorsement timelines can change and depend on individual circumstances and the endorsing body. Check the current GOV.UK processing-time guidance and the selected endorsing body's published information before planning around a deadline."
       }
     },
     {
       "@type": "Question",
-      "name": "Which bodies endorse Innovator Founder Visa applications?",
+      "name": "Which bodies can endorse Innovator Founder applications?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "There are four Home Office-approved endorsing bodies as of October 2024: Envestors Limited (envestors.co.uk), Innovator International Limited (innovatorinternational.com), UK Endorsing Services / UKES (ukesapp.co.uk), and the Global Entrepreneurs Programme (invitation only — cannot be applied to directly)."
+        "text": "Only organisations on the current GOV.UK list of authorised Innovator Founder endorsing bodies can issue an endorsement for the route. The list can change, so applicants should verify the current GOV.UK publication before relying on any third-party list."
       }
     },
     {
       "@type": "Question",
-      "name": "How long is the Innovator Founder Visa valid?",
+      "name": "Can the Innovator Founder route lead to settlement?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The visa is initially granted for 3 years. It can be extended for a further 3 years if you continue to meet the requirements. After 3 years on the visa, you may be eligible to apply for Indefinite Leave to Remain (ILR/settlement), which costs £2,885."
+        "text": "The Innovator Founder route can lead to settlement. Current GOV.UK guidance states that a person may be eligible after the qualifying period if they also meet the applicable residence, endorsement and business-achievement requirements. Eligibility must be assessed against the rules in force at the time of application."
       }
     }
   ]
@@ -169,13 +162,7 @@ export const createBlogPostingSchema = (
   "about": {
     "@type": "Thing",
     "name": "UK Innovator Founder Visa"
-  },
-  "reviewedBy": [
-    { "@type": "Organization", "name": "Gemini AI" },
-    { "@type": "Organization", "name": "OpenAI GPT-4o" },
-    { "@type": "Organization", "name": "Claude AI" },
-    { "@type": "Organization", "name": "Qwen AI" }
-  ]
+  }
 });
 
 export const createArticleSchema = (
@@ -250,7 +237,7 @@ export const createPricingSchema = (
   "@context": "https://schema.org",
   "@type": "Product",
   "name": `${tierName} — UK Innovator Founder Visa Assistant`,
-  "description": `${tierName} plan for UK Innovator Founder Visa application assistance`,
+  "description": `${tierName} plan for UK Innovator Founder application-preparation tools`,
   "image": `${BASE}/og-image.webp`,
   "brand": {
     "@type": "Brand",
@@ -261,42 +248,7 @@ export const createPricingSchema = (
     "price": (pricePence / 100).toFixed(2),
     "priceCurrency": currency,
     "availability": "https://schema.org/InStock",
-    "url": `${BASE}/pricing`,
-    "shippingDetails": {
-      "@type": "OfferShippingDetails",
-      "shippingRate": {
-        "@type": "MonetaryAmount",
-        "value": "0",
-        "currency": "GBP"
-      },
-      "shippingDestination": {
-        "@type": "DefinedRegion",
-        "addressCountry": "GB"
-      },
-      "deliveryTime": {
-        "@type": "ShippingDeliveryTime",
-        "handlingTime": {
-          "@type": "QuantitativeValue",
-          "minValue": "0",
-          "maxValue": "0",
-          "unitCode": "DAY"
-        },
-        "transitTime": {
-          "@type": "QuantitativeValue",
-          "minValue": "0",
-          "maxValue": "0",
-          "unitCode": "DAY"
-        }
-      }
-    },
-    "hasMerchantReturnPolicy": {
-      "@type": "MerchantReturnPolicy",
-      "applicableCountry": "GB",
-      "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-      "merchantReturnDays": 14,
-      "returnMethod": "https://schema.org/ReturnByMail",
-      "returnFees": "https://schema.org/FreeReturn"
-    }
+    "url": `${BASE}/pricing`
   },
   "additionalProperty": features.map(feature => ({
     "@type": "PropertyValue",
