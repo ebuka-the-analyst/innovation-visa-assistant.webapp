@@ -7,43 +7,43 @@ const features = [
   {
     id: "ai-intelligence",
     icon: Brain,
-    title: "AI-Powered Intelligence",
-    description: "Advanced Qwen AI technology generates tailored content specific to your business and industry",
+    title: "Managed AI Assistance",
+    description: "Managed AI infrastructure supports OpenAI and Anthropic models to help draft and review business-planning content.",
     color: "from-primary to-chart-1",
   },
   {
     id: "endorsing-ready",
     icon: Shield,
-    title: "Endorsing Body Ready",
-    description: "Formatted specifically for UK endorsing bodies like Envestors, UKES, and Innovator International",
+    title: "Endorsement-Criteria Structure",
+    description: "Organises preparation around published Innovator Founder requirements and publicly available endorsing-body information.",
     color: "from-chart-4 to-chart-2",
   },
   {
     id: "scalability-focus",
     icon: Rocket,
     title: "Scalability Focus",
-    description: "Demonstrates clear growth potential and job creation plans required for approval",
+    description: "Helps document structured growth planning, market expansion and potential job creation where relevant to your business.",
     color: "from-chart-3 to-chart-5",
   },
   {
     id: "fifteen-minute",
     icon: Clock,
-    title: "15-Minute Generation",
-    description: "Complete business plans generated in minutes, not weeks of manual work",
+    title: "AI-Assisted Drafting",
+    description: "Turns structured questionnaire responses into editable planning drafts. Generation time varies with plan depth and system load.",
     color: "from-chart-2 to-chart-3",
   },
   {
     id: "compliance",
     icon: FileCheck,
-    title: "Compliance Guaranteed",
-    description: "Covers all three criteria: Innovation, Viability, and Scalability",
+    title: "Compliance-Focused Checks",
+    description: "Flags potential gaps against configured Innovation, Viability and Scalability checks without guaranteeing legal or visa compliance.",
     color: "from-chart-5 to-chart-4",
   },
   {
     id: "financial",
     icon: TrendingUp,
     title: "Financial Projections",
-    description: "Detailed 3-year forecasts with realistic assumptions and market analysis",
+    description: "Builds scenario-based forecasts from your assumptions so you can review and refine the financial case for your venture.",
     color: "from-primary to-chart-3",
   },
 ];
@@ -62,11 +62,9 @@ export default function FeaturesSection() {
       <section className="py-20 md:py-32">
         <div className="responsive-container">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="font-serif text-xl font-bold mb-6">
-              Everything You Need to Succeed
-            </h2>
+            <h2 className="font-serif text-xl font-bold mb-6">Tools for Evidence-Led Preparation</h2>
             <p className="text-lg text-muted-foreground">
-              Comprehensive features designed specifically for UK Innovator Founder Visa applications
+              Practical tools designed to help founders organise, draft and review Innovator Founder application-preparation materials.
             </p>
           </div>
 
@@ -78,16 +76,11 @@ export default function FeaturesSection() {
                 onClick={() => handleOpenModal(feature.id)}
                 data-testid={`card-feature-${index}`}
               >
-                {/* Holographic gradient background */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
-                
                 <div className="relative">
-                  {/* Icon */}
                   <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} p-3 mb-6 group-hover:scale-110 transition-transform duration-300`}>
                     <feature.icon className="w-full h-full text-white" />
                   </div>
-
-                  {/* Content */}
                   <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
                   <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
                 </div>
@@ -97,12 +90,7 @@ export default function FeaturesSection() {
         </div>
       </section>
 
-      {/* Features Modal */}
-      <FeaturesModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)}
-        featureId={selectedFeatureId}
-      />
+      <FeaturesModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} featureId={selectedFeatureId} />
     </>
   );
 }
