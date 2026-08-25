@@ -2,7 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const root = process.cwd();
-const explicitFiles = [
+const requiredFiles = [
   "server/index.ts",
   "server/aiProviderGateway.ts",
   "server/expertBookingRoutes.ts",
@@ -22,11 +22,31 @@ const explicitFiles = [
   "client/src/lib/cookiePreferences.ts",
 ];
 
-for (const file of explicitFiles) {
+for (const file of requiredFiles) {
   if (!fs.existsSync(path.join(root, file))) throw new Error(`Public trust validator: required file missing: ${file}`);
 }
 
-const combined = explicitFiles.map((file) => `\n/* ${file} */\n${fs.readFileSync(path.join(root, file), "utf8")}`).join("\n");
+function walk(relativeDir) {
+  const dir = path.join(root, relativeDir);
+  const results = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const rel = path.join(relativeDir, entry.name).replace(/\\/g, "/");
+    if (entry.isDirectory()) {
+      if (rel.includes("/admin") || rel.includes("/__tests__")) continue;
+      results.push(...walk(rel));
+    } else if (/\.(?:ts|tsx)$/.test(entry.name)) {
+      results.push(rel);
+    }
+  }
+  return results;
+}
+
+const files = Array.from(new Set([
+  ...requiredFiles,
+  ...walk("client/src"),
+]));
+const combinedRaw = files.map((file) => `\n/* ${file} */\n${fs.readFileSync(path.join(root, file), "utf8")}`).join("\n");
+const combined = combinedRaw.replace(/\\'/g, "'");
 
 const forbidden = [
   "Trusted by 500+ Approved Applicants",
@@ -57,6 +77,8 @@ const forbidden = [
   "Ready-to-use legal document templates",
   "Expert guidance on endorsement, requirements (£1,191 fee, £1,270 savings)",
   "Every article is quad-AI verified against official GOV.UK sources for 100% accuracy",
+  "100+ professional-grade AI tools",
+  "personalised visa guidance",
 ];
 
 for (const phrase of forbidden) {
@@ -98,9 +120,4 @@ if (!initBlock.includes("hasAnalyticsConsent()")) {
   throw new Error("Public trust regression: Google Analytics initialization is not gated by explicit analytics consent");
 }
 
-console.log(JSON.stringify({
-  ok: true,
-  filesChecked: explicitFiles.length,
-  forbiddenClaimsChecked: forbidden.length,
-  requiredSafeguardsChecked: required.length,
-}, null, 2));
+console.log(JSON.stringify({ ok: true, filesChecked: files.length, forbiddenClaimsChecked: forbidden.length, requiredSafeguardsChecked: required.length }, null, 2));
