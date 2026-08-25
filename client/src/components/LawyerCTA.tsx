@@ -16,13 +16,13 @@ export default function LawyerCTA() {
                 </div>
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-2xl mb-3">Do You Need an Immigration Lawyer?</h3>
+                <h3 className="font-semibold text-2xl mb-3">Need Personalised Immigration Advice?</h3>
                 <p className="text-muted-foreground mb-6">
-                  Having the right legal guidance is crucial for the outcome of your application. If you don't yet have an immigration lawyer, we will connect you with a vetted and trusted professional from our invite-only network.
+                  Innovator Founder Visa Assistant does not provide regulated immigration advice. If you need advice about your individual circumstances, you can use our expert finder to look for participating immigration lawyers and advisers and check their professional status before instructing them.
                 </p>
-                <Link href="/settings">
+                <Link href="/tools/lawyer-finder">
                   <Button className="group gap-2" data-testid="button-connect-lawyer">
-                    Connect with Expert
+                    Find an Expert
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
