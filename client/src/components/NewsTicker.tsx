@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import NewsModal from "./NewsModal";
@@ -16,8 +16,7 @@ type LiveNewsArticle = {
   aiSummary?: string | null;
 };
 
-const STRICT_TICKER_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 730;
-const STRICT_TICKER_FUTURE_SKEW_MS = 1000 * 60 * 60 * 24;
+const TICKER_FUTURE_SKEW_MS = 1000 * 60 * 60 * 24;
 
 function formatDate(value?: string | null) {
   if (!value) return "Date unavailable";
@@ -34,7 +33,9 @@ function isStrictTickerArticle(article: LiveNewsArticle) {
   const timestamp = new Date(article.publishedAt).getTime();
   if (!Number.isFinite(timestamp)) return false;
   const now = Date.now();
-  if (timestamp < now - STRICT_TICKER_MAX_AGE_MS || timestamp > now + STRICT_TICKER_FUTURE_SKEW_MS) return false;
+  const currentYear = new Date(now).getUTCFullYear();
+  const yearStart = Date.UTC(currentYear, 0, 1, 0, 0, 0, 0);
+  if (timestamp < yearStart || timestamp > now + TICKER_FUTURE_SKEW_MS) return false;
 
   try {
     const hostname = new URL(String(article.url || "")).hostname.toLowerCase();
@@ -60,29 +61,22 @@ export default function NewsTicker() {
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [loadError, setLoadError] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const tickerRef = useRef<HTMLDivElement>(null);
   const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchNews = async () => {
-    setRefreshing(true);
     try {
       const response = await fetch("/api/news?limit=20");
       if (!response.ok) throw new Error(`News request failed (${response.status})`);
       const payload = await response.json();
       if (!Array.isArray(payload)) throw new Error("News feed returned an invalid response");
 
-      // Defence in depth: even if the API is accidentally broadened later, the
-      // homepage will only render current, directly named Innovator Founder GOV.UK items.
+      // Defence in depth: the homepage independently requires a current-year,
+      // directly named Innovator Founder update on an official GOV.UK URL.
       setNewsItems(payload.filter(isStrictTickerArticle).map(toNewsItem));
-      setLoadError(false);
     } catch (error) {
-      console.error("Failed to fetch news:", error);
-      setLoadError(true);
+      console.error("Failed to fetch current-year Innovator Founder updates:", error);
       setNewsItems([]);
-    } finally {
-      setRefreshing(false);
     }
   };
 
@@ -95,7 +89,7 @@ export default function NewsTicker() {
   useEffect(() => {
     if (!tickerRef.current || newsItems.length === 0) return;
     let currentScroll = tickerRef.current.scrollLeft;
-    const itemWidth = 320;
+    const itemWidth = 360;
     const totalWidth = Math.max(itemWidth, newsItems.length * itemWidth);
     scrollIntervalRef.current = setInterval(() => {
       currentScroll += 1;
@@ -111,34 +105,33 @@ export default function NewsTicker() {
     tickerRef.current?.scrollBy({ left: amount, behavior: "smooth" });
   };
 
+  // Do not render a large empty ticker bar. If GOV.UK is temporarily unavailable
+  // or there are no qualifying current-year updates, the homepage simply omits it.
+  if (!newsItems.length) return null;
+
   return (
     <>
       <div className="flex items-center gap-1 border-b bg-background px-2 py-2" data-testid="live-news-ticker">
         <div className="flex-shrink-0 rounded bg-[#005EB8] px-1">
-          <Button variant="ghost" size="icon" onClick={() => scrollBy(-320)} className="h-6 w-6 hover:bg-[#004B93]" disabled={!newsItems.length} data-testid="button-ticker-backward">
+          <Button variant="ghost" size="icon" onClick={() => scrollBy(-360)} className="h-6 w-6 hover:bg-[#004B93]" data-testid="button-ticker-backward" aria-label="Previous Innovator Founder update">
             <ChevronLeft className="h-3 w-3 text-white" />
           </Button>
         </div>
 
         <div className="flex-1 overflow-hidden" ref={tickerRef}>
-          {newsItems.length ? (
-            <div className="flex min-w-max items-center gap-4">
-              {newsItems.map((item) => (
-                <button key={item.id} onClick={() => { setSelectedArticle(item); setModalOpen(true); }} className="w-80 flex-shrink-0 cursor-pointer px-3 py-1 text-left text-xs text-foreground transition-colors hover:text-red-700 hover:underline dark:hover:text-red-300">
-                  <div className="line-clamp-2 leading-4"><span className="mr-1 text-red-500">•</span>{item.title}</div>
-                  <div className="mt-0.5 pl-3 text-[10px] text-muted-foreground">GOV.UK · {item.date}</div>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="flex h-8 items-center justify-center gap-2 text-xs text-muted-foreground">
-              {refreshing ? <><RefreshCw className="h-3.5 w-3.5 animate-spin" /> Checking official Innovator Founder updates...</> : loadError ? <button className="hover:text-red-700 hover:underline" onClick={() => void fetchNews()}>Official news feed unavailable. Retry</button> : "No new official Innovator Founder updates are available right now."}
-            </div>
-          )}
+          <div className="flex min-w-max items-center gap-4">
+            {newsItems.map((item) => (
+              <button key={item.id} onClick={() => { setSelectedArticle(item); setModalOpen(true); }} className="w-[360px] flex-shrink-0 cursor-pointer px-3 py-1 text-left text-xs text-foreground transition-colors hover:text-red-700 hover:underline dark:hover:text-red-300">
+                <div className="line-clamp-1 leading-4"><span className="mr-1 text-red-500">•</span>{item.title}</div>
+                <div className="mt-0.5 line-clamp-1 pl-3 text-[11px] text-muted-foreground">{item.content}</div>
+                <div className="mt-0.5 pl-3 text-[10px] text-muted-foreground">GOV.UK · Updated {item.date}</div>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="flex-shrink-0 rounded bg-[#005EB8] px-1">
-          <Button variant="ghost" size="icon" onClick={() => scrollBy(320)} className="h-6 w-6 hover:bg-[#004B93]" disabled={!newsItems.length} data-testid="button-ticker-forward">
+          <Button variant="ghost" size="icon" onClick={() => scrollBy(360)} className="h-6 w-6 hover:bg-[#004B93]" data-testid="button-ticker-forward" aria-label="Next Innovator Founder update">
             <ChevronRight className="h-3 w-3 text-white" />
           </Button>
         </div>
