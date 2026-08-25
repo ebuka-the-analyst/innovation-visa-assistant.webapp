@@ -55,6 +55,9 @@ jobs:
       - name: Test strict Innovator Founder news relevance
         run: npx tsx scripts/test-news-relevance.ts
 
+      - name: Validate homepage claims and safety wording
+        run: node scripts/validate-homepage-claims.cjs
+
       - name: Test eligibility policy
         run: node scripts/test-eligibility-policy.cjs
 
