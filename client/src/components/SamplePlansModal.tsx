@@ -46,7 +46,8 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
               Illustrative Business Plan Samples
             </DialogTitle>
           </div>
-          <DialogDescription className="text-base">
+          <Badge className="mx-auto bg-amber-100 text-amber-900 hover:bg-amber-100 border border-amber-300">FICTIONAL EXAMPLES ONLY</Badge>
+          <DialogDescription className="text-base mt-2">
             Fictional preparation examples showing possible structure and evidence themes. They are not real customer applications, endorsements or approved visa cases.
           </DialogDescription>
           <div className="flex items-center justify-center gap-3 mt-3 flex-wrap">
@@ -65,10 +66,11 @@ export default function SamplePlansModal({ open, onOpenChange }: SamplePlanModal
 
         <div className="grid md:grid-cols-3 gap-5 mt-6">
           {SAMPLE_PLANS.map((plan) => (
-            <Card key={plan.title} className="p-5 hover-elevate">
-              <div className="flex items-center gap-2 mb-3">
+            <Card key={plan.title} className="p-5 hover-elevate relative overflow-hidden">
+              <div className="absolute top-0 right-0 rounded-bl-lg bg-amber-100 px-2 py-1 text-[10px] font-bold tracking-wide text-amber-900">FICTIONAL EXAMPLE</div>
+              <div className="flex items-center gap-2 mb-3 pt-4">
                 <Sparkles className="w-4 h-4 text-primary" />
-                <Badge variant="secondary">Fictional example</Badge>
+                <Badge variant="secondary">FICTIONAL EXAMPLE</Badge>
               </div>
               <h3 className="font-semibold text-lg mb-1">{plan.title}</h3>
               <p className="text-xs text-primary mb-3">{plan.industry}</p>
