@@ -139,4 +139,93 @@ function replaceAllKnown(source, replacements) {
   write(rel, source);
 }
 
+// 6) Neutralise legacy approval/social-proof language in every supported public
+// translation so a language switch cannot reintroduce unsupported claims.
+{
+  const rel = "client/src/lib/translations.ts";
+  let source = read(rel);
+  source = replaceAllKnown(source, [
+    ["World's First Global AI Visa Platform", "Global AI Visa Preparation Platform"],
+    ["AI-powered visa assistance for entrepreneurs, innovators, and skilled professionals. Select your destination country to begin.", "AI-assisted visa preparation tools for entrepreneurs, innovators and skilled professionals. Select your destination country to begin."],
+    ["Compliance Verified", "Compliance Preparation"],
+    ["500+ Approved", "Preparation Tools"],
+    ["Trusted by 500+ Approved Applicants", "Built for Innovator Founder preparation"],
+    ["See how your business scores across Innovation, Viability, and Scalability criteria. This readiness assessment helps you understand your visa application strength before formal submission.", "See how your business scores across Innovation, Viability and Scalability criteria. This preparation assessment highlights strengths and gaps before formal submission."],
+    ["Get Your UK Innovator Visa", "Prepare Your UK Innovator Founder Application"],
+    ["Approved", "Prepared"],
+    ["Professional, endorsing body-ready business plans covering", "Business-plan preparation support covering"],
+
+    ["Primera Plataforma Global de Visas con IA del Mundo", "Plataforma Global de Preparación de Visas con IA"],
+    ["Asistencia de visa impulsada por IA para emprendedores, innovadores y profesionales calificados. Selecciona tu país de destino para comenzar.", "Herramientas de preparación de visas con IA para emprendedores, innovadores y profesionales cualificados. Selecciona tu país de destino para comenzar."],
+    ["Cumplimiento Verificado", "Preparación de Cumplimiento"],
+    ["500+ Aprobados", "Herramientas de Preparación"],
+    ["Confiado por más de 500 Solicitantes Aprobados", "Diseñado para la preparación Innovator Founder"],
+    ["Vea cómo su negocio puntúa en criterios de Innovación, Viabilidad y Escalabilidad. Esta evaluación de preparación le ayuda a entender la fortaleza de su solicitud de visa antes de la presentación formal.", "Vea cómo su negocio puntúa en criterios de Innovación, Viabilidad y Escalabilidad. Esta evaluación destaca fortalezas y áreas de preparación antes de la presentación formal."],
+    ["Obtén tu Visa de Innovador del Reino Unido", "Prepare su Solicitud Innovator Founder del Reino Unido"],
+    ["Aprobada", "Preparada"],
+    ["Planes de negocio profesionales listos para organismos de endoso que cubren", "Apoyo para preparar planes de negocio que cubren"],
+
+    ["Première Plateforme Mondiale de Visa IA au Monde", "Plateforme Mondiale de Préparation de Visa avec IA"],
+    ["Assistance visa alimentée par l'IA pour les entrepreneurs, innovateurs et professionnels qualifiés. Sélectionnez votre pays de destination pour commencer.", "Outils de préparation de visa assistés par IA pour les entrepreneurs, innovateurs et professionnels qualifiés. Sélectionnez votre pays de destination pour commencer."],
+    ["Conformité Vérifiée", "Préparation à la Conformité"],
+    ["500+ Approuvés", "Outils de Préparation"],
+    ["Approuvé par plus de 500 Candidats", "Conçu pour la préparation Innovator Founder"],
+    ["Découvrez comment votre entreprise se classe selon les critères d'Innovation, de Viabilité et d'Évolutivité. Cette évaluation de préparation vous aide à comprendre la force de votre demande de visa avant la soumission formelle.", "Découvrez comment votre entreprise se classe selon les critères d'Innovation, de Viabilité et d'Évolutivité. Cette évaluation met en évidence les forces et les points à préparer avant la soumission formelle."],
+    ["Obtenez Votre Visa Innovateur UK", "Préparez Votre Demande Innovator Founder au Royaume-Uni"],
+    ["Approuvé", "Préparé"],
+    ["Plans d'affaires professionnels prêts pour les organismes d'approbation couvrant", "Aide à la préparation de plans d'affaires couvrant"],
+
+    ["Weltweit Erste Globale KI-Visa-Plattform", "Globale KI-Plattform zur Visumvorbereitung"],
+    ["KI-gestützte Visa-Unterstützung für Unternehmer, Innovatoren und Fachkräfte. Wählen Sie Ihr Zielland aus, um zu beginnen.", "KI-gestützte Werkzeuge zur Visumvorbereitung für Unternehmer, Innovatoren und Fachkräfte. Wählen Sie Ihr Zielland aus, um zu beginnen."],
+    ["Konformität Verifiziert", "Compliance-Vorbereitung"],
+    ["500+ Genehmigt", "Vorbereitungswerkzeuge"],
+    ["Vertraut von über 500 Genehmigten Antragstellern", "Für die Innovator-Founder-Vorbereitung entwickelt"],
+    ["Sehen Sie, wie Ihr Unternehmen bei Innovation, Rentabilität und Skalierbarkeit abschneidet. Diese Bereitschaftsbewertung hilft Ihnen, die Stärke Ihres Visumantrags vor der formellen Einreichung zu verstehen.", "Sehen Sie, wie Ihr Unternehmen bei Innovation, Rentabilität und Skalierbarkeit abschneidet. Diese Bewertung zeigt Stärken und Vorbereitungslücken vor der formellen Einreichung."],
+    ["Holen Sie Sich Ihr UK Innovator Visum", "Bereiten Sie Ihren UK-Innovator-Founder-Antrag vor"],
+    ["Genehmigt", "Vorbereitet"],
+    ["Professionelle, für Endorsing-Bodies geeignete Businesspläne, die abdecken", "Unterstützung bei der Vorbereitung von Businessplänen, die abdecken"],
+
+    ["全球首个人工智能签证平台", "全球人工智能签证准备平台"],
+    ["为企业家、创新者和专业人士提供人工智能签证协助。选择您的目的地国家开始。", "为企业家、创新者和专业人士提供人工智能辅助的签证准备工具。选择您的目的地国家开始。"],
+    ["合规验证", "合规准备"],
+    ["500+已批准", "准备工具"],
+    ["受到500多名已批准申请人的信任", "专为Innovator Founder申请准备而设计"],
+    ["查看您的业务在创新、可行性和可扩展性标准方面的得分。此准备评估可帮助您在正式提交前了解签证申请的实力。", "查看您的业务在创新、可行性和可扩展性标准方面的得分。此准备评估可帮助您在正式提交前识别优势和准备差距。"],
+    ["获得您的英国创新者签证", "准备您的英国Innovator Founder申请"],
+    ["已批准", "已准备"],
+    ["专业的、适合背书机构的商业计划，涵盖", "商业计划准备支持，涵盖"],
+
+    ["أول منصة عالمية للتأشيرات بالذكاء الاصطناعي", "منصة عالمية للتحضير للتأشيرات بالذكاء الاصطناعي"],
+    ["مساعدة التأشيرات المدعومة بالذكاء الاصطناعي لرواد الأعمال والمبتكرين والمحترفين المهرة. اختر بلد وجهتك للبدء.", "أدوات مدعومة بالذكاء الاصطناعي للتحضير للتأشيرات لرواد الأعمال والمبتكرين والمحترفين المهرة. اختر بلد وجهتك للبدء."],
+    ["التوافق موثق", "التحضير للامتثال"],
+    ["+500 معتمد", "أدوات التحضير"],
+    ["موثوق به من قبل أكثر من 500 متقدم معتمد", "مصمم للتحضير لمسار Innovator Founder"],
+    ["شاهد كيف يسجل عملك عبر معايير الابتكار والجدوى والقابلية للتوسع. يساعدك تقييم الجاهزية هذا على فهم قوة طلب التأشيرة الخاص بك قبل التقديم الرسمي.", "شاهد كيف يسجل عملك عبر معايير الابتكار والجدوى والقابلية للتوسع. يوضح هذا التقييم نقاط القوة وفجوات التحضير قبل التقديم الرسمي."],
+    ["احصل على تأشيرة المبتكر البريطانية", "حضّر طلب Innovator Founder في المملكة المتحدة"],
+    ["معتمد", "مُحضّر"],
+    ["خطط عمل احترافية جاهزة لهيئات المصادقة تغطي", "دعم إعداد خطة العمل التي تغطي"],
+
+    ["Primeira Plataforma Global de Visto com IA do Mundo", "Plataforma Global de Preparação de Visto com IA"],
+    ["Assistência de visto com IA para empreendedores, inovadores e profissionais qualificados. Selecione seu país de destino para começar.", "Ferramentas de preparação de visto com IA para empreendedores, inovadores e profissionais qualificados. Selecione seu país de destino para começar."],
+    ["Conformidade Verificada", "Preparação de Conformidade"],
+    ["500+ Aprovados", "Ferramentas de Preparação"],
+    ["Confiado por mais de 500 Candidatos Aprovados", "Criado para a preparação Innovator Founder"],
+    ["Veja como seu negócio pontua nos critérios de Inovação, Viabilidade e Escalabilidade. Esta avaliação de prontidão ajuda você a entender a força do seu pedido de visto antes da submissão formal.", "Veja como seu negócio pontua nos critérios de Inovação, Viabilidade e Escalabilidade. Esta avaliação destaca pontos fortes e lacunas de preparação antes da submissão formal."],
+    ["Obtenha Seu Visto de Inovador do Reino Unido", "Prepare Sua Solicitação Innovator Founder do Reino Unido"],
+    ["Aprovado", "Preparado"],
+    ["Planos de negócios profissionais prontos para órgãos de endosso cobrindo", "Apoio à preparação de planos de negócios cobrindo"],
+
+    ["世界初のグローバルAIビザプラットフォーム", "グローバルAIビザ準備プラットフォーム"],
+    ["起業家、イノベーター、熟練した専門家のためのAI搭載ビザ支援。目的地の国を選択して開始してください。", "起業家、イノベーター、専門家向けのAI支援ビザ準備ツールです。目的地の国を選択して開始してください。"],
+    ["コンプライアンス確認済み", "コンプライアンス準備"],
+    ["500以上承認", "準備ツール"],
+    ["500人以上の承認済み申請者に信頼されています", "Innovator Founder申請準備のために設計"],
+    ["イノベーション、実行可能性、スケーラビリティの基準であなたのビジネスがどのようにスコアリングされるかをご覧ください。この準備評価は、正式な提出前にビザ申請の強さを理解するのに役立ちます。", "イノベーション、実行可能性、スケーラビリティの基準でビジネスを評価し、正式な提出前の強みと準備上の不足を確認できます。"],
+    ["英国イノベータービザを取得", "英国Innovator Founder申請を準備"],
+    ["承認済み", "準備済み"],
+    ["承認機関向けの専門的なビジネスプランをカバー", "ビジネスプラン準備支援の対象"],
+  ]);
+  write(rel, source);
+}
+
 console.log("[platform-trust] Public trust hardening preparation complete");
