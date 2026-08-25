@@ -24,14 +24,26 @@ function formatDate(value?: string | null) {
     : date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 
+function isStrictTickerArticle(article: LiveNewsArticle) {
+  if (!article?.id || !/\binnovator[\s-]+founder\b/i.test(String(article.title || ""))) return false;
+  if (!article.publishedAt || Number.isNaN(new Date(article.publishedAt).getTime())) return false;
+
+  try {
+    const hostname = new URL(String(article.url || "")).hostname.toLowerCase();
+    return hostname === "gov.uk" || hostname === "www.gov.uk";
+  } catch {
+    return false;
+  }
+}
+
 function toNewsItem(article: LiveNewsArticle): NewsItem {
   return {
     id: article.id,
     title: article.title,
     date: formatDate(article.publishedAt),
-    content: article.aiSummary || article.description || article.content || "Open the source for the full article.",
-    source: article.sourceName || "Source not recorded",
-    category: article.category || "News",
+    content: article.description || "Open GOV.UK for the full official update.",
+    source: "GOV.UK (Home Office / UKVI)",
+    category: "Innovator Founder",
     sourceUrl: article.url || undefined,
   };
 }
@@ -48,11 +60,14 @@ export default function NewsTicker() {
   const fetchNews = async () => {
     setRefreshing(true);
     try {
-      const response = await fetch("/api/news?limit=30");
+      const response = await fetch("/api/news?limit=20");
       if (!response.ok) throw new Error(`News request failed (${response.status})`);
       const payload = await response.json();
       if (!Array.isArray(payload)) throw new Error("News feed returned an invalid response");
-      setNewsItems(payload.filter((article) => article?.id && article?.title).map(toNewsItem));
+
+      // Defence in depth: even if the API is accidentally broadened later, the
+      // homepage will only render directly named Innovator Founder GOV.UK items.
+      setNewsItems(payload.filter(isStrictTickerArticle).map(toNewsItem));
       setLoadError(false);
     } catch (error) {
       console.error("Failed to fetch news:", error);
@@ -102,13 +117,14 @@ export default function NewsTicker() {
             <div className="flex min-w-max items-center gap-4">
               {newsItems.map((item) => (
                 <button key={item.id} onClick={() => { setSelectedArticle(item); setModalOpen(true); }} className="w-80 flex-shrink-0 cursor-pointer px-3 py-1 text-left text-xs text-foreground transition-colors hover:text-red-700 hover:underline dark:hover:text-red-300">
-                  <span className="mr-1 text-red-500">•</span><span className="line-clamp-2 leading-4">{item.title}</span>
+                  <div className="line-clamp-2 leading-4"><span className="mr-1 text-red-500">•</span>{item.title}</div>
+                  <div className="mt-0.5 pl-3 text-[10px] text-muted-foreground">GOV.UK · {item.date}</div>
                 </button>
               ))}
             </div>
           ) : (
             <div className="flex h-8 items-center justify-center gap-2 text-xs text-muted-foreground">
-              {refreshing ? <><RefreshCw className="h-3.5 w-3.5 animate-spin" /> Loading current news...</> : loadError ? <button className="hover:text-red-700 hover:underline" onClick={() => void fetchNews()}>Live news unavailable. Retry</button> : "No current news items are available."}
+              {refreshing ? <><RefreshCw className="h-3.5 w-3.5 animate-spin" /> Checking official Innovator Founder updates...</> : loadError ? <button className="hover:text-red-700 hover:underline" onClick={() => void fetchNews()}>Official news feed unavailable. Retry</button> : "No new official Innovator Founder updates are available right now."}
             </div>
           )}
         </div>
