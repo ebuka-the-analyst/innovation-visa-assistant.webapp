@@ -1,10 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle } from "lucide-react";
+import { ArrowRight, Calculator, CheckCircle, ClipboardCheck, FileText, FolderCheck } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 import SamplePlansModal from "./SamplePlansModal";
 import ReadinessScoreWidget from "./ReadinessScoreWidget";
 import { useAuth } from "@/hooks/useAuth";
+
+const preparationAreas = [
+  { label: "Business Plan", icon: FileText },
+  { label: "Evidence", icon: FolderCheck },
+  { label: "Financials", icon: Calculator },
+  { label: "Review", icon: ClipboardCheck },
+];
 
 export default function HeroSection() {
   const [sampleModalOpen, setSampleModalOpen] = useState(false);
@@ -69,27 +76,22 @@ export default function HeroSection() {
               </Button>
             </div>
 
-            <div className="flex items-center gap-3 pt-4">
-              <div className="flex -space-x-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-chart-3 border-2 border-background flex items-center justify-center text-white font-semibold text-sm"
-                  >
-                    {String.fromCharCode(64 + i)}
+            <div className="pt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-w-xl" aria-label="Preparation areas supported by the platform">
+                {preparationAreas.map(({ label, icon: Icon }) => (
+                  <div key={label} className="flex items-center gap-2 rounded-lg border border-border/70 bg-background/70 px-3 py-2 text-sm">
+                    <Icon className="h-4 w-4 text-primary shrink-0" />
+                    <span className="font-medium text-foreground">{label}</span>
                   </div>
                 ))}
               </div>
-              <div className="text-sm">
-                <p className="font-medium text-foreground">Evidence-led preparation</p>
-                <p className="text-muted-foreground">Software support, not legal advice or a decision-maker</p>
-              </div>
+              <p className="mt-3 text-sm text-muted-foreground">Software support for evidence-led preparation, not legal advice or a decision-maker.</p>
             </div>
           </div>
 
           <div className="relative lg:block hidden space-y-4">
             <div>
-              <p className="text-sm font-semibold text-primary mb-2">Illustrative Readiness Preview</p>
+              <p className="text-sm font-semibold text-primary mb-2">Example Preparation Score Preview</p>
               <p className="text-muted-foreground text-sm max-w-sm">
                 Example scores show how the platform can organise evidence across Innovation, Viability and Scalability. They are not visa approval probabilities or endorsement decisions.
               </p>
