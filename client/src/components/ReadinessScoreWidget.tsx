@@ -35,7 +35,7 @@ export default function ReadinessScoreWidget({
   return (
     <div className="flex flex-col items-center justify-center gap-8">
       <div className="relative w-48 h-48">
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 160 160" aria-label="Illustrative readiness score">
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 160 160" aria-label="Example preparation score">
           <defs>
             <filter id="glow">
               <feGaussianBlur stdDeviation="3" result="coloredBlur" />
@@ -66,15 +66,14 @@ export default function ReadinessScoreWidget({
           />
         </svg>
 
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="text-center">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Example Score</p>
-            <p className="text-xl font-bold text-[#005EB8]">{animatedScore}%</p>
-          </div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-6">
+          <span className="mb-2 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-bold tracking-wide text-amber-800">EXAMPLE ONLY</span>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-center leading-tight">Example preparation score</p>
+          <p className="text-xl font-bold text-[#005EB8]">{animatedScore}%</p>
         </div>
       </div>
 
-      <div className="w-full space-y-4">
+      <div className="w-full space-y-4" aria-label="Illustrative criterion scores">
         {[
           ["Innovation", innovationScore, "bg-[#005EB8]", "text-primary"],
           ["Viability", viabilityScore, "bg-[#eab308]", "text-chart-3"],
@@ -85,7 +84,7 @@ export default function ReadinessScoreWidget({
               <span className="text-xs font-semibold text-foreground">{label}</span>
               <span className={`text-xs font-bold ${textClass}`}>{score}%</span>
             </div>
-            <div className="w-full h-2 bg-muted rounded-full overflow-hidden" role="progressbar" aria-label={`Illustrative ${label} score`} aria-valuenow={Number(score)} aria-valuemin={0} aria-valuemax={100}>
+            <div className="w-full h-2 bg-muted rounded-full overflow-hidden" role="progressbar" aria-label={`Example ${label} preparation score`} aria-valuenow={Number(score)} aria-valuemin={0} aria-valuemax={100}>
               <div className={`h-full ${barClass} rounded-full transition-all duration-1000`} style={{ width: `${score}%` }} />
             </div>
           </div>
