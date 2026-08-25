@@ -24,9 +24,9 @@ export default function TestimonialsSection() {
     <section className="py-20 md:py-32 bg-gradient-to-b from-background to-accent/5">
       <div className="responsive-container">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="font-serif text-xl font-bold mb-6">Built for Responsible Application Preparation</h2>
+          <h2 className="font-serif text-xl font-bold mb-6">Transparent, Evidence-Led Preparation</h2>
           <p className="text-lg text-muted-foreground">
-            We do not publish invented customer stories or imply that using the platform guarantees endorsement or visa approval.
+            Designed around clear platform boundaries, evidence-led workflows and human review so you can understand what the software supports and what it does not decide.
           </p>
         </div>
 
