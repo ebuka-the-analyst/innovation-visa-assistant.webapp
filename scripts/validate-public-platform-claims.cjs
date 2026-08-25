@@ -45,8 +45,13 @@ const files = Array.from(new Set([
   ...requiredFiles,
   ...walk("client/src"),
 ]));
-const combinedRaw = files.map((file) => `\n/* ${file} */\n${fs.readFileSync(path.join(root, file), "utf8")}`).join("\n");
-const combined = combinedRaw.replace(/\\'/g, "'");
+const sourceByFile = new Map(files.map((file) => [
+  file,
+  fs.readFileSync(path.join(root, file), "utf8").replace(/\\'/g, "'"),
+]));
+const combined = Array.from(sourceByFile.entries())
+  .map(([file, source]) => `\n/* ${file} */\n${source}`)
+  .join("\n");
 
 const forbidden = [
   "Trusted by 500+ Approved Applicants",
@@ -82,7 +87,12 @@ const forbidden = [
 ];
 
 for (const phrase of forbidden) {
-  if (combined.includes(phrase)) throw new Error(`Public trust regression: forbidden public claim remains: ${phrase}`);
+  const offenders = Array.from(sourceByFile.entries())
+    .filter(([, source]) => source.includes(phrase))
+    .map(([file]) => file);
+  if (offenders.length) {
+    throw new Error(`Public trust regression: forbidden public claim remains: ${phrase} in ${offenders.join(", ")}`);
+  }
 }
 
 const required = [
