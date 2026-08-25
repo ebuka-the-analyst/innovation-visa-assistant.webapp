@@ -7,20 +7,16 @@ export default function Disclaimer() {
         <div className="flex gap-4 max-w-4xl mx-auto">
           <AlertCircle className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
           <div className="text-sm text-muted-foreground">
-            <p className="font-semibold text-foreground mb-2">Legal Disclaimer</p>
+            <p className="font-semibold text-foreground mb-2">Important Information</p>
             <p className="mb-3">
-              Innovator Founder Visa Assistant provides automated business plan generation for the UK Innovator Founder Visa route. This service is NOT a substitute for professional legal advice. 
-              The information provided by Innovator Founder Visa Assistant is for informational and educational purposes only and does not constitute legal advice. 
-              Immigration law is complex and requirements vary by individual circumstances. We strongly recommend consulting with a qualified immigration lawyer 
-              before submitting your Innovator Founder Visa application to the UK Home Office. Innovator Founder Visa Assistant and its team cannot be held responsible for visa rejections or 
-              immigration-related consequences resulting from the use of this platform.
+              Innovator Founder Visa Assistant is a software platform providing business-planning tools, automated assessments and general information for the UK Innovator Founder route. It does not provide regulated immigration advice, make endorsement or visa decisions, or guarantee any outcome. AI-generated content may contain errors and should be reviewed before use. Always verify current immigration requirements on GOV.UK. If you need advice about your individual immigration circumstances, consult an appropriately regulated immigration adviser or legal professional. Use of the platform is subject to our Terms of Service, and nothing in this notice excludes any liability that cannot lawfully be excluded.
             </p>
             <p className="text-xs">
               For questions or support, contact us at{" "}
               <a href="mailto:support@innovatorfoundervisaassistant.co.uk" className="text-primary hover:underline">
                 support@innovatorfoundervisaassistant.co.uk
-              </a>
-              {" "}or{" "}
+              </a>{" "}
+              or{" "}
               <a href="mailto:hello@innovatorfoundervisaassistant.co.uk" className="text-primary hover:underline">
                 hello@innovatorfoundervisaassistant.co.uk
               </a>

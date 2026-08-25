@@ -8,35 +8,35 @@ import {
 const faqs = [
   {
     question: "What if I'm not approved for the visa?",
-    answer: "While we can't guarantee visa approval (as that's decided by endorsing bodies and UK government), our business plans are specifically designed to meet all Innovator Founder Visa criteria. We offer a 7-day money-back guarantee if you're not satisfied with the quality of the generated plan.",
+    answer: "Innovator Founder Visa Assistant cannot guarantee endorsement or visa approval. Decisions are made by the relevant endorsing body and UK Visas and Immigration. The platform is designed to help you organise and review preparation materials, and purchases remain subject to the refund and cancellation terms shown in our Terms of Service.",
   },
   {
     question: "How long does generation take?",
-    answer: "Most business plans are generated in 3-5 minutes. Premium and Enterprise tiers may take slightly longer due to additional features like detailed financial projections and expert review.",
+    answer: "Generation time varies with the amount of information supplied, plan depth, provider availability and system load. The platform is designed to speed up first-draft preparation, but we do not promise a fixed delivery time for every plan.",
   },
   {
     question: "Can I make changes after generation?",
-    answer: "Yes! Basic tier includes 1 revision, Premium includes 3 revisions, and Enterprise includes unlimited revisions. You can also download and edit the PDF directly.",
+    answer: "Yes. Generated material is intended to be reviewed and refined. Current revision allowances, credits and editing options depend on your purchased plan and are shown on the pricing and account pages.",
   },
   {
     question: "Which endorsing bodies do you support?",
-    answer: "Our plans are formatted for all current UK endorsing bodies (November 2025): Envestors, UK Endorsing Services (UKES), Innovator International, and the Global Entrepreneurs Programme (GEP). Premium tier allows you to select your specific endorsing body for tailored formatting.",
+    answer: "The platform uses publicly available information about the authorised Innovator Founder endorsing bodies and GOV.UK guidance. The authorised list can change, so always check the current GOV.UK endorsing-body list and the relevant body's own published requirements before relying on any comparison.",
   },
   {
     question: "Do you guarantee visa approval?",
-    answer: "No service can guarantee visa approval as the decision lies with endorsing bodies and UK Visas & Immigration. However, our plans are designed to comprehensively address all three Innovator Founder Visa criteria: Innovation, Viability, and Scalability.",
+    answer: "No. The platform does not guarantee endorsement, visa approval or settlement. It helps you prepare material around published Innovator Founder criteria, including Innovation, Viability and Scalability, but it is not a decision-maker and does not provide regulated immigration advice.",
   },
   {
     question: "What's included in the business plan?",
-    answer: "All plans include: Executive Summary, Business Description, Market Analysis, Innovation Statement, Viability Assessment, Scalability Plan, and Conclusion. Premium and Enterprise tiers add detailed Financial Projections, Risk Analysis, and more.",
+    answer: "Plans can include structured sections covering the business proposition, market, innovation, viability, scalability, operations, risks and financial assumptions. The exact depth and available features depend on the plan purchased and the information you provide.",
   },
   {
     question: "Can I see a sample before purchasing?",
-    answer: "Yes! Click 'See Sample Plan' on the homepage to view an example business plan. Please note that your generated plan will be customized to your specific business.",
+    answer: "Yes. You can open a sample plan from the homepage. Samples are illustrative examples only and are not evidence of endorsement, visa approval or a guaranteed format for every business.",
   },
   {
     question: "What payment methods do you accept?",
-    answer: "We accept all major credit cards, debit cards, and digital wallets through our secure Stripe payment gateway. All transactions are SSL encrypted.",
+    answer: "Payments are processed through Stripe. The payment methods available to you are the options shown at checkout and may vary by device, location and Stripe configuration.",
   },
 ];
 
@@ -45,28 +45,18 @@ export default function FAQSection() {
     <section className="py-20 md:py-32 bg-gradient-to-b from-accent/5 to-background">
       <div className="responsive-container">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="font-serif text-xl font-bold mb-6">
-            Frequently Asked Questions
-          </h2>
-          <p className="text-lg text-muted-foreground">
-            Everything you need to know about Innovator Founder Visa Assistant
-          </p>
+          <h2 className="font-serif text-xl font-bold mb-6">Frequently Asked Questions</h2>
+          <p className="text-lg text-muted-foreground">Important information about how Innovator Founder Visa Assistant works and what it does not promise.</p>
         </div>
 
         <div className="max-w-3xl mx-auto">
           <Accordion type="single" collapsible className="space-y-4">
             {faqs.map((faq, index) => (
-              <AccordionItem
-                key={index}
-                value={`item-${index}`}
-                className="border border-border rounded-lg px-6 data-[state=open]:bg-accent/5"
-              >
+              <AccordionItem key={index} value={`item-${index}`} className="border border-border rounded-lg px-6 data-[state=open]:bg-accent/5">
                 <AccordionTrigger className="text-left hover:no-underline py-6">
                   <span className="font-semibold text-lg">{faq.question}</span>
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
-                  {faq.answer}
-                </AccordionContent>
+                <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">{faq.answer}</AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
@@ -74,10 +64,7 @@ export default function FAQSection() {
 
         <div className="text-center mt-12">
           <p className="text-muted-foreground mb-4">Still have questions?</p>
-          <a
-            href="mailto:support@innovatorfoundervisaassistant.co.uk"
-            className="text-primary hover:underline font-medium"
-          >
+          <a href="mailto:support@innovatorfoundervisaassistant.co.uk" className="text-primary hover:underline font-medium">
             Contact our support team →
           </a>
         </div>

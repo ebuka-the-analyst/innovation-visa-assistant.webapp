@@ -8,14 +8,14 @@ export default function PlatformPillars() {
     {
       icon: Brain,
       name: "Innovator Founder Visa Assistant - Intelligence Engine",
-      subtitle: "End-to-End Business Planning",
-      description: "Advanced AI system that generates comprehensive, endorser-ready business plans. Evaluates your business across Innovation, Viability, and Scalability criteria with financial projections, competitive analysis, and job creation roadmaps—all internally consistent and submission-ready.",
+      subtitle: "Structured Business Planning",
+      description: "AI-assisted tools help draft and review business-plan material across Innovation, Viability and Scalability, including financial assumptions, competitive positioning and growth planning. Outputs are preparation materials, not endorsement decisions or legal advice.",
       features: [
-        "Innovation, Viability, Scalability assessment",
-        "Multi-sheet financial projections",
-        "Professional business plans (25-80 pages)",
-        "Rejection analysis & reapplication strategy",
-        "Real-time generation in 3-5 minutes"
+        "Innovation, Viability and Scalability preparation",
+        "Scenario-based financial projections",
+        "Structured business-plan sections",
+        "Documented refusal-reason analysis tools",
+        "Editable AI-assisted drafting"
       ],
       links: [
         { label: "Generate Business Plan", route: "/questionnaire?tier=enterprise" },
@@ -26,32 +26,32 @@ export default function PlatformPillars() {
     {
       icon: Zap,
       name: "Innovator Founder Visa Assistant - Diagnostics",
-      subtitle: "Eligibility & Route Analysis",
-      description: "Real-time AI diagnostic engine that tests your business against all UK Innovator Founder Visa requirements. Compares endorser routes, scores your viability for each endorser, models your team gaps, and forecasts realistic traction benchmarks—so you know your success probability before investing.",
+      subtitle: "Eligibility Preparation & Route Information",
+      description: "Diagnostic tools compare saved application information with published route criteria and surface preparation gaps. They can compare public endorsing-body information and business evidence, but they do not predict approval or proprietary endorser decisions.",
       features: [
-        "Real-time eligibility checking against Home Office rules",
-        "Endorser fit scoring & comparison",
-        "4-route visa strategy analysis",
-        "Team skill gap identification",
-        "Traction forecasting vs. comparable ventures"
+        "Preparation checks against published criteria",
+        "Public endorsing-body information comparison",
+        "Published visa-route information",
+        "Team capability gap identification",
+        "Traction and evidence planning"
       ],
       links: [
-        { label: "Check Eligibility", route: "/questionnaire" },
+        { label: "Check Preparation", route: "/questionnaire" },
         { label: "Compare Endorsers", route: "/endorser-comparison" }
       ],
       color: "from-blue-500 to-cyan-500"
     },
     {
       icon: Users,
-      name: "Innovator Founder Visa Assistant - Mentorship Hub",
+      name: "Innovator Founder Visa Assistant - Support Hub",
       subtitle: "Interview Prep & Expert Network",
-      description: "AI-powered coaching studio + expert network. Mock interview scenarios with Advanced feedback, document organization with submission checklists, expert immigration lawyer consultations, and settlement planning for post-visa growth. Guides you from application through to ILR eligibility.",
+      description: "AI-assisted interview practice, document organisation and access to participating professional advisers can support your preparation. Settlement tools provide general planning information and links to current official requirements rather than personal immigration advice.",
       features: [
-        "AI mock interview coaching with feedback",
-        "Document organization & gap identification",
-        "Immigration lawyer & advisor network",
-        "Post-visa settlement & ILR roadmap",
-        "Continuous mentorship & compliance monitoring"
+        "AI mock interview practice with feedback",
+        "Document organisation and gap identification",
+        "Participating lawyer and adviser network",
+        "Settlement-planning information",
+        "Preparation reminders and evidence tracking"
       ],
       links: [
         { label: "Practice Interviews", route: "/interview-prep" },
@@ -65,11 +65,9 @@ export default function PlatformPillars() {
     <section className="py-24 md:py-32 bg-muted/50">
       <div className="responsive-container">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="font-serif text-xl font-bold mb-4">
-            One Platform. Three Power Tools.
-          </h2>
+          <h2 className="font-serif text-xl font-bold mb-4">One Platform. Three Preparation Workflows.</h2>
           <p className="text-lg text-muted-foreground">
-            Innovator Founder Visa Assistant combines business planning, eligibility diagnostics, and expert mentorship into one unified platform for UK Innovator Founder Visa success
+            Bring business planning, diagnostics and expert-support options together in one workspace for Innovator Founder application preparation.
           </p>
         </div>
 
@@ -81,7 +79,6 @@ export default function PlatformPillars() {
               data-testid={`card-pillar-${pillar.name.replace(/\s+/g, '-').toLowerCase()}`}
             >
               <div className={`absolute inset-0 bg-gradient-to-br ${pillar.color} opacity-5 group-hover:opacity-10 transition-opacity`} />
-              
               <div className="relative z-10">
                 <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${pillar.color} p-4 mb-6 text-white`}>
                   <pillar.icon className="w-full h-full" />
@@ -122,11 +119,11 @@ export default function PlatformPillars() {
         </div>
 
         <div className="mt-16 p-8 bg-primary/5 border border-primary/20 rounded-lg text-center">
-          <h3 className="font-semibold text-lg mb-3">Integrated Workflow</h3>
+          <h3 className="font-semibold text-lg mb-3">Integrated Preparation Workflow</h3>
           <p className="text-muted-foreground mb-4 max-w-2xl mx-auto">
-            Generate your business plan with Innovator Founder Visa Assistant Intelligence Engine. Test your eligibility and compare routes with Diagnostics. Practice interviews and access expert consultants with the Mentorship Hub. All three tools work together seamlessly.
+            Draft and review your business plan, work through preparation checks, practise interviews and access expert-support options. Tool availability depends on your current plan and account entitlements.
           </p>
-          <p className="text-sm font-semibold text-primary">Everything included in your Innovator Founder Visa Assistant subscription.</p>
+          <p className="text-sm font-semibold text-primary">No tool on the platform guarantees endorsement, visa approval or settlement eligibility.</p>
         </div>
       </div>
     </section>

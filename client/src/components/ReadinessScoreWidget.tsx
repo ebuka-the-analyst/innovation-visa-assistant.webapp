@@ -34,11 +34,8 @@ export default function ReadinessScoreWidget({
 
   return (
     <div className="flex flex-col items-center justify-center gap-8">
-      {/* Circular Gauge */}
       <div className="relative w-48 h-48">
-        {/* Background circle */}
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 160 160">
-          {/* Glow effect */}
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 160 160" aria-label="Illustrative readiness score">
           <defs>
             <filter id="glow">
               <feGaussianBlur stdDeviation="3" result="coloredBlur" />
@@ -53,18 +50,7 @@ export default function ReadinessScoreWidget({
             </linearGradient>
           </defs>
 
-          {/* Background track */}
-          <circle
-            cx="80"
-            cy="80"
-            r={radius}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="6"
-            className="text-muted-foreground/20"
-          />
-
-          {/* Animated progress track */}
+          <circle cx="80" cy="80" r={radius} fill="none" stroke="currentColor" strokeWidth="6" className="text-muted-foreground/20" />
           <circle
             cx="80"
             cy="80"
@@ -76,75 +62,38 @@ export default function ReadinessScoreWidget({
             strokeDashoffset={offset}
             strokeLinecap="round"
             className="transition-all duration-75"
-            style={{
-              filter: "url(#glow)",
-              transform: "rotate(-90deg)",
-              transformOrigin: "80px 80px",
-            }}
+            style={{ filter: "url(#glow)", transform: "rotate(-90deg)", transformOrigin: "80px 80px" }}
           />
         </svg>
 
-        {/* Center content */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <div className="text-center">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-              Readiness
-            </p>
-            <p className="text-xl font-bold text-[#005EB8]">
-              {animatedScore}%
-            </p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Example Score</p>
+            <p className="text-xl font-bold text-[#005EB8]">{animatedScore}%</p>
           </div>
         </div>
       </div>
 
-      {/* Score Breakdown Bars */}
       <div className="w-full space-y-4">
-        {/* Innovation */}
-        <div className="space-y-1.5">
-          <div className="flex justify-between items-center">
-            <span className="text-xs font-semibold text-foreground">Innovation</span>
-            <span className="text-xs font-bold text-primary">{innovationScore}%</span>
+        {[
+          ["Innovation", innovationScore, "bg-[#005EB8]", "text-primary"],
+          ["Viability", viabilityScore, "bg-[#eab308]", "text-chart-3"],
+          ["Scalability", scalabilityScore, "bg-[#059669]", "text-chart-2"],
+        ].map(([label, score, barClass, textClass]) => (
+          <div className="space-y-1.5" key={String(label)}>
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-semibold text-foreground">{label}</span>
+              <span className={`text-xs font-bold ${textClass}`}>{score}%</span>
+            </div>
+            <div className="w-full h-2 bg-muted rounded-full overflow-hidden" role="progressbar" aria-label={`Illustrative ${label} score`} aria-valuenow={Number(score)} aria-valuemin={0} aria-valuemax={100}>
+              <div className={`h-full ${barClass} rounded-full transition-all duration-1000`} style={{ width: `${score}%` }} />
+            </div>
           </div>
-          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#005EB8] rounded-full transition-all duration-1000"
-              style={{ width: `${innovationScore}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Viability */}
-        <div className="space-y-1.5">
-          <div className="flex justify-between items-center">
-            <span className="text-xs font-semibold text-foreground">Viability</span>
-            <span className="text-xs font-bold text-chart-3">{viabilityScore}%</span>
-          </div>
-          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#eab308] rounded-full transition-all duration-1000"
-              style={{ width: `${viabilityScore}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Scalability */}
-        <div className="space-y-1.5">
-          <div className="flex justify-between items-center">
-            <span className="text-xs font-semibold text-foreground">Scalability</span>
-            <span className="text-xs font-bold text-chart-2">{scalabilityScore}%</span>
-          </div>
-          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#059669] rounded-full transition-all duration-1000"
-              style={{ width: `${scalabilityScore}%` }}
-            />
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Caption */}
       <p className="text-xs text-muted-foreground text-center max-w-xs">
-        Your readiness score updates as you complete the assessment
+        Illustrative preparation scores only. They are not endorsement decisions, visa approval probabilities or legal advice.
       </p>
     </div>
   );
