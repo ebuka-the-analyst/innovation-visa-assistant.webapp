@@ -16,25 +16,25 @@ const workspaceItems = [
   {
     label: "Business Plan",
     description: "Build and refine your core plan",
-    status: "In progress",
+    action: "Build your plan",
     icon: FileText,
   },
   {
     label: "Founder Profile",
     description: "Capture your experience and suitability",
-    status: "Complete",
+    action: "Add your details",
     icon: ClipboardCheck,
   },
   {
     label: "Innovation Evidence",
     description: "Organise supporting evidence and validation",
-    status: "Add evidence",
+    action: "Collect evidence",
     icon: FolderCheck,
   },
   {
     label: "Financial Forecast",
     description: "Prepare assumptions and projections",
-    status: "Ready to review",
+    action: "Build forecast",
     icon: Calculator,
   },
 ];
@@ -45,7 +45,6 @@ export default function HeroSection() {
 
   const hasPaidPlan = isAuthenticated && user?.subscriptionTier && user.subscriptionTier !== "free";
   const generatePlanHref = hasPaidPlan ? "/questionnaire" : "/pricing";
-  const workspaceHref = isAuthenticated ? "/dashboard" : "/features-showcase";
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-background via-accent/5 to-primary/5 py-8 md:py-10 lg:py-12">
@@ -135,7 +134,7 @@ export default function HeroSection() {
                 </div>
 
                 <div className="divide-y divide-border/60 px-6">
-                  {workspaceItems.map(({ label, description, status, icon: Icon }) => (
+                  {workspaceItems.map(({ label, description, action, icon: Icon }) => (
                     <div key={label} className="flex items-center gap-4 py-4">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                         <Icon className="h-5 w-5" />
@@ -147,15 +146,15 @@ export default function HeroSection() {
                         </p>
                       </div>
                       <span className="shrink-0 rounded-full border border-border/80 bg-muted/60 px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                        {status}
+                        {action}
                       </span>
                     </div>
                   ))}
                 </div>
 
                 <div className="flex items-center justify-between gap-4 border-t border-border/70 bg-muted/20 px-6 py-5">
-                  <p className="text-xs text-muted-foreground">Everything remains editable as your case develops.</p>
-                  <Link href={workspaceHref}>
+                  <p className="text-xs text-muted-foreground">Everything remains editable as your preparation develops.</p>
+                  <Link href="/features">
                     <Button variant="outline" size="sm" className="group whitespace-nowrap">
                       Explore the Platform
                       <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-1" />
