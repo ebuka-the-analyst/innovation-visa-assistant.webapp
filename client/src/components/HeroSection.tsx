@@ -59,8 +59,8 @@ export default function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-background via-accent/5 to-primary/5 py-7 md:py-10 lg:py-12">
       <div className="pointer-events-none absolute inset-0 opacity-25" aria-hidden="true">
-        <div className="absolute -top-20 left-1/4 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
-        <div className="absolute -bottom-20 right-1/4 h-80 w-80 rounded-full bg-chart-2/15 blur-3xl" />
+        <div className="absolute -top-20 left-1/4 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute -bottom-20 right-1/4 h-80 w-80 rounded-full bg-chart-2/20 blur-3xl" />
       </div>
 
       <div className="responsive-container relative z-10">
@@ -116,13 +116,13 @@ export default function HeroSection() {
 
           <div className="relative hidden lg:block">
             <div className="pointer-events-none absolute inset-x-10 inset-y-8 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
-            <div className="relative rounded-[1.75rem] border border-border/80 bg-card/85 p-5 shadow-xl backdrop-blur-sm xl:p-6">
+            <div className="relative rounded-[1.75rem] border border-border/80 bg-card/80 p-5 shadow-xl backdrop-blur-sm xl:p-6">
               <div className="mb-5 flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Preparation overview</p>
                   <h2 className="mt-1 text-xl font-semibold text-foreground xl:text-2xl">Your Preparation Workspace</h2>
                 </div>
-                <span className="shrink-0 rounded-full border border-primary/15 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+                <span className="shrink-0 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
                   Workspace preview
                 </span>
               </div>
@@ -133,7 +133,7 @@ export default function HeroSection() {
                     key={title}
                     className="flex items-center gap-3 rounded-xl border border-border/70 bg-background/70 px-4 py-3"
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/8">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                       <Icon className="h-5 w-5 text-primary" />
                     </div>
                     <div className="min-w-0">
