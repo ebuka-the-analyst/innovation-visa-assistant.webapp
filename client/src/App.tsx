@@ -443,7 +443,7 @@ function AppLayout() {
     SIDEBAR_HIDDEN_PREFIXES.some(prefix => location.startsWith(prefix));
   const isCustomLayoutRoute = CUSTOM_LAYOUT_ROUTES.includes(location);
   const isPublicAppShellRoute = PUBLIC_APP_SHELL_ROUTES.includes(location);
-  const { data: shellUser, isLoading: shellAuthLoading } = useQuery<{ id: string } | null>({
+  const { data: publicShellUser, isLoading: publicShellAuthLoading } = useQuery<{ id: string } | null>({
     queryKey: ["/api/auth/user"],
     retry: false,
   });
@@ -451,11 +451,11 @@ function AppLayout() {
   useActivityTracker();
 
   if (isPublicAppShellRoute) {
-    if (shellAuthLoading) {
+    if (publicShellAuthLoading) {
       return <PageLoadingSkeleton />;
     }
 
-    const demoMode = !shellUser;
+    const demoMode = !publicShellUser;
 
     return (
       <SidebarProvider>
