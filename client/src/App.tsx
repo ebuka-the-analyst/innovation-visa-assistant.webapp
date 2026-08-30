@@ -406,6 +406,11 @@ function UnifiedHeader({ demoMode = false }: { demoMode?: boolean }) {
           <span className="hidden sm:inline">Logout</span>
         </Button>
       ) : null}
+      {!demoMode && !user && (
+        <Link href="/login?redirect=%2Fexpert-booking">
+          <Button variant="outline" size="sm" data-testid="button-header-signin">Sign in</Button>
+        </Link>
+      )}
     </header>
   );
 }
