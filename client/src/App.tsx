@@ -141,6 +141,7 @@ const BlogPostPage = lazy(() => import("@/pages/blog-post"));
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/uk", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide", "/blog"];
 const SIDEBAR_HIDDEN_PREFIXES = ["/blog/"];
 const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard"];
+const PUBLIC_APP_SHELL_ROUTES = ["/ai-transparency"];
 
 function PageLoadingSkeleton() {
   return (
@@ -340,12 +341,13 @@ function Router() {
   );
 }
 
-function UnifiedHeader() {
+function UnifiedHeader({ demoMode = false }: { demoMode?: boolean }) {
   const [, setLocation] = useLocation();
   
   const { data: user } = useQuery<{ id: string; email: string; displayName?: string; firstName?: string }>({
     queryKey: ['/api/auth/user'],
     retry: false,
+    enabled: !demoMode,
   });
 
   const logoutMutation = useMutation({
@@ -374,17 +376,25 @@ function UnifiedHeader() {
           </div>
         </div>
       </Link>
-      <div className="h-6 w-px bg-border mx-1 hidden md:block" />
-      <HeaderNavTabs />
+      {!demoMode && (
+        <>
+          <div className="h-6 w-px bg-border mx-1 hidden md:block" />
+          <HeaderNavTabs />
+        </>
+      )}
       <div className="flex-1" />
-      {user && (
+      {!demoMode && user && (
         <span className="hidden lg:block text-sm text-muted-foreground">
           {user.firstName || user.displayName || user.email}
         </span>
       )}
-      {user && <NotificationBell />}
+      {!demoMode && user && <NotificationBell />}
       <ThemeToggle />
-      {user && (
+      {demoMode ? (
+        <Link href="/login">
+          <Button size="sm" data-testid="button-header-signin">Sign In</Button>
+        </Link>
+      ) : user ? (
         <Button
           variant="outline"
           size="sm"
@@ -395,7 +405,7 @@ function UnifiedHeader() {
           <LogOut className="h-4 w-4 mr-1" />
           <span className="hidden sm:inline">Logout</span>
         </Button>
-      )}
+      ) : null}
     </header>
   );
 }
@@ -427,8 +437,38 @@ function AppLayout() {
   const isPublicRoute = SIDEBAR_HIDDEN_ROUTES.includes(location) || 
     SIDEBAR_HIDDEN_PREFIXES.some(prefix => location.startsWith(prefix));
   const isCustomLayoutRoute = CUSTOM_LAYOUT_ROUTES.includes(location);
+  const isPublicAppShellRoute = PUBLIC_APP_SHELL_ROUTES.includes(location);
+  const { data: shellUser, isLoading: shellAuthLoading } = useQuery<{ id: string } | null>({
+    queryKey: ["/api/auth/user"],
+    retry: false,
+  });
 
   useActivityTracker();
+
+  if (isPublicAppShellRoute) {
+    if (shellAuthLoading) {
+      return <PageLoadingSkeleton />;
+    }
+
+    const demoMode = !shellUser;
+
+    return (
+      <SidebarProvider>
+        <div className="flex h-screen w-full">
+          <AppSidebar demoMode={demoMode} />
+          <div className="flex flex-col flex-1 w-full">
+            <UnifiedHeader demoMode={demoMode} />
+            <main className="flex-1 overflow-auto">
+              {!demoMode && <ContextualDocumentNotice />}
+              <Suspense fallback={<PageLoadingSkeleton />}>
+                <Router />
+              </Suspense>
+            </main>
+          </div>
+        </div>
+      </SidebarProvider>
+    );
+  }
 
   if (isPublicRoute) {
     return (
