@@ -67,7 +67,7 @@ for (const phrase of forbidden) {
 
 const required = [
   "Prepare a Stronger UK Innovator Founder",
-  "not visa approval probabilities",
+  "not endorsement decisions, visa approval probabilities or legal advice",
   "does not provide regulated immigration advice",
   "What the Innovator Founder Rules Assess",
   "Transparent, Evidence-Led Preparation",

@@ -406,6 +406,11 @@ function UnifiedHeader({ demoMode = false }: { demoMode?: boolean }) {
           <span className="hidden sm:inline">Logout</span>
         </Button>
       ) : null}
+      {!demoMode && !user && (
+        <Link href="/login?redirect=%2Fexpert-booking">
+          <Button variant="outline" size="sm" data-testid="button-header-signin">Sign in</Button>
+        </Link>
+      )}
     </header>
   );
 }
@@ -438,7 +443,7 @@ function AppLayout() {
     SIDEBAR_HIDDEN_PREFIXES.some(prefix => location.startsWith(prefix));
   const isCustomLayoutRoute = CUSTOM_LAYOUT_ROUTES.includes(location);
   const isPublicAppShellRoute = PUBLIC_APP_SHELL_ROUTES.includes(location);
-  const { data: shellUser, isLoading: shellAuthLoading } = useQuery<{ id: string } | null>({
+  const { data: publicShellUser, isLoading: publicShellAuthLoading } = useQuery<{ id: string } | null>({
     queryKey: ["/api/auth/user"],
     retry: false,
   });
@@ -446,11 +451,11 @@ function AppLayout() {
   useActivityTracker();
 
   if (isPublicAppShellRoute) {
-    if (shellAuthLoading) {
+    if (publicShellAuthLoading) {
       return <PageLoadingSkeleton />;
     }
 
-    const demoMode = !shellUser;
+    const demoMode = !publicShellUser;
 
     return (
       <SidebarProvider>
