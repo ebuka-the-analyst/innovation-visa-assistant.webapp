@@ -18,6 +18,7 @@
     "db:migrate:app": "node server/scripts/run-app-migrations.cjs",
     "db:verify:app": "node server/scripts/verify-app-schema.cjs",
     "test:e2e:progress": "playwright test tests/e2e/progress-tracker.spec.ts --project=chromium",
+    "test:maintenance": "node --import tsx --test tests/maintenance-mode.test.ts",
     "test:readiness-contract": "node --test tests/readiness-contract.test.cjs"
   },
   "dependencies": {

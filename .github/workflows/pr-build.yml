@@ -58,6 +58,9 @@ jobs:
       - name: Test readiness architecture contracts
         run: npm run test:readiness-contract
 
+      - name: Test maintenance mode policy
+        run: npm run test:maintenance
+
       - name: Test strict Innovator Founder news relevance
         run: npx tsx scripts/test-news-relevance.ts
 
