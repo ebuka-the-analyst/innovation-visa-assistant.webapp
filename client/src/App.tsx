@@ -37,6 +37,7 @@ const GlobalLanding = lazy(() => import("@/pages/global-landing"));
 const Home = lazy(() => import("@/pages/home"));
 const Login = lazy(() => import("@/pages/login"));
 const Signup = lazy(() => import("@/pages/signup"));
+const MaintenancePage = lazy(() => import("@/pages/maintenance"));
 const VerifyEmail = lazy(() => import("@/pages/verify-email"));
 const ForgotPassword = lazy(() => import("@/pages/forgot-password"));
 const ResetPassword = lazy(() => import("@/pages/reset-password"));
@@ -152,6 +153,49 @@ function PageLoadingSkeleton() {
       </div>
     </div>
   );
+}
+
+interface MaintenanceStatus {
+  active: boolean;
+  adminBypass: boolean;
+  message: string;
+  scheduledEnd: string | null;
+}
+
+function MaintenanceBoundary({ children }: { children: React.ReactNode }) {
+  const { data, isLoading } = useQuery<MaintenanceStatus>({
+    queryKey: ["/api/maintenance/status"],
+    queryFn: async () => {
+      const response = await fetch("/api/maintenance/status", {
+        credentials: "include",
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error("Maintenance status is unavailable");
+      return response.json();
+    },
+    staleTime: 2_000,
+    refetchInterval: 10_000,
+    refetchOnWindowFocus: true,
+  });
+
+  const adminSignInRequested =
+    window.location.pathname === "/login" &&
+    new URLSearchParams(window.location.search).get("maintenance-admin") === "1";
+
+  if (isLoading) return <PageLoadingSkeleton />;
+
+  if (data?.active && !data.adminBypass && !adminSignInRequested) {
+    return (
+      <Suspense fallback={<PageLoadingSkeleton />}>
+        <MaintenancePage
+          message={data.message}
+          scheduledEnd={data.scheduledEnd}
+        />
+      </Suspense>
+    );
+  }
+
+  return <>{children}</>;
 }
 
 function AnimatedSidebarTrigger() {
@@ -540,16 +584,18 @@ function App() {
           <AnalyticsProvider>
             <VoicePermissionProvider>
               <TooltipProvider>
-                <CountryWidgets />
-                <Suspense fallback={null}>
-                  <FloatingFeedback />
-                  <SiteFeedbackPopup />
-                </Suspense>
-                <Toaster />
-                <AppLayout />
-                <Suspense fallback={null}>
-                  <CookieConsent />
-                </Suspense>
+                <MaintenanceBoundary>
+                  <CountryWidgets />
+                  <Suspense fallback={null}>
+                    <FloatingFeedback />
+                    <SiteFeedbackPopup />
+                  </Suspense>
+                  <Toaster />
+                  <AppLayout />
+                  <Suspense fallback={null}>
+                    <CookieConsent />
+                  </Suspense>
+                </MaintenanceBoundary>
               </TooltipProvider>
             </VoicePermissionProvider>
           </AnalyticsProvider>

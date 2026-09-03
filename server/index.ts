@@ -607,7 +607,11 @@ app.use((req, res, next) => {
   const originalJson = res.json.bind(res);
 
   res.json = ((body: any) => {
-    if (process.env.NODE_ENV === "production" && res.statusCode >= 500) {
+    if (
+      process.env.NODE_ENV === "production" &&
+      res.statusCode >= 500 &&
+      !res.locals.preserveErrorResponse
+    ) {
       const existingReference = body && typeof body === "object" ? body.reference : undefined;
       const reference = existingReference || ("IFVA-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 7).toUpperCase());
       const publicMessage = "We couldn't complete that request just now. Please try again.";

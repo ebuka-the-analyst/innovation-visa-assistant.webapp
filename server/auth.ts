@@ -10,6 +10,14 @@ import { verifyTurnstileToken } from "./turnstile";
 import { generateVerificationToken, getTokenExpiry, sendVerificationEmail, sendPasswordResetEmail, getResetTokenExpiry, sendWelcomeEmail } from "./email";
 import { db } from "./db";
 import { securityEvents } from "@shared/schema";
+import {
+  getMaintenanceConfig,
+  isMaintenanceActive,
+  isTrustedMaintenanceWrite,
+  maintenanceApiGate,
+  saveMaintenanceConfig,
+  sendMaintenanceResponse,
+} from "./maintenance";
 
 // Helper function to log security events
 async function logSecurityEvent(
@@ -86,6 +94,96 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  // Maintenance settings must be reachable before the global API gate. The
+  // public status endpoint contains no privileged data and tells the client
+  // whether to render the maintenance screen. Authenticated admins bypass it.
+  app.get("/api/maintenance/status", async (req, res) => {
+    try {
+      const config = await getMaintenanceConfig();
+      const user = req.user as { isAdmin?: boolean } | undefined;
+      res.setHeader("Cache-Control", "no-store");
+      res.json({
+        ...config,
+        active: isMaintenanceActive(config),
+        adminBypass: user?.isAdmin === true,
+      });
+    } catch (error) {
+      console.error("[Maintenance] Could not load public status:", error);
+      // Fail open if the settings store is temporarily unavailable so a DB
+      // incident does not accidentally take the whole public site offline.
+      res.status(200).json({
+        enabled: false,
+        active: false,
+        adminBypass: false,
+        message: "",
+        scheduledStart: null,
+        scheduledEnd: null,
+      });
+    }
+  });
+
+  app.get(
+    "/api/admin/maintenance",
+    isAuthenticated,
+    requireAdmin,
+    async (_req, res) => {
+      try {
+        const config = await getMaintenanceConfig(true);
+        res.setHeader("Cache-Control", "no-store");
+        res.json({ ...config, active: isMaintenanceActive(config) });
+      } catch (error) {
+        console.error("[Maintenance] Could not load admin settings:", error);
+        res.status(503).json({ message: "Maintenance settings are temporarily unavailable" });
+      }
+    },
+  );
+
+  app.put(
+    "/api/admin/maintenance",
+    isAuthenticated,
+    requireAdmin,
+    async (req, res) => {
+      try {
+        if (!req.is("application/json")) {
+          return res.status(415).json({ message: "Content-Type must be application/json" });
+        }
+        if (!isTrustedMaintenanceWrite(req)) {
+          return res.status(403).json({ message: "Untrusted request origin" });
+        }
+
+        const allowedKeys = new Set([
+          "enabled",
+          "message",
+          "scheduledStart",
+          "scheduledEnd",
+        ]);
+        if (
+          !req.body ||
+          typeof req.body !== "object" ||
+          Array.isArray(req.body) ||
+          Object.keys(req.body).some((key) => !allowedKeys.has(key))
+        ) {
+          return res.status(422).json({ message: "The request contains unknown fields" });
+        }
+
+        const user = req.user as { id: string };
+        const config = await saveMaintenanceConfig(req.body, user.id);
+        res.json({ ...config, active: isMaintenanceActive(config) });
+      } catch (error: any) {
+        if (error?.message === "Scheduled end must be after scheduled start") {
+          return res.status(422).json({ message: error.message });
+        }
+        console.error("[Maintenance] Could not save admin settings:", error);
+        res.status(503).json({ message: "Maintenance settings could not be saved" });
+      }
+    },
+  );
+
+  // From this point onward every API route is denied to non-admin users while
+  // the configured maintenance window is active. Static assets remain
+  // available so the client can render the maintenance screen.
+  app.use(maintenanceApiGate);
+
   // Configure Local Strategy (email/password)
   passport.use(
     new LocalStrategy(
@@ -161,6 +259,16 @@ export async function setupAuth(app: Express) {
 
           // Check if user already exists
           const existingUser = await storage.getUserByEmail(normalizedEmail);
+
+          const maintenanceConfig = await getMaintenanceConfig();
+          if (
+            isMaintenanceActive(maintenanceConfig) &&
+            existingUser?.isAdmin !== true
+          ) {
+            // Do not create Google OAuth accounts or establish normal-user
+            // sessions while maintenance mode is active.
+            return done(null, false, { message: "MAINTENANCE_MODE" });
+          }
 
           if (existingUser) {
             // User exists - link Google account if not already linked
@@ -408,6 +516,12 @@ export async function setupAuth(app: Express) {
           }
           return res.status(401).json({ message });
         }
+
+        const maintenanceConfig = await getMaintenanceConfig();
+        if (isMaintenanceActive(maintenanceConfig) && user.isAdmin !== true) {
+          return sendMaintenanceResponse(res, maintenanceConfig);
+        }
+
         req.login({ id: user.id }, (loginErr) => {
           if (loginErr) {
             console.error("Session login error:", loginErr);

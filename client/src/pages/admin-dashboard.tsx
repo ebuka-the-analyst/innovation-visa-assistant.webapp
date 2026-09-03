@@ -1643,6 +1643,59 @@ function SocialPostGenerator() {
 
 // ===== MAIN COMPONENT =====
 
+interface AdminMaintenanceConfig {
+  enabled: boolean;
+  active: boolean;
+  message: string;
+  scheduledStart: string | null;
+  scheduledEnd: string | null;
+}
+
+interface MaintenanceDraft {
+  enabled: boolean;
+  message: string;
+  scheduledStart: string;
+  scheduledEnd: string;
+}
+
+const DEFAULT_MAINTENANCE_DRAFT: MaintenanceDraft = {
+  enabled: false,
+  message: "We are performing scheduled maintenance. Please check back soon.",
+  scheduledStart: "",
+  scheduledEnd: "",
+};
+
+function isoToLocalDateTime(value: string | null): string {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const offsetMs = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
+}
+
+function configToMaintenanceDraft(config: AdminMaintenanceConfig): MaintenanceDraft {
+  return {
+    enabled: config.enabled,
+    message: config.message,
+    scheduledStart: isoToLocalDateTime(config.scheduledStart),
+    scheduledEnd: isoToLocalDateTime(config.scheduledEnd),
+  };
+}
+
+function maintenanceDraftToPayload(draft: MaintenanceDraft) {
+  return {
+    enabled: draft.enabled,
+    message: draft.message,
+    scheduledStart: draft.scheduledStart
+      ? new Date(draft.scheduledStart).toISOString()
+      : null,
+    scheduledEnd: draft.scheduledEnd
+      ? new Date(draft.scheduledEnd).toISOString()
+      : null,
+  };
+}
+
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -1697,6 +1750,10 @@ export default function AdminDashboard() {
   const [dashboardLayout, setDashboardLayout] = useState<DashboardLayout | null>(null);
   const [filterPresets, setFilterPresets] = useState<FilterPreset[]>([]);
   const [showActivityFeed, setShowActivityFeed] = useState(true);
+  const [maintenanceDraft, setMaintenanceDraft] = useState<MaintenanceDraft>(
+    DEFAULT_MAINTENANCE_DRAFT,
+  );
+  const [maintenanceDirty, setMaintenanceDirty] = useState(false);
 
   // Modal states
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -1871,6 +1928,59 @@ export default function AdminDashboard() {
   const { data: user, isLoading: userLoading } = useQuery<User>({
     queryKey: ['/api/auth/user'],
     retry: false,
+  });
+
+  const {
+    data: maintenanceConfig,
+    isLoading: maintenanceLoading,
+  } = useQuery<AdminMaintenanceConfig>({
+    queryKey: ['/api/admin/maintenance'],
+    enabled: !!user?.isAdmin && activeSection === 'settings-maintenance',
+    staleTime: 0,
+  });
+
+  useEffect(() => {
+    if (maintenanceConfig && !maintenanceDirty) {
+      setMaintenanceDraft(configToMaintenanceDraft(maintenanceConfig));
+    }
+  }, [maintenanceConfig, maintenanceDirty]);
+
+  const saveMaintenanceMutation = useMutation({
+    mutationFn: async (draft: MaintenanceDraft) => {
+      const response = await apiRequest(
+        'PUT',
+        '/api/admin/maintenance',
+        maintenanceDraftToPayload(draft),
+      );
+      return response.json() as Promise<AdminMaintenanceConfig>;
+    },
+    onSuccess: (saved, submittedDraft) => {
+      setMaintenanceDraft(configToMaintenanceDraft(saved));
+      setMaintenanceDirty(false);
+      queryClient.setQueryData(['/api/admin/maintenance'], saved);
+      queryClient.invalidateQueries({ queryKey: ['/api/maintenance/status'] });
+      toast({
+        title: submittedDraft.enabled
+          ? 'Maintenance mode enabled'
+          : 'Maintenance mode disabled',
+        description: saved.active
+          ? 'Non-admin users are now blocked from the platform.'
+          : submittedDraft.enabled
+            ? 'The maintenance schedule is saved and will activate at the scheduled start.'
+            : 'Normal platform access has been restored.',
+      });
+    },
+    onError: (error: Error) => {
+      if (maintenanceConfig) {
+        setMaintenanceDraft(configToMaintenanceDraft(maintenanceConfig));
+      }
+      setMaintenanceDirty(false);
+      toast({
+        title: 'Could not save maintenance settings',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
   });
 
   // Redirect if not admin
@@ -14425,7 +14535,13 @@ export default function AdminDashboard() {
                                   <div className="w-12 h-12 mx-auto mb-0.5 rounded-full bg-green-500/10 flex items-center justify-center">
                                     <CheckCircle className="h-3 w-3 text-green-500" />
                                   </div>
-                                  <p className="text-xs font-bold text-green-500">Online</p>
+                                  <p className="text-xs font-bold text-green-500">
+                                    {maintenanceConfig?.active
+                                      ? 'Maintenance'
+                                      : maintenanceConfig?.enabled
+                                        ? 'Scheduled'
+                                        : 'Online'}
+                                  </p>
                                   <p className="text-[9px] text-muted-foreground">System Status</p>
                                 </div>
                               </CardContent>
@@ -14487,7 +14603,17 @@ export default function AdminDashboard() {
                                     </p>
                                   </div>
                                 </div>
-                                <Switch />
+                                <Switch
+                                  checked={maintenanceDraft.enabled}
+                                  disabled={maintenanceLoading || saveMaintenanceMutation.isPending}
+                                  onCheckedChange={(enabled) => {
+                                    const nextDraft = { ...maintenanceDraft, enabled };
+                                    setMaintenanceDraft(nextDraft);
+                                    setMaintenanceDirty(false);
+                                    saveMaintenanceMutation.mutate(nextDraft);
+                                  }}
+                                  data-testid="switch-maintenance-mode"
+                                />
                               </div>
 
                               <div className="space-y-1.5">
@@ -14495,18 +14621,80 @@ export default function AdminDashboard() {
                                 <Input
                                   placeholder="We're performing scheduled maintenance. Please check back soon."
                                   className="h-12"
+                                  value={maintenanceDraft.message}
+                                  disabled={maintenanceLoading || saveMaintenanceMutation.isPending}
+                                  onChange={(event) => {
+                                    setMaintenanceDraft((current) => ({
+                                      ...current,
+                                      message: event.target.value,
+                                    }));
+                                    setMaintenanceDirty(true);
+                                  }}
+                                  maxLength={500}
+                                  data-testid="input-maintenance-message"
                                 />
                               </div>
 
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                                 <div className="space-y-0.5">
                                   <Label>Scheduled Start</Label>
-                                  <Input type="datetime-local" />
+                                  <Input
+                                    type="datetime-local"
+                                    value={maintenanceDraft.scheduledStart}
+                                    disabled={maintenanceLoading || saveMaintenanceMutation.isPending}
+                                    onChange={(event) => {
+                                      setMaintenanceDraft((current) => ({
+                                        ...current,
+                                        scheduledStart: event.target.value,
+                                      }));
+                                      setMaintenanceDirty(true);
+                                    }}
+                                    data-testid="input-maintenance-start"
+                                  />
                                 </div>
                                 <div className="space-y-0.5">
                                   <Label>Scheduled End</Label>
-                                  <Input type="datetime-local" />
+                                  <Input
+                                    type="datetime-local"
+                                    value={maintenanceDraft.scheduledEnd}
+                                    disabled={maintenanceLoading || saveMaintenanceMutation.isPending}
+                                    onChange={(event) => {
+                                      setMaintenanceDraft((current) => ({
+                                        ...current,
+                                        scheduledEnd: event.target.value,
+                                      }));
+                                      setMaintenanceDirty(true);
+                                    }}
+                                    data-testid="input-maintenance-end"
+                                  />
                                 </div>
+                              </div>
+
+                              <div className="flex flex-col gap-2 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                                <p className="text-[9px] text-muted-foreground">
+                                  {maintenanceConfig?.active
+                                    ? 'Maintenance is active. Only administrators can access the platform.'
+                                    : maintenanceDraft.enabled
+                                      ? 'Maintenance is enabled and waiting for its scheduled start.'
+                                      : 'Maintenance is off. Normal platform access is available.'}
+                                </p>
+                                <Button
+                                  size="sm"
+                                  onClick={() => saveMaintenanceMutation.mutate(maintenanceDraft)}
+                                  disabled={
+                                    maintenanceLoading ||
+                                    saveMaintenanceMutation.isPending ||
+                                    !maintenanceDirty
+                                  }
+                                  data-testid="button-save-maintenance"
+                                >
+                                  {saveMaintenanceMutation.isPending ? (
+                                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Save className="mr-2 h-4 w-4" />
+                                  )}
+                                  Save settings
+                                </Button>
                               </div>
                             </CardContent>
                           </Card>
