@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Visa Assistant">
+  <defs>
+    <linearGradient id="v" x1="18" y1="18" x2="104" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B63F6"/>
+      <stop offset="1" stop-color="#22C1F6"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="#FFFFFF"/>
+  <path d="M17 27h29l19 48 22-48h27l-35 79c-3 8-9 12-16 12-8 0-14-4-18-12L17 27Z" fill="url(#v)"/>
+  <path d="M65 75 87 27h27l-35 79c-3 8-9 12-16 12-5 0-9-2-13-5l15-38Z" fill="#22C1F6" opacity=".9"/>
+  <path d="M73 38 101 16l-8 17 17 4-37 11 11-10-11 0Z" fill="#0B63F6"/>
+</svg>
