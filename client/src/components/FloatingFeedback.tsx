@@ -1,11 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useLocation } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MessageSquareWarning, X, Send, Loader2, Bug, Lightbulb, HelpCircle, ThumbsUp, CheckCircle2, Star } from "lucide-react";
+import {
+  MessageSquareWarning,
+  X,
+  Send,
+  Loader2,
+  Bug,
+  Lightbulb,
+  HelpCircle,
+  ThumbsUp,
+  CheckCircle2,
+  Star,
+} from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -18,21 +30,78 @@ interface FeedbackOption {
   color: string;
 }
 
+interface FeedbackContext {
+  label: string;
+  shortLabel: string;
+  helper: string;
+}
+
+const OVERLAY_EVENT = "visaassistant:overlay-open";
+
 const feedbackOptions: FeedbackOption[] = [
   { type: "bug", label: "Report a Bug", icon: Bug, color: "#ef4444" },
   { type: "suggestion", label: "Suggestion", icon: Lightbulb, color: "#005EB8" },
-  { type: "question", label: "Question", icon: HelpCircle, color: "#41B6E6" },
+  {
+    type: "question",
+    label: "Platform Question",
+    icon: HelpCircle,
+    color: "#41B6E6",
+  },
   { type: "praise", label: "Rate Us ★", icon: ThumbsUp, color: "#22c55e" },
 ];
 
 const STAR_LABELS = ["", "Poor", "Fair", "Good", "Great", "Excellent"];
 
+function getFeedbackContext(pathname: string): FeedbackContext {
+  const path = pathname || "/";
+  const hostname =
+    typeof window !== "undefined" ? window.location.hostname.toLowerCase() : "";
+
+  const isInnovatorHost =
+    hostname === "innovatorfoundervisaassistant.co.uk" ||
+    hostname === "www.innovatorfoundervisaassistant.co.uk";
+
+  if (
+    isInnovatorHost ||
+    path.startsWith("/uk/innovatorfoundervisaassistant")
+  ) {
+    return {
+      label: "UK Innovator Founder Visa Assistant",
+      shortLabel: "UK Innovator Founder",
+      helper:
+        "Your feedback will be tagged to the Innovator Founder experience and the page you are viewing.",
+    };
+  }
+
+  const isGlobalHost =
+    hostname === "visaassistant.global" ||
+    hostname === "www.visaassistant.global";
+
+  if (path === "/v2" || (isGlobalHost && (path === "/" || path === ""))) {
+    return {
+      label: "Visa Assistant Global",
+      shortLabel: "Global Home",
+      helper:
+        "Your feedback will be tagged to the global experience and the page you are viewing.",
+    };
+  }
+
+  return {
+    label: "Visa Assistant",
+    shortLabel: "Platform",
+    helper:
+      "Your feedback will include the page you are viewing so we can investigate it faster.",
+  };
+}
+
 export default function FloatingFeedback() {
+  const [location] = useLocation();
+  const feedbackContext = getFeedbackContext(location);
+
   const [isOpen, setIsOpen] = useState(false);
   const [isDismissed, setIsDismissed] = useState(() => {
-    // Check sessionStorage - start half open unless user dismissed in this session
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('feedback_dismissed') === 'true';
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("feedback_dismissed") === "true";
     }
     return false;
   });
@@ -45,9 +114,25 @@ export default function FloatingFeedback() {
   const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
 
-  const { data: user } = useQuery<{ id: string; email: string; firstName?: string } | null>({
+  const { data: user } = useQuery<{
+    id: string;
+    email: string;
+    firstName?: string;
+  } | null>({
     queryKey: ["/api/auth/user"],
   });
+
+  useEffect(() => {
+    const handleOverlayOpen = (event: Event) => {
+      const source = (event as CustomEvent<string>).detail;
+      if (source && source !== "feedback") {
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener(OVERLAY_EVENT, handleOverlayOpen);
+    return () => window.removeEventListener(OVERLAY_EVENT, handleOverlayOpen);
+  }, []);
 
   const submitMutation = useMutation({
     mutationFn: async (data: {
@@ -66,7 +151,7 @@ export default function FloatingFeedback() {
     onSuccess: () => {
       setSubmitted(true);
       toast({
-        title: "Feedback Received!",
+        title: "Feedback received",
         description: "Thank you for helping us improve.",
       });
       setTimeout(() => {
@@ -98,9 +183,20 @@ export default function FloatingFeedback() {
     setTimeout(resetForm, 300);
   };
 
+  const openFeedback = () => {
+    window.dispatchEvent(
+      new CustomEvent(OVERLAY_EVENT, { detail: "feedback" }),
+    );
+    setIsOpen(true);
+    setIsDismissed(false);
+  };
+
   const handleSubmit = () => {
     if (!feedbackType) {
-      toast({ title: "Please select a feedback type", variant: "destructive" });
+      toast({
+        title: "Please select a feedback type",
+        variant: "destructive",
+      });
       return;
     }
     if (!message.trim()) {
@@ -112,16 +208,32 @@ export default function FloatingFeedback() {
       return;
     }
 
+    const optionLabel =
+      feedbackOptions.find((option) => option.type === feedbackType)?.label ||
+      "Feedback";
+    const smartSubject =
+      subject.trim() ||
+      `[${feedbackContext.shortLabel}] ${optionLabel}: ${message
+        .trim()
+        .replace(/\s+/g, " ")
+        .slice(0, 70)}`;
+
+    const browserContext = [
+      navigator.userAgent,
+      `lang=${navigator.language || "unknown"}`,
+      `tz=${Intl.DateTimeFormat().resolvedOptions().timeZone || "unknown"}`,
+    ].join(" | ");
+
     submitMutation.mutate({
       type: feedbackType,
-      subject: subject.trim() || `${feedbackOptions.find(o => o.type === feedbackType)?.label}`,
+      subject: smartSubject,
       message: message.trim(),
       email: user?.email || email.trim(),
       rating: rating > 0 ? rating : undefined,
-      pageUrl: window.location.pathname,
+      pageUrl: window.location.href,
       userId: user?.id,
-      browserInfo: navigator.userAgent,
-      screenSize: `${window.screen.width}x${window.screen.height}`,
+      browserInfo: browserContext,
+      screenSize: `${window.innerWidth}x${window.innerHeight} viewport / ${window.screen.width}x${window.screen.height} screen`,
     });
   };
 
@@ -129,46 +241,59 @@ export default function FloatingFeedback() {
     <>
       <style>{`
         @keyframes feedback-pulse {
-          0%, 100% { 
-            opacity: 1; 
+          0%, 100% {
+            opacity: 1;
             box-shadow: 0 0 15px rgba(17, 182, 233, 0.4);
           }
-          50% { 
-            opacity: 0.9; 
+          50% {
+            opacity: 0.9;
             box-shadow: 0 0 25px rgba(255, 165, 54, 0.5);
           }
         }
       `}</style>
 
-      {/* Floating Feedback Button - bottom left with dismiss like chat icon */}
       {createPortal(
         <div className="fixed left-4 bottom-4 z-[9999]">
-          <div className={`flex items-center gap-0.5 transition-all duration-300 ${
-            isDismissed ? "scale-50 opacity-60 hover:opacity-100 hover:scale-75" : "opacity-50 hover:opacity-100"
-          }`}>
-            {/* Main feedback button */}
+          <div
+            className={`flex items-center gap-0.5 transition-all duration-300 ${
+              isDismissed
+                ? "scale-50 opacity-60 hover:opacity-100 hover:scale-75"
+                : "opacity-50 hover:opacity-100"
+            }`}
+          >
             <button
               onClick={() => {
-                // Always open the feedback form directly when clicked (whether dismissed or not)
-                setIsOpen(true);
-                setIsDismissed(false);
+                if (isOpen) {
+                  handleClose();
+                } else {
+                  openFeedback();
+                }
               }}
               className={`rounded-lg shadow-lg hover-elevate transition-all duration-300 flex flex-col items-center justify-center text-white ${
                 isDismissed ? "w-8 h-8 rounded-full" : "w-[37px] h-[35px]"
               }`}
               style={{ background: "#005EB8" }}
               data-testid="button-feedback-toggle"
-              aria-label={isDismissed ? "Restore feedback" : isOpen ? "Close feedback" : "Send feedback"}
+              aria-label={
+                isDismissed
+                  ? "Restore feedback"
+                  : isOpen
+                    ? "Close feedback"
+                    : "Send feedback"
+              }
             >
-              <MessageSquareWarning className="w-4 h-4" />
+              {isOpen ? (
+                <X className="w-4 h-4" />
+              ) : (
+                <MessageSquareWarning className="w-4 h-4" />
+              )}
             </button>
-            
-            {/* Dismiss X button - attached to the right, like chat icon */}
+
             {!isDismissed && !isOpen && (
               <button
                 onClick={() => {
                   setIsDismissed(true);
-                  sessionStorage.setItem('feedback_dismissed', 'true');
+                  sessionStorage.setItem("feedback_dismissed", "true");
                 }}
                 className="w-5 h-6 bg-red-500 hover:bg-red-600 rounded-r-full flex items-center justify-center text-white transition-colors shadow-sm"
                 data-testid="button-dismiss-feedback"
@@ -179,12 +304,11 @@ export default function FloatingFeedback() {
             )}
           </div>
         </div>,
-        document.body
+        document.body,
       )}
 
-      {/* Backdrop for click-outside to close */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-[9997] bg-transparent"
           onClick={() => setIsOpen(false)}
           data-testid="feedback-backdrop"
@@ -197,21 +321,29 @@ export default function FloatingFeedback() {
             inset-0 sm:inset-auto
             sm:left-4 sm:bottom-16
             sm:w-[340px] md:w-[380px]
-            sm:h-auto sm:max-h-[60vh]"
+            sm:h-auto sm:max-h-[65vh]"
           data-testid="feedback-window"
         >
-          <div 
-            className="p-4 flex-shrink-0 flex items-center justify-between"
-            style={{ background: "linear-gradient(135deg, #41B6E6 0%, #005EB8 100%)" }}
+          <div
+            className="p-4 flex-shrink-0 flex items-start justify-between gap-3"
+            style={{
+              background: "linear-gradient(135deg, #41B6E6 0%, #005EB8 100%)",
+            }}
           >
-            <div className="flex items-center gap-2">
-              <MessageSquareWarning className="w-5 h-5 text-white" />
-              <h3 className="font-semibold text-white">Send Feedback</h3>
+            <div className="flex items-start gap-2 min-w-0">
+              <MessageSquareWarning className="w-5 h-5 text-white mt-0.5 flex-shrink-0" />
+              <div className="min-w-0">
+                <h3 className="font-semibold text-white">Send Feedback</h3>
+                <p className="text-white/80 text-xs truncate">
+                  {feedbackContext.label}
+                </p>
+              </div>
             </div>
             <button
               onClick={handleClose}
-              className="text-white/80 hover:text-white transition-colors sm:hidden"
-              data-testid="button-feedback-close-mobile"
+              className="text-white/80 hover:text-white transition-colors"
+              data-testid="button-feedback-close"
+              aria-label="Close feedback"
             >
               <X className="w-5 h-5" />
             </button>
@@ -223,13 +355,26 @@ export default function FloatingFeedback() {
                 <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4">
                   <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
                 </div>
-                <h4 className="font-semibold text-lg mb-2">Thank You!</h4>
-                <p className="text-muted-foreground text-sm">Your feedback helps us improve the platform.</p>
+                <h4 className="font-semibold text-lg mb-2">Thank you</h4>
+                <p className="text-muted-foreground text-sm">
+                  Your feedback helps us improve the platform.
+                </p>
               </div>
             ) : (
               <>
+                <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+                  <p className="text-xs font-medium text-foreground">
+                    Current area: {feedbackContext.label}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {feedbackContext.helper}
+                  </p>
+                </div>
+
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">What type of feedback?</Label>
+                  <Label className="text-sm font-medium mb-2 block">
+                    What type of feedback?
+                  </Label>
                   <div className="grid grid-cols-2 gap-2">
                     {feedbackOptions.map((option) => {
                       const Icon = option.icon;
@@ -238,15 +383,20 @@ export default function FloatingFeedback() {
                         <button
                           key={option.type}
                           onClick={() => setFeedbackType(option.type)}
-                          className={`p-3 rounded-lg border-2 transition-all flex flex-col items-center gap-1.5 text-xs font-medium
-                            ${isSelected 
-                              ? "border-current bg-muted" 
+                          className={`p-3 rounded-lg border-2 transition-all flex flex-col items-center gap-1.5 text-xs font-medium ${
+                            isSelected
+                              ? "border-current bg-muted"
                               : "border-border hover:border-muted-foreground/50"
-                            }`}
-                          style={{ color: isSelected ? option.color : undefined }}
+                          }`}
+                          style={{
+                            color: isSelected ? option.color : undefined,
+                          }}
                           data-testid={`button-feedback-type-${option.type}`}
                         >
-                          <Icon className="w-5 h-5" style={{ color: option.color }} />
+                          <Icon
+                            className="w-5 h-5"
+                            style={{ color: option.color }}
+                          />
                           {option.label}
                         </button>
                       );
@@ -254,11 +404,21 @@ export default function FloatingFeedback() {
                   </div>
                 </div>
 
-                {/* Star rating — always shown once type selected */}
+                {feedbackType === "question" && (
+                  <div className="rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 px-3 py-2 text-xs text-blue-900 dark:text-blue-100">
+                    For visa or immigration preparation questions, the AI
+                    Assistant is usually faster. Use this form for questions
+                    about the platform, your account or a feature.
+                  </div>
+                )}
+
                 {feedbackType && (
                   <div>
                     <Label className="text-sm font-medium mb-1.5 block">
-                      Rate your experience <span className="text-muted-foreground text-xs">(optional)</span>
+                      Rate your experience{" "}
+                      <span className="text-muted-foreground text-xs">
+                        (optional)
+                      </span>
                     </Label>
                     <div className="flex items-center gap-1">
                       {[1, 2, 3, 4, 5].map((star) => {
@@ -267,17 +427,22 @@ export default function FloatingFeedback() {
                           <button
                             key={star}
                             type="button"
-                            onClick={() => setRating(star === rating ? 0 : star)}
+                            onClick={() =>
+                              setRating(star === rating ? 0 : star)
+                            }
                             onMouseEnter={() => setHoveredRating(star)}
                             onMouseLeave={() => setHoveredRating(0)}
                             className="p-0.5 transition-transform hover:scale-110"
                             data-testid={`button-rating-${star}`}
+                            aria-label={`Rate ${star} out of 5`}
                           >
                             <Star
                               className="w-6 h-6 transition-colors"
                               style={{
-                                fill: star <= display ? "#f59e0b" : "transparent",
-                                color: star <= display ? "#f59e0b" : "#9ca3af",
+                                fill:
+                                  star <= display ? "#f59e0b" : "transparent",
+                                color:
+                                  star <= display ? "#f59e0b" : "#9ca3af",
                               }}
                             />
                           </button>
@@ -293,8 +458,14 @@ export default function FloatingFeedback() {
                 )}
 
                 <div>
-                  <Label htmlFor="feedback-subject" className="text-sm font-medium mb-1.5 block">
-                    Subject <span className="text-muted-foreground text-xs">(optional)</span>
+                  <Label
+                    htmlFor="feedback-subject"
+                    className="text-sm font-medium mb-1.5 block"
+                  >
+                    Subject{" "}
+                    <span className="text-muted-foreground text-xs">
+                      (optional)
+                    </span>
                   </Label>
                   <Input
                     id="feedback-subject"
@@ -307,21 +478,24 @@ export default function FloatingFeedback() {
                 </div>
 
                 <div>
-                  <Label htmlFor="feedback-message" className="text-sm font-medium mb-1.5 block">
-                    Your Message <span className="text-destructive">*</span>
+                  <Label
+                    htmlFor="feedback-message"
+                    className="text-sm font-medium mb-1.5 block"
+                  >
+                    Your message <span className="text-destructive">*</span>
                   </Label>
                   <Textarea
                     id="feedback-message"
                     placeholder={
-                      feedbackType === "bug" 
-                        ? "Describe the issue, what you expected, and what happened instead..."
+                      feedbackType === "bug"
+                        ? "What were you trying to do, what happened, and what did you expect instead?"
                         : feedbackType === "suggestion"
-                        ? "Share your idea for improvement..."
-                        : feedbackType === "question"
-                        ? "What would you like to know?"
-                        : feedbackType === "praise"
-                        ? "What's working great for you? We'd love to hear it!"
-                        : "Tell us more..."
+                          ? "What should we improve, and how would it help you?"
+                          : feedbackType === "question"
+                            ? "What would you like to know about the platform?"
+                            : feedbackType === "praise"
+                              ? "What's working well for you?"
+                              : "Tell us more..."
                     }
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
@@ -332,8 +506,11 @@ export default function FloatingFeedback() {
 
                 {!user && (
                   <div>
-                    <Label htmlFor="feedback-email" className="text-sm font-medium mb-1.5 block">
-                      Your Email <span className="text-destructive">*</span>
+                    <Label
+                      htmlFor="feedback-email"
+                      className="text-sm font-medium mb-1.5 block"
+                    >
+                      Your email <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       id="feedback-email"
@@ -344,13 +521,16 @@ export default function FloatingFeedback() {
                       className="bg-muted/50"
                       data-testid="input-feedback-email"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">So we can follow up if needed</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      So we can follow up if needed
+                    </p>
                   </div>
                 )}
 
                 {user && (
                   <p className="text-xs text-muted-foreground">
-                    Submitting as <span className="font-medium">{user.email}</span>
+                    Submitting as{" "}
+                    <span className="font-medium">{user.email}</span>
                   </p>
                 )}
               </>
@@ -361,7 +541,12 @@ export default function FloatingFeedback() {
             <div className="p-4 border-t flex-shrink-0">
               <Button
                 onClick={handleSubmit}
-                disabled={submitMutation.isPending || !feedbackType || !message.trim()}
+                disabled={
+                  submitMutation.isPending ||
+                  !feedbackType ||
+                  !message.trim() ||
+                  (!user && !email.trim())
+                }
                 className="w-full bg-gradient-to-r from-[#41B6E6] to-[#005EB8] hover:opacity-90"
                 data-testid="button-feedback-send"
               >
