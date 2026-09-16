@@ -1,5 +1,4 @@
 import { useId } from "react";
-import { Plane } from "lucide-react";
 
 type VisaAssistantBrandProps = {
   routeLabel?: string;
@@ -16,48 +15,82 @@ export default function VisaAssistantBrand({
 }: VisaAssistantBrandProps) {
   const rawId = useId();
   const gradientId = `visa-assistant-v-${rawId.replace(/:/g, "")}`;
-  const markSize = compact ? "h-9 w-10" : "h-11 w-12";
-  const wordSize = compact ? "text-[14px]" : "text-[17px]";
+
+  const markSize = compact ? "h-12 w-[58px]" : "h-16 w-[76px]";
+  const visaSize = compact ? "text-[21px]" : "text-[29px]";
+  const assistantSize = compact ? "text-[20px]" : "text-[28px]";
+  const routeTextSize = compact ? "text-[10px]" : "text-[13px]";
 
   return (
     <div
       className={`inline-flex flex-col justify-center ${className}`}
       aria-label={routeLabel ? `Visa Assistant — ${routeLabel}` : "Visa Assistant"}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         <div className={`relative shrink-0 ${markSize}`} aria-hidden="true">
-          <svg viewBox="0 0 76 70" className="h-full w-full" focusable="false">
+          <svg
+            viewBox="0 0 96 86"
+            className="h-full w-full overflow-visible"
+            focusable="false"
+            role="presentation"
+          >
             <defs>
-              <linearGradient id={gradientId} x1="5" y1="5" x2="68" y2="65" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#0B63F6" />
-                <stop offset="100%" stopColor="#22C1F6" />
+              <linearGradient id={gradientId} x1="8" y1="8" x2="78" y2="78" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#075BE8" />
+                <stop offset="55%" stopColor="#126EF5" />
+                <stop offset="100%" stopColor="#27B8F3" />
               </linearGradient>
             </defs>
+
+            {/* Official V mark */}
             <path
-              d="M6 8h18.5L38 41 53 8h17L48 61.5C46 66 42.5 68 38 68c-4.6 0-8.2-2.2-10.1-6.4L6 8Z"
+              d="M6 18h23.2l18.1 38.4c2.1 4.4 5.2 4.3 7.4-.1L73.1 18H92L66 72.4C62.3 80.1 57.4 84 50.1 84c-7.7 0-12.5-4-16-11.4L6 18Z"
               fill={`url(#${gradientId})`}
             />
             <path
-              d="M38 41 53 8h17L48 61.5C46 66 42.5 68 38 68c-3.1 0-5.8-1-7.8-3L38 41Z"
-              fill="#22C1F6"
-              opacity="0.88"
+              d="M47.3 56.4 73.1 18H92L66 72.4C62.3 80.1 57.4 84 50.1 84c-4 0-7.3-1.1-10.1-3.4l7.3-24.2Z"
+              fill="#2DBDF4"
+              opacity="0.96"
+            />
+            <path
+              d="M6 18h23.2l18.1 38.4c1 2.1 2.3 3.2 3.8 3.4-3.2 8.3-7 14.8-11.5 19.3-2.1-1.8-3.9-4.1-5.5-7L6 18Z"
+              fill="#075BE8"
+              opacity="0.92"
+            />
+
+            {/* Aircraft + rising flight path */}
+            <path
+              d="M44.5 29.7C53 23 61.9 16.5 72.7 10.9"
+              fill="none"
+              stroke="#075BE8"
+              strokeWidth="3.3"
+              strokeLinecap="round"
+            />
+            <path
+              d="M72.4 7.5 79.3 3l3.6 1.2-3.3 5.4 9.5 2.3 1.4 2.8-12.8-.5-6.4 8.2-2.8-.8 3.3-8-6.5-2.6 1.5-2 7 1.2 3.2-4.1 2.2.9-2.3 6.2Z"
+              fill="#075BE8"
             />
           </svg>
-          <Plane className="absolute -right-1 -top-0.5 h-4 w-4 -rotate-[18deg] text-[#0B63F6] stroke-[2.5]" />
         </div>
 
-        <div className={`flex flex-col font-extrabold tracking-tight leading-[0.88] ${wordSize}`}>
-          <span className="text-[#0F172A] dark:text-white">Visa</span>
-          <span className="text-[#0B63F6] dark:text-[#41B6E6]">Assistant</span>
+        <div className="flex flex-col font-black tracking-[-0.045em] leading-[0.82]">
+          <span className={`${visaSize} text-[#0B2A66] dark:text-white`}>Visa</span>
+          <span className={`${assistantSize} text-[#126EF5] dark:text-[#41B6E6]`}>Assistant</span>
         </div>
       </div>
 
       {routeLabel && (
-        <div className={`mt-1 flex items-center gap-1.5 pl-1 font-semibold text-muted-foreground ${compact ? "text-[8px]" : "text-[9px]"}`}>
-          <span className="h-px w-2.5 bg-border" aria-hidden="true" />
-          {routeFlag && <span aria-hidden="true">{routeFlag}</span>}
+        <div
+          className={`mt-1.5 flex w-full items-center justify-center gap-2 font-bold tracking-[-0.02em] text-[#0B2A66] dark:text-white ${routeTextSize}`}
+        >
+          <span className="h-px w-4 bg-[#9FB3D1] dark:bg-slate-600" aria-hidden="true" />
+          {routeFlag && (
+            <span className={`${compact ? "text-[15px]" : "text-[20px]"} leading-none`} aria-hidden="true">
+              {routeFlag}
+            </span>
+          )}
           <span className="whitespace-nowrap">{routeLabel}</span>
-          <span className="h-px w-2.5 bg-border" aria-hidden="true" />
+          <span className="h-px w-4 bg-[#9FB3D1] dark:bg-slate-600" aria-hidden="true" />
         </div>
       )}
     </div>
