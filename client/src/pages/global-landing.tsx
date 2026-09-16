@@ -1,25 +1,26 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { 
-  Search, 
-  Lock, 
-  Unlock, 
-  Globe2, 
-  Sparkles, 
-  Star,
-  Shield,
-  Users,
-  FileText,
+import {
   Bot,
-  ChevronRight
+  ChevronRight,
+  FileText,
+  Globe2,
+  Lock,
+  Search,
+  Shield,
+  Sparkles,
+  Star,
+  Unlock,
+  Users,
 } from "lucide-react";
 import globeImage from "@assets/unnamed_(1)_1769196836272.png";
 import LanguageSelector from "@/components/LanguageSelector";
 import ThemeToggle from "@/components/ThemeToggle";
+import VisaAssistantBrand from "@/components/VisaAssistantBrand";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Country {
@@ -50,15 +51,15 @@ function CountryFlag({ code, className = "" }: { code: string; className?: strin
     se: "se",
     ch: "ch",
   };
-  
+
   const flagCode = countryCodeMap[code] || code;
-  
+
   return (
-    <img 
+    <img
       src={`https://flagcdn.com/w80/${flagCode}.png`}
       srcSet={`https://flagcdn.com/w160/${flagCode}.png 2x`}
       alt={code.toUpperCase()}
-      className={`w-8 h-6 rounded object-cover shadow-sm ${className}`}
+      className={`h-6 w-8 rounded object-cover shadow-sm ${className}`}
     />
   );
 }
@@ -91,216 +92,83 @@ export default function GlobalLanding() {
   const globeRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
 
-  const filteredCountries = countries.filter(country =>
-    country.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredCountries = countries.filter((country) =>
+    country.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleCountrySelect = (country: Country) => {
     if (!country.isUnlocked) return;
-    
+
     setSelectedCountry(country);
     setIsZooming(true);
-    
     sessionStorage.setItem("navigating_from_global", country.code);
-    
-    // Start fade-out before navigation
-    setTimeout(() => {
-      setIsFadingOut(true);
-    }, 1200);
-    
-    // Navigate after fade-out completes
-    setTimeout(() => {
-      setLocation(`/${country.code}`);
-    }, 1800);
+
+    setTimeout(() => setIsFadingOut(true), 1200);
+    setTimeout(() => setLocation(`/${country.code}`), 1800);
   };
 
   useEffect(() => {
-    const createStars = () => {
-      const container = document.getElementById('starfield');
-      if (!container) return;
-      
-      container.innerHTML = '';
-      for (let i = 0; i < 150; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        star.style.left = `${Math.random() * 100}%`;
-        star.style.top = `${Math.random() * 100}%`;
-        star.style.animationDelay = `${Math.random() * 3}s`;
-        star.style.width = `${Math.random() * 2 + 1}px`;
-        star.style.height = star.style.width;
-        container.appendChild(star);
-      }
-    };
-    
-    createStars();
+    const container = document.getElementById("starfield");
+    if (!container) return;
+
+    container.innerHTML = "";
+    for (let i = 0; i < 150; i += 1) {
+      const star = document.createElement("div");
+      star.className = "star";
+      star.style.left = `${Math.random() * 100}%`;
+      star.style.top = `${Math.random() * 100}%`;
+      star.style.animationDelay = `${Math.random() * 3}s`;
+      star.style.width = `${Math.random() * 2 + 1}px`;
+      star.style.height = star.style.width;
+      container.appendChild(star);
+    }
   }, []);
 
   return (
-    <div className="h-screen bg-gradient-to-b from-sky-100 to-blue-50 dark:bg-[#0a0a1a] dark:from-[#0a0a1a] dark:to-[#0a0a1a] text-gray-900 dark:text-white overflow-hidden relative flex flex-col">
+    <div className="relative flex h-screen flex-col overflow-hidden bg-gradient-to-b from-sky-100 to-blue-50 text-gray-900 dark:from-[#0a0a1a] dark:to-[#0a0a1a] dark:text-white">
       <style>{`
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 1; }
-        }
-        
-        @keyframes zoom-in {
-          0% { transform: scale(1) rotateY(0deg); }
-          50% { transform: scale(2) rotateY(180deg); }
-          100% { transform: scale(50) rotateY(360deg); opacity: 0; }
-        }
-        
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        
-        @keyframes pulse-glow {
-          0%, 100% { box-shadow: 0 0 15px rgba(0, 94, 184, 0.3); }
-          50% { box-shadow: 0 0 30px rgba(0, 94, 184, 0.5), 0 0 45px rgba(0, 94, 184, 0.2); }
-        }
-        
-        @keyframes fade-in {
-          0% { opacity: 0; }
-          100% { opacity: 1; }
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 0.4s ease-out forwards;
-        }
-        
-        .star {
-          position: absolute;
-          background: white;
-          border-radius: 50%;
-          animation: twinkle 3s infinite;
-        }
-        
-        .dark .star {
-          display: block;
-        }
-        
-        :not(.dark) .star {
-          display: none;
-        }
-        
-        .globe-container {
-          perspective: 1000px;
-          animation: float 6s ease-in-out infinite;
-        }
-        
-        .globe {
-          border-radius: 50%;
-          box-shadow: 
-            inset -20px -20px 40px rgba(0,0,0,0.3),
-            0 0 30px rgba(0, 94, 184, 0.3),
-            0 0 60px rgba(0, 94, 184, 0.15);
-          animation: pulse-glow 4s ease-in-out infinite;
-        }
-        
-        .dark .globe {
-          box-shadow: 
-            inset -20px -20px 40px rgba(0,0,0,0.5),
-            0 0 30px rgba(0, 94, 184, 0.3),
-            0 0 60px rgba(0, 94, 184, 0.15);
-        }
-        
-        .globe.zooming {
-          animation: zoom-in 1.5s ease-in forwards;
-        }
-        
-        .country-card {
-          backdrop-filter: blur(10px);
-          background: rgba(255, 255, 255, 0.8);
-          border: 1px solid rgba(0, 94, 184, 0.2);
-          transition: all 0.2s ease;
-        }
-        
-        .dark .country-card {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .country-card.unlocked {
-          background: rgba(5, 150, 105, 0.1);
-          border: 2px solid rgba(5, 150, 105, 0.5);
-        }
-        
-        .dark .country-card.unlocked {
-          background: rgba(5, 150, 105, 0.15);
-          border: 2px solid rgba(5, 150, 105, 0.6);
-        }
-        
-        .country-card.unlocked:hover {
-          background: rgba(5, 150, 105, 0.2);
-          border-color: rgba(5, 150, 105, 0.7);
-        }
-        
-        .dark .country-card.unlocked:hover {
-          background: rgba(5, 150, 105, 0.25);
-        }
-        
-        .country-card.locked {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-        
-        .gradient-text {
-          background: linear-gradient(135deg, #005EB8 0%, #41B6E6 50%, #00A499 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-        
-        .glass-panel {
-          backdrop-filter: blur(20px);
-          background: rgba(255, 255, 255, 0.8);
-          border: 1px solid rgba(0, 94, 184, 0.1);
-        }
-        
-        .dark .glass-panel {
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        
-        .scrollbar-thin::-webkit-scrollbar {
-          width: 4px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-track {
-          background: rgba(0,0,0,0.05);
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb {
-          background: rgba(0,94,184,0.3);
-          border-radius: 2px;
-        }
-        .dark .scrollbar-thin::-webkit-scrollbar-track {
-          background: rgba(255,255,255,0.05);
-        }
-        .dark .scrollbar-thin::-webkit-scrollbar-thumb {
-          background: rgba(255,255,255,0.2);
-        }
+        @keyframes twinkle { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
+        @keyframes zoom-in { 0% { transform: scale(1) rotateY(0); } 50% { transform: scale(2) rotateY(180deg); } 100% { transform: scale(50) rotateY(360deg); opacity: 0; } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 15px rgba(0,94,184,.3); } 50% { box-shadow: 0 0 30px rgba(0,94,184,.5), 0 0 45px rgba(0,94,184,.2); } }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in { animation: fade-in .4s ease-out forwards; }
+        .star { position: absolute; background: white; border-radius: 999px; animation: twinkle 3s infinite; }
+        :not(.dark) .star { display: none; }
+        .globe-container { perspective: 1000px; animation: float 6s ease-in-out infinite; }
+        .globe { border-radius: 999px; box-shadow: inset -20px -20px 40px rgba(0,0,0,.3), 0 0 30px rgba(0,94,184,.3), 0 0 60px rgba(0,94,184,.15); animation: pulse-glow 4s ease-in-out infinite; }
+        .dark .globe { box-shadow: inset -20px -20px 40px rgba(0,0,0,.5), 0 0 30px rgba(0,94,184,.3), 0 0 60px rgba(0,94,184,.15); }
+        .globe.zooming { animation: zoom-in 1.5s ease-in forwards; }
+        .country-card { backdrop-filter: blur(10px); background: rgba(255,255,255,.8); border: 1px solid rgba(0,94,184,.2); transition: all .2s ease; }
+        .dark .country-card { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.1); }
+        .country-card.unlocked { background: rgba(5,150,105,.1); border: 2px solid rgba(5,150,105,.5); }
+        .dark .country-card.unlocked { background: rgba(5,150,105,.15); border-color: rgba(5,150,105,.6); }
+        .country-card.unlocked:hover { background: rgba(5,150,105,.2); border-color: rgba(5,150,105,.7); }
+        .country-card.locked { opacity: .5; cursor: not-allowed; }
+        .gradient-text { background: linear-gradient(135deg,#005EB8 0%,#41B6E6 50%,#00A499 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .glass-panel { backdrop-filter: blur(20px); background: rgba(255,255,255,.8); border: 1px solid rgba(0,94,184,.1); }
+        .dark .glass-panel { background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.08); }
+        .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: rgba(0,0,0,.05); }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(0,94,184,.3); border-radius: 2px; }
       `}</style>
 
-      <div id="starfield" className="fixed inset-0 pointer-events-none" />
+      <div id="starfield" className="pointer-events-none fixed inset-0" />
 
-      <div className={`relative z-10 flex flex-col h-full transition-opacity duration-500 ${isZooming ? 'opacity-0' : 'opacity-100'}`}>
-        <header className="flex-shrink-0 glass-panel">
-          <div className="max-w-7xl mx-auto px-3 py-2 flex items-center justify-between">
+      <div className={`relative z-10 flex h-full flex-col transition-opacity duration-500 ${isZooming ? "opacity-0" : "opacity-100"}`}>
+        <header className="glass-panel flex-shrink-0">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2">
+            <VisaAssistantBrand compact />
+
             <div className="flex items-center gap-2">
-              <Globe2 className="h-6 w-6 text-[#005EB8]" />
-              <div>
-                <h1 className="text-base font-bold leading-tight">Visa Assistant</h1>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-none">.global</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs py-0.5">
-                <Sparkles className="h-3 w-3 mr-1" />
+              <Badge className="border-emerald-500/30 bg-emerald-500/20 py-0.5 text-xs text-emerald-500 dark:text-emerald-400">
+                <Sparkles className="mr-1 h-3 w-3" />
                 {t.globalLanding.aiPowered}
               </Badge>
               <LanguageSelector />
               <ThemeToggle />
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 className="border-[#005EB8]/50 text-[#005EB8]"
                 onClick={() => setLocation("/login")}
@@ -312,175 +180,118 @@ export default function GlobalLanding() {
           </div>
         </header>
 
-        <main className="flex-1 flex overflow-hidden">
-          <div className="flex-1 flex flex-col items-center justify-center px-4 lg:px-8 py-2">
-            <div className="text-center mb-1 lg:mb-2 max-w-xl">
-              <Badge className="mb-1 bg-[#005EB8]/20 text-[#41B6E6] border-[#005EB8]/30 text-[10px] py-0.5">
-                <Globe2 className="h-2.5 w-2.5 mr-1" />
+        <main className="flex flex-1 overflow-hidden">
+          <div className="flex flex-1 flex-col items-center justify-center px-4 py-2 lg:px-8">
+            <div className="mb-1 max-w-xl text-center lg:mb-2">
+              <Badge className="mb-1 border-[#005EB8]/30 bg-[#005EB8]/20 py-0.5 text-[10px] text-[#41B6E6]">
+                <Globe2 className="mr-1 h-2.5 w-2.5" />
                 {t.globalLanding.badge}
               </Badge>
-              <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold mb-1">
+              <h1 className="mb-1 text-xl font-bold sm:text-2xl lg:text-3xl xl:text-4xl">
                 <span className="gradient-text">{t.globalLanding.headline}</span>
                 <br />
                 <span className="text-gray-900 dark:text-white">{t.globalLanding.subHeadline}</span>
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 text-xs lg:text-sm">
-                {t.globalLanding.description}
-              </p>
+              </h1>
+              <p className="text-xs text-gray-600 dark:text-gray-400 lg:text-sm">{t.globalLanding.description}</p>
             </div>
 
-            <div 
-              ref={globeRef}
-              className="globe-container relative mb-1"
-            >
-              <div 
-                className={`globe w-28 h-28 sm:w-32 sm:h-32 lg:w-40 lg:h-40 xl:w-48 xl:h-48 rounded-full overflow-hidden ${isZooming ? 'zooming' : ''}`}
-              >
-                <img 
-                  src={globeImage} 
-                  alt="Earth Globe" 
-                  className="w-full h-full object-cover"
-                  draggable={false}
-                />
+            <div ref={globeRef} className="globe-container relative mb-1">
+              <div className={`globe h-28 w-28 overflow-hidden sm:h-32 sm:w-32 lg:h-40 lg:w-40 xl:h-48 xl:w-48 ${isZooming ? "zooming" : ""}`}>
+                <img src={globeImage} alt="Earth globe" className="h-full w-full object-cover" draggable={false} />
               </div>
-              
               <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                <Badge variant="outline" className="bg-black/50 border-white/20 text-white text-[10px] py-0.5">
-                  <Star className="h-2.5 w-2.5 mr-1 text-yellow-400" />
+                <Badge variant="outline" className="border-white/20 bg-black/50 py-0.5 text-[10px] text-white">
+                  <Star className="mr-1 h-2.5 w-2.5 text-yellow-400" />
                   {t.globalLanding.countriesCount} | 1 {t.globalLanding.live} | 15 {t.globalLanding.comingSoon}
                 </Badge>
               </div>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-3 mb-2">
-              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
-                <Bot className="h-3 w-3 text-[#41B6E6]" />
-                <span>{t.globalLanding.multiAgentAI}</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
-                <FileText className="h-3 w-3 text-emerald-400" />
-                <span>{t.globalLanding.documentGeneration}</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
-                <Shield className="h-3 w-3 text-yellow-400" />
-                <span>{t.globalLanding.complianceVerified}</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
-                <Users className="h-3 w-3 text-purple-400" />
-                <span>{t.globalLanding.approvedApplicants}</span>
-              </div>
+            <div className="mb-2 flex flex-wrap justify-center gap-3">
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400"><Bot className="h-3 w-3 text-[#41B6E6]" /><span>{t.globalLanding.multiAgentAI}</span></div>
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400"><FileText className="h-3 w-3 text-emerald-400" /><span>{t.globalLanding.documentGeneration}</span></div>
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400"><Shield className="h-3 w-3 text-yellow-400" /><span>{t.globalLanding.complianceVerified}</span></div>
+              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400"><Users className="h-3 w-3 text-purple-400" /><span>{t.globalLanding.approvedApplicants}</span></div>
             </div>
 
             <div className="relative w-full max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
               <Input
                 placeholder={t.globalLanding.searchPlaceholder}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 py-1.5 text-sm bg-white/80 dark:bg-white/5 border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder:text-gray-500 rounded-full focus:border-[#005EB8] focus:ring-[#005EB8]"
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="rounded-full border-gray-300 bg-white/80 py-1.5 pl-9 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#005EB8] focus:ring-[#005EB8] dark:border-white/10 dark:bg-white/5 dark:text-white"
                 data-testid="input-country-search"
               />
             </div>
           </div>
 
-          <div className="w-72 lg:w-80 xl:w-96 glass-panel rounded-l-2xl flex flex-col overflow-hidden">
-            <div className="p-3 pb-2 flex-shrink-0">
-              <h3 className="text-sm font-semibold">{t.globalLanding.selectDestination}</h3>
+          <aside className="glass-panel flex w-72 flex-col overflow-hidden rounded-l-2xl lg:w-80 xl:w-96">
+            <div className="flex-shrink-0 p-3 pb-2">
+              <h2 className="text-sm font-semibold">{t.globalLanding.selectDestination}</h2>
               <p className="text-xs text-gray-600 dark:text-gray-400">{t.globalLanding.chooseCountry}</p>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-3 space-y-1.5 scrollbar-thin">
+            <div className="scrollbar-thin flex-1 space-y-1.5 overflow-y-auto px-3">
               {filteredCountries.map((country) => (
                 <Card
                   key={country.code}
-                  className={`country-card p-2 cursor-pointer ${country.isUnlocked ? 'unlocked' : 'locked'}`}
+                  className={`country-card cursor-pointer p-2 ${country.isUnlocked ? "unlocked" : "locked"}`}
                   onClick={() => handleCountrySelect(country)}
                   data-testid={`card-country-${country.code}`}
                 >
                   <div className="flex items-center gap-2">
                     <CountryFlag code={country.flagCode} />
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-medium text-gray-900 dark:text-white truncate">{country.name}</span>
-                        {country.isUnlocked ? (
-                          <Unlock className="h-3 w-3 text-emerald-400 flex-shrink-0" />
-                        ) : (
-                          <Lock className="h-3 w-3 text-gray-500 flex-shrink-0" />
-                        )}
+                        <span className="truncate text-xs font-medium text-gray-900 dark:text-white">{country.name}</span>
+                        {country.isUnlocked ? <Unlock className="h-3 w-3 flex-shrink-0 text-emerald-400" /> : <Lock className="h-3 w-3 flex-shrink-0 text-gray-500" />}
                       </div>
-                      <div className="flex flex-wrap gap-0.5 mt-0.5">
-                        {country.visaTypes.slice(0, 2).map((visa, i) => (
-                          <span key={i} className="text-[9px] px-1 py-0.5 rounded bg-gray-200/80 dark:bg-white/10 text-gray-600 dark:text-gray-400">
-                            {visa}
-                          </span>
+                      <div className="mt-0.5 flex flex-wrap gap-0.5">
+                        {country.visaTypes.slice(0, 2).map((visa) => (
+                          <span key={visa} className="rounded bg-gray-200/80 px-1 py-0.5 text-[9px] text-gray-600 dark:bg-white/10 dark:text-gray-400">{visa}</span>
                         ))}
-                        {country.visaTypes.length > 2 && (
-                          <span className="text-[9px] px-1 py-0.5 rounded bg-gray-200/80 dark:bg-white/10 text-gray-600 dark:text-gray-400">
-                            +{country.visaTypes.length - 2}
-                          </span>
-                        )}
+                        {country.visaTypes.length > 2 && <span className="rounded bg-gray-200/80 px-1 py-0.5 text-[9px] text-gray-600 dark:bg-white/10 dark:text-gray-400">+{country.visaTypes.length - 2}</span>}
                       </div>
                     </div>
                     {country.isUnlocked ? (
                       <ChevronRight className="h-4 w-4 text-[#005EB8]" />
                     ) : country.comingSoon ? (
-                      <Badge className="text-[7px] bg-amber-500/20 text-amber-400 border-amber-500/30 px-1 py-0">
-                        {t.globalLanding.next}
-                      </Badge>
+                      <Badge className="border-amber-500/30 bg-amber-500/20 px-1 py-0 text-[7px] text-amber-400">{t.globalLanding.next}</Badge>
                     ) : (
-                      <Badge className="text-[7px] bg-gray-500/20 text-gray-400 border-gray-500/30 px-1 py-0">
-                        {t.globalLanding.soon}
-                      </Badge>
+                      <Badge className="border-gray-500/30 bg-gray-500/20 px-1 py-0 text-[7px] text-gray-400">{t.globalLanding.soon}</Badge>
                     )}
                   </div>
                 </Card>
               ))}
             </div>
 
-            <div className="p-2 border-t border-white/10 flex-shrink-0">
-              <p className="text-[10px] text-gray-500 text-center">
-                {t.globalLanding.moreLaunching}
-              </p>
+            <div className="flex-shrink-0 border-t border-white/10 p-2">
+              <p className="text-center text-[10px] text-gray-500">{t.globalLanding.moreLaunching}</p>
             </div>
-          </div>
+          </aside>
         </main>
 
-        <footer className="flex-shrink-0 glass-panel py-1.5">
-          <div className="max-w-7xl mx-auto px-4 flex items-center justify-between text-xs text-gray-500">
+        <footer className="glass-panel flex-shrink-0 py-1.5">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 text-xs text-gray-500">
             <p>2026 {t.globalLanding.footerText}</p>
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" className="text-gray-500 text-xs h-6 px-2" data-testid="link-privacy">{t.globalLanding.privacy}</Button>
-              <Button variant="ghost" size="sm" className="text-gray-500 text-xs h-6 px-2" data-testid="link-terms">{t.globalLanding.terms}</Button>
+              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-gray-500" data-testid="link-privacy">{t.globalLanding.privacy}</Button>
+              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-gray-500" data-testid="link-terms">{t.globalLanding.terms}</Button>
             </div>
           </div>
         </footer>
       </div>
 
       {isZooming && (
-        <div 
-          className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-500 ease-out ${
-            isFadingOut 
-              ? "bg-[#0a0a1a] opacity-100" 
-              : "bg-sky-100 dark:bg-[#0a0a1a] animate-fade-in"
-          }`}
-        >
-          <div className={`text-center transition-all duration-500 ease-out ${
-            isFadingOut ? "opacity-0 scale-110 translate-y-[-20px]" : "opacity-100 scale-100"
-          }`}>
+        <div className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-500 ease-out ${isFadingOut ? "bg-[#0a0a1a] opacity-100" : "animate-fade-in bg-sky-100 dark:bg-[#0a0a1a]"}`}>
+          <div className={`text-center transition-all duration-500 ease-out ${isFadingOut ? "-translate-y-5 scale-110 opacity-0" : "scale-100 opacity-100"}`}>
             <div className="globe-container">
-              <div className={`globe zooming w-48 h-48 lg:w-64 lg:h-64 rounded-full overflow-hidden transition-transform duration-500 ${
-                isFadingOut ? "scale-150" : "scale-100"
-              }`}>
-                <img 
-                  src={globeImage} 
-                  alt="Earth Globe" 
-                  className="w-full h-full object-cover"
-                />
+              <div className={`globe zooming h-48 w-48 overflow-hidden transition-transform duration-500 lg:h-64 lg:w-64 ${isFadingOut ? "scale-150" : "scale-100"}`}>
+                <img src={globeImage} alt="Earth globe" className="h-full w-full object-cover" />
               </div>
             </div>
-            <p className={`mt-6 text-lg font-semibold text-gray-900 dark:text-white transition-opacity duration-300 ${
-              isFadingOut ? "opacity-0" : "animate-pulse"
-            }`}>
+            <p className={`mt-6 text-lg font-semibold text-gray-900 transition-opacity duration-300 dark:text-white ${isFadingOut ? "opacity-0" : "animate-pulse"}`}>
               Traveling to {selectedCountry?.name}...
             </p>
           </div>
