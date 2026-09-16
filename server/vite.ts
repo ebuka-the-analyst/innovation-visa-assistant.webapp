@@ -5,6 +5,11 @@ import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import viteConfig from "../vite.config";
 import { nanoid } from "nanoid";
+import {
+  getSeoProfile,
+  registerSeoDiscoveryRoutes,
+  renderSeoHtml,
+} from "./seoPresentation";
 
 const viteLogger = createLogger();
 
@@ -40,6 +45,7 @@ export async function setupVite(app: Express, server: Server) {
     appType: "custom",
   });
 
+  registerSeoDiscoveryRoutes(app);
   app.use(vite.middlewares);
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
@@ -52,13 +58,16 @@ export async function setupVite(app: Express, server: Server) {
         "index.html",
       );
 
-      // always reload the index.html file from disk incase it changes
+      // Always reload index.html in development so metadata changes are immediate.
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
       template = template.replace(
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`,
       );
+      template = renderSeoHtml(template, req);
       const page = await vite.transformIndexHtml(url, template);
+      const profile = getSeoProfile(req);
+      res.setHeader("X-Robots-Tag", profile.robots);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
@@ -85,7 +94,14 @@ export function serveStatic(app: Express) {
     );
   }
 
+  // These routes are intentionally generated at request time so the same build can
+  // serve visaassistant.global and the legacy Innovator Founder hostname safely.
+  registerSeoDiscoveryRoutes(app);
+
   app.use(express.static(distPath, {
+    // Do not let express.static serve index.html directly. The catch-all below must
+    // inject hostname/path-specific metadata into every HTML response.
+    index: false,
     setHeaders: (res, filePath) => {
       const normalisedPath = filePath.split(path.sep).join("/");
       if (normalisedPath.endsWith("/index.html")) {
@@ -104,10 +120,19 @@ export function serveStatic(app: Express) {
     },
   }));
 
-  // Fall through to index.html for client-side routes. This response must also be
-  // uncached so a deep link cannot resurrect asset references from an old release.
-  app.use("*", (_req, res) => {
-    setApplicationShellHeaders(res);
-    res.sendFile(path.resolve(distPath, "index.html"));
+  // Fall through to index.html for client-side routes. Render the HTML shell per
+  // request so crawlers receive correct title, canonical, robots, social metadata
+  // and JSON-LD even when they do not execute the React application.
+  app.use("*", async (req, res, next) => {
+    try {
+      setApplicationShellHeaders(res);
+      const template = await fs.promises.readFile(path.resolve(distPath, "index.html"), "utf-8");
+      const profile = getSeoProfile(req);
+      const page = renderSeoHtml(template, req);
+      res.setHeader("X-Robots-Tag", profile.robots);
+      res.status(200).type("html").send(page);
+    } catch (error) {
+      next(error);
+    }
   });
 }
