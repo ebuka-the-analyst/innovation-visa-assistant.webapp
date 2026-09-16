@@ -139,7 +139,14 @@ const BusinessPlanTemplatePage = lazy(() => import("@/pages/seo/business-plan-te
 const BlogPage = lazy(() => import("@/pages/blog"));
 const BlogPostPage = lazy(() => import("@/pages/blog-post"));
 
-const SIDEBAR_HIDDEN_ROUTES = ["/", "/uk", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide", "/blog"];
+const INNOVATOR_FOUNDER_PATH = "/uk/innovatorfoundervisaassistant";
+const VISA_ASSISTANT_GLOBAL_HOSTS = new Set(["visaassistant.global", "www.visaassistant.global"]);
+
+function isVisaAssistantGlobalHost() {
+  return typeof window !== "undefined" && VISA_ASSISTANT_GLOBAL_HOSTS.has(window.location.hostname.toLowerCase());
+}
+
+const SIDEBAR_HIDDEN_ROUTES = ["/", "/uk", INNOVATOR_FOUNDER_PATH, "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide", "/blog"];
 const SIDEBAR_HIDDEN_PREFIXES = ["/blog/"];
 const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard"];
 const PUBLIC_APP_SHELL_ROUTES = ["/ai-transparency"];
@@ -296,12 +303,17 @@ function HeaderNavTabs() {
   );
 }
 
+function RootLanding() {
+  return isVisaAssistantGlobalHost() ? <GlobalLanding /> : <Home />;
+}
+
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={RootLanding} />
       <Route path="/v2" component={GlobalLanding} />
       <Route path="/uk" component={Home} />
+      <Route path={INNOVATOR_FOUNDER_PATH} component={Home} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
       <Route path="/verify-email" component={VerifyEmail} />
@@ -566,7 +578,7 @@ function AnalyticsProvider({ children }: { children: React.ReactNode }) {
 
 function CountryWidgets() {
   const [location] = useLocation();
-  const isGlobalLanding = location === "/v2";
+  const isGlobalLanding = location === "/v2" || (location === "/" && isVisaAssistantGlobalHost());
   
   return (
     <Suspense fallback={null}>
