@@ -68,7 +68,7 @@ export default function Header() {
       {!disclaimerDismissed && (
         <div
           className="relative w-full border-b border-red-700/40 px-3 py-2.5 sm:px-4"
-          style={{ backgroundColor: "#DC2626" }}
+          style={{ backgroundColor: '#DC2626' }}
           role="note"
           aria-label="Important platform information"
         >
