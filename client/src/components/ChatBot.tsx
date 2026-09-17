@@ -9,7 +9,7 @@ interface Message {
   content: string;
 }
 
-type PageContextKey = "global" | "uk";
+type PageContextKey = "global" | "uk" | "catalogue";
 
 const OVERLAY_EVENT = "visaassistant:overlay-open";
 
@@ -28,6 +28,15 @@ const PAGE_CONTEXTS = {
       "Which visa route is live now?",
       "Tell me about the UK Innovator Founder route",
     ],
+  },
+  catalogue: {
+    key: "catalogue" as const,
+    title: "Visa Route AI Assistant",
+    greeting: "Hi! I can see which country catalogue you are browsing and can help explain the routes shown on this page, compare preparation needs, and point you to the relevant official authority. What would you like to know?",
+    disclaimer: "AI-assisted preparation information, not regulated immigration advice. Immigration requirements can change; verify current requirements with the relevant official authority.",
+    placeholder: "Ask about the routes on this page...",
+    gradient: "linear-gradient(135deg, #0D2C4A 0%, #41B6E6 100%)",
+    suggestions: ["What routes are shown on this page?", "Which routes fit skilled professionals?", "What should I prepare before applying?"],
   },
   uk: {
     key: "uk" as const,
@@ -68,6 +77,10 @@ function getPageContextKey(pathname: string): PageContextKey {
 
   if (path === "/v2" || (isGlobalHost && (path === "/" || path === ""))) {
     return "global";
+  }
+
+  if (isGlobalHost && /^\/(uk|us|ca|au|de|fr|nl|sg|ae|nz|jp|ie|pt|es|se|ch)\/?$/.test(path)) {
+    return "catalogue";
   }
 
   return "uk";
