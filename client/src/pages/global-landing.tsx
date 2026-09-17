@@ -9,12 +9,10 @@ import {
   ChevronRight,
   FileText,
   Globe2,
-  Lock,
   Search,
   Shield,
   Sparkles,
   Star,
-  Unlock,
   Users,
 } from "lucide-react";
 import globeImage from "@assets/unnamed_(1)_1769196836272.png";
@@ -28,8 +26,7 @@ interface Country {
   name: string;
   flagCode: string;
   visaTypes: string[];
-  isUnlocked: boolean;
-  comingSoon?: boolean;
+  routeCount: number;
 }
 
 function CountryFlag({ code, className = "" }: { code: string; className?: string }) {
@@ -65,22 +62,22 @@ function CountryFlag({ code, className = "" }: { code: string; className?: strin
 }
 
 const countries: Country[] = [
-  { code: "uk", name: "United Kingdom", flagCode: "uk", visaTypes: ["Innovator Founder", "Global Talent", "Skilled Worker"], isUnlocked: true },
-  { code: "us", name: "United States", flagCode: "us", visaTypes: ["EB-1", "EB-2 NIW", "O-1", "E-2"], isUnlocked: false, comingSoon: true },
-  { code: "ca", name: "Canada", flagCode: "ca", visaTypes: ["Start-up Visa", "Express Entry", "Provincial Nominee"], isUnlocked: false },
-  { code: "au", name: "Australia", flagCode: "au", visaTypes: ["Global Talent", "Business Innovation", "Skilled Independent"], isUnlocked: false },
-  { code: "de", name: "Germany", flagCode: "de", visaTypes: ["EU Blue Card", "Self-Employment", "Freelance"], isUnlocked: false },
-  { code: "fr", name: "France", flagCode: "fr", visaTypes: ["French Tech Visa", "Talent Passport", "Entrepreneur"], isUnlocked: false },
-  { code: "nl", name: "Netherlands", flagCode: "nl", visaTypes: ["Startup Visa", "Self-Employment", "Highly Skilled Migrant"], isUnlocked: false },
-  { code: "sg", name: "Singapore", flagCode: "sg", visaTypes: ["EntrePass", "Tech.Pass", "Employment Pass"], isUnlocked: false },
-  { code: "ae", name: "United Arab Emirates", flagCode: "ae", visaTypes: ["Golden Visa", "Green Visa", "Freelancer Visa"], isUnlocked: false },
-  { code: "nz", name: "New Zealand", flagCode: "nz", visaTypes: ["Entrepreneur Work Visa", "Investor Visa", "Global Impact Visa"], isUnlocked: false },
-  { code: "jp", name: "Japan", flagCode: "jp", visaTypes: ["Startup Visa", "Business Manager", "Highly Skilled Professional"], isUnlocked: false },
-  { code: "ie", name: "Ireland", flagCode: "ie", visaTypes: ["Start-up Entrepreneur", "Immigrant Investor"], isUnlocked: false },
-  { code: "pt", name: "Portugal", flagCode: "pt", visaTypes: ["Golden Visa", "D7 Visa", "Tech Visa"], isUnlocked: false },
-  { code: "es", name: "Spain", flagCode: "es", visaTypes: ["Entrepreneur Visa", "Digital Nomad Visa", "Golden Visa"], isUnlocked: false },
-  { code: "se", name: "Sweden", flagCode: "se", visaTypes: ["Self-Employment Permit", "Work Permit"], isUnlocked: false },
-  { code: "ch", name: "Switzerland", flagCode: "ch", visaTypes: ["Self-Employment Permit", "L Permit", "B Permit"], isUnlocked: false },
+  { code: "uk", routeCount: 42, name: "United Kingdom", flagCode: "uk", visaTypes: ["Innovator Founder", "Global Talent", "Skilled Worker"] },
+  { code: "us", routeCount: 25, name: "United States", flagCode: "us", visaTypes: ["EB-1", "EB-2 NIW", "O-1", "E-2"] },
+  { code: "ca", routeCount: 18, name: "Canada", flagCode: "ca", visaTypes: ["Start-up Visa", "Express Entry", "Provincial Nominee"] },
+  { code: "au", routeCount: 20, name: "Australia", flagCode: "au", visaTypes: ["Global Talent", "Business Innovation", "Skilled Independent"] },
+  { code: "de", routeCount: 15, name: "Germany", flagCode: "de", visaTypes: ["EU Blue Card", "Self-Employment", "Freelance"] },
+  { code: "fr", routeCount: 16, name: "France", flagCode: "fr", visaTypes: ["French Tech Visa", "Talent Passport", "Entrepreneur"] },
+  { code: "nl", routeCount: 14, name: "Netherlands", flagCode: "nl", visaTypes: ["Startup Visa", "Self-Employment", "Highly Skilled Migrant"] },
+  { code: "sg", routeCount: 13, name: "Singapore", flagCode: "sg", visaTypes: ["EntrePass", "Tech.Pass", "Employment Pass"] },
+  { code: "ae", routeCount: 14, name: "United Arab Emirates", flagCode: "ae", visaTypes: ["Golden Visa", "Green Visa", "Freelancer Visa"] },
+  { code: "nz", routeCount: 17, name: "New Zealand", flagCode: "nz", visaTypes: ["Entrepreneur Work Visa", "Investor Visa", "Global Impact Visa"] },
+  { code: "jp", routeCount: 16, name: "Japan", flagCode: "jp", visaTypes: ["Startup Visa", "Business Manager", "Highly Skilled Professional"] },
+  { code: "ie", routeCount: 15, name: "Ireland", flagCode: "ie", visaTypes: ["Start-up Entrepreneur", "Immigrant Investor"] },
+  { code: "pt", routeCount: 14, name: "Portugal", flagCode: "pt", visaTypes: ["Golden Visa", "D7 Visa", "Tech Visa"] },
+  { code: "es", routeCount: 16, name: "Spain", flagCode: "es", visaTypes: ["Entrepreneur Visa", "Digital Nomad Visa", "Golden Visa"] },
+  { code: "se", routeCount: 14, name: "Sweden", flagCode: "se", visaTypes: ["Self-Employment Permit", "Work Permit"] },
+  { code: "ch", routeCount: 15, name: "Switzerland", flagCode: "ch", visaTypes: ["Self-Employment Permit", "L Permit", "B Permit"] },
 ];
 
 export default function GlobalLanding() {
@@ -139,11 +136,7 @@ export default function GlobalLanding() {
         .globe.zooming { animation: zoom-in 1.5s ease-in forwards; }
         .country-card { backdrop-filter: blur(10px); background: rgba(255,255,255,.8); border: 1px solid rgba(0,94,184,.2); transition: all .2s ease; }
         .dark .country-card { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.1); }
-        .country-card.unlocked { background: rgba(5,150,105,.1); border: 2px solid rgba(5,150,105,.5); }
-        .dark .country-card.unlocked { background: rgba(5,150,105,.15); border-color: rgba(5,150,105,.6); }
-        .country-card.unlocked:hover { background: rgba(5,150,105,.2); border-color: rgba(5,150,105,.7); }
-        .country-card.locked { opacity: .72; cursor: pointer; }
-        .country-card.locked:hover { opacity: .92; border-color: rgba(0,94,184,.45); transform: translateY(-1px); }
+        .country-card:hover { border-color: rgba(0,94,184,.45); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,94,184,.08); }
         .gradient-text { background: linear-gradient(135deg,#005EB8 0%,#41B6E6 50%,#00A499 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .glass-panel { backdrop-filter: blur(20px); background: rgba(255,255,255,.8); border: 1px solid rgba(0,94,184,.1); }
         .dark .glass-panel { background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.08); }
@@ -235,7 +228,7 @@ export default function GlobalLanding() {
               {filteredCountries.map((country) => (
                 <Card
                   key={country.code}
-                  className={`country-card cursor-pointer p-3 md:p-2 ${country.isUnlocked ? "unlocked" : "locked"}`}
+                  className="country-card cursor-pointer p-3 md:p-2"
                   onClick={() => handleCountrySelect(country)}
                   data-testid={`card-country-${country.code}`}
                 >
@@ -244,22 +237,16 @@ export default function GlobalLanding() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <span className="truncate text-sm font-medium text-gray-900 dark:text-white md:text-xs">{country.name}</span>
-                        {country.isUnlocked ? <Unlock className="h-3.5 w-3.5 flex-shrink-0 text-emerald-400 md:h-3 md:w-3" /> : <Lock className="h-3.5 w-3.5 flex-shrink-0 text-gray-500 md:h-3 md:w-3" />}
+                        
                       </div>
                       <div className="mt-1 flex flex-wrap gap-1 md:mt-0.5 md:gap-0.5">
                         {country.visaTypes.slice(0, 2).map((visa) => (
                           <span key={visa} className="rounded bg-gray-200/80 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-400 md:px-1 md:text-[9px]">{visa}</span>
                         ))}
-                        {country.visaTypes.length > 2 && <span className="rounded bg-gray-200/80 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-400 md:px-1 md:text-[9px]">+{country.visaTypes.length - 2}</span>}
+                        {country.routeCount > 2 && <span className="rounded bg-gray-200/80 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-400 md:px-1 md:text-[9px]">+{country.routeCount - 2}</span>}
                       </div>
                     </div>
-                    {country.isUnlocked ? (
-                      <ChevronRight className="h-5 w-5 flex-shrink-0 text-[#005EB8] md:h-4 md:w-4" />
-                    ) : country.comingSoon ? (
-                      <Badge className="border-amber-500/30 bg-amber-500/20 px-1.5 py-0.5 text-[8px] text-amber-400 md:px-1 md:py-0 md:text-[7px]">{t.globalLanding.next}</Badge>
-                    ) : (
-                      <Badge className="border-gray-500/30 bg-gray-500/20 px-1.5 py-0.5 text-[8px] text-gray-400 md:px-1 md:py-0 md:text-[7px]">{t.globalLanding.soon}</Badge>
-                    )}
+                    <ChevronRight className="h-5 w-5 flex-shrink-0 text-[#005EB8] md:h-4 md:w-4" />
                   </div>
                 </Card>
               ))}
@@ -272,7 +259,7 @@ export default function GlobalLanding() {
         </main>
 
         <footer className="glass-panel flex-shrink-0 py-2 md:py-1.5">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 text-[10px] text-gray-500 md:text-xs">
+          <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-1 px-4 text-center sm:flex-row sm:gap-4 text-[10px] text-gray-500 md:text-xs">
             <p>2026 {t.globalLanding.footerText}</p>
             <div className="flex items-center gap-1 md:gap-3">
               <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] text-gray-500 md:px-2 md:text-xs" data-testid="link-privacy">{t.globalLanding.privacy}</Button>

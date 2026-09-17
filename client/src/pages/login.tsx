@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import logoLightImg from "@assets/official_logo.webp";
 import logoDarkImg from "@assets/logo_dark.webp";
+import VisaAssistantBrand from "@/components/VisaAssistantBrand";
 import { SEOHead } from "@/components/SEOHead";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { trackLogin, trackFormStart, trackFormSubmit, trackError } from "@/lib/analytics";
@@ -147,40 +148,33 @@ export default function Login() {
     );
   }
 
+  const isGlobalHost = typeof window !== "undefined" && /(^|\.)visaassistant\.global$/i.test(window.location.hostname);
+
   return (
     <>
       <SEOHead
-        title="Sign In | UK Innovator Founder Visa Assistant"
-        description="Sign in to your UK Innovator Founder Visa Assistant account. Continue working on your business plan, innovation assessment, and visa application tools."
+        title={isGlobalHost ? "Sign In | Visa Assistant Global" : "Sign In | UK Innovator Founder Visa Assistant"}
+        description={isGlobalHost ? "Sign in to Visa Assistant Global and continue your visa preparation journey." : "Sign in to your UK Innovator Founder Visa Assistant account. Continue working on your business plan, innovation assessment, and visa application tools."}
         path="/login"
       />
-      <div className="h-screen flex flex-col md:flex-row overflow-hidden">
+      <div className={isGlobalHost ? "min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-50 via-white to-blue-50 p-4 dark:from-[#090b18] dark:via-[#0b1020] dark:to-[#090b18]" : "h-screen flex flex-col md:flex-row overflow-hidden"}>
         {/* Left Side - Branding */}
-        <div className="hidden md:flex md:w-[45%] bg-gradient-to-br from-primary/10 via-primary/5 to-background items-center justify-center p-6">
+        <div className={isGlobalHost ? "hidden" : "hidden md:flex md:w-[45%] bg-gradient-to-br from-primary/10 via-primary/5 to-background items-center justify-center p-6"}>
           <div className="text-center space-y-4">
-            <div className="isolate z-[9999] mix-blend-normal bg-transparent flex justify-center">
-              <div className="logo-container overflow-hidden">
-                <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
-                <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
-              </div>
-            </div>
+            <div className="flex justify-center">{isGlobalHost ? <VisaAssistantBrand /> : <div className="logo-container overflow-hidden"><img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-light object-contain" /><img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-dark object-contain" /></div>}</div>
             <h1 className="text-lg font-bold text-foreground">Welcome back</h1>
-            <p className="text-sm text-muted-foreground">Continue your visa journey</p>
+            <p className="text-sm text-muted-foreground">{isGlobalHost ? "Continue your global visa preparation journey" : "Continue your visa journey"}</p>
           </div>
         </div>
 
         {/* Right Side - Form */}
-        <div className="flex-1 flex items-center justify-center bg-background p-4">
-          <div className="w-full max-w-xs space-y-3">
+        <div className={isGlobalHost ? "w-full max-w-md rounded-3xl border bg-background/95 p-6 shadow-xl sm:p-8" : "flex-1 flex items-center justify-center bg-background p-4"}>
+          <div className={isGlobalHost ? "mx-auto w-full max-w-sm space-y-4" : "w-full max-w-xs space-y-3"}>
             {/* Mobile only header */}
-            <div className="md:hidden text-center space-y-1 mb-2">
-              <div className="isolate z-[9999] mix-blend-normal bg-transparent flex justify-center">
-                <div className="logo-container overflow-hidden">
-                  <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain" />
-                  <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark object-contain" />
-                </div>
-              </div>
-              <h1 className="text-sm font-bold">Welcome back</h1>
+            <div className={isGlobalHost ? "text-center space-y-2 mb-5" : "md:hidden text-center space-y-1 mb-2"}>
+              <div className="flex justify-center">{isGlobalHost ? <VisaAssistantBrand /> : <div className="logo-container overflow-hidden"><img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain" /><img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark object-contain" /></div>}</div>
+              <h1 className={isGlobalHost ? "text-xl font-bold" : "text-sm font-bold"}>Welcome back</h1>
+              {isGlobalHost && <p className="text-sm text-muted-foreground">Continue your visa preparation journey</p>}
             </div>
           {verificationRequired && (
             <Alert className="border-amber-500/50 bg-amber-500/10">
