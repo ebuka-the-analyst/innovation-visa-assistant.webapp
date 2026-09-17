@@ -122,7 +122,7 @@ export default function GlobalLanding() {
       <style>{`
         @keyframes twinkle { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
         @keyframes zoom-in { 0% { transform: scale(1) rotateY(0); } 50% { transform: scale(2) rotateY(180deg); } 100% { transform: scale(50) rotateY(360deg); opacity: 0; } }
-        @keyframes earth-spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+        @keyframes earth-surface-spin { from { background-position-x: 0%; } to { background-position-x: 200%; } }
         @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 15px rgba(0,94,184,.3); } 50% { box-shadow: 0 0 30px rgba(0,94,184,.5), 0 0 45px rgba(0,94,184,.2); } }
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
         .animate-fade-in { animation: fade-in .4s ease-out forwards; }
@@ -130,8 +130,8 @@ export default function GlobalLanding() {
         :not(.dark) .star { display: none; }
         .globe-container { perspective: 1000px; }
         .globe { border-radius: 999px; box-shadow: inset -20px -20px 40px rgba(0,0,0,.3), 0 0 30px rgba(0,94,184,.3), 0 0 60px rgba(0,94,184,.15); animation: pulse-glow 4s ease-in-out infinite; }
-        .globe img { animation: earth-spin 45s linear infinite; transform-origin: center; transform-style: preserve-3d; backface-visibility: visible; }
-        .globe.zooming img { animation: none; }
+        .earth-surface { position: absolute; inset: 0; border-radius: inherit; background-image: var(--earth-image); background-size: 200% 100%; background-repeat: repeat-x; background-position-y: center; animation: earth-surface-spin 60s linear infinite; }
+        .globe.zooming .earth-surface { animation: none; background-size: cover; background-position: center; }
         .dark .globe { box-shadow: inset -20px -20px 40px rgba(0,0,0,.5), 0 0 30px rgba(0,94,184,.3), 0 0 60px rgba(0,94,184,.15); }
         .globe.zooming { animation: zoom-in 1.5s ease-in forwards; }
         .country-card { backdrop-filter: blur(10px); background: rgba(255,255,255,.8); border: 1px solid rgba(0,94,184,.2); transition: all .2s ease; }
@@ -185,7 +185,7 @@ export default function GlobalLanding() {
 
             <div ref={globeRef} className="globe-container relative mb-6 mt-2 md:mb-1 md:mt-0">
               <div className={`globe h-36 w-36 overflow-hidden sm:h-40 sm:w-40 md:h-32 md:w-32 lg:h-40 lg:w-40 xl:h-48 xl:w-48 ${isZooming ? "zooming" : ""}`}>
-                <img src={globeImage} alt="Earth globe" className="h-full w-full object-cover" draggable={false} />
+                <div className="earth-surface" role="img" aria-label="Earth globe" style={{ "--earth-image": `url(${globeImage})` } as React.CSSProperties} />
               </div>
             </div>
 
