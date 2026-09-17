@@ -125,7 +125,7 @@ export default function GlobalLanding() {
   }, []);
 
   return (
-    <div className="relative flex h-screen flex-col overflow-hidden bg-gradient-to-b from-sky-100 to-blue-50 text-gray-900 dark:from-[#0a0a1a] dark:to-[#0a0a1a] dark:text-white">
+    <div className="relative flex min-h-[100svh] flex-col overflow-y-auto bg-gradient-to-b from-sky-100 to-blue-50 text-gray-900 dark:from-[#0a0a1a] dark:to-[#0a0a1a] dark:text-white md:h-screen md:overflow-hidden">
       <style>{`
         @keyframes twinkle { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
         @keyframes zoom-in { 0% { transform: scale(1) rotateY(0); } 50% { transform: scale(2) rotateY(180deg); } 100% { transform: scale(50) rotateY(360deg); opacity: 0; } }
@@ -155,13 +155,13 @@ export default function GlobalLanding() {
 
       <div id="starfield" className="pointer-events-none fixed inset-0" />
 
-      <div className={`relative z-10 flex h-full flex-col transition-opacity duration-500 ${isZooming ? "opacity-0" : "opacity-100"}`}>
+      <div className={`relative z-10 flex min-h-[100svh] flex-col transition-opacity duration-500 md:h-full md:min-h-0 ${isZooming ? "opacity-0" : "opacity-100"}`}>
         <header className="glass-panel flex-shrink-0">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-2">
             <VisaAssistantBrand compact />
 
-            <div className="flex items-center gap-2">
-              <Badge className="border-emerald-500/30 bg-emerald-500/20 py-0.5 text-xs text-emerald-500 dark:text-emerald-400">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Badge className="hidden border-emerald-500/30 bg-emerald-500/20 py-0.5 text-xs text-emerald-500 dark:text-emerald-400 sm:inline-flex">
                 <Sparkles className="mr-1 h-3 w-3" />
                 {t.globalLanding.aiPowered}
               </Badge>
@@ -170,7 +170,7 @@ export default function GlobalLanding() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-[#005EB8]/50 text-[#005EB8]"
+                className="h-9 border-[#005EB8]/50 px-3 text-[#005EB8]"
                 onClick={() => setLocation("/login")}
                 data-testid="button-global-login"
               >
@@ -180,104 +180,104 @@ export default function GlobalLanding() {
           </div>
         </header>
 
-        <main className="flex flex-1 overflow-hidden">
-          <div className="flex flex-1 flex-col items-center justify-center px-4 py-2 lg:px-8">
-            <div className="mb-1 max-w-xl text-center lg:mb-2">
-              <Badge className="mb-1 border-[#005EB8]/30 bg-[#005EB8]/20 py-0.5 text-[10px] text-[#41B6E6]">
+        <main className="flex flex-1 flex-col overflow-visible md:flex-row md:overflow-hidden">
+          <div className="flex flex-none flex-col items-center justify-center px-5 pb-7 pt-8 md:flex-1 md:px-4 md:py-2 lg:px-8">
+            <div className="mb-4 max-w-xl text-center md:mb-2">
+              <Badge className="mb-2 border-[#005EB8]/30 bg-[#005EB8]/20 px-3 py-1 text-[10px] text-[#41B6E6] md:mb-1 md:px-2 md:py-0.5">
                 <Globe2 className="mr-1 h-2.5 w-2.5" />
                 {t.globalLanding.badge}
               </Badge>
-              <h1 className="mb-1 text-xl font-bold sm:text-2xl lg:text-3xl xl:text-4xl">
+              <h1 className="mb-3 text-3xl font-bold leading-tight sm:text-4xl md:mb-1 md:text-2xl lg:text-3xl xl:text-4xl">
                 <span className="gradient-text">{t.globalLanding.headline}</span>
                 <br />
                 <span className="text-gray-900 dark:text-white">{t.globalLanding.subHeadline}</span>
               </h1>
-              <p className="text-xs text-gray-600 dark:text-gray-400 lg:text-sm">{t.globalLanding.description}</p>
+              <p className="mx-auto max-w-md text-sm leading-6 text-gray-600 dark:text-gray-400 md:text-xs md:leading-normal lg:text-sm">{t.globalLanding.description}</p>
             </div>
 
-            <div ref={globeRef} className="globe-container relative mb-1">
-              <div className={`globe h-28 w-28 overflow-hidden sm:h-32 sm:w-32 lg:h-40 lg:w-40 xl:h-48 xl:w-48 ${isZooming ? "zooming" : ""}`}>
+            <div ref={globeRef} className="globe-container relative mb-6 mt-2 md:mb-1 md:mt-0">
+              <div className={`globe h-36 w-36 overflow-hidden sm:h-40 sm:w-40 md:h-32 md:w-32 lg:h-40 lg:w-40 xl:h-48 xl:w-48 ${isZooming ? "zooming" : ""}`}>
                 <img src={globeImage} alt="Earth globe" className="h-full w-full object-cover" draggable={false} />
               </div>
               <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                <Badge variant="outline" className="border-white/20 bg-black/50 py-0.5 text-[10px] text-white">
+                <Badge variant="outline" className="border-white/20 bg-black/55 px-2.5 py-1 text-[10px] text-white md:py-0.5">
                   <Star className="mr-1 h-2.5 w-2.5 text-yellow-400" />
                   {t.globalLanding.countriesCount} | 1 {t.globalLanding.live} | 15 {t.globalLanding.comingSoon}
                 </Badge>
               </div>
             </div>
 
-            <div className="mb-2 flex flex-wrap justify-center gap-3">
-              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400"><Bot className="h-3 w-3 text-[#41B6E6]" /><span>{t.globalLanding.multiAgentAI}</span></div>
-              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400"><FileText className="h-3 w-3 text-emerald-400" /><span>{t.globalLanding.documentGeneration}</span></div>
-              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400"><Shield className="h-3 w-3 text-yellow-400" /><span>{t.globalLanding.complianceVerified}</span></div>
-              <div className="flex items-center gap-1.5 text-[10px] text-gray-600 dark:text-gray-400"><Users className="h-3 w-3 text-purple-400" /><span>{t.globalLanding.approvedApplicants}</span></div>
+            <div className="mb-5 grid w-full max-w-sm grid-cols-2 gap-x-3 gap-y-2.5 md:mb-2 md:flex md:max-w-none md:flex-wrap md:justify-center md:gap-3">
+              <div className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-400 md:text-[10px]"><Bot className="h-3.5 w-3.5 flex-shrink-0 text-[#41B6E6] md:h-3 md:w-3" /><span>{t.globalLanding.multiAgentAI}</span></div>
+              <div className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-400 md:text-[10px]"><FileText className="h-3.5 w-3.5 flex-shrink-0 text-emerald-400 md:h-3 md:w-3" /><span>{t.globalLanding.documentGeneration}</span></div>
+              <div className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-400 md:text-[10px]"><Shield className="h-3.5 w-3.5 flex-shrink-0 text-yellow-400 md:h-3 md:w-3" /><span>{t.globalLanding.complianceVerified}</span></div>
+              <div className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-400 md:text-[10px]"><Users className="h-3.5 w-3.5 flex-shrink-0 text-purple-400 md:h-3 md:w-3" /><span>{t.globalLanding.approvedApplicants}</span></div>
             </div>
 
-            <div className="relative w-full max-w-xs">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <div className="relative w-full max-w-sm md:max-w-xs">
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 md:left-3" />
               <Input
                 placeholder={t.globalLanding.searchPlaceholder}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                className="rounded-full border-gray-300 bg-white/80 py-1.5 pl-9 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#005EB8] focus:ring-[#005EB8] dark:border-white/10 dark:bg-white/5 dark:text-white"
+                className="h-12 rounded-full border-gray-300 bg-white/80 pl-11 text-base text-gray-900 placeholder:text-gray-500 focus:border-[#005EB8] focus:ring-[#005EB8] dark:border-white/10 dark:bg-white/5 dark:text-white md:h-auto md:py-1.5 md:pl-9 md:text-sm"
                 data-testid="input-country-search"
               />
             </div>
           </div>
 
-          <aside className="glass-panel flex w-72 flex-col overflow-hidden rounded-l-2xl lg:w-80 xl:w-96">
-            <div className="flex-shrink-0 p-3 pb-2">
-              <h2 className="text-sm font-semibold">{t.globalLanding.selectDestination}</h2>
-              <p className="text-xs text-gray-600 dark:text-gray-400">{t.globalLanding.chooseCountry}</p>
+          <aside className="glass-panel mx-3 mb-4 flex min-h-[32rem] w-auto flex-col overflow-hidden rounded-2xl md:mx-0 md:mb-0 md:min-h-0 md:w-72 md:rounded-l-2xl md:rounded-r-none lg:w-80 xl:w-96">
+            <div className="flex-shrink-0 p-4 pb-3 md:p-3 md:pb-2">
+              <h2 className="text-lg font-semibold md:text-sm">{t.globalLanding.selectDestination}</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 md:text-xs">{t.globalLanding.chooseCountry}</p>
             </div>
 
-            <div className="scrollbar-thin flex-1 space-y-1.5 overflow-y-auto px-3">
+            <div className="scrollbar-thin flex-1 space-y-2 overflow-y-auto px-3 pb-2 md:space-y-1.5 md:pb-0">
               {filteredCountries.map((country) => (
                 <Card
                   key={country.code}
-                  className={`country-card cursor-pointer p-2 ${country.isUnlocked ? "unlocked" : "locked"}`}
+                  className={`country-card cursor-pointer p-3 md:p-2 ${country.isUnlocked ? "unlocked" : "locked"}`}
                   onClick={() => handleCountrySelect(country)}
                   data-testid={`card-country-${country.code}`}
                 >
-                  <div className="flex items-center gap-2">
-                    <CountryFlag code={country.flagCode} />
+                  <div className="flex items-center gap-3 md:gap-2">
+                    <CountryFlag code={country.flagCode} className="h-7 w-10 md:h-6 md:w-8" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="truncate text-xs font-medium text-gray-900 dark:text-white">{country.name}</span>
-                        {country.isUnlocked ? <Unlock className="h-3 w-3 flex-shrink-0 text-emerald-400" /> : <Lock className="h-3 w-3 flex-shrink-0 text-gray-500" />}
+                        <span className="truncate text-sm font-medium text-gray-900 dark:text-white md:text-xs">{country.name}</span>
+                        {country.isUnlocked ? <Unlock className="h-3.5 w-3.5 flex-shrink-0 text-emerald-400 md:h-3 md:w-3" /> : <Lock className="h-3.5 w-3.5 flex-shrink-0 text-gray-500 md:h-3 md:w-3" />}
                       </div>
-                      <div className="mt-0.5 flex flex-wrap gap-0.5">
+                      <div className="mt-1 flex flex-wrap gap-1 md:mt-0.5 md:gap-0.5">
                         {country.visaTypes.slice(0, 2).map((visa) => (
-                          <span key={visa} className="rounded bg-gray-200/80 px-1 py-0.5 text-[9px] text-gray-600 dark:bg-white/10 dark:text-gray-400">{visa}</span>
+                          <span key={visa} className="rounded bg-gray-200/80 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-400 md:px-1 md:text-[9px]">{visa}</span>
                         ))}
-                        {country.visaTypes.length > 2 && <span className="rounded bg-gray-200/80 px-1 py-0.5 text-[9px] text-gray-600 dark:bg-white/10 dark:text-gray-400">+{country.visaTypes.length - 2}</span>}
+                        {country.visaTypes.length > 2 && <span className="rounded bg-gray-200/80 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-400 md:px-1 md:text-[9px]">+{country.visaTypes.length - 2}</span>}
                       </div>
                     </div>
                     {country.isUnlocked ? (
-                      <ChevronRight className="h-4 w-4 text-[#005EB8]" />
+                      <ChevronRight className="h-5 w-5 flex-shrink-0 text-[#005EB8] md:h-4 md:w-4" />
                     ) : country.comingSoon ? (
-                      <Badge className="border-amber-500/30 bg-amber-500/20 px-1 py-0 text-[7px] text-amber-400">{t.globalLanding.next}</Badge>
+                      <Badge className="border-amber-500/30 bg-amber-500/20 px-1.5 py-0.5 text-[8px] text-amber-400 md:px-1 md:py-0 md:text-[7px]">{t.globalLanding.next}</Badge>
                     ) : (
-                      <Badge className="border-gray-500/30 bg-gray-500/20 px-1 py-0 text-[7px] text-gray-400">{t.globalLanding.soon}</Badge>
+                      <Badge className="border-gray-500/30 bg-gray-500/20 px-1.5 py-0.5 text-[8px] text-gray-400 md:px-1 md:py-0 md:text-[7px]">{t.globalLanding.soon}</Badge>
                     )}
                   </div>
                 </Card>
               ))}
             </div>
 
-            <div className="flex-shrink-0 border-t border-white/10 p-2">
-              <p className="text-center text-[10px] text-gray-500">{t.globalLanding.moreLaunching}</p>
+            <div className="flex-shrink-0 border-t border-white/10 p-3 md:p-2">
+              <p className="text-center text-xs text-gray-500 md:text-[10px]">{t.globalLanding.moreLaunching}</p>
             </div>
           </aside>
         </main>
 
-        <footer className="glass-panel flex-shrink-0 py-1.5">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 text-xs text-gray-500">
+        <footer className="glass-panel flex-shrink-0 py-2 md:py-1.5">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 text-[10px] text-gray-500 md:text-xs">
             <p>2026 {t.globalLanding.footerText}</p>
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-gray-500" data-testid="link-privacy">{t.globalLanding.privacy}</Button>
-              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-gray-500" data-testid="link-terms">{t.globalLanding.terms}</Button>
+            <div className="flex items-center gap-1 md:gap-3">
+              <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] text-gray-500 md:px-2 md:text-xs" data-testid="link-privacy">{t.globalLanding.privacy}</Button>
+              <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] text-gray-500 md:px-2 md:text-xs" data-testid="link-terms">{t.globalLanding.terms}</Button>
             </div>
           </div>
         </footer>
