@@ -1,7 +1,7 @@
 name: Wire UK visa routes
 on:
   push:
-    branches: [feature/uk-visa-routes-catalogue]
+    branches: [main]
 permissions:
   contents: write
 jobs:
@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: feature/uk-visa-routes-catalogue
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: 22
