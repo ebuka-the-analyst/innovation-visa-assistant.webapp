@@ -9,6 +9,9 @@ import { Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageCode } from "@/lib/translations";
 
+// Shared globally: every current and future page should render this component rather than its own flag control.
+// The selected language is persisted by LanguageContext and is therefore carried across route navigation.
+
 interface Language {
   code: LanguageCode;
   name: string;
