@@ -1,0 +1,78 @@
+name: Polish global UI
+on:
+  push:
+    paths:
+      - '.github/workflows/polish-global-ui.yml'
+permissions:
+  contents: write
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Apply global platform UI fixes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('client/src/pages/global-landing.tsx')
+          s=p.read_text()
+          # Make every country visually open/explorable; assistant availability is handled inside catalogues.
+          s=s.replace('  Lock,\n', '')
+          s=s.replace('  Unlock,\n', '')
+          s=s.replace('  isUnlocked: boolean;\n  comingSoon?: boolean;\n', '')
+          import re
+          s=re.sub(r', isUnlocked: (?:true|false)(?:, comingSoon: true)?', '', s)
+          s=s.replace('.country-card.unlocked { background: rgba(5,150,105,.1); border: 2px solid rgba(5,150,105,.5); }\n        .dark .country-card.unlocked { background: rgba(5,150,105,.15); border-color: rgba(5,150,105,.6); }\n        .country-card.unlocked:hover { background: rgba(5,150,105,.2); border-color: rgba(5,150,105,.7); }\n        .country-card.locked { opacity: .72; cursor: pointer; }\n        .country-card.locked:hover { opacity: .92; border-color: rgba(0,94,184,.45); transform: translateY(-1px); }', '.country-card:hover { border-color: rgba(0,94,184,.45); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,94,184,.08); }')
+          s=s.replace('className={`country-card cursor-pointer p-3 md:p-2 ${country.isUnlocked ? "unlocked" : "locked"}`}', 'className="country-card cursor-pointer p-3 md:p-2"')
+          s=s.replace('{country.isUnlocked ? <Unlock className="h-3.5 w-3.5 flex-shrink-0 text-emerald-400 md:h-3 md:w-3" /> : <Lock className="h-3.5 w-3.5 flex-shrink-0 text-gray-500 md:h-3 md:w-3" />}', '')
+          # Use catalogue route counts for exact +N preview counts. Counts represent the catalogue entries currently published for each country.
+          counts={'uk':42,'us':25,'ca':18,'au':20,'de':15,'fr':16,'nl':14,'sg':13,'ae':14,'nz':17,'jp':16,'ie':15,'pt':14,'es':16,'se':14,'ch':15}
+          s=s.replace('interface Country {\n', 'interface Country {\n')
+          s=s.replace('  visaTypes: string[];\n', '  visaTypes: string[];\n  routeCount: number;\n')
+          for code,n in counts.items():
+            s=s.replace(f'{{ code: "{code}",', f'{{ code: "{code}", routeCount: {n},')
+          s=s.replace('{country.visaTypes.length > 2 && <span className="rounded bg-gray-200/80 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-400 md:px-1 md:text-[9px]">+{country.visaTypes.length - 2}</span>}', '{country.routeCount > 2 && <span className="rounded bg-gray-200/80 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-400 md:px-1 md:text-[9px]">+{country.routeCount - 2}</span>}')
+          # Every country has a catalogue, so always show navigation chevron, no NEXT/SOON badge at country level.
+          s=re.sub(r'\{country\.isUnlocked \? \(\s*<ChevronRight className="h-5 w-5 flex-shrink-0 text\[#[^\n]+?\n\s*\) : country\.comingSoon \? \([\s\S]*?\) : \([\s\S]*?\)\}', '<ChevronRight className="h-5 w-5 flex-shrink-0 text-[#005EB8] md:h-4 md:w-4" />', s)
+          # fallback exact block based on current source
+          start='{country.isUnlocked ? (\n                      <ChevronRight'
+          if start in s:
+            a=s.index(start); b=s.index('                    )}',a)+len('                    )}')
+            s=s[:a]+'<ChevronRight className="h-5 w-5 flex-shrink-0 text-[#005EB8] md:h-4 md:w-4" />'+s[b:]
+          # Center global footer contents.
+          s=s.replace('mx-auto flex max-w-7xl items-center justify-between gap-2 px-4', 'mx-auto flex max-w-7xl flex-col items-center justify-center gap-1 px-4 text-center sm:flex-row sm:gap-4')
+          p.write_text(s)
+
+          # Rebrand login to the global platform on visaassistant.global and centre the experience.
+          p=Path('client/src/pages/login.tsx'); s=p.read_text()
+          s=s.replace('import logoDarkImg from "@assets/logo_dark.webp";','import logoDarkImg from "@assets/logo_dark.webp";\nimport VisaAssistantBrand from "@/components/VisaAssistantBrand";')
+          s=s.replace('  return (\n    <>', '  const isGlobalHost = typeof window !== "undefined" && /(^|\\.)visaassistant\\.global$/i.test(window.location.hostname);\n\n  return (\n    <>')
+          s=s.replace('title="Sign In | UK Innovator Founder Visa Assistant"', 'title={isGlobalHost ? "Sign In | Visa Assistant Global" : "Sign In | UK Innovator Founder Visa Assistant"}')
+          s=s.replace('description="Sign in to your UK Innovator Founder Visa Assistant account. Continue working on your business plan, innovation assessment, and visa application tools."', 'description={isGlobalHost ? "Sign in to Visa Assistant Global and continue your visa preparation journey." : "Sign in to your UK Innovator Founder Visa Assistant account. Continue working on your business plan, innovation assessment, and visa application tools."}')
+          old='<div className="isolate z-[9999] mix-blend-normal bg-transparent flex justify-center">\n              <div className="logo-container overflow-hidden">\n                <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />\n                <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />\n              </div>\n            </div>'
+          s=s.replace(old, '<div className="flex justify-center">{isGlobalHost ? <VisaAssistantBrand /> : <div className="logo-container overflow-hidden"><img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-light object-contain" /><img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-dark object-contain" /></div>}</div>')
+          s=s.replace('<p className="text-sm text-muted-foreground">Continue your visa journey</p>', '<p className="text-sm text-muted-foreground">{isGlobalHost ? "Continue your global visa preparation journey" : "Continue your visa journey"}</p>')
+          # centre login as one coherent card on global host rather than old split Innovator branding
+          s=s.replace('<div className="h-screen flex flex-col md:flex-row overflow-hidden">', '<div className={isGlobalHost ? "min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-50 via-white to-blue-50 p-4 dark:from-[#090b18] dark:via-[#0b1020] dark:to-[#090b18]" : "h-screen flex flex-col md:flex-row overflow-hidden"}>')
+          s=s.replace('<div className="hidden md:flex md:w-[45%] bg-gradient-to-br from-primary/10 via-primary/5 to-background items-center justify-center p-6">', '<div className={isGlobalHost ? "hidden" : "hidden md:flex md:w-[45%] bg-gradient-to-br from-primary/10 via-primary/5 to-background items-center justify-center p-6"}>')
+          s=s.replace('<div className="flex-1 flex items-center justify-center bg-background p-4">', '<div className={isGlobalHost ? "w-full max-w-md rounded-3xl border bg-background/95 p-6 shadow-xl sm:p-8" : "flex-1 flex items-center justify-center bg-background p-4"}>')
+          s=s.replace('<div className="w-full max-w-xs space-y-3">', '<div className={isGlobalHost ? "mx-auto w-full max-w-sm space-y-4" : "w-full max-w-xs space-y-3"}>')
+          s=s.replace('<div className="md:hidden text-center space-y-1 mb-2">', '<div className={isGlobalHost ? "text-center space-y-2 mb-5" : "md:hidden text-center space-y-1 mb-2"}>')
+          # mobile/global brand block
+          mob='<div className="isolate z-[9999] mix-blend-normal bg-transparent flex justify-center">\n                <div className="logo-container overflow-hidden">\n                  <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain" />\n                  <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark object-contain" />\n                </div>\n              </div>'
+          s=s.replace(mob, '<div className="flex justify-center">{isGlobalHost ? <VisaAssistantBrand /> : <div className="logo-container overflow-hidden"><img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain" /><img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark object-contain" /></div>}</div>')
+          s=s.replace('<h1 className="text-sm font-bold">Welcome back</h1>', '<h1 className={isGlobalHost ? "text-xl font-bold" : "text-sm font-bold"}>Welcome back</h1>\n              {isGlobalHost && <p className="text-sm text-muted-foreground">Continue your visa preparation journey</p>}')
+          p.write_text(s)
+          PY
+      - name: Build check
+        run: npm ci && npm run build
+      - name: Commit fixes
+        run: |
+          git config user.name 'Ebuka Ben Umeh'
+          git config user.email 'ebuka.umeh40@outlook.com'
+          git add client/src/pages/global-landing.tsx client/src/pages/login.tsx
+          git commit -m 'Polish global country selector login and footer' || exit 0
+          git push
