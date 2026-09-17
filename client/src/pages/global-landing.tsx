@@ -122,7 +122,7 @@ export default function GlobalLanding() {
       <style>{`
         @keyframes twinkle { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
         @keyframes zoom-in { 0% { transform: scale(1) rotateY(0); } 50% { transform: scale(2) rotateY(180deg); } 100% { transform: scale(50) rotateY(360deg); opacity: 0; } }
-        @keyframes earth-surface-spin { from { background-position: 0% center; } to { background-position: -200% center; } }
+        @keyframes earth-surface-spin { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 15px rgba(0,94,184,.3); } 50% { box-shadow: 0 0 30px rgba(0,94,184,.5), 0 0 45px rgba(0,94,184,.2); } }
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
         .animate-fade-in { animation: fade-in .4s ease-out forwards; }
@@ -130,17 +130,18 @@ export default function GlobalLanding() {
         :not(.dark) .star { display: none; }
         .globe-container { perspective: 1000px; }
         .globe { border-radius: 999px; box-shadow: inset -20px -20px 40px rgba(0,0,0,.3), 0 0 30px rgba(0,94,184,.3), 0 0 60px rgba(0,94,184,.15); animation: pulse-glow 4s ease-in-out infinite; }
-        .earth-surface { position: absolute; inset: 0; border-radius: inherit; background-size: 200% 100%; background-repeat: repeat-x; background-position: 0% center; animation: earth-surface-spin 60s linear infinite; }
-        .earth-surface::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 24px 0 30px rgba(0,0,0,.28), inset -24px 0 30px rgba(0,0,0,.38), inset 0 10px 18px rgba(255,255,255,.08); }
-        .globe.zooming .earth-surface { animation: none; background-size: cover; background-position: center; }
+        .earth-track { position: absolute; inset: 0 auto 0 0; display: flex; width: 200%; height: 100%; animation: earth-surface-spin 60s linear infinite; }
+        .earth-track img { width: 50%; height: 100%; flex: 0 0 50%; object-fit: cover; }
+        .earth-shading { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 22px 0 30px rgba(0,0,0,.24), inset -22px 0 32px rgba(0,0,0,.34), inset 0 8px 16px rgba(255,255,255,.08); }
+        .globe.zooming .earth-track { animation: none; }
         .dark .globe { box-shadow: inset -20px -20px 40px rgba(0,0,0,.5), 0 0 30px rgba(0,94,184,.3), 0 0 60px rgba(0,94,184,.15); }
         .globe.zooming { animation: zoom-in 1.5s ease-in forwards; }
         .country-card { backdrop-filter: blur(10px); background: rgba(255,255,255,.8); border: 1px solid rgba(0,94,184,.2); transition: all .2s ease; }
-        .dark .country-card { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.1); }
+        .dark .country-card { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.20); }
         .country-card:hover { border-color: rgba(0,94,184,.45); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,94,184,.08); }
         .gradient-text { background: linear-gradient(135deg,#005EB8 0%,#41B6E6 50%,#00A499 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .glass-panel { backdrop-filter: blur(20px); background: rgba(255,255,255,.8); border: 1px solid rgba(0,94,184,.1); }
-        .dark .glass-panel { background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.08); }
+        .dark .glass-panel { background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.16); }
         .scrollbar-thin::-webkit-scrollbar { width: 4px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: rgba(0,0,0,.05); }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(0,94,184,.3); border-radius: 2px; }
@@ -181,20 +182,20 @@ export default function GlobalLanding() {
                 <br />
                 <span className="text-gray-900 dark:text-white">{t.globalLanding.subHeadline}</span>
               </h1>
-              <p className="mx-auto max-w-md text-sm leading-6 text-gray-600 dark:text-gray-400 md:text-xs md:leading-normal lg:text-sm">{t.globalLanding.description}</p>
+              <p className="mx-auto max-w-md text-sm leading-6 text-gray-600 dark:text-gray-300 md:text-xs md:leading-normal lg:text-sm">{t.globalLanding.description}</p>
             </div>
 
             <div ref={globeRef} className="globe-container relative mb-6 mt-2 md:mb-1 md:mt-0">
               <div className={`globe h-36 w-36 overflow-hidden sm:h-40 sm:w-40 md:h-32 md:w-32 lg:h-40 lg:w-40 xl:h-48 xl:w-48 ${isZooming ? "zooming" : ""}`}>
-                <div className="earth-surface" role="img" aria-label="Rotating Earth globe" style={{ backgroundImage: `url(${globeImage})` }} />
+                <div className="earth-track" role="img" aria-label="Rotating Earth globe"><img src={globeImage} alt="" draggable={false} /><img src={globeImage} alt="" draggable={false} /></div><div className="earth-shading" />
               </div>
             </div>
 
             <div className="mb-5 grid w-full max-w-sm grid-cols-2 gap-x-3 gap-y-2.5 md:mb-2 md:flex md:max-w-none md:flex-wrap md:justify-center md:gap-3">
-              <div className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-400 md:text-[10px]"><Bot className="h-3.5 w-3.5 flex-shrink-0 text-[#41B6E6] md:h-3 md:w-3" /><span>{t.globalLanding.multiAgentAI}</span></div>
-              <div className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-400 md:text-[10px]"><FileText className="h-3.5 w-3.5 flex-shrink-0 text-emerald-400 md:h-3 md:w-3" /><span>{t.globalLanding.documentGeneration}</span></div>
-              <div className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-400 md:text-[10px]"><Shield className="h-3.5 w-3.5 flex-shrink-0 text-yellow-400 md:h-3 md:w-3" /><span>{t.globalLanding.complianceVerified}</span></div>
-              <div className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-400 md:text-[10px]"><Users className="h-3.5 w-3.5 flex-shrink-0 text-purple-400 md:h-3 md:w-3" /><span>{t.globalLanding.approvedApplicants}</span></div>
+              <div className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-300 md:text-[10px]"><Bot className="h-3.5 w-3.5 flex-shrink-0 text-[#41B6E6] md:h-3 md:w-3" /><span>{t.globalLanding.multiAgentAI}</span></div>
+              <div className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-300 md:text-[10px]"><FileText className="h-3.5 w-3.5 flex-shrink-0 text-emerald-400 md:h-3 md:w-3" /><span>{t.globalLanding.documentGeneration}</span></div>
+              <div className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-300 md:text-[10px]"><Shield className="h-3.5 w-3.5 flex-shrink-0 text-yellow-400 md:h-3 md:w-3" /><span>{t.globalLanding.complianceVerified}</span></div>
+              <div className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-300 md:text-[10px]"><Users className="h-3.5 w-3.5 flex-shrink-0 text-purple-400 md:h-3 md:w-3" /><span>{t.globalLanding.approvedApplicants}</span></div>
             </div>
 
             <div className="relative w-full max-w-sm md:max-w-xs">
@@ -203,7 +204,7 @@ export default function GlobalLanding() {
                 placeholder={t.globalLanding.searchPlaceholder}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                className="h-12 rounded-full border-gray-300 bg-white/80 pl-11 text-base text-gray-900 placeholder:text-gray-500 focus:border-[#005EB8] focus:ring-[#005EB8] dark:border-white/10 dark:bg-white/5 dark:text-white md:h-auto md:py-1.5 md:pl-9 md:text-sm"
+                className="h-12 rounded-full border-gray-300 bg-white/80 pl-11 text-base text-gray-900 placeholder:text-gray-500 focus:border-[#005EB8] focus:ring-[#005EB8] dark:border-white/25 dark:bg-white/10 dark:text-white dark:placeholder:text-gray-300 md:h-auto md:py-1.5 md:pl-9 md:text-sm"
                 data-testid="input-country-search"
               />
             </div>
@@ -212,7 +213,7 @@ export default function GlobalLanding() {
           <aside className="glass-panel mx-3 mb-4 flex min-h-[32rem] w-auto flex-col overflow-hidden rounded-2xl md:mx-0 md:mb-0 md:min-h-0 md:w-72 md:rounded-l-2xl md:rounded-r-none lg:w-80 xl:w-96">
             <div className="flex-shrink-0 p-4 pb-3 md:p-3 md:pb-2">
               <h2 className="text-lg font-semibold md:text-sm">{t.globalLanding.selectDestination}</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 md:text-xs">{t.globalLanding.chooseCountry}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 md:text-xs">{t.globalLanding.chooseCountry}</p>
             </div>
 
             <div className="scrollbar-thin flex-1 space-y-2 overflow-y-auto px-3 pb-2 md:space-y-1.5 md:pb-0">
@@ -232,9 +233,9 @@ export default function GlobalLanding() {
                       </div>
                       <div className="mt-1 flex flex-wrap gap-1 md:mt-0.5 md:gap-0.5">
                         {country.visaTypes.slice(0, 2).map((visa) => (
-                          <span key={visa} className="rounded bg-gray-200/80 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-400 md:px-1 md:text-[9px]">{visa}</span>
+                          <span key={visa} className="rounded bg-gray-200/80 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-300 md:px-1 md:text-[9px]">{visa}</span>
                         ))}
-                        {country.routeCount > 2 && <span className="rounded bg-gray-200/80 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-400 md:px-1 md:text-[9px]">+{country.routeCount - 2}</span>}
+                        {country.routeCount > 2 && <span className="rounded bg-gray-200/80 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-300 md:px-1 md:text-[9px]">+{country.routeCount - 2}</span>}
                       </div>
                     </div>
                     <ChevronRight className="h-5 w-5 flex-shrink-0 text-[#005EB8] md:h-4 md:w-4" />
@@ -244,17 +245,17 @@ export default function GlobalLanding() {
             </div>
 
             <div className="flex-shrink-0 border-t border-white/10 p-3 md:p-2">
-              <p className="text-center text-xs text-gray-500 md:text-[10px]">{t.globalLanding.moreLaunching}</p>
+              <p className="text-center text-xs text-gray-500 dark:text-gray-300 md:text-[10px]">{t.globalLanding.moreLaunching}</p>
             </div>
           </aside>
         </main>
 
         <footer className="glass-panel flex-shrink-0 py-2 md:py-1.5">
-          <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-1 px-4 text-center sm:flex-row sm:gap-4 text-[10px] text-gray-500 md:text-xs">
+          <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-1 px-4 text-center sm:flex-row sm:gap-4 text-[10px] text-gray-500 dark:text-gray-300 md:text-xs">
             <p>2026 {t.globalLanding.footerText}</p>
             <div className="flex items-center gap-1 md:gap-3">
-              <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] text-gray-500 md:px-2 md:text-xs" data-testid="link-privacy">{t.globalLanding.privacy}</Button>
-              <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] text-gray-500 md:px-2 md:text-xs" data-testid="link-terms">{t.globalLanding.terms}</Button>
+              <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] text-gray-500 dark:text-gray-300 md:px-2 md:text-xs" data-testid="link-privacy">{t.globalLanding.privacy}</Button>
+              <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[10px] text-gray-500 dark:text-gray-300 md:px-2 md:text-xs" data-testid="link-terms">{t.globalLanding.terms}</Button>
             </div>
           </div>
         </footer>
