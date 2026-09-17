@@ -32,6 +32,7 @@ const SiteFeedbackPopup = lazy(() => import("@/components/SiteFeedbackPopup").th
 // ============ LAZY LOADED PAGES ============
 // Global landing page
 const GlobalLanding = lazy(() => import("@/pages/global-landing"));
+const UkVisaRoutes = lazy(() => import("@/pages/uk-visa-routes"));
 
 // Public pages (marketing/auth)
 const Home = lazy(() => import("@/pages/home"));
@@ -67,6 +68,7 @@ const EndorserComparison = lazy(() => import("@/pages/endorser-comparison"));
 const EndorserInvestmentRequirements = lazy(() => import("@/pages/endorser-investment-requirements"));
 const DocumentOrganizer = lazy(() => import("@/pages/document-organizer"));
 const ExpertBooking = lazy(() => import("@/pages/expert-booking"));
+const ExpertJoin = lazy(() => import("@/pages/expert-join"));
 
 // Analysis and diagnostics
 const RejectionAnalysis = lazy(() => import("@/pages/rejection-analysis"));
@@ -109,6 +111,8 @@ const News = lazy(() => import("@/pages/news"));
 const AdminDashboard = lazy(() => import("@/pages/admin-dashboard"));
 const BlogDashboard = lazy(() => import("@/pages/admin/BlogDashboard"));
 const SeoStrategy = lazy(() => import("@/pages/admin/SeoStrategy"));
+const AdminAIProviders = lazy(() => import("@/pages/admin/AIProviders"));
+const AdminExpertNetwork = lazy(() => import("@/pages/admin/ExpertNetwork"));
 const PartnerDashboard = lazy(() => import("@/pages/partner-dashboard"));
 
 // OMNI - Advanced AI Features
@@ -146,9 +150,10 @@ function isVisaAssistantGlobalHost() {
   return typeof window !== "undefined" && VISA_ASSISTANT_GLOBAL_HOSTS.has(window.location.hostname.toLowerCase());
 }
 
-const SIDEBAR_HIDDEN_ROUTES = ["/", "/uk", INNOVATOR_FOUNDER_PATH, "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide", "/blog"];
+const SIDEBAR_HIDDEN_ROUTES = ["/", "/uk", INNOVATOR_FOUNDER_PATH, "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide", "/blog", "/join-expert-network"];
 const SIDEBAR_HIDDEN_PREFIXES = ["/blog/"];
-const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard"];
+const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard", "/admin/ai-providers", "/admin/expert-network"];
+const OPEN_ACCESS_DASHBOARD_ROUTES = ["/expert-booking"];
 const PUBLIC_APP_SHELL_ROUTES = ["/ai-transparency"];
 
 function PageLoadingSkeleton() {
@@ -312,7 +317,7 @@ function Router() {
     <Switch>
       <Route path="/" component={RootLanding} />
       <Route path="/v2" component={GlobalLanding} />
-      <Route path="/uk" component={Home} />
+      <Route path="/uk" component={UkVisaRoutes} />
       <Route path={INNOVATOR_FOUNDER_PATH} component={Home} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
@@ -329,6 +334,7 @@ function Router() {
       <Route path="/endorser-comparison" component={EntitledEndorserComparison} />
       <Route path="/document-organizer" component={EntitledDocumentOrganizer} />
       <Route path="/expert-booking" component={ExpertBooking} />
+      <Route path="/join-expert-network" component={ExpertJoin} />
       <Route path="/rejection-analysis" component={EntitledRejectionAnalysis} />
       <Route path="/settlement-planning" component={EntitledSettlementPlanning} />
       <Route path="/features-dashboard" component={FeaturesDashboard} />
@@ -344,6 +350,8 @@ function Router() {
       <Route path="/endorser-investment" component={EndorserInvestmentRequirements} />
       <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/handoff" component={Handoff} />
+      <Route path="/admin/ai-providers" component={AdminAIProviders} />
+      <Route path="/admin/expert-network" component={AdminExpertNetwork} />
       <Route path="/admin-dashboard" component={AdminDashboard} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/blog" component={BlogDashboard} />
@@ -495,9 +503,14 @@ function useActivityTracker() {
 
 function AppLayout() {
   const [location] = useLocation();
+  const { data: shellUser } = useQuery<{ id: string }>({
+    queryKey: ["/api/auth/user"],
+    retry: false,
+  });
   const isPublicRoute = SIDEBAR_HIDDEN_ROUTES.includes(location) || 
     SIDEBAR_HIDDEN_PREFIXES.some(prefix => location.startsWith(prefix));
   const isCustomLayoutRoute = CUSTOM_LAYOUT_ROUTES.includes(location);
+  const isOpenAccessDashboardRoute = OPEN_ACCESS_DASHBOARD_ROUTES.includes(location);
   const isPublicAppShellRoute = PUBLIC_APP_SHELL_ROUTES.includes(location);
   const { data: publicShellUser, isLoading: publicShellAuthLoading } = useQuery<{ id: string } | null>({
     queryKey: ["/api/auth/user"],
@@ -521,6 +534,24 @@ function AppLayout() {
             <UnifiedHeader demoMode={demoMode} />
             <main className="flex-1 overflow-auto">
               {!demoMode && <ContextualDocumentNotice />}
+              <Suspense fallback={<PageLoadingSkeleton />}>
+                <Router />
+              </Suspense>
+            </main>
+          </div>
+        </div>
+      </SidebarProvider>
+    );
+  }
+
+  if (isOpenAccessDashboardRoute) {
+    return (
+      <SidebarProvider>
+        <div className="flex h-screen w-full">
+          <AppSidebar publicMode={!shellUser} />
+          <div className="flex flex-col flex-1 w-full min-w-0">
+            <UnifiedHeader />
+            <main className="flex-1 overflow-auto">
               <Suspense fallback={<PageLoadingSkeleton />}>
                 <Router />
               </Suspense>
