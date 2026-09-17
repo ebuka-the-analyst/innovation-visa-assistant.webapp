@@ -127,7 +127,7 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: strin
 }
 
 export async function sendEmail({ to, subject, html, from, emailType = 'system', recipientName, userId }: SendEmailParams) {
-  const DEFAULT_FROM_EMAIL = 'noreply@innovatorfoundervisaassistant.co.uk';
+  const DEFAULT_FROM_EMAIL = process.env.DEFAULT_FROM_EMAIL || 'noreply@visaassistant.global';
   const EMAIL_TIMEOUT_MS = 15000; // 15 second timeout for email operations
   
   console.log('[Email Send] Attempting to send email to:', to);
@@ -160,7 +160,7 @@ export async function sendEmail({ to, subject, html, from, emailType = 'system',
     return { success: false, error: "Email service not configured" };
   }
 
-  const fromAddress = from || `UK Innovator Visa Assistant <${DEFAULT_FROM_EMAIL}>`;
+  const fromAddress = from || `Visa Assistant Global <${DEFAULT_FROM_EMAIL}>`;
 
   try {
     let messageId: string = '';
@@ -281,7 +281,7 @@ export async function sendPasswordResetEmail(
         <p style="font-size: 18px; margin-bottom: 20px;">Hi ${escapeHtml(firstName)},</p>
         
         <p style="font-size: 16px; margin-bottom: 20px;">
-          We received a request to reset your password for your UK Innovator Founder Visa Assistant account.
+          We received a request to reset your password for your Visa Assistant Global account.
         </p>
         
         <p style="font-size: 16px; margin-bottom: 30px;">
@@ -322,8 +322,8 @@ export async function sendPasswordResetEmail(
         <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
         
         <p style="font-size: 12px; color: #999; text-align: center;">
-          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
-          Questions? Contact <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+          © ${new Date().getFullYear()} Visa Assistant Global<br>
+          Questions? Contact <a href="mailto:support@visaassistant.global" style="color: #11b6e9;">support@visaassistant.global</a>
         </p>
       </div>
     </body>
@@ -332,7 +332,7 @@ export async function sendPasswordResetEmail(
 
   return sendEmail({
     to: email,
-    subject: 'Password Reset Request - UK Innovator Founder Visa Assistant',
+    subject: 'Password Reset Request - Visa Assistant Global',
     html,
     emailType: 'password_reset',
     recipientName: firstName
@@ -361,7 +361,7 @@ export async function sendVerificationEmail(
     </head>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
       <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to UK Innovator Founder Visa Assistant</h1>
+        <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to Visa Assistant Global</h1>
       </div>
       
       <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
@@ -407,7 +407,7 @@ export async function sendVerificationEmail(
         <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
         
         <p style="font-size: 12px; color: #999; text-align: center;">
-          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+          © ${new Date().getFullYear()} Visa Assistant Global<br>
           Your trusted partner in visa success
         </p>
       </div>
@@ -580,7 +580,7 @@ export async function sendPaymentReceiptEmail(
             <strong>Need Help?</strong> Our support team is here for you.
           </p>
           <p style="margin: 0; font-size: 14px; color: #666;">
-            Email: <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a><br>
+            Email: <a href="mailto:support@visaassistant.global" style="color: #11b6e9;">support@visaassistant.global</a><br>
             Billing: <a href="mailto:billing@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">billing@innovatorfoundervisaassistant.co.uk</a>
           </p>
         </div>
@@ -593,7 +593,7 @@ export async function sendPaymentReceiptEmail(
             This receipt serves as confirmation of your payment. Please save this email for your records.
           </p>
           <p style="font-size: 12px; color: #999; margin-bottom: 10px;">
-            UK Innovator Founder Visa Assistant<br>
+            Visa Assistant Global<br>
             Digital Services Provider | United Kingdom
           </p>
           <p style="font-size: 11px; color: #bbb;">
@@ -684,9 +684,9 @@ export async function sendWelcomeEmail(
         <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
         
         <p style="font-size: 12px; color: #999; text-align: center;">
-          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+          © ${new Date().getFullYear()} Visa Assistant Global<br>
           Your trusted partner in visa success<br>
-          <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+          <a href="mailto:support@visaassistant.global" style="color: #11b6e9;">support@visaassistant.global</a>
         </p>
       </div>
     </body>
@@ -695,7 +695,7 @@ export async function sendWelcomeEmail(
 
   return sendEmail({
     to: email,
-    subject: 'Welcome to UK Innovator Founder Visa Assistant!',
+    subject: 'Welcome to Visa Assistant Global!',
     html,
     emailType: 'welcome',
     recipientName: firstName
@@ -777,9 +777,9 @@ export async function sendAdminVerificationSuccessEmail(
         <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
         
         <p style="font-size: 12px; color: #999; text-align: center;">
-          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
+          © ${new Date().getFullYear()} Visa Assistant Global<br>
           Your trusted partner in visa success<br>
-          <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+          <a href="mailto:support@visaassistant.global" style="color: #11b6e9;">support@visaassistant.global</a>
         </p>
       </div>
     </body>
@@ -855,8 +855,8 @@ export async function sendPlanCompletionEmail(
         <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
         
         <p style="font-size: 12px; color: #999; text-align: center;">
-          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
-          <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+          © ${new Date().getFullYear()} Visa Assistant Global<br>
+          <a href="mailto:support@visaassistant.global" style="color: #11b6e9;">support@visaassistant.global</a>
         </p>
       </div>
     </body>
@@ -955,8 +955,8 @@ export async function sendUpgradeReminderEmail(
         <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
         
         <p style="font-size: 12px; color: #999; text-align: center;">
-          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
-          <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+          © ${new Date().getFullYear()} Visa Assistant Global<br>
+          <a href="mailto:support@visaassistant.global" style="color: #11b6e9;">support@visaassistant.global</a>
         </p>
       </div>
     </body>
@@ -1046,8 +1046,8 @@ export async function sendWeeklyProgressEmail(
         <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
         
         <p style="font-size: 12px; color: #999; text-align: center;">
-          © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
-          <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+          © ${new Date().getFullYear()} Visa Assistant Global<br>
+          <a href="mailto:support@visaassistant.global" style="color: #11b6e9;">support@visaassistant.global</a>
         </p>
       </div>
     </body>
@@ -1137,8 +1137,8 @@ export async function sendDeadlineReminderEmail(
           <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
           
           <p style="font-size: 12px; color: #999; text-align: center;">
-            © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
-            <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+            © ${new Date().getFullYear()} Visa Assistant Global<br>
+            <a href="mailto:support@visaassistant.global" style="color: #11b6e9;">support@visaassistant.global</a>
           </p>
         </div>
       </div>
@@ -1164,7 +1164,7 @@ export async function sendSupportNotificationEmail(
   subject: string,
   message: string
 ): Promise<{ success: boolean; error?: string }> {
-  const supportEmail = 'support@innovatorfoundervisaassistant.co.uk';
+  const supportEmail = 'support@visaassistant.global';
   
   const html = `
     <!DOCTYPE html>
@@ -1254,8 +1254,8 @@ export async function sendSupportNotificationEmail(
           <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
           
           <p style="font-size: 12px; color: #999; text-align: center;">
-            © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
-            <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+            © ${new Date().getFullYear()} Visa Assistant Global<br>
+            <a href="mailto:support@visaassistant.global" style="color: #11b6e9;">support@visaassistant.global</a>
           </p>
         </div>
       </div>
@@ -1335,8 +1335,8 @@ export async function sendReferralSignupNotification(
           <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
           
           <p style="font-size: 12px; color: #999; text-align: center;">
-            © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
-            <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+            © ${new Date().getFullYear()} Visa Assistant Global<br>
+            <a href="mailto:support@visaassistant.global" style="color: #11b6e9;">support@visaassistant.global</a>
           </p>
         </div>
       </div>
@@ -1415,8 +1415,8 @@ export async function sendReferralPurchaseNotification(
           <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
           
           <p style="font-size: 12px; color: #999; text-align: center;">
-            © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
-            <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+            © ${new Date().getFullYear()} Visa Assistant Global<br>
+            <a href="mailto:support@visaassistant.global" style="color: #11b6e9;">support@visaassistant.global</a>
           </p>
         </div>
       </div>
@@ -1506,8 +1506,8 @@ export async function sendRewardApprovalNotification(
           <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
           
           <p style="font-size: 12px; color: #999; text-align: center;">
-            © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
-            <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+            © ${new Date().getFullYear()} Visa Assistant Global<br>
+            <a href="mailto:support@visaassistant.global" style="color: #11b6e9;">support@visaassistant.global</a>
           </p>
         </div>
       </div>
@@ -1649,15 +1649,15 @@ export async function sendPayoutStatusNotification(
           </p>
           ` : `
           <p style="font-size: 14px; color: #666;">
-            If you have questions about this decision, please contact our support team at support@innovatorfoundervisaassistant.co.uk.
+            If you have questions about this decision, please contact our support team at support@visaassistant.global.
           </p>
           `}
           
           <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
           
           <p style="font-size: 12px; color: #999; text-align: center;">
-            © ${new Date().getFullYear()} UK Innovator Founder Visa Assistant<br>
-            <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">support@innovatorfoundervisaassistant.co.uk</a>
+            © ${new Date().getFullYear()} Visa Assistant Global<br>
+            <a href="mailto:support@visaassistant.global" style="color: #11b6e9;">support@visaassistant.global</a>
           </p>
         </div>
       </div>
@@ -1843,7 +1843,7 @@ export function generateVerificationEmail(code: string, displayName: string): st
           <tr>
             <td style="padding: 32px 40px; background-color: #f7fafc; border-top: 1px solid #e2e8f0;">
               <p style="margin: 0 0 8px 0; color: #718096; font-size: 13px; text-align: center;">
-                Need help? Contact us at <a href="mailto:support@innovatorfoundervisaassistant.co.uk" style="color: #ffa536; text-decoration: none;">support@innovatorfoundervisaassistant.co.uk</a>
+                Need help? Contact us at <a href="mailto:support@visaassistant.global" style="color: #ffa536; text-decoration: none;">support@visaassistant.global</a>
               </p>
               <p style="margin: 0; color: #a0aec0; font-size: 12px; text-align: center;">
                 © 2024 Innovator Visa AI Assistant. All rights reserved.
@@ -1937,7 +1937,7 @@ export async function sendBulkWelcomeEmail(users: Array<{ id: string; email: str
           <strong>Ebuka Benedict Umeh</strong>
         </p>
         <p style="font-size: 14px; color: #666; margin-top: 0;">
-          Founder, UK Innovator Founder Visa Assistant<br>
+          Founder, Visa Assistant Global<br>
           <a href="https://www.innovatorfoundervisaassistant.co.uk" style="color: #11b6e9;">www.innovatorfoundervisaassistant.co.uk</a>
         </p>
       </div>

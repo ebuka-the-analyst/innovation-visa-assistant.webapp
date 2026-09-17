@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle2, AlertCircle, Loader2, Mail } from "lucide-react";
+import VisaAssistantBrand from "@/components/VisaAssistantBrand";
 
 export default function VerifyEmail() {
   const [, setLocation] = useLocation();
@@ -85,7 +86,7 @@ export default function VerifyEmail() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/5 to-primary/5 p-4">
-      <Card className="w-full max-w-md" data-testid="card-verify-email">
+      <Card className="w-full max-w-md" data-testid="card-verify-email"><div className="flex justify-center pt-5">{typeof window !== "undefined" && /(^|\.)visaassistant\.global$/i.test(window.location.hostname) && <VisaAssistantBrand />}</div>
         <CardHeader className="space-y-1 text-center">
           {status === "loading" && (
             <>
@@ -171,7 +172,7 @@ export default function VerifyEmail() {
           <p className="text-sm text-muted-foreground text-center">
             Need help?{" "}
             <a 
-              href="mailto:support@innovatorfoundervisaassistant.co.uk" 
+              href={typeof window !== "undefined" && /(^|\.)visaassistant\.global$/i.test(window.location.hostname) ? "mailto:support@visaassistant.global" : "mailto:support@innovatorfoundervisaassistant.co.uk"} 
               className="text-primary hover:underline"
               data-testid="link-support"
             >

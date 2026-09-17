@@ -11,6 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import logoLightImg from "@assets/official_logo.webp";
 import logoDarkImg from "@assets/logo_dark.webp";
 import { SEOHead } from "@/components/SEOHead";
+import VisaAssistantBrand from "@/components/VisaAssistantBrand";
 import { trackSignUp, trackFormStart, trackFormSubmit, trackError } from "@/lib/analytics";
 
 export default function Signup() {
@@ -167,12 +168,14 @@ export default function Signup() {
     }
   };
 
+  const isGlobalHost = typeof window !== "undefined" && /(^|\.)visaassistant\.global$/i.test(window.location.hostname);
+
   // Show success screen after registration
   if (registrationSuccess) {
     return (
       <>
         <SEOHead
-          title="Verify Your Email | UK Innovator Founder Visa Assistant"
+          title={isGlobalHost ? "Verify Your Email | Visa Assistant Global" : "Verify Your Email | UK Innovator Founder Visa Assistant"}
           description="Please verify your email to complete your registration."
           path="/signup"
         />
@@ -224,22 +227,19 @@ export default function Signup() {
   return (
     <>
       <SEOHead
-        title="Sign Up | UK Innovator Founder Visa Assistant"
-        description="Create your free account and start your UK Innovator Founder Visa application journey. Access 100+ professional-level tools, business plan generator, and expert guidance."
+        title={isGlobalHost ? "Sign Up | Visa Assistant Global" : "Sign Up | UK Innovator Founder Visa Assistant"}
+        description={isGlobalHost ? "Create your Visa Assistant Global account and start preparing for your chosen visa route." : "Create your free account and start your UK Innovator Founder Visa application journey. Access 100+ professional-level tools, business plan generator, and expert guidance."}
         path="/signup"
       />
-      <div className="h-screen flex flex-col md:flex-row overflow-hidden">
+      <div className={isGlobalHost ? "min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-50 via-white to-blue-50 p-4 dark:from-[#090b18] dark:via-[#0b1020] dark:to-[#090b18]" : "h-screen flex flex-col md:flex-row overflow-hidden"}>
         {/* Left Side - Branding */}
-        <div className="hidden md:flex md:w-[45%] bg-gradient-to-br from-primary/10 via-primary/5 to-background items-center justify-center p-6">
+        <div className={isGlobalHost ? "hidden" : "hidden md:flex md:w-[45%] bg-gradient-to-br from-primary/10 via-primary/5 to-background items-center justify-center p-6"}>
           <div className="text-center space-y-4">
             <div className="isolate z-[9999] mix-blend-normal bg-transparent flex justify-center">
-              <div className="logo-container overflow-hidden">
-                <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />
-                <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />
-              </div>
+              {isGlobalHost ? <VisaAssistantBrand /> : <div className="logo-container overflow-hidden"><img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-light object-contain" /><img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-dark object-contain" /></div>}
             </div>
             <h1 className="text-lg font-bold text-foreground">Create your account</h1>
-            <p className="text-sm text-muted-foreground">Start your visa journey</p>
+            <p className="text-sm text-muted-foreground">{isGlobalHost ? "Start your global visa preparation journey" : "Start your visa journey"}</p>
             {referralCode && referralDiscount && (
               <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs">
                 <Gift className="h-3 w-3" />
@@ -250,15 +250,12 @@ export default function Signup() {
         </div>
 
         {/* Right Side - Form */}
-        <div className="flex-1 flex items-center justify-center bg-background p-4">
-          <div className="w-full max-w-xs space-y-2">
+        <div className={isGlobalHost ? "w-full max-w-md rounded-3xl border bg-background/95 p-6 shadow-xl sm:p-8" : "flex-1 flex items-center justify-center bg-background p-4"}>
+          <div className={isGlobalHost ? "mx-auto w-full max-w-sm space-y-4" : "w-full max-w-xs space-y-2"}>
             {/* Mobile only header */}
-            <div className="md:hidden text-center space-y-1 mb-2">
+            <div className={isGlobalHost ? "text-center space-y-2 mb-5" : "md:hidden text-center space-y-1 mb-2"}>
               <div className="isolate z-[9999] mix-blend-normal bg-transparent flex justify-center">
-                <div className="logo-container overflow-hidden">
-                  <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain" />
-                  <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark object-contain" />
-                </div>
+                {isGlobalHost ? <VisaAssistantBrand /> : <div className="logo-container overflow-hidden"><img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain" /><img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark object-contain" /></div>}
               </div>
               <h1 className="text-sm font-bold">Create your account</h1>
               {referralCode && referralDiscount && (

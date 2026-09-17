@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Mail, CheckCircle2 } from "lucide-react";
+import VisaAssistantBrand from "@/components/VisaAssistantBrand";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -59,7 +60,7 @@ export default function ForgotPassword() {
   if (isSubmitted) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-        <Card className="w-full max-w-md" data-testid="card-success">
+        <Card className="w-full max-w-md" data-testid="card-success"><div className="flex justify-center pt-5">{typeof window !== "undefined" && /(^|\.)visaassistant\.global$/i.test(window.location.hostname) && <VisaAssistantBrand />}</div>
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
               <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
@@ -99,7 +100,7 @@ export default function ForgotPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-orange-50 via-blue-50 to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-      <Card className="w-full max-w-md" data-testid="card-forgot-password">
+      <Card className="w-full max-w-md" data-testid="card-forgot-password"><div className="flex justify-center pt-5">{typeof window !== "undefined" && /(^|\.)visaassistant\.global$/i.test(window.location.hostname) && <VisaAssistantBrand />}</div>
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center">
             <Mail className="h-8 w-8 text-orange-600 dark:text-orange-400" />
