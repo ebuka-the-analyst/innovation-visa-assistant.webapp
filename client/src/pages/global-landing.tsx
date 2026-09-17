@@ -122,7 +122,7 @@ export default function GlobalLanding() {
       <style>{`
         @keyframes twinkle { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
         @keyframes zoom-in { 0% { transform: scale(1) rotateY(0); } 50% { transform: scale(2) rotateY(180deg); } 100% { transform: scale(50) rotateY(360deg); opacity: 0; } }
-        @keyframes earth-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes earth-spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
         @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 15px rgba(0,94,184,.3); } 50% { box-shadow: 0 0 30px rgba(0,94,184,.5), 0 0 45px rgba(0,94,184,.2); } }
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
         .animate-fade-in { animation: fade-in .4s ease-out forwards; }
@@ -130,7 +130,7 @@ export default function GlobalLanding() {
         :not(.dark) .star { display: none; }
         .globe-container { perspective: 1000px; }
         .globe { border-radius: 999px; box-shadow: inset -20px -20px 40px rgba(0,0,0,.3), 0 0 30px rgba(0,94,184,.3), 0 0 60px rgba(0,94,184,.15); animation: pulse-glow 4s ease-in-out infinite; }
-        .globe img { animation: earth-spin 45s linear infinite; transform-origin: center; }
+        .globe img { animation: earth-spin 45s linear infinite; transform-origin: center; transform-style: preserve-3d; backface-visibility: visible; }
         .globe.zooming img { animation: none; }
         .dark .globe { box-shadow: inset -20px -20px 40px rgba(0,0,0,.5), 0 0 30px rgba(0,94,184,.3), 0 0 60px rgba(0,94,184,.15); }
         .globe.zooming { animation: zoom-in 1.5s ease-in forwards; }
