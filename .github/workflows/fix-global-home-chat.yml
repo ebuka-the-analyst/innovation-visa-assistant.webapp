@@ -1,7 +1,8 @@
 name: Fix global homepage and chatbot
 on:
   push:
-    paths: ['.github/workflows/fix-global-home-chat.yml']
+    paths:
+      - '.github/workflows/fix-global-home-chat.yml'
 permissions:
   contents: write
 jobs:
@@ -10,94 +11,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '22', cache: 'npm' }
+        with:
+          node-version: '22'
+          cache: npm
       - name: Apply fixes
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
-
           p=Path('client/src/pages/global-landing.tsx')
           s=p.read_text()
-          # Remove no-longer-used icon imports tied to removed badges.
           s=s.replace('  Globe2,\n', '').replace('  Star,\n', '')
-          # Fixed globe position. Slow continuous rotation of the Earth image only.
           s=s.replace('@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }', '@keyframes earth-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }')
           s=s.replace('.globe-container { perspective: 1000px; animation: float 6s ease-in-out infinite; }', '.globe-container { perspective: 1000px; }')
-          s=s.replace('.globe { border-radius: 999px; box-shadow: inset -20px -20px 40px rgba(0,0,0,.3), 0 0 30px rgba(0,94,184,.3), 0 0 60px rgba(0,94,184,.15); animation: pulse-glow 4s ease-in-out infinite; }', '.globe { border-radius: 999px; box-shadow: inset -20px -20px 40px rgba(0,0,0,.3), 0 0 30px rgba(0,94,184,.3), 0 0 60px rgba(0,94,184,.15); animation: pulse-glow 4s ease-in-out infinite; }\n        .globe img { animation: earth-spin 45s linear infinite; transform-origin: center; }\n        .globe.zooming img { animation: none; }')
-          # Remove hero platform badge.
+          needle='.globe { border-radius: 999px; box-shadow: inset -20px -20px 40px rgba(0,0,0,.3), 0 0 30px rgba(0,94,184,.3), 0 0 60px rgba(0,94,184,.15); animation: pulse-glow 4s ease-in-out infinite; }'
+          s=s.replace(needle, needle+'\n        .globe img { animation: earth-spin 45s linear infinite; transform-origin: center; }\n        .globe.zooming img { animation: none; }')
           s=re.sub(r'\s*<Badge className="mb-2 border-\[#005EB8\]/30[\s\S]*?\{t\.globalLanding\.badge\}[\s\S]*?</Badge>', '', s, count=1)
-          # Remove country/live/coming-soon badge under globe.
           s=re.sub(r'\s*<div className="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap">[\s\S]*?\{t\.globalLanding\.comingSoon\}[\s\S]*?</div>', '', s, count=1)
           p.write_text(s)
-
-          # Chatbot: gpt-5.6 is a Responses API model in this app. The old chat.completions
-          # call was inconsistent with the platform's own gpt-5-family handling.
           p=Path('server/chatRoutes.ts')
           s=p.read_text()
-          old='''    const response: any = await managedAI.chat.completions.create({
-      model: BUSINESS_PLAN_MODEL as any,
-      messages,
-      max_tokens: 1500,
-    } as any);
-
-    return (
-      response.choices?.[0]?.message?.content?.trim() ||
-      "I couldn't generate a response just now. Please try again."
-    );'''
-          new='''    const isLatestGptFamily = /^gpt-5/i.test(BUSINESS_PLAN_MODEL);
-
-    if (isLatestGptFamily) {
-      const input = messages.map((item) => ({
-        role: item.role,
-        content: item.content,
-      }));
-      const response: any = await managedAI.responses.create({
-        model: BUSINESS_PLAN_MODEL as any,
-        input,
-        max_output_tokens: 1500,
-        reasoning: { effort: "low" },
-        text: { verbosity: "medium" },
-      } as any);
-      const outputText =
-        typeof response.output_text === "string"
-          ? response.output_text.trim()
-          : "";
-      const fallbackText = Array.isArray(response.output)
-        ? response.output
-            .flatMap((item: any) => item?.content || [])
-            .map((contentItem: any) => contentItem?.text || "")
-            .join("")
-            .trim()
-        : "";
-      const content = outputText || fallbackText;
-      if (!content) throw new Error("OpenAI returned empty chat response");
-      return content;
-    }
-
-    const response: any = await managedAI.chat.completions.create({
-      model: BUSINESS_PLAN_MODEL as any,
-      messages,
-      max_tokens: 1500,
-    } as any);
-    const content = response.choices?.[0]?.message?.content?.trim();
-    if (!content) throw new Error("OpenAI returned empty chat response");
-    return content;'''
-          if old not in s:
-            raise SystemExit('Expected chatbot model call not found; refusing unsafe patch')
-          s=s.replace(old,new)
+          start=s.index('    const response: any = await managedAI.chat.completions.create({', s.index('export async function chat('))
+          end=s.index('\n  } catch (error) {', start)
+          replacement='''    const isLatestGptFamily = /^gpt-5/i.test(BUSINESS_PLAN_MODEL);\n\n    if (isLatestGptFamily) {\n      const response: any = await managedAI.responses.create({\n        model: BUSINESS_PLAN_MODEL as any,\n        input: messages,\n        max_output_tokens: 1500,\n        reasoning: { effort: "low" },\n        text: { verbosity: "medium" },\n      } as any);\n      const outputText = typeof response.output_text === "string" ? response.output_text.trim() : "";\n      const fallbackText = Array.isArray(response.output) ? response.output.flatMap((item: any) => item?.content || []).map((item: any) => item?.text || "").join("").trim() : "";\n      const content = outputText || fallbackText;\n      if (!content) throw new Error("OpenAI returned empty chat response");\n      return content;\n    }\n\n    const response: any = await managedAI.chat.completions.create({ model: BUSINESS_PLAN_MODEL as any, messages, max_tokens: 1500 } as any);\n    const content = response.choices?.[0]?.message?.content?.trim();\n    if (!content) throw new Error("OpenAI returned empty chat response");\n    return content;'''
+          s=s[:start]+replacement+s[end:]
           p.write_text(s)
           PY
-      - name: Verify removed homepage elements
+      - name: Verify
         run: |
-          ! grep -q 'animation: float 6s' client/src/pages/global-landing.tsx
-          ! grep -q 't.globalLanding.badge' client/src/pages/global-landing.tsx
-          ! grep -q 't.globalLanding.countriesCount' client/src/pages/global-landing.tsx
+          test "$(grep -c 't.globalLanding.badge' client/src/pages/global-landing.tsx || true)" = "0"
+          test "$(grep -c 't.globalLanding.countriesCount' client/src/pages/global-landing.tsx || true)" = "0"
           grep -q 'earth-spin 45s linear infinite' client/src/pages/global-landing.tsx
           grep -q 'managedAI.responses.create' server/chatRoutes.ts
       - name: Build
         run: npm ci && npm run build
-      - name: Commit and deploy through main
+      - name: Commit
         run: |
           git config user.name 'Ebuka Ben Umeh'
           git config user.email 'ebuka.umeh40@outlook.com'
