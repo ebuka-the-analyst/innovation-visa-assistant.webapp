@@ -101,7 +101,7 @@ export default function CountryVisaRoutes({code}:{code:string}){
  useEffect(()=>{
   if(typeof document==="undefined" || language==="en") return;
   const controller=new AbortController();
-  const translate=async(text:string)=>{try{const res=await fetch(\`/api/translate?lang=\${encodeURIComponent(language)}\`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text}),signal:controller.signal});if(!res.ok)return text;const data=await res.json();return data.translation||text;}catch{return text;}};
+  const translate=async(text:string)=>{try{const res=await fetch(`/api/translate?lang=${encodeURIComponent(language)}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text}),signal:controller.signal});if(!res.ok)return text;const data=await res.json();return data.translation||text;}catch{return text;}};
   const root=document.querySelector("#country-catalogue-main"); if(!root)return;
   const nodes:Text[]=[]; const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT); let node:Node|null;
   while((node=walker.nextNode())){const t=node as Text;const el=t.parentElement;if(t.data.trim()&&el&&!["SCRIPT","STYLE","INPUT","TEXTAREA"].includes(el.tagName)&&!el.closest("[data-no-auto-translate]"))nodes.push(t);}
