@@ -15,7 +15,8 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          # signup: same hostname-aware global treatment already used by login
+          import re
+          # Sign-up: hostname-aware global presentation while preserving specialist domain.
           p=Path('client/src/pages/signup.tsx'); s=p.read_text()
           if 'VisaAssistantBrand' not in s:
             s=s.replace('import { SEOHead } from "@/components/SEOHead";', 'import { SEOHead } from "@/components/SEOHead";\nimport VisaAssistantBrand from "@/components/VisaAssistantBrand";')
@@ -30,36 +31,28 @@ jobs:
           s=s.replace('<div className="flex-1 flex items-center justify-center bg-background p-4">','<div className={isGlobalHost ? "w-full max-w-md rounded-3xl border bg-background/95 p-6 shadow-xl sm:p-8" : "flex-1 flex items-center justify-center bg-background p-4"}>')
           s=s.replace('<div className="w-full max-w-xs space-y-2">','<div className={isGlobalHost ? "mx-auto w-full max-w-sm space-y-4" : "w-full max-w-xs space-y-2"}>')
           s=s.replace('<div className="md:hidden text-center space-y-1 mb-2">','<div className={isGlobalHost ? "text-center space-y-2 mb-5" : "md:hidden text-center space-y-1 mb-2"}>')
-          # Replace both logo blocks with hostname-aware brand while preserving specialist domain logo
-          import re
-          blocks=list(re.finditer(r'<div className="isolate z-\[9999\][\s\S]*?</div>\s*</div>',s))
-          for m in reversed(blocks):
-            old=m.group(0)
-            h='h-10' if 'h-10' in old else 'h-20'
-            new=f'<div className="flex justify-center">{{isGlobalHost ? <VisaAssistantBrand /> : <div className="logo-container overflow-hidden"><img src={{logoLightImg}} alt="UK Innovator Founder Visa Assistant" className="{h} w-auto logo-light object-contain" /><img src={{logoDarkImg}} alt="UK Innovator Founder Visa Assistant" className="{h} w-auto logo-dark object-contain" /></div>}}</div>'
-            s=s[:m.start()]+new+s[m.end():]
+          # Use brand component in the two existing logo containers without restructuring surrounding JSX.
+          s=s.replace('<div className="logo-container overflow-hidden">\n                <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" />\n                <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-dark object-contain !mix-blend-normal !filter-none !opacity-100" />\n              </div>', '{isGlobalHost ? <VisaAssistantBrand /> : <div className="logo-container overflow-hidden"><img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-light object-contain" /><img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-20 w-auto logo-dark object-contain" /></div>}')
+          s=s.replace('<div className="logo-container overflow-hidden">\n                  <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain" />\n                  <img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark object-contain" />\n                </div>', '{isGlobalHost ? <VisaAssistantBrand /> : <div className="logo-container overflow-hidden"><img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-light object-contain" /><img src={logoDarkImg} alt="UK Innovator Founder Visa Assistant" className="h-10 w-auto logo-dark object-contain" /></div>}')
           s=s.replace('<p className="text-sm text-muted-foreground">Start your visa journey</p>','<p className="text-sm text-muted-foreground">{isGlobalHost ? "Start your global visa preparation journey" : "Start your visa journey"}</p>')
           p.write_text(s)
 
-          # Add global brand to password/verification account cards.
+          # Shared account pages: add a small global brand header inside existing cards, avoiding wrapper/tag changes.
           for fn in ['forgot-password.tsx','reset-password.tsx','verify-email.tsx']:
             p=Path('client/src/pages')/fn; s=p.read_text()
             if 'VisaAssistantBrand' not in s:
-              # append after last import line
               lines=s.splitlines(); idx=max(i for i,x in enumerate(lines) if x.startswith('import ')); lines.insert(idx+1,'import VisaAssistantBrand from "@/components/VisaAssistantBrand";'); s='\n'.join(lines)+'\n'
-            # place brand above every card, only on global hostname
-            s=s.replace('<Card className="w-full max-w-md"', '<div className="w-full max-w-md space-y-4"><div className="flex justify-center">{typeof window !== "undefined" && /(^|\\.)visaassistant\\.global$/i.test(window.location.hostname) && <VisaAssistantBrand />}</div><Card className="w-full"')
-            # close wrapper immediately after card when followed by parent close; safe for these standalone page cards
-            s=s.replace('</Card>\n      </div>', '</Card></div>\n      </div>')
+            brand='<div className="flex justify-center pt-5">{typeof window !== "undefined" && /(^|\\.)visaassistant\\.global$/i.test(window.location.hostname) && <VisaAssistantBrand />}</div>'
+            # Insert after each standalone Card opening. Multiple state cards are intentional.
+            s=re.sub(r'(<Card className="w-full max-w-md"[^>]*>)', r'\1'+brand, s)
             if fn=='verify-email.tsx':
               s=s.replace('href="mailto:support@innovatorfoundervisaassistant.co.uk"','href={typeof window !== "undefined" && /(^|\\.)visaassistant\\.global$/i.test(window.location.hostname) ? "mailto:support@visaassistant.global" : "mailto:support@innovatorfoundervisaassistant.co.uk"}')
             p.write_text(s)
 
-          # Email service: global parent brand is now default for account/system email identity and links.
+          # Global account/system email identity. Keep route-specific product/report copy elsewhere intact.
           p=Path('server/email.ts'); s=p.read_text()
           s=s.replace("const DEFAULT_FROM_EMAIL = 'noreply@innovatorfoundervisaassistant.co.uk';", "const DEFAULT_FROM_EMAIL = process.env.DEFAULT_FROM_EMAIL || 'noreply@visaassistant.global';")
           s=s.replace('`UK Innovator Visa Assistant <${DEFAULT_FROM_EMAIL}>`','`Visa Assistant Global <${DEFAULT_FROM_EMAIL}>`')
-          # account emails are global account communications; route-specific commercial emails remain untouched unless explicitly matching these strings
           s=s.replace('your UK Innovator Founder Visa Assistant account','your Visa Assistant Global account')
           s=s.replace('Welcome to UK Innovator Founder Visa Assistant','Welcome to Visa Assistant Global')
           s=s.replace('UK Innovator Founder Visa Assistant<br>','Visa Assistant Global<br>')
@@ -67,10 +60,6 @@ jobs:
           s=s.replace('support@innovatorfoundervisaassistant.co.uk','support@visaassistant.global')
           p.write_text(s)
           PY
-      - name: Repository audit report
-        run: |
-          echo 'Remaining specialist-brand references (reviewed as route-specific candidates):'
-          grep -RIn --exclude-dir=node_modules --exclude-dir=.git --exclude='*.md' -E 'innovatorfoundervisaassistant\.co\.uk|UK Innovator Founder Visa Assistant|official_logo\.webp' client server shared 2>/dev/null | head -200 || true
       - name: Build
         run: npm ci && npm run build
       - name: Commit
