@@ -8,6 +8,8 @@ import { Card } from "@/components/ui/card";
 import VisaAssistantBrand from "@/components/VisaAssistantBrand";
 import LanguageSelector from "@/components/LanguageSelector";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getCatalogueText } from "@/lib/catalogue-i18n";
 
 const INNOVATOR_FOUNDER_PATH = "/uk/innovatorfoundervisaassistant";
 
@@ -103,6 +105,8 @@ const groups: RouteGroup[] = [
 
 export default function UkVisaRoutes() {
   const [, setLocation] = useLocation();
+  const { language } = useLanguage();
+  const tx = getCatalogueText(language);
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -116,21 +120,21 @@ export default function UkVisaRoutes() {
       <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-[#090b18]/90">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2.5 sm:px-6">
           <VisaAssistantBrand compact />
-          <div className="flex items-center gap-1.5"><LanguageSelector /><ThemeToggle /><Button variant="outline" size="sm" onClick={() => setLocation("/login")}>Sign In</Button></div>
+          <div className="flex items-center gap-1.5"><LanguageSelector /><ThemeToggle /><Button variant="outline" size="sm" onClick={() => setLocation("/login")}>{tx.signIn}</Button></div>
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
-        <Button variant="ghost" className="mb-4 -ml-3 gap-2" onClick={() => setLocation("/")}><ArrowLeft className="h-4 w-4" />All countries</Button>
+        <Button variant="ghost" className="mb-4 -ml-3 gap-2" onClick={() => setLocation("/")}><ArrowLeft className="h-4 w-4" />{tx.allCountries}</Button>
         <section className="mb-8 rounded-3xl border border-blue-100 bg-white/80 p-5 shadow-sm dark:border-white/10 dark:bg-white/[.04] sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <div className="mb-3 flex items-center gap-3"><img src="https://flagcdn.com/w160/gb.png" alt="United Kingdom" className="h-10 w-14 rounded-md object-cover shadow" /><Badge className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600">United Kingdom · Live</Badge></div>
-              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">UK visa routes</h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">Explore UK immigration routes by category. Innovator Founder has a full Visa Assistant today; other routes are visible now and will gain dedicated preparation assistants as they launch.</p>
-              <p className="mt-2 text-xs text-slate-500">Route catalogue checked against GOV.UK on 17 September 2026. Always verify current requirements on GOV.UK before applying.</p>
+              <div className="mb-3 flex items-center gap-3"><img src="https://flagcdn.com/w160/gb.png" alt="United Kingdom" className="h-10 w-14 rounded-md object-cover shadow" /><Badge className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600">United Kingdom · {tx.live}</Badge></div>
+              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{tx.visaRoutes("UK")}</h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">{tx.exploreUK}</p>
+              <p className="mt-2 text-xs text-slate-500">{tx.checkedUK}</p>
             </div>
-            <div className="w-full lg:max-w-sm"><div className="relative"><Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" /><Input value={query} onChange={e => setQuery(e.target.value)} placeholder={`Search ${total} UK routes...`} className="h-12 rounded-2xl pl-12" /></div></div>
+            <div className="w-full lg:max-w-sm"><div className="relative"><Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" /><Input value={query} onChange={e => setQuery(e.target.value)} placeholder={tx.searchRoutes(total, "UK")} className="h-12 rounded-2xl pl-12" /></div></div>
           </div>
         </section>
 
@@ -141,14 +145,14 @@ export default function UkVisaRoutes() {
               <div className="mb-3 flex items-start gap-3"><div className="rounded-xl bg-blue-50 p-2 text-[#005EB8] dark:bg-blue-500/10"><Icon className="h-5 w-5" /></div><div><h2 className="text-xl font-semibold">{group.title}</h2><p className="text-sm text-slate-500 dark:text-slate-400">{group.description}</p></div></div>
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {group.routes.map(route => <Card key={route.name} className={`flex min-h-40 flex-col justify-between rounded-2xl p-5 transition ${route.status === "live" ? "border-emerald-400/70 bg-emerald-50/50 shadow-sm dark:bg-emerald-500/5" : "border-slate-200 bg-white/80 dark:border-white/10 dark:bg-white/[.03]"}`}>
-                  <div><div className="mb-2 flex items-start justify-between gap-3"><h3 className="font-semibold leading-5">{route.name}</h3>{route.status === "live" ? <Badge className="bg-emerald-600 text-white">Available</Badge> : <Badge variant="secondary" className="gap-1 whitespace-nowrap"><Lock className="h-3 w-3" />Coming soon</Badge>}</div><p className="text-sm leading-5 text-slate-600 dark:text-slate-400">{route.description}</p></div>
-                  <div className="mt-5 flex items-center justify-between gap-2">{route.status === "live" && route.href ? <Button className="gap-1.5 bg-[#005EB8]" onClick={() => setLocation(route.href!)}>Open assistant <ChevronRight className="h-4 w-4" /></Button> : <span className="text-xs text-slate-400">Assistant in development</span>}{route.officialUrl && <a href={route.officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-[#005EB8] hover:underline">GOV.UK <ExternalLink className="h-3 w-3" /></a>}</div>
+                  <div><div className="mb-2 flex items-start justify-between gap-3"><h3 className="font-semibold leading-5">{route.name}</h3>{route.status === "live" ? <Badge className="bg-emerald-600 text-white">{tx.available}</Badge> : <Badge variant="secondary" className="gap-1 whitespace-nowrap"><Lock className="h-3 w-3" />{tx.comingSoon}</Badge>}</div><p className="text-sm leading-5 text-slate-600 dark:text-slate-400">{route.description}</p></div>
+                  <div className="mt-5 flex items-center justify-between gap-2">{route.status === "live" && route.href ? <Button className="gap-1.5 bg-[#005EB8]" onClick={() => setLocation(route.href!)}>{tx.openAssistant} <ChevronRight className="h-4 w-4" /></Button> : <span className="text-xs text-slate-400">{tx.assistantDevelopment}</span>}{route.officialUrl && <a href={route.officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-[#005EB8] hover:underline">{tx.official} <ExternalLink className="h-3 w-3" /></a>}</div>
                 </Card>)}
               </div>
             </section>;
           })}
         </div>
-        {filtered.length === 0 && <div className="py-20 text-center text-slate-500">No UK visa routes match “{query}”.</div>}
+        {filtered.length === 0 && <div className="py-20 text-center text-slate-500">{tx.noRoutes(query, "UK")}</div>}
       </main>
     </div>
   );
