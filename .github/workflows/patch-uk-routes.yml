@@ -1,0 +1,39 @@
+name: Wire UK visa routes
+on:
+  push:
+    branches: [feature/uk-visa-routes-catalogue]
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/uk-visa-routes-catalogue
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wire UK route catalogue
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('client/src/App.tsx')
+          s = p.read_text()
+          needle = 'const GlobalLanding = lazy(() => import("@/pages/global-landing"));'
+          addition = needle + '\nconst UkVisaRoutes = lazy(() => import("@/pages/uk-visa-routes"));'
+          if 'const UkVisaRoutes =' not in s:
+              s = s.replace(needle, addition)
+          s = s.replace('<Route path="/uk" component={Home} />', '<Route path="/uk" component={UkVisaRoutes} />')
+          p.write_text(s)
+          PY
+      - name: Verify build
+        run: npm ci && npm run build
+      - name: Commit wiring
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add client/src/App.tsx
+          git diff --cached --quiet || git commit -m "Wire UK visa routes catalogue"
+          git push
