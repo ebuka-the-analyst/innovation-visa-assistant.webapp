@@ -1,0 +1,53 @@
+name: Wire global country catalogues
+on:
+  push:
+    paths:
+      - '.github/workflows/wire-global-country-catalogues.yml'
+permissions:
+  contents: write
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Wire routes and country navigation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          app = Path('client/src/App.tsx')
+          s = app.read_text()
+          marker = 'const UkVisaRoutes = lazy(() => import("@/pages/uk-visa-routes"));'
+          addition = marker + '\nconst CountryVisaRoutes = lazy(() => import("@/pages/country-visa-routes"));\nconst UsVisaRoutes = () => <CountryVisaRoutes code="us" />;\nconst CaVisaRoutes = () => <CountryVisaRoutes code="ca" />;\nconst AuVisaRoutes = () => <CountryVisaRoutes code="au" />;\nconst DeVisaRoutes = () => <CountryVisaRoutes code="de" />;\nconst FrVisaRoutes = () => <CountryVisaRoutes code="fr" />;\nconst NlVisaRoutes = () => <CountryVisaRoutes code="nl" />;\nconst SgVisaRoutes = () => <CountryVisaRoutes code="sg" />;\nconst AeVisaRoutes = () => <CountryVisaRoutes code="ae" />;\nconst NzVisaRoutes = () => <CountryVisaRoutes code="nz" />;\nconst JpVisaRoutes = () => <CountryVisaRoutes code="jp" />;\nconst IeVisaRoutes = () => <CountryVisaRoutes code="ie" />;\nconst PtVisaRoutes = () => <CountryVisaRoutes code="pt" />;\nconst EsVisaRoutes = () => <CountryVisaRoutes code="es" />;\nconst SeVisaRoutes = () => <CountryVisaRoutes code="se" />;\nconst ChVisaRoutes = () => <CountryVisaRoutes code="ch" />;'
+          if 'const CountryVisaRoutes' not in s:
+              s = s.replace(marker, addition)
+
+          route_marker = '      <Route path="/uk" component={UkVisaRoutes} />'
+          route_block = route_marker + '\n      <Route path="/us" component={UsVisaRoutes} />\n      <Route path="/ca" component={CaVisaRoutes} />\n      <Route path="/au" component={AuVisaRoutes} />\n      <Route path="/de" component={DeVisaRoutes} />\n      <Route path="/fr" component={FrVisaRoutes} />\n      <Route path="/nl" component={NlVisaRoutes} />\n      <Route path="/sg" component={SgVisaRoutes} />\n      <Route path="/ae" component={AeVisaRoutes} />\n      <Route path="/nz" component={NzVisaRoutes} />\n      <Route path="/jp" component={JpVisaRoutes} />\n      <Route path="/ie" component={IeVisaRoutes} />\n      <Route path="/pt" component={PtVisaRoutes} />\n      <Route path="/es" component={EsVisaRoutes} />\n      <Route path="/se" component={SeVisaRoutes} />\n      <Route path="/ch" component={ChVisaRoutes} />'
+          if '<Route path="/us" component={UsVisaRoutes}' not in s:
+              s = s.replace(route_marker, route_block)
+
+          old_hidden = 'const SIDEBAR_HIDDEN_ROUTES = ["/", "/uk", INNOVATOR_FOUNDER_PATH,'
+          new_hidden = 'const SIDEBAR_HIDDEN_ROUTES = ["/", "/uk", "/us", "/ca", "/au", "/de", "/fr", "/nl", "/sg", "/ae", "/nz", "/jp", "/ie", "/pt", "/es", "/se", "/ch", INNOVATOR_FOUNDER_PATH,'
+          s = s.replace(old_hidden, new_hidden)
+          app.write_text(s)
+
+          landing = Path('client/src/pages/global-landing.tsx')
+          s = landing.read_text()
+          s = s.replace('    if (!country.isUnlocked) return;\n\n', '')
+          s = s.replace('.country-card.locked { opacity: .5; cursor: not-allowed; }', '.country-card.locked { opacity: .72; cursor: pointer; }\n        .country-card.locked:hover { opacity: .92; border-color: rgba(0,94,184,.45); transform: translateY(-1px); }')
+          landing.write_text(s)
+          PY
+      - name: Commit wiring
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add client/src/App.tsx client/src/pages/global-landing.tsx
+          git diff --cached --quiet && exit 0
+          git commit -m "Open country catalogues while keeping assistants locked"
+          git push
