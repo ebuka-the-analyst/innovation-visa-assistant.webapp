@@ -99,16 +99,16 @@ const countries:Record<string,Country>={
 export default function CountryVisaRoutes({code}:{code:string}){
  const [,setLocation]=useLocation(); const { language }=useLanguage(); const tx=getCatalogueText(language); const [query,setQuery]=useState(""); const c=countries[code];
  useEffect(()=>{
-  if(typeof document==="undefined" || language==="en") return;
-  const controller=new AbortController();
-  const translate=async(text:string)=>{try{const res=await fetch(`/api/translate?lang=${encodeURIComponent(language)}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text}),signal:controller.signal});if(!res.ok)return text;const data=await res.json();return data.translation||text;}catch{return text;}};
+  if(typeof document==="undefined") return;
   const root=document.querySelector("#country-catalogue-main"); if(!root)return;
-  const nodes:Text[]=[]; const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT); let node:Node|null;
+  const controller=new AbortController();
+  if(language==="en") return;
+  const translate=async(text:string)=>{try{const res=await fetch(`/api/translate?lang=${encodeURIComponent(language)}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text}),signal:controller.signal});if(!res.ok)return text;const data=await res.json();return data.translation||text;}catch{return text;}};
+  const nodes:Text[]=[];const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let node:Node|null;
   while((node=walker.nextNode())){const t=node as Text;const el=t.parentElement;if(t.data.trim()&&el&&!["SCRIPT","STYLE","INPUT","TEXTAREA"].includes(el.tagName)&&!el.closest("[data-no-auto-translate]"))nodes.push(t);}
-  (async()=>{for(const t of nodes){if(!t.isConnected)continue;const source=t.data;const translated=await translate(source);if(t.isConnected&&translated!==source)t.data=translated;}})();
+  (async()=>{for(let i=0;i<nodes.length;i+=20){await Promise.all(nodes.slice(i,i+20).map(async t=>{if(!t.isConnected)return;const source=t.data;const translated=await translate(source);if(t.isConnected)t.data=translated;}));}})();
   return()=>controller.abort();
- },[language,code,filtered]);
- const filtered=useMemo(()=>{if(!c)return[];const q=query.trim().toLowerCase();if(!q)return c.groups;return c.groups.map(x=>({...x,routes:x.routes.filter(v=>`${v.name} ${v.description}`.toLowerCase().includes(q))})).filter(x=>x.routes.length)},[c,query]);
+ },[language,code,query]);
  if(!c)return null; const total=c.groups.reduce((n,x)=>n+x.routes.length,0);
  return <div className="min-h-[100svh] bg-gradient-to-b from-sky-50 via-white to-blue-50 text-slate-900 dark:from-[#090b18] dark:via-[#0b1020] dark:to-[#090b18] dark:text-white">
   <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-[#090b18]/90"><div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2.5 sm:px-6"><VisaAssistantBrand compact/><div className="flex items-center gap-1.5"><LanguageSelector/><ThemeToggle/><Button variant="outline" size="sm" onClick={()=>setLocation('/login')}>{tx.signIn}</Button></div></div></header>
