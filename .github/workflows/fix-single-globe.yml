@@ -1,0 +1,43 @@
+name: Fix single globe
+on:
+  push:
+    paths: ['.github/workflows/fix-single-globe.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Replace duplicate Earth with one fixed spinning globe
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('client/src/pages/global-landing.tsx')
+          s=p.read_text()
+          s=s.replace('@keyframes earth-surface-spin { from { transform: translateX(0); } to { transform: translateX(-50%); } }', '@keyframes earth-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }')
+          s=s.replace('.earth-track { position: absolute; inset: 0 auto 0 0; display: flex; width: 200%; height: 100%; animation: earth-surface-spin 60s linear infinite; }\n        .earth-track img { width: 50%; height: 100%; flex: 0 0 50%; object-fit: cover; }\n        .earth-shading { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 22px 0 30px rgba(0,0,0,.24), inset -22px 0 32px rgba(0,0,0,.34), inset 0 8px 16px rgba(255,255,255,.08); }\n        .globe.zooming .earth-track { animation: none; }', '.earth-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 999px; animation: earth-spin 60s linear infinite; transform-origin: 50% 50%; }\n        .earth-shading { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 22px 0 30px rgba(0,0,0,.24), inset -22px 0 32px rgba(0,0,0,.34), inset 0 8px 16px rgba(255,255,255,.08); }\n        .globe.zooming .earth-image { animation: none; }')
+          old='<div className="earth-track" role="img" aria-label="Rotating Earth globe"><img src={globeImage} alt="" draggable={false} /><img src={globeImage} alt="" draggable={false} /></div><div className="earth-shading" />'
+          new='<img src={globeImage} alt="Rotating Earth globe" className="earth-image" draggable={false} /><div className="earth-shading" />'
+          if old not in s: raise SystemExit('duplicate globe markup not found')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+      - name: Verify one globe only
+        run: |
+          test "$(grep -o 'src={globeImage}' client/src/pages/global-landing.tsx | wc -l)" -eq 1
+          ! grep -q 'earth-track' client/src/pages/global-landing.tsx
+          grep -q 'earth-spin 60s linear infinite' client/src/pages/global-landing.tsx
+      - name: Build
+        run: npm ci && npm run build
+      - name: Commit and deploy
+        run: |
+          git config user.name 'Ebuka Ben Umeh'
+          git config user.email 'ebuka.umeh40@outlook.com'
+          git add client/src/pages/global-landing.tsx
+          git commit -m 'Show one fixed continuously spinning globe'
+          git push
