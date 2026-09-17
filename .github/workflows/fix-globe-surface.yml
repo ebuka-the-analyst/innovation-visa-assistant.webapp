@@ -1,0 +1,46 @@
+name: Fix globe surface animation
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-globe-surface.yml'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Keep globe full size while surface moves horizontally
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('client/src/pages/global-landing.tsx')
+          s=p.read_text()
+          s=s.replace('@keyframes earth-spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }', '@keyframes earth-surface-spin { from { background-position-x: 0%; } to { background-position-x: 200%; } }')
+          s=s.replace('.globe img { animation: earth-spin 45s linear infinite; transform-origin: center; transform-style: preserve-3d; backface-visibility: visible; }\n        .globe.zooming img { animation: none; }', '.earth-surface { position: absolute; inset: 0; border-radius: inherit; background-image: var(--earth-image); background-size: 200% 100%; background-repeat: repeat-x; background-position-y: center; animation: earth-surface-spin 60s linear infinite; }\n        .globe.zooming .earth-surface { animation: none; background-size: cover; background-position: center; }')
+          old='<img src={globeImage} alt="Earth globe" className="h-full w-full object-cover" draggable={false} />'
+          new='<div className="earth-surface" role="img" aria-label="Earth globe" style={{ "--earth-image": `url(${globeImage})` } as React.CSSProperties} />'
+          if old not in s:
+            raise SystemExit('Main globe image markup not found')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+      - name: Verify
+        run: |
+          ! grep -q 'earth-spin' client/src/pages/global-landing.tsx
+          ! grep -q 'rotateY(360deg)' client/src/pages/global-landing.tsx | true
+          grep -q 'earth-surface-spin 60s linear infinite' client/src/pages/global-landing.tsx
+          grep -q 'background-size: 200% 100%' client/src/pages/global-landing.tsx
+      - name: Build
+        run: npm ci && npm run build
+      - name: Commit
+        run: |
+          git config user.name 'Ebuka Ben Umeh'
+          git config user.email 'ebuka.umeh40@outlook.com'
+          git add client/src/pages/global-landing.tsx
+          git commit -m 'Keep globe fixed while Earth surface rotates horizontally'
+          git push
