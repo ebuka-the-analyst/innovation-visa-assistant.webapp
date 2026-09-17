@@ -8,11 +8,9 @@ import {
   Bot,
   ChevronRight,
   FileText,
-  Globe2,
   Search,
   Shield,
   Sparkles,
-  Star,
   Users,
 } from "lucide-react";
 import globeImage from "@assets/unnamed_(1)_1769196836272.png";
@@ -124,14 +122,16 @@ export default function GlobalLanding() {
       <style>{`
         @keyframes twinkle { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
         @keyframes zoom-in { 0% { transform: scale(1) rotateY(0); } 50% { transform: scale(2) rotateY(180deg); } 100% { transform: scale(50) rotateY(360deg); opacity: 0; } }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes earth-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 15px rgba(0,94,184,.3); } 50% { box-shadow: 0 0 30px rgba(0,94,184,.5), 0 0 45px rgba(0,94,184,.2); } }
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
         .animate-fade-in { animation: fade-in .4s ease-out forwards; }
         .star { position: absolute; background: white; border-radius: 999px; animation: twinkle 3s infinite; }
         :not(.dark) .star { display: none; }
-        .globe-container { perspective: 1000px; animation: float 6s ease-in-out infinite; }
+        .globe-container { perspective: 1000px; }
         .globe { border-radius: 999px; box-shadow: inset -20px -20px 40px rgba(0,0,0,.3), 0 0 30px rgba(0,94,184,.3), 0 0 60px rgba(0,94,184,.15); animation: pulse-glow 4s ease-in-out infinite; }
+        .globe img { animation: earth-spin 45s linear infinite; transform-origin: center; }
+        .globe.zooming img { animation: none; }
         .dark .globe { box-shadow: inset -20px -20px 40px rgba(0,0,0,.5), 0 0 30px rgba(0,94,184,.3), 0 0 60px rgba(0,94,184,.15); }
         .globe.zooming { animation: zoom-in 1.5s ease-in forwards; }
         .country-card { backdrop-filter: blur(10px); background: rgba(255,255,255,.8); border: 1px solid rgba(0,94,184,.2); transition: all .2s ease; }
@@ -175,10 +175,6 @@ export default function GlobalLanding() {
         <main className="flex flex-1 flex-col overflow-visible md:flex-row md:overflow-hidden">
           <div className="flex flex-none flex-col items-center justify-center px-5 pb-7 pt-8 md:flex-1 md:px-4 md:py-2 lg:px-8">
             <div className="mb-4 max-w-xl text-center md:mb-2">
-              <Badge className="mb-2 border-[#005EB8]/30 bg-[#005EB8]/20 px-3 py-1 text-[10px] text-[#41B6E6] md:mb-1 md:px-2 md:py-0.5">
-                <Globe2 className="mr-1 h-2.5 w-2.5" />
-                {t.globalLanding.badge}
-              </Badge>
               <h1 className="mb-3 text-3xl font-bold leading-tight sm:text-4xl md:mb-1 md:text-2xl lg:text-3xl xl:text-4xl">
                 <span className="gradient-text">{t.globalLanding.headline}</span>
                 <br />
@@ -190,12 +186,6 @@ export default function GlobalLanding() {
             <div ref={globeRef} className="globe-container relative mb-6 mt-2 md:mb-1 md:mt-0">
               <div className={`globe h-36 w-36 overflow-hidden sm:h-40 sm:w-40 md:h-32 md:w-32 lg:h-40 lg:w-40 xl:h-48 xl:w-48 ${isZooming ? "zooming" : ""}`}>
                 <img src={globeImage} alt="Earth globe" className="h-full w-full object-cover" draggable={false} />
-              </div>
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                <Badge variant="outline" className="border-white/20 bg-black/55 px-2.5 py-1 text-[10px] text-white md:py-0.5">
-                  <Star className="mr-1 h-2.5 w-2.5 text-yellow-400" />
-                  {t.globalLanding.countriesCount} | 1 {t.globalLanding.live} | 15 {t.globalLanding.comingSoon}
-                </Badge>
               </div>
             </div>
 

@@ -143,16 +143,27 @@ export async function chat(
       },
     ];
 
-    const response: any = await managedAI.chat.completions.create({
-      model: BUSINESS_PLAN_MODEL as any,
-      messages,
-      max_tokens: 1500,
-    } as any);
+    const isLatestGptFamily = /^gpt-5/i.test(BUSINESS_PLAN_MODEL);
 
-    return (
-      response.choices?.[0]?.message?.content?.trim() ||
-      "I couldn't generate a response just now. Please try again."
-    );
+    if (isLatestGptFamily) {
+      const response: any = await managedAI.responses.create({
+        model: BUSINESS_PLAN_MODEL as any,
+        input: messages,
+        max_output_tokens: 1500,
+        reasoning: { effort: "low" },
+        text: { verbosity: "medium" },
+      } as any);
+      const outputText = typeof response.output_text === "string" ? response.output_text.trim() : "";
+      const fallbackText = Array.isArray(response.output) ? response.output.flatMap((item: any) => item?.content || []).map((item: any) => item?.text || "").join("").trim() : "";
+      const content = outputText || fallbackText;
+      if (!content) throw new Error("OpenAI returned empty chat response");
+      return content;
+    }
+
+    const response: any = await managedAI.chat.completions.create({ model: BUSINESS_PLAN_MODEL as any, messages, max_tokens: 1500 } as any);
+    const content = response.choices?.[0]?.message?.content?.trim();
+    if (!content) throw new Error("OpenAI returned empty chat response");
+    return content;
   } catch (error) {
     console.error("Chat error:", error);
     throw new Error("Failed to generate response");
