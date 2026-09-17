@@ -97,8 +97,6 @@ export default function GlobalLanding() {
   );
 
   const handleCountrySelect = (country: Country) => {
-    if (!country.isUnlocked) return;
-
     setSelectedCountry(country);
     setIsZooming(true);
     sessionStorage.setItem("navigating_from_global", country.code);
@@ -144,7 +142,8 @@ export default function GlobalLanding() {
         .country-card.unlocked { background: rgba(5,150,105,.1); border: 2px solid rgba(5,150,105,.5); }
         .dark .country-card.unlocked { background: rgba(5,150,105,.15); border-color: rgba(5,150,105,.6); }
         .country-card.unlocked:hover { background: rgba(5,150,105,.2); border-color: rgba(5,150,105,.7); }
-        .country-card.locked { opacity: .5; cursor: not-allowed; }
+        .country-card.locked { opacity: .72; cursor: pointer; }
+        .country-card.locked:hover { opacity: .92; border-color: rgba(0,94,184,.45); transform: translateY(-1px); }
         .gradient-text { background: linear-gradient(135deg,#005EB8 0%,#41B6E6 50%,#00A499 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .glass-panel { backdrop-filter: blur(20px); background: rgba(255,255,255,.8); border: 1px solid rgba(0,94,184,.1); }
         .dark .glass-panel { background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.08); }

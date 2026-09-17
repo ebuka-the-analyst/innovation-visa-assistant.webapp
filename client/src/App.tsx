@@ -33,6 +33,22 @@ const SiteFeedbackPopup = lazy(() => import("@/components/SiteFeedbackPopup").th
 // Global landing page
 const GlobalLanding = lazy(() => import("@/pages/global-landing"));
 const UkVisaRoutes = lazy(() => import("@/pages/uk-visa-routes"));
+const CountryVisaRoutes = lazy(() => import("@/pages/country-visa-routes"));
+const UsVisaRoutes = () => <CountryVisaRoutes code="us" />;
+const CaVisaRoutes = () => <CountryVisaRoutes code="ca" />;
+const AuVisaRoutes = () => <CountryVisaRoutes code="au" />;
+const DeVisaRoutes = () => <CountryVisaRoutes code="de" />;
+const FrVisaRoutes = () => <CountryVisaRoutes code="fr" />;
+const NlVisaRoutes = () => <CountryVisaRoutes code="nl" />;
+const SgVisaRoutes = () => <CountryVisaRoutes code="sg" />;
+const AeVisaRoutes = () => <CountryVisaRoutes code="ae" />;
+const NzVisaRoutes = () => <CountryVisaRoutes code="nz" />;
+const JpVisaRoutes = () => <CountryVisaRoutes code="jp" />;
+const IeVisaRoutes = () => <CountryVisaRoutes code="ie" />;
+const PtVisaRoutes = () => <CountryVisaRoutes code="pt" />;
+const EsVisaRoutes = () => <CountryVisaRoutes code="es" />;
+const SeVisaRoutes = () => <CountryVisaRoutes code="se" />;
+const ChVisaRoutes = () => <CountryVisaRoutes code="ch" />;
 
 // Public pages (marketing/auth)
 const Home = lazy(() => import("@/pages/home"));
@@ -150,7 +166,7 @@ function isVisaAssistantGlobalHost() {
   return typeof window !== "undefined" && VISA_ASSISTANT_GLOBAL_HOSTS.has(window.location.hostname.toLowerCase());
 }
 
-const SIDEBAR_HIDDEN_ROUTES = ["/", "/uk", INNOVATOR_FOUNDER_PATH, "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide", "/blog", "/join-expert-network"];
+const SIDEBAR_HIDDEN_ROUTES = ["/", "/uk", "/us", "/ca", "/au", "/de", "/fr", "/nl", "/sg", "/ae", "/nz", "/jp", "/ie", "/pt", "/es", "/se", "/ch", INNOVATOR_FOUNDER_PATH, "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide", "/blog", "/join-expert-network"];
 const SIDEBAR_HIDDEN_PREFIXES = ["/blog/"];
 const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard", "/admin/ai-providers", "/admin/expert-network"];
 const OPEN_ACCESS_DASHBOARD_ROUTES = ["/expert-booking"];
@@ -318,6 +334,21 @@ function Router() {
       <Route path="/" component={RootLanding} />
       <Route path="/v2" component={GlobalLanding} />
       <Route path="/uk" component={UkVisaRoutes} />
+      <Route path="/us" component={UsVisaRoutes} />
+      <Route path="/ca" component={CaVisaRoutes} />
+      <Route path="/au" component={AuVisaRoutes} />
+      <Route path="/de" component={DeVisaRoutes} />
+      <Route path="/fr" component={FrVisaRoutes} />
+      <Route path="/nl" component={NlVisaRoutes} />
+      <Route path="/sg" component={SgVisaRoutes} />
+      <Route path="/ae" component={AeVisaRoutes} />
+      <Route path="/nz" component={NzVisaRoutes} />
+      <Route path="/jp" component={JpVisaRoutes} />
+      <Route path="/ie" component={IeVisaRoutes} />
+      <Route path="/pt" component={PtVisaRoutes} />
+      <Route path="/es" component={EsVisaRoutes} />
+      <Route path="/se" component={SeVisaRoutes} />
+      <Route path="/ch" component={ChVisaRoutes} />
       <Route path={INNOVATOR_FOUNDER_PATH} component={Home} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
