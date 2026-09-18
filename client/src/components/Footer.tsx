@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import logoLightImg from "@assets/official_logo.webp";
 import logoDarkImg from "@assets/logo_dark.webp";
 import { ComplianceBadges } from "@/components/ComplianceBadges";
+import { innovatorFounderPath } from "@/lib/innovator-founder-routes";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
@@ -47,30 +48,30 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold mb-4">Product</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><a href="/features" className="hover:text-primary transition-colors" data-testid="link-features">Features</a></li>
-              <li><a href="/pricing" className="hover:text-primary transition-colors" data-testid="link-pricing">Pricing</a></li>
-              <li><a href="/tools-hub" className="hover:text-primary transition-colors" data-testid="link-templates">Tools</a></li>
-              <li><a href="/generation" className="hover:text-primary transition-colors" data-testid="link-sample-plans">Sample Plans</a></li>
+              <li><a href={innovatorFounderPath("/features")} className="hover:text-primary transition-colors" data-testid="link-features">Features</a></li>
+              <li><a href={innovatorFounderPath("/pricing")} className="hover:text-primary transition-colors" data-testid="link-pricing">Pricing</a></li>
+              <li><a href={innovatorFounderPath("/tools-hub")} className="hover:text-primary transition-colors" data-testid="link-templates">Tools</a></li>
+              <li><a href={innovatorFounderPath("/generation")} className="hover:text-primary transition-colors" data-testid="link-sample-plans">Sample Plans</a></li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-semibold mb-4">Resources</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><a href="/guide" className="hover:text-primary transition-colors" data-testid="link-documentation">Documentation</a></li>
-              <li><a href="/faq" className="hover:text-primary transition-colors" data-testid="link-faq">FAQ</a></li>
-              <li><a href="/ai-transparency" className="hover:text-primary transition-colors" data-testid="link-ai-transparency">AI Transparency</a></li>
-              <li><a href="/support" className="hover:text-primary transition-colors" data-testid="link-support">Support</a></li>
+              <li><a href={innovatorFounderPath("/guide")} className="hover:text-primary transition-colors" data-testid="link-documentation">Documentation</a></li>
+              <li><a href={innovatorFounderPath("/faq")} className="hover:text-primary transition-colors" data-testid="link-faq">FAQ</a></li>
+              <li><a href={innovatorFounderPath("/ai-transparency")} className="hover:text-primary transition-colors" data-testid="link-ai-transparency">AI Transparency</a></li>
+              <li><a href={innovatorFounderPath("/support")} className="hover:text-primary transition-colors" data-testid="link-support">Support</a></li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-semibold mb-4">Legal & Transparency</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><a href="/ai-transparency" className="hover:text-primary transition-colors" data-testid="link-ai-how-it-works">How Our AI Works</a></li>
-              <li><a href="/testing-validation" className="hover:text-primary transition-colors" data-testid="link-testing">Testing & Validation</a></li>
-              <li><a href="/compliance-dashboard" className="hover:text-primary transition-colors" data-testid="link-compliance">Platform Controls</a></li>
-              <li><a href="/privacy" className="hover:text-primary transition-colors" data-testid="link-data-protection">Privacy & Data Protection</a></li>
+              <li><a href={innovatorFounderPath("/ai-transparency")} className="hover:text-primary transition-colors" data-testid="link-ai-how-it-works">How Our AI Works</a></li>
+              <li><a href={innovatorFounderPath("/testing-validation")} className="hover:text-primary transition-colors" data-testid="link-testing">Testing & Validation</a></li>
+              <li><a href={innovatorFounderPath("/compliance-dashboard")} className="hover:text-primary transition-colors" data-testid="link-compliance">Platform Controls</a></li>
+              <li><a href={innovatorFounderPath("/privacy")} className="hover:text-primary transition-colors" data-testid="link-data-protection">Privacy & Data Protection</a></li>
             </ul>
           </div>
 
@@ -78,7 +79,7 @@ export default function Footer() {
             <h3 className="font-semibold mb-4">Contact</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li><a href="mailto:hello@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors" data-testid="link-general-inquiries">General Inquiries</a></li>
-              <li><a href="/support" className="hover:text-primary transition-colors" data-testid="link-customer-support">Customer Support</a></li>
+              <li><a href={innovatorFounderPath("/support")} className="hover:text-primary transition-colors" data-testid="link-customer-support">Customer Support</a></li>
               <li><a href="mailto:billing@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors" data-testid="link-billing">Billing & Payments</a></li>
               <li><a href="mailto:team@innovatorfoundervisaassistant.co.uk" className="hover:text-primary transition-colors" data-testid="link-partnership">Partnership Inquiries</a></li>
             </ul>
@@ -124,9 +125,9 @@ export default function Footer() {
             </div>
           </div>
           <div className="flex gap-6 text-sm text-muted-foreground">
-            <a href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</a>
-            <a href="/terms" className="hover:text-primary transition-colors">Terms of Service</a>
-            <a href="/cookies" className="hover:text-primary transition-colors">Cookie Policy</a>
+            <a href={innovatorFounderPath("/privacy")} className="hover:text-primary transition-colors">Privacy Policy</a>
+            <a href={innovatorFounderPath("/terms")} className="hover:text-primary transition-colors">Terms of Service</a>
+            <a href={innovatorFounderPath("/cookies")} className="hover:text-primary transition-colors">Cookie Policy</a>
           </div>
         </div>
       </div>
