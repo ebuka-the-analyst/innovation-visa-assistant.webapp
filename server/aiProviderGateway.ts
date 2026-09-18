@@ -282,7 +282,7 @@ export function registerAIProviderGatewayRoutes(app: Express): void {
   app.post("/api/translate", async (req, res) => {
     try {
       if (!req.is("application/json")) return res.status(415).json({ error: "Content-Type must be application/json" });
-      const language = String(req.body?.lang || "").trim().toLowerCase();
+      const language = String(req.body?.lang || req.query?.lang || "").trim().toLowerCase();
       const text = String(req.body?.text || "");
       const supported: Record<string, string> = {
         de: "German", es: "Spanish", fr: "French", pt: "Portuguese",
