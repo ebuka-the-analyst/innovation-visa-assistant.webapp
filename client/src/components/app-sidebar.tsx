@@ -50,6 +50,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { innovatorFounderPath, isInnovatorFounderPath } from "@/lib/innovator-founder-routes";
 
 type NavItem = {
   title: string;
@@ -72,6 +73,8 @@ interface AppSidebarProps {
 
 export function AppSidebar({ demoMode = false }: AppSidebarProps) {
   const [location, setLocation] = useLocation();
+  const scoped = isInnovatorFounderPath(location);
+  const routeFor = (path: string) => scoped ? innovatorFounderPath(path) : path;
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     "Core Platform": true,
   });
@@ -98,7 +101,7 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
       if (data?.redirectUrl) {
         window.location.href = data.redirectUrl;
       } else {
-        setLocation("/login");
+        setLocation(routeFor("/login"));
       }
     },
   });
@@ -121,10 +124,10 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
     }));
   };
 
-  const isItemActive = (url: string) => location === url;
+  const isItemActive = (url: string) => location === routeFor(url);
 
   const isSectionActive = (items: NavItem[]) => {
-    return items.some(item => location === item.url);
+    return items.some(item => location === routeFor(item.url));
   };
 
   const navGroups: NavGroup[] = [
@@ -297,7 +300,7 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
                           <SidebarMenuButton
                             asChild
                             isActive={isActive}
-                            onClick={() => setLocation(item.url)}
+                            onClick={() => setLocation(routeFor(item.url))}
                             className={`cursor-pointer transition-colors py-2 px-2.5 rounded-md ${
                               isActive
                                 ? "bg-primary/10 text-primary border-l-2 border-primary -ml-px"
@@ -352,7 +355,7 @@ export function AppSidebar({ demoMode = false }: AppSidebarProps) {
               variant="default"
               size="sm"
               className="w-full justify-start gap-2 h-7 text-xs"
-              onClick={() => setLocation("/login")}
+              onClick={() => setLocation(routeFor("/login"))}
               data-testid="sidebar-login-button"
             >
               <LogOut className="h-3 w-3" />
