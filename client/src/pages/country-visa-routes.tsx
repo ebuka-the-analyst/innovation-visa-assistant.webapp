@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, Award, Baby, BookOpen, BriefcaseBusiness, Building2, Camera, Church, ExternalLink, GraduationCap, Handshake, Heart, House, Languages, Leaf, Lightbulb, Lock, Microscope, Palette, Plane, Repeat2, Rocket, Scale, Search, ShieldCheck, Stethoscope, Trophy, Users, Wrench } from "lucide-react";
+import { ArrowLeft, Award, Baby, BookOpen, BriefcaseBusiness, Building2, Camera, Church, ExternalLink, GraduationCap, Handshake, Heart, House, Languages, Leaf, Lightbulb, Lock, Microscope, Palette, Plane, Repeat2, Rocket, Scale, Search, ShieldCheck, Sparkles, Stethoscope, Trophy, Users, Wrench } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
