@@ -60,7 +60,10 @@ update("client/src/App.tsx", (source) => {
     next = next.replace(publicAnchor, `${openShell}${publicAnchor}`);
   }
 
-  if (!next.includes('href="/login?redirect=%2Fexpert-booking"')) {
+  if (
+    !next.includes('href="/login?redirect=%2Fexpert-booking"') &&
+    !next.includes('href={routeFor("/login?redirect=%2Fexpert-booking")}')
+  ) {
     const logoutBlock = `      {user && (\n        <Button\n          variant=\"outline\"\n          size=\"sm\"\n          onClick={() => logoutMutation.mutate()}\n          disabled={logoutMutation.isPending}\n          data-testid=\"button-header-logout\"\n        >\n          <LogOut className=\"h-4 w-4 mr-1\" />\n          <span className=\"hidden sm:inline\">Logout</span>\n        </Button>\n      )}`;
     if (!next.includes(logoutBlock)) throw new Error("Could not locate header logout control");
     next = next.replace(logoutBlock, `${logoutBlock}\n      {!user && (\n        <Link href=\"/login?redirect=%2Fexpert-booking\">\n          <Button variant=\"outline\" size=\"sm\" data-testid=\"button-header-signin\">Sign in</Button>\n        </Link>\n      )}`);
