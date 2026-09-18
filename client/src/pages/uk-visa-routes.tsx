@@ -243,8 +243,8 @@ export default function UkVisaRoutes() {
 
         <section className="relative mb-7 overflow-hidden rounded-[30px] border border-blue-100 bg-[#dff2ff] shadow-[0_18px_55px_rgba(31,96,170,.10)] dark:border-white/10 dark:bg-[#11182b]">
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-95 dark:opacity-45"
-            style={{ backgroundImage: `url("${WESTMINSTER_IMAGE}")` }}
+            className="absolute inset-0 bg-no-repeat opacity-95 dark:opacity-45"
+            style={{ backgroundImage: `url("${WESTMINSTER_IMAGE}")`, backgroundSize: "auto 88%", backgroundPosition: "right center" }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#eaf7ff] via-[#eaf7ff]/95 to-[#eaf7ff]/15 dark:from-[#10182b] dark:via-[#10182b]/95 dark:to-[#10182b]/20" />
 
@@ -364,9 +364,9 @@ export default function UkVisaRoutes() {
                                 if (isLive && route.href) setLocation(route.href);
                                 else if (route.officialUrl) window.open(route.officialUrl, "_blank", "noopener,noreferrer");
                               }}
-                              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-700 transition group-hover:bg-blue-50 group-hover:text-[#086cf2] dark:bg-white/10 dark:text-white"
+                              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${isLive ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/30 animate-pulse hover:bg-emerald-600" : "bg-slate-50 text-slate-700 group-hover:bg-blue-50 group-hover:text-[#086cf2] dark:bg-white/10 dark:text-white"}`}
                             >
-                              <ArrowRight className="h-4 w-4" />
+                              <ArrowRight className={`h-4 w-4 ${isLive ? "transition-transform duration-500 group-hover:translate-x-1" : ""}`} />
                             </button>
                           </div>
                         </div>
