@@ -13,6 +13,7 @@ import { Link } from "wouter";
 import { useState } from "react";
 import SamplePlansModal from "./SamplePlansModal";
 import { useAuth } from "@/hooks/useAuth";
+import { innovatorFounderPath } from "@/lib/innovator-founder-routes";
 
 const preparationAreas = [
   { label: "Business Plan", icon: FileText },
@@ -54,7 +55,7 @@ export default function HeroSection() {
   const { user, isAuthenticated } = useAuth();
 
   const hasPaidPlan = isAuthenticated && user?.subscriptionTier && user.subscriptionTier !== "free";
-  const generatePlanHref = hasPaidPlan ? "/questionnaire" : "/pricing";
+  const generatePlanHref = innovatorFounderPath(hasPaidPlan ? "/questionnaire" : "/pricing");
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-background via-accent/5 to-primary/5 py-7 md:py-10 lg:py-12">
@@ -149,7 +150,7 @@ export default function HeroSection() {
                   <CheckCircle className="h-4 w-4 shrink-0 text-primary" />
                   <span>Everything remains editable as you refine your application.</span>
                 </div>
-                <Link href="/features">
+                <Link href={innovatorFounderPath("/features")}>
                   <Button size="sm" variant="outline" className="group shrink-0">
                     Explore the Platform
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
