@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { ALL_TOOLS } from "@shared/tools-data";
 import * as Icons from "lucide-react";
 import { Check, ChevronRight, Wrench, Wallet, Activity, LayoutDashboard, PanelLeft } from "lucide-react";
@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import logoLight from "@assets/official_logo.webp";
 import logoDark from "@assets/logo_dark.webp";
 import { useCommercialCatalog, type PlanId } from "@/hooks/useCommercialCatalog";
+import { innovatorFounderPath, isInnovatorFounderPath } from "@/lib/innovator-founder-routes";
 
 type IconName = keyof typeof Icons;
 
@@ -74,6 +75,9 @@ function AnimatedSidebarTrigger() {
 }
 
 export default function FeaturesShowcase() {
+  const [location] = useLocation();
+  const scoped = isInnovatorFounderPath(location);
+  const routeFor = (path: string) => scoped ? innovatorFounderPath(path) : path;
   const { user } = useAuth();
   const isDemoMode = !user;
   const { plans, toolCounts, formatPrice } = useCommercialCatalog();
@@ -119,7 +123,7 @@ export default function FeaturesShowcase() {
           <header className="sticky top-0 z-50 flex h-14 items-center justify-between gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
             <div className="flex items-center gap-2">
               <AnimatedSidebarTrigger />
-              <Link href="/">
+              <Link href={routeFor("/")}>
                 <div className="logo-container h-8">
                   <img src={logoLight} alt="Logo" className="h-8 w-auto logo-light" loading="lazy" />
                   <img src={logoDark} alt="Logo" className="h-8 w-auto logo-dark" loading="lazy" />
@@ -129,7 +133,7 @@ export default function FeaturesShowcase() {
             <div className="flex items-center gap-2">
               <ThemeToggle />
               {isDemoMode && (
-                <Link href="/login">
+                <Link href={routeFor("/login")}>
                   <Button size="sm" data-testid="button-login">Sign In</Button>
                 </Link>
               )}
@@ -188,7 +192,7 @@ export default function FeaturesShowcase() {
                         ))}
                       </div>
                       
-                      <Link href="/tools-hub">
+                      <Link href={routeFor("/tools-hub")}>
                         <Button size="sm" variant="outline" className="w-full gap-2" data-testid={`button-view-${idx}`}>
                           View All Tools <ChevronRight className="w-3 h-3" />
                         </Button>
@@ -216,7 +220,7 @@ export default function FeaturesShowcase() {
                         <div><span className="font-semibold">{tier.access}</span> access</div>
                         <div><span className="font-semibold">{tier.pages}</span> plan</div>
                       </div>
-                      <Link href="/pricing">
+                      <Link href={routeFor("/pricing")}>
                         <Button size="sm" variant={tier.popular ? "default" : "outline"} className="w-full" data-testid={`button-pricing-${idx}`}>
                           Choose Plan
                         </Button>
@@ -230,7 +234,7 @@ export default function FeaturesShowcase() {
               <section className="mb-12 md:mb-16 lg:mb-20">
                 <h2 className="text-xl sm:text-2xl md:text-xl font-bold mb-6 md:mb-8">Explore Our Platform</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-                  <Link href="/tools-hub">
+                  <Link href={routeFor("/tools-hub")}>
                     <Card className="p-6 hover-elevate cursor-pointer text-center" data-testid="card-link-tools">
                       <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                         <Wrench className="w-6 h-6" />
@@ -240,7 +244,7 @@ export default function FeaturesShowcase() {
                     </Card>
                   </Link>
 
-                  <Link href="/pricing">
+                  <Link href={routeFor("/pricing")}>
                     <Card className="p-6 hover-elevate cursor-pointer text-center" data-testid="card-link-pricing">
                       <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                         <Wallet className="w-6 h-6" />
@@ -250,7 +254,7 @@ export default function FeaturesShowcase() {
                     </Card>
                   </Link>
 
-                  <Link href="/diagnostics">
+                  <Link href={routeFor("/diagnostics")}>
                     <Card className="p-6 hover-elevate cursor-pointer text-center" data-testid="card-link-diagnostics">
                       <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                         <Activity className="w-6 h-6" />
@@ -260,7 +264,7 @@ export default function FeaturesShowcase() {
                     </Card>
                   </Link>
 
-                  <Link href="/dashboard">
+                  <Link href={routeFor("/dashboard")}>
                     <Card className="p-6 hover-elevate cursor-pointer text-center" data-testid="card-link-dashboard">
                       <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                         <LayoutDashboard className="w-6 h-6" />
@@ -279,12 +283,12 @@ export default function FeaturesShowcase() {
                   Choose your plan and start building your visa-approved business plan today
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link href="/pricing">
+                  <Link href={routeFor("/pricing")}>
                     <Button size="lg" data-testid="button-cta-pricing">
                       View All Plans
                     </Button>
                   </Link>
-                  <Link href="/tools-hub">
+                  <Link href={routeFor("/tools-hub")}>
                     <Button size="lg" variant="outline" data-testid="button-cta-tools">
                       Explore Tools
                     </Button>
