@@ -109,7 +109,7 @@ export default function CountryVisaRoutes({code}:{code:string}){
   (async()=>{for(let i=0;i<nodes.length;i+=20){await Promise.all(nodes.slice(i,i+20).map(async t=>{if(!t.isConnected)return;const source=t.data;const translated=await translate(source);if(t.isConnected)t.data=translated;}));}})();
   return()=>controller.abort();
  },[language,code,query]);
- if(!c)return null; const total=c.groups.reduce((n,x)=>n+x.routes.length,0);
+ const filtered=useMemo(()=>{if(!c)return[];const q=query.trim().toLowerCase();if(!q)return c.groups;return c.groups.map(x=>({...x,routes:x.routes.filter(v=>`${v.name} ${v.description}`.toLowerCase().includes(q))})).filter(x=>x.routes.length)},[c,query]);\n if(!c)return null; const total=c.groups.reduce((n,x)=>n+x.routes.length,0);
  return <div className="min-h-[100svh] bg-gradient-to-b from-sky-50 via-white to-blue-50 text-slate-900 dark:from-[#090b18] dark:via-[#0b1020] dark:to-[#090b18] dark:text-white">
   <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-[#090b18]/90"><div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2.5 sm:px-6"><VisaAssistantBrand compact/><div className="flex items-center gap-1.5"><LanguageSelector/><ThemeToggle/><Button variant="outline" size="sm" onClick={()=>setLocation('/login')}>{tx.signIn}</Button></div></div></header>
   <main id="country-catalogue-main" className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8"><Button variant="ghost" className="mb-4 -ml-3 gap-2" onClick={()=>setLocation('/')}><ArrowLeft className="h-4 w-4"/>{tx.allCountries}</Button>
