@@ -10,6 +10,7 @@ import LanguageSelector from "@/components/LanguageSelector";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCatalogueText } from "@/lib/catalogue-i18n";
+import { getStaticUkCatalogueTranslation, hasCompleteStaticUkCatalogue } from "@/lib/uk-catalogue-static-translations";
 
 const INNOVATOR_FOUNDER_PATH = "/uk/innovatorfoundervisaassistant";
 
@@ -117,7 +118,7 @@ export default function UkVisaRoutes() {
   const total = groups.reduce((sum, group) => sum + group.routes.length, 0);
 
   useEffect(() => {
-    if (language === "en") {
+    if (language === "en" || hasCompleteStaticUkCatalogue(language)) {
       setTranslatedCatalogue({});
       return;
     }
@@ -173,10 +174,10 @@ export default function UkVisaRoutes() {
           {filtered.map(group => {
             const Icon = group.icon;
             return <section key={group.title}>
-              <div className="mb-3 flex items-start gap-3"><div className="rounded-xl bg-blue-50 p-2 text-[#005EB8] dark:bg-blue-500/10"><Icon className="h-5 w-5" /></div><div><h2 className="text-xl font-semibold">{translatedCatalogue[group.title] || group.title}</h2><p className="text-sm text-slate-500 dark:text-slate-400">{translatedCatalogue[group.description] || group.description}</p></div></div>
+              <div className="mb-3 flex items-start gap-3"><div className="rounded-xl bg-blue-50 p-2 text-[#005EB8] dark:bg-blue-500/10"><Icon className="h-5 w-5" /></div><div><h2 className="text-xl font-semibold">{getStaticUkCatalogueTranslation(language, group.title) || translatedCatalogue[group.title] || group.title}</h2><p className="text-sm text-slate-500 dark:text-slate-400">{getStaticUkCatalogueTranslation(language, group.description) || translatedCatalogue[group.description] || group.description}</p></div></div>
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {group.routes.map(route => <Card key={route.name} className={`flex min-h-40 flex-col justify-between rounded-2xl p-5 transition ${route.status === "live" ? "border-emerald-400/70 bg-emerald-50/50 shadow-sm dark:bg-emerald-500/5" : "border-slate-200 bg-white/80 dark:border-white/10 dark:bg-white/[.03]"}`}>
-                  <div><div className="mb-2 flex items-start justify-between gap-3"><h3 className="font-semibold leading-5">{translatedCatalogue[route.name] || route.name}</h3>{route.status === "live" ? <Badge className="bg-emerald-600 text-white">{tx.available}</Badge> : <Badge variant="secondary" className="gap-1 whitespace-nowrap"><Lock className="h-3 w-3" />{tx.comingSoon}</Badge>}</div><p className="text-sm leading-5 text-slate-600 dark:text-slate-400">{translatedCatalogue[route.description] || route.description}</p></div>
+                  <div><div className="mb-2 flex items-start justify-between gap-3"><h3 className="font-semibold leading-5">{getStaticUkCatalogueTranslation(language, route.name) || translatedCatalogue[route.name] || route.name}</h3>{route.status === "live" ? <Badge className="bg-emerald-600 text-white">{tx.available}</Badge> : <Badge variant="secondary" className="gap-1 whitespace-nowrap"><Lock className="h-3 w-3" />{tx.comingSoon}</Badge>}</div><p className="text-sm leading-5 text-slate-600 dark:text-slate-400">{getStaticUkCatalogueTranslation(language, route.description) || translatedCatalogue[route.description] || route.description}</p></div>
                   <div className="mt-5 flex items-center justify-between gap-2">{route.status === "live" && route.href ? <Button className="gap-1.5 bg-[#005EB8]" onClick={() => setLocation(route.href!)}>{tx.openAssistant} <ChevronRight className="h-4 w-4" /></Button> : <span className="text-xs text-slate-400">{tx.assistantDevelopment}</span>}{route.officialUrl && <a href={route.officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-[#005EB8] hover:underline">{tx.official} <ExternalLink className="h-3 w-3" /></a>}</div>
                 </Card>)}
               </div>
