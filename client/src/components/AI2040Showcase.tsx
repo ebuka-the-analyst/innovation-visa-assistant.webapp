@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
+import { innovatorFounderPath } from "@/lib/innovator-founder-routes";
 
 const features = [
   {
@@ -24,7 +25,7 @@ const features = [
     icon: Crown,
     color: "#d946ef",
     gradient: "from-purple-500 to-pink-500",
-    href: "/oracle-supervisor"
+    href: innovatorFounderPath("/oracle-supervisor")
   },
   {
     id: "autopilot",
@@ -33,7 +34,7 @@ const features = [
     icon: Mic,
     color: "#22c55e",
     gradient: "from-green-500 to-emerald-500",
-    href: "/founder-autopilot"
+    href: innovatorFounderPath("/founder-autopilot")
   },
   {
     id: "neural-twin",
@@ -42,7 +43,7 @@ const features = [
     icon: Users,
     color: "#3b82f6",
     gradient: "from-blue-500 to-cyan-500",
-    href: "/neural-twin"
+    href: innovatorFounderPath("/neural-twin")
   },
   {
     id: "regulatory",
@@ -51,7 +52,7 @@ const features = [
     icon: Scale,
     color: "#f59e0b",
     gradient: "from-amber-500 to-orange-500",
-    href: "/regulatory-copilot"
+    href: innovatorFounderPath("/regulatory-copilot")
   },
   {
     id: "economic",
@@ -60,7 +61,7 @@ const features = [
     icon: LineChart,
     color: "#06b6d4",
     gradient: "from-[#41B6E6] to-[#0072CE]",
-    href: "/economic-impact"
+    href: innovatorFounderPath("/economic-impact")
   },
   {
     id: "knowledge",
@@ -69,7 +70,7 @@ const features = [
     icon: Network,
     color: "#8b5cf6",
     gradient: "from-violet-500 to-purple-500",
-    href: "/knowledge-graph"
+    href: innovatorFounderPath("/knowledge-graph")
   },
   {
     id: "voice",
@@ -78,7 +79,7 @@ const features = [
     icon: Volume2,
     color: "#ec4899",
     gradient: "from-pink-500 to-rose-500",
-    href: "/voice-builder"
+    href: innovatorFounderPath("/voice-builder")
   }
 ];
 
@@ -189,7 +190,7 @@ export default function AI2040Showcase() {
           viewport={{ once: true }}
           className="text-center"
         >
-          <Link href="/oracle-supervisor">
+          <Link href={innovatorFounderPath("/oracle-supervisor")}>
             <Button size="lg" className="group gap-2">
               <Zap className="w-5 h-5" />
               Explore AI Command Center
