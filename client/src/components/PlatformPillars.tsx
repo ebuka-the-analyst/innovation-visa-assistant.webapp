@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Brain, Zap, Users } from "lucide-react";
 import { Link } from "wouter";
+import { innovatorFounderPath } from "@/lib/innovator-founder-routes";
 
 export default function PlatformPillars() {
   const pillars = [
@@ -18,8 +19,8 @@ export default function PlatformPillars() {
         "Editable AI-assisted drafting"
       ],
       links: [
-        { label: "Generate Business Plan", route: "/questionnaire?tier=enterprise" },
-        { label: "See Sample Plans", route: "/#samples" }
+        { label: "Generate Business Plan", route: innovatorFounderPath("/questionnaire?tier=enterprise") },
+        { label: "See Sample Plans", route: innovatorFounderPath("/#samples") }
       ],
       color: "from-purple-500 to-primary"
     },
@@ -36,8 +37,8 @@ export default function PlatformPillars() {
         "Traction and evidence planning"
       ],
       links: [
-        { label: "Check Preparation", route: "/questionnaire" },
-        { label: "Compare Endorsers", route: "/endorser-comparison" }
+        { label: "Check Preparation", route: innovatorFounderPath("/questionnaire") },
+        { label: "Compare Endorsers", route: innovatorFounderPath("/endorser-comparison") }
       ],
       color: "from-blue-500 to-cyan-500"
     },
@@ -54,8 +55,8 @@ export default function PlatformPillars() {
         "Preparation reminders and evidence tracking"
       ],
       links: [
-        { label: "Practice Interviews", route: "/interview-prep" },
-        { label: "Book Expert Consultation", route: "/expert-booking" }
+        { label: "Practice Interviews", route: innovatorFounderPath("/interview-prep") },
+        { label: "Book Expert Consultation", route: innovatorFounderPath("/expert-booking") }
       ],
       color: "from-green-500 to-emerald-500"
     }
