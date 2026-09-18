@@ -319,6 +319,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google OAuth authentication (must be before routes)
   await setupAuth(app);
 
+  app.post("/api/translate", async (req, res) => {
+    try {
+      const language = String(req.query.lang || req.body?.lang || "en").trim().toLowerCase();
+      const languageNames: Record<string, string> = { es: "Spanish", fr: "French", de: "German", zh: "Simplified Chinese", ar: "Arabic", pt: "Portuguese", ja: "Japanese" };
+      const target = languageNames[language];
+      const texts = Array.isArray(req.body?.texts)
+        ? req.body.texts.map((v: unknown) => String(v ?? "")).filter(Boolean).slice(0, 100)
+        : [String(req.body?.text ?? "")].filter(Boolean);
+      if (language === "en" || !target) return res.json({ translations: texts, translation: texts[0] || "" });
+      if (!texts.length) return res.status(400).json({ error: "No text supplied" });
+      const prompt = `Translate each item in this JSON array into ${target}. Preserve proper nouns only where they should conventionally remain untranslated. Return ONLY a valid JSON array of translated strings in exactly the same order and length. Do not add markdown.\n\n${JSON.stringify(texts)}`;
+      const raw = await callAI(prompt, 6000);
+      const cleaned = raw.replace(/^\s*```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+      const parsed = JSON.parse(cleaned);
+      if (!Array.isArray(parsed) || parsed.length !== texts.length) throw new Error("Invalid translation response shape");
+      const translations = parsed.map((v: unknown, i: number) => String(v ?? texts[i]));
+      res.set("Cache-Control", "public, max-age=86400");
+      return res.json({ translations, translation: translations[0] || "" });
+    } catch (error) {
+      console.error("Catalogue translation error:", error);
+      return res.status(500).json({ error: "Translation unavailable" });
+    }
+  });
+
   app.get("/api/pricing", async (_req, res) => {
     try {
       res.set("Cache-Control", "no-store");
