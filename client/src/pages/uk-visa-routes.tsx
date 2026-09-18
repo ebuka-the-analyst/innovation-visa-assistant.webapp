@@ -17,6 +17,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCatalogueText } from "@/lib/catalogue-i18n";
 import { getStaticUkCatalogueTranslation, hasCompleteStaticUkCatalogue } from "@/lib/uk-catalogue-static-translations";
+import globeImage from "@assets/unnamed_(1)_1769196836272.png";
 
 const INNOVATOR_FOUNDER_PATH = "/uk/innovatorfoundervisaassistant";
 const WESTMINSTER_IMAGE = "https://images.unsplash.com/photo-1755453468328-9b5f7ed16408?auto=format&fit=crop&q=84&w=2200";
@@ -175,6 +176,7 @@ export default function UkVisaRoutes() {
   const [query, setQuery] = useState("");
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [translatedCatalogue, setTranslatedCatalogue] = useState<Record<string, string>>({});
+  const [travelTarget, setTravelTarget] = useState<VisaRoute | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -217,8 +219,53 @@ export default function UkVisaRoutes() {
   const t = (text: string) => getStaticUkCatalogueTranslation(language, text) || translatedCatalogue[text] || text;
   const scrollToRoutes = () => document.getElementById("visa-routes")?.scrollIntoView({ behavior: "smooth" });
 
+  const openLiveRoute = (route: VisaRoute) => {
+    if (route.status !== "live" || !route.href || travelTarget) return;
+    setTravelTarget(route);
+    sessionStorage.removeItem("navigating_from_global");
+    window.setTimeout(() => setLocation(route.href!), 1500);
+  };
+
   return (
     <div className="min-h-[100svh] bg-[#f7fbff] text-[#07183b] dark:bg-[#080b18] dark:text-white">
+      <style>{`
+        @keyframes visa-route-travel-zoom {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(30); opacity: 0; }
+        }
+        @keyframes visa-route-globe-spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes visa-route-pulse-glow {
+          0%, 100% { box-shadow: inset -20px -20px 40px rgba(0,0,0,.3), 0 0 15px rgba(0,94,184,.3), 0 0 60px rgba(0,94,184,.15); }
+          50% { box-shadow: inset -20px -20px 40px rgba(0,0,0,.3), 0 0 30px rgba(0,94,184,.5), 0 0 60px rgba(0,94,184,.2); }
+        }
+        .visa-route-travel-globe {
+          position: relative;
+          border-radius: 999px;
+          animation: visa-route-pulse-glow 4s ease-in-out infinite, visa-route-travel-zoom 1.5s ease-in forwards;
+        }
+        .visa-route-travel-earth {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 999px;
+          animation: visa-route-globe-spin 60s linear infinite;
+          transform-origin: 50% 50%;
+        }
+        .visa-route-travel-globe .visa-route-travel-earth {
+          animation: none;
+        }
+        .visa-route-earth-shading {
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          pointer-events: none;
+          box-shadow: inset 22px 0 30px rgba(0,0,0,.18), inset -22px 0 32px rgba(0,0,0,.28), inset 0 8px 16px rgba(255,255,255,.08);
+        }
+      `}</style>
       <header className="sticky top-0 z-40 border-b border-blue-100/70 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-[#0b0e1d]/95">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-5 py-3 lg:px-8">
           <VisaAssistantBrand compact />
@@ -359,12 +406,11 @@ export default function UkVisaRoutes() {
                               </a>
                             ) : <span />}
                             <button
-                              aria-label={isLive ? tx.openAssistant : tx.official}
-                              onClick={() => {
-                                if (isLive && route.href) setLocation(route.href);
-                                else if (route.officialUrl) window.open(route.officialUrl, "_blank", "noopener,noreferrer");
-                              }}
-                              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${isLive ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/30 animate-pulse hover:bg-emerald-600" : "bg-slate-50 text-slate-700 group-hover:bg-blue-50 group-hover:text-[#086cf2] dark:bg-white/10 dark:text-white"}`}
+                              aria-label={isLive ? tx.openAssistant : tx.comingSoon}
+                              title={isLive ? tx.openAssistant : tx.comingSoon}
+                              disabled={!isLive || Boolean(travelTarget)}
+                              onClick={() => openLiveRoute(route)}
+                              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${isLive ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/30 animate-pulse hover:bg-emerald-600" : "cursor-not-allowed bg-slate-50 text-slate-400 opacity-70 dark:bg-white/10 dark:text-slate-500"}`}
                             >
                               <ArrowRight className={`h-4 w-4 ${isLive ? "transition-transform duration-500 group-hover:translate-x-1" : ""}`} />
                             </button>
@@ -390,6 +436,17 @@ export default function UkVisaRoutes() {
 
         {filtered.length === 0 && <div className="py-20 text-center text-slate-500">{tx.noRoutes(query, "UK")}</div>}
       </main>
+
+      {travelTarget && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-sky-100 dark:bg-[#0a0a1a]" aria-live="polite">
+          <div className="h-48 w-48 rounded-full sm:h-56 sm:w-56 lg:h-64 lg:w-64">
+            <div className="visa-route-travel-globe h-full w-full overflow-hidden">
+              <img src={globeImage} alt="" className="visa-route-travel-earth" draggable={false} />
+              <div className="visa-route-earth-shading" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
