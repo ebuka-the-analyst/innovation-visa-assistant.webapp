@@ -1,4 +1,5 @@
 import type { LanguageCode } from "@/lib/translations";
+import { extraStaticUkCatalogueTranslations } from "@/lib/uk-catalogue-static-translations-extra";
 
 const zh: Record<string, string> = {
   "Business & Talent": "商业与人才",
@@ -208,12 +209,12 @@ const ar: Record<string, string> = {
   "Current immigration routes and extensions for eligible Ukrainians and their families.": "مسارات الهجرة والتمديدات الحالية للأوكرانيين المؤهلين وأفراد أسرهم."
 };
 
-const staticTranslations: Partial<Record<LanguageCode, Record<string, string>>> = { zh, ar };
+const staticTranslations: Partial<Record<LanguageCode, Record<string, string>>> = { zh, ar, ...extraStaticUkCatalogueTranslations };
 
 export function getStaticUkCatalogueTranslation(language: LanguageCode, text: string): string | undefined {
   return staticTranslations[language]?.[text];
 }
 
 export function hasCompleteStaticUkCatalogue(language: LanguageCode): boolean {
-  return language === "zh" || language === "ar";
+  return language !== "en" && Boolean(staticTranslations[language]);
 }
