@@ -104,12 +104,116 @@ const zh: Record<string, string> = {
   "Current immigration routes and extensions for eligible Ukrainians and their families.": "面向合资格乌克兰公民及其家庭成员的现行移民路线和延期安排。"
 };
 
-const staticTranslations: Partial<Record<LanguageCode, Record<string, string>>> = { zh };
+const ar: Record<string, string> = {
+  "Business & Talent": "الأعمال والمواهب",
+  "Routes for founders, recognised talent and high-potential professionals.": "مسارات للمؤسسين وأصحاب المواهب المعترف بها والمهنيين ذوي الإمكانات العالية.",
+  "Innovator Founder": "تأشيرة المؤسس المبتكر",
+  "Build and grow an innovative, viable and scalable UK business.": "أنشئ وطوّر مشروعاً مبتكراً وقابلاً للاستمرار والتوسع في المملكة المتحدة.",
+  "Global Talent": "تأشيرة المواهب العالمية",
+  "For leaders or potential leaders in qualifying fields.": "للقادة أو من لديهم إمكانية أن يصبحوا قادة في المجالات المؤهلة.",
+  "High Potential Individual (HPI)": "تأشيرة الأفراد ذوي الإمكانات العالية (HPI)",
+  "For recent graduates of eligible leading global universities.": "للخريجين الجدد من الجامعات العالمية الرائدة المؤهلة.",
+
+  "Work": "العمل",
+  "Sponsored, unsponsored and temporary routes for working in the UK.": "مسارات عمل برعاية وبدون رعاية ومسارات مؤقتة للعمل في المملكة المتحدة.",
+  "Skilled Worker": "تأشيرة العامل الماهر",
+  "For eligible jobs with an approved UK employer.": "للوظائف المؤهلة لدى صاحب عمل بريطاني معتمد.",
+  "Health and Care Worker": "تأشيرة عامل الصحة والرعاية",
+  "For eligible health and adult social care professionals.": "للمهنيين المؤهلين في مجالي الصحة والرعاية الاجتماعية للبالغين.",
+  "Scale-up Worker": "تأشيرة عامل الشركات سريعة النمو",
+  "For eligible jobs at qualifying fast-growing UK businesses.": "للوظائف المؤهلة لدى الشركات البريطانية سريعة النمو المستوفية للشروط.",
+  "Graduate": "تأشيرة الخريجين",
+  "For eligible graduates who completed a course in the UK.": "للخريجين المؤهلين الذين أكملوا دورة دراسية في المملكة المتحدة.",
+  "Youth Mobility Scheme": "تأشيرة برنامج تنقل الشباب",
+  "For eligible young people from participating countries and territories.": "للشباب المؤهلين من الدول والأقاليم المشاركة.",
+  "India Young Professionals Scheme": "تأشيرة برنامج المهنيين الشباب من الهند",
+  "For eligible Indian citizens aged 18 to 30 selected in the ballot.": "للمواطنين الهنود المؤهلين بين 18 و30 عاماً الذين يتم اختيارهم عبر القرعة.",
+  "UK Ancestry": "تأشيرة الأصول البريطانية",
+  "For eligible Commonwealth citizens with a qualifying UK-born grandparent.": "لمواطني الكومنولث المؤهلين الذين لديهم جد أو جدة مولود في المملكة المتحدة وفق الشروط.",
+  "International Sportsperson": "تأشيرة الرياضي الدولي",
+  "For elite sportspeople and qualified coaches.": "للرياضيين النخبة والمدربين المؤهلين.",
+  "Minister of Religion": "تأشيرة وزير الدين",
+  "For eligible faith-community roles sponsored in the UK.": "للوظائف الدينية المؤهلة التي تحظى برعاية في المملكة المتحدة.",
+  "Senior or Specialist Worker (GBM)": "تأشيرة العامل الكبير أو المتخصص (التنقل التجاري العالمي)",
+  "Temporary assignment to a linked UK business.": "لمهمة مؤقتة لدى شركة بريطانية مرتبطة.",
+  "Graduate Trainee (GBM)": "تأشيرة المتدرب الخريج (التنقل التجاري العالمي)",
+  "UK placement as part of an eligible graduate training programme.": "لتدريب أو مهمة في المملكة المتحدة ضمن برنامج تدريب خريجين مؤهل.",
+  "UK Expansion Worker (GBM)": "تأشيرة عامل توسع الشركات في المملكة المتحدة (التنقل التجاري العالمي)",
+  "For workers establishing a UK branch of an overseas business.": "للعاملين الذين ينشئون فرعاً في المملكة المتحدة لشركة خارجية.",
+  "Service Supplier (GBM)": "تأشيرة مزود الخدمات (التنقل التجاري العالمي)",
+  "For eligible contractual service assignments in the UK.": "لمهام تقديم خدمات تعاقدية مؤهلة في المملكة المتحدة.",
+  "Secondment Worker (GBM)": "تأشيرة العامل المنتدب (التنقل التجاري العالمي)",
+  "For eligible secondments connected to high-value contracts.": "للانتدابات المؤهلة المرتبطة بعقود عالية القيمة.",
+  "Seasonal Worker": "تأشيرة العامل الموسمي",
+  "Temporary work in eligible seasonal sectors.": "للعمل المؤقت في القطاعات الموسمية المؤهلة.",
+  "Government Authorised Exchange": "تأشيرة برنامج التبادل المعتمد من الحكومة",
+  "Temporary work experience, training, research or fellowship schemes.": "لخبرة عمل مؤقتة أو تدريب أو بحث أو برامج زمالة.",
+  "Creative Worker": "تأشيرة العامل في المجال الإبداعي",
+  "Temporary work in eligible creative industries.": "للعمل المؤقت في الصناعات الإبداعية المؤهلة.",
+  "Religious Worker": "تأشيرة العامل الديني",
+  "Temporary religious work in the UK.": "للعمل الديني المؤقت في المملكة المتحدة.",
+  "Charity Worker": "تأشيرة العامل الخيري",
+  "Temporary unpaid voluntary work for a UK charity.": "للعمل التطوعي المؤقت غير المدفوع لدى مؤسسة خيرية بريطانية.",
+  "International Agreement": "تأشيرة الاتفاقيات الدولية",
+  "Work covered by international law or treaty arrangements.": "للعمل المشمول بالقانون الدولي أو ترتيبات المعاهدات.",
+  "Overseas Domestic Worker": "تأشيرة العامل المنزلي من الخارج",
+  "For eligible domestic workers accompanying an employer to the UK.": "للعمال المنزليين المؤهلين المرافقين لصاحب عمل إلى المملكة المتحدة.",
+  "Representative of an Overseas Business": "تأشيرة ممثل شركة أجنبية",
+  "For eligible representatives covered by the remaining route provisions.": "للممثلين المؤهلين المشمولين بالأحكام المتبقية لهذا المسار.",
+
+  "Study": "الدراسة",
+  "Routes for higher education, independent schools and short English courses.": "مسارات للتعليم العالي والمدارس المستقلة ودورات اللغة الإنجليزية القصيرة.",
+  "Student": "تأشيرة الطالب",
+  "For eligible further or higher education courses with a licensed sponsor.": "لدورات التعليم الإضافي أو العالي المؤهلة لدى جهة راعية مرخصة.",
+  "Child Student": "تأشيرة الطالب الطفل",
+  "For children aged 4 to 17 studying at an independent school.": "للأطفال من 4 إلى 17 عاماً الذين يدرسون في مدرسة مستقلة.",
+  "Short-term Study": "تأشيرة الدراسة قصيرة الأجل",
+  "For eligible English language courses lasting 6 to 11 months.": "لدورات اللغة الإنجليزية المؤهلة التي تستمر من 6 إلى 11 شهراً.",
+
+  "Family": "العائلة",
+  "Routes for partners, children, parents and other qualifying family circumstances.": "مسارات للشركاء والأطفال والوالدين والحالات العائلية الأخرى المؤهلة.",
+  "Partner or Spouse": "تأشيرة الشريك أو الزوج",
+  "Join or remain with an eligible partner or spouse in the UK.": "للانضمام إلى شريك أو زوج مؤهل في المملكة المتحدة أو البقاء معه.",
+  "Fiancé, Fiancée or Proposed Civil Partner": "تأشيرة الخطيب أو الخطيبة أو الشريك المدني المقترح",
+  "Come to the UK to marry or form a civil partnership and meet the family route requirements.": "للدخول إلى المملكة المتحدة للزواج أو لتكوين شراكة مدنية مع استيفاء متطلبات مسار العائلة.",
+  "Child": "تأشيرة الطفل",
+  "Eligible children joining or staying with family in the UK.": "للأطفال المؤهلين الذين ينضمون إلى عائلاتهم في المملكة المتحدة أو يبقون معها.",
+  "Parent": "تأشيرة الوالد",
+  "For eligible parents joining or remaining with a child in the UK.": "للوالدين المؤهلين للانضمام إلى طفل في المملكة المتحدة أو البقاء معه.",
+  "Adult Dependent Relative": "تأشيرة القريب البالغ المعال",
+  "For qualifying relatives who need long-term personal care.": "للأقارب المؤهلين الذين يحتاجون إلى رعاية شخصية طويلة الأجل.",
+  "EU Settlement Scheme Family Permit": "تصريح عائلة برنامج تسوية الاتحاد الأوروبي",
+  "For qualifying family members under the EU Settlement Scheme.": "لأفراد الأسرة المؤهلين بموجب برنامج تسوية الاتحاد الأوروبي.",
+
+  "Visit & Transit": "الزيارة والعبور",
+  "Short stays, marriage visits and transit through the UK.": "للإقامات القصيرة وزيارات الزواج والعبور عبر المملكة المتحدة.",
+  "Standard Visitor": "تأشيرة الزائر القياسية",
+  "Tourism, family visits, eligible business activities and other permitted short stays.": "للسياحة وزيارات العائلة والأنشطة التجارية المؤهلة وغيرها من الإقامات القصيرة المسموح بها.",
+  "Marriage Visitor": "تأشيرة زائر للزواج",
+  "Come to the UK to marry or form a civil partnership without settling.": "للدخول إلى المملكة المتحدة للزواج أو لتكوين شراكة مدنية دون نية الاستقرار.",
+  "Transit Visa": "تأشيرة العبور",
+  "For eligible travellers passing through the UK on the way elsewhere.": "للمسافرين المؤهلين الذين يعبرون المملكة المتحدة في طريقهم إلى وجهة أخرى.",
+  "Electronic Travel Authorisation (ETA)": "تصريح السفر الإلكتروني (ETA)",
+  "Travel permission for eligible visitors who do not need a visa.": "إذن سفر للزوار المؤهلين الذين لا يحتاجون إلى تأشيرة.",
+
+  "Other UK Routes": "مسارات بريطانية أخرى",
+  "Additional routes and status pathways listed by UK Visas and Immigration.": "مسارات وتأهيلات إضافية مدرجة لدى إدارة التأشيرات والهجرة البريطانية.",
+  "British National (Overseas)": "تأشيرة المواطن البريطاني (ما وراء البحار)",
+  "The BNO route for eligible British National (Overseas) citizens and family members.": "مسار BNO للمواطنين البريطانيين (ما وراء البحار) المؤهلين وأفراد أسرهم.",
+  "Frontier Worker Permit": "تصريح عامل الحدود",
+  "For eligible cross-border workers protected by the Withdrawal Agreement.": "للعاملين المؤهلين عبر الحدود والمشمولين بحماية اتفاقية الانسحاب.",
+  "EU Settlement Scheme": "برنامج تسوية الاتحاد الأوروبي",
+  "Settled or pre-settled status for eligible EU, EEA and Swiss citizens and family members.": "وضع الإقامة المستقرة أو ما قبل المستقرة لمواطني الاتحاد الأوروبي والمنطقة الاقتصادية الأوروبية وسويسرا المؤهلين وأفراد أسرهم.",
+  "Ukraine Schemes": "برامج أوكرانيا",
+  "Current immigration routes and extensions for eligible Ukrainians and their families.": "مسارات الهجرة والتمديدات الحالية للأوكرانيين المؤهلين وأفراد أسرهم."
+};
+
+const staticTranslations: Partial<Record<LanguageCode, Record<string, string>>> = { zh, ar };
 
 export function getStaticUkCatalogueTranslation(language: LanguageCode, text: string): string | undefined {
   return staticTranslations[language]?.[text];
 }
 
 export function hasCompleteStaticUkCatalogue(language: LanguageCode): boolean {
-  return language === "zh";
+  return language === "zh" || language === "ar";
 }
