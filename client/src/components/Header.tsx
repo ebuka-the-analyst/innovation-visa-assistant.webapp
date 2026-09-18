@@ -89,7 +89,7 @@ export default function Header() {
 
       <nav className={`container mx-auto flex items-center justify-between border-b border-border/40 px-3 transition-[height] duration-200 ease-out md:px-6 ${isScrolled ? "h-14 md:h-16" : "h-20 md:h-24"}`}>
         <div className="isolate z-[9999] bg-transparent" data-testid="brand-logo">
-          <VisaAssistantBrand routeFlag="🇬🇧" routeLabel="UK Innovator Founder" compact={isScrolled} />
+          <VisaAssistantBrand routeFlag="🇬🇧" routeLabel="UK Innovator Founder" compact={isScrolled} logoHref="/" />
         </div>
 
         <div className={`hidden items-center transition-all duration-300 md:flex ${isScrolled ? "gap-4" : "gap-8"}`}>
