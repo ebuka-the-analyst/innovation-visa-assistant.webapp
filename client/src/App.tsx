@@ -192,47 +192,7 @@ const INNOVATOR_FOUNDER_PUBLIC_SUBROUTES = [
   "/testing-validation",
 ];
 
-const SIDEBAR_HIDDEN_ROUTES = [
-  "/",
-  "/uk",
-  "/us",
-  "/ca",
-  "/au",
-  "/de",
-  "/fr",
-  "/nl",
-  "/sg",
-  "/ae",
-  "/nz",
-  "/jp",
-  "/ie",
-  "/pt",
-  "/es",
-  "/se",
-  "/ch",
-  INNOVATOR_FOUNDER_PATH,
-  "/login",
-  "/signup",
-  "/verify-email",
-  "/forgot-password",
-  "/reset-password",
-  "/pricing",
-  "/checkout",
-  "/faq",
-  "/guide",
-  "/privacy",
-  "/terms",
-  "/cookies",
-  "/features",
-  "/about",
-  "/endorsing-bodies",
-  "/eligibility",
-  "/business-plan-template",
-  "/guide/ultimate-uk-innovator-founder-visa-guide",
-  "/blog",
-  "/join-expert-network",
-  ...INNOVATOR_FOUNDER_PUBLIC_SUBROUTES.map(innovatorFounderPath),
-];
+const SIDEBAR_HIDDEN_ROUTES = ["/", "/uk", "/us", "/ca", "/au", "/de", "/fr", "/nl", "/sg", "/ae", "/nz", "/jp", "/ie", "/pt", "/es", "/se", "/ch", INNOVATOR_FOUNDER_PATH, "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide", "/blog", "/join-expert-network", ...INNOVATOR_FOUNDER_PUBLIC_SUBROUTES.map(innovatorFounderPath)];
 const SIDEBAR_HIDDEN_PREFIXES = ["/blog/", `${INNOVATOR_FOUNDER_PATH}/blog/`];
 const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard", "/admin/ai-providers", "/admin/expert-network"];
 const OPEN_ACCESS_DASHBOARD_ROUTES = ["/expert-booking", innovatorFounderPath("/expert-booking")];
