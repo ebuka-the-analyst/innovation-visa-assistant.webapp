@@ -158,26 +158,26 @@ export default function CountryVisaRoutes({code}:{code:string}){
  return <div className="min-h-[100svh] bg-gradient-to-b from-sky-50 via-white to-blue-50 text-slate-900 dark:from-[#090b18] dark:via-[#0b1020] dark:to-[#090b18] dark:text-white">
   <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-[#090b18]/90"><div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2.5 sm:px-6"><VisaAssistantBrand compact/><div className="flex items-center gap-1.5"><LanguageSelector/><ThemeToggle/><Button variant="outline" size="sm" onClick={()=>setLocation('/login')}>{tx.signIn}</Button></div></div></header>
   <main id="country-catalogue-main" className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8"><Button variant="ghost" className="mb-4 -ml-3 gap-2" onClick={()=>setLocation('/')}><ArrowLeft className="h-4 w-4"/>{tx.allCountries}</Button>
-   <section className="relative mb-8 min-h-[350px] overflow-hidden rounded-[30px] border border-blue-100 shadow-[0_18px_55px_rgba(31,96,170,.10)] dark:border-white/10">
+   <section className="relative mb-8 overflow-hidden rounded-[30px] border border-blue-100 shadow-[0_18px_55px_rgba(31,96,170,.10)] dark:border-white/10">
     <div
       className="absolute inset-0 bg-cover bg-center"
       style={{ backgroundImage: `url("${countryHeroImages[code]}")` }}
       aria-hidden="true"
     />
     <div className="absolute inset-0 bg-gradient-to-r from-[#07172f]/95 via-[#0b1933]/88 to-[#0b1933]/35" aria-hidden="true" />
-    <div className="relative flex min-h-[350px] flex-col justify-center p-6 sm:p-8 lg:p-10">
+    <div className="relative flex flex-col justify-center p-4 sm:p-5 lg:h-[210px] lg:p-5">
       <div className="max-w-4xl">
-        <div className="mb-4 flex items-center gap-3">
-          <img src={`https://flagcdn.com/w160/${c.flag}.png`} alt={c.name} className="h-10 w-14 rounded-md object-cover shadow"/>
+        <div className="mb-2 flex items-center gap-3">
+          <img src={`https://flagcdn.com/w160/${c.flag}.png`} alt={c.name} className="h-8 w-11 rounded-md object-cover shadow"/>
           <Badge className="gap-1 rounded-full bg-red-500 px-3 py-1 text-white shadow-sm hover:bg-red-500"><Lock className="h-3 w-3"/>{c.name} · {tx.comingSoon}</Badge>
         </div>
-        <h1 className="text-4xl font-black tracking-[-0.035em] text-white sm:text-5xl lg:text-6xl">{tx.visaRoutes(c.name)}</h1>
-        <p className="mt-4 max-w-3xl text-base leading-7 text-slate-100 sm:text-lg">{tx.exploreCountry(c.name)}</p>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">{tx.checkedCountry(c.authority)}</p>
-        <div className="mt-6 max-w-3xl rounded-2xl border border-white/15 bg-[#08152c]/78 p-1.5 shadow-xl backdrop-blur-sm">
+        <h1 className="text-3xl font-black tracking-[-0.035em] text-white sm:text-4xl lg:text-[42px]">{tx.visaRoutes(c.name)}</h1>
+        <p className="mt-2 max-w-3xl text-sm leading-5 text-slate-100 sm:text-base">{tx.exploreCountry(c.name)}</p>
+        <p className="mt-1.5 max-w-3xl text-xs leading-4 text-slate-300">{tx.checkedCountry(c.authority)}</p>
+        <div className="mt-3 max-w-3xl rounded-2xl border border-white/15 bg-[#08152c]/78 p-1.5 shadow-xl backdrop-blur-sm">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-300"/>
-            <Input value={query} onChange={e=>setQuery(e.target.value)} placeholder={tx.searchRoutes(total)} className="h-12 rounded-xl border-white/10 bg-transparent pl-12 text-base text-white placeholder:text-slate-300 focus-visible:ring-blue-400"/>
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-300"/>
+            <Input value={query} onChange={e=>setQuery(e.target.value)} placeholder={tx.searchRoutes(total)} className="h-10 rounded-xl border-white/10 bg-transparent pl-11 text-sm text-white placeholder:text-slate-300 focus-visible:ring-blue-400"/>
           </div>
         </div>
       </div>
