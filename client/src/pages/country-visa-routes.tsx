@@ -165,7 +165,7 @@ export default function CountryVisaRoutes({code}:{code:string}){
       aria-hidden="true"
     />
     <div className="absolute inset-0 bg-gradient-to-r from-[#07172f]/95 via-[#0b1933]/88 to-[#0b1933]/35" aria-hidden="true" />
-    <div className="relative flex flex-col justify-center p-4 sm:p-5 lg:h-[210px] lg:p-5">
+    <div className="relative flex flex-col justify-center p-4 sm:p-5 lg:h-[290px] lg:p-5">
       <div className="max-w-4xl">
         <div className="mb-2 flex items-center gap-3">
           <img src={`https://flagcdn.com/w160/${c.flag}.png`} alt={c.name} className="h-8 w-11 rounded-md object-cover shadow"/>
