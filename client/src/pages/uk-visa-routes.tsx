@@ -248,37 +248,37 @@ export default function UkVisaRoutes() {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#eaf7ff] via-[#eaf7ff]/95 to-[#eaf7ff]/15 dark:from-[#10182b] dark:via-[#10182b]/95 dark:to-[#10182b]/20" />
 
-          <div className="relative grid min-h-[350px] gap-6 p-6 md:p-8 lg:grid-cols-[minmax(0,1.25fr)_320px] lg:p-10">
+          <div className="relative grid gap-4 p-4 md:p-5 lg:h-[210px] lg:grid-cols-[minmax(0,1.25fr)_300px] lg:p-5">
             <div className="flex max-w-3xl flex-col justify-center">
-              <div className="mb-4 flex items-center gap-3">
-                <img src="https://flagcdn.com/w160/gb.png" alt="United Kingdom" className="h-10 w-14 rounded-md object-cover shadow-sm" />
+              <div className="mb-2 flex items-center gap-3">
+                <img src="https://flagcdn.com/w160/gb.png" alt="United Kingdom" className="h-8 w-11 rounded-md object-cover shadow-sm" />
                 <Badge className="rounded-full border border-emerald-300/70 bg-emerald-50 px-3 py-1 text-emerald-700 shadow-none hover:bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
                   United Kingdom · {tx.live}
                 </Badge>
               </div>
-              <h1 className="text-4xl font-black tracking-[-0.035em] text-[#07183b] sm:text-5xl lg:text-6xl dark:text-white">{tx.visaRoutes("UK")}</h1>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg dark:text-slate-200">{tx.exploreUK}</p>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-300">{tx.checkedUK}</p>
+              <h1 className="text-3xl font-black tracking-[-0.035em] text-[#07183b] sm:text-4xl lg:text-[42px] dark:text-white">{tx.visaRoutes("UK")}</h1>
+              <p className="mt-2 max-w-2xl text-sm leading-5 text-slate-600 sm:text-base dark:text-slate-200">{tx.exploreUK}</p>
+              <p className="mt-1.5 max-w-2xl text-xs leading-4 text-slate-500 dark:text-slate-300">{tx.checkedUK}</p>
 
-              <div className="mt-6 flex max-w-3xl gap-2 rounded-2xl border border-white/80 bg-white/95 p-1.5 shadow-lg shadow-blue-900/5 dark:border-white/10 dark:bg-[#11182b]/95">
+              <div className="mt-3 flex max-w-3xl gap-2 rounded-2xl border border-white/80 bg-white/95 p-1.5 shadow-lg shadow-blue-900/5 dark:border-white/10 dark:bg-[#11182b]/95">
                 <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                  <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <Input
                     value={query}
                     onChange={e => setQuery(e.target.value)}
                     onKeyDown={e => { if (e.key === "Enter") scrollToRoutes(); }}
                     placeholder={tx.searchRoutes(total, "UK")}
-                    className="h-12 border-0 bg-transparent pl-12 text-base shadow-none focus-visible:ring-0"
+                    className="h-10 border-0 bg-transparent pl-11 text-sm shadow-none focus-visible:ring-0"
                   />
                 </div>
-                <Button onClick={scrollToRoutes} className="h-12 rounded-xl bg-[#086cf2] px-6 text-base font-semibold hover:bg-[#075fd4]">
+                <Button onClick={scrollToRoutes} className="h-10 rounded-xl bg-[#086cf2] px-5 text-sm font-semibold hover:bg-[#075fd4]">
                   {copy.search} <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
               </div>
             </div>
 
-            <div className="hidden self-center rounded-2xl border border-white/80 bg-white/90 p-5 shadow-xl shadow-blue-900/10 backdrop-blur md:block dark:border-white/10 dark:bg-[#10182b]/90">
-              <div className="space-y-5">
+            <div className="hidden self-center rounded-2xl border border-white/80 bg-white/90 p-3.5 shadow-xl shadow-blue-900/10 backdrop-blur md:block dark:border-white/10 dark:bg-[#10182b]/90">
+              <div className="space-y-2.5">
                 {[
                   [Compass, copy.explore, copy.exploreText],
                   [FileText, copy.prepare, copy.prepareText],
@@ -286,8 +286,8 @@ export default function UkVisaRoutes() {
                 ].map(([Icon, title, desc]) => {
                   const C = Icon as LucideIcon;
                   return <div key={String(title)} className="flex gap-3">
-                    <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#086cf2] dark:bg-blue-500/10"><C className="h-5 w-5" /></div>
-                    <div><p className="font-bold text-[#07183b] dark:text-white">{String(title)}</p><p className="mt-0.5 text-sm leading-5 text-slate-500 dark:text-slate-300">{String(desc)}</p></div>
+                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[#086cf2] dark:bg-blue-500/10"><C className="h-4 w-4" /></div>
+                    <div><p className="text-sm font-bold text-[#07183b] dark:text-white">{String(title)}</p><p className="mt-0.5 text-xs leading-4 text-slate-500 dark:text-slate-300">{String(desc)}</p></div>
                   </div>;
                 })}
               </div>
