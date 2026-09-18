@@ -4,6 +4,7 @@ import { Check, X, Star } from "lucide-react";
 import { Link } from "wouter";
 import { useCommercialCatalog, type PlanId } from "@/hooks/useCommercialCatalog";
 import { TIER_CREDITS } from "@/hooks/useTierAccess";
+import { innovatorFounderPath } from "@/lib/innovator-founder-routes";
 
 const PLAN_PAGE_COPY: Record<PlanId, string> = {
   free: "10-15 page plan",
@@ -100,7 +101,7 @@ export default function PricingSection() {
                 ))}
               </ul>
 
-              <Link href="/pricing">
+              <Link href={innovatorFounderPath("/pricing")}>
                 <Button className="w-full" variant={tier.featured ? "default" : "outline"} size="lg" data-testid={`button-select-${tier.id}`}>
                   {tier.cta}
                 </Button>
