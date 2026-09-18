@@ -86,19 +86,19 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-slate-50">
-          <Card className="max-w-xl w-full overflow-hidden border-slate-200 shadow-xl shadow-slate-200/60">
+        <div className="fixed inset-0 z-[9999] flex h-[100dvh] items-center justify-center overflow-hidden bg-slate-50 p-3 sm:p-4">
+          <Card className="max-h-[calc(100dvh-24px)] w-full max-w-xl overflow-hidden border-slate-200 shadow-xl shadow-slate-200/60 sm:max-h-[calc(100dvh-32px)]">
             <div className="h-1.5 bg-emerald-600" />
-            <CardContent className="p-7 sm:p-10">
-              <div className="flex justify-center mb-7">
+            <CardContent className="overflow-hidden p-5 sm:p-7">
+              <div className="mb-4 flex justify-center">
                 <img
                   src={logoLightImg}
                   alt="Innovator Founder Visa Assistant"
-                  className="h-14 w-auto object-contain"
+                  className="h-10 w-auto object-contain"
                 />
               </div>
 
-              <div className="mx-auto mb-5 w-14 h-14 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-100 bg-amber-50">
                 <AlertTriangle className="w-7 h-7 text-amber-600" />
               </div>
 
@@ -106,12 +106,12 @@ export class ErrorBoundary extends Component<Props, State> {
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-950">
                   We couldn&apos;t load this page
                 </h1>
-                <p className="text-slate-600 leading-7 max-w-md mx-auto">
+                <p className="mx-auto max-w-md text-slate-600 leading-6">
                   Something interrupted this part of the platform. Your account and any work that was already saved are unaffected.
                 </p>
               </div>
 
-              <div className="mt-6 rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3 flex gap-3 items-start">
+              <div className="mt-4 flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
                 <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm font-semibold text-emerald-950">Your information remains protected</p>
@@ -119,7 +119,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2.5 mt-7">
+              <div className="mt-5 flex flex-col gap-2">
                 <Button onClick={this.handleRetry} className="w-full gap-2 h-11 bg-emerald-600 hover:bg-emerald-700">
                   <RefreshCw className="w-4 h-4" />
                   Reload this page
@@ -134,7 +134,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 </Button>
               </div>
 
-              <div className="mt-6 pt-5 border-t border-slate-100 text-center">
+              <div className="mt-4 border-t border-slate-100 pt-3 text-center">
                 <p className="text-xs text-slate-500">
                   Support reference <span className="font-mono font-medium text-slate-700">{this.state.errorReference}</span>
                 </p>
