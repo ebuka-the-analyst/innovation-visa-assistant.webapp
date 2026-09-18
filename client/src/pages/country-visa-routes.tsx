@@ -160,8 +160,8 @@ export default function CountryVisaRoutes({code}:{code:string}){
   <main id="country-catalogue-main" className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8"><Button variant="ghost" className="mb-4 -ml-3 gap-2" onClick={()=>setLocation('/')}><ArrowLeft className="h-4 w-4"/>{tx.allCountries}</Button>
    <section className="relative mb-8 overflow-hidden rounded-[30px] border border-blue-100 shadow-[0_18px_55px_rgba(31,96,170,.10)] dark:border-white/10">
     <div
-      className="absolute inset-0 bg-cover bg-center"
-      style={{ backgroundImage: `url("${countryHeroImages[code]}")` }}
+      className="absolute inset-0 bg-no-repeat"
+      style={{ backgroundImage: `url("${countryHeroImages[code]}")`, backgroundSize: "auto 88%", backgroundPosition: "right center" }}
       aria-hidden="true"
     />
     <div className="absolute inset-0 bg-gradient-to-r from-[#07172f]/95 via-[#0b1933]/88 to-[#0b1933]/35" aria-hidden="true" />
