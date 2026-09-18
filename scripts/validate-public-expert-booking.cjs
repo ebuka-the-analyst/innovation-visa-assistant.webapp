@@ -21,9 +21,17 @@ const webhook = read("server/expertBookingPaymentWebhook.ts");
 const migration = read("migrations/app/20260821_public_expert_booking.sql");
 
 assert(!app.match(/SIDEBAR_HIDDEN_ROUTES[^\n]+"\/expert-booking"/), "Expert Booking must not use the standalone public layout");
-assert(app.includes('const OPEN_ACCESS_DASHBOARD_ROUTES = ["/expert-booking"]'), "Expert Booking must be marked as an open-access dashboard-shell route");
+assert(
+  app.includes('const OPEN_ACCESS_DASHBOARD_ROUTES = ["/expert-booking"]')
+    || app.includes('const OPEN_ACCESS_DASHBOARD_ROUTES = ["/expert-booking", innovatorFounderPath("/expert-booking")]'),
+  "Expert Booking must be marked as an open-access dashboard-shell route",
+);
 assert(app.includes("<AppSidebar publicMode"), "Logged-out Expert Booking must render the dashboard sidebar");
-assert(app.includes('href="/login?redirect=%2Fexpert-booking"'), "Logged-out dashboard header must expose a sign-in action");
+assert(
+  app.includes('href="/login?redirect=%2Fexpert-booking"')
+    || app.includes('href={routeFor("/login?redirect=%2Fexpert-booking")}'),
+  "Logged-out dashboard header must expose a sign-in action",
+);
 assert(appSidebar.includes("publicMode?: boolean"), "Sidebar must support an unauthenticated public mode");
 assert(appSidebar.includes("const publicUser = {"), "Sidebar must support a public shell identity internally");
 
