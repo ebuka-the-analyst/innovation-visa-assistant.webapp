@@ -235,7 +235,7 @@ const SIDEBAR_HIDDEN_ROUTES = [
 ];
 const SIDEBAR_HIDDEN_PREFIXES = ["/blog/", `${INNOVATOR_FOUNDER_PATH}/blog/`];
 const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard", "/admin/ai-providers", "/admin/expert-network"];
-const OPEN_ACCESS_DASHBOARD_ROUTES = ["/expert-booking"];
+const OPEN_ACCESS_DASHBOARD_ROUTES = ["/expert-booking", innovatorFounderPath("/expert-booking")];
 const PUBLIC_APP_SHELL_ROUTES = ["/ai-transparency"];
 
 const INNOVATOR_FOUNDER_CANONICAL_ROOTS = new Set([
@@ -248,7 +248,7 @@ const INNOVATOR_FOUNDER_CANONICAL_ROOTS = new Set([
   "/endorser-investment", "/ai-assistant", "/handoff", "/oracle-supervisor",
   "/founder-autopilot", "/neural-twin", "/voice-builder", "/regulatory-copilot",
   "/economic-impact", "/knowledge-graph", "/referral-dashboard", "/premium-features",
-  "/achievements", "/template-library", "/document-review", "/success-stories",
+  "/achievements", "/template-library", "/document-review", "/success-stories", "/partner-dashboard",
   "/calendar", "/news", "/interview-prep", "/traction-evidence", "/founder-portfolio",
   "/endorser-cover-letter", "/commercial-validation", "/oisc-compliance",
   "/market-data-verifier", "/mvp-demo-guide", "/financial-resilience", "/visa-prefill",
@@ -477,6 +477,7 @@ function Router() {
       <Route path={innovatorFounderPath("/endorser-investment")} component={EndorserInvestmentRequirements} />
       <Route path={innovatorFounderPath("/ai-assistant")} component={AIAssistant} />
       <Route path={innovatorFounderPath("/handoff")} component={Handoff} />
+      <Route path={innovatorFounderPath("/partner-dashboard")} component={PartnerDashboard} />
       <Route path={innovatorFounderPath("/oracle-supervisor")} component={EntitledOracleSupervisor} />
       <Route path={innovatorFounderPath("/founder-autopilot")} component={EntitledFounderAutopilot} />
       <Route path={innovatorFounderPath("/neural-twin")} component={EntitledNeuralTwin} />
