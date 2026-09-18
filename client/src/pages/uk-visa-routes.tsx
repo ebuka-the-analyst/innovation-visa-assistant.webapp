@@ -248,7 +248,7 @@ export default function UkVisaRoutes() {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#eaf7ff] via-[#eaf7ff]/95 to-[#eaf7ff]/15 dark:from-[#10182b] dark:via-[#10182b]/95 dark:to-[#10182b]/20" />
 
-          <div className="relative grid gap-4 p-4 md:p-5 lg:h-[210px] lg:grid-cols-[minmax(0,1.25fr)_300px] lg:p-5">
+          <div className="relative grid gap-4 p-4 md:p-5 lg:h-[290px] lg:grid-cols-[minmax(0,1.25fr)_300px] lg:p-5">
             <div className="flex max-w-3xl flex-col justify-center">
               <div className="mb-2 flex items-center gap-3">
                 <img src="https://flagcdn.com/w160/gb.png" alt="United Kingdom" className="h-8 w-11 rounded-md object-cover shadow-sm" />
