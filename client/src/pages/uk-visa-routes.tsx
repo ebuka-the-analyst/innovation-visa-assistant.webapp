@@ -1,10 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, BriefcaseBusiness, ChevronRight, ExternalLink, GraduationCap, Heart, Lock, Search, Sparkles, Users, Plane, Building2 } from "lucide-react";
+import {
+  ArrowLeft, ArrowRight, Award, Baby, BarChart3, BookOpen, BriefcaseBusiness,
+  Building2, Camera, ChevronRight, Church, Compass, ExternalLink, FileText,
+  Globe2, GraduationCap, Handshake, Heart, House, Languages, Leaf, Lightbulb,
+  MapPin, Palette, Plane, Repeat2, Rocket, Route, Scale, School, Search,
+  ShieldCheck, Stethoscope, Trophy, Users, Wrench,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 import VisaAssistantBrand from "@/components/VisaAssistantBrand";
 import LanguageSelector from "@/components/LanguageSelector";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -13,15 +19,16 @@ import { getCatalogueText } from "@/lib/catalogue-i18n";
 import { getStaticUkCatalogueTranslation, hasCompleteStaticUkCatalogue } from "@/lib/uk-catalogue-static-translations";
 
 const INNOVATOR_FOUNDER_PATH = "/uk/innovatorfoundervisaassistant";
+const WESTMINSTER_IMAGE = "https://images.unsplash.com/photo-1755453468328-9b5f7ed16408?auto=format&fit=crop&q=84&w=2200";
 
 type VisaRoute = { name: string; description: string; status?: "live"; href?: string; officialUrl?: string };
-type RouteGroup = { title: string; description: string; icon: typeof BriefcaseBusiness; routes: VisaRoute[] };
+type RouteGroup = { title: string; description: string; icon: LucideIcon; routes: VisaRoute[] };
 
 const groups: RouteGroup[] = [
   {
     title: "Business & Talent",
     description: "Routes for founders, recognised talent and high-potential professionals.",
-    icon: Sparkles,
+    icon: Users,
     routes: [
       { name: "Innovator Founder", description: "Build and grow an innovative, viable and scalable UK business.", status: "live", href: INNOVATOR_FOUNDER_PATH, officialUrl: "https://www.gov.uk/innovator-founder-visa" },
       { name: "Global Talent", description: "For leaders or potential leaders in qualifying fields.", officialUrl: "https://www.gov.uk/global-talent" },
@@ -104,17 +111,79 @@ const groups: RouteGroup[] = [
   },
 ];
 
+const routeIcon: Record<string, LucideIcon> = {
+  "Innovator Founder": Lightbulb,
+  "Global Talent": Award,
+  "High Potential Individual (HPI)": GraduationCap,
+  "Skilled Worker": Wrench,
+  "Health and Care Worker": Stethoscope,
+  "Scale-up Worker": Rocket,
+  "Graduate": GraduationCap,
+  "Youth Mobility Scheme": Plane,
+  "India Young Professionals Scheme": BriefcaseBusiness,
+  "UK Ancestry": Globe2,
+  "International Sportsperson": Trophy,
+  "Minister of Religion": Church,
+  "Senior or Specialist Worker (GBM)": BriefcaseBusiness,
+  "Graduate Trainee (GBM)": GraduationCap,
+  "UK Expansion Worker (GBM)": Building2,
+  "Service Supplier (GBM)": Handshake,
+  "Secondment Worker (GBM)": Repeat2,
+  "Seasonal Worker": Leaf,
+  "Government Authorised Exchange": Repeat2,
+  "Creative Worker": Palette,
+  "Religious Worker": Church,
+  "Charity Worker": Heart,
+  "International Agreement": Scale,
+  "Overseas Domestic Worker": House,
+  "Representative of an Overseas Business": Building2,
+  "Student": BookOpen,
+  "Child Student": School,
+  "Short-term Study": Languages,
+  "Partner or Spouse": Heart,
+  "Fiancé, Fiancée or Proposed Civil Partner": Heart,
+  "Child": Baby,
+  "Parent": Users,
+  "Adult Dependent Relative": Users,
+  "EU Settlement Scheme Family Permit": Users,
+  "Standard Visitor": Camera,
+  "Marriage Visitor": Heart,
+  "Transit Visa": Route,
+  "Electronic Travel Authorisation (ETA)": Plane,
+  "British National (Overseas)": Globe2,
+  "Frontier Worker Permit": Repeat2,
+  "EU Settlement Scheme": House,
+  "Ukraine Schemes": ShieldCheck,
+};
+
+const uiCopy = {
+  en: { search:"Search", viewAll:"View all", showLess:"Show less", countries:"Countries", routes:"Visa routes", guides:"Guides", about:"About", explore:"Explore", exploreText:"Find the right route for your goals", prepare:"Prepare", prepareText:"Get clear, up-to-date guidance", move:"Move forward", moveText:"Turn your ambitions into reality" },
+  es: { search:"Buscar", viewAll:"Ver todo", showLess:"Ver menos", countries:"Países", routes:"Rutas de visado", guides:"Guías", about:"Acerca de", explore:"Explorar", exploreText:"Encuentra la ruta adecuada para tus objetivos", prepare:"Prepárate", prepareText:"Obtén orientación clara y actualizada", move:"Avanza", moveText:"Convierte tus ambiciones en realidad" },
+  fr: { search:"Rechercher", viewAll:"Tout voir", showLess:"Voir moins", countries:"Pays", routes:"Voies de visa", guides:"Guides", about:"À propos", explore:"Explorer", exploreText:"Trouvez la voie adaptée à vos objectifs", prepare:"Préparer", prepareText:"Obtenez des conseils clairs et à jour", move:"Avancer", moveText:"Transformez vos ambitions en réalité" },
+  de: { search:"Suchen", viewAll:"Alle anzeigen", showLess:"Weniger anzeigen", countries:"Länder", routes:"Visumrouten", guides:"Leitfäden", about:"Über uns", explore:"Entdecken", exploreText:"Finden Sie die passende Route für Ihre Ziele", prepare:"Vorbereiten", prepareText:"Klare und aktuelle Orientierung erhalten", move:"Weiterkommen", moveText:"Machen Sie Ihre Ziele zur Realität" },
+  zh: { search:"搜索", viewAll:"查看全部", showLess:"收起", countries:"国家", routes:"签证路线", guides:"指南", about:"关于", explore:"探索", exploreText:"找到适合您目标的路线", prepare:"准备", prepareText:"获取清晰、最新的指导", move:"向前迈进", moveText:"把您的目标变成现实" },
+  ar: { search:"بحث", viewAll:"عرض الكل", showLess:"عرض أقل", countries:"الدول", routes:"مسارات التأشيرة", guides:"الأدلة", about:"حول", explore:"استكشف", exploreText:"اعثر على المسار المناسب لأهدافك", prepare:"استعد", prepareText:"احصل على إرشادات واضحة وحديثة", move:"تقدم", moveText:"حوّل طموحاتك إلى واقع" },
+  pt: { search:"Pesquisar", viewAll:"Ver tudo", showLess:"Ver menos", countries:"Países", routes:"Rotas de visto", guides:"Guias", about:"Sobre", explore:"Explorar", exploreText:"Encontre a rota certa para os seus objetivos", prepare:"Preparar", prepareText:"Obtenha orientação clara e atualizada", move:"Avançar", moveText:"Transforme as suas ambições em realidade" },
+  ja: { search:"検索", viewAll:"すべて表示", showLess:"折りたたむ", countries:"国", routes:"ビザルート", guides:"ガイド", about:"概要", explore:"探す", exploreText:"目標に合ったルートを見つける", prepare:"準備", prepareText:"明確で最新の案内を確認", move:"前へ進む", moveText:"目標を現実に変える" },
+} as const;
+
 export default function UkVisaRoutes() {
   const [, setLocation] = useLocation();
   const { language } = useLanguage();
   const tx = getCatalogueText(language);
+  const copy = uiCopy[language] || uiCopy.en;
   const [query, setQuery] = useState("");
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [translatedCatalogue, setTranslatedCatalogue] = useState<Record<string, string>>({});
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return groups;
-    return groups.map(group => ({ ...group, routes: group.routes.filter(route => `${route.name} ${route.description}`.toLowerCase().includes(q)) })).filter(group => group.routes.length);
+    return groups
+      .map(group => ({ ...group, routes: group.routes.filter(route => `${route.name} ${route.description}`.toLowerCase().includes(q)) }))
+      .filter(group => group.routes.length);
   }, [query]);
+
   const total = groups.reduce((sum, group) => sum + group.routes.length, 0);
 
   useEffect(() => {
@@ -145,45 +214,180 @@ export default function UkVisaRoutes() {
     return () => controller.abort();
   }, [language]);
 
-
+  const t = (text: string) => getStaticUkCatalogueTranslation(language, text) || translatedCatalogue[text] || text;
+  const scrollToRoutes = () => document.getElementById("visa-routes")?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <div className="min-h-[100svh] bg-gradient-to-b from-sky-50 via-white to-blue-50 text-slate-900 dark:from-[#090b18] dark:via-[#0b1020] dark:to-[#090b18] dark:text-white">
-      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-[#090b18]/90">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2.5 sm:px-6">
+    <div className="min-h-[100svh] bg-[#f7fbff] text-[#07183b] dark:bg-[#080b18] dark:text-white">
+      <header className="sticky top-0 z-40 border-b border-blue-100/70 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-[#0b0e1d]/95">
+        <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-5 py-3 lg:px-8">
           <VisaAssistantBrand compact />
-          <div className="flex items-center gap-1.5"><LanguageSelector /><ThemeToggle /><Button variant="outline" size="sm" onClick={() => setLocation("/login")}>{tx.signIn}</Button></div>
+          <nav className="hidden items-center gap-8 text-sm font-semibold text-slate-700 lg:flex dark:text-slate-200">
+            <button onClick={() => setLocation("/")} className="transition hover:text-blue-600">{copy.countries}</button>
+            <button onClick={scrollToRoutes} className="transition hover:text-blue-600">{copy.routes}</button>
+            <button onClick={() => setLocation("/blog")} className="transition hover:text-blue-600">{copy.guides}</button>
+            <button onClick={() => setLocation("/")} className="transition hover:text-blue-600">{copy.about}</button>
+          </nav>
+          <div className="flex items-center gap-1.5">
+            <LanguageSelector />
+            <ThemeToggle />
+            <Button className="rounded-xl bg-[#086cf2] px-5 shadow-sm hover:bg-[#075fd4]" onClick={() => setLocation("/login")}>{tx.signIn}</Button>
+          </div>
         </div>
       </header>
 
-      <main id="uk-catalogue-main" className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
-        <Button variant="ghost" className="mb-4 -ml-3 gap-2" onClick={() => setLocation("/")}><ArrowLeft className="h-4 w-4" />{tx.allCountries}</Button>
-        <section className="mb-8 rounded-3xl border border-blue-100 bg-white/80 p-5 shadow-sm dark:border-white/10 dark:bg-white/[.04] sm:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
-              <div className="mb-3 flex items-center gap-3"><img src="https://flagcdn.com/w160/gb.png" alt="United Kingdom" className="h-10 w-14 rounded-md object-cover shadow" /><Badge className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600">United Kingdom · {tx.live}</Badge></div>
-              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{tx.visaRoutes("UK")}</h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">{tx.exploreUK}</p>
-              <p className="mt-2 text-xs text-slate-500">{tx.checkedUK}</p>
+      <main className="mx-auto max-w-[1500px] px-4 pb-16 pt-5 sm:px-6 lg:px-8">
+        <Button variant="ghost" className="mb-3 -ml-3 gap-2 text-slate-700 dark:text-slate-200" onClick={() => setLocation("/")}>
+          <ArrowLeft className="h-4 w-4" /> {tx.allCountries}
+        </Button>
+
+        <section className="relative mb-7 overflow-hidden rounded-[30px] border border-blue-100 bg-[#dff2ff] shadow-[0_18px_55px_rgba(31,96,170,.10)] dark:border-white/10 dark:bg-[#11182b]">
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-95 dark:opacity-45"
+            style={{ backgroundImage: `url("${WESTMINSTER_IMAGE}")` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#eaf7ff] via-[#eaf7ff]/95 to-[#eaf7ff]/15 dark:from-[#10182b] dark:via-[#10182b]/95 dark:to-[#10182b]/20" />
+
+          <div className="relative grid min-h-[350px] gap-6 p-6 md:p-8 lg:grid-cols-[minmax(0,1.25fr)_320px] lg:p-10">
+            <div className="flex max-w-3xl flex-col justify-center">
+              <div className="mb-4 flex items-center gap-3">
+                <img src="https://flagcdn.com/w160/gb.png" alt="United Kingdom" className="h-10 w-14 rounded-md object-cover shadow-sm" />
+                <Badge className="rounded-full border border-emerald-300/70 bg-emerald-50 px-3 py-1 text-emerald-700 shadow-none hover:bg-emerald-50 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+                  United Kingdom · {tx.live}
+                </Badge>
+              </div>
+              <h1 className="text-4xl font-black tracking-[-0.035em] text-[#07183b] sm:text-5xl lg:text-6xl dark:text-white">{tx.visaRoutes("UK")}</h1>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg dark:text-slate-200">{tx.exploreUK}</p>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-300">{tx.checkedUK}</p>
+
+              <div className="mt-6 flex max-w-3xl gap-2 rounded-2xl border border-white/80 bg-white/95 p-1.5 shadow-lg shadow-blue-900/5 dark:border-white/10 dark:bg-[#11182b]/95">
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                  <Input
+                    value={query}
+                    onChange={e => setQuery(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") scrollToRoutes(); }}
+                    placeholder={tx.searchRoutes(total, "UK")}
+                    className="h-12 border-0 bg-transparent pl-12 text-base shadow-none focus-visible:ring-0"
+                  />
+                </div>
+                <Button onClick={scrollToRoutes} className="h-12 rounded-xl bg-[#086cf2] px-6 text-base font-semibold hover:bg-[#075fd4]">
+                  {copy.search} <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <div className="w-full lg:max-w-sm"><div className="relative"><Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" /><Input value={query} onChange={e => setQuery(e.target.value)} placeholder={tx.searchRoutes(total, "UK")} className="h-12 rounded-2xl pl-12" /></div></div>
+
+            <div className="hidden self-center rounded-2xl border border-white/80 bg-white/90 p-5 shadow-xl shadow-blue-900/10 backdrop-blur md:block dark:border-white/10 dark:bg-[#10182b]/90">
+              <div className="space-y-5">
+                {[
+                  [Compass, copy.explore, copy.exploreText],
+                  [FileText, copy.prepare, copy.prepareText],
+                  [BarChart3, copy.move, copy.moveText],
+                ].map(([Icon, title, desc]) => {
+                  const C = Icon as LucideIcon;
+                  return <div key={String(title)} className="flex gap-3">
+                    <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#086cf2] dark:bg-blue-500/10"><C className="h-5 w-5" /></div>
+                    <div><p className="font-bold text-[#07183b] dark:text-white">{String(title)}</p><p className="mt-0.5 text-sm leading-5 text-slate-500 dark:text-slate-300">{String(desc)}</p></div>
+                  </div>;
+                })}
+              </div>
+            </div>
           </div>
         </section>
 
-        <div className="space-y-8">
+        <div id="visa-routes" className="space-y-7 scroll-mt-24">
           {filtered.map(group => {
-            const Icon = group.icon;
-            return <section key={group.title}>
-              <div className="mb-3 flex items-start gap-3"><div className="rounded-xl bg-blue-50 p-2 text-[#005EB8] dark:bg-blue-500/10"><Icon className="h-5 w-5" /></div><div><h2 className="text-xl font-semibold">{getStaticUkCatalogueTranslation(language, group.title) || translatedCatalogue[group.title] || group.title}</h2><p className="text-sm text-slate-500 dark:text-slate-400">{getStaticUkCatalogueTranslation(language, group.description) || translatedCatalogue[group.description] || group.description}</p></div></div>
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                {group.routes.map(route => <Card key={route.name} className={`flex min-h-40 flex-col justify-between rounded-2xl p-5 transition ${route.status === "live" ? "border-emerald-400/70 bg-emerald-50/50 shadow-sm dark:bg-emerald-500/5" : "border-slate-200 bg-white/80 dark:border-white/10 dark:bg-white/[.03]"}`}>
-                  <div><div className="mb-2 flex items-start justify-between gap-3"><h3 className="font-semibold leading-5">{getStaticUkCatalogueTranslation(language, route.name) || translatedCatalogue[route.name] || route.name}</h3>{route.status === "live" ? <Badge className="bg-emerald-600 text-white">{tx.available}</Badge> : <Badge variant="secondary" className="gap-1 whitespace-nowrap"><Lock className="h-3 w-3" />{tx.comingSoon}</Badge>}</div><p className="text-sm leading-5 text-slate-600 dark:text-slate-400">{getStaticUkCatalogueTranslation(language, route.description) || translatedCatalogue[route.description] || route.description}</p></div>
-                  <div className="mt-5 flex items-center justify-between gap-2">{route.status === "live" && route.href ? <Button className="gap-1.5 bg-[#005EB8]" onClick={() => setLocation(route.href!)}>{tx.openAssistant} <ChevronRight className="h-4 w-4" /></Button> : <span className="text-xs text-slate-400">{tx.assistantDevelopment}</span>}{route.officialUrl && <a href={route.officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-[#005EB8] hover:underline">{tx.official} <ExternalLink className="h-3 w-3" /></a>}</div>
-                </Card>)}
-              </div>
-            </section>;
+            const GroupIcon = group.icon;
+            const expanded = Boolean(expandedGroups[group.title]);
+            const routesToShow = query.trim() || expanded ? group.routes : group.routes.slice(0, 3);
+            return (
+              <section key={group.title}>
+                <div className="mb-3 flex items-end justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-white/10">
+                      <GroupIcon className="h-6 w-6 text-black dark:text-white" strokeWidth={2.3} />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-extrabold tracking-tight sm:text-2xl">{t(group.title)}</h2>
+                      <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{t(group.description)}</p>
+                    </div>
+                  </div>
+                  {!query.trim() && group.routes.length > 3 && (
+                    <button
+                      onClick={() => setExpandedGroups(prev => ({ ...prev, [group.title]: !expanded }))}
+                      className="hidden items-center gap-1.5 pb-1 text-sm font-semibold text-[#086cf2] transition hover:text-[#075fd4] sm:inline-flex"
+                    >
+                      {expanded ? copy.showLess : copy.viewAll} <ChevronRight className={`h-4 w-4 transition ${expanded ? "rotate-90" : ""}`} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {routesToShow.map(route => {
+                    const Icon = routeIcon[route.name] || BriefcaseBusiness;
+                    const isLive = route.status === "live";
+                    return (
+                      <article
+                        key={route.name}
+                        className={`group relative flex min-h-[148px] items-stretch gap-4 rounded-2xl border bg-white p-4 shadow-[0_8px_30px_rgba(15,56,110,.055)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_38px_rgba(15,56,110,.10)] dark:bg-white/[.035] ${
+                          isLive ? "border-emerald-200 dark:border-emerald-500/30" : "border-blue-100 dark:border-white/10"
+                        }`}
+                      >
+                        <div className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl ${isLive ? "bg-emerald-50 dark:bg-emerald-500/10" : "bg-blue-50 dark:bg-white/10"}`}>
+                          <Icon className="h-8 w-8 text-black dark:text-white" strokeWidth={2.1} />
+                        </div>
+
+                        <div className="flex min-w-0 flex-1 flex-col">
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="pr-2 text-[17px] font-extrabold leading-5 text-[#07183b] dark:text-white">{t(route.name)}</h3>
+                            {isLive
+                              ? <Badge className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300">{tx.available}</Badge>
+                              : <Badge className="shrink-0 rounded-full bg-red-500 px-3 py-1 text-white shadow-sm hover:bg-red-500">{tx.comingSoon}</Badge>}
+                          </div>
+
+                          <p className="mt-1.5 line-clamp-2 text-sm leading-5 text-slate-500 dark:text-slate-400">{t(route.description)}</p>
+
+                          <div className="mt-auto flex items-end justify-between gap-3 pt-3">
+                            {route.officialUrl ? (
+                              <a
+                                href={route.officialUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#086cf2] hover:underline"
+                              >
+                                {tx.official} <ExternalLink className="h-3.5 w-3.5" />
+                              </a>
+                            ) : <span />}
+                            <button
+                              aria-label={isLive ? tx.openAssistant : tx.official}
+                              onClick={() => {
+                                if (isLive && route.href) setLocation(route.href);
+                                else if (route.officialUrl) window.open(route.officialUrl, "_blank", "noopener,noreferrer");
+                              }}
+                              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-700 transition group-hover:bg-blue-50 group-hover:text-[#086cf2] dark:bg-white/10 dark:text-white"
+                            >
+                              <ArrowRight className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+
+                {!query.trim() && group.routes.length > 3 && (
+                  <button
+                    onClick={() => setExpandedGroups(prev => ({ ...prev, [group.title]: !expanded }))}
+                    className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#086cf2] sm:hidden"
+                  >
+                    {expanded ? copy.showLess : copy.viewAll} <ChevronRight className={`h-4 w-4 transition ${expanded ? "rotate-90" : ""}`} />
+                  </button>
+                )}
+              </section>
+            );
           })}
         </div>
+
         {filtered.length === 0 && <div className="py-20 text-center text-slate-500">{tx.noRoutes(query, "UK")}</div>}
       </main>
     </div>
