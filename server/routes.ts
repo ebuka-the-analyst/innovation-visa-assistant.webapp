@@ -330,7 +330,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (language === "en" || !target) return res.json({ translations: texts, translation: texts[0] || "" });
       if (!texts.length) return res.status(400).json({ error: "No text supplied" });
       const prompt = `Translate each item in this JSON array into ${target}. Preserve proper nouns only where they should conventionally remain untranslated. Return ONLY a valid JSON array of translated strings in exactly the same order and length. Do not add markdown.\n\n${JSON.stringify(texts)}`;
-      const raw = await callAI(prompt, 6000);
+      let raw: string;
+      try {
+        raw = await callAI(prompt, 6000);
+      } catch (primaryError) {
+        // Railway can run without the managed OpenAI gateway. Fall back to the
+        // directly configured Gemini provider so catalogue translation does not
+        // silently fall back to English when that gateway is unavailable.
+        const geminiResponse = await geminiAI.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: prompt,
+        });
+        raw = String(geminiResponse.text || "").trim();
+        if (!raw) throw primaryError;
+      }
       const cleaned = raw.replace(/^\s*```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
       const parsed = JSON.parse(cleaned);
       if (!Array.isArray(parsed) || parsed.length !== texts.length) throw new Error("Invalid translation response shape");
