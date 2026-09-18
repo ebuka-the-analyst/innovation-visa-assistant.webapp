@@ -108,12 +108,43 @@ export default function UkVisaRoutes() {
   const { language } = useLanguage();
   const tx = getCatalogueText(language);
   const [query, setQuery] = useState("");
+  const [translatedDescriptions, setTranslatedDescriptions] = useState<Record<string, string>>({});
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return groups;
     return groups.map(group => ({ ...group, routes: group.routes.filter(route => `${route.name} ${route.description}`.toLowerCase().includes(q)) })).filter(group => group.routes.length);
   }, [query]);
   const total = groups.reduce((sum, group) => sum + group.routes.length, 0);
+
+  useEffect(() => {
+    if (language === "en") {
+      setTranslatedDescriptions({});
+      return;
+    }
+    const controller = new AbortController();
+    const descriptions = Array.from(new Set([
+      ...groups.map(group => group.description),
+      ...groups.flatMap(group => group.routes.map(route => route.description)),
+    ]));
+    void Promise.all(descriptions.map(async description => {
+      try {
+        const res = await fetch(`/api/translate?lang=${encodeURIComponent(language)}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: description }),
+          signal: controller.signal,
+        });
+        if (!res.ok) return [description, description] as const;
+        const data = await res.json();
+        return [description, data.translation || description] as const;
+      } catch {
+        return [description, description] as const;
+      }
+    })).then(entries => {
+      if (!controller.signal.aborted) setTranslatedDescriptions(Object.fromEntries(entries));
+    });
+    return () => controller.abort();
+  }, [language]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -192,10 +223,10 @@ export default function UkVisaRoutes() {
           {filtered.map(group => {
             const Icon = group.icon;
             return <section key={group.title}>
-              <div className="mb-3 flex items-start gap-3"><div className="rounded-xl bg-blue-50 p-2 text-[#005EB8] dark:bg-blue-500/10"><Icon className="h-5 w-5" /></div><div><h2 className="text-xl font-semibold">{group.title}</h2><p className="text-sm text-slate-500 dark:text-slate-400">{group.description}</p></div></div>
+              <div className="mb-3 flex items-start gap-3"><div className="rounded-xl bg-blue-50 p-2 text-[#005EB8] dark:bg-blue-500/10"><Icon className="h-5 w-5" /></div><div><h2 className="text-xl font-semibold">{group.title}</h2><p className="text-sm text-slate-500 dark:text-slate-400">{translatedDescriptions[group.description] || group.description}</p></div></div>
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {group.routes.map(route => <Card key={route.name} className={`flex min-h-40 flex-col justify-between rounded-2xl p-5 transition ${route.status === "live" ? "border-emerald-400/70 bg-emerald-50/50 shadow-sm dark:bg-emerald-500/5" : "border-slate-200 bg-white/80 dark:border-white/10 dark:bg-white/[.03]"}`}>
-                  <div><div className="mb-2 flex items-start justify-between gap-3"><h3 className="font-semibold leading-5">{route.name}</h3>{route.status === "live" ? <Badge className="bg-emerald-600 text-white">{tx.available}</Badge> : <Badge variant="secondary" className="gap-1 whitespace-nowrap"><Lock className="h-3 w-3" />{tx.comingSoon}</Badge>}</div><p className="text-sm leading-5 text-slate-600 dark:text-slate-400">{route.description}</p></div>
+                  <div><div className="mb-2 flex items-start justify-between gap-3"><h3 className="font-semibold leading-5">{route.name}</h3>{route.status === "live" ? <Badge className="bg-emerald-600 text-white">{tx.available}</Badge> : <Badge variant="secondary" className="gap-1 whitespace-nowrap"><Lock className="h-3 w-3" />{tx.comingSoon}</Badge>}</div><p className="text-sm leading-5 text-slate-600 dark:text-slate-400">{translatedDescriptions[route.description] || route.description}</p></div>
                   <div className="mt-5 flex items-center justify-between gap-2">{route.status === "live" && route.href ? <Button className="gap-1.5 bg-[#005EB8]" onClick={() => setLocation(route.href!)}>{tx.openAssistant} <ChevronRight className="h-4 w-4" /></Button> : <span className="text-xs text-slate-400">{tx.assistantDevelopment}</span>}{route.officialUrl && <a href={route.officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-[#005EB8] hover:underline">{tx.official} <ExternalLink className="h-3 w-3" /></a>}</div>
                 </Card>)}
               </div>
