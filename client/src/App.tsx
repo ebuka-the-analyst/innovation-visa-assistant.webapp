@@ -238,6 +238,34 @@ const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard", "/admin/ai-providers
 const OPEN_ACCESS_DASHBOARD_ROUTES = ["/expert-booking"];
 const PUBLIC_APP_SHELL_ROUTES = ["/ai-transparency"];
 
+const INNOVATOR_FOUNDER_CANONICAL_ROOTS = new Set([
+  "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password",
+  "/dashboard", "/pricing", "/checkout", "/questionnaire", "/theme-selection",
+  "/adaptive-intake", "/generation", "/endorser-comparison", "/document-organizer",
+  "/expert-booking", "/join-expert-network", "/rejection-analysis", "/settlement-planning",
+  "/features-dashboard", "/kpi-dashboard", "/evidence-graph", "/rfe-defence-lab",
+  "/diagnostics", "/settings", "/data-manager", "/tools-hub", "/features",
+  "/endorser-investment", "/ai-assistant", "/handoff", "/oracle-supervisor",
+  "/founder-autopilot", "/neural-twin", "/voice-builder", "/regulatory-copilot",
+  "/economic-impact", "/knowledge-graph", "/referral-dashboard", "/premium-features",
+  "/achievements", "/template-library", "/document-review", "/success-stories",
+  "/calendar", "/news", "/interview-prep", "/traction-evidence", "/founder-portfolio",
+  "/endorser-cover-letter", "/commercial-validation", "/oisc-compliance",
+  "/market-data-verifier", "/mvp-demo-guide", "/financial-resilience", "/visa-prefill",
+  "/ai-transparency", "/testing-validation", "/compliance-dashboard", "/faq", "/guide",
+  "/privacy", "/terms", "/cookies", "/progress", "/support", "/documents", "/about",
+  "/endorsing-bodies", "/eligibility", "/business-plan-template", "/blog"
+]);
+
+function shouldStayInInnovatorFounderScope(path: string): boolean {
+  if (INNOVATOR_FOUNDER_CANONICAL_ROOTS.has(path)) return true;
+  return (
+    path.startsWith("/tools/") ||
+    path.startsWith("/blog/") ||
+    path.startsWith("/guide/")
+  );
+}
+
 function PageLoadingSkeleton() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
@@ -677,7 +705,30 @@ function useActivityTracker() {
 }
 
 function AppLayout() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const scoped = isInnovatorFounderPath(location);
+  const hadCanonicalScope =
+    typeof window !== "undefined" &&
+    window.sessionStorage.getItem("ifva-canonical-scope") === "1";
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !isVisaAssistantGlobalHost()) return;
+
+    if (scoped) {
+      window.sessionStorage.setItem("ifva-canonical-scope", "1");
+      return;
+    }
+
+    if (hadCanonicalScope && shouldStayInInnovatorFounderScope(location)) {
+      setLocation(innovatorFounderPath(location), { replace: true } as any);
+    }
+  }, [location, scoped, hadCanonicalScope, setLocation]);
+
+  const redirectingToCanonicalScope =
+    isVisaAssistantGlobalHost() &&
+    hadCanonicalScope &&
+    !scoped &&
+    shouldStayInInnovatorFounderScope(location);
   const { data: shellUser } = useQuery<{ id: string }>({
     queryKey: ["/api/auth/user"],
     retry: false,
@@ -693,6 +744,10 @@ function AppLayout() {
   });
 
   useActivityTracker();
+
+  if (redirectingToCanonicalScope) {
+    return <PageLoadingSkeleton />;
+  }
 
   if (isPublicAppShellRoute) {
     if (publicShellAuthLoading) {
