@@ -277,6 +277,40 @@ function trustedWriteOrigin(req: Request): boolean {
 }
 
 export function registerAIProviderGatewayRoutes(app: Express): void {
+  // Public UI translation endpoint. Keeps provider credentials server-side and
+  // translates catalogue content that is generated from route data at runtime.
+  app.post("/api/translate", async (req, res) => {
+    try {
+      if (!req.is("application/json")) return res.status(415).json({ error: "Content-Type must be application/json" });
+      const language = String(req.body?.lang || "").trim().toLowerCase();
+      const text = String(req.body?.text || "");
+      const supported: Record<string, string> = {
+        de: "German", es: "Spanish", fr: "French", pt: "Portuguese",
+        zh: "Simplified Chinese", ja: "Japanese", ar: "Arabic",
+      };
+      if (!supported[language]) return res.status(422).json({ error: "Unsupported language" });
+      if (!text.trim()) return res.json({ translation: text });
+      if (text.length > 5000) return res.status(413).json({ error: "Text too long" });
+
+      const result = await withProviderFallback((setting) => callChatWithProvider(setting, {
+        messages: [
+          {
+            role: "system",
+            content: `Translate the supplied Visa Assistant interface text into ${supported[language]}. Preserve visa-route meaning, abbreviations such as HPI/GBM, proper nouns where appropriate, and GOV.UK exactly. Return only the translated text, with no quotation marks or commentary.`,
+          },
+          { role: "user", content: text },
+        ],
+        max_completion_tokens: 1200,
+      }));
+      const translation = String(result?.choices?.[0]?.message?.content || "").trim() || text;
+      res.setHeader("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
+      return res.json({ translation });
+    } catch (error: any) {
+      console.error("[Translation] Failed", error?.message || error);
+      return res.status(503).json({ error: "Translation temporarily unavailable" });
+    }
+  });
+
   app.post("/internal-ai-gateway/v1/chat/completions", async (req, res) => {
     if (!internalGatewayAuthorised(req)) return res.status(401).json({ error: { message: "Unauthorised internal AI gateway request" } });
     try {
