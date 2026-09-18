@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Search } from "lucide-react";
 import { Link } from "wouter";
+import { innovatorFounderPath } from "@/lib/innovator-founder-routes";
 
 export default function LawyerCTA() {
   return (
@@ -20,7 +21,7 @@ export default function LawyerCTA() {
                 <p className="text-muted-foreground mb-6">
                   Innovator Founder Visa Assistant does not provide regulated immigration advice. If you need advice about your individual circumstances, you can use our expert finder to look for participating immigration lawyers and advisers and check their professional status before instructing them.
                 </p>
-                <Link href="/tools/lawyer-finder">
+                <Link href={innovatorFounderPath("/tools/lawyer-finder")}>
                   <Button className="group gap-2" data-testid="button-connect-lawyer">
                     Find an Expert
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
