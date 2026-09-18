@@ -85,9 +85,18 @@ export default function VisaAssistantBrand({
         >
           <span className="h-px w-4 bg-[#9FB3D1] dark:bg-slate-600" aria-hidden="true" />
           {routeFlag && (
-            <span className={`${compact ? "text-[15px]" : "text-[20px]"} leading-none`} aria-hidden="true">
-              {routeFlag}
-            </span>
+            routeFlag === "🇬🇧" || routeFlag.toUpperCase() === "GB" || routeFlag.toUpperCase() === "UK" ? (
+              <img
+                src="https://flagcdn.com/w40/gb.png"
+                alt=""
+                aria-hidden="true"
+                className={`${compact ? "h-[15px] w-5" : "h-5 w-7"} rounded-sm object-cover shadow-sm`}
+              />
+            ) : (
+              <span className={`${compact ? "text-[15px]" : "text-[20px]"} leading-none`} aria-hidden="true">
+                {routeFlag}
+              </span>
+            )
           )}
           <span className="whitespace-nowrap">{routeLabel}</span>
           <span className="h-px w-4 bg-[#9FB3D1] dark:bg-slate-600" aria-hidden="true" />
