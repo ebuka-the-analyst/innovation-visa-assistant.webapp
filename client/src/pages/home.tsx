@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import NewsTicker from "@/components/NewsTicker";
 import HeroSection from "@/components/HeroSection";
@@ -17,27 +16,8 @@ import Footer from "@/components/Footer";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, softwareApplicationSchema, visaFAQSchema, websiteSchema } from "@/lib/seo-schemas";
 import { GlobalNavButton } from "@/components/global-nav-button";
-import { CountryLoading } from "@/components/country-loading";
 
 export default function Home() {
-  const [showLoading, setShowLoading] = useState(false);
-  const [loadingComplete, setLoadingComplete] = useState(false);
-
-  useEffect(() => {
-    const fromGlobal = sessionStorage.getItem("navigating_from_global");
-    if (fromGlobal === "uk") {
-      setShowLoading(true);
-      sessionStorage.removeItem("navigating_from_global");
-    } else {
-      setLoadingComplete(true);
-    }
-  }, []);
-
-  const handleLoadingComplete = () => {
-    setShowLoading(false);
-    setLoadingComplete(true);
-  };
-
   const combinedSchema = {
     "@context": "https://schema.org",
     "@graph": [
@@ -47,16 +27,6 @@ export default function Home() {
       visaFAQSchema
     ]
   };
-
-  if (showLoading && !loadingComplete) {
-    return (
-      <CountryLoading
-        countryName="United Kingdom"
-        countryCode="uk"
-        onComplete={handleLoadingComplete}
-      />
-    );
-  }
 
   return (
     <div className="min-h-screen">
