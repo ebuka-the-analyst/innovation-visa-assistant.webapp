@@ -27,6 +27,7 @@ export default function VisaAssistantBrand({
   return (
     <div
       className={`inline-flex flex-col justify-center ${className}`}
+      data-no-auto-translate
       aria-label={routeLabel ? `Visa Assistant — ${routeLabel}` : "Visa Assistant"}
     >
       {logoHref ? (
