@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft, BriefcaseBusiness, ChevronRight, ExternalLink, GraduationCap, Heart, Lock, Search, Sparkles, Users, Plane, Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -115,6 +115,56 @@ export default function UkVisaRoutes() {
   }, [query]);
   const total = groups.reduce((sum, group) => sum + group.routes.length, 0);
 
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.querySelector("#uk-catalogue-main");
+    if (!root || language === "en") return;
+
+    const controller = new AbortController();
+    const translate = async (text: string) => {
+      try {
+        const res = await fetch(`/api/translate?lang=${encodeURIComponent(language)}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+          signal: controller.signal,
+        });
+        if (!res.ok) return text;
+        const data = await res.json();
+        return data.translation || text;
+      } catch {
+        return text;
+      }
+    };
+
+    const nodes: Text[] = [];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node: Node | null;
+    while ((node = walker.nextNode())) {
+      const textNode = node as Text;
+      const el = textNode.parentElement;
+      if (
+        textNode.data.trim() &&
+        el &&
+        !["SCRIPT", "STYLE", "INPUT", "TEXTAREA"].includes(el.tagName) &&
+        !el.closest("[data-no-auto-translate]")
+      ) nodes.push(textNode);
+    }
+
+    void (async () => {
+      for (let i = 0; i < nodes.length; i += 20) {
+        await Promise.all(nodes.slice(i, i + 20).map(async textNode => {
+          if (!textNode.isConnected) return;
+          const source = textNode.data;
+          const translated = await translate(source);
+          if (textNode.isConnected) textNode.data = translated;
+        }));
+      }
+    })();
+
+    return () => controller.abort();
+  }, [language, query]);
+
   return (
     <div className="min-h-[100svh] bg-gradient-to-b from-sky-50 via-white to-blue-50 text-slate-900 dark:from-[#090b18] dark:via-[#0b1020] dark:to-[#090b18] dark:text-white">
       <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-[#090b18]/90">
@@ -124,7 +174,7 @@ export default function UkVisaRoutes() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
+      <main id="uk-catalogue-main" className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
         <Button variant="ghost" className="mb-4 -ml-3 gap-2" onClick={() => setLocation("/")}><ArrowLeft className="h-4 w-4" />{tx.allCountries}</Button>
         <section className="mb-8 rounded-3xl border border-blue-100 bg-white/80 p-5 shadow-sm dark:border-white/10 dark:bg-white/[.04] sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
