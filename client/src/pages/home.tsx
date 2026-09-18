@@ -36,44 +36,34 @@ export default function Home() {
       ["SCRIPT", "STYLE", "NOSCRIPT", "CODE", "PRE"].includes(element.tagName) ||
       Boolean(element.closest("[data-no-auto-translate]"));
 
-    const translationCache = new Map<string, Promise<string>>();
-
-    const translateOne = (source: string) => {
-      const text = source.trim();
-      if (!text) return Promise.resolve(source);
-      const cached = translationCache.get(text);
-      if (cached) return cached;
-
-      const request = fetch(`/api/translate?lang=${encodeURIComponent(language)}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-        signal: controller.signal,
-      })
-        .then(async response => {
-          if (!response.ok) return text;
-          const data = await response.json();
-          return typeof data.translation === "string" && data.translation.trim()
-            ? data.translation
-            : text;
-        })
-        .catch(() => text);
-
-      translationCache.set(text, request);
-      return request;
-    };
+    const translationCache = new Map<string, string>();
 
     const translateTexts = async (texts: string[]) => {
       const unique = Array.from(new Set(texts.map(text => text.trim()).filter(Boolean)));
       const translated = new Map<string, string>();
 
-      for (let i = 0; i < unique.length; i += 20) {
-        const chunk = unique.slice(i, i + 20);
-        const values = await Promise.all(chunk.map(source => translateOne(source)));
-        chunk.forEach((source, index) => translated.set(source, values[index] || source));
-        if (controller.signal.aborted) break;
+      const uncached = unique.filter(text => !translationCache.has(text));
+      for (let i = 0; i < uncached.length; i += 60) {
+        const chunk = uncached.slice(i, i + 60);
+        try {
+          const response = await fetch(`/api/translate?lang=${encodeURIComponent(language)}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ texts: chunk }),
+            signal: controller.signal,
+          });
+          if (!response.ok) continue;
+          const data = await response.json();
+          const translations = Array.isArray(data.translations) ? data.translations : [];
+          chunk.forEach((source, index) => {
+            translationCache.set(source, translations[index] || source);
+          });
+        } catch {
+          if (controller.signal.aborted) break;
+        }
       }
 
+      unique.forEach(source => translated.set(source, translationCache.get(source) || source));
       return translated;
     };
 
