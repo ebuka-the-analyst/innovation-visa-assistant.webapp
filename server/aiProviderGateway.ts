@@ -23,8 +23,21 @@ const DEFAULT_SETTINGS: ProviderSetting[] = [
 function upstreamOpenAIKey(): string {
   const captured = String(process.env.UPSTREAM_OPENAI_API_KEY || "").trim();
   if (captured) return captured;
+
+  // Railway/Replit AI integrations expose the usable provider credential under
+  // AI_INTEGRATIONS_OPENAI_API_KEY. The preload intentionally replaces
+  // OPENAI_API_KEY with the internal gateway token, so this integration key
+  // must be considered separately for the upstream provider.
+  const integrated = String(process.env.AI_INTEGRATIONS_OPENAI_API_KEY || "").trim();
+  if (integrated) return integrated;
+
   if (process.env.AI_PROVIDER_GATEWAY_ACTIVE === "1") return "";
   return String(process.env.OPENAI_API_KEY || "").trim();
+}
+
+function upstreamOpenAIBaseURL(): string {
+  const integratedBase = String(process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || "").trim();
+  return integratedBase || "https://api.openai.com/v1";
 }
 
 function configured(provider: ProviderId): boolean {
@@ -185,7 +198,7 @@ function responseFromAnthropic(response: any, providerModel: string): any {
 async function callChatWithProvider(setting: ProviderSetting, body: any): Promise<any> {
   const model = resolveModel(setting);
   if (setting.provider === "openai") {
-    const client = new OpenAI({ apiKey: upstreamOpenAIKey(), baseURL: "https://api.openai.com/v1" });
+    const client = new OpenAI({ apiKey: upstreamOpenAIKey(), baseURL: upstreamOpenAIBaseURL() });
     const payload: any = {
       ...body,
       model,
@@ -225,7 +238,7 @@ function responseInputToMessages(input: any): any[] {
 async function callResponseWithProvider(setting: ProviderSetting, body: any): Promise<any> {
   const model = resolveModel(setting);
   if (setting.provider === "openai") {
-    const client = new OpenAI({ apiKey: upstreamOpenAIKey(), baseURL: "https://api.openai.com/v1" });
+    const client = new OpenAI({ apiKey: upstreamOpenAIKey(), baseURL: upstreamOpenAIBaseURL() });
     const result: any = await client.responses.create({ ...body, model, stream: false } as any);
     result.provider = "openai";
     return result;
