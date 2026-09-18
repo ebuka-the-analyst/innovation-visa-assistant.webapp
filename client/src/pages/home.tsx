@@ -18,6 +18,7 @@ import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema, softwareApplicationSchema, visaFAQSchema, websiteSchema } from "@/lib/seo-schemas";
 import { GlobalNavButton } from "@/components/global-nav-button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getInnovatorFounderStaticTranslation, hasDeterministicInnovatorFounderTranslation } from "@/lib/innovator-founder-static-i18n";
 
 export default function Home() {
   const { language } = useLanguage();
@@ -37,29 +38,39 @@ export default function Home() {
       Boolean(element.closest("[data-no-auto-translate]"));
 
     const translationCache = new Map<string, string>();
+    const deterministicOnly = hasDeterministicInnovatorFounderTranslation(language);
 
     const translateTexts = async (texts: string[]) => {
       const unique = Array.from(new Set(texts.map(text => text.trim()).filter(Boolean)));
       const translated = new Map<string, string>();
 
-      const uncached = unique.filter(text => !translationCache.has(text));
-      for (let i = 0; i < uncached.length; i += 60) {
-        const chunk = uncached.slice(i, i + 60);
-        try {
-          const response = await fetch(`/api/translate?lang=${encodeURIComponent(language)}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ texts: chunk }),
-            signal: controller.signal,
-          });
-          if (!response.ok) continue;
-          const data = await response.json();
-          const translations = Array.isArray(data.translations) ? data.translations : [];
-          chunk.forEach((source, index) => {
-            translationCache.set(source, translations[index] || source);
-          });
-        } catch {
-          if (controller.signal.aborted) break;
+      unique.forEach(source => {
+        const staticTranslation = getInnovatorFounderStaticTranslation(language, source);
+        if (staticTranslation !== source) {
+          translationCache.set(source, staticTranslation);
+        }
+      });
+
+      if (!deterministicOnly) {
+        const uncached = unique.filter(text => !translationCache.has(text));
+        for (let i = 0; i < uncached.length; i += 60) {
+          const chunk = uncached.slice(i, i + 60);
+          try {
+            const response = await fetch(`/api/translate?lang=${encodeURIComponent(language)}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ texts: chunk }),
+              signal: controller.signal,
+            });
+            if (!response.ok) continue;
+            const data = await response.json();
+            const translations = Array.isArray(data.translations) ? data.translations : [];
+            chunk.forEach((source, index) => {
+              translationCache.set(source, translations[index] || source);
+            });
+          } catch {
+            if (controller.signal.aborted) break;
+          }
         }
       }
 
@@ -159,7 +170,7 @@ export default function Home() {
         schema={combinedSchema}
       />
       <Header />
-      <NewsTicker />
+      {language === "en" ? <NewsTicker /> : null}
       <main>
         <HeroSection />
         <div id="features">
