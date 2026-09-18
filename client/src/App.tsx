@@ -20,6 +20,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { initActivityTracking, trackRouteChange } from "@/lib/activityTracker";
 import { useInitGA, useAnalytics, useUserIdentification, useScrollTracking } from "@/hooks/use-analytics";
 import { ToolEntitlementGuard } from "@/components/ToolEntitlementGuard";
+import { INNOVATOR_FOUNDER_BASE_PATH, innovatorFounderPath, isInnovatorFounderPath } from "@/lib/innovator-founder-routes";
 
 // Lazy load ChatBot, FloatingFeedback and other heavy components
 const ChatBot = lazy(() => import("@/components/ChatBot"));
@@ -159,15 +160,80 @@ const BusinessPlanTemplatePage = lazy(() => import("@/pages/seo/business-plan-te
 const BlogPage = lazy(() => import("@/pages/blog"));
 const BlogPostPage = lazy(() => import("@/pages/blog-post"));
 
-const INNOVATOR_FOUNDER_PATH = "/uk/innovatorfoundervisaassistant";
+const INNOVATOR_FOUNDER_PATH = INNOVATOR_FOUNDER_BASE_PATH;
 const VISA_ASSISTANT_GLOBAL_HOSTS = new Set(["visaassistant.global", "www.visaassistant.global"]);
 
 function isVisaAssistantGlobalHost() {
   return typeof window !== "undefined" && VISA_ASSISTANT_GLOBAL_HOSTS.has(window.location.hostname.toLowerCase());
 }
 
-const SIDEBAR_HIDDEN_ROUTES = ["/", "/uk", "/us", "/ca", "/au", "/de", "/fr", "/nl", "/sg", "/ae", "/nz", "/jp", "/ie", "/pt", "/es", "/se", "/ch", INNOVATOR_FOUNDER_PATH, "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide", "/blog", "/join-expert-network"];
-const SIDEBAR_HIDDEN_PREFIXES = ["/blog/"];
+const INNOVATOR_FOUNDER_PUBLIC_SUBROUTES = [
+  "/login",
+  "/signup",
+  "/verify-email",
+  "/forgot-password",
+  "/reset-password",
+  "/pricing",
+  "/checkout",
+  "/faq",
+  "/guide",
+  "/privacy",
+  "/terms",
+  "/cookies",
+  "/features",
+  "/about",
+  "/endorsing-bodies",
+  "/eligibility",
+  "/business-plan-template",
+  "/guide/ultimate-uk-innovator-founder-visa-guide",
+  "/blog",
+  "/join-expert-network",
+  "/ai-transparency",
+  "/testing-validation",
+];
+
+const SIDEBAR_HIDDEN_ROUTES = [
+  "/",
+  "/uk",
+  "/us",
+  "/ca",
+  "/au",
+  "/de",
+  "/fr",
+  "/nl",
+  "/sg",
+  "/ae",
+  "/nz",
+  "/jp",
+  "/ie",
+  "/pt",
+  "/es",
+  "/se",
+  "/ch",
+  INNOVATOR_FOUNDER_PATH,
+  "/login",
+  "/signup",
+  "/verify-email",
+  "/forgot-password",
+  "/reset-password",
+  "/pricing",
+  "/checkout",
+  "/faq",
+  "/guide",
+  "/privacy",
+  "/terms",
+  "/cookies",
+  "/features",
+  "/about",
+  "/endorsing-bodies",
+  "/eligibility",
+  "/business-plan-template",
+  "/guide/ultimate-uk-innovator-founder-visa-guide",
+  "/blog",
+  "/join-expert-network",
+  ...INNOVATOR_FOUNDER_PUBLIC_SUBROUTES.map(innovatorFounderPath),
+];
+const SIDEBAR_HIDDEN_PREFIXES = ["/blog/", `${INNOVATOR_FOUNDER_PATH}/blog/`];
 const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard", "/admin/ai-providers", "/admin/expert-network"];
 const OPEN_ACCESS_DASHBOARD_ROUTES = ["/expert-booking"];
 const PUBLIC_APP_SHELL_ROUTES = ["/ai-transparency"];
@@ -300,14 +366,16 @@ const navTabs = [
 
 function HeaderNavTabs() {
   const [location] = useLocation();
+  const scoped = isInnovatorFounderPath(location);
   
   return (
     <nav className="hidden md:flex items-center gap-1">
       {navTabs.map((tab) => {
-        const isActive = location === tab.href || (tab.href !== "/dashboard" && location.startsWith(tab.href));
+        const href = scoped ? innovatorFounderPath(tab.href) : tab.href;
+        const isActive = location === href || (tab.href !== "/dashboard" && location.startsWith(href));
         const Icon = tab.icon;
         return (
-          <Link key={tab.href} href={tab.href}>
+          <Link key={tab.href} href={href}>
             <Button
               variant={isActive ? "secondary" : "ghost"}
               size="sm"
@@ -350,6 +418,80 @@ function Router() {
       <Route path="/se" component={SeVisaRoutes} />
       <Route path="/ch" component={ChVisaRoutes} />
       <Route path={INNOVATOR_FOUNDER_PATH} component={Home} />
+      <Route path={innovatorFounderPath("/login")} component={Login} />
+      <Route path={innovatorFounderPath("/signup")} component={Signup} />
+      <Route path={innovatorFounderPath("/verify-email")} component={VerifyEmail} />
+      <Route path={innovatorFounderPath("/forgot-password")} component={ForgotPassword} />
+      <Route path={innovatorFounderPath("/reset-password")} component={ResetPassword} />
+      <Route path={innovatorFounderPath("/dashboard")} component={Dashboard} />
+      <Route path={innovatorFounderPath("/pricing")} component={Pricing} />
+      <Route path={innovatorFounderPath("/checkout")} component={Checkout} />
+      <Route path={innovatorFounderPath("/questionnaire")} component={Questionnaire} />
+      <Route path={innovatorFounderPath("/theme-selection")} component={ThemeSelection} />
+      <Route path={innovatorFounderPath("/adaptive-intake")} component={AdaptiveIntake} />
+      <Route path={innovatorFounderPath("/generation")} component={Generation} />
+      <Route path={innovatorFounderPath("/endorser-comparison")} component={EntitledEndorserComparison} />
+      <Route path={innovatorFounderPath("/document-organizer")} component={EntitledDocumentOrganizer} />
+      <Route path={innovatorFounderPath("/expert-booking")} component={ExpertBooking} />
+      <Route path={innovatorFounderPath("/join-expert-network")} component={ExpertJoin} />
+      <Route path={innovatorFounderPath("/rejection-analysis")} component={EntitledRejectionAnalysis} />
+      <Route path={innovatorFounderPath("/settlement-planning")} component={EntitledSettlementPlanning} />
+      <Route path={innovatorFounderPath("/features-dashboard")} component={FeaturesDashboard} />
+      <Route path={innovatorFounderPath("/kpi-dashboard")} component={EntitledKPIDashboard} />
+      <Route path={innovatorFounderPath("/evidence-graph")} component={EvidenceGraph} />
+      <Route path={innovatorFounderPath("/rfe-defence-lab")} component={EntitledRFEDefenceLab} />
+      <Route path={innovatorFounderPath("/diagnostics")} component={Diagnostics} />
+      <Route path={innovatorFounderPath("/settings")} component={Settings} />
+      <Route path={innovatorFounderPath("/data-manager")} component={DataModal} />
+      <Route path={innovatorFounderPath("/tools-hub")} component={ToolsHub} />
+      <Route path={innovatorFounderPath("/tools/:toolId")} component={ToolPage} />
+      <Route path={innovatorFounderPath("/features")} component={FeaturesShowcase} />
+      <Route path={innovatorFounderPath("/endorser-investment")} component={EndorserInvestmentRequirements} />
+      <Route path={innovatorFounderPath("/ai-assistant")} component={AIAssistant} />
+      <Route path={innovatorFounderPath("/handoff")} component={Handoff} />
+      <Route path={innovatorFounderPath("/oracle-supervisor")} component={EntitledOracleSupervisor} />
+      <Route path={innovatorFounderPath("/founder-autopilot")} component={EntitledFounderAutopilot} />
+      <Route path={innovatorFounderPath("/neural-twin")} component={EntitledNeuralTwin} />
+      <Route path={innovatorFounderPath("/voice-builder")} component={EntitledVoiceBuilder} />
+      <Route path={innovatorFounderPath("/regulatory-copilot")} component={EntitledRegulatoryCopilot} />
+      <Route path={innovatorFounderPath("/economic-impact")} component={EntitledEconomicImpact} />
+      <Route path={innovatorFounderPath("/knowledge-graph")} component={EntitledKnowledgeGraph} />
+      <Route path={innovatorFounderPath("/referral-dashboard")} component={ReferralDashboard} />
+      <Route path={innovatorFounderPath("/premium-features")} component={PremiumFeatures} />
+      <Route path={innovatorFounderPath("/achievements")} component={Achievements} />
+      <Route path={innovatorFounderPath("/template-library")} component={TemplateLibrary} />
+      <Route path={innovatorFounderPath("/document-review")} component={DocumentReviewPage} />
+      <Route path={innovatorFounderPath("/success-stories")} component={SuccessStories} />
+      <Route path={innovatorFounderPath("/calendar")} component={CalendarSync} />
+      <Route path={innovatorFounderPath("/news")} component={News} />
+      <Route path={innovatorFounderPath("/interview-prep")} component={EntitledInterviewPrep} />
+      <Route path={innovatorFounderPath("/traction-evidence")} component={EntitledTractionEvidence} />
+      <Route path={innovatorFounderPath("/founder-portfolio")} component={EntitledFounderPortfolio} />
+      <Route path={innovatorFounderPath("/endorser-cover-letter")} component={EntitledEndorserCoverLetter} />
+      <Route path={innovatorFounderPath("/commercial-validation")} component={EntitledCommercialValidation} />
+      <Route path={innovatorFounderPath("/oisc-compliance")} component={EntitledOISCCompliance} />
+      <Route path={innovatorFounderPath("/market-data-verifier")} component={EntitledMarketDataVerifier} />
+      <Route path={innovatorFounderPath("/mvp-demo-guide")} component={EntitledMVPDemoGuide} />
+      <Route path={innovatorFounderPath("/financial-resilience")} component={EntitledFinancialResilience} />
+      <Route path={innovatorFounderPath("/visa-prefill")} component={VisaPrefillDashboard} />
+      <Route path={innovatorFounderPath("/ai-transparency")} component={AITransparency} />
+      <Route path={innovatorFounderPath("/testing-validation")} component={TestingValidation} />
+      <Route path={innovatorFounderPath("/compliance-dashboard")} component={ComplianceDashboard} />
+      <Route path={innovatorFounderPath("/faq")} component={FAQ} />
+      <Route path={innovatorFounderPath("/guide")} component={Guide} />
+      <Route path={innovatorFounderPath("/privacy")} component={Privacy} />
+      <Route path={innovatorFounderPath("/terms")} component={Terms} />
+      <Route path={innovatorFounderPath("/cookies")} component={Cookies} />
+      <Route path={innovatorFounderPath("/progress")} component={Progress} />
+      <Route path={innovatorFounderPath("/support")} component={Support} />
+      <Route path={innovatorFounderPath("/documents")} component={Documents} />
+      <Route path={innovatorFounderPath("/guide/ultimate-uk-innovator-founder-visa-guide")} component={UltimateGuide} />
+      <Route path={innovatorFounderPath("/about")} component={AboutPage} />
+      <Route path={innovatorFounderPath("/endorsing-bodies")} component={EndorsingBodiesPage} />
+      <Route path={innovatorFounderPath("/eligibility")} component={EligibilityPage} />
+      <Route path={innovatorFounderPath("/business-plan-template")} component={BusinessPlanTemplatePage} />
+      <Route path={innovatorFounderPath("/blog")} component={BlogPage} />
+      <Route path={innovatorFounderPath("/blog/:slug")} component={BlogPostPage} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
       <Route path="/verify-email" component={VerifyEmail} />
@@ -437,7 +579,9 @@ function Router() {
 }
 
 function UnifiedHeader({ demoMode = false }: { demoMode?: boolean }) {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const scoped = isInnovatorFounderPath(location);
+  const routeFor = (path: string) => scoped ? innovatorFounderPath(path) : path;
   
   const { data: user } = useQuery<{ id: string; email: string; displayName?: string; firstName?: string }>({
     queryKey: ['/api/auth/user'],
@@ -455,7 +599,7 @@ function UnifiedHeader({ demoMode = false }: { demoMode?: boolean }) {
       if (data?.redirectUrl) {
         window.location.href = data.redirectUrl;
       } else {
-        setLocation("/login");
+        setLocation(routeFor("/login"));
       }
     },
   });
@@ -463,7 +607,7 @@ function UnifiedHeader({ demoMode = false }: { demoMode?: boolean }) {
   return (
     <header className="flex items-center gap-2 md:gap-4 px-2 md:px-4 py-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
       <AnimatedSidebarTrigger />
-      <Link href="/">
+      <Link href={routeFor("/")}>
         <div className="isolate z-[9999] mix-blend-normal bg-transparent cursor-pointer hover:opacity-85 transition-opacity" data-testid="button-header-logo">
           <div className="logo-container overflow-hidden flex items-center">
             <img src={logoLightImg} alt="UK Innovator Founder Visa Assistant" width="143" height="40" className="h-8 md:h-10 w-auto logo-light object-contain !mix-blend-normal !filter-none !opacity-100" loading="lazy" />
@@ -486,7 +630,7 @@ function UnifiedHeader({ demoMode = false }: { demoMode?: boolean }) {
       {!demoMode && user && <NotificationBell />}
       <ThemeToggle />
       {demoMode ? (
-        <Link href="/login">
+        <Link href={routeFor("/login")}>
           <Button size="sm" data-testid="button-header-signin">Sign In</Button>
         </Link>
       ) : user ? (
@@ -502,7 +646,7 @@ function UnifiedHeader({ demoMode = false }: { demoMode?: boolean }) {
         </Button>
       ) : null}
       {!demoMode && !user && (
-        <Link href="/login?redirect=%2Fexpert-booking">
+        <Link href={routeFor("/login?redirect=%2Fexpert-booking")}>
           <Button variant="outline" size="sm" data-testid="button-header-signin">Sign in</Button>
         </Link>
       )}
