@@ -27,12 +27,12 @@ export default function VisaAssistantBrand({
   return (
     <div
       className={`inline-flex flex-col justify-center ${className}`}
-      data-no-auto-translate
       aria-label={routeLabel ? `Visa Assistant — ${routeLabel}` : "Visa Assistant"}
     >
       {logoHref ? (
         <Link
           href={logoHref}
+          data-no-auto-translate
           className="flex items-center gap-2.5 rounded-md transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#126EF5] focus-visible:ring-offset-2"
           aria-label="Visa Assistant home"
         >
@@ -64,7 +64,7 @@ export default function VisaAssistantBrand({
           </div>
         </Link>
       ) : (
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5" data-no-auto-translate>
         <div className={`relative shrink-0 ${markSize}`} aria-hidden="true">
           <svg
             viewBox="0 0 96 86"
