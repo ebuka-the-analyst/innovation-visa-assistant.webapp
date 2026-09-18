@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, BriefcaseBusiness, ExternalLink, GraduationCap, Heart, Lock, Search, Sparkles, Plane, Building2 } from "lucide-react";
+import { ArrowLeft, Award, Baby, BookOpen, BriefcaseBusiness, Building2, Camera, Church, ExternalLink, GraduationCap, Handshake, Heart, House, Languages, Leaf, Lightbulb, Lock, Microscope, Palette, Plane, Repeat2, Rocket, Scale, Search, ShieldCheck, Stethoscope, Trophy, Users, Wrench } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 import VisaAssistantBrand from "@/components/VisaAssistantBrand";
 import LanguageSelector from "@/components/LanguageSelector";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -96,6 +95,33 @@ const countries:Record<string,Country>={
   g("Study & Family",GraduationCap,[r("Student National Visa / Residence","Long-term study with cantonal residence authorisation."),r("Family Reunification","Qualifying spouse/partner and family residence."),r("Marriage in Switzerland","National visa/residence process where applicable."),r("Residence without gainful employment","Residence for eligible financially self-sufficient applicants, subject to applicable rules.")])]},
 };
 
+function routeIconFor(name:string,description:string){
+ const value=`${name} ${description}`.toLowerCase();
+ if(/health|medical|care|patient/.test(value)) return Stethoscope;
+ if(/sport|athlet|coach/.test(value)) return Trophy;
+ if(/religio|minister|faith/.test(value)) return Church;
+ if(/creative|artist|cultur/.test(value)) return Palette;
+ if(/student|study|school|graduate|education|training/.test(value)) return GraduationCap;
+ if(/research|scientist|professor/.test(value)) return Microscope;
+ if(/child/.test(value)) return Baby;
+ if(/spouse|partner|fianc|family|parent|relative/.test(value)) return Heart;
+ if(/refugee|asylum|humanitarian|protection|parole/.test(value)) return ShieldCheck;
+ if(/visitor|touris|visit/.test(value)) return Camera;
+ if(/transit|travel|eta|esta|holiday|mobility/.test(value)) return Plane;
+ if(/seasonal|agricultur/.test(value)) return Leaf;
+ if(/exchange|secondment|transfer|intracompany|intra-company/.test(value)) return Repeat2;
+ if(/treaty|agreement|legal|blue card/.test(value)) return Scale;
+ if(/domestic|residence|settlement|permanent residence/.test(value)) return House;
+ if(/start-up|startup|entrepreneur|innovator|self-employ/.test(value)) return Lightbulb;
+ if(/talent|extraordinary|high potential|exceptional/.test(value)) return Award;
+ if(/invest|business manager|business owner|golden visa/.test(value)) return Rocket;
+ if(/skilled|worker|work permit|employment|employee|profession|occupation|specialist|manager|permit/.test(value)) return Wrench;
+ if(/language/.test(value)) return Languages;
+ if(/supplier|contract/.test(value)) return Handshake;
+ if(/academic|course/.test(value)) return BookOpen;
+ return BriefcaseBusiness;
+}
+
 export default function CountryVisaRoutes({code}:{code:string}){
  const [,setLocation]=useLocation(); const { language }=useLanguage(); const tx=getCatalogueText(language); const [query,setQuery]=useState(""); const c=countries[code];
  useEffect(()=>{
@@ -114,8 +140,8 @@ export default function CountryVisaRoutes({code}:{code:string}){
  return <div className="min-h-[100svh] bg-gradient-to-b from-sky-50 via-white to-blue-50 text-slate-900 dark:from-[#090b18] dark:via-[#0b1020] dark:to-[#090b18] dark:text-white">
   <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-[#090b18]/90"><div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2.5 sm:px-6"><VisaAssistantBrand compact/><div className="flex items-center gap-1.5"><LanguageSelector/><ThemeToggle/><Button variant="outline" size="sm" onClick={()=>setLocation('/login')}>{tx.signIn}</Button></div></div></header>
   <main id="country-catalogue-main" className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8"><Button variant="ghost" className="mb-4 -ml-3 gap-2" onClick={()=>setLocation('/')}><ArrowLeft className="h-4 w-4"/>{tx.allCountries}</Button>
-   <section className="mb-8 rounded-3xl border border-blue-100 bg-white/80 p-5 shadow-sm dark:border-white/10 dark:bg-white/[.04] sm:p-8"><div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"><div className="max-w-3xl"><div className="mb-3 flex items-center gap-3"><img src={`https://flagcdn.com/w160/${c.flag}.png`} alt={c.name} className="h-10 w-14 rounded-md object-cover shadow"/><Badge variant="secondary" className="gap-1"><Lock className="h-3 w-3"/>{c.name} · {tx.comingSoon}</Badge></div><h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{tx.visaRoutes(c.name)}</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">{tx.exploreCountry(c.name)}</p><p className="mt-2 text-xs text-slate-500">{tx.checkedCountry(c.authority)}</p></div><div className="w-full lg:max-w-sm"><div className="relative"><Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"/><Input value={query} onChange={e=>setQuery(e.target.value)} placeholder={tx.searchRoutes(total)} className="h-12 rounded-2xl pl-12"/></div></div></div></section>
-   <div className="space-y-8">{filtered.map(group=>{const Icon=group.icon;return <section key={group.title}><div className="mb-3 flex items-start gap-3"><div className="rounded-xl bg-blue-50 p-2 text-[#005EB8] dark:bg-blue-500/10"><Icon className="h-5 w-5"/></div><div><h2 className="text-xl font-semibold">{group.title}</h2></div></div><div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{group.routes.map(route=><Card key={route.name} className="flex min-h-36 flex-col justify-between rounded-2xl border-slate-200 bg-white/80 p-5 dark:border-white/10 dark:bg-white/[.03]"><div><div className="mb-2 flex items-start justify-between gap-3"><h3 className="font-semibold leading-5">{route.name}</h3><Badge variant="secondary" className="gap-1 whitespace-nowrap"><Lock className="h-3 w-3"/>{tx.comingSoon}</Badge></div><p className="text-sm leading-5 text-slate-600 dark:text-slate-400">{route.description}</p></div><span className="mt-5 text-xs text-slate-400">{tx.assistantDevelopment}</span></Card>)}</div></section>})}</div>
+   <section className="mb-8 rounded-3xl border border-blue-100 bg-white/80 p-5 shadow-sm dark:border-white/10 dark:bg-white/[.04] sm:p-8"><div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"><div className="max-w-3xl"><div className="mb-3 flex items-center gap-3"><img src={`https://flagcdn.com/w160/${c.flag}.png`} alt={c.name} className="h-10 w-14 rounded-md object-cover shadow"/><Badge className="gap-1 rounded-full bg-red-500 px-3 py-1 text-white shadow-sm hover:bg-red-500"><Lock className="h-3 w-3"/>{c.name} · {tx.comingSoon}</Badge></div><h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{tx.visaRoutes(c.name)}</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">{tx.exploreCountry(c.name)}</p><p className="mt-2 text-xs text-slate-500">{tx.checkedCountry(c.authority)}</p></div><div className="w-full lg:max-w-sm"><div className="relative"><Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"/><Input value={query} onChange={e=>setQuery(e.target.value)} placeholder={tx.searchRoutes(total)} className="h-12 rounded-2xl pl-12"/></div></div></div></section>
+   <div className="space-y-8">{filtered.map(group=>{const Icon=group.icon;return <section key={group.title}><div className="mb-3 flex items-start gap-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-white/10"><Icon className="h-6 w-6 text-black dark:text-white" strokeWidth={2.3}/></div><div><h2 className="text-xl font-semibold">{group.title}</h2></div></div><div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{group.routes.map(route=>{const RouteIcon=routeIconFor(route.name,route.description);return <article key={route.name} className="group flex min-h-[148px] items-stretch gap-4 rounded-2xl border border-blue-100 bg-white p-4 shadow-[0_8px_30px_rgba(15,56,110,.055)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_38px_rgba(15,56,110,.10)] dark:border-white/10 dark:bg-white/[.035]"><div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-white/10"><RouteIcon className="h-8 w-8 text-black dark:text-white" strokeWidth={2.1}/></div><div className="flex min-w-0 flex-1 flex-col"><div className="flex items-start justify-between gap-2"><h3 className="pr-2 text-[17px] font-extrabold leading-5 text-slate-900 dark:text-white">{route.name}</h3><Badge className="shrink-0 gap-1 rounded-full bg-red-500 px-3 py-1 text-white shadow-sm hover:bg-red-500"><Lock className="h-3 w-3"/>{tx.comingSoon}</Badge></div><p className="mt-1.5 text-sm leading-5 text-slate-600 dark:text-slate-400">{route.description}</p><span className="mt-auto pt-3 text-xs text-slate-400">{tx.assistantDevelopment}</span></div></article>})}</div></section>})}</div>
    {filtered.length===0&&<div className="py-20 text-center text-slate-500">{tx.noRoutes(query)}</div>}
    <div className="mt-10 text-center"><a href={c.officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-[#005EB8] hover:underline">{tx.officialAuthority} <ExternalLink className="h-4 w-4"/></a></div>
   </main></div>
