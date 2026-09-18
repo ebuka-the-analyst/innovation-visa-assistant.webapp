@@ -12,6 +12,24 @@ import { getCatalogueText } from "@/lib/catalogue-i18n";
 
 const AUTO_TRANSLATE_ID = "visaassistant-page-translate";
 
+const countryHeroImages: Record<string, string> = {
+  us: "https://unsplash.com/photos/L_U4jhwZ6hY/download?force=true&w=2200",
+  ca: "https://unsplash.com/photos/C2keINMOhIE/download?force=true&w=2200",
+  au: "https://unsplash.com/photos/HlNhYW50CJs/download?force=true&w=2200",
+  de: "https://unsplash.com/photos/CPKYsEel_Jw/download?force=true&w=2200",
+  fr: "https://unsplash.com/photos/IrlGJTJd-qI/download?force=true&w=2200",
+  nl: "https://unsplash.com/photos/h8hXSf0_Kzk/download?force=true&w=2200",
+  sg: "https://unsplash.com/photos/HaH5Zap_VXE/download?force=true&w=2200",
+  ae: "https://unsplash.com/photos/7Hs7EkN9S9o/download?force=true&w=2200",
+  nz: "https://unsplash.com/photos/8M7I-jXlWR8/download?force=true&w=2200",
+  jp: "https://unsplash.com/photos/1NhHaL92wjg/download?force=true&w=2200",
+  ie: "https://unsplash.com/photos/wXuWMhVqL7k/download?force=true&w=2200",
+  pt: "https://unsplash.com/photos/SuwpP1pl47s/download?force=true&w=2200",
+  es: "https://unsplash.com/photos/E6hOXV2aVMw/download?force=true&w=2200",
+  se: "https://unsplash.com/photos/MD81eKcb9WY/download?force=true&w=2200",
+  ch: "https://unsplash.com/photos/hg8aJi7IDEY/download?force=true&w=2200",
+};
+
 type Route = { name:string; description:string };
 type Group = { title:string; icon: typeof BriefcaseBusiness; routes:Route[] };
 type Country = { name:string; flag:string; authority:string; officialUrl:string; groups:Group[] };
@@ -140,7 +158,31 @@ export default function CountryVisaRoutes({code}:{code:string}){
  return <div className="min-h-[100svh] bg-gradient-to-b from-sky-50 via-white to-blue-50 text-slate-900 dark:from-[#090b18] dark:via-[#0b1020] dark:to-[#090b18] dark:text-white">
   <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-[#090b18]/90"><div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2.5 sm:px-6"><VisaAssistantBrand compact/><div className="flex items-center gap-1.5"><LanguageSelector/><ThemeToggle/><Button variant="outline" size="sm" onClick={()=>setLocation('/login')}>{tx.signIn}</Button></div></div></header>
   <main id="country-catalogue-main" className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8"><Button variant="ghost" className="mb-4 -ml-3 gap-2" onClick={()=>setLocation('/')}><ArrowLeft className="h-4 w-4"/>{tx.allCountries}</Button>
-   <section className="mb-8 rounded-3xl border border-blue-100 bg-white/80 p-5 shadow-sm dark:border-white/10 dark:bg-white/[.04] sm:p-8"><div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"><div className="max-w-3xl"><div className="mb-3 flex items-center gap-3"><img src={`https://flagcdn.com/w160/${c.flag}.png`} alt={c.name} className="h-10 w-14 rounded-md object-cover shadow"/><Badge className="gap-1 rounded-full bg-red-500 px-3 py-1 text-white shadow-sm hover:bg-red-500"><Lock className="h-3 w-3"/>{c.name} · {tx.comingSoon}</Badge></div><h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{tx.visaRoutes(c.name)}</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">{tx.exploreCountry(c.name)}</p><p className="mt-2 text-xs text-slate-500">{tx.checkedCountry(c.authority)}</p></div><div className="w-full lg:max-w-sm"><div className="relative"><Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"/><Input value={query} onChange={e=>setQuery(e.target.value)} placeholder={tx.searchRoutes(total)} className="h-12 rounded-2xl pl-12"/></div></div></div></section>
+   <section className="relative mb-8 min-h-[350px] overflow-hidden rounded-[30px] border border-blue-100 shadow-[0_18px_55px_rgba(31,96,170,.10)] dark:border-white/10">
+    <div
+      className="absolute inset-0 bg-cover bg-center"
+      style={{ backgroundImage: `url("${countryHeroImages[code]}")` }}
+      aria-hidden="true"
+    />
+    <div className="absolute inset-0 bg-gradient-to-r from-[#07172f]/95 via-[#0b1933]/88 to-[#0b1933]/35" aria-hidden="true" />
+    <div className="relative flex min-h-[350px] flex-col justify-center p-6 sm:p-8 lg:p-10">
+      <div className="max-w-4xl">
+        <div className="mb-4 flex items-center gap-3">
+          <img src={`https://flagcdn.com/w160/${c.flag}.png`} alt={c.name} className="h-10 w-14 rounded-md object-cover shadow"/>
+          <Badge className="gap-1 rounded-full bg-red-500 px-3 py-1 text-white shadow-sm hover:bg-red-500"><Lock className="h-3 w-3"/>{c.name} · {tx.comingSoon}</Badge>
+        </div>
+        <h1 className="text-4xl font-black tracking-[-0.035em] text-white sm:text-5xl lg:text-6xl">{tx.visaRoutes(c.name)}</h1>
+        <p className="mt-4 max-w-3xl text-base leading-7 text-slate-100 sm:text-lg">{tx.exploreCountry(c.name)}</p>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">{tx.checkedCountry(c.authority)}</p>
+        <div className="mt-6 max-w-3xl rounded-2xl border border-white/15 bg-[#08152c]/78 p-1.5 shadow-xl backdrop-blur-sm">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-300"/>
+            <Input value={query} onChange={e=>setQuery(e.target.value)} placeholder={tx.searchRoutes(total)} className="h-12 rounded-xl border-white/10 bg-transparent pl-12 text-base text-white placeholder:text-slate-300 focus-visible:ring-blue-400"/>
+          </div>
+        </div>
+      </div>
+    </div>
+   </section>
    <div className="space-y-8">{filtered.map(group=>{const Icon=group.icon;return <section key={group.title}><div className="mb-3 flex items-start gap-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-white/10"><Icon className="h-6 w-6 text-black dark:text-white" strokeWidth={2.3}/></div><div><h2 className="text-xl font-semibold">{group.title}</h2></div></div><div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{group.routes.map(route=>{const RouteIcon=routeIconFor(route.name,route.description);return <article key={route.name} className="group flex min-h-[148px] items-stretch gap-4 rounded-2xl border border-blue-100 bg-white p-4 shadow-[0_8px_30px_rgba(15,56,110,.055)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_38px_rgba(15,56,110,.10)] dark:border-white/10 dark:bg-white/[.035]"><div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-white/10"><RouteIcon className="h-8 w-8 text-black dark:text-white" strokeWidth={2.1}/></div><div className="flex min-w-0 flex-1 flex-col"><div className="flex items-start justify-between gap-2"><h3 className="pr-2 text-[17px] font-extrabold leading-5 text-slate-900 dark:text-white">{route.name}</h3><Badge className="shrink-0 gap-1 rounded-full bg-red-500 px-3 py-1 text-white shadow-sm hover:bg-red-500"><Lock className="h-3 w-3"/>{tx.comingSoon}</Badge></div><p className="mt-1.5 text-sm leading-5 text-slate-600 dark:text-slate-400">{route.description}</p><span className="mt-auto pt-3 text-xs text-slate-400">{tx.assistantDevelopment}</span></div></article>})}</div></section>})}</div>
    {filtered.length===0&&<div className="py-20 text-center text-slate-500">{tx.noRoutes(query)}</div>}
    <div className="mt-10 text-center"><a href={c.officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-[#005EB8] hover:underline">{tx.officialAuthority} <ExternalLink className="h-4 w-4"/></a></div>
