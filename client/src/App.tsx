@@ -21,6 +21,7 @@ import { initActivityTracking, trackRouteChange } from "@/lib/activityTracker";
 import { useInitGA, useAnalytics, useUserIdentification, useScrollTracking } from "@/hooks/use-analytics";
 import { ToolEntitlementGuard } from "@/components/ToolEntitlementGuard";
 import { INNOVATOR_FOUNDER_BASE_PATH, innovatorFounderPath, isInnovatorFounderPath } from "@/lib/innovator-founder-routes";
+import { COUNTRY_CODES } from "@/lib/country-public-data";
 
 // Lazy load ChatBot, FloatingFeedback and other heavy components
 const ChatBot = lazy(() => import("@/components/ChatBot"));
@@ -35,6 +36,7 @@ const SiteFeedbackPopup = lazy(() => import("@/components/SiteFeedbackPopup").th
 const GlobalLanding = lazy(() => import("@/pages/global-landing"));
 const UkVisaRoutes = lazy(() => import("@/pages/uk-visa-routes"));
 const CountryVisaRoutes = lazy(() => import("@/pages/country-visa-routes"));
+const CountryMenuPage = lazy(() => import("@/pages/country-menu-page"));
 const UsVisaRoutes = () => <CountryVisaRoutes code="us" />;
 const CaVisaRoutes = () => <CountryVisaRoutes code="ca" />;
 const AuVisaRoutes = () => <CountryVisaRoutes code="au" />;
@@ -50,6 +52,16 @@ const PtVisaRoutes = () => <CountryVisaRoutes code="pt" />;
 const EsVisaRoutes = () => <CountryVisaRoutes code="es" />;
 const SeVisaRoutes = () => <CountryVisaRoutes code="se" />;
 const ChVisaRoutes = () => <CountryVisaRoutes code="ch" />;
+
+function CountryMenuRoute({ section }: { section: "countries" | "how-it-works" | "about" | "contact" }) {
+  const [location] = useLocation();
+  const code = location.split("/").filter(Boolean)[0] || "";
+  return <CountryMenuPage code={code} section={section} />;
+}
+const CountryCountriesPage = () => <CountryMenuRoute section="countries" />;
+const CountryHowItWorksPage = () => <CountryMenuRoute section="how-it-works" />;
+const CountryAboutPage = () => <CountryMenuRoute section="about" />;
+const CountryContactPage = () => <CountryMenuRoute section="contact" />;
 
 // Public pages (marketing/auth)
 const Home = lazy(() => import("@/pages/home"));
@@ -405,6 +417,10 @@ function Router() {
       <Route path="/es" component={EsVisaRoutes} />
       <Route path="/se" component={SeVisaRoutes} />
       <Route path="/ch" component={ChVisaRoutes} />
+      <Route path="/:country/countries" component={CountryCountriesPage} />
+      <Route path="/:country/how-it-works" component={CountryHowItWorksPage} />
+      <Route path="/:country/about" component={CountryAboutPage} />
+      <Route path="/:country/contact" component={CountryContactPage} />
       <Route path={INNOVATOR_FOUNDER_PATH} component={Home} />
       <Route path={innovatorFounderPath("/login")} component={Login} />
       <Route path={innovatorFounderPath("/signup")} component={Signup} />
