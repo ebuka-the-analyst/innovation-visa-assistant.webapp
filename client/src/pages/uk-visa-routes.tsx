@@ -11,12 +11,10 @@ import type { LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import VisaAssistantBrand from "@/components/VisaAssistantBrand";
-import LanguageSelector from "@/components/LanguageSelector";
-import ThemeToggle from "@/components/ThemeToggle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCatalogueText } from "@/lib/catalogue-i18n";
 import { getStaticUkCatalogueTranslation, hasCompleteStaticUkCatalogue } from "@/lib/uk-catalogue-static-translations";
+import CountryPublicNav from "@/components/CountryPublicNav";
 import globeImage from "@assets/unnamed_(1)_1769196836272.png";
 
 const INNOVATOR_FOUNDER_PATH = "/uk/innovatorfoundervisaassistant";
@@ -266,22 +264,7 @@ export default function UkVisaRoutes() {
           box-shadow: inset 22px 0 30px rgba(0,0,0,.18), inset -22px 0 32px rgba(0,0,0,.28), inset 0 8px 16px rgba(255,255,255,.08);
         }
       `}</style>
-      <header className="sticky top-0 z-40 border-b border-blue-100/70 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-[#0b0e1d]/95">
-        <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-5 py-3 lg:px-8">
-          <VisaAssistantBrand compact />
-          <nav className="hidden items-center gap-8 text-sm font-semibold text-slate-700 lg:flex dark:text-slate-200">
-            <button onClick={() => setLocation("/")} className="transition hover:text-blue-600">{copy.countries}</button>
-            <button onClick={scrollToRoutes} className="transition hover:text-blue-600">{copy.routes}</button>
-            <button onClick={() => setLocation("/blog")} className="transition hover:text-blue-600">{copy.guides}</button>
-            <button onClick={() => setLocation("/")} className="transition hover:text-blue-600">{copy.about}</button>
-          </nav>
-          <div className="flex items-center gap-1.5">
-            <LanguageSelector />
-            <ThemeToggle />
-            <Button className="rounded-xl bg-[#086cf2] px-5 shadow-sm hover:bg-[#075fd4]" onClick={() => setLocation("/login")}>{tx.signIn}</Button>
-          </div>
-        </div>
-      </header>
+      <CountryPublicNav code="uk" active="routes" />
 
       <main className="mx-auto max-w-[1500px] px-4 pb-16 pt-5 sm:px-6 lg:px-8">
         <Button variant="ghost" className="mb-3 -ml-3 gap-2 text-slate-700 dark:text-slate-200" onClick={() => setLocation("/")}>
