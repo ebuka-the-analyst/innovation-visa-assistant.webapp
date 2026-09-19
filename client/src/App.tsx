@@ -34,6 +34,8 @@ const SiteFeedbackPopup = lazy(() => import("@/components/SiteFeedbackPopup").th
 // ============ LAZY LOADED PAGES ============
 // Global landing page
 const GlobalLanding = lazy(() => import("@/pages/global-landing"));
+const GlobalPrivacyPage = lazy(() => import("@/pages/global-legal").then(m => ({ default: m.GlobalPrivacyPage })));
+const GlobalTermsPage = lazy(() => import("@/pages/global-legal").then(m => ({ default: m.GlobalTermsPage })));
 const UkVisaRoutes = lazy(() => import("@/pages/uk-visa-routes"));
 const CountryVisaRoutes = lazy(() => import("@/pages/country-visa-routes"));
 const CountryMenuPage = lazy(() => import("@/pages/country-menu-page"));
@@ -238,6 +240,12 @@ function shouldStayInInnovatorFounderScope(path: string): boolean {
   );
 }
 
+function isGlobalDiscoveryPath(path: string): boolean {
+  if (path === "/" || path === "/v2") return true;
+  if (isInnovatorFounderPath(path)) return false;
+  return /^\/(uk|us|ca|au|de|fr|nl|sg|ae|nz|jp|ie|pt|es|se|ch)(?:\/|$)/.test(path);
+}
+
 function PageLoadingSkeleton() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
@@ -394,6 +402,14 @@ function HeaderNavTabs() {
 
 function RootLanding() {
   return isVisaAssistantGlobalHost() ? <GlobalLanding /> : <Home />;
+}
+
+function RootPrivacy() {
+  return isVisaAssistantGlobalHost() ? <GlobalPrivacyPage /> : <Privacy />;
+}
+
+function RootTerms() {
+  return isVisaAssistantGlobalHost() ? <GlobalTermsPage /> : <Terms />;
 }
 
 function Router() {
@@ -565,8 +581,8 @@ function Router() {
       <Route path="/compliance-dashboard" component={ComplianceDashboard} />
       <Route path="/faq" component={FAQ} />
       <Route path="/guide" component={Guide} />
-      <Route path="/privacy" component={Privacy} />
-      <Route path="/terms" component={Terms} />
+      <Route path="/privacy" component={RootPrivacy} />
+      <Route path="/terms" component={RootTerms} />
       <Route path="/cookies" component={Cookies} />
       <Route path="/progress" component={Progress} />
       <Route path="/support" component={Support} />
@@ -693,6 +709,15 @@ function AppLayout() {
 
     if (scoped) {
       window.sessionStorage.setItem("ifva-canonical-scope", "1");
+      return;
+    }
+
+    // Leaving the dedicated Innovator Founder product for the global or
+    // country-discovery experience must also leave its route scope behind.
+    // Otherwise global footer links such as /privacy and /terms can be
+    // incorrectly rewritten back into the Innovator Founder product.
+    if (isGlobalDiscoveryPath(location)) {
+      window.sessionStorage.removeItem("ifva-canonical-scope");
       return;
     }
 
