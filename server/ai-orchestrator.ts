@@ -38,6 +38,47 @@ interface OrchestratorResult {
   };
 }
 
+interface ChatPageContext {
+  ipAddress?: string;
+  userAgent?: string;
+  sessionId?: string;
+  pageContext?: string;
+  pagePath?: string;
+  pageCountry?: string;
+  pageCountryName?: string;
+  pageAuthority?: string;
+  pageSection?: string;
+}
+
+const COUNTRY_CHAT_META: Record<string, { name: string; authority: string }> = {
+  uk: { name: "United Kingdom", authority: "GOV.UK / UK Visas and Immigration" },
+  us: { name: "United States", authority: "USCIS / U.S. Department of State" },
+  ca: { name: "Canada", authority: "Immigration, Refugees and Citizenship Canada" },
+  au: { name: "Australia", authority: "Department of Home Affairs" },
+  de: { name: "Germany", authority: "Federal Government / Federal Foreign Office" },
+  fr: { name: "France", authority: "France-Visas" },
+  nl: { name: "Netherlands", authority: "Immigration and Naturalisation Service (IND)" },
+  sg: { name: "Singapore", authority: "MOM / Immigration & Checkpoints Authority" },
+  ae: { name: "United Arab Emirates", authority: "UAE Government / ICP" },
+  nz: { name: "New Zealand", authority: "Immigration New Zealand" },
+  jp: { name: "Japan", authority: "Ministry of Foreign Affairs / Immigration Services Agency" },
+  ie: { name: "Ireland", authority: "Irish Immigration Service" },
+  pt: { name: "Portugal", authority: "AIMA / Portuguese Government" },
+  es: { name: "Spain", authority: "Spanish Government / Ministry of Foreign Affairs" },
+  se: { name: "Sweden", authority: "Swedish Migration Agency" },
+  ch: { name: "Switzerland", authority: "State Secretariat for Migration (SEM)" },
+};
+
+function resolveCountryChatMeta(context?: ChatPageContext) {
+  const fallback = context?.pageCountry ? COUNTRY_CHAT_META[context.pageCountry] : undefined;
+  return {
+    code: context?.pageCountry || "",
+    name: context?.pageCountryName || fallback?.name || "this country",
+    authority: context?.pageAuthority || fallback?.authority || "the relevant official immigration authority",
+    section: context?.pageSection || "visa-routes",
+  };
+}
+
 
 // System prompt that includes action capabilities
 const ORCHESTRATOR_SYSTEM_PROMPT = `You are the UK Innovator Founder Visa AI Assistant - an expert-level advisor with the ability to perform actions on behalf of authenticated users.
@@ -105,13 +146,21 @@ export async function orchestrateChat(
   userMessage: string,
   conversationHistory: Message[],
   user: User | null,
-  context: { ipAddress?: string; userAgent?: string; sessionId?: string; pageContext?: string }
+  context: ChatPageContext
 ): Promise<OrchestratorResult> {
   const commercialPromptContext = await getCommercialPromptContext();
   
-  // If no authenticated user, use regular chat without actions
-  if (!user) {
-    return regularChat(userMessage, conversationHistory, context.pageContext, commercialPromptContext);
+  // Global and country-catalogue pages are discovery surfaces, not the
+  // Innovator Founder workspace. Keep their answers country-aware even when
+  // the visitor happens to be signed in.
+  if (!user || context.pageContext === "global" || context.pageContext === "catalogue") {
+    return regularChat(
+      userMessage,
+      conversationHistory,
+      context.pageContext,
+      commercialPromptContext,
+      context,
+    );
   }
 
   const actionContext: ActionContext = {
@@ -239,7 +288,7 @@ export async function orchestrateChat(
   }
 
   console.error("[AI Orchestrator] All providers failed, falling back to regular chat");
-  return regularChat(userMessage, conversationHistory);
+  return regularChat(userMessage, conversationHistory, context.pageContext, commercialPromptContext, context);
 }
 
 // Helper functions for retry logic
@@ -297,40 +346,64 @@ async function regularChat(
   userMessage: string,
   conversationHistory: Message[],
   pageContext?: string,
-  commercialPromptContext?: string
+  commercialPromptContext?: string,
+  pageMeta?: ChatPageContext,
 ): Promise<OrchestratorResult> {
-  // Different system prompts based on page context
   const isGlobal = pageContext === "global";
-  
+  const isCatalogue = pageContext === "catalogue";
+  const country = resolveCountryChatMeta(pageMeta);
+
   const baseSystemPrompt = isGlobal
-    ? `You are the Global Visa Assistant - an AI-powered guide for exploring immigration options across 16 countries worldwide.
-
-AVAILABLE COUNTRIES:
-- UK (Live): Innovator Founder Visa - for entrepreneurs starting innovative businesses
-- USA, Canada, Australia, Germany, Singapore, UAE, Portugal, Spain, Netherlands, France, New Zealand, Ireland, Japan, Switzerland, Hong Kong (Coming Soon)
+    ? `You are Visa Assistant Global, an AI guide for exploring immigration and visa-route information across the countries available on this platform.
 
 RULES:
-- Be concise: 2-4 sentences typical
-- Help users understand which country might suit their immigration goals
-- For UK questions, you can provide detailed Innovator Founder Visa guidance
-- For other countries, explain they are coming soon and what visa types will be available
-- Never guarantee visa approval for any country
-- Encourage users to select UK to explore the full platform
+- Be concise: 2-4 sentences is typical unless the user asks for detail.
+- Keep the answer tied to the country or route the user asks about.
+- Never guarantee visa approval or imply you are a regulated immigration adviser.
+- Do not invent current fees, salary thresholds, processing times or eligibility cut-offs.
+- For time-sensitive requirements, direct the user to the relevant official immigration authority.
+- The UK Innovator Founder preparation assistant is a separate dedicated product; do not steer users into it unless they ask about that UK route.
 
-Give helpful guidance about global immigration opportunities.`
-    : `You are an expert UK Innovator Founder Visa consultant.
+Help users discover the right country hub and understand the route information shown on Visa Assistant Global.`
+    : isCatalogue
+      ? `You are the ${country.name} Visa Assistant on Visa Assistant Global.
+
+CURRENT PAGE CONTEXT:
+- Country: ${country.name}
+- Page section: ${country.section}
+- Official authority to verify current requirements: ${country.authority}
+- Page path: ${pageMeta?.pagePath || "unknown"}
 
 RULES:
-- Be concise: 2-4 sentences typical
-- Use UK English spelling
-- Never guarantee visa approval
-- If uncertain, say "verify with gov.uk"
-- Focus only on Innovator Founder Visa
+- Answer in the context of ${country.name}. Do NOT answer as the UK Innovator Founder assistant unless the user explicitly asks to compare with that UK route.
+- Help explain the visa routes, route categories and preparation concepts shown for ${country.name} on this platform.
+- The route catalogue can be browsed even when dedicated preparation tools are not yet live. Never pretend a coming-soon tool is already available.
+- Be concise: 2-4 sentences is typical unless the user asks for detail.
+- Never guarantee an immigration outcome and never present yourself as a regulated immigration adviser.
+- Do not invent current fees, salary thresholds, processing times, quotas or eligibility cut-offs.
+- If the user asks for a current legal requirement or a fact that may change, tell them to verify it with ${country.authority}.
+- If the user asks about another country, make clear that they should switch to that country's hub for country-specific guidance.
+
+Give direct, useful answers about ${country.name} and the current page.`
+      : `You are an AI preparation assistant for the UK Innovator Founder route.
+
+RULES:
+- Be concise: 2-4 sentences typical.
+- Use UK English spelling.
+- Never guarantee visa approval.
+- If a requirement may have changed, tell the user to verify it with GOV.UK.
+- Focus on Innovator Founder preparation unless the user explicitly asks for a comparison.
+- Do not claim to be a regulated immigration adviser.
 
 Give direct, helpful answers.`;
-  const systemPrompt = `${baseSystemPrompt}\n\n${commercialPromptContext ?? await getCommercialPromptContext()}`;
 
-  // OpenAI only (primary)
+  // Commercial plan details belong to the dedicated Innovator Founder product,
+  // not to the global/country discovery assistant.
+  const systemPrompt =
+    isGlobal || isCatalogue
+      ? baseSystemPrompt
+      : `${baseSystemPrompt}\n\n${commercialPromptContext ?? await getCommercialPromptContext()}`;
+
   const chatProviders = [
     { name: "OpenAI", client: openaiClient, model: "gpt-4o" },
   ];
@@ -371,59 +444,60 @@ Give direct, helpful answers.`;
   }
 
   console.error("[Regular Chat] All providers failed, using intelligent fallback");
-  return getIntelligentFallback(userMessage);
+  return getIntelligentFallback(userMessage, pageContext, pageMeta);
 }
 
-// Intelligent fallback responses when all AI providers fail
-function getIntelligentFallback(userMessage: string): OrchestratorResult {
+function getIntelligentFallback(
+  userMessage: string,
+  pageContext?: string,
+  pageMeta?: ChatPageContext,
+): OrchestratorResult {
   const lowerMessage = userMessage.toLowerCase();
-  
+
+  if (pageContext === "catalogue") {
+    const country = resolveCountryChatMeta(pageMeta);
+    return {
+      response:
+        `You're currently viewing ${country.name}. I can help explain the route catalogue and preparation concepts on this page, but I can't safely confirm a time-sensitive immigration requirement while the live AI service is unavailable. Please verify current rules with ${country.authority}.`,
+      provider: "Fallback",
+    };
+  }
+
+  if (pageContext === "global") {
+    return {
+      response:
+        "I can help you navigate Visa Assistant Global and choose a country hub. The live AI service is temporarily unavailable, so for current immigration requirements please use the official authority for the country you are considering.",
+      provider: "Fallback",
+    };
+  }
+
   if (lowerMessage.includes("requirement") || lowerMessage.includes("eligible") || lowerMessage.includes("qualify")) {
     return {
-      response: `For Innovator Founder Visa requirements, you need:
-- An innovative, viable, and scalable business idea
-- Endorsement from an approved endorsing body
-- At least £50,000 investment funds (if required)
-- English proficiency (B2 level)
-- Maintenance funds (£1,270 for 28 days)
-
-Visit gov.uk/innovation-visa for complete details.`,
+      response:
+        "For the UK Innovator Founder route, preparation commonly focuses on the published route requirements, endorsement, your business proposition and supporting evidence. Because requirements can change, verify the current eligibility rules directly on GOV.UK before relying on them.",
       provider: "Fallback"
     };
   }
-  
+
   if (lowerMessage.includes("endorser") || lowerMessage.includes("endorsement")) {
     return {
-      response: `You need endorsement from a Home Office approved body. They assess if your business is:
-- Innovative (new or significantly different)
-- Viable (skills and market potential)
-- Scalable (potential for growth)
-
-Find approved bodies at gov.uk.`,
+      response:
+        "The Innovator Founder route requires endorsement from an authorised endorsing body. Your preparation should clearly evidence innovation, viability and scalability, and you should verify the current authorised-body list and requirements on GOV.UK.",
       provider: "Fallback"
     };
   }
-  
+
   if (lowerMessage.includes("cost") || lowerMessage.includes("fee") || lowerMessage.includes("how much")) {
     return {
-      response: `Innovator Founder Visa costs approximately:
-- Application: £1,036 (outside UK) or £1,292 (in UK)
-- Healthcare surcharge: £1,035/year
-- Endorsement fees vary by body
-
-Check gov.uk for current fees.`,
+      response:
+        "Application, healthcare and endorsement-related costs can change. Please check the current Innovator Founder fees on GOV.UK and the relevant endorsing body's own published charges before budgeting.",
       provider: "Fallback"
     };
   }
-  
-  return {
-    response: `I'm experiencing a brief connection issue. Please try again in a moment.
 
-For immediate help, visit gov.uk/innovation-visa or ask me about:
-- Visa requirements
-- Endorsing bodies
-- Application fees
-- Processing times`,
+  return {
+    response:
+      "I'm experiencing a brief connection issue. Please try again in a moment. For time-sensitive Innovator Founder requirements, use the current GOV.UK guidance.",
     provider: "Fallback"
   };
 }
