@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, X, Send, Loader2, AlertCircle, Globe } from "lucide-react";
+import { COUNTRY_PUBLIC_DATA, isCountryCode, type CountryCode } from "@/lib/country-public-data";
 
 interface Message {
   role: "user" | "assistant";
@@ -11,6 +12,14 @@ interface Message {
 
 type PageContextKey = "global" | "uk" | "catalogue";
 
+type CountryPageContext = {
+  code: CountryCode;
+  name: string;
+  authority: string;
+  section: string;
+  sectionLabel: string;
+};
+
 const OVERLAY_EVENT = "visaassistant:overlay-open";
 
 const PAGE_CONTEXTS = {
@@ -18,7 +27,7 @@ const PAGE_CONTEXTS = {
     key: "global" as const,
     title: "Visa Assistant Global",
     greeting:
-      "Welcome to Visa Assistant Global. I can help you explore the destinations and visa routes available on this platform. The UK Innovator Founder assistant is live, while other country tools are being added. What would you like help with?",
+      "Welcome to Visa Assistant Global. I can help you explore destinations and visa routes available on this platform. The UK Innovator Founder assistant is live, while other dedicated country tools are being added. What would you like help with?",
     disclaimer:
       "AI-assisted preparation information, not regulated immigration advice. Requirements can change, so verify time-sensitive information with the relevant official immigration authority.",
     placeholder: "Ask about destinations, visa routes or the platform...",
@@ -26,17 +35,8 @@ const PAGE_CONTEXTS = {
     suggestions: [
       "What can Visa Assistant Global help me with?",
       "Which visa route is live now?",
-      "Tell me about the UK Innovator Founder route",
+      "How do I explore a country's visa routes?",
     ],
-  },
-  catalogue: {
-    key: "catalogue" as const,
-    title: "Visa Route AI Assistant",
-    greeting: "Hi! I can see which country catalogue you are browsing and can help explain the routes shown on this page, compare preparation needs, and point you to the relevant official authority. What would you like to know?",
-    disclaimer: "AI-assisted preparation information, not regulated immigration advice. Immigration requirements can change; verify current requirements with the relevant official authority.",
-    placeholder: "Ask about the routes on this page...",
-    gradient: "linear-gradient(135deg, #0D2C4A 0%, #41B6E6 100%)",
-    suggestions: ["What routes are shown on this page?", "Which routes fit skilled professionals?", "What should I prepare before applying?"],
   },
   uk: {
     key: "uk" as const,
@@ -54,6 +54,37 @@ const PAGE_CONTEXTS = {
     ],
   },
 };
+
+const COUNTRY_PATH_RE = /^\/(uk|us|ca|au|de|fr|nl|sg|ae|nz|jp|ie|pt|es|se|ch)(?:\/|$)/;
+
+function getCountryPageContext(pathname: string): CountryPageContext | null {
+  const path = pathname || "/";
+  const match = path.match(COUNTRY_PATH_RE);
+  if (!match || !isCountryCode(match[1])) return null;
+
+  const code = match[1];
+  const data = COUNTRY_PUBLIC_DATA[code];
+  const remainder = path.slice(code.length + 1).replace(/^\//, "").split(/[?#]/)[0];
+  const section = remainder || "visa-routes";
+  const sectionLabel =
+    section === "contact"
+      ? "contact and support"
+      : section === "about"
+        ? "about"
+        : section === "how-it-works"
+          ? "how it works"
+          : section === "countries"
+            ? "countries"
+            : "visa routes";
+
+  return {
+    code,
+    name: data.name,
+    authority: data.authority,
+    section,
+    sectionLabel,
+  };
+}
 
 function getPageContextKey(pathname: string): PageContextKey {
   const path = pathname || "/";
@@ -79,17 +110,46 @@ function getPageContextKey(pathname: string): PageContextKey {
     return "global";
   }
 
-  if (isGlobalHost && /^\/(uk|us|ca|au|de|fr|nl|sg|ae|nz|jp|ie|pt|es|se|ch)\/?$/.test(path)) {
+  // Every country page and country subpage must stay country-aware.
+  // Previously only exact routes such as /us matched, so /us/contact,
+  // /us/about and /us/how-it-works incorrectly fell through to the UK assistant.
+  if (isGlobalHost && COUNTRY_PATH_RE.test(path)) {
     return "catalogue";
   }
 
   return "uk";
 }
 
+function getCatalogueContext(country: CountryPageContext) {
+  return {
+    key: "catalogue" as const,
+    title: `${country.name} Visa Assistant`,
+    greeting:
+      `Hi! You're exploring the ${country.name} ${country.sectionLabel} page. I can help explain the visa routes and information shown for ${country.name}, help you understand preparation at a high level, and point you to ${country.authority} for current official requirements. What would you like to know?`,
+    disclaimer:
+      `AI-assisted information for ${country.name} route discovery, not regulated immigration advice. Immigration requirements can change; verify current requirements with ${country.authority}.`,
+    placeholder: `Ask about ${country.name} visa routes...`,
+    gradient: "linear-gradient(135deg, #0D2C4A 0%, #41B6E6 100%)",
+    suggestions: [
+      `What ${country.name} routes can I explore here?`,
+      `Which ${country.name} route categories suit skilled professionals?`,
+      `Where can I verify ${country.name}'s official requirements?`,
+    ],
+  };
+}
+
 export default function ChatBot() {
   const [location] = useLocation();
   const contextKey = getPageContextKey(location);
-  const pageContext = PAGE_CONTEXTS[contextKey];
+  const countryContext = getCountryPageContext(location);
+  const pageContext =
+    contextKey === "catalogue" && countryContext
+      ? getCatalogueContext(countryContext)
+      : PAGE_CONTEXTS[contextKey];
+  const contextIdentity =
+    contextKey === "catalogue" && countryContext
+      ? `catalogue:${countryContext.code}:${countryContext.section}`
+      : contextKey;
 
   const [isOpen, setIsOpen] = useState(false);
   const [isDismissed, setIsDismissed] = useState(() => {
@@ -98,8 +158,8 @@ export default function ChatBot() {
     }
     return false;
   });
-  const [currentContextKey, setCurrentContextKey] =
-    useState<PageContextKey>(contextKey);
+  const [currentContextIdentity, setCurrentContextIdentity] =
+    useState<string>(contextIdentity);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -123,12 +183,12 @@ export default function ChatBot() {
   }, []);
 
   useEffect(() => {
-    if (contextKey !== currentContextKey) {
+    if (contextIdentity !== currentContextIdentity) {
       setMessages([{ role: "assistant", content: pageContext.greeting }]);
       setInput("");
-      setCurrentContextKey(contextKey);
+      setCurrentContextIdentity(contextIdentity);
     }
-  }, [contextKey, currentContextKey, pageContext.greeting]);
+  }, [contextIdentity, currentContextIdentity, pageContext.greeting]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -163,6 +223,10 @@ export default function ChatBot() {
           conversationHistory: messages.slice(-12),
           pageContext: contextKey,
           pagePath: location,
+          pageCountry: countryContext?.code,
+          pageCountryName: countryContext?.name,
+          pageAuthority: countryContext?.authority,
+          pageSection: countryContext?.section,
           pageUrl:
             typeof window !== "undefined" ? window.location.href : location,
         }),
@@ -289,7 +353,7 @@ export default function ChatBot() {
           >
             <div className="flex justify-between items-center gap-2">
               <h3 className="font-bold text-sm sm:text-base md:text-lg truncate flex items-center gap-2">
-                {contextKey === "global" && <Globe className="w-4 h-4" />}
+                {(contextKey === "global" || contextKey === "catalogue") && <Globe className="w-4 h-4" />}
                 {pageContext.title}
               </h3>
               <button
