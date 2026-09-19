@@ -4714,7 +4714,7 @@ Respond ONLY with valid JSON in this exact format:
   // Chat API endpoint - Advanced AI Orchestrator with action capabilities
   app.post("/api/chat", async (req, res) => {
     try {
-      const { message, conversationHistory, pageContext } = req.body;
+      const { message, conversationHistory, pageContext, pagePath, pageCountry, pageCountryName, pageAuthority, pageSection } = req.body;
 
       if (
         !message ||
@@ -4736,6 +4736,11 @@ Respond ONLY with valid JSON in this exact format:
         userAgent: req.headers["user-agent"],
         sessionId: req.sessionID,
         pageContext: pageContext || "uk", // Default to UK if not specified
+        pagePath,
+        pageCountry,
+        pageCountryName,
+        pageAuthority,
+        pageSection,
       };
 
       // Use the orchestrator for intelligent action handling
@@ -4758,7 +4763,7 @@ Respond ONLY with valid JSON in this exact format:
       res.status(500).json({
         error: "Failed to process chat message",
         response:
-          "I apologize for the technical difficulty. Please try again shortly. For immediate assistance, please contact support or visit the official Home Office website.",
+          "I apologise for the technical difficulty. Please try again shortly. For time-sensitive immigration requirements, use the relevant official immigration authority for the country you are viewing.",
       });
     }
   });
