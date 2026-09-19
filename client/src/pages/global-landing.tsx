@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,4 +21,4 @@ export default function GlobalLanding(){const [,setLocation]=useLocation();const
   className="group/arrow flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[#005EB8] shadow-sm transition-all duration-300 hover:scale-105 hover:bg-[#005EB8] hover:text-white active:scale-95 dark:bg-white/10 dark:text-[#41B6E6] dark:hover:bg-[#005EB8] dark:hover:text-white"
 >
   <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover/arrow:translate-x-0.5"/>
-</button></div></Card>)}</div><div className="flex-shrink-0 border-t border-gray-200 px-3 py-2 text-center text-[10px] text-gray-500 dark:border-white/15 dark:text-gray-300">{destinationCopy.explore}</div></div></main><footer className="flex-shrink-0 border-t border-[#005EB8]/10 bg-white/70 px-4 py-3 text-xs text-gray-600 dark:border-white/15 dark:bg-white/[.04] dark:text-gray-200"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-2 text-center"><span>2026 {t.globalLanding.footerText}</span><button onClick={()=>setLocation("/privacy")}>{t.globalLanding.privacy}</button><button onClick={()=>setLocation("/terms")}>{t.globalLanding.terms}</button></div></footer></div></div>}
+</button></div></Card>)}</div><div className="flex-shrink-0 border-t border-gray-200 px-3 py-2 text-center text-[10px] text-gray-500 dark:border-white/15 dark:text-gray-300">{destinationCopy.explore}</div></div></main><footer className="flex-shrink-0 border-t border-[#005EB8]/10 bg-white/70 px-4 py-3 text-xs text-gray-600 dark:border-white/15 dark:bg-white/[.04] dark:text-gray-200"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-2 text-center"><Link href="/" className="hover:text-[#005EB8] dark:hover:text-[#41B6E6]">2026 {t.globalLanding.footerText}</Link><Link href="/privacy" className="hover:text-[#005EB8] hover:underline dark:hover:text-[#41B6E6]">{t.globalLanding.privacy}</Link><Link href="/terms" className="hover:text-[#005EB8] hover:underline dark:hover:text-[#41B6E6]">{t.globalLanding.terms}</Link></div></footer></div></div>}
