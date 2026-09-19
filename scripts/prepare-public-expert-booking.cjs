@@ -32,14 +32,19 @@ update("server/index.ts", (source) => {
 update("client/src/App.tsx", (source) => {
   let next = source;
 
-  const hiddenMatch = next.match(/const SIDEBAR_HIDDEN_ROUTES = \[([^\]]*)\];/);
+  const hiddenMatch = next.match(/const SIDEBAR_HIDDEN_ROUTES = [^\n]+;/);
   if (!hiddenMatch) throw new Error("Could not locate public route list");
-  const hiddenEntries = hiddenMatch[1]
-    .split(",")
-    .map((entry) => entry.trim())
-    .filter(Boolean)
-    .filter((entry) => entry !== '"/expert-booking"');
-  next = next.replace(hiddenMatch[0], `const SIDEBAR_HIDDEN_ROUTES = [${hiddenEntries.join(", ")}];`);
+
+  // Modern public-route arrays may contain nested expressions such as
+  // COUNTRY_CODES.flatMap(code => [...]). Do not parse the array by splitting
+  // on commas or stopping at the first closing bracket. We only need to ensure
+  // the legacy plain "/expert-booking" entry is not hidden.
+  let hiddenDeclaration = hiddenMatch[0];
+  hiddenDeclaration = hiddenDeclaration
+    .replace(', "/expert-booking"', "")
+    .replace('"/expert-booking", ', "")
+    .replace('"/expert-booking"', "");
+  next = next.replace(hiddenMatch[0], hiddenDeclaration);
 
   if (!next.includes("OPEN_ACCESS_DASHBOARD_ROUTES")) {
     const customAnchor = next.match(/const CUSTOM_LAYOUT_ROUTES = \[[^\]]*\];/);
