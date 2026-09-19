@@ -4,11 +4,10 @@ import { ArrowLeft, Award, Baby, BookOpen, BriefcaseBusiness, Building2, Camera,
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import VisaAssistantBrand from "@/components/VisaAssistantBrand";
-import LanguageSelector from "@/components/LanguageSelector";
-import ThemeToggle from "@/components/ThemeToggle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCatalogueText } from "@/lib/catalogue-i18n";
+import CountryPublicNav from "@/components/CountryPublicNav";
+import type { CountryCode } from "@/lib/country-public-data";
 
 const AUTO_TRANSLATE_ID = "visaassistant-page-translate";
 
@@ -156,7 +155,7 @@ export default function CountryVisaRoutes({code}:{code:string}){
  const filtered=useMemo(()=>{if(!c)return[];const q=query.trim().toLowerCase();if(!q)return c.groups;return c.groups.map(x=>({...x,routes:x.routes.filter(v=>`${v.name} ${v.description}`.toLowerCase().includes(q))})).filter(x=>x.routes.length)},[c,query]);
  if(!c)return null; const total=c.groups.reduce((n,x)=>n+x.routes.length,0);
  return <div className="min-h-[100svh] bg-gradient-to-b from-sky-50 via-white to-blue-50 text-slate-900 dark:from-[#090b18] dark:via-[#0b1020] dark:to-[#090b18] dark:text-white">
-  <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-[#090b18]/90"><div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2.5 sm:px-6"><VisaAssistantBrand compact/><div className="flex items-center gap-1.5"><LanguageSelector/><ThemeToggle/><Button variant="outline" size="sm" onClick={()=>setLocation('/login')}>{tx.signIn}</Button></div></div></header>
+  <CountryPublicNav code={code as CountryCode} active="routes" />
   <main id="country-catalogue-main" className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8"><Button variant="ghost" className="mb-4 -ml-3 gap-2" onClick={()=>setLocation('/')}><ArrowLeft className="h-4 w-4"/>{tx.allCountries}</Button>
    <section className="relative mb-8 overflow-hidden rounded-[30px] border border-blue-100 shadow-[0_18px_55px_rgba(31,96,170,.10)] dark:border-white/10">
     <div
