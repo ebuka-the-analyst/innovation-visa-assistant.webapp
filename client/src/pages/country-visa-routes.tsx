@@ -6,10 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCatalogueText } from "@/lib/catalogue-i18n";
+import { localizeCountryName } from "@/lib/global-destination-i18n";
 import CountryPublicNav from "@/components/CountryPublicNav";
 import type { CountryCode } from "@/lib/country-public-data";
-
-const AUTO_TRANSLATE_ID = "visaassistant-page-translate";
 
 const countryHeroImages: Record<string, string> = {
   us: "https://unsplash.com/photos/L_U4jhwZ6hY/download?force=true&w=2200",
@@ -140,19 +139,90 @@ function routeIconFor(name:string,description:string){
 }
 
 export default function CountryVisaRoutes({code}:{code:string}){
- const [,setLocation]=useLocation(); const { language }=useLanguage(); const tx=getCatalogueText(language); const [query,setQuery]=useState(""); const c=countries[code];
+ const [,setLocation]=useLocation();
+ const { language }=useLanguage();
+ const tx=getCatalogueText(language);
+ const [query,setQuery]=useState("");
+ const [translatedCatalogue,setTranslatedCatalogue]=useState<Record<string,string>>({});
+ const c=countries[code];
+
  useEffect(()=>{
-  if(typeof document==="undefined") return;
-  const root=document.querySelector("#country-catalogue-main"); if(!root)return;
+  if(!c || language==="en"){
+   setTranslatedCatalogue({});
+   return;
+  }
+
   const controller=new AbortController();
-  if(language==="en") return;
-  const translate=async(text:string)=>{try{const res=await fetch(`/api/translate?lang=${encodeURIComponent(language)}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text}),signal:controller.signal});if(!res.ok)return text;const data=await res.json();return data.translation||text;}catch{return text;}};
-  const nodes:Text[]=[];const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let node:Node|null;
-  while((node=walker.nextNode())){const t=node as Text;const el=t.parentElement;if(t.data.trim()&&el&&!["SCRIPT","STYLE","INPUT","TEXTAREA"].includes(el.tagName)&&!el.closest("[data-no-auto-translate]"))nodes.push(t);}
-  (async()=>{for(let i=0;i<nodes.length;i+=20){await Promise.all(nodes.slice(i,i+20).map(async t=>{if(!t.isConnected)return;const source=t.data;const translated=await translate(source);if(t.isConnected)t.data=translated;}));}})();
+  const cacheKey=`visaassistant:catalogue:${code}:${language}:v2`;
+  let cached:Record<string,string>={};
+  try{
+   const raw=window.localStorage.getItem(cacheKey);
+   cached=raw?JSON.parse(raw):{};
+  }catch{
+   cached={};
+  }
+  setTranslatedCatalogue(cached);
+
+  const texts=Array.from(new Set([
+   ...c.groups.map(group=>group.title),
+   ...c.groups.flatMap(group=>group.routes.flatMap(route=>[route.name,route.description])),
+  ]));
+  const missing=texts.filter(text=>!cached[text]);
+
+  const run=async()=>{
+   const next={...cached};
+   for(let i=0;i<missing.length;i+=60){
+    if(controller.signal.aborted) return;
+    const chunk=missing.slice(i,i+60);
+    let completed=false;
+    for(let attempt=0;attempt<2&&!completed;attempt++){
+     try{
+      const res=await fetch(`/api/translate?lang=${encodeURIComponent(language)}`,{
+       method:"POST",
+       headers:{"Content-Type":"application/json"},
+       body:JSON.stringify({texts:chunk}),
+       signal:controller.signal,
+      });
+      if(!res.ok) throw new Error(`Translation request failed: ${res.status}`);
+      const data=await res.json();
+      const values=Array.isArray(data.translations)?data.translations:[];
+      if(values.length!==chunk.length) throw new Error("Translation response length mismatch");
+      chunk.forEach((source,index)=>{
+       const value=String(values[index]||"").trim();
+       if(value) next[source]=value;
+      });
+      completed=true;
+     }catch(error){
+      if(controller.signal.aborted) return;
+      if(attempt===0) await new Promise(resolve=>window.setTimeout(resolve,350));
+     }
+    }
+    if(!controller.signal.aborted){
+     setTranslatedCatalogue({...next});
+     try{window.localStorage.setItem(cacheKey,JSON.stringify(next));}catch{}
+    }
+   }
+  };
+  void run();
   return()=>controller.abort();
- },[language,code,query]);
- const filtered=useMemo(()=>{if(!c)return[];const q=query.trim().toLowerCase();if(!q)return c.groups;return c.groups.map(x=>({...x,routes:x.routes.filter(v=>`${v.name} ${v.description}`.toLowerCase().includes(q))})).filter(x=>x.routes.length)},[c,query]);
+ },[language,code,c]);
+
+ const t=(text:string)=>translatedCatalogue[text]||text;
+ const displayCountryName=c?localizeCountryName(language,code,c.name):"";
+ const filtered=useMemo(()=>{
+  if(!c)return[];
+  const q=query.trim().toLocaleLowerCase();
+  if(!q)return c.groups;
+  return c.groups.map(group=>({
+   ...group,
+   routes:group.routes.filter(route=>{
+    const haystack=[group.title,route.name,route.description,t(group.title),t(route.name),t(route.description)]
+      .join(" ")
+      .toLocaleLowerCase();
+    return haystack.includes(q);
+   })
+  })).filter(group=>group.routes.length);
+ },[c,query,translatedCatalogue,language]);
  if(!c)return null; const total=c.groups.reduce((n,x)=>n+x.routes.length,0);
  return <div className="min-h-[100svh] bg-gradient-to-b from-sky-50 via-white to-blue-50 text-slate-900 dark:from-[#090b18] dark:via-[#0b1020] dark:to-[#090b18] dark:text-white">
   <CountryPublicNav code={code as CountryCode} active="routes" />
@@ -168,22 +238,22 @@ export default function CountryVisaRoutes({code}:{code:string}){
       <div className="max-w-4xl">
         <div className="mb-2 flex items-center gap-3">
           <img src={`https://flagcdn.com/w160/${c.flag}.png`} alt={c.name} className="h-8 w-11 rounded-md object-cover shadow"/>
-          <Badge className="gap-1 rounded-full bg-red-500 px-3 py-1 text-white shadow-sm hover:bg-red-500"><Lock className="h-3 w-3"/>{c.name} · {tx.comingSoon}</Badge>
+          <Badge className="gap-1 rounded-full bg-red-500 px-3 py-1 text-white shadow-sm hover:bg-red-500"><Lock className="h-3 w-3"/>{displayCountryName} · {tx.comingSoon}</Badge>
         </div>
-        <h1 className="text-3xl font-black tracking-[-0.035em] text-white sm:text-4xl lg:text-[42px]">{tx.visaRoutes(c.name)}</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-5 text-slate-100 sm:text-base">{tx.exploreCountry(c.name)}</p>
+        <h1 className="text-3xl font-black tracking-[-0.035em] text-white sm:text-4xl lg:text-[42px]">{tx.visaRoutes(displayCountryName)}</h1>
+        <p className="mt-2 max-w-3xl text-sm leading-5 text-slate-100 sm:text-base">{tx.exploreCountry(displayCountryName)}</p>
         <p className="mt-1.5 max-w-3xl text-xs leading-4 text-slate-300">{tx.checkedCountry(c.authority)}</p>
         <div className="mt-3 max-w-3xl rounded-2xl border border-white/15 bg-[#08152c]/78 p-1.5 shadow-xl backdrop-blur-sm">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-300"/>
-            <Input value={query} onChange={e=>setQuery(e.target.value)} placeholder={tx.searchRoutes(total)} className="h-10 rounded-xl border-white/10 bg-transparent pl-11 text-sm text-white placeholder:text-slate-300 focus-visible:ring-blue-400"/>
+            <Input value={query} onChange={e=>setQuery(e.target.value)} placeholder={tx.searchRoutes(total,displayCountryName)} className="h-10 rounded-xl border-white/10 bg-transparent pl-11 text-sm text-white placeholder:text-slate-300 focus-visible:ring-blue-400"/>
           </div>
         </div>
       </div>
     </div>
    </section>
-   <div className="space-y-8">{filtered.map(group=>{const Icon=group.icon;return <section key={group.title}><div className="mb-3 flex items-start gap-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-white/10"><Icon className="h-6 w-6 text-black dark:text-white" strokeWidth={2.3}/></div><div><h2 className="text-xl font-semibold">{group.title}</h2></div></div><div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{group.routes.map(route=>{const RouteIcon=routeIconFor(route.name,route.description);return <article key={route.name} className="group flex min-h-[148px] items-stretch gap-4 rounded-2xl border border-blue-100 bg-white p-4 shadow-[0_8px_30px_rgba(15,56,110,.055)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_38px_rgba(15,56,110,.10)] dark:border-white/10 dark:bg-white/[.035]"><div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-white/10"><RouteIcon className="h-8 w-8 text-black dark:text-white" strokeWidth={2.1}/></div><div className="flex min-w-0 flex-1 flex-col"><div className="flex items-start justify-between gap-2"><h3 className="pr-2 text-[17px] font-extrabold leading-5 text-slate-900 dark:text-white">{route.name}</h3><Badge className="shrink-0 gap-1 rounded-full bg-red-500 px-3 py-1 text-white shadow-sm hover:bg-red-500"><Lock className="h-3 w-3"/>{tx.comingSoon}</Badge></div><p className="mt-1.5 text-sm leading-5 text-slate-600 dark:text-slate-400">{route.description}</p><span className="mt-auto pt-3 text-xs text-slate-400">{tx.assistantDevelopment}</span></div></article>})}</div></section>})}</div>
-   {filtered.length===0&&<div className="py-20 text-center text-slate-500">{tx.noRoutes(query)}</div>}
+   <div className="space-y-8">{filtered.map(group=>{const Icon=group.icon;return <section key={group.title}><div className="mb-3 flex items-start gap-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-white/10"><Icon className="h-6 w-6 text-black dark:text-white" strokeWidth={2.3}/></div><div><h2 className="text-xl font-semibold">{t(group.title)}</h2></div></div><div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{group.routes.map(route=>{const RouteIcon=routeIconFor(route.name,route.description);return <article key={route.name} className="group flex min-h-[148px] items-stretch gap-4 rounded-2xl border border-blue-100 bg-white p-4 shadow-[0_8px_30px_rgba(15,56,110,.055)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_38px_rgba(15,56,110,.10)] dark:border-white/10 dark:bg-white/[.035]"><div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-white/10"><RouteIcon className="h-8 w-8 text-black dark:text-white" strokeWidth={2.1}/></div><div className="flex min-w-0 flex-1 flex-col"><div className="flex items-start justify-between gap-2"><h3 className="pr-2 text-[17px] font-extrabold leading-5 text-slate-900 dark:text-white">{t(route.name)}</h3><Badge className="shrink-0 gap-1 rounded-full bg-red-500 px-3 py-1 text-white shadow-sm hover:bg-red-500"><Lock className="h-3 w-3"/>{tx.comingSoon}</Badge></div><p className="mt-1.5 text-sm leading-5 text-slate-600 dark:text-slate-400">{t(route.description)}</p><span className="mt-auto pt-3 text-xs text-slate-400">{tx.assistantDevelopment}</span></div></article>})}</div></section>})}</div>
+   {filtered.length===0&&<div className="py-20 text-center text-slate-500">{tx.noRoutes(query,displayCountryName)}</div>}
    <div className="mt-10 text-center"><a href={c.officialUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-[#005EB8] hover:underline">{tx.officialAuthority} <ExternalLink className="h-4 w-4"/></a></div>
   </main></div>
 }
