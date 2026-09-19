@@ -315,6 +315,8 @@ function formatEmailType(type: string): string {
   );
 }
 
+const catalogueTranslationCache = new Map<string, string>();
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google OAuth authentication (must be before routes)
   await setupAuth(app);
@@ -329,25 +331,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : [String(req.body?.text ?? "")].filter(Boolean);
       if (language === "en" || !target) return res.json({ translations: texts, translation: texts[0] || "" });
       if (!texts.length) return res.status(400).json({ error: "No text supplied" });
-      const prompt = `Translate each item in this JSON array into ${target}. Preserve proper nouns only where they should conventionally remain untranslated. Return ONLY a valid JSON array of translated strings in exactly the same order and length. Do not add markdown.\n\n${JSON.stringify(texts)}`;
-      let raw: string;
-      try {
-        raw = await callAI(prompt, 6000);
-      } catch (primaryError) {
-        // Railway can run without the managed OpenAI gateway. Fall back to the
-        // directly configured Gemini provider so catalogue translation does not
-        // silently fall back to English when that gateway is unavailable.
-        const geminiResponse = await geminiAI.models.generateContent({
-          model: "gemini-2.5-flash",
-          contents: prompt,
-        });
-        raw = String(geminiResponse.text || "").trim();
-        if (!raw) throw primaryError;
+
+      const cachedTranslations = new Map<string, string>();
+      const missingTexts: string[] = [];
+      for (const text of texts) {
+        const cached = catalogueTranslationCache.get(`${language}:${text}`);
+        if (cached) cachedTranslations.set(text, cached);
+        else if (!missingTexts.includes(text)) missingTexts.push(text);
       }
-      const cleaned = raw.replace(/^\s*```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
-      const parsed = JSON.parse(cleaned);
-      if (!Array.isArray(parsed) || parsed.length !== texts.length) throw new Error("Invalid translation response shape");
-      const translations = parsed.map((v: unknown, i: number) => String(v ?? texts[i]));
+
+      if (missingTexts.length) {
+        const prompt = `Translate each item in this JSON array into ${target}. Preserve visa abbreviations, programme names and proper nouns where they conventionally remain untranslated, but translate ordinary route names, category headings and explanatory descriptions naturally. Return ONLY a valid JSON array of translated strings in exactly the same order and length. Do not add markdown.\n\n${JSON.stringify(missingTexts)}`;
+        let raw: string;
+        try {
+          raw = await callAI(prompt, 6000);
+        } catch (primaryError) {
+          // Railway can run without the managed OpenAI gateway. Fall back to the
+          // directly configured Gemini provider so country catalogues still translate.
+          let geminiError: unknown = primaryError;
+          raw = "";
+          for (let attempt = 0; attempt < 2 && !raw; attempt++) {
+            try {
+              const geminiResponse = await geminiAI.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: prompt,
+              });
+              raw = String(geminiResponse.text || "").trim();
+            } catch (error) {
+              geminiError = error;
+            }
+          }
+          if (!raw) throw geminiError;
+        }
+
+        const cleaned = raw.replace(/^\s*```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+        const parsed = JSON.parse(cleaned);
+        if (!Array.isArray(parsed) || parsed.length !== missingTexts.length) {
+          throw new Error("Invalid translation response shape");
+        }
+
+        parsed.forEach((value: unknown, index: number) => {
+          const source = missingTexts[index];
+          const translated = String(value ?? source).trim() || source;
+          catalogueTranslationCache.set(`${language}:${source}`, translated);
+          cachedTranslations.set(source, translated);
+        });
+      }
+
+      const translations = texts.map(text => cachedTranslations.get(text) || text);
       res.set("Cache-Control", "public, max-age=86400");
       return res.json({ translations, translation: translations[0] || "" });
     } catch (error) {
