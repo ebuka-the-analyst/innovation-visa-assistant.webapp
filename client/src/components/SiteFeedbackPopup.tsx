@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Star, X, Sparkles, Send } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getFeedbackCopy } from "@/lib/feedback-i18n";
 
 const FEEDBACK_STORAGE_KEY = "site_feedback_state_v2";
 const TIME_THRESHOLD_MINUTES = 30;
@@ -27,6 +29,8 @@ export function SiteFeedbackPopup() {
   const [comment, setComment] = useState("");
   const { toast } = useToast();
   const [location] = useLocation();
+  const { language } = useLanguage();
+  const copy = getFeedbackCopy(language);
   
   const { data: user } = useQuery<{ id: string; email: string } | null>({
     queryKey: ["/api/auth/user"],
@@ -49,8 +53,8 @@ export function SiteFeedbackPopup() {
       saveFeedbackState({ ...state, submitted: true });
       setIsOpen(false);
       toast({
-        title: "Thank you!",
-        description: "Your feedback helps us improve.",
+        title: copy.thankYou,
+        description: copy.feedbackHelps,
       });
     },
   });
@@ -172,7 +176,7 @@ export function SiteFeedbackPopup() {
   const handleSubmit = () => {
     if (rating === 0) {
       toast({
-        title: "Please select a rating",
+        title: copy.selectRating,
         variant: "destructive",
       });
       return;
@@ -202,7 +206,7 @@ export function SiteFeedbackPopup() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleDismiss()}>
-      <DialogContent className="sm:max-w-md border-0 bg-gradient-to-br from-background via-background to-muted/30 shadow-2xl [&>button]:hidden">
+      <DialogContent data-no-auto-translate className="sm:max-w-md border-0 bg-gradient-to-br from-background via-background to-muted/30 shadow-2xl [&>button]:hidden">
         <button
           onClick={handleDismiss}
           className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none z-50"
@@ -216,7 +220,7 @@ export function SiteFeedbackPopup() {
             <Sparkles className="h-6 w-6 text-white" />
           </div>
           <DialogTitle className="text-xl font-semibold">
-            How's your experience so far?
+            {copy.siteQuestion}
           </DialogTitle>
         </DialogHeader>
 
@@ -244,7 +248,7 @@ export function SiteFeedbackPopup() {
 
           <div className="space-y-2">
             <Textarea
-              placeholder="What would make this better? (optional)"
+              placeholder={copy.sitePlaceholder}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               className="resize-none min-h-[80px] bg-muted/50 border-muted-foreground/20 focus:border-[#005EB8]/50"
@@ -259,7 +263,7 @@ export function SiteFeedbackPopup() {
               className="flex-1"
               data-testid="button-feedback-skip"
             >
-              Not now
+              {copy.notNow}
             </Button>
             <Button
               onClick={handleSubmit}
@@ -268,11 +272,11 @@ export function SiteFeedbackPopup() {
               data-testid="button-feedback-submit"
             >
               {submitMutation.isPending ? (
-                "Sending..."
+                copy.sending
               ) : (
                 <>
                   <Send className="h-4 w-4 mr-2" />
-                  Send
+                  {copy.send}
                 </>
               )}
             </Button>
