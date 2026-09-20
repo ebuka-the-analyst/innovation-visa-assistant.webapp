@@ -128,20 +128,20 @@ export default function Header() {
         <div className="border-t border-border bg-background/95 backdrop-blur-xl md:hidden">
           <div className="container mx-auto flex flex-col gap-4 px-4 py-6">
             <button onClick={() => handleNavigation("features")} className="py-2 text-left transition-colors hover:text-primary" data-testid="button-mobile-nav-features">Features</button>
-            <Link href="/blog" className="block py-2 transition-colors hover:text-primary" data-testid="link-mobile-blog">Blog</Link>
+            <Link href={innovatorFounderPath("/blog")} className="block py-2 transition-colors hover:text-primary" data-testid="link-mobile-blog">Blog</Link>
             <button onClick={() => handleNavigation("pricing")} className="py-2 text-left transition-colors hover:text-primary" data-testid="button-mobile-nav-pricing">Pricing</button>
             <button onClick={() => handleNavigation("faq")} className="py-2 text-left transition-colors hover:text-primary" data-testid="button-mobile-nav-faq">FAQ</button>
             <div className="flex flex-col gap-2 border-t border-border pt-4">
               <div className="flex items-center gap-2"><ThemeToggle /><span className="text-sm text-muted-foreground">Dark Mode</span></div>
               {isAuthenticated ? (
                 <>
-                  <Link href="/dashboard" className="w-full"><Button variant="ghost" className="w-full justify-start" data-testid="button-mobile-dashboard"><LayoutDashboard className="mr-2 h-4 w-4" />Dashboard</Button></Link>
+                  <Link href={innovatorFounderPath("/dashboard")} className="w-full"><Button variant="ghost" className="w-full justify-start" data-testid="button-mobile-dashboard"><LayoutDashboard className="mr-2 h-4 w-4" />Dashboard</Button></Link>
                   <Button variant="outline" className="w-full justify-start" onClick={() => logoutMutation.mutate()} disabled={logoutMutation.isPending} data-testid="button-mobile-logout"><LogOut className="mr-2 h-4 w-4" />Log Out</Button>
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="w-full"><Button variant="ghost" className="w-full justify-start" data-testid="button-mobile-signin">Sign In</Button></Link>
-                  <Link href="/pricing" className="w-full"><Button className="w-full" data-testid="button-mobile-cta">Get Started</Button></Link>
+                  <Link href={innovatorFounderPath("/login")} className="w-full"><Button variant="ghost" className="w-full justify-start" data-testid="button-mobile-signin">Sign In</Button></Link>
+                  <Link href={innovatorFounderPath("/pricing")} className="w-full"><Button className="w-full" data-testid="button-mobile-cta">Get Started</Button></Link>
                 </>
               )}
             </div>
