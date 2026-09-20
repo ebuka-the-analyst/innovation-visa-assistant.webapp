@@ -16,6 +16,7 @@ interface ChatOptions {
   pageContext?: PageContext;
   pagePath?: string;
   pageUrl?: string;
+  language?: string;
   conversationHistory?: ConversationMessage[];
 }
 
@@ -122,6 +123,7 @@ function sanitizeHistory(value: unknown): ConversationMessage[] {
 function buildSystemPrompt(
   pageContext: PageContext,
   pagePath?: string,
+  language?: string,
 ): string {
   const basePrompt = pageContext === "global"
     ? GLOBAL_SYSTEM_PROMPT
@@ -130,9 +132,28 @@ function buildSystemPrompt(
       : UK_SYSTEM_PROMPT;
   const safePath = sanitizeText(pagePath, 300).replace(/[\r\n]+/g, " ");
 
-  if (!safePath) return basePrompt;
+  const languageMap: Record<string, string> = {
+    en: "English",
+    es: "Spanish",
+    fr: "French",
+    de: "German",
+    zh: "Simplified Chinese",
+    ar: "Arabic",
+    pt: "Portuguese",
+    ja: "Japanese",
+  };
+  const responseLanguage = languageMap[sanitizeText(language, 8).toLowerCase()] || "English";
+  const languageInstruction = `
 
-  return `${basePrompt}
+RESPONSE LANGUAGE
+- Respond in ${responseLanguage}.
+- Keep official programme names, abbreviations and proper nouns in their conventional form when translating them would reduce accuracy.
+- If the user explicitly asks for another language in their message, follow that request for that response.
+- Do not mix English explanatory sentences into a non-English response unless an official term genuinely needs to remain in English.`;
+
+  if (!safePath) return basePrompt + languageInstruction;
+
+  return `${basePrompt}${languageInstruction}
 
 CURRENT PRODUCT LOCATION
 The user is currently on: ${safePath}
@@ -152,7 +173,7 @@ export async function chat(
     const pageContext: PageContext =
       options.pageContext === "global" ? "global" : options.pageContext === "catalogue" ? "catalogue" : "uk";
     const conversationHistory = sanitizeHistory(options.conversationHistory);
-    const systemPrompt = buildSystemPrompt(pageContext, options.pagePath);
+    const systemPrompt = buildSystemPrompt(pageContext, options.pagePath, options.language);
 
     const messages: any[] = [
       {
@@ -201,6 +222,7 @@ router.post("/chat", async (req: Request, res: Response) => {
       pageContext,
       pagePath,
       pageUrl,
+      language,
     } = req.body ?? {};
 
     if (!message || typeof message !== "string") {
@@ -218,6 +240,7 @@ router.post("/chat", async (req: Request, res: Response) => {
       pageContext: safePageContext,
       pagePath: sanitizeText(pagePath, 300),
       pageUrl: sanitizeText(pageUrl, 1000),
+      language: sanitizeText(language, 8),
       conversationHistory: sanitizeHistory(conversationHistory),
     });
 
