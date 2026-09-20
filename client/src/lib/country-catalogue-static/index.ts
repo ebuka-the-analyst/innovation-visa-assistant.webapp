@@ -7,6 +7,12 @@ import nl from "./nl";
 import sg from "./sg";
 import ae from "./ae";
 import nz from "./nz";
+import jp from "./jp";
+import ie from "./ie";
+import pt from "./pt";
+import es from "./es";
+import se from "./se";
+import ch from "./ch";
 
 export type StaticCatalogueTranslations = Record<string, Record<string, string>>;
 
@@ -20,6 +26,12 @@ const staticCountryCatalogueTranslations: Record<string, StaticCatalogueTranslat
   sg,
   ae,
   nz,
+  jp,
+  ie,
+  pt,
+  es,
+  se,
+  ch,
 };
 
 export function getStaticCountryCatalogueTranslation(
