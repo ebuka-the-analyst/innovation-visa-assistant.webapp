@@ -9,6 +9,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getFeedbackCopy } from "@/lib/feedback-i18n";
+import { innovatorFounderPath } from "@/lib/innovator-founder-routes";
 
 const FEEDBACK_STORAGE_KEY = "site_feedback_state_v2";
 const TIME_THRESHOLD_MINUTES = 30;
@@ -128,7 +129,12 @@ export function SiteFeedbackPopup() {
       return;
     }
 
-    const isDashboard = location === '/dashboard' || location.startsWith('/dashboard');
+    const scopedDashboard = innovatorFounderPath("/dashboard");
+    const isDashboard =
+      location === "/dashboard" ||
+      location.startsWith("/dashboard/") ||
+      location === scopedDashboard ||
+      location.startsWith(`${scopedDashboard}/`);
     if (!isDashboard) {
       return;
     }
