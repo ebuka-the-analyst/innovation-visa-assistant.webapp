@@ -341,38 +341,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (missingTexts.length) {
-        const prompt = `Translate each item in this JSON array into ${target}. Preserve visa abbreviations, programme names and proper nouns where they conventionally remain untranslated, but translate ordinary route names, category headings and explanatory descriptions naturally. Return ONLY a valid JSON array of translated strings in exactly the same order and length. Do not add markdown.\n\n${JSON.stringify(missingTexts)}`;
-        let raw: string;
-        try {
-          raw = await callAI(prompt, 6000);
-        } catch (primaryError) {
-          // Railway can run without the managed OpenAI gateway. Fall back to the
-          // directly configured Gemini provider so country catalogues still translate.
-          let geminiError: unknown = primaryError;
-          raw = "";
-          for (let attempt = 0; attempt < 2 && !raw; attempt++) {
+        const prompt = `Translate every item in this JSON array from English into ${target}.
+
+Rules:
+- Translate ordinary visa route names, category headings and explanatory descriptions naturally.
+- Keep only genuine abbreviations, official programme abbreviations and brand names untranslated when appropriate.
+- Do not leave normal English sentences untranslated.
+- Preserve punctuation and meaning.
+- Return ONLY one valid JSON array of strings in exactly the same order and length.
+- Do not add markdown, commentary or keys.
+
+INPUT:
+${JSON.stringify(missingTexts)}`;
+
+        const parseTranslationArray = (raw: string): string[] => {
+          const stripped = String(raw || "")
+            .replace(/^\s*```(?:json)?\s*/i, "")
+            .replace(/\s*```\s*$/i, "")
+            .trim();
+          const first = stripped.indexOf("[");
+          const last = stripped.lastIndexOf("]");
+          const candidate = first >= 0 && last > first ? stripped.slice(first, last + 1) : stripped;
+          const parsed = JSON.parse(candidate);
+          if (!Array.isArray(parsed) || parsed.length !== missingTexts.length) {
+            throw new Error("Invalid translation response shape");
+          }
+          return parsed.map((value: unknown, index: number) =>
+            String(value ?? missingTexts[index]).trim() || missingTexts[index],
+          );
+        };
+
+        const looksTranslated = (values: string[]) => {
+          const meaningful = missingTexts
+            .map((source, index) => ({ source, translated: values[index] || source }))
+            .filter(({ source }) => /[A-Za-z]{4,}/.test(source) && source.length > 12);
+          if (!meaningful.length) return true;
+          const changed = meaningful.filter(({ source, translated }) => translated !== source).length;
+          return changed >= Math.max(1, Math.ceil(meaningful.length * 0.55));
+        };
+
+        let translationsFromProvider: string[] | null = null;
+        const providerErrors: string[] = [];
+
+        if (process.env.OPENAI_API_KEY) {
+          try {
+            const completion = await openaiClient.chat.completions.create({
+              model: "gpt-4o",
+              messages: [
+                { role: "system", content: "You are a precise localisation engine. Follow the requested output format exactly." },
+                { role: "user", content: prompt },
+              ],
+              max_tokens: 7000,
+              temperature: 0.1,
+            });
+            const values = parseTranslationArray(completion.choices[0]?.message?.content || "");
+            if (!looksTranslated(values)) throw new Error("OpenAI returned mostly untranslated text");
+            translationsFromProvider = values;
+          } catch (error: any) {
+            providerErrors.push(`OpenAI: ${error?.message || String(error)}`);
+          }
+        }
+
+        const geminiKeys = [
+          process.env.GEMINI_API_KEY,
+          process.env.GEMINI_API_KEY_2,
+          process.env.GEMINI_API_KEY_3,
+          process.env.GEMINI_API_KEY_4,
+          process.env.AI_INTEGRATIONS_GEMINI_API_KEY,
+        ].filter(Boolean) as string[];
+
+        if (!translationsFromProvider) {
+          for (let keyIndex = 0; keyIndex < geminiKeys.length && !translationsFromProvider; keyIndex++) {
             try {
-              const geminiResponse = await geminiAI.models.generateContent({
+              const ai = new GoogleGenAI({ apiKey: geminiKeys[keyIndex] });
+              const response = await ai.models.generateContent({
                 model: "gemini-2.5-flash",
                 contents: prompt,
+                config: { maxOutputTokens: 8000, temperature: 0.1 },
               });
-              raw = String(geminiResponse.text || "").trim();
-            } catch (error) {
-              geminiError = error;
+              const values = parseTranslationArray(String(response.text || ""));
+              if (!looksTranslated(values)) throw new Error("Gemini returned mostly untranslated text");
+              translationsFromProvider = values;
+            } catch (error: any) {
+              providerErrors.push(`Gemini key ${keyIndex + 1}: ${error?.message || String(error)}`);
             }
           }
-          if (!raw) throw geminiError;
         }
 
-        const cleaned = raw.replace(/^\s*```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
-        const parsed = JSON.parse(cleaned);
-        if (!Array.isArray(parsed) || parsed.length !== missingTexts.length) {
-          throw new Error("Invalid translation response shape");
+        if (!translationsFromProvider) {
+          console.error("Catalogue translation providers failed:", providerErrors.join(" | "));
+          throw new Error("No translation provider returned a valid translated batch");
         }
 
-        parsed.forEach((value: unknown, index: number) => {
+        translationsFromProvider.forEach((translated, index) => {
           const source = missingTexts[index];
-          const translated = String(value ?? source).trim() || source;
           catalogueTranslationCache.set(`${language}:${source}`, translated);
           cachedTranslations.set(source, translated);
         });
