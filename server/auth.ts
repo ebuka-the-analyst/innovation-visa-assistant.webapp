@@ -238,6 +238,13 @@ export async function setupAuth(app: Express) {
   // Configure Google OAuth Strategy (only if credentials are available)
   const googleClientId = process.env.GOOGLE_CLIENT_ID;
   const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  console.log("[AuthDiag] Google OAuth env", {
+    clientIdConfigured: Boolean(googleClientId?.trim()),
+    clientIdLength: googleClientId?.trim().length || 0,
+    clientSecretConfigured: Boolean(googleClientSecret?.trim()),
+    clientSecretLength: googleClientSecret?.trim().length || 0,
+    callbackConfigured: Boolean(process.env.GOOGLE_CALLBACK_URL?.trim()),
+  });
   
   if (googleClientId && googleClientSecret) {
     passport.use(
