@@ -695,60 +695,6 @@ app.get("/health", (_req, res) => {
   }, () => {
     log(`serving on port ${port}`);
 
-    // TEMPORARY one-time static catalogue translation export. This calls the
-    // local authenticated exporter and writes base64-encoded JSON records to
-    // Railway logs so they can be committed back into the repository. Remove
-    // after the static locale bundle has been created.
-    if (process.env.STATIC_TRANSLATION_EXPORT_ON_START === "1" && process.env.STATIC_TRANSLATION_EXPORT_TOKEN) {
-      setTimeout(async () => {
-        const countries = ["us","ca","au","de","fr","nl","sg","ae","nz","jp","ie","pt","es","se","ch"];
-        const languages = ["es","fr","de","zh","ar","pt","ja"];
-        const tasks = countries.flatMap(country => languages.map(language => ({ country, language })));
-        let cursor = 0;
-
-        const worker = async (workerId: number) => {
-          while (cursor < tasks.length) {
-            const task = tasks[cursor++];
-            const url =
-              `http://127.0.0.1:${port}/api/internal/catalogue-static-export?country=${task.country}&lang=${task.language}&token=${encodeURIComponent(process.env.STATIC_TRANSLATION_EXPORT_TOKEN || "")}`;
-            let payload = "";
-            let errorMessage = "";
-            for (let attempt = 1; attempt <= 2 && !payload; attempt++) {
-              try {
-                const response = await fetch(url);
-                const body = await response.text();
-                if (!response.ok) throw new Error(`HTTP ${response.status}: ${body.slice(0, 300)}`);
-                payload = body;
-              } catch (error: any) {
-                errorMessage = error?.message || String(error);
-                if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 800));
-              }
-            }
-
-            if (payload) {
-              const encoded = Buffer.from(payload, "utf8").toString("base64");
-              const chunkSize = 7000;
-              const chunks = Math.ceil(encoded.length / chunkSize);
-              for (let part = 0; part < chunks; part++) {
-                const piece = encoded.slice(part * chunkSize, (part + 1) * chunkSize);
-                console.log(`STATIC_I18N|${task.country}|${task.language}|${part + 1}|${chunks}|${piece}`);
-              }
-            } else {
-              console.error(`STATIC_I18N_ERROR|${task.country}|${task.language}|${errorMessage}`);
-            }
-          }
-          console.log(`STATIC_I18N_WORKER_DONE|${workerId}`);
-        };
-
-        try {
-          await Promise.all([worker(1), worker(2), worker(3)]);
-          console.log("STATIC_I18N_EXPORT_COMPLETE");
-        } catch (error) {
-          console.error("STATIC_I18N_EXPORT_FATAL", error);
-        }
-      }, 20000);
-    }
-    
     // Verify Stripe mode on startup
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     const stripePublicKey = process.env.VITE_STRIPE_PUBLIC_KEY;
