@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getFeedbackCopy, type FeedbackCopy } from "@/lib/feedback-i18n";
 
 type FeedbackType = "bug" | "suggestion" | "question" | "praise" | "other";
 
@@ -38,21 +40,16 @@ interface FeedbackContext {
 
 const OVERLAY_EVENT = "visaassistant:overlay-open";
 
-const feedbackOptions: FeedbackOption[] = [
-  { type: "bug", label: "Report a Bug", icon: Bug, color: "#ef4444" },
-  { type: "suggestion", label: "Suggestion", icon: Lightbulb, color: "#005EB8" },
-  {
-    type: "question",
-    label: "Platform Question",
-    icon: HelpCircle,
-    color: "#41B6E6",
-  },
-  { type: "praise", label: "Rate Us ★", icon: ThumbsUp, color: "#22c55e" },
-];
+function feedbackOptions(copy: FeedbackCopy): FeedbackOption[] {
+  return [
+    { type: "bug", label: copy.reportBug, icon: Bug, color: "#ef4444" },
+    { type: "suggestion", label: copy.suggestion, icon: Lightbulb, color: "#005EB8" },
+    { type: "question", label: copy.platformQuestion, icon: HelpCircle, color: "#41B6E6" },
+    { type: "praise", label: copy.rateUs, icon: ThumbsUp, color: "#22c55e" },
+  ];
+}
 
-const STAR_LABELS = ["", "Poor", "Fair", "Good", "Great", "Excellent"];
-
-function getFeedbackContext(pathname: string): FeedbackContext {
+function getFeedbackContext(pathname: string, copy: FeedbackCopy): FeedbackContext {
   const path = pathname || "/";
   const hostname =
     typeof window !== "undefined" ? window.location.hostname.toLowerCase() : "";
@@ -66,10 +63,9 @@ function getFeedbackContext(pathname: string): FeedbackContext {
     path.startsWith("/uk/innovatorfoundervisaassistant")
   ) {
     return {
-      label: "UK Innovator Founder Visa Assistant",
-      shortLabel: "UK Innovator Founder",
-      helper:
-        "Your feedback will be tagged to the Innovator Founder experience and the page you are viewing.",
+      label: copy.innovatorLabel,
+      shortLabel: copy.innovatorShort,
+      helper: copy.innovatorHelper,
     };
   }
 
@@ -79,24 +75,26 @@ function getFeedbackContext(pathname: string): FeedbackContext {
 
   if (path === "/v2" || (isGlobalHost && (path === "/" || path === ""))) {
     return {
-      label: "Visa Assistant Global",
-      shortLabel: "Global Home",
-      helper:
-        "Your feedback will be tagged to the global experience and the page you are viewing.",
+      label: copy.globalLabel,
+      shortLabel: copy.globalShort,
+      helper: copy.globalHelper,
     };
   }
 
   return {
-    label: "Visa Assistant",
-    shortLabel: "Platform",
-    helper:
-      "Your feedback will include the page you are viewing so we can investigate it faster.",
+    label: copy.platformLabel,
+    shortLabel: copy.platformShort,
+    helper: copy.platformHelper,
   };
 }
 
 export default function FloatingFeedback() {
   const [location] = useLocation();
-  const feedbackContext = getFeedbackContext(location);
+  const { language } = useLanguage();
+  const copy = getFeedbackCopy(language);
+  const options = feedbackOptions(copy);
+  const starLabels = ["", copy.poor, copy.fair, copy.good, copy.great, copy.excellent];
+  const feedbackContext = getFeedbackContext(location, copy);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isDismissed, setIsDismissed] = useState(() => {
@@ -151,8 +149,8 @@ export default function FloatingFeedback() {
     onSuccess: () => {
       setSubmitted(true);
       toast({
-        title: "Feedback received",
-        description: "Thank you for helping us improve.",
+        title: copy.feedbackReceived,
+        description: copy.thanksImprove,
       });
       setTimeout(() => {
         resetForm();
@@ -161,8 +159,8 @@ export default function FloatingFeedback() {
     },
     onError: () => {
       toast({
-        title: "Failed to submit",
-        description: "Please try again later.",
+        title: copy.failedSubmit,
+        description: copy.tryLater,
         variant: "destructive",
       });
     },
@@ -194,23 +192,23 @@ export default function FloatingFeedback() {
   const handleSubmit = () => {
     if (!feedbackType) {
       toast({
-        title: "Please select a feedback type",
+        title: copy.selectType,
         variant: "destructive",
       });
       return;
     }
     if (!message.trim()) {
-      toast({ title: "Please enter your message", variant: "destructive" });
+      toast({ title: copy.enterMessage, variant: "destructive" });
       return;
     }
     if (!user && !email.trim()) {
-      toast({ title: "Please enter your email", variant: "destructive" });
+      toast({ title: copy.enterEmail, variant: "destructive" });
       return;
     }
 
     const optionLabel =
-      feedbackOptions.find((option) => option.type === feedbackType)?.label ||
-      "Feedback";
+      options.find((option) => option.type === feedbackType)?.label ||
+      copy.sendFeedback;
     const smartSubject =
       subject.trim() ||
       `[${feedbackContext.shortLabel}] ${optionLabel}: ${message
@@ -276,10 +274,10 @@ export default function FloatingFeedback() {
               data-testid="button-feedback-toggle"
               aria-label={
                 isDismissed
-                  ? "Restore feedback"
+                  ? copy.restoreFeedback
                   : isOpen
-                    ? "Close feedback"
-                    : "Send feedback"
+                    ? copy.closeFeedback
+                    : copy.sendFeedback
               }
             >
               {isOpen ? (
@@ -297,7 +295,7 @@ export default function FloatingFeedback() {
                 }}
                 className="w-5 h-6 bg-red-500 hover:bg-red-600 rounded-r-full flex items-center justify-center text-white transition-colors shadow-sm"
                 data-testid="button-dismiss-feedback"
-                aria-label="Minimize feedback button"
+                aria-label={copy.minimizeFeedback}
               >
                 <X className="w-3 h-3" />
               </button>
@@ -323,6 +321,7 @@ export default function FloatingFeedback() {
             sm:w-[340px] md:w-[380px]
             sm:h-auto sm:max-h-[65vh]"
           data-testid="feedback-window"
+          data-no-auto-translate
         >
           <div
             className="p-4 flex-shrink-0 flex items-start justify-between gap-3"
@@ -333,7 +332,7 @@ export default function FloatingFeedback() {
             <div className="flex items-start gap-2 min-w-0">
               <MessageSquareWarning className="w-5 h-5 text-white mt-0.5 flex-shrink-0" />
               <div className="min-w-0">
-                <h3 className="font-semibold text-white">Send Feedback</h3>
+                <h3 className="font-semibold text-white">{copy.sendFeedback}</h3>
                 <p className="text-white/80 text-xs truncate">
                   {feedbackContext.label}
                 </p>
@@ -343,7 +342,7 @@ export default function FloatingFeedback() {
               onClick={handleClose}
               className="text-white/80 hover:text-white transition-colors"
               data-testid="button-feedback-close"
-              aria-label="Close feedback"
+              aria-label={copy.closeFeedback}
             >
               <X className="w-5 h-5" />
             </button>
@@ -355,16 +354,16 @@ export default function FloatingFeedback() {
                 <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4">
                   <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
                 </div>
-                <h4 className="font-semibold text-lg mb-2">Thank you</h4>
+                <h4 className="font-semibold text-lg mb-2">{copy.thankYou}</h4>
                 <p className="text-muted-foreground text-sm">
-                  Your feedback helps us improve the platform.
+                  {copy.feedbackHelps}
                 </p>
               </div>
             ) : (
               <>
                 <div className="rounded-lg border border-border bg-muted/40 px-3 py-2">
                   <p className="text-xs font-medium text-foreground">
-                    Current area: {feedbackContext.label}
+                    {copy.currentArea} {feedbackContext.label}
                   </p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">
                     {feedbackContext.helper}
@@ -373,10 +372,10 @@ export default function FloatingFeedback() {
 
                 <div>
                   <Label className="text-sm font-medium mb-2 block">
-                    What type of feedback?
+                    {copy.whatType}
                   </Label>
                   <div className="grid grid-cols-2 gap-2">
-                    {feedbackOptions.map((option) => {
+                    {options.map((option) => {
                       const Icon = option.icon;
                       const isSelected = feedbackType === option.type;
                       return (
@@ -406,18 +405,16 @@ export default function FloatingFeedback() {
 
                 {feedbackType === "question" && (
                   <div className="rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 px-3 py-2 text-xs text-blue-900 dark:text-blue-100">
-                    For visa or immigration preparation questions, the AI
-                    Assistant is usually faster. Use this form for questions
-                    about the platform, your account or a feature.
+                    {copy.questionHint}
                   </div>
                 )}
 
                 {feedbackType && (
                   <div>
                     <Label className="text-sm font-medium mb-1.5 block">
-                      Rate your experience{" "}
+                      {copy.rateExperience}{" "}
                       <span className="text-muted-foreground text-xs">
-                        (optional)
+                        ({copy.optional})
                       </span>
                     </Label>
                     <div className="flex items-center gap-1">
@@ -434,7 +431,7 @@ export default function FloatingFeedback() {
                             onMouseLeave={() => setHoveredRating(0)}
                             className="p-0.5 transition-transform hover:scale-110"
                             data-testid={`button-rating-${star}`}
-                            aria-label={`Rate ${star} out of 5`}
+                            aria-label={copy.rateAria(star)}
                           >
                             <Star
                               className="w-6 h-6 transition-colors"
@@ -450,7 +447,7 @@ export default function FloatingFeedback() {
                       })}
                       {(hoveredRating || rating) > 0 && (
                         <span className="text-xs text-muted-foreground ml-1">
-                          {STAR_LABELS[hoveredRating || rating]}
+                          {starLabels[hoveredRating || rating]}
                         </span>
                       )}
                     </div>
@@ -462,14 +459,14 @@ export default function FloatingFeedback() {
                     htmlFor="feedback-subject"
                     className="text-sm font-medium mb-1.5 block"
                   >
-                    Subject{" "}
+                    {copy.subject}{" "}
                     <span className="text-muted-foreground text-xs">
                       (optional)
                     </span>
                   </Label>
                   <Input
                     id="feedback-subject"
-                    placeholder="Brief summary..."
+                    placeholder={copy.subjectPlaceholder}
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     className="bg-muted/50"
@@ -482,20 +479,20 @@ export default function FloatingFeedback() {
                     htmlFor="feedback-message"
                     className="text-sm font-medium mb-1.5 block"
                   >
-                    Your message <span className="text-destructive">*</span>
+                    {copy.yourMessage} <span className="text-destructive">*</span>
                   </Label>
                   <Textarea
                     id="feedback-message"
                     placeholder={
                       feedbackType === "bug"
-                        ? "What were you trying to do, what happened, and what did you expect instead?"
+                        ? copy.bugPlaceholder
                         : feedbackType === "suggestion"
-                          ? "What should we improve, and how would it help you?"
+                          ? copy.suggestionPlaceholder
                           : feedbackType === "question"
-                            ? "What would you like to know about the platform?"
+                            ? copy.questionPlaceholder
                             : feedbackType === "praise"
-                              ? "What's working well for you?"
-                              : "Tell us more..."
+                              ? copy.praisePlaceholder
+                              : copy.genericPlaceholder
                     }
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
@@ -510,7 +507,7 @@ export default function FloatingFeedback() {
                       htmlFor="feedback-email"
                       className="text-sm font-medium mb-1.5 block"
                     >
-                      Your email <span className="text-destructive">*</span>
+                      {copy.yourEmail} <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       id="feedback-email"
@@ -522,14 +519,14 @@ export default function FloatingFeedback() {
                       data-testid="input-feedback-email"
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      So we can follow up if needed
+                      {copy.followUp}
                     </p>
                   </div>
                 )}
 
                 {user && (
                   <p className="text-xs text-muted-foreground">
-                    Submitting as{" "}
+                    {copy.submittingAs}{" "}
                     <span className="font-medium">{user.email}</span>
                   </p>
                 )}
@@ -553,12 +550,12 @@ export default function FloatingFeedback() {
                 {submitMutation.isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Sending...
+                    {copy.sending}
                   </>
                 ) : (
                   <>
                     <Send className="w-4 h-4 mr-2" />
-                    Send Feedback
+                    {copy.sendFeedback}
                   </>
                 )}
               </Button>
