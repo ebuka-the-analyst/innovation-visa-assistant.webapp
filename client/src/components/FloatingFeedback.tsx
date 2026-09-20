@@ -460,9 +460,7 @@ export default function FloatingFeedback() {
                     className="text-sm font-medium mb-1.5 block"
                   >
                     {copy.subject}{" "}
-                    <span className="text-muted-foreground text-xs">
-                      (optional)
-                    </span>
+                    <span className="text-muted-foreground text-xs">({copy.optional})</span>
                   </Label>
                   <Input
                     id="feedback-subject"
