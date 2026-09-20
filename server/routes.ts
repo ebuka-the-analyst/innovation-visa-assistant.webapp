@@ -449,6 +449,149 @@ ${JSON.stringify(missingTexts)}`;
     }
   });
 
+
+  // TEMPORARY authenticated exporter used once to generate repository-bundled
+  // catalogue translations. Remove after the static locale file is committed.
+  app.get("/api/internal/catalogue-static-export", async (req, res) => {
+    try {
+      const expectedToken = process.env.STATIC_TRANSLATION_EXPORT_TOKEN;
+      const suppliedToken = String(req.query.token || "");
+      if (!expectedToken || suppliedToken !== expectedToken) {
+        return res.status(404).json({ error: "Not found" });
+      }
+
+      const country = String(req.query.country || "").toLowerCase();
+      const language = String(req.query.lang || "").toLowerCase();
+      const countryOrder = ["us","ca","au","de","fr","nl","sg","ae","nz","jp","ie","pt","es","se","ch"];
+      const targets: Record<string, string> = {
+        es: "Spanish",
+        fr: "French",
+        de: "German",
+        zh: "Simplified Chinese",
+        ar: "Arabic",
+        pt: "Portuguese",
+        ja: "Japanese",
+      };
+      const target = targets[language];
+      if (!countryOrder.includes(country) || !target) {
+        return res.status(400).json({ error: "Unsupported country or language" });
+      }
+
+      const sourcePath = path.resolve(process.cwd(), "client/src/pages/country-visa-routes.tsx");
+      const source = fs.readFileSync(sourcePath, "utf8");
+      const currentMarker = `\n ${country}:{name:`;
+      const start = source.indexOf(currentMarker);
+      if (start < 0) return res.status(500).json({ error: "Country catalogue block not found" });
+
+      const currentIndex = countryOrder.indexOf(country);
+      let end = source.indexOf("\n};", start);
+      if (currentIndex < countryOrder.length - 1) {
+        const nextMarker = `\n ${countryOrder[currentIndex + 1]}:{name:`;
+        const next = source.indexOf(nextMarker, start + currentMarker.length);
+        if (next > start) end = next;
+      }
+      if (end <= start) return res.status(500).json({ error: "Country catalogue boundary not found" });
+
+      const block = source.slice(start, end);
+      const strings: string[] = [];
+      for (const match of block.matchAll(/g\("([^"]+)"/g)) strings.push(match[1]);
+      for (const match of block.matchAll(/r\("([^"]+)","([^"]*)"\)/g)) {
+        strings.push(match[1], match[2]);
+      }
+      const unique = Array.from(new Set(strings));
+
+      const prompt = `Translate every item in this JSON array from English into ${target} for a multilingual immigration-route catalogue.
+
+Requirements:
+- Preserve the SAME meaning and level of certainty.
+- Use natural, professional ${target}; do not translate word-by-word mechanically.
+- For official programme or visa names, use a conventional translated form where natural while preserving official abbreviations and subclass/form codes.
+- Do not add legal claims, eligibility criteria, fees, thresholds or promises that are not in the source.
+- Keep proper nouns and government programme abbreviations when appropriate.
+- Return ONLY a valid JSON array of strings in exactly the same order and length.
+- No markdown and no commentary.
+
+INPUT:
+${JSON.stringify(unique)}`;
+
+      const parseArray = (raw: string): string[] => {
+        const stripped = String(raw || "")
+          .replace(/^\s*```(?:json)?\s*/i, "")
+          .replace(/\s*```\s*$/i, "")
+          .trim();
+        const first = stripped.indexOf("[");
+        const last = stripped.lastIndexOf("]");
+        const candidate = first >= 0 && last > first ? stripped.slice(first, last + 1) : stripped;
+        const parsed = JSON.parse(candidate);
+        if (!Array.isArray(parsed) || parsed.length !== unique.length) {
+          throw new Error(`Expected ${unique.length} translations but got ${Array.isArray(parsed) ? parsed.length : "non-array"}`);
+        }
+        return parsed.map((value: unknown, index: number) =>
+          String(value ?? unique[index]).trim() || unique[index],
+        );
+      };
+
+      let translated: string[] | null = null;
+      const errors: string[] = [];
+
+      if (process.env.OPENAI_API_KEY) {
+        try {
+          const completion = await openaiClient.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              { role: "system", content: "You are a precise professional localisation engine. Preserve legal and immigration meaning exactly and obey the requested JSON-only format." },
+              { role: "user", content: prompt },
+            ],
+            max_tokens: 12000,
+            temperature: 0.1,
+          });
+          translated = parseArray(completion.choices[0]?.message?.content || "");
+        } catch (error: any) {
+          errors.push(`OpenAI: ${error?.message || String(error)}`);
+        }
+      }
+
+      const geminiKeys = [
+        process.env.GEMINI_API_KEY,
+        process.env.GEMINI_API_KEY_2,
+        process.env.GEMINI_API_KEY_3,
+        process.env.GEMINI_API_KEY_4,
+        process.env.AI_INTEGRATIONS_GEMINI_API_KEY,
+      ].filter(Boolean) as string[];
+
+      if (!translated) {
+        for (let i = 0; i < geminiKeys.length && !translated; i++) {
+          try {
+            const ai = new GoogleGenAI({ apiKey: geminiKeys[i] });
+            const response = await ai.models.generateContent({
+              model: "gemini-2.5-flash",
+              contents: prompt,
+              config: { maxOutputTokens: 16000, temperature: 0.1 },
+            });
+            translated = parseArray(String(response.text || ""));
+          } catch (error: any) {
+            errors.push(`Gemini ${i + 1}: ${error?.message || String(error)}`);
+          }
+        }
+      }
+
+      if (!translated) {
+        return res.status(503).json({ error: "Translation generation failed", details: errors });
+      }
+
+      const items = unique.map((sourceText, i) => ({
+        source: sourceText,
+        translation: translated![i],
+      }));
+
+      res.set("Cache-Control", "no-store");
+      return res.json({ country, language, count: items.length, items });
+    } catch (error: any) {
+      console.error("Static catalogue export error:", error);
+      return res.status(500).json({ error: error?.message || "Static catalogue export failed" });
+    }
+  });
+
   app.get("/api/pricing", async (_req, res) => {
     try {
       res.set("Cache-Control", "no-store");
