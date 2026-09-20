@@ -42,6 +42,7 @@ interface ChatPageContext {
   ipAddress?: string;
   userAgent?: string;
   sessionId?: string;
+  language?: string;
   pageContext?: string;
   pagePath?: string;
   pageCountry?: string;
@@ -77,6 +78,86 @@ function resolveCountryChatMeta(context?: ChatPageContext) {
     authority: context?.pageAuthority || fallback?.authority || "the relevant official immigration authority",
     section: context?.pageSection || "visa-routes",
   };
+}
+
+
+const CHAT_LANGUAGES: Record<string, string> = {
+  en: "English",
+  es: "Spanish",
+  fr: "French",
+  de: "German",
+  zh: "Simplified Chinese",
+  ar: "Arabic",
+  pt: "Portuguese",
+  ja: "Japanese",
+};
+
+function normaliseChatLanguage(value?: string): keyof typeof CHAT_LANGUAGES {
+  const code = String(value || "en").toLowerCase();
+  return Object.prototype.hasOwnProperty.call(CHAT_LANGUAGES, code) ? code : "en";
+}
+
+function responseLanguageInstruction(value?: string): string {
+  const code = normaliseChatLanguage(value);
+  const name = CHAT_LANGUAGES[code];
+  return `
+
+RESPONSE LANGUAGE
+- Respond in ${name}.
+- Keep official programme names, abbreviations, government names and proper nouns in their conventional form when translating them would reduce accuracy.
+- Do not mix English explanatory sentences into a non-English answer unless an official term genuinely needs to remain in English.
+- If the user explicitly asks for another language in their message, follow that request for that response.`;
+}
+
+function localisedFallback(
+  language: string | undefined,
+  kind: "connection" | "global" | "catalogue",
+  countryName?: string,
+  authority?: string,
+): string {
+  const code = normaliseChatLanguage(language);
+  const country = countryName || "this country";
+  const official = authority || "the relevant official immigration authority";
+
+  if (kind === "global") {
+    const values: Record<string, string> = {
+      en: "I can help you navigate Visa Assistant Global and choose a country hub. The live AI service is temporarily unavailable, so for current immigration requirements please use the official authority for the country you are considering.",
+      es: "Puedo ayudarte a navegar por Visa Assistant Global y elegir el centro de un país. El servicio de IA está temporalmente no disponible, así que para los requisitos migratorios actuales consulta la autoridad oficial del país que estés considerando.",
+      fr: "Je peux vous aider à naviguer dans Visa Assistant Global et à choisir un espace pays. Le service d’IA est temporairement indisponible ; pour les exigences d’immigration actuelles, consultez l’autorité officielle du pays concerné.",
+      de: "Ich kann Ihnen helfen, Visa Assistant Global zu nutzen und ein Länder-Hub auszuwählen. Der Live-KI-Dienst ist vorübergehend nicht verfügbar; prüfen Sie aktuelle Einwanderungsanforderungen daher bei der offiziellen Behörde des betreffenden Landes.",
+      zh: "我可以帮助您浏览 Visa Assistant Global 并选择相应的国家中心。目前实时人工智能服务暂时不可用，因此有关最新移民要求，请以您所考虑国家的官方移民机构信息为准。",
+      ar: "يمكنني مساعدتك في التنقل داخل Visa Assistant Global واختيار مركز الدولة المناسب. خدمة الذكاء الاصطناعي المباشرة غير متاحة مؤقتاً، لذا يُرجى الرجوع إلى الجهة الرسمية للدولة المعنية لمعرفة متطلبات الهجرة الحالية.",
+      pt: "Posso ajudar a navegar no Visa Assistant Global e a escolher o centro de um país. O serviço de IA está temporariamente indisponível; para requisitos de imigração atuais, consulte a autoridade oficial do país em questão.",
+      ja: "Visa Assistant Global の案内や国別ハブの選択をお手伝いできます。現在ライブAIサービスが一時的に利用できないため、最新の移民要件は検討中の国の公的機関で確認してください。",
+    };
+    return values[code] || values.en;
+  }
+
+  if (kind === "catalogue") {
+    const values: Record<string, string> = {
+      en: `You're currently viewing ${country}. I can help explain the route catalogue and preparation concepts on this page, but I can't safely confirm a time-sensitive immigration requirement while the live AI service is unavailable. Please verify current rules with ${official}.`,
+      es: `Actualmente estás consultando ${country}. Puedo explicar el catálogo de rutas y los conceptos de preparación de esta página, pero no puedo confirmar de forma segura un requisito migratorio sensible al tiempo mientras el servicio de IA no esté disponible. Verifica las normas actuales con ${official}.`,
+      fr: `Vous consultez actuellement ${country}. Je peux expliquer le catalogue de voies et les notions de préparation de cette page, mais je ne peux pas confirmer de manière fiable une exigence d’immigration susceptible de changer tant que le service d’IA est indisponible. Vérifiez les règles actuelles auprès de ${official}.`,
+      de: `Sie sehen derzeit ${country}. Ich kann den Routenkatalog und die Vorbereitungskonzepte dieser Seite erklären, kann aber eine zeitkritische Einwanderungsanforderung nicht zuverlässig bestätigen, solange der Live-KI-Dienst nicht verfügbar ist. Prüfen Sie die aktuellen Regeln bei ${official}.`,
+      zh: `您当前正在浏览${country}。我可以解释此页面上的签证路线目录和准备要点，但在实时人工智能服务不可用期间，我无法可靠确认具有时效性的移民要求。请通过 ${official} 核实最新规定。`,
+      ar: `أنت تتصفح حالياً ${country}. يمكنني شرح كتالوج المسارات ومفاهيم التحضير في هذه الصفحة، لكن لا يمكنني تأكيد متطلبات هجرة متغيرة زمنياً بشكل آمن أثناء تعطل خدمة الذكاء الاصطناعي المباشرة. تحقّق من القواعد الحالية لدى ${official}.`,
+      pt: `Está atualmente a consultar ${country}. Posso explicar o catálogo de rotas e os conceitos de preparação desta página, mas não posso confirmar com segurança um requisito de imigração sensível ao tempo enquanto o serviço de IA estiver indisponível. Confirme as regras atuais junto de ${official}.`,
+      ja: `現在 ${country} を閲覧しています。このページのルート一覧や準備の考え方は説明できますが、ライブAIサービスが利用できない間は、変更される可能性のある移民要件を安全に確定できません。最新の規則は ${official} で確認してください。`,
+    };
+    return values[code] || values.en;
+  }
+
+  const values: Record<string, string> = {
+    en: "I'm experiencing a brief connection issue. Please try again in a moment. For time-sensitive Innovator Founder requirements, use the current GOV.UK guidance.",
+    es: "Estoy teniendo un breve problema de conexión. Inténtalo de nuevo en un momento. Para los requisitos de Innovator Founder que puedan cambiar, consulta la orientación actual de GOV.UK.",
+    fr: "Je rencontre un bref problème de connexion. Réessayez dans un instant. Pour les exigences Innovator Founder susceptibles de changer, consultez les directives actuelles de GOV.UK.",
+    de: "Es gibt gerade ein kurzes Verbindungsproblem. Versuchen Sie es gleich noch einmal. Für zeitkritische Innovator-Founder-Anforderungen nutzen Sie bitte die aktuellen Hinweise auf GOV.UK.",
+    zh: "目前出现短暂的连接问题，请稍后再试。对于可能随时间变化的英国创新者创始人要求，请以 GOV.UK 的最新官方指南为准。",
+    ar: "توجد حالياً مشكلة اتصال مؤقتة. حاول مرة أخرى بعد قليل. بالنسبة لمتطلبات Innovator Founder التي قد تتغير بمرور الوقت، يُرجى الرجوع إلى أحدث إرشادات GOV.UK.",
+    pt: "Estou a ter um breve problema de ligação. Tente novamente dentro de instantes. Para requisitos Innovator Founder sujeitos a alterações, consulte as orientações atuais do GOV.UK.",
+    ja: "一時的な接続問題が発生しています。少し待ってからもう一度お試しください。変更される可能性のある Innovator Founder の要件については、GOV.UK の最新ガイダンスを確認してください。",
+  };
+  return values[code] || values.en;
 }
 
 
@@ -184,7 +265,7 @@ export async function orchestrateChat(
       const response = await provider.client.chat.completions.create({
         model: provider.model,
         messages: [
-          { role: "system", content: `${ORCHESTRATOR_SYSTEM_PROMPT}\n\n${commercialPromptContext}` },
+          { role: "system", content: `${ORCHESTRATOR_SYSTEM_PROMPT}\n\n${commercialPromptContext}${responseLanguageInstruction(context.language)}` },
           ...conversationHistory.map(msg => ({
             role: msg.role as "user" | "assistant",
             content: msg.content
@@ -245,7 +326,7 @@ export async function orchestrateChat(
         const followUpResponse = await provider.client.chat.completions.create({
           model: provider.model,
           messages: [
-            { role: "system", content: "You are a helpful assistant. The user requested an action and you executed it. Provide a brief, helpful response that summarises the result and offers relevant next steps. Be conversational and supportive. Use UK English." },
+            { role: "system", content: `You are a helpful assistant. The user requested an action and you executed it. Provide a brief, helpful response that summarises the result and offers relevant next steps. Be conversational and supportive.${responseLanguageInstruction(context.language)}` },
             { role: "user", content: `The user asked: "${userMessage}"\n\nAction executed: ${functionName}\nResult: ${actionResult.message}\n\nProvide a helpful response that incorporates this information.` }
           ],
           max_tokens: 300,
@@ -399,10 +480,11 @@ Give direct, helpful answers.`;
 
   // Commercial plan details belong to the dedicated Innovator Founder product,
   // not to the global/country discovery assistant.
+  const languageInstruction = responseLanguageInstruction(pageMeta?.language);
   const systemPrompt =
     isGlobal || isCatalogue
-      ? baseSystemPrompt
-      : `${baseSystemPrompt}\n\n${commercialPromptContext ?? await getCommercialPromptContext()}`;
+      ? `${baseSystemPrompt}${languageInstruction}`
+      : `${baseSystemPrompt}\n\n${commercialPromptContext ?? await getCommercialPromptContext()}${languageInstruction}`;
 
   const chatProviders = [
     { name: "OpenAI", client: openaiClient, model: "gpt-4o" },
@@ -457,16 +539,14 @@ function getIntelligentFallback(
   if (pageContext === "catalogue") {
     const country = resolveCountryChatMeta(pageMeta);
     return {
-      response:
-        `You're currently viewing ${country.name}. I can help explain the route catalogue and preparation concepts on this page, but I can't safely confirm a time-sensitive immigration requirement while the live AI service is unavailable. Please verify current rules with ${country.authority}.`,
+      response: localisedFallback(pageMeta?.language, "catalogue", country.name, country.authority),
       provider: "Fallback",
     };
   }
 
   if (pageContext === "global") {
     return {
-      response:
-        "I can help you navigate Visa Assistant Global and choose a country hub. The live AI service is temporarily unavailable, so for current immigration requirements please use the official authority for the country you are considering.",
+      response: localisedFallback(pageMeta?.language, "global"),
       provider: "Fallback",
     };
   }
@@ -496,8 +576,7 @@ function getIntelligentFallback(
   }
 
   return {
-    response:
-      "I'm experiencing a brief connection issue. Please try again in a moment. For time-sensitive Innovator Founder requirements, use the current GOV.UK guidance.",
+    response: localisedFallback(pageMeta?.language, "connection"),
     provider: "Fallback"
   };
 }
