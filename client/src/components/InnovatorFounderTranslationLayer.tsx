@@ -3,33 +3,9 @@ import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getInnovatorFounderStaticTranslation } from "@/lib/innovator-founder-static-i18n";
 import { INNOVATOR_FOUNDER_BASE_PATH, isInnovatorFounderPath } from "@/lib/innovator-founder-routes";
+import { isKnownUiString } from "@/lib/generated-ui-string-allowlist";
 
 const GLOBAL_HOSTS = new Set(["visaassistant.global", "www.visaassistant.global"]);
-
-const PUBLIC_SUFFIXES = new Set([
-  "",
-  "/login",
-  "/signup",
-  "/verify-email",
-  "/forgot-password",
-  "/reset-password",
-  "/pricing",
-  "/checkout",
-  "/faq",
-  "/guide",
-  "/privacy",
-  "/terms",
-  "/cookies",
-  "/features",
-  "/about",
-  "/endorsing-bodies",
-  "/eligibility",
-  "/business-plan-template",
-  "/join-expert-network",
-  "/ai-transparency",
-  "/testing-validation",
-  "/blog",
-]);
 
 const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "CODE", "PRE", "TEXTAREA"]);
 
@@ -46,12 +22,6 @@ function scopedSuffix(location: string): string | null {
   }
 
   return null;
-}
-
-function isPublicSuffix(suffix: string) {
-  if (PUBLIC_SUFFIXES.has(suffix)) return true;
-  if (suffix === "/guide/ultimate-uk-innovator-founder-visa-guide") return true;
-  return false;
 }
 
 type TextRecord = { node: Text; source: string; translated: string };
@@ -86,7 +56,7 @@ export default function InnovatorFounderTranslationLayer() {
     }
 
     const memoryCache = new Map<string, string>(Object.entries(persistentCache));
-    const allowNetworkFallback = isPublicSuffix(suffix);
+    const allowNetworkFallback = true;
 
     const shouldSkip = (element: Element | null) =>
       !element ||
@@ -124,7 +94,7 @@ export default function InnovatorFounderTranslationLayer() {
       }
 
       if (allowNetworkFallback) {
-        const missing = unique.filter(source => !memoryCache.has(source));
+        const missing = unique.filter(source => !memoryCache.has(source) && isKnownUiString(source));
 
         for (let i = 0; i < missing.length; i += 50) {
           if (disposed || controller.signal.aborted) break;
