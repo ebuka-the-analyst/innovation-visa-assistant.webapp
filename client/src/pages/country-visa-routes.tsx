@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft, Award, Baby, BookOpen, BriefcaseBusiness, Building2, Camera, Church, ExternalLink, GraduationCap, Handshake, Heart, House, Languages, Leaf, Lightbulb, Lock, Microscope, Palette, Plane, Repeat2, Rocket, Scale, Search, ShieldCheck, Sparkles, Stethoscope, Trophy, Users, Wrench } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { getCatalogueText } from "@/lib/catalogue-i18n";
 import { localizeCountryName } from "@/lib/global-destination-i18n";
 import CountryPublicNav from "@/components/CountryPublicNav";
 import type { CountryCode } from "@/lib/country-public-data";
+import { getStaticCountryCatalogueTranslation } from "@/lib/country-catalogue-static";
 
 const countryHeroImages: Record<string, string> = {
   us: "https://unsplash.com/photos/L_U4jhwZ6hY/download?force=true&w=2200",
@@ -143,71 +144,8 @@ export default function CountryVisaRoutes({code}:{code:string}){
  const { language }=useLanguage();
  const tx=getCatalogueText(language);
  const [query,setQuery]=useState("");
- const [translatedCatalogue,setTranslatedCatalogue]=useState<Record<string,string>>({});
  const c=countries[code];
-
- useEffect(()=>{
-  if(!c || language==="en"){
-   setTranslatedCatalogue({});
-   return;
-  }
-
-  const controller=new AbortController();
-  const cacheKey=`visaassistant:catalogue:${code}:${language}:v3`;
-  let cached:Record<string,string>={};
-  try{
-   const raw=window.localStorage.getItem(cacheKey);
-   cached=raw?JSON.parse(raw):{};
-  }catch{
-   cached={};
-  }
-  setTranslatedCatalogue(cached);
-
-  const texts=Array.from(new Set([
-   ...c.groups.map(group=>group.title),
-   ...c.groups.flatMap(group=>group.routes.flatMap(route=>[route.name,route.description])),
-  ]));
-  const missing=texts.filter(text=>!cached[text]);
-
-  const run=async()=>{
-   const next={...cached};
-   for(let i=0;i<missing.length;i+=60){
-    if(controller.signal.aborted) return;
-    const chunk=missing.slice(i,i+60);
-    let completed=false;
-    for(let attempt=0;attempt<2&&!completed;attempt++){
-     try{
-      const res=await fetch(`/api/translate?lang=${encodeURIComponent(language)}`,{
-       method:"POST",
-       headers:{"Content-Type":"application/json"},
-       body:JSON.stringify({texts:chunk}),
-       signal:controller.signal,
-      });
-      if(!res.ok) throw new Error(`Translation request failed: ${res.status}`);
-      const data=await res.json();
-      const values=Array.isArray(data.translations)?data.translations:[];
-      if(values.length!==chunk.length) throw new Error("Translation response length mismatch");
-      chunk.forEach((source,index)=>{
-       const value=String(values[index]||"").trim();
-       if(value) next[source]=value;
-      });
-      completed=true;
-     }catch(error){
-      if(controller.signal.aborted) return;
-      if(attempt===0) await new Promise(resolve=>window.setTimeout(resolve,350));
-     }
-    }
-    if(!controller.signal.aborted){
-     setTranslatedCatalogue({...next});
-     try{window.localStorage.setItem(cacheKey,JSON.stringify(next));}catch{}
-    }
-   }
-  };
-  void run();
-  return()=>controller.abort();
- },[language,code,c]);
-
- const t=(text:string)=>translatedCatalogue[text]||text;
+ const t=(text:string)=>getStaticCountryCatalogueTranslation(code,language,text);
  const displayCountryName=c?localizeCountryName(language,code,c.name):"";
  const filtered=useMemo(()=>{
   if(!c)return[];
@@ -222,7 +160,7 @@ export default function CountryVisaRoutes({code}:{code:string}){
     return haystack.includes(q);
    })
   })).filter(group=>group.routes.length);
- },[c,query,translatedCatalogue,language]);
+ },[c,query,language]);
  if(!c)return null; const total=c.groups.reduce((n,x)=>n+x.routes.length,0);
  return <div className="min-h-[100svh] bg-gradient-to-b from-sky-50 via-white to-blue-50 text-slate-900 dark:from-[#090b18] dark:via-[#0b1020] dark:to-[#090b18] dark:text-white">
   <CountryPublicNav code={code as CountryCode} active="routes" />
