@@ -22,6 +22,7 @@ import { useInitGA, useAnalytics, useUserIdentification, useScrollTracking } fro
 import { ToolEntitlementGuard } from "@/components/ToolEntitlementGuard";
 import { INNOVATOR_FOUNDER_BASE_PATH, innovatorFounderPath, isInnovatorFounderPath } from "@/lib/innovator-founder-routes";
 import { COUNTRY_CODES } from "@/lib/country-public-data";
+import InnovatorFounderTranslationLayer from "@/components/InnovatorFounderTranslationLayer";
 
 // Lazy load ChatBot, FloatingFeedback and other heavy components
 const ChatBot = lazy(() => import("@/components/ChatBot"));
@@ -856,6 +857,7 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <LanguageProvider>
+          <InnovatorFounderTranslationLayer />
           <AnalyticsProvider>
             <VoicePermissionProvider>
               <TooltipProvider>
