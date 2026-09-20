@@ -2,9 +2,8 @@ import { useLocation } from "wouter";
 import VisaAssistantBrand from "@/components/VisaAssistantBrand";
 import LanguageSelector from "@/components/LanguageSelector";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Button } from "@/components/ui/button";
+import PublicAccountControls from "@/components/PublicAccountControls";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { getCatalogueText } from "@/lib/catalogue-i18n";
 import type { CountryCode } from "@/lib/country-public-data";
 
 type ActiveMenu = "countries" | "routes" | "how-it-works" | "about" | "contact";
@@ -23,7 +22,6 @@ const menuCopy = {
 export default function CountryPublicNav({code,active}:{code:CountryCode;active:ActiveMenu}) {
   const [,setLocation]=useLocation();
   const {language}=useLanguage();
-  const tx=getCatalogueText(language);
   const copy=menuCopy[language]||menuCopy.en;
   const items=[
     {id:"countries" as const,label:copy.countries,href:`/${code}/countries`},
@@ -49,7 +47,7 @@ export default function CountryPublicNav({code,active}:{code:CountryCode;active:
       <div className="flex items-center gap-1.5">
         <LanguageSelector/>
         <ThemeToggle/>
-        <Button className="rounded-xl bg-[#086cf2] px-5 shadow-sm hover:bg-[#075fd4]" onClick={()=>setLocation("/login")}>{tx.signIn}</Button>
+        <PublicAccountControls compact/>
       </div>
     </div>
   </header>;
