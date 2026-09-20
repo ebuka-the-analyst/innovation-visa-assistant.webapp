@@ -1,5 +1,6 @@
 import type { LanguageCode } from "@/lib/translations";
 import { getTranslation } from "@/lib/translations";
+import { getInnovatorFounderDeepStaticTranslation } from "@/lib/innovator-founder-deep-static-i18n";
 
 const ZH: Record<string, string> = {
   "Important:": "重要提示：",
@@ -624,6 +625,9 @@ const CORE: Partial<Record<LanguageCode, Record<string, string>>> = {
 export function getInnovatorFounderStaticTranslation(language: LanguageCode, source: string): string {
   const text = source.trim();
   if (!text || language === "en") return source;
+
+  const deepStatic = getInnovatorFounderDeepStaticTranslation(language, text);
+  if (deepStatic) return deepStatic;
 
   if (language === "zh" && ZH[text]) return ZH[text];
   if (language === "ja" && JA[text]) return JA[text];
