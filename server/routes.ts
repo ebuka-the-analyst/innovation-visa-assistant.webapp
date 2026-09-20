@@ -4950,7 +4950,7 @@ Respond ONLY with valid JSON in this exact format:
   // Chat API endpoint - Advanced AI Orchestrator with action capabilities
   app.post("/api/chat", async (req, res) => {
     try {
-      const { message, conversationHistory, pageContext, pagePath, pageCountry, pageCountryName, pageAuthority, pageSection } = req.body;
+      const { message, conversationHistory, pageContext, pagePath, pageCountry, pageCountryName, pageAuthority, pageSection, language } = req.body;
 
       if (
         !message ||
@@ -4973,6 +4973,7 @@ Respond ONLY with valid JSON in this exact format:
         sessionId: req.sessionID,
         pageContext: pageContext || "uk", // Default to UK if not specified
         pagePath,
+        language: typeof language === "string" ? language.slice(0, 8) : "en",
         pageCountry,
         pageCountryName,
         pageAuthority,
