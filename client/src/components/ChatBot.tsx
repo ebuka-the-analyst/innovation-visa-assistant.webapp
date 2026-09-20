@@ -113,6 +113,10 @@ export default function ChatBot() {
     contextKey === "catalogue" && countryContext
       ? `catalogue:${countryContext.code}:${countryContext.section}:${language}`
       : `${contextKey}:${language}`;
+  const chatGradient =
+    contextKey === "global"
+      ? "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)"
+      : "linear-gradient(135deg, #0D2C4A 0%, #41B6E6 100%)";
 
   const [isOpen, setIsOpen] = useState(false);
   const [isDismissed, setIsDismissed] = useState(() => {
@@ -300,6 +304,7 @@ export default function ChatBot() {
             sm:h-[470px] md:h-[520px] lg:h-[560px]
             sm:max-h-[calc(100vh-120px)]"
           data-testid="chatbot-window"
+          data-no-auto-translate
         >
           <div className="bg-amber-50 dark:bg-amber-950/50 border-b border-amber-200 dark:border-amber-800 px-3 py-2 flex-shrink-0">
             <div className="flex items-start gap-2">
@@ -312,7 +317,7 @@ export default function ChatBot() {
 
           <div
             className="px-3 py-3 sm:px-4 sm:py-4 text-white flex-shrink-0"
-            style={{ background: pageContext.gradient }}
+            style={{ background: chatGradient }}
           >
             <div className="flex justify-between items-center gap-2">
               <h3 className="font-bold text-sm sm:text-base md:text-lg truncate flex items-center gap-2">
