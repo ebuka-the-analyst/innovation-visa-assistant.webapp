@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, X, Send, Loader2, AlertCircle, Globe } from "lucide-react";
 import { COUNTRY_PUBLIC_DATA, isCountryCode, type CountryCode } from "@/lib/country-public-data";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { localizeCountryName } from "@/lib/global-destination-i18n";
+import { getCatalogueChatbotCopy, getGlobalChatbotCopy, getUkChatbotCopy } from "@/lib/chatbot-i18n";
 
 interface Message {
   role: "user" | "assistant";
@@ -21,39 +24,6 @@ type CountryPageContext = {
 };
 
 const OVERLAY_EVENT = "visaassistant:overlay-open";
-
-const PAGE_CONTEXTS = {
-  global: {
-    key: "global" as const,
-    title: "Visa Assistant Global",
-    greeting:
-      "Welcome to Visa Assistant Global. I can help you explore destinations and visa routes available on this platform. The UK Innovator Founder assistant is live, while other dedicated country tools are being added. What would you like help with?",
-    disclaimer:
-      "AI-assisted preparation information, not regulated immigration advice. Requirements can change, so verify time-sensitive information with the relevant official immigration authority.",
-    placeholder: "Ask about destinations, visa routes or the platform...",
-    gradient: "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
-    suggestions: [
-      "What can Visa Assistant Global help me with?",
-      "Which visa route is live now?",
-      "How do I explore a country's visa routes?",
-    ],
-  },
-  uk: {
-    key: "uk" as const,
-    title: "UK Innovator Founder AI Assistant",
-    greeting:
-      "Hi! I can help you prepare for the UK Innovator Founder route, including your business plan, innovation evidence, endorsement preparation and supporting documents. What are you working on?",
-    disclaimer:
-      "AI-assisted preparation information, not regulated immigration advice. UK immigration requirements can change; verify current requirements with GOV.UK and relevant official sources.",
-    placeholder: "Ask about Innovator Founder preparation...",
-    gradient: "linear-gradient(135deg, #0D2C4A 0%, #41B6E6 100%)",
-    suggestions: [
-      "What should I prepare first?",
-      "How can I strengthen my innovation evidence?",
-      "What should my business plan demonstrate?",
-    ],
-  },
-};
 
 const COUNTRY_PATH_RE = /^\/(uk|us|ca|au|de|fr|nl|sg|ae|nz|jp|ie|pt|es|se|ch)(?:\/|$)/;
 
@@ -120,36 +90,29 @@ function getPageContextKey(pathname: string): PageContextKey {
   return "uk";
 }
 
-function getCatalogueContext(country: CountryPageContext) {
-  return {
-    key: "catalogue" as const,
-    title: `${country.name} Visa Assistant`,
-    greeting:
-      `Hi! You're exploring the ${country.name} ${country.sectionLabel} page. I can help explain the visa routes and information shown for ${country.name}, help you understand preparation at a high level, and point you to ${country.authority} for current official requirements. What would you like to know?`,
-    disclaimer:
-      `AI-assisted information for ${country.name} route discovery, not regulated immigration advice. Immigration requirements can change; verify current requirements with ${country.authority}.`,
-    placeholder: `Ask about ${country.name} visa routes...`,
-    gradient: "linear-gradient(135deg, #0D2C4A 0%, #41B6E6 100%)",
-    suggestions: [
-      `What ${country.name} routes can I explore here?`,
-      `Which ${country.name} route categories suit skilled professionals?`,
-      `Where can I verify ${country.name}'s official requirements?`,
-    ],
-  };
-}
-
 export default function ChatBot() {
   const [location] = useLocation();
+  const { language } = useLanguage();
   const contextKey = getPageContextKey(location);
   const countryContext = getCountryPageContext(location);
+  const displayCountryName = countryContext
+    ? localizeCountryName(language, countryContext.code, countryContext.name)
+    : "";
   const pageContext =
     contextKey === "catalogue" && countryContext
-      ? getCatalogueContext(countryContext)
-      : PAGE_CONTEXTS[contextKey];
+      ? getCatalogueChatbotCopy(
+          language,
+          displayCountryName,
+          countryContext.authority,
+          countryContext.section,
+        )
+      : contextKey === "global"
+        ? getGlobalChatbotCopy(language)
+        : getUkChatbotCopy(language);
   const contextIdentity =
     contextKey === "catalogue" && countryContext
-      ? `catalogue:${countryContext.code}:${countryContext.section}`
-      : contextKey;
+      ? `catalogue:${countryContext.code}:${countryContext.section}:${language}`
+      : `${contextKey}:${language}`;
 
   const [isOpen, setIsOpen] = useState(false);
   const [isDismissed, setIsDismissed] = useState(() => {
@@ -227,6 +190,7 @@ export default function ChatBot() {
           pageCountryName: countryContext?.name,
           pageAuthority: countryContext?.authority,
           pageSection: countryContext?.section,
+          language,
           pageUrl:
             typeof window !== "undefined" ? window.location.href : location,
         }),
@@ -255,8 +219,7 @@ export default function ChatBot() {
         ...prev,
         {
           role: "assistant",
-          content:
-            "I couldn't complete that request just now. Please try again in a moment. For time-sensitive immigration requirements, use the relevant official government source.",
+          content: pageContext.error,
         },
       ]);
     } finally {
@@ -282,7 +245,7 @@ export default function ChatBot() {
               }}
               className="w-5 h-6 bg-red-500 hover:bg-red-600 rounded-l-full flex items-center justify-center text-white transition-colors shadow-sm"
               data-testid="button-dismiss-chat"
-              aria-label="Minimize chat button"
+              aria-label={pageContext.minimize}
             >
               <X className="w-3 h-3" />
             </button>
@@ -305,10 +268,10 @@ export default function ChatBot() {
             data-testid="button-chatbot-toggle"
             aria-label={
               isDismissed
-                ? "Restore chat button"
+                ? pageContext.restore
                 : isOpen
-                  ? "Close chat"
-                  : "Open AI Assistant"
+                  ? pageContext.close
+                  : pageContext.open
             }
           >
             {isOpen ? (
@@ -342,7 +305,7 @@ export default function ChatBot() {
             <div className="flex items-start gap-2">
               <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
               <p className="text-[10px] sm:text-xs text-amber-800 dark:text-amber-200 leading-tight">
-                <strong>Important:</strong> {pageContext.disclaimer}
+                <strong>{pageContext.important}</strong> {pageContext.disclaimer}
               </p>
             </div>
           </div>
@@ -360,7 +323,7 @@ export default function ChatBot() {
                 onClick={() => setIsOpen(false)}
                 className="text-white/90 hover:text-white transition-colors p-1 -mr-1 flex-shrink-0"
                 data-testid="button-close-chat"
-                aria-label="Close chat"
+                aria-label={pageContext.close}
               >
                 <X className="w-5 h-5" />
               </button>
