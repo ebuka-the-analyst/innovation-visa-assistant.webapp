@@ -203,14 +203,22 @@ export default function InnovatorFounderTranslationLayer() {
 
     const observer = new MutationObserver(mutations => {
       if (disposed || applying) return;
-      const added: Node[] = [];
+      const targets: Node[] = [];
       for (const mutation of mutations) {
-        mutation.addedNodes.forEach(node => added.push(node));
+        if (mutation.type === "characterData") {
+          targets.push(mutation.target);
+          continue;
+        }
+        mutation.addedNodes.forEach(node => targets.push(node));
       }
-      added.forEach(node => void translateContainer(node));
+      targets.forEach(node => void translateContainer(node));
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    // React often reuses an existing text node and changes only its character
+    // data when async catalogue/pricing data arrives or when a user switches a
+    // carousel/tab. Watching characterData keeps those deeper dynamic surfaces
+    // in the selected language as well.
+    observer.observe(document.body, { childList: true, characterData: true, subtree: true });
 
     return () => {
       disposed = true;
