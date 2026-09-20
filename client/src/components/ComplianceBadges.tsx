@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Shield, CheckCircle2, FileText, Lock } from "lucide-react";
+import { innovatorFounderPath } from "@/lib/innovator-founder-routes";
 import {
   Tooltip,
   TooltipContent,
@@ -17,7 +18,7 @@ export function ComplianceBadges({ variant = "compact", className = "" }: Compli
       <div className={`flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground ${className}`}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <a href="/privacy" className="flex items-center gap-1 hover:text-foreground transition-colors" data-testid="link-privacy-badge">
+            <a href={innovatorFounderPath("/privacy")} className="flex items-center gap-1 hover:text-foreground transition-colors" data-testid="link-privacy-badge">
               <Shield className="h-3 w-3" />
               <span>Privacy Information</span>
             </a>
@@ -29,7 +30,7 @@ export function ComplianceBadges({ variant = "compact", className = "" }: Compli
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <a href="/ai-transparency" className="flex items-center gap-1 hover:text-foreground transition-colors">
+            <a href={innovatorFounderPath("/ai-transparency")} className="flex items-center gap-1 hover:text-foreground transition-colors">
               <Lock className="h-3 w-3" />
               <span>AI Transparency</span>
             </a>
@@ -70,7 +71,7 @@ export function ComplianceBadges({ variant = "compact", className = "" }: Compli
 
   return (
     <div className={`grid md:grid-cols-3 gap-4 ${className}`}>
-      <a href="/privacy" className="flex items-center gap-3 p-4 border rounded-lg bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-800 hover:border-green-400 transition-colors">
+      <a href={innovatorFounderPath("/privacy")} className="flex items-center gap-3 p-4 border rounded-lg bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-800 hover:border-green-400 transition-colors">
         <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900"><Lock className="h-5 w-5 text-green-600 dark:text-green-400" /></div>
         <div>
           <p className="font-semibold text-green-800 dark:text-green-200">Privacy Information</p>
@@ -78,7 +79,7 @@ export function ComplianceBadges({ variant = "compact", className = "" }: Compli
         </div>
       </a>
 
-      <a href="/ai-transparency" className="flex items-center gap-3 p-4 border rounded-lg bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 hover:border-blue-400 transition-colors">
+      <a href={innovatorFounderPath("/ai-transparency")} className="flex items-center gap-3 p-4 border rounded-lg bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 hover:border-blue-400 transition-colors">
         <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900"><Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" /></div>
         <div>
           <p className="font-semibold text-blue-800 dark:text-blue-200">AI Transparency</p>
@@ -100,7 +101,7 @@ export function ComplianceBadges({ variant = "compact", className = "" }: Compli
 export function ICORegistrationBadge({ className = "" }: { className?: string }) {
   return (
     <a
-      href="/privacy"
+      href={innovatorFounderPath("/privacy")}
       className={`inline-flex items-center gap-2 px-3 py-2 border rounded-lg bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 hover:border-blue-400 transition-colors ${className}`}
       data-testid="link-data-protection-information"
     >
