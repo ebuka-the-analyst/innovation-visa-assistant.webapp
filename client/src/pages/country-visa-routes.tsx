@@ -153,7 +153,7 @@ export default function CountryVisaRoutes({code}:{code:string}){
   }
 
   const controller=new AbortController();
-  const cacheKey=`visaassistant:catalogue:${code}:${language}:v2`;
+  const cacheKey=`visaassistant:catalogue:${code}:${language}:v3`;
   let cached:Record<string,string>={};
   try{
    const raw=window.localStorage.getItem(cacheKey);
