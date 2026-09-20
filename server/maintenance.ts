@@ -151,6 +151,7 @@ const MAINTENANCE_SAFE_AUTH_PATHS = new Set([
   "/api/auth/login",
   "/api/auth/google",
   "/api/auth/callback/google",
+  "/api/auth/bridge-callback",
   "/api/auth/logout",
   "/api/logout",
   "/api/auth/forgot-password",
