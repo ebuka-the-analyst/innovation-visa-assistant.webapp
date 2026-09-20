@@ -5,6 +5,7 @@ import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
 import bcrypt from "bcrypt";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { storage } from "./storage";
 import { verifyTurnstileToken } from "./turnstile";
 import { generateVerificationToken, getTokenExpiry, sendVerificationEmail, sendPasswordResetEmail, getResetTokenExpiry, sendWelcomeEmail } from "./email";
@@ -86,6 +87,64 @@ interface User {
   isEmailVerified?: boolean;
   subscriptionTier?: string;
   subscriptionStatus?: string;
+}
+
+const OAUTH_BRIDGE_CALLBACK = "https://visaassistant.global/api/auth/bridge-callback";
+const OAUTH_BRIDGE_AUDIENCE = "visaassistant.global";
+const OAUTH_BRIDGE_TTL_MS = 2 * 60 * 1000;
+
+type OauthBridgePayload = {
+  uid: string;
+  state: string;
+  aud: string;
+  exp: number;
+};
+
+function signOauthBridgeToken(payload: OauthBridgePayload, secret: string): string {
+  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const signature = createHmac("sha256", secret).update(body).digest("base64url");
+  return `${body}.${signature}`;
+}
+
+function verifyOauthBridgeToken(token: string, secret: string): OauthBridgePayload | null {
+  const [body, signature] = token.split(".");
+  if (!body || !signature) return null;
+
+  const expected = createHmac("sha256", secret).update(body).digest("base64url");
+  const actualBuffer = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expected);
+  if (
+    actualBuffer.length !== expectedBuffer.length ||
+    !timingSafeEqual(actualBuffer, expectedBuffer)
+  ) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as OauthBridgePayload;
+    if (
+      !payload ||
+      typeof payload.uid !== "string" ||
+      typeof payload.state !== "string" ||
+      payload.aud !== OAUTH_BRIDGE_AUDIENCE ||
+      typeof payload.exp !== "number" ||
+      Date.now() > payload.exp
+    ) {
+      return null;
+    }
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function isValidBridgeRequest(state: unknown, returnTo: unknown): state is string {
+  return (
+    typeof state === "string" &&
+    state.length >= 24 &&
+    state.length <= 200 &&
+    returnTo === OAUTH_BRIDGE_CALLBACK
+  );
 }
 
 export async function setupAuth(app: Express) {
@@ -238,13 +297,6 @@ export async function setupAuth(app: Express) {
   // Configure Google OAuth Strategy (only if credentials are available)
   const googleClientId = process.env.GOOGLE_CLIENT_ID;
   const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  console.log("[AuthDiag] Google OAuth env", {
-    clientIdConfigured: Boolean(googleClientId?.trim()),
-    clientIdLength: googleClientId?.trim().length || 0,
-    clientSecretConfigured: Boolean(googleClientSecret?.trim()),
-    clientSecretLength: googleClientSecret?.trim().length || 0,
-    callbackConfigured: Boolean(process.env.GOOGLE_CALLBACK_URL?.trim()),
-  });
   
   if (googleClientId && googleClientSecret) {
     passport.use(
@@ -551,32 +603,152 @@ export async function setupAuth(app: Express) {
     }
   });
 
-  // Google OAuth routes (only if Google OAuth is configured)
+  const oauthBridgeSecret = process.env.OAUTH_BRIDGE_SECRET?.trim();
+  const oauthBridgeProviderOrigin = process.env.OAUTH_BRIDGE_PROVIDER_ORIGIN?.trim()?.replace(/\/$/, "");
+
+  // Google OAuth can run locally when credentials are present. The global
+  // visaassistant.global service intentionally reuses the established Google
+  // OAuth provider on the Innovator Founder service through a short-lived,
+  // state-bound bridge so credentials do not need to be duplicated.
   if (googleClientId && googleClientSecret) {
-    app.get("/api/auth/google", passport.authenticate("google", { prompt: "select_account" }));
+    app.get("/api/auth/google", (req, res, next) => {
+      const bridge = req.query.bridge === "1";
+      const state = req.query.state;
+      const returnTo = req.query.returnTo;
+
+      if (bridge) {
+        if (!oauthBridgeSecret || !isValidBridgeRequest(state, returnTo)) {
+          return res.redirect("/login?google=bridge-invalid");
+        }
+
+        (req.session as any).oauthBridge = {
+          state,
+          returnTo,
+          createdAt: Date.now(),
+        };
+
+        return req.session.save((saveErr) => {
+          if (saveErr) return next(saveErr);
+          return passport.authenticate("google", { prompt: "select_account" })(req, res, next);
+        });
+      }
+
+      return passport.authenticate("google", { prompt: "select_account" })(req, res, next);
+    });
 
     app.get(
       "/api/auth/callback/google",
-      passport.authenticate("google", { failureRedirect: "/login" }),
-      (req, res) => {
-        // Explicitly save session before redirecting
-        req.session.save((err) => {
-          if (err) {
-            console.error("Session save error:", err);
+      passport.authenticate("google", { failureRedirect: "/login?google=failed" }),
+      (req, res, next) => {
+        const bridge = (req.session as any).oauthBridge as
+          | { state?: string; returnTo?: string; createdAt?: number }
+          | undefined;
+
+        delete (req.session as any).oauthBridge;
+
+        if (
+          bridge &&
+          oauthBridgeSecret &&
+          isValidBridgeRequest(bridge.state, bridge.returnTo) &&
+          typeof bridge.createdAt === "number" &&
+          Date.now() - bridge.createdAt <= OAUTH_BRIDGE_TTL_MS
+        ) {
+          const user = req.user as { id?: string } | undefined;
+          if (!user?.id) {
+            return res.redirect("/login?google=failed");
           }
-          res.redirect("/dashboard");
+
+          const token = signOauthBridgeToken(
+            {
+              uid: user.id,
+              state: bridge.state,
+              aud: OAUTH_BRIDGE_AUDIENCE,
+              exp: Date.now() + OAUTH_BRIDGE_TTL_MS,
+            },
+            oauthBridgeSecret,
+          );
+
+          return req.session.save((saveErr) => {
+            if (saveErr) return next(saveErr);
+            return res.redirect(`${bridge.returnTo}?token=${encodeURIComponent(token)}`);
+          });
+        }
+
+        // Normal direct login on the service that owns Google credentials.
+        return req.session.save((saveErr) => {
+          if (saveErr) return next(saveErr);
+          return res.redirect("/dashboard");
         });
-      }
+      },
     );
-  } else {
-    // Return error if Google OAuth is not configured
-    app.get("/api/auth/google", (req, res) => {
-      res.status(503).json({ message: "Google login is not configured on this server" });
+  } else if (oauthBridgeSecret && oauthBridgeProviderOrigin) {
+    app.get("/api/auth/google", (req, res, next) => {
+      const state = randomBytes(24).toString("base64url");
+      (req.session as any).oauthBridgeState = state;
+      (req.session as any).oauthBridgeStartedAt = Date.now();
+
+      return req.session.save((saveErr) => {
+        if (saveErr) return next(saveErr);
+        const providerUrl = new URL("/api/auth/google", oauthBridgeProviderOrigin);
+        providerUrl.searchParams.set("bridge", "1");
+        providerUrl.searchParams.set("state", state);
+        providerUrl.searchParams.set("returnTo", OAUTH_BRIDGE_CALLBACK);
+        return res.redirect(providerUrl.toString());
+      });
     });
-    app.get("/api/auth/callback/google", (req, res) => {
-      res.status(503).json({ message: "Google login is not configured on this server" });
+
+    app.get("/api/auth/callback/google", (_req, res) => {
+      return res.redirect("/uk/innovatorfoundervisaassistant/login?google=bridge-required");
+    });
+  } else {
+    app.get("/api/auth/google", (_req, res) => {
+      return res.redirect("/uk/innovatorfoundervisaassistant/login?google=unavailable");
+    });
+    app.get("/api/auth/callback/google", (_req, res) => {
+      return res.redirect("/uk/innovatorfoundervisaassistant/login?google=unavailable");
     });
   }
+
+  app.get("/api/auth/bridge-callback", async (req, res, next) => {
+    try {
+      if (!oauthBridgeSecret) {
+        return res.redirect("/uk/innovatorfoundervisaassistant/login?google=unavailable");
+      }
+
+      const token = typeof req.query.token === "string" ? req.query.token : "";
+      const payload = verifyOauthBridgeToken(token, oauthBridgeSecret);
+      const expectedState = (req.session as any).oauthBridgeState;
+      const startedAt = (req.session as any).oauthBridgeStartedAt;
+
+      delete (req.session as any).oauthBridgeState;
+      delete (req.session as any).oauthBridgeStartedAt;
+
+      if (
+        !payload ||
+        typeof expectedState !== "string" ||
+        payload.state !== expectedState ||
+        typeof startedAt !== "number" ||
+        Date.now() - startedAt > OAUTH_BRIDGE_TTL_MS
+      ) {
+        return res.redirect("/uk/innovatorfoundervisaassistant/login?google=bridge-expired");
+      }
+
+      const user = await storage.getUser(payload.uid);
+      if (!user || !user.isEmailVerified) {
+        return res.redirect("/uk/innovatorfoundervisaassistant/login?google=failed");
+      }
+
+      return req.login({ id: user.id }, (loginErr) => {
+        if (loginErr) return next(loginErr);
+        return req.session.save((saveErr) => {
+          if (saveErr) return next(saveErr);
+          return res.redirect("/uk/innovatorfoundervisaassistant/dashboard");
+        });
+      });
+    } catch (error) {
+      return next(error);
+    }
+  });
 
   // Get current user endpoint
   app.get("/api/auth/user", isAuthenticated, async (req, res) => {
