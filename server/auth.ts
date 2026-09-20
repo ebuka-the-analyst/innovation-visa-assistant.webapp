@@ -66,11 +66,13 @@ export function getSession() {
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    rolling: true,
     proxy: true,
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
+      path: '/',
       maxAge: sessionTtl,
     },
   });
@@ -782,7 +784,7 @@ export async function setupAuth(app: Express) {
   const handleLogout = (req: any, res: any) => {
     const isPost = req.method === 'POST';
     const sendResponse = () => {
-      res.clearCookie('connect.sid');
+      res.clearCookie('connect.sid', { path: '/' });
       if (isPost) {
         res.json({ success: true, redirectUrl: "/" });
       } else {
