@@ -1,6 +1,7 @@
 import { X, Sparkles, Brain, Shield, Rocket, Clock, CheckCircle, TrendingUp, type LucideIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { innovatorFounderPath } from "@/lib/innovator-founder-routes";
 
 interface Feature {
   id: string;
@@ -152,6 +153,10 @@ export default function FeaturesModal({ isOpen, onClose, featureId }: FeaturesMo
   const [selectedId, setSelectedId] = useState(featureId || FEATURES[0].id);
   const feature = FEATURES.find(f => f.id === selectedId);
 
+  useEffect(() => {
+    if (featureId) setSelectedId(featureId);
+  }, [featureId]);
+
   if (!isOpen) return null;
 
   return (
@@ -244,7 +249,7 @@ export default function FeaturesModal({ isOpen, onClose, featureId }: FeaturesMo
             <div className="border-t border-border p-6 bg-muted/30 dark:bg-slate-800 flex justify-between items-center">
               <p className="text-sm text-muted-foreground">Ready to start your preparation workflow?</p>
               <button
-                onClick={() => { onClose(); setLocation("/pricing"); }}
+                onClick={() => { onClose(); setLocation(innovatorFounderPath("/pricing")); }}
                 className="px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-chart-3 text-white font-semibold hover:shadow-lg transition-all hover:scale-105"
                 data-testid="button-start-from-modal"
               >
