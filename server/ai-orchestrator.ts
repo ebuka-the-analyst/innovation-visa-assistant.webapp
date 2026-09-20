@@ -161,6 +161,47 @@ function localisedFallback(
 }
 
 
+function localisedUkTopicFallback(
+  language: string | undefined,
+  topic: "requirements" | "endorsement" | "fees",
+): string {
+  const code = normaliseChatLanguage(language);
+  const copy: Record<string, Record<string, string>> = {
+    requirements: {
+      en: "For the UK Innovator Founder route, preparation commonly focuses on the published route requirements, endorsement, your business proposition and supporting evidence. Because requirements can change, verify the current eligibility rules directly on GOV.UK before relying on them.",
+      es: "Para la ruta UK Innovator Founder, la preparación suele centrarse en los requisitos publicados, el endorsement, la propuesta de negocio y las pruebas de apoyo. Como los requisitos pueden cambiar, verifica las normas de elegibilidad actuales directamente en GOV.UK antes de basarte en ellas.",
+      fr: "Pour la voie UK Innovator Founder, la préparation porte généralement sur les exigences publiées, l’endorsement, votre projet d’entreprise et les preuves justificatives. Comme les exigences peuvent évoluer, vérifiez les règles d’éligibilité actuelles directement sur GOV.UK avant de vous y fier.",
+      de: "Bei der UK-Innovator-Founder-Route konzentriert sich die Vorbereitung in der Regel auf die veröffentlichten Anforderungen, das Endorsement, Ihr Geschäftsvorhaben und die dazugehörigen Nachweise. Da sich Anforderungen ändern können, prüfen Sie die aktuellen Zulassungsregeln direkt auf GOV.UK.",
+      zh: "对于英国创新者创始人路线，准备工作通常围绕已公布的路线要求、背书、您的商业方案以及支持证据展开。由于要求可能发生变化，在依赖这些信息之前，请直接通过 GOV.UK 核实最新资格规则。",
+      ar: "بالنسبة لمسار UK Innovator Founder، يتركز التحضير عادةً على المتطلبات المنشورة والتأييد ومقترح الأعمال والأدلة الداعمة. ولأن المتطلبات قد تتغير، تحقّق من قواعد الأهلية الحالية مباشرةً عبر GOV.UK قبل الاعتماد عليها.",
+      pt: "Na rota UK Innovator Founder, a preparação costuma centrar-se nos requisitos publicados, no endorsement, na proposta de negócio e nas provas de suporte. Como os requisitos podem mudar, confirme as regras de elegibilidade atuais diretamente no GOV.UK antes de confiar nelas.",
+      ja: "英国Innovator Founderルートの準備では、公表されている要件、エンドースメント、事業提案、裏付け資料が中心になります。要件は変更される可能性があるため、利用前に最新の適格性ルールをGOV.UKで直接確認してください。",
+    },
+    endorsement: {
+      en: "The Innovator Founder route requires endorsement from an authorised endorsing body. Your preparation should clearly evidence innovation, viability and scalability, and you should verify the current authorised-body list and requirements on GOV.UK.",
+      es: "La ruta Innovator Founder exige endorsement de un organismo autorizado. Tu preparación debe demostrar claramente innovación, viabilidad y escalabilidad, y debes verificar en GOV.UK la lista y los requisitos actuales de los organismos autorizados.",
+      fr: "La voie Innovator Founder exige un endorsement d’un organisme autorisé. Votre préparation doit démontrer clairement l’innovation, la viabilité et la capacité de croissance, et vous devez vérifier sur GOV.UK la liste et les exigences actuelles des organismes autorisés.",
+      de: "Für die Innovator-Founder-Route ist ein Endorsement durch eine autorisierte Stelle erforderlich. Ihre Vorbereitung sollte Innovation, Tragfähigkeit und Skalierbarkeit klar belegen; prüfen Sie außerdem die aktuelle Liste und die Anforderungen der autorisierten Stellen auf GOV.UK.",
+      zh: "创新者创始人路线需要获得获授权背书机构的背书。您的准备材料应清楚证明创新性、可行性和可扩展性，并应通过 GOV.UK 核实当前获授权机构名单及其要求。",
+      ar: "يتطلب مسار Innovator Founder تأييداً من جهة تأييد معتمدة. ينبغي أن تُظهر موادك بوضوح الابتكار والقابلية للاستمرار والتوسع، وأن تتحقق من قائمة الجهات المعتمدة الحالية ومتطلباتها عبر GOV.UK.",
+      pt: "A rota Innovator Founder exige endorsement de um organismo autorizado. A preparação deve demonstrar claramente inovação, viabilidade e escalabilidade, e deve confirmar no GOV.UK a lista atual de organismos autorizados e respetivos requisitos.",
+      ja: "Innovator Founderルートでは、認可されたエンドース機関からのエンドースメントが必要です。準備資料ではイノベーション、実現可能性、スケーラビリティを明確に示し、最新の認可機関一覧と要件はGOV.UKで確認してください。",
+    },
+    fees: {
+      en: "Application, healthcare and endorsement-related costs can change. Please check the current Innovator Founder fees on GOV.UK and the relevant endorsing body's own published charges before budgeting.",
+      es: "Las tasas de solicitud, salud y endorsement pueden cambiar. Antes de preparar el presupuesto, consulta en GOV.UK las tasas actuales de Innovator Founder y los cargos publicados por el organismo de endorsement correspondiente.",
+      fr: "Les frais de demande, de santé et liés à l’endorsement peuvent changer. Avant d’établir votre budget, vérifiez sur GOV.UK les frais Innovator Founder en vigueur ainsi que les tarifs publiés par l’organisme d’endorsement concerné.",
+      de: "Antrags-, Gesundheits- und Endorsement-Kosten können sich ändern. Prüfen Sie vor der Budgetplanung die aktuellen Innovator-Founder-Gebühren auf GOV.UK sowie die veröffentlichten Gebühren der jeweiligen Endorsement-Stelle.",
+      zh: "申请费、医疗附加费及与背书相关的费用都可能发生变化。制定预算前，请通过 GOV.UK 核实当前 Innovator Founder 费用，并查看相关背书机构公布的收费标准。",
+      ar: "قد تتغير رسوم الطلب والرعاية الصحية والتكاليف المتعلقة بالتأييد. قبل إعداد الميزانية، تحقّق من رسوم Innovator Founder الحالية عبر GOV.UK ومن الرسوم المنشورة لدى جهة التأييد المعنية.",
+      pt: "Os custos de candidatura, saúde e endorsement podem mudar. Antes de definir o orçamento, confirme no GOV.UK as taxas atuais de Innovator Founder e os encargos publicados pelo organismo de endorsement relevante.",
+      ja: "申請、医療、エンドースメント関連の費用は変更される可能性があります。予算を組む前に、GOV.UKで最新のInnovator Founder料金を確認し、該当するエンドース機関が公表する料金も確認してください。",
+    },
+  };
+  return copy[topic][code] || copy[topic].en;
+}
+
+
 // System prompt that includes action capabilities
 const ORCHESTRATOR_SYSTEM_PROMPT = `You are the UK Innovator Founder Visa AI Assistant - an expert-level advisor with the ability to perform actions on behalf of authenticated users.
 
@@ -553,24 +594,21 @@ function getIntelligentFallback(
 
   if (lowerMessage.includes("requirement") || lowerMessage.includes("eligible") || lowerMessage.includes("qualify")) {
     return {
-      response:
-        "For the UK Innovator Founder route, preparation commonly focuses on the published route requirements, endorsement, your business proposition and supporting evidence. Because requirements can change, verify the current eligibility rules directly on GOV.UK before relying on them.",
+      response: localisedUkTopicFallback(pageMeta?.language, "requirements"),
       provider: "Fallback"
     };
   }
 
   if (lowerMessage.includes("endorser") || lowerMessage.includes("endorsement")) {
     return {
-      response:
-        "The Innovator Founder route requires endorsement from an authorised endorsing body. Your preparation should clearly evidence innovation, viability and scalability, and you should verify the current authorised-body list and requirements on GOV.UK.",
+      response: localisedUkTopicFallback(pageMeta?.language, "endorsement"),
       provider: "Fallback"
     };
   }
 
   if (lowerMessage.includes("cost") || lowerMessage.includes("fee") || lowerMessage.includes("how much")) {
     return {
-      response:
-        "Application, healthcare and endorsement-related costs can change. Please check the current Innovator Founder fees on GOV.UK and the relevant endorsing body's own published charges before budgeting.",
+      response: localisedUkTopicFallback(pageMeta?.language, "fees"),
       provider: "Fallback"
     };
   }
