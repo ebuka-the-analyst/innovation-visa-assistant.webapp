@@ -7,6 +7,7 @@ import connectPg from "connect-pg-simple";
 import bcrypt from "bcrypt";
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { storage } from "./storage";
+import { toPublicAuthUser } from "./publicAuthUser";
 import { verifyTurnstileToken } from "./turnstile";
 import { generateVerificationToken, getTokenExpiry, sendVerificationEmail, sendPasswordResetEmail, getResetTokenExpiry, sendWelcomeEmail } from "./email";
 import { db } from "./db";
@@ -524,7 +525,7 @@ export async function setupAuth(app: Express) {
 
       // DO NOT log user in - they must verify email first
       // Return success without creating a session
-      const { password: _, ...safeUser } = newUser;
+      const safeUser = toPublicAuthUser(newUser);
       res.json({ 
         success: true, 
         user: safeUser,
@@ -592,9 +593,22 @@ export async function setupAuth(app: Express) {
             if (saveErr) {
               console.error("Session save error:", saveErr);
               // Still return success since login worked, session might persist on next request
+            } else {
+              // Record the successful local sign-in for incident review.
+              // Security event persistence must not block a completed login.
+              void logSecurityEvent(
+                "successful_login",
+                "Successful password sign-in",
+                "low",
+                user.email || null,
+                ipAddress,
+                userAgent,
+                { userId: user.id, isAdmin: user.isAdmin === true, method: "password" },
+              );
             }
-            // Return user without password
-            const { password: _, ...safeUser } = user;
+            // Only send explicitly approved account fields to the browser.
+            // A full database row may contain password-reset and verification tokens.
+            const safeUser = toPublicAuthUser(user);
             res.json({ success: true, user: safeUser });
           });
         });
