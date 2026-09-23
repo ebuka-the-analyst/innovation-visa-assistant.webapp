@@ -19,7 +19,8 @@
     "db:verify:app": "node server/scripts/verify-app-schema.cjs",
     "test:e2e:progress": "playwright test tests/e2e/progress-tracker.spec.ts --project=chromium",
     "test:maintenance": "node --import tsx --test tests/maintenance-mode.test.ts",
-    "test:readiness-contract": "node --test tests/readiness-contract.test.cjs"
+    "test:readiness-contract": "node --test tests/readiness-contract.test.cjs",
+    "test:auth-security": "node --import tsx --test tests/auth-security.test.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.71",
