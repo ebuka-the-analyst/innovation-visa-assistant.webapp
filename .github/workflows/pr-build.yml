@@ -61,6 +61,9 @@ jobs:
       - name: Test maintenance mode policy
         run: npm run test:maintenance
 
+      - name: Test authentication and session security
+        run: npm run test:auth-security
+
       - name: Test strict Innovator Founder news relevance
         run: npx tsx scripts/test-news-relevance.ts
 
