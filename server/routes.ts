@@ -16529,7 +16529,7 @@ Return a JSON object with:
         // Delete all sessions for this user from the session store
         // The session table stores sessions with user info in the 'sess' JSONB column
         const result = await db.execute(
-          sql`DELETE FROM session WHERE sess::jsonb->'passport'->>'user' = ${userId}`,
+          sql`DELETE FROM sessions WHERE sess::jsonb->'passport'->>'user' = ${userId}`,
         );
 
         res.json({
