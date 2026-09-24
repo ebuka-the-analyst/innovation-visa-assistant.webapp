@@ -207,6 +207,7 @@ const menuGroups = [
       { id: "logs-errors", label: "Error Log", icon: AlertTriangle, badge: "errors" },
       { id: "logs-audit", label: "Audit Trail", icon: History, badge: null },
       { id: "logs-security", label: "Security Events", icon: Shield, badge: null },
+      { id: "logs-login-audit", label: "Login & Security Audit", icon: Lock, badge: null },
     ]
   },
   {
