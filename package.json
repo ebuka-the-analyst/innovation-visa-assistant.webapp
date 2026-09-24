@@ -20,7 +20,8 @@
     "test:e2e:progress": "playwright test tests/e2e/progress-tracker.spec.ts --project=chromium",
     "test:maintenance": "node --import tsx --test tests/maintenance-mode.test.ts",
     "test:readiness-contract": "node --test tests/readiness-contract.test.cjs",
-    "test:auth-security": "node --import tsx --test tests/auth-security.test.ts"
+    "test:auth-security": "node --import tsx --test tests/auth-security.test.ts",
+    "test:login-security-audit": "node --import tsx --test tests/login-security-audit.test.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.71",
