@@ -1,0 +1,42 @@
+name: Authentication security regression
+
+on:
+  pull_request:
+    paths:
+      - "server/auth.ts"
+      - "server/publicAuthUser.ts"
+      - "server/routes.ts"
+      - "tests/auth-security.test.ts"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/auth-security-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  authentication:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run authentication regression tests
+        run: npm run test:auth-security
+
+      - name: Build production bundles
+        run: npm run build
+
+      - name: TypeScript baseline diagnostic
+        continue-on-error: true
+        run: npm run check
