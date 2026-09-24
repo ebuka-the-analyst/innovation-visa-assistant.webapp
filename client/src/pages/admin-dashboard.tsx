@@ -30,6 +30,7 @@ import { AdminSidebar } from "@/components/AdminSidebar";
 import { PromoCodeGenerator } from "@/components/admin/PromoCodeGenerator";
 import { PricingAccessManagement } from "@/components/admin/PricingAccessManagement";
 import { AdminRevisionQueue } from "@/components/admin/AdminRevisionQueue";
+import { LoginSecurityAudit } from "@/components/admin/LoginSecurityAudit";
 import { 
   RealtimeMonitor, 
   HeatmapView, 
@@ -3639,6 +3640,7 @@ export default function AdminDashboard() {
       'logs-errors': 'Error Log',
       'logs-audit': 'Audit Trail',
       'logs-security': 'Security Events',
+      'logs-login-audit': 'Login & Security Audit',
       'support-lookup': 'Customer Support — User Lookup',
       'support-disputes': 'Customer Support — Dispute Tracker',
       'comms-emails': 'Email Analytics',
@@ -9074,6 +9076,10 @@ export default function AdminDashboard() {
                       transition={{ duration: 0.5 }}
                       className="space-y-1.5"
                     >
+                      {activeSection === "logs-login-audit" && (
+                        <LoginSecurityAudit />
+                      )}
+
                       {/* 1. ACTIVITY LOG - Comprehensive Activity Stream */}
                       {activeSection === 'logs-activity' && (
                         <>
