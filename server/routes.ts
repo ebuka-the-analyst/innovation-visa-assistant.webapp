@@ -52,6 +52,7 @@ import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
 import crypto from "crypto";
 import { setupAuth, isAuthenticated, requireAdmin } from "./auth";
+import { registerLoginSecurityAuditRoutes } from "./loginSecurityAuditRoutes";
 import {
   sendPaymentReceiptEmail,
   sendPasswordResetEmail,
@@ -320,6 +321,7 @@ const catalogueTranslationCache = new Map<string, string>();
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google OAuth authentication (must be before routes)
   await setupAuth(app);
+  registerLoginSecurityAuditRoutes(app);
 
   app.post("/api/translate", async (req, res) => {
     try {
@@ -8622,7 +8624,7 @@ EXAMPLES OF GOOD RESPONSES:
   });
 
   // Log a security event (internal use)
-  app.post("/api/security/log", async (req, res) => {
+  app.post("/api/security/log", requireAdmin, async (req, res) => {
     try {
       const {
         eventType,
