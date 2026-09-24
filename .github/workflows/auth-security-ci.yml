@@ -5,8 +5,14 @@ on:
     paths:
       - "server/auth.ts"
       - "server/publicAuthUser.ts"
+      - "server/loginSecurityAudit.ts"
+      - "server/loginSecurityAuditRoutes.ts"
       - "server/routes.ts"
+      - "client/src/components/admin/LoginSecurityAudit.tsx"
+      - "client/src/components/AdminSidebar.tsx"
+      - "client/src/pages/admin-dashboard.tsx"
       - "tests/auth-security.test.ts"
+      - "tests/login-security-audit.test.ts"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/auth-security-ci.yml"
@@ -33,6 +39,9 @@ jobs:
 
       - name: Run authentication regression tests
         run: npm run test:auth-security
+
+      - name: Run login security audit regression tests
+        run: npm run test:login-security-audit
 
       - name: Build production bundles
         run: npm run build
