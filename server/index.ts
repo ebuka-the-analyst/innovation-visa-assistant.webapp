@@ -5,6 +5,7 @@ import { registerBusinessPlanRevisionRoutes } from "./businessPlanRevisionRoutes
 import { registerAdminBusinessPlanRevisionRoutes } from "./adminBusinessPlanRevisionRoutes";
 import { startBusinessPlanRevisionWorker } from "./services/businessPlanRevisionService";
 import { registerAIProviderGatewayRoutes, registerAIProviderAdminRoutes } from "./aiProviderGateway";
+import { registerSearchConsoleAdminRoutes } from "./searchConsoleAdmin";
 import type { Express as ExpressType } from "express";
 import type { Server } from "http";
 import path from "path";
@@ -640,6 +641,7 @@ app.get("/health", (_req, res) => {
   const server = await registerRoutes(app);
   registerAIProviderGatewayRoutes(app);
   registerAIProviderAdminRoutes(app);
+  registerSearchConsoleAdminRoutes(app);
   registerBusinessPlanRevisionRoutes(app);
   registerAdminBusinessPlanRevisionRoutes(app);
   startBusinessPlanGenerationWorker();
