@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import SearchConsoleDashboard from "@/components/admin/SearchConsoleDashboard";
 import {
   Search,
   Zap,
@@ -2295,6 +2296,9 @@ export default function SeoStrategy() {
           {/* Main Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="flex flex-wrap gap-1 h-auto p-1">
+              <TabsTrigger value="rankings" className="text-xs">
+                Google Rankings
+              </TabsTrigger>
               <TabsTrigger value="overview" className="text-xs">
                 Overview
               </TabsTrigger>
@@ -2340,6 +2344,10 @@ export default function SeoStrategy() {
             </TabsList>
 
             {/* Overview Tab */}
+            <TabsContent value="rankings" className="space-y-4 mt-4">
+              <SearchConsoleDashboard />
+            </TabsContent>
+
             <TabsContent value="overview" className="space-y-4 mt-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Card>
