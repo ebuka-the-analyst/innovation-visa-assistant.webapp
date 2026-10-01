@@ -17,6 +17,8 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import SearchConsoleDashboard from "@/components/admin/SearchConsoleDashboard";
+import { AdminSidebar } from "@/components/AdminSidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import {
   Search,
   ArrowLeft,
@@ -1551,7 +1553,17 @@ export default function SeoStrategy() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <SidebarProvider style={{ "--sidebar-width": "18rem", "--sidebar-width-icon": "4rem" } as React.CSSProperties}>
+      <div className="flex h-screen w-full">
+        <AdminSidebar
+          activeSection="content-seo"
+          onSectionChange={(section) => {
+            if (section === "content-seo") return;
+            window.location.href = `/admin-dashboard#${section}`;
+          }}
+        />
+        <SidebarInset className="flex-1 overflow-auto">
+          <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-2">
