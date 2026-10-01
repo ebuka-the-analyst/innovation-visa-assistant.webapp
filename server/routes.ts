@@ -21776,6 +21776,58 @@ IMPORTANT RULES:
       res.status(500).json({ error: `SEO autopilot refresh failed: ${msg}` });
     }
   });
+  app.get("/api/seo/autopilot/execution", requireAdmin, async (_req, res) => {
+    try {
+      const plans = await db
+        .select()
+        .from(seoAutomationPlans)
+        .orderBy(desc(seoAutomationPlans.createdAt))
+        .limit(1);
+
+      if (!plans.length) return res.json({ active: false, execution: null });
+
+      const plan = plans[0];
+      const data = (plan.strategyData || {}) as any;
+      res.json({
+        active: plan.status === "active" && data.autopilotMode === "top5-lifetime",
+        planId: plan.id,
+        execution: data.execution || null,
+        approvedOverrides: data.approvedOverrides || {},
+      });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      res.status(500).json({ error: msg });
+    }
+  });
+
+  app.post("/api/seo/autopilot/actions/:actionId/decision", requireAdmin, async (req, res) => {
+    try {
+      const decision = String(req.body?.decision || "");
+      if (decision !== "approve" && decision !== "reject") {
+        return res.status(400).json({ error: "decision must be approve or reject" });
+      }
+
+      const plans = await db
+        .select()
+        .from(seoAutomationPlans)
+        .orderBy(desc(seoAutomationPlans.createdAt))
+        .limit(1);
+      if (!plans.length) return res.status(404).json({ error: "SEO autopilot plan not found" });
+
+      const { decideSeoAutopilotAction } = await import("./seoAutomation.js");
+      const result = await decideSeoAutopilotAction(
+        plans[0].id,
+        String(req.params.actionId),
+        decision as "approve" | "reject",
+      );
+      res.json({ success: true, ...result });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error("[SEO Autopilot] Action decision error:", msg);
+      res.status(500).json({ error: msg });
+    }
+  });
+
 
   // Get current automation plan status
   app.get("/api/seo/automation-status", requireAdmin, async (req, res) => {
