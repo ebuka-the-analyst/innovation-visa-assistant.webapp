@@ -105,7 +105,7 @@ export default function SearchConsoleDashboard() {
           <CardDescription>
             {notConfigured
               ? "The dashboard is built and ready. Add the Search Console service-account credentials to Railway to start pulling live Google ranking data."
-              : "The app could not fetch live Search Console data. Check the service-account access and configured site URL."}
+              : configPayload?.diagnostic || "The app could not fetch live Search Console data. Check the service-account access and configured site URL."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
