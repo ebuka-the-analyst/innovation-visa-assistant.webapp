@@ -21752,6 +21752,31 @@ IMPORTANT RULES:
     }
   });
 
+  // Lifetime Top 5 SEO autopilot
+  app.post("/api/seo/autopilot/activate", requireAdmin, async (_req, res) => {
+    try {
+      const { activateLifetimeTop5Autopilot } = await import("./seoAutomation.js");
+      const result = await activateLifetimeTop5Autopilot();
+      res.json({ success: true, perpetual: true, targetPosition: 5, ...result });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error("[SEO Autopilot] Activation error:", msg);
+      res.status(500).json({ error: `SEO autopilot activation failed: ${msg}` });
+    }
+  });
+
+  app.post("/api/seo/autopilot/refresh", requireAdmin, async (_req, res) => {
+    try {
+      const { refreshLifetimeTop5Autopilot } = await import("./seoAutomation.js");
+      await refreshLifetimeTop5Autopilot(false);
+      res.json({ success: true });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error("[SEO Autopilot] Refresh error:", msg);
+      res.status(500).json({ error: `SEO autopilot refresh failed: ${msg}` });
+    }
+  });
+
   // Get current automation plan status
   app.get("/api/seo/automation-status", requireAdmin, async (req, res) => {
     try {
@@ -21771,6 +21796,9 @@ IMPORTANT RULES:
           ? Math.round((plan.queuedItems / plan.totalContentItems) * 100)
           : 0;
 
+      const strategyData = (plan.strategyData || {}) as any;
+      const mission = Array.isArray(strategyData.mission) ? strategyData.mission : [];
+
       res.json({
         active: plan.status === "active",
         plan: {
@@ -21784,6 +21812,13 @@ IMPORTANT RULES:
           startDate: plan.startDate,
           nextQueueDate: plan.nextQueueDate,
           progressPct,
+          mode: strategyData.autopilotMode || "90-day",
+          perpetual: strategyData.perpetual === true,
+          targetPosition: strategyData.targetPosition || null,
+          lastRunAt: strategyData.lastRunAt || null,
+          missionCount: mission.length,
+          top5Count: mission.filter((item: any) => Number(item.position) > 0 && Number(item.position) <= 5).length,
+          fastWinCount: mission.filter((item: any) => Number(item.position) > 5 && Number(item.position) <= 10).length,
         },
       });
     } catch (error: unknown) {
