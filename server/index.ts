@@ -748,6 +748,22 @@ app.get("/health", (_req, res) => {
       }
     }, 10000); // 10 second delay after startup
 
+    // Lifetime SEO autopilot ranking monitor: refresh Search Console mission daily.
+    // Content creation remains weekly and capped to avoid keyword cannibalisation.
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+    const runSeoDailyMonitor = async () => {
+      try {
+        const { refreshLifetimeTop5Autopilot } = await import("./seoAutomation.js");
+        await refreshLifetimeTop5Autopilot(false);
+      } catch (err) {
+        console.error("[SEO Autopilot] Daily monitor error:", err);
+      }
+    };
+    setTimeout(() => {
+      runSeoDailyMonitor();
+      setInterval(runSeoDailyMonitor, ONE_DAY_MS);
+    }, 2 * 60 * 1000);
+
     // Weekly SEO automation cron: every Monday at 8am GMT
     const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
     const msUntilNextMonday8am = (() => {
