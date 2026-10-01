@@ -209,7 +209,7 @@ const INNOVATOR_FOUNDER_PUBLIC_SUBROUTES = [
 
 const SIDEBAR_HIDDEN_ROUTES = ["/", "/uk", "/us", "/ca", "/au", "/de", "/fr", "/nl", "/sg", "/ae", "/nz", "/jp", "/ie", "/pt", "/es", "/se", "/ch", INNOVATOR_FOUNDER_PATH, "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password", "/pricing", "/checkout", "/faq", "/guide", "/privacy", "/terms", "/cookies", "/features", "/about", "/endorsing-bodies", "/eligibility", "/business-plan-template", "/guide/ultimate-uk-innovator-founder-visa-guide", "/blog", "/join-expert-network", ...INNOVATOR_FOUNDER_PUBLIC_SUBROUTES.map(innovatorFounderPath), ...COUNTRY_CODES.flatMap(code => [`/${code}/countries`, `/${code}/how-it-works`, `/${code}/about`, `/${code}/contact`])];
 const SIDEBAR_HIDDEN_PREFIXES = ["/blog/", `${INNOVATOR_FOUNDER_PATH}/blog/`];
-const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard", "/admin/ai-providers", "/admin/expert-network"];
+const CUSTOM_LAYOUT_ROUTES = ["/admin", "/admin-dashboard", "/admin/ai-providers", "/admin/expert-network", "/admin/blog", "/admin/seo-strategy"];
 const OPEN_ACCESS_DASHBOARD_ROUTES = ["/expert-booking", innovatorFounderPath("/expert-booking")];
 const PUBLIC_APP_SHELL_ROUTES = ["/ai-transparency"];
 
