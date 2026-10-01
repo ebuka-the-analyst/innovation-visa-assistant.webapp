@@ -10,9 +10,244 @@
 
 import { db } from "./db.js";
 import { blogGenerationQueue, seoAutomationPlans } from "../shared/schema.js";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
+import { GoogleAuth } from "google-auth-library";
 
 const MAX_POSTS_PER_WEEK = 2;
+
+type SearchQueryRow = {
+  query: string;
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+};
+
+const COMMERCIAL_TERMS = [
+  "innovator",
+  "founder",
+  "visa",
+  "business plan",
+  "endorsement",
+  "endorsing",
+  "application",
+  "support",
+  "assistance",
+  "requirements",
+  "eligibility",
+  "interview",
+];
+
+function isCommercialQuery(query: string): boolean {
+  const value = query.toLowerCase().trim();
+  if (!value || value.length < 4) return false;
+  return COMMERCIAL_TERMS.some((term) => value.includes(term));
+}
+
+function normalizePrivateKey(value: string | undefined): string {
+  if (!value) return "";
+  let key = value.trim();
+  if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
+    key = key.slice(1, -1).trim();
+  }
+  key = key.replace(/\\r\\n/g, "\n").replace(/\\n/g, "\n").replace(/\\r/g, "\n").trim();
+  const begin = "-----BEGIN PRIVATE KEY-----";
+  const end = "-----END PRIVATE KEY-----";
+  const start = key.indexOf(begin);
+  const finish = key.indexOf(end);
+  return start >= 0 && finish >= start ? key.slice(start, finish + end.length) : key;
+}
+
+async function fetchCommercialSearchQueries(days = 28): Promise<SearchQueryRow[]> {
+  const clientEmail = String(process.env.GOOGLE_SEARCH_CONSOLE_CLIENT_EMAIL || "").trim();
+  const privateKey = normalizePrivateKey(process.env.GOOGLE_SEARCH_CONSOLE_PRIVATE_KEY);
+  const siteUrl = String(process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL || "").trim();
+
+  if (!clientEmail || !privateKey || !siteUrl) {
+    throw new Error("Search Console credentials are not configured");
+  }
+
+  const auth = new GoogleAuth({
+    credentials: { client_email: clientEmail, private_key: privateKey },
+    scopes: ["https://www.googleapis.com/auth/webmasters.readonly"],
+  });
+  const client = await auth.getClient();
+  const token = await client.getAccessToken();
+  const accessToken = typeof token === "string" ? token : token?.token;
+  if (!accessToken) throw new Error("Unable to obtain Search Console access token");
+
+  const end = new Date();
+  end.setUTCDate(end.getUTCDate() - 2);
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - days + 1);
+  const iso = (d: Date) => d.toISOString().slice(0, 10);
+
+  const response = await fetch(
+    `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        startDate: iso(start),
+        endDate: iso(end),
+        dimensions: ["query"],
+        type: "web",
+        dataState: "all",
+        rowLimit: 250,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Search Console API ${response.status}: ${await response.text()}`);
+  }
+
+  const payload: any = await response.json();
+  return (payload.rows || [])
+    .map((row: any) => ({
+      query: String(row.keys?.[0] || "").trim(),
+      clicks: Number(row.clicks || 0),
+      impressions: Number(row.impressions || 0),
+      ctr: Number(row.ctr || 0),
+      position: Number(row.position || 0),
+    }))
+    .filter((row: SearchQueryRow) => isCommercialQuery(row.query));
+}
+
+function buildTop5Mission(rows: SearchQueryRow[]) {
+  return rows
+    .filter((row) => row.position > 0 && row.impressions >= 5)
+    .map((row) => {
+      const bucket =
+        row.position <= 5 ? "top5" :
+        row.position <= 10 ? "fast-win" :
+        row.position <= 20 ? "page-one" :
+        row.position <= 50 ? "growth" : "long-term";
+      const action =
+        row.position <= 5
+          ? "Defend ranking with freshness, internal links and CTR monitoring."
+          : row.position <= 10
+            ? "Optimise the ranking page, strengthen internal links and improve title/meta CTR."
+            : row.position <= 20
+              ? "Expand topical depth and add supporting internal content."
+              : "Build stronger dedicated content and authority before pushing for page one.";
+      return { ...row, bucket, gapToTop5: Math.max(0, row.position - 5), action };
+    })
+    .sort((a, b) => {
+      const aScore = (a.position <= 10 ? 1000 : 0) + a.impressions * 2 - a.position;
+      const bScore = (b.position <= 10 ? 1000 : 0) + b.impressions * 2 - b.position;
+      return bScore - aScore;
+    });
+}
+
+async function queueAutopilotSupportContent(planId: string, mission: ReturnType<typeof buildTop5Mission>) {
+  const candidates = mission
+    .filter((item) => item.position > 10 && item.position <= 50 && item.impressions >= 10)
+    .slice(0, 2);
+
+  let queued = 0;
+  for (const item of candidates) {
+    const topic = `${item.query}: UK Innovator Founder Visa Guide`;
+    const existing = await db
+      .select({ id: blogGenerationQueue.id })
+      .from(blogGenerationQueue)
+      .where(eq(blogGenerationQueue.topic, topic))
+      .limit(1);
+    if (existing.length) continue;
+
+    const publishDate = new Date();
+    publishDate.setUTCDate(publishDate.getUTCDate() + (queued === 0 ? 1 : 4));
+    publishDate.setUTCHours(9, 0, 0, 0);
+
+    await db.insert(blogGenerationQueue).values({
+      targetDate: publishDate,
+      topic,
+      category: "Innovator Founder Visa",
+      status: "pending",
+    });
+    queued++;
+  }
+  return queued;
+}
+
+export async function activateLifetimeTop5Autopilot(): Promise<{ planId: string; missionCount: number; queuedNow: number }> {
+  const rows = await fetchCommercialSearchQueries(28);
+  const mission = buildTop5Mission(rows);
+
+  await db
+    .update(seoAutomationPlans)
+    .set({ status: "paused", updatedAt: new Date() })
+    .where(eq(seoAutomationPlans.status, "active"));
+
+  const strategyData = {
+    autopilotMode: "top5-lifetime",
+    perpetual: true,
+    targetPosition: 5,
+    lastRunAt: new Date().toISOString(),
+    mission,
+    safeguards: {
+      maxNewPostsPerWeek: 2,
+      noAutomatedThirdPartyPosting: true,
+      noPaidOrManipulativeLinks: true,
+    },
+  };
+
+  const [plan] = await db.insert(seoAutomationPlans).values({
+    strategyData,
+    businessName: "UK Innovator Founder Visa Assistant",
+    status: "active",
+    totalContentItems: mission.length,
+    queuedItems: 0,
+    completedItems: 0,
+    weekNumber: 1,
+    startDate: new Date(),
+    nextQueueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    updatedAt: new Date(),
+  }).returning();
+
+  const queuedNow = await queueAutopilotSupportContent(plan.id, mission);
+  await db.update(seoAutomationPlans).set({
+    queuedItems: queuedNow,
+    updatedAt: new Date(),
+  }).where(eq(seoAutomationPlans.id, plan.id));
+
+  return { planId: plan.id, missionCount: mission.length, queuedNow };
+}
+
+export async function refreshLifetimeTop5Autopilot(queueContent = false): Promise<void> {
+  const activePlans = await db
+    .select()
+    .from(seoAutomationPlans)
+    .where(eq(seoAutomationPlans.status, "active"));
+
+  for (const plan of activePlans) {
+    const data = (plan.strategyData || {}) as any;
+    if (data.autopilotMode !== "top5-lifetime") continue;
+
+    const rows = await fetchCommercialSearchQueries(28);
+    const mission = buildTop5Mission(rows);
+    const queued = queueContent ? await queueAutopilotSupportContent(plan.id, mission) : 0;
+
+    await db.update(seoAutomationPlans).set({
+      strategyData: {
+        ...data,
+        perpetual: true,
+        targetPosition: 5,
+        lastRunAt: new Date().toISOString(),
+        mission,
+      },
+      totalContentItems: mission.length,
+      queuedItems: (plan.queuedItems || 0) + queued,
+      weekNumber: (plan.weekNumber || 0) + (queueContent ? 1 : 0),
+      nextQueueDate: queueContent ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) : plan.nextQueueDate,
+      updatedAt: new Date(),
+    }).where(eq(seoAutomationPlans.id, plan.id));
+  }
+}
+
 
 export interface AutomationContentItem {
   title: string;
@@ -211,10 +446,14 @@ export async function runWeeklyAutomationCron(): Promise<void> {
     .where(eq(seoAutomationPlans.status, "active"));
 
   for (const plan of activePlans) {
+    const strategyData = (plan.strategyData || {}) as any;
+    if (strategyData.autopilotMode === "top5-lifetime") {
+      continue;
+    }
+
     const currentWeek = (plan.weekNumber || 1) + 1;
 
     if (currentWeek > 13) {
-      // Plan complete
       await db
         .update(seoAutomationPlans)
         .set({ status: "completed", updatedAt: new Date() })
@@ -242,4 +481,8 @@ export async function runWeeklyAutomationCron(): Promise<void> {
 
     console.log(`[SEO Automation] Week ${currentWeek}: queued ${queued} items for plan ${plan.id}`);
   }
+
+  // Lifetime Top 5 plans never complete. Refresh rankings and queue at most
+  // two supporting content items per week based on current Search Console data.
+  await refreshLifetimeTop5Autopilot(true);
 }
