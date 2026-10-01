@@ -36,8 +36,14 @@ function upstreamOpenAIKey(): string {
 }
 
 function upstreamOpenAIBaseURL(): string {
+  const captured = String(process.env.UPSTREAM_OPENAI_API_KEY || "").trim();
+  if (captured) return "https://api.openai.com/v1";
+
+  const integrated = String(process.env.AI_INTEGRATIONS_OPENAI_API_KEY || "").trim();
   const integratedBase = String(process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || "").trim();
-  return integratedBase || "https://api.openai.com/v1";
+  if (integrated && integratedBase) return integratedBase;
+
+  return "https://api.openai.com/v1";
 }
 
 function configured(provider: ProviderId): boolean {
