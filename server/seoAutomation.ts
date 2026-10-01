@@ -173,6 +173,243 @@ async function queueAutopilotSupportContent(planId: string, mission: ReturnType<
   return queued;
 }
 
+
+type SeoAuditCheck = {
+  id: string;
+  label: string;
+  status: "pass" | "warning" | "fail";
+  detail: string;
+};
+
+type SeoApprovalAction = {
+  id: string;
+  type: "meta-refresh" | "content-review";
+  risk: "medium" | "high";
+  status: "pending" | "approved" | "rejected";
+  keyword: string;
+  path: string;
+  reason: string;
+  proposedTitle?: string;
+  proposedDescription?: string;
+  createdAt: string;
+  decidedAt?: string;
+};
+
+function preferredPathForQuery(query: string): string {
+  const q = query.toLowerCase();
+  if (q.includes("business plan")) return "/business-plan-template";
+  if (q.includes("endors")) return "/endorsing-bodies";
+  if (q.includes("eligib") || q.includes("requirement")) return "/eligibility";
+  if (q.includes("guide") || q.includes("overview")) return "/guide";
+  if (q.includes("support") || q.includes("assist")) return "/";
+  return "/guide";
+}
+
+function titleCaseQuery(query: string): string {
+  return query
+    .trim()
+    .replace(/["']/g, "")
+    .split(/\s+/)
+    .map((part) => part ? part.charAt(0).toUpperCase() + part.slice(1) : part)
+    .join(" ");
+}
+
+function buildApprovalQueue(
+  mission: ReturnType<typeof buildTop5Mission>,
+  previous: SeoApprovalAction[] = [],
+): SeoApprovalAction[] {
+  const previousByKey = new Map(previous.map((item) => [`${item.type}:${item.keyword.toLowerCase()}`, item]));
+  const candidates = mission
+    .filter((item) => item.position > 5 && item.position <= 20 && item.impressions >= 15)
+    .slice(0, 12);
+
+  const next: SeoApprovalAction[] = candidates.map((item) => {
+    const key = `meta-refresh:${item.query.toLowerCase()}`;
+    const existing = previousByKey.get(key);
+    if (existing) return existing;
+
+    const keywordTitle = titleCaseQuery(item.query);
+    const path = preferredPathForQuery(item.query);
+    const proposedTitle = `${keywordTitle} | UK Innovator Founder Visa 2026`.slice(0, 62);
+    const proposedDescription =
+      `Explore ${item.query} with practical UK Innovator Founder Visa guidance, eligibility support, endorsement preparation and AI-powered application tools.`.slice(0, 158);
+
+    return {
+      id: `meta-${Buffer.from(item.query).toString("base64url").slice(0, 20)}`,
+      type: "meta-refresh",
+      risk: "medium",
+      status: "pending",
+      keyword: item.query,
+      path,
+      reason:
+        item.position <= 10
+          ? `Position ${item.position.toFixed(1)} with ${item.impressions} impressions. A stronger search snippet may help move this query toward the Top 5.`
+          : `Position ${item.position.toFixed(1)} with ${item.impressions} impressions. Improve relevance before pushing for page-one and Top 5 visibility.`,
+      proposedTitle,
+      proposedDescription,
+      createdAt: new Date().toISOString(),
+    };
+  });
+
+  // Keep previously decided actions for audit history even if they no longer qualify.
+  const decided = previous.filter((item) => item.status !== "pending");
+  const combined = [...next, ...decided.filter((old) => !next.some((item) => item.id === old.id))];
+  return combined.slice(0, 30);
+}
+
+async function runSeoSiteAudit(): Promise<SeoAuditCheck[]> {
+  const base = "https://innovatorfoundervisaassistant.co.uk";
+  const checks: SeoAuditCheck[] = [];
+  const pages = ["/", "/guide", "/faq", "/eligibility", "/endorsing-bodies", "/business-plan-template"];
+
+  try {
+    const response = await fetch(`${base}/sitemap.xml`, { redirect: "follow" });
+    checks.push({
+      id: "sitemap",
+      label: "XML sitemap",
+      status: response.ok ? "pass" : "fail",
+      detail: response.ok ? "Sitemap is reachable." : `Sitemap returned HTTP ${response.status}.`,
+    });
+  } catch (error: any) {
+    checks.push({ id: "sitemap", label: "XML sitemap", status: "fail", detail: error?.message || "Sitemap request failed." });
+  }
+
+  try {
+    const response = await fetch(`${base}/robots.txt`, { redirect: "follow" });
+    const body = await response.text();
+    checks.push({
+      id: "robots",
+      label: "robots.txt",
+      status: response.ok && !/disallow:\s*\/$/im.test(body) ? "pass" : "warning",
+      detail: response.ok ? "robots.txt is reachable and the whole site is not blocked." : `robots.txt returned HTTP ${response.status}.`,
+    });
+  } catch (error: any) {
+    checks.push({ id: "robots", label: "robots.txt", status: "fail", detail: error?.message || "robots.txt request failed." });
+  }
+
+  let canonicalPass = 0;
+  let schemaPass = 0;
+  let descriptionPass = 0;
+  for (const path of pages) {
+    try {
+      const response = await fetch(`${base}${path}`, { redirect: "follow" });
+      const html = await response.text();
+      if (response.ok && /rel=["']canonical["']/i.test(html)) canonicalPass++;
+      if (response.ok && /application\/ld\+json/i.test(html)) schemaPass++;
+      if (response.ok && /name=["']description["']/i.test(html)) descriptionPass++;
+    } catch {}
+  }
+
+  checks.push({
+    id: "canonicals",
+    label: "Canonical tags",
+    status: canonicalPass === pages.length ? "pass" : canonicalPass >= pages.length - 1 ? "warning" : "fail",
+    detail: `${canonicalPass}/${pages.length} priority pages returned a canonical tag.`,
+  });
+  checks.push({
+    id: "schema",
+    label: "Structured data",
+    status: schemaPass >= 4 ? "pass" : schemaPass >= 2 ? "warning" : "fail",
+    detail: `${schemaPass}/${pages.length} priority pages returned JSON-LD structured data.`,
+  });
+  checks.push({
+    id: "descriptions",
+    label: "Meta descriptions",
+    status: descriptionPass === pages.length ? "pass" : descriptionPass >= pages.length - 1 ? "warning" : "fail",
+    detail: `${descriptionPass}/${pages.length} priority pages returned a meta description.`,
+  });
+
+  return checks;
+}
+
+async function buildExecutionState(
+  mission: ReturnType<typeof buildTop5Mission>,
+  previousExecution: any = {},
+) {
+  const audit = await runSeoSiteAudit();
+  const approvalQueue = buildApprovalQueue(
+    mission,
+    Array.isArray(previousExecution?.approvalQueue) ? previousExecution.approvalQueue : [],
+  );
+
+  const automaticActions = [
+    {
+      id: "daily-rank-refresh",
+      label: "Refresh commercial Search Console mission",
+      status: "active",
+      cadence: "daily",
+      lastRunAt: new Date().toISOString(),
+    },
+    {
+      id: "technical-audit",
+      label: "Check sitemap, robots, canonicals, schema and descriptions",
+      status: audit.some((item) => item.status === "fail") ? "attention" : "active",
+      cadence: "daily",
+      lastRunAt: new Date().toISOString(),
+    },
+    {
+      id: "support-content",
+      label: "Queue supporting content for high-impression growth queries",
+      status: "active",
+      cadence: "weekly",
+      maxPerWeek: 2,
+    },
+  ];
+
+  return {
+    lastAuditAt: new Date().toISOString(),
+    audit,
+    automaticActions,
+    approvalQueue,
+  };
+}
+
+export async function decideSeoAutopilotAction(
+  planId: string,
+  actionId: string,
+  decision: "approve" | "reject",
+): Promise<any> {
+  const [plan] = await db
+    .select()
+    .from(seoAutomationPlans)
+    .where(eq(seoAutomationPlans.id, planId))
+    .limit(1);
+  if (!plan) throw new Error("SEO autopilot plan not found");
+
+  const data = (plan.strategyData || {}) as any;
+  const execution = data.execution || {};
+  const queue: SeoApprovalAction[] = Array.isArray(execution.approvalQueue) ? execution.approvalQueue : [];
+  const action = queue.find((item) => item.id === actionId);
+  if (!action) throw new Error("SEO action not found");
+
+  action.status = decision === "approve" ? "approved" : "rejected";
+  action.decidedAt = new Date().toISOString();
+
+  const approvedOverrides = { ...(data.approvedOverrides || {}) };
+  if (decision === "approve" && action.type === "meta-refresh" && action.proposedTitle && action.proposedDescription) {
+    approvedOverrides[action.path] = {
+      title: action.proposedTitle,
+      description: action.proposedDescription,
+      keyword: action.keyword,
+      approvedAt: action.decidedAt,
+    };
+  }
+
+  await db.update(seoAutomationPlans).set({
+    strategyData: {
+      ...data,
+      approvedOverrides,
+      execution: {
+        ...execution,
+        approvalQueue: queue,
+      },
+    },
+    updatedAt: new Date(),
+  }).where(eq(seoAutomationPlans.id, planId));
+
+  return { action, overrideApplied: decision === "approve" && action.type === "meta-refresh" };
+}
+
 export async function activateLifetimeTop5Autopilot(): Promise<{ planId: string; missionCount: number; queuedNow: number }> {
   const rows = await fetchCommercialSearchQueries(28);
   const mission = buildTop5Mission(rows);
@@ -182,12 +419,15 @@ export async function activateLifetimeTop5Autopilot(): Promise<{ planId: string;
     .set({ status: "paused", updatedAt: new Date() })
     .where(eq(seoAutomationPlans.status, "active"));
 
+  const execution = await buildExecutionState(mission);
+
   const strategyData = {
     autopilotMode: "top5-lifetime",
     perpetual: true,
     targetPosition: 5,
     lastRunAt: new Date().toISOString(),
     mission,
+    execution,
     safeguards: {
       maxNewPostsPerWeek: 2,
       noAutomatedThirdPartyPosting: true,
@@ -230,6 +470,7 @@ export async function refreshLifetimeTop5Autopilot(queueContent = false): Promis
     const rows = await fetchCommercialSearchQueries(28);
     const mission = buildTop5Mission(rows);
     const queued = queueContent ? await queueAutopilotSupportContent(plan.id, mission) : 0;
+    const execution = await buildExecutionState(mission, data.execution);
 
     await db.update(seoAutomationPlans).set({
       strategyData: {
@@ -238,6 +479,7 @@ export async function refreshLifetimeTop5Autopilot(queueContent = false): Promis
         targetPosition: 5,
         lastRunAt: new Date().toISOString(),
         mission,
+        execution,
       },
       totalContentItems: mission.length,
       queuedItems: (plan.queuedItems || 0) + queued,
