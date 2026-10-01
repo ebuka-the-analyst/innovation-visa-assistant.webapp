@@ -1,4 +1,5 @@
 import { useState, useCallback, type ReactNode } from "react";
+import { useLocation } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
@@ -18,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import SearchConsoleDashboard from "@/components/admin/SearchConsoleDashboard";
 import {
   Search,
+  ArrowLeft,
   Zap,
   TrendingUp,
   Globe,
@@ -1348,6 +1350,7 @@ function BacklinkEngine() {
 
 export default function SeoStrategy() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [result, setResult] = useState<SEOStrategyResult | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
   const { statuses, cycle } = useTaskTracker("seo-strategy-tasks");
@@ -1551,15 +1554,26 @@ export default function SeoStrategy() {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Search className="w-6 h-6 text-primary" />
-            PhD-Level SEO Strategy Engine
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Quad-AI analysis: Gemini + GPT-4o + Claude + Qwen working in
-            parallel across all 4 SEO pillars
-          </p>
+        <div className="space-y-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLocation("/admin-dashboard")}
+            data-testid="button-back-admin-dashboard"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Admin Dashboard
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <Search className="w-6 h-6 text-primary" />
+              PhD-Level SEO Strategy Engine
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Quad-AI analysis: Gemini + GPT-4o + Claude + Qwen working in
+              parallel across all 4 SEO pillars
+            </p>
+          </div>
         </div>
         <div className="flex gap-2">
           {result && (
@@ -1628,6 +1642,20 @@ export default function SeoStrategy() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Google Search Console rankings — always visible */}
+      <section className="space-y-3" data-testid="section-google-rankings">
+        <div>
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-primary" />
+            Google Rankings
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Live Google Search Console clicks, impressions, CTR, ranking positions and SEO opportunities.
+          </p>
+        </div>
+        <SearchConsoleDashboard />
+      </section>
 
       {/* ── Backlink Intelligence Engine — always visible ── */}
       <BacklinkEngine />
@@ -2296,9 +2324,6 @@ export default function SeoStrategy() {
           {/* Main Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="flex flex-wrap gap-1 h-auto p-1">
-              <TabsTrigger value="rankings" className="text-xs">
-                Google Rankings
-              </TabsTrigger>
               <TabsTrigger value="overview" className="text-xs">
                 Overview
               </TabsTrigger>
@@ -2344,10 +2369,6 @@ export default function SeoStrategy() {
             </TabsList>
 
             {/* Overview Tab */}
-            <TabsContent value="rankings" className="space-y-4 mt-4">
-              <SearchConsoleDashboard />
-            </TabsContent>
-
             <TabsContent value="overview" className="space-y-4 mt-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Card>
