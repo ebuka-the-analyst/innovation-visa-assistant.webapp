@@ -18,7 +18,37 @@ const SCOPES = ["https://www.googleapis.com/auth/webmasters.readonly"];
 const DEFAULT_SITE_URL = "https://innovatorfoundervisaassistant.co.uk/";
 
 function normalisePrivateKey(value: string | undefined) {
-  return value?.replace(/\\n/g, "\n");
+  if (!value) return value;
+
+  let key = value.trim();
+
+  // Railway values are sometimes pasted directly from JSON, with wrapping
+  // quotes, escaped newlines, or stray angle brackets from copy/paste.
+  if (
+    (key.startsWith('"') && key.endsWith('"')) ||
+    (key.startsWith("'") && key.endsWith("'"))
+  ) {
+    key = key.slice(1, -1).trim();
+  }
+
+  key = key
+    .replace(/^<+/, "")
+    .replace(/>+$/, "")
+    .replace(/\\r\\n/g, "\n")
+    .replace(/\\n/g, "\n")
+    .replace(/\\r/g, "\n")
+    .trim();
+
+  const begin = "-----BEGIN PRIVATE KEY-----";
+  const end = "-----END PRIVATE KEY-----";
+  const beginIndex = key.indexOf(begin);
+  const endIndex = key.indexOf(end);
+
+  if (beginIndex >= 0 && endIndex >= beginIndex) {
+    key = key.slice(beginIndex, endIndex + end.length);
+  }
+
+  return key;
 }
 
 function getSearchConsoleConfig() {
@@ -279,8 +309,8 @@ export function registerSearchConsoleAdminRoutes(app: Express) {
       let diagnostic = "Google Search Console returned an unexpected connection error.";
       if (/disabled|has not been used|accessnotconfigured|api.*enable/i.test(rawMessage)) {
         diagnostic = "The Google Search Console API is not enabled for the Google Cloud project used by this service account.";
-      } else if (/invalid_grant|jwt|signature|private key|invalid.*credential/i.test(rawMessage)) {
-        diagnostic = "The service-account credential could not be authenticated. Recheck the private key value in Railway.";
+      } else if (/invalid_grant|jwt|signature|private key|invalid.*credential|decoder routines|DECODER/i.test(rawMessage)) {
+        diagnostic = "The service-account private key could not be decoded. Recheck the GOOGLE_SEARCH_CONSOLE_PRIVATE_KEY formatting in Railway.";
       } else if (/403|forbidden|permission|insufficient/i.test(rawMessage)) {
         diagnostic = "The service account authenticated, but Google denied access to the Search Console property.";
       } else if (/404|not found|site.*not/i.test(rawMessage)) {
