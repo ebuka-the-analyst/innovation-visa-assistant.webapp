@@ -20,6 +20,9 @@ import {
   MousePointerClick,
   Search,
   Target,
+  Trophy,
+  Rocket,
+  Gauge,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -126,6 +129,29 @@ export default function SearchConsoleDashboard() {
 
   const summary = data.summary;
 
+  const top5Count = data.queries.filter((row) => row.position > 0 && row.position <= 5).length;
+  const top10Count = data.queries.filter((row) => row.position > 5 && row.position <= 10).length;
+  const top20Count = data.queries.filter((row) => row.position > 10 && row.position <= 20).length;
+  const top50Count = data.queries.filter((row) => row.position > 20 && row.position <= 50).length;
+
+  const top5Mission = data.queries
+    .filter((row) => row.position > 5 && row.position <= 20 && row.impressions >= 5)
+    .sort((a, b) => {
+      const positionPriority = a.position - b.position;
+      if (Math.abs(positionPriority) >= 2) return positionPriority;
+      return b.impressions - a.impressions;
+    })
+    .slice(0, 15);
+
+  const missionAction = (position: number, ctr: number, impressions: number) => {
+    if (position <= 8) {
+      if (ctr < 0.03 && impressions >= 20) return "Improve title/meta CTR + strengthen internal links";
+      return "Strengthen on-page relevance + internal links";
+    }
+    if (position <= 12) return "Expand page depth + add supporting content";
+    return "Build dedicated supporting content + authority links";
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -187,6 +213,83 @@ export default function SearchConsoleDashboard() {
           <CardContent>{changeLabel(summary.changes.ctr)}</CardContent>
         </Card>
       </div>
+
+      <Card className="border-primary/20">
+        <CardHeader>
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Trophy className="h-5 w-5" />
+                Top 5 Mission
+              </CardTitle>
+              <CardDescription>
+                Prioritise live Search Console queries already close enough to move into positions 1–5.
+              </CardDescription>
+            </div>
+            <Badge variant="outline" className="w-fit">Target: Top 5</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-lg border p-3">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Trophy className="h-4 w-4" />Top 5</div>
+              <div className="mt-1 text-2xl font-semibold">{top5Count}</div>
+              <div className="text-[11px] text-muted-foreground">queries already achieved</div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Rocket className="h-4 w-4" />Positions 6–10</div>
+              <div className="mt-1 text-2xl font-semibold">{top10Count}</div>
+              <div className="text-[11px] text-muted-foreground">fastest Top 5 candidates</div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Target className="h-4 w-4" />Positions 11–20</div>
+              <div className="mt-1 text-2xl font-semibold">{top20Count}</div>
+              <div className="text-[11px] text-muted-foreground">page-one opportunities</div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Gauge className="h-4 w-4" />Positions 21–50</div>
+              <div className="mt-1 text-2xl font-semibold">{top50Count}</div>
+              <div className="text-[11px] text-muted-foreground">longer-term growth pool</div>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b text-left text-muted-foreground">
+                  <th className="py-2">Keyword</th>
+                  <th>Current</th>
+                  <th>Target</th>
+                  <th>Gap</th>
+                  <th>Impressions</th>
+                  <th>Clicks</th>
+                  <th>CTR</th>
+                  <th>Recommended action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {top5Mission.map((row) => (
+                  <tr key={row.query} className="border-b last:border-0">
+                    <td className="py-2 pr-3 font-medium">{row.query || "(not provided)"}</td>
+                    <td>{row.position.toFixed(1)}</td>
+                    <td>5.0</td>
+                    <td>{Math.max(0, row.position - 5).toFixed(1)}</td>
+                    <td>{row.impressions.toLocaleString()}</td>
+                    <td>{row.clicks.toLocaleString()}</td>
+                    <td>{formatPercent(row.ctr)}</td>
+                    <td className="min-w-[260px] text-muted-foreground">{missionAction(row.position, row.ctr, row.impressions)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {top5Mission.length === 0 && (
+              <div className="py-6 text-center text-sm text-muted-foreground">
+                No queries between positions 6 and 20 met the current impression threshold in this period.
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
