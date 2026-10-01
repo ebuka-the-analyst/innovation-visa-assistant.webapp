@@ -23,6 +23,11 @@ import {
   Trophy,
   Rocket,
   Gauge,
+  ShieldCheck,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Settings2,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -113,6 +118,36 @@ export default function SearchConsoleDashboard() {
     autopilotStatus?.active === true &&
     autopilotStatus?.plan?.mode === "top5-lifetime" &&
     autopilotStatus?.plan?.perpetual === true;
+
+  const { data: executionData, refetch: refetchExecution } = useQuery<any>({
+    queryKey: ["/api/seo/autopilot/execution"],
+    queryFn: async () => {
+      const response = await fetch("/api/seo/autopilot/execution", { credentials: "include" });
+      if (!response.ok) throw new Error("Failed to load SEO execution state");
+      return response.json();
+    },
+    enabled: lifetimeActive,
+    refetchInterval: 60000,
+    retry: false,
+  });
+
+  const decisionMutation = useMutation({
+    mutationFn: async ({ actionId, decision }: { actionId: string; decision: "approve" | "reject" }) => {
+      const response = await fetch(`/api/seo/autopilot/actions/${encodeURIComponent(actionId)}/decision`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.error || "Failed to update SEO action");
+      return payload;
+    },
+    onSuccess: () => {
+      refetchExecution();
+      queryClient.invalidateQueries({ queryKey: ["/api/seo/automation-status"] });
+    },
+  });
   const { data, isLoading, error, refetch, isFetching } = useQuery<SearchConsoleData>({
     queryKey: ["/api/admin/seo/search-console", days],
     queryFn: async () => {
@@ -349,6 +384,141 @@ export default function SearchConsoleDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {lifetimeActive && (
+        <Card className="border-emerald-500/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ShieldCheck className="h-5 w-5" />
+              SEO Autopilot Execution
+            </CardTitle>
+            <CardDescription>
+              Low-risk SEO work runs automatically. Search-snippet and higher-impact changes wait for your approval.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {!executionData?.execution ? (
+              <div className="rounded-md border bg-muted/30 p-4 text-sm text-muted-foreground">
+                Initial site audit is being prepared. The autopilot refreshes shortly after deployment and then daily.
+              </div>
+            ) : (
+              <>
+                <div>
+                  <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+                    <Settings2 className="h-4 w-4" />
+                    Automatic actions
+                  </div>
+                  <div className="grid gap-2 md:grid-cols-3">
+                    {(executionData.execution.automaticActions || []).map((item: any) => (
+                      <div key={item.id} className="rounded-lg border p-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-medium">{item.label}</span>
+                          <Badge variant="outline">{item.cadence}</Badge>
+                        </div>
+                        <p className="mt-1 text-[11px] text-muted-foreground">
+                          {item.status === "attention" ? "Needs attention from the technical audit." : "Running automatically."}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <ShieldCheck className="h-4 w-4" />
+                      Daily technical audit
+                    </div>
+                    {executionData.execution.lastAuditAt && (
+                      <span className="text-[11px] text-muted-foreground">
+                        {new Date(executionData.execution.lastAuditAt).toLocaleString("en-GB")}
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+                    {(executionData.execution.audit || []).map((check: any) => (
+                      <div key={check.id} className="rounded-lg border p-3">
+                        <div className="flex items-center gap-2 text-xs font-medium">
+                          {check.status === "pass" ? (
+                            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          ) : check.status === "warning" ? (
+                            <AlertTriangle className="h-4 w-4 text-amber-600" />
+                          ) : (
+                            <XCircle className="h-4 w-4 text-red-600" />
+                          )}
+                          {check.label}
+                        </div>
+                        <p className="mt-1 text-[11px] text-muted-foreground">{check.detail}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <div>
+                      <div className="text-sm font-medium">Approval queue</div>
+                      <p className="text-[11px] text-muted-foreground">
+                        Approving a metadata action applies the proposed title and description to the mapped live route. Rejected items are retained for audit history.
+                      </p>
+                    </div>
+                    <Badge variant="outline">
+                      {(executionData.execution.approvalQueue || []).filter((item: any) => item.status === "pending").length} pending
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    {(executionData.execution.approvalQueue || [])
+                      .filter((item: any) => item.status === "pending")
+                      .slice(0, 10)
+                      .map((item: any) => (
+                        <div key={item.id} className="rounded-lg border p-3">
+                          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-sm font-semibold">{item.keyword}</span>
+                                <Badge variant="outline">{item.path}</Badge>
+                                <Badge variant="secondary">{item.risk} risk</Badge>
+                              </div>
+                              <p className="mt-1 text-xs text-muted-foreground">{item.reason}</p>
+                              {item.proposedTitle && (
+                                <div className="mt-2 rounded-md bg-muted/40 p-2 text-xs">
+                                  <div><span className="font-medium">Title:</span> {item.proposedTitle}</div>
+                                  <div className="mt-1"><span className="font-medium">Description:</span> {item.proposedDescription}</div>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex shrink-0 gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={decisionMutation.isPending}
+                                onClick={() => decisionMutation.mutate({ actionId: item.id, decision: "reject" })}
+                              >
+                                Reject
+                              </Button>
+                              <Button
+                                size="sm"
+                                disabled={decisionMutation.isPending}
+                                onClick={() => decisionMutation.mutate({ actionId: item.id, decision: "approve" })}
+                              >
+                                Approve & Apply
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    {(executionData.execution.approvalQueue || []).filter((item: any) => item.status === "pending").length === 0 && (
+                      <div className="rounded-md border bg-muted/30 p-4 text-sm text-muted-foreground">
+                        No higher-impact changes are waiting for approval right now.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
