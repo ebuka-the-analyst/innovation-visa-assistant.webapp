@@ -3677,6 +3677,9 @@ export default function SeoStrategy() {
           </Tabs>
         </div>
       )}
-    </div>
+          </div>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 }
