@@ -273,11 +273,24 @@ export function registerSearchConsoleAdminRoutes(app: Express) {
         fetchedAt: new Date().toISOString(),
       });
     } catch (error: any) {
-      console.error("[Search Console] Failed to fetch ranking data:", error);
+      const rawMessage = String(error?.message || "Unknown Search Console error");
+      console.error("[Search Console] Failed to fetch ranking data:", rawMessage);
+
+      let diagnostic = "Google Search Console returned an unexpected connection error.";
+      if (/disabled|has not been used|accessnotconfigured|api.*enable/i.test(rawMessage)) {
+        diagnostic = "The Google Search Console API is not enabled for the Google Cloud project used by this service account.";
+      } else if (/invalid_grant|jwt|signature|private key|invalid.*credential/i.test(rawMessage)) {
+        diagnostic = "The service-account credential could not be authenticated. Recheck the private key value in Railway.";
+      } else if (/403|forbidden|permission|insufficient/i.test(rawMessage)) {
+        diagnostic = "The service account authenticated, but Google denied access to the Search Console property.";
+      } else if (/404|not found|site.*not/i.test(rawMessage)) {
+        diagnostic = "Google could not find the configured Search Console property. Recheck GOOGLE_SEARCH_CONSOLE_SITE_URL.";
+      }
+
       res.status(502).json({
         configured: true,
         error: "Unable to fetch Google Search Console data",
-        detail: process.env.NODE_ENV === "development" ? error?.message : undefined,
+        diagnostic,
       });
     }
   });
