@@ -13,8 +13,8 @@ import fs from "fs";
 import compression from "compression";
 import { fileURLToPath } from "url";
 import { db } from "./db";
-import { sql, eq, and } from "drizzle-orm";
-import { blogPosts } from "../shared/schema";
+import { sql, eq, and, desc } from "drizzle-orm";
+import { blogPosts, seoAutomationPlans } from "../shared/schema";
 
 // Get __dirname equivalent for ESM (works in Node 18+)
 const __filename = fileURLToPath(import.meta.url);
@@ -218,6 +218,34 @@ function serveStatic(app: ExpressType) {
     }
   };
 
+  let seoOverrideCache: { expiresAt: number; overrides: Record<string, any> } = {
+    expiresAt: 0,
+    overrides: {},
+  };
+
+  async function getApprovedSeoOverrides(): Promise<Record<string, any>> {
+    if (Date.now() < seoOverrideCache.expiresAt) return seoOverrideCache.overrides;
+    try {
+      const plans = await db
+        .select({ strategyData: seoAutomationPlans.strategyData })
+        .from(seoAutomationPlans)
+        .where(eq(seoAutomationPlans.status, "active"))
+        .orderBy(desc(seoAutomationPlans.createdAt))
+        .limit(1);
+      const data = (plans[0]?.strategyData || {}) as any;
+      const overrides =
+        data?.autopilotMode === "top5-lifetime" && data?.approvedOverrides
+          ? data.approvedOverrides
+          : {};
+      seoOverrideCache = { expiresAt: Date.now() + 60_000, overrides };
+      return overrides;
+    } catch (error) {
+      console.warn("[SEO Autopilot] Could not load approved metadata overrides:", error);
+      seoOverrideCache = { expiresAt: Date.now() + 30_000, overrides: {} };
+      return {};
+    }
+  }
+
   // Helper: inject meta tags into base HTML
   function injectMeta(html: string, title: string, description: string, path: string, schema?: object, ogImage?: string, keywords?: string): string {
     const BASE = "https://innovatorfoundervisaassistant.co.uk";
@@ -388,9 +416,25 @@ function serveStatic(app: ExpressType) {
     }
 
     // ── Static route meta injection ───────────────────────────────────────────
-    const meta = routeMeta[req.path];
-    if (meta) {
-      console.log(`[SEO] Injecting meta for route: ${req.path}`);
+    const approvedSeoOverrides = await getApprovedSeoOverrides();
+    const approvedOverride = approvedSeoOverrides[req.path];
+    const baseMeta = routeMeta[req.path];
+    const meta = approvedOverride
+      ? {
+          ...(baseMeta || {}),
+          title: approvedOverride.title || baseMeta?.title,
+          description: approvedOverride.description || baseMeta?.description,
+          keywords: baseMeta?.keywords,
+          schema: baseMeta?.schema,
+        }
+      : baseMeta;
+
+    if (meta?.title && meta?.description) {
+      console.log(
+        approvedOverride
+          ? `[SEO Autopilot] Injecting approved metadata override for route: ${req.path}`
+          : `[SEO] Injecting meta for route: ${req.path}`,
+      );
       html = injectMeta(html, meta.title, meta.description, req.path, meta.schema, undefined, meta.keywords);
     }
 
