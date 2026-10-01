@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Area,
   AreaChart,
@@ -79,6 +79,40 @@ function shortPage(page: string) {
 
 export default function SearchConsoleDashboard() {
   const [days, setDays] = useState(28);
+  const queryClient = useQueryClient();
+
+  const { data: autopilotStatus } = useQuery<any>({
+    queryKey: ["/api/seo/automation-status"],
+    queryFn: async () => {
+      const response = await fetch("/api/seo/automation-status", { credentials: "include" });
+      if (!response.ok) throw new Error("Failed to load SEO automation status");
+      return response.json();
+    },
+    refetchInterval: 30000,
+    retry: false,
+  });
+
+  const activateAutopilot = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/seo/autopilot/activate", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.error || "Failed to activate SEO autopilot");
+      return payload;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/seo/automation-status"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/seo/search-console"] });
+    },
+  });
+
+  const lifetimeActive =
+    autopilotStatus?.active === true &&
+    autopilotStatus?.plan?.mode === "top5-lifetime" &&
+    autopilotStatus?.plan?.perpetual === true;
   const { data, isLoading, error, refetch, isFetching } = useQuery<SearchConsoleData>({
     queryKey: ["/api/admin/seo/search-console", days],
     queryFn: async () => {
@@ -216,7 +250,7 @@ export default function SearchConsoleDashboard() {
 
       <Card className="border-primary/20">
         <CardHeader>
-          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Trophy className="h-5 w-5" />
@@ -226,8 +260,33 @@ export default function SearchConsoleDashboard() {
                 Prioritise live Search Console queries already close enough to move into positions 1–5.
               </CardDescription>
             </div>
-            <Badge variant="outline" className="w-fit">Target: Top 5</Badge>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="w-fit">Target: Top 5</Badge>
+              {lifetimeActive ? (
+                <Badge className="w-fit">Lifetime Autopilot Active</Badge>
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={() => activateAutopilot.mutate()}
+                  disabled={activateAutopilot.isPending}
+                >
+                  <Rocket className="mr-2 h-4 w-4" />
+                  {activateAutopilot.isPending ? "Activating…" : "Enable Lifetime Autopilot"}
+                </Button>
+              )}
+            </div>
           </div>
+          {activateAutopilot.isError && (
+            <div className="rounded-md border border-red-500/30 bg-red-500/5 p-3 text-xs text-red-600">
+              {activateAutopilot.error instanceof Error ? activateAutopilot.error.message : "Could not activate SEO autopilot."}
+            </div>
+          )}
+          {lifetimeActive && (
+            <div className="rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
+              Daily ranking monitoring is active. Weekly content support is capped at two items to avoid keyword cannibalisation. The plan does not expire automatically.
+              {autopilotStatus?.plan?.lastRunAt ? ` Last refreshed ${new Date(autopilotStatus.plan.lastRunAt).toLocaleString("en-GB")}.` : ""}
+            </div>
+          )}
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
