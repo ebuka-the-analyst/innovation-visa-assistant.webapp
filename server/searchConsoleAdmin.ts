@@ -1,6 +1,11 @@
 import type { Express } from "express";
 import { GoogleAuth } from "google-auth-library";
 import { requireAdmin } from "./auth";
+import {
+  analyseSeoQuery,
+  chooseSeoContentDecision,
+  normaliseSearchConsolePath,
+} from "./seoQueryIntelligence";
 
 type SearchAnalyticsRow = {
   keys?: string[];
@@ -194,7 +199,7 @@ export function registerSearchConsoleAdminRoutes(app: Express) {
         rowLimit: 250,
       };
 
-      const [summaryRows, previousRows, daily, queries, pages, devices, countries] =
+      const [summaryRows, previousRows, daily, queries, pages, devices, countries, queryPages] =
         await Promise.all([
           querySearchConsole(config.siteUrl, accessToken, {
             ...base,
@@ -238,20 +243,78 @@ export function registerSearchConsoleAdminRoutes(app: Express) {
             dimensions: ["country"],
             rowLimit: 25,
           }),
+          querySearchConsole(config.siteUrl, accessToken, {
+            ...base,
+            ...current,
+            dimensions: ["query", "page"],
+            rowLimit: 500,
+          }),
         ]);
 
       const currentMetrics = aggregate(summaryRows.rows);
       const previousMetrics = aggregate(previousRows.rows);
 
-      const keywordRows = (queries.rows || []).map((row) => ({
-        query: row.keys?.[0] || "",
-        clicks: Number(row.clicks || 0),
-        impressions: Number(row.impressions || 0),
-        ctr: Number(row.ctr || 0),
-        position: Number(row.position || 0),
-      }));
+      const landingByQuery = new Map<
+        string,
+        { page: string; path: string; clicks: number; impressions: number; position: number }
+      >();
 
-      const opportunities = keywordRows
+      for (const row of queryPages.rows || []) {
+        const query = String(row.keys?.[0] || "").trim();
+        const page = String(row.keys?.[1] || "").trim();
+        if (!query || !page) continue;
+
+        const candidate = {
+          page,
+          path: normaliseSearchConsolePath(page),
+          clicks: Number(row.clicks || 0),
+          impressions: Number(row.impressions || 0),
+          position: Number(row.position || 0),
+        };
+        const existing = landingByQuery.get(query);
+        if (
+          !existing ||
+          candidate.impressions > existing.impressions ||
+          (candidate.impressions === existing.impressions && candidate.clicks > existing.clicks)
+        ) {
+          landingByQuery.set(query, candidate);
+        }
+      }
+
+      const keywordRows = (queries.rows || []).map((row) => {
+        const query = String(row.keys?.[0] || "").trim();
+        const clicks = Number(row.clicks || 0);
+        const impressions = Number(row.impressions || 0);
+        const ctr = Number(row.ctr || 0);
+        const position = Number(row.position || 0);
+        const intelligence = analyseSeoQuery(query);
+        const landing = landingByQuery.get(query);
+        const page = landing?.page || "";
+        const path = landing?.path || "";
+        const contentDecision = chooseSeoContentDecision({
+          ...intelligence,
+          actualPath: path,
+          position,
+        });
+
+        return {
+          query,
+          clicks,
+          impressions,
+          ctr,
+          position,
+          ...intelligence,
+          page,
+          path,
+          pageMatchesRecommendation: Boolean(
+            path && path === intelligence.recommendedPath,
+          ),
+          contentDecision,
+        };
+      });
+
+      const qualifiedRows = keywordRows.filter((row) => row.qualified);
+      const opportunities = qualifiedRows
         .filter((row) => row.impressions >= 10 && row.position >= 4 && row.position <= 20)
         .sort((a, b) => b.impressions - a.impressions)
         .slice(0, 12);
@@ -278,6 +341,13 @@ export function registerSearchConsoleAdminRoutes(app: Express) {
           position: Number(row.position || 0),
         })),
         queries: keywordRows,
+        queryQuality: {
+          qualified: qualifiedRows.length,
+          excluded: keywordRows.length - qualifiedRows.length,
+          top5Qualified: qualifiedRows.filter((row) => row.position > 0 && row.position <= 5).length,
+          top10Qualified: qualifiedRows.filter((row) => row.position > 5 && row.position <= 10).length,
+          top20Qualified: qualifiedRows.filter((row) => row.position > 10 && row.position <= 20).length,
+        },
         pages: (pages.rows || []).map((row) => ({
           page: row.keys?.[0] || "",
           clicks: Number(row.clicks || 0),
