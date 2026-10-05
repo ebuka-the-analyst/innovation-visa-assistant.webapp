@@ -319,6 +319,128 @@ export function registerSearchConsoleAdminRoutes(app: Express) {
         .sort((a, b) => b.impressions - a.impressions)
         .slice(0, 12);
 
+      const dedicatedIntentClusters = new Set([
+        "business-plan",
+        "endorsement",
+        "eligibility",
+      ]);
+
+      const alignmentIssues = qualifiedRows
+        .filter(
+          (row) =>
+            dedicatedIntentClusters.has(row.cluster) &&
+            Boolean(row.path) &&
+            Boolean(row.recommendedPath) &&
+            row.path !== row.recommendedPath &&
+            row.impressions >= 3,
+        )
+        .map((row) => ({
+          query: row.query,
+          cluster: row.cluster,
+          currentPath: row.path,
+          recommendedPath: row.recommendedPath,
+          position: row.position,
+          impressions: row.impressions,
+          clicks: row.clicks,
+          ctr: row.ctr,
+          priorityScore:
+            Math.round(
+              row.impressions * 2 +
+                Math.max(0, 60 - row.position) +
+                (row.position <= 20 ? 40 : 0),
+            ),
+          reason:
+            `Google is ranking ${row.path} for this ${row.cluster.replace(/-/g, " ")} query, but ${row.recommendedPath} is the dedicated intent page.`,
+        }))
+        .sort((a, b) => b.priorityScore - a.priorityScore)
+        .slice(0, 20);
+
+      const anchorTextForCluster = (cluster: string) => {
+        if (cluster === "business-plan") return "Innovator Founder business plan preparation";
+        if (cluster === "endorsement") return "Innovator Founder endorsement preparation";
+        if (cluster === "eligibility") return "Innovator Founder eligibility requirements";
+        return "UK Innovator Founder Visa guide";
+      };
+
+      const internalLinkSuggestions = Array.from(
+        new Map(
+          alignmentIssues.map((issue) => {
+            const key = `${issue.currentPath}->${issue.recommendedPath}`;
+            return [
+              key,
+              {
+                fromPath: issue.currentPath,
+                toPath: issue.recommendedPath,
+                anchorText: anchorTextForCluster(issue.cluster),
+                cluster: issue.cluster,
+                query: issue.query,
+                reason:
+                  `Help Google transfer topical relevance from the currently ranking page to the dedicated ${issue.cluster.replace(/-/g, " ")} page.`,
+              },
+            ] as const;
+          }),
+        ).values(),
+      );
+
+      const top5ActionQueue = qualifiedRows
+        .filter((row) => row.impressions >= 5 && row.position > 0 && row.position <= 50)
+        .map((row) => {
+          const misaligned =
+            dedicatedIntentClusters.has(row.cluster) &&
+            Boolean(row.path) &&
+            row.path !== row.recommendedPath;
+          let actionType:
+            | "landing-page-alignment"
+            | "snippet-ctr"
+            | "internal-links"
+            | "content-depth";
+          let action: string;
+          let approvalRequired = false;
+
+          if (misaligned) {
+            actionType = "landing-page-alignment";
+            action =
+              `Strengthen ${row.recommendedPath} for "${row.query}" and add contextual links from ${row.path}. Avoid creating a competing page.`;
+          } else if (row.position <= 10 && row.ctr < 0.03 && row.impressions >= 20) {
+            actionType = "snippet-ctr";
+            approvalRequired = true;
+            action =
+              `Review the title and meta description on ${row.path || row.recommendedPath} to improve CTR while preserving search intent.`;
+          } else if (row.position <= 10) {
+            actionType = "internal-links";
+            action =
+              `Defend and improve this page-one ranking with stronger contextual internal links to ${row.path || row.recommendedPath}.`;
+          } else {
+            actionType = "content-depth";
+            action =
+              `Improve topical depth and on-page relevance on ${row.path || row.recommendedPath}; create support content only when the intent is distinct.`;
+          }
+
+          const priorityScore = Math.round(
+            row.impressions * 2 +
+              Math.max(0, 55 - row.position) +
+              (row.position <= 10 ? 100 : 0) +
+              (misaligned ? 80 : 0),
+          );
+
+          return {
+            query: row.query,
+            cluster: row.cluster,
+            path: row.path || row.recommendedPath,
+            recommendedPath: row.recommendedPath,
+            position: row.position,
+            impressions: row.impressions,
+            clicks: row.clicks,
+            ctr: row.ctr,
+            actionType,
+            action,
+            priorityScore,
+            approvalRequired,
+          };
+        })
+        .sort((a, b) => b.priorityScore - a.priorityScore)
+        .slice(0, 20);
+
       res.set("Cache-Control", "private, max-age=300");
       return res.json({
         configured: true,
@@ -370,6 +492,9 @@ export function registerSearchConsoleAdminRoutes(app: Express) {
           position: Number(row.position || 0),
         })),
         opportunities,
+        alignmentIssues,
+        internalLinkSuggestions,
+        top5ActionQueue,
         fetchedAt: new Date().toISOString(),
       });
     } catch (error: any) {
