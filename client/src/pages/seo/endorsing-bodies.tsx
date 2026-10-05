@@ -1,4 +1,5 @@
-import { SEOHead } from "@/components/SEOHead";\nimport { SeoTopicLinks } from "@/components/SeoTopicLinks";
+import { SEOHead } from "@/components/SEOHead";
+import { SeoTopicLinks } from "@/components/SeoTopicLinks";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -306,7 +307,9 @@ export default function EndorsingBodiesPage() {
             </p>
           </section>
 
-          <SeoTopicLinks excludePath="/endorsing-bodies" heading="Related Innovator Founder preparation resources" />\n\n          <Card className="bg-gradient-to-r from-primary to-[#41B6E6] text-white">
+          <SeoTopicLinks excludePath="/endorsing-bodies" heading="Related Innovator Founder preparation resources" />
+
+          <Card className="bg-gradient-to-r from-primary to-[#41B6E6] text-white">
             <CardContent className="py-8 text-center">
               <h2 className="text-2xl font-bold mb-4">Ready to Apply for Endorsement?</h2>
               <p className="mb-6 opacity-90">
