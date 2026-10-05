@@ -28,10 +28,10 @@ const activeEndorsingBodies = [
     cost: "£1,000"
   },
   { 
-    name: "UK Endorsing Services", 
+    name: "UK Endorsing Services (UKES)", 
     type: "Active",
     location: "UK-wide", 
-    website: "ukendorsingservices.co.uk", 
+    website: "ukesapp.co.uk", 
     featured: true, 
     description: "Active endorsing body providing visa endorsement services for international entrepreneurs with innovative business ideas.",
     sectors: ["All Sectors"],
@@ -43,7 +43,7 @@ const activeEndorsingBodies = [
     location: "London", 
     website: "innovatorinternational.com", 
     featured: true, 
-    description: "Supporting international entrepreneurs since 2019. Over 700+ entrepreneurs endorsed successfully. Specialist in guiding founders through the endorsement process.",
+    description: "Authorised business endorsing body for Innovator Founder applications, with its own published application and assessment process.",
     sectors: ["All Sectors"],
     cost: "£1,000"
   },
@@ -55,7 +55,7 @@ const activeEndorsingBodies = [
     featured: true, 
     description: "Government-run programme by the Department for Business and Trade. Invitation-only for exceptional tech entrepreneurs with high-growth potential businesses.",
     sectors: ["Technology", "High-Growth"],
-    cost: "Free (invitation only)",
+    cost: "Invitation only — check programme terms",
     invitationOnly: true
   },
 ];
@@ -77,10 +77,10 @@ export default function EndorsingBodiesPage() {
   return (
     <>
       <SEOHead
-        title="UK Innovator Founder Visa Endorsing Bodies 2026 | Official List"
-        description="Complete list of approved endorsing bodies for UK Innovator Founder Visa in 2026. Only 4 active endorsing bodies can issue new endorsements: Envestors, UK Endorsing Services, Innovator International, and GEP."
+        title="UK Innovator Founder Visa Endorsing Bodies 2026 | UKES & Official List"
+        description="Current Innovator Founder endorsing bodies for 2026, including UK Endorsing Services (UKES), Innovator International, Envestors and invitation-only GEP."
         path="/endorsing-bodies"
-        keywords="UK endorsing bodies 2026, Innovator Visa endorsement, Envestors endorsement, Innovator International, UK visa endorsing bodies list, startup visa endorsement"
+        keywords="UKES innovator founder, UK Endorsing Services, UK endorsing bodies 2026, Innovator Visa endorsement, Envestors endorsement, Innovator International, UK visa endorsing bodies list"
         schemas={[endorsingBodiesListSchema, breadcrumbSchema]}
       />
 
@@ -93,15 +93,14 @@ export default function EndorsingBodiesPage() {
               <span className="text-foreground">Endorsing Bodies</span>
             </nav>
 
-            <Badge className="mb-4 bg-primary/10 text-primary">Updated January 2026</Badge>
+            <Badge className="mb-4 bg-primary/10 text-primary">Checked against GOV.UK list updated 7 August 2026</Badge>
 
             <h1 className="text-4xl md:text-5xl font-bold mb-6" data-testid="heading-endorsing-bodies">
               UK Innovator Founder Visa Endorsing Bodies
             </h1>
 
             <p className="text-xl text-muted-foreground mb-8">
-              As of 2026, there are only <strong>4 active endorsing bodies</strong> approved by the UK Home Office 
-              to issue new endorsements for the Innovator Founder Visa. Find the right organization for your application.
+              The current GOV.UK list names <strong>three Business Endorsing Bodies</strong> that can issue Innovator Founder endorsements, plus the <strong>Global Entrepreneurs Programme (GEP)</strong>, which can endorse invited participants for the Innovator Founder route.
             </p>
 
             <div className="flex flex-wrap gap-4">
@@ -146,16 +145,15 @@ export default function EndorsingBodiesPage() {
               </p>
               <p>
                 Receiving endorsement is mandatory for the visa application. You must also attend 
-                <strong> two contact point meetings</strong> during your visa period (at 6 and 12 months) 
-                to demonstrate progress against your endorsed business plan.
+                <strong> at least two contact point meetings</strong> during your period of permission. Home Office guidance says endorsing bodies should hold these as close as practicably possible to 12 and 24 months after permission is granted or after arrival in the UK following that grant.
               </p>
             </div>
           </section>
 
           <section className="mb-12">
             <div className="flex items-center gap-3 mb-6">
-              <h2 className="text-2xl font-bold">Active Endorsing Bodies (2026)</h2>
-              <Badge className="bg-green-500/10 text-green-600">4 Bodies</Badge>
+              <h2 className="text-2xl font-bold">Current Innovator Founder Endorsing Bodies (2026)</h2>
+              <Badge className="bg-green-500/10 text-green-600">3 business bodies + GEP</Badge>
             </div>
 
             <div className="grid gap-4">
@@ -216,28 +214,28 @@ export default function EndorsingBodiesPage() {
                     <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5" />
                     <div>
                       <p className="font-medium">Initial Endorsement</p>
-                      <p className="text-muted-foreground text-sm">£1,000 per person (paid to endorsing body)</p>
+                      <p className="text-muted-foreground text-sm">£1,000 per person, paid to the endorsing body (excluding VAT where chargeable)</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5" />
                     <div>
                       <p className="font-medium">Contact Point Meetings</p>
-                      <p className="text-muted-foreground text-sm">£500 per meeting (2 mandatory meetings)</p>
+                      <p className="text-muted-foreground text-sm">£500 per meeting, with at least 2 meetings during permission (excluding VAT where chargeable)</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Clock className="w-5 h-5 text-blue-500 mt-0.5" />
                     <div>
                       <p className="font-medium">Processing Time</p>
-                      <p className="text-muted-foreground text-sm">4-8 weeks typically</p>
+                      <p className="text-muted-foreground text-sm">Varies by endorsing body and application circumstances</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Calendar className="w-5 h-5 text-purple-500 mt-0.5" />
                     <div>
-                      <p className="font-medium">Endorsement Validity</p>
-                      <p className="text-muted-foreground text-sm">3 months from issue date</p>
+                      <p className="font-medium">Visa Application Timing</p>
+                      <p className="text-muted-foreground text-sm">The endorsement letter must be dated no earlier than 3 months before the visa application</p>
                     </div>
                   </div>
                 </div>
@@ -252,7 +250,7 @@ export default function EndorsingBodiesPage() {
               {[
                 { title: "Compare All Four Bodies", desc: "With only 4 active options, research each one thoroughly before applying" },
                 { title: "Check Sector Expertise", desc: "Some bodies have stronger networks in specific industries - this can help post-endorsement" },
-                { title: "Review Success Criteria", desc: "Each body may have slightly different assessment approaches and requirements" },
+                { title: "Review Each Application Process", desc: "All bodies assess the route requirements, but their published processes and evidence requests can differ" },
                 { title: "Consider GEP (If Eligible)", desc: "The government programme is free but invitation-only for exceptional founders" },
                 { title: "Plan for Contact Meetings", desc: "You'll need 2 mandatory meetings - choose a body you can build a relationship with" },
                 { title: "Check Processing Times", desc: "Application processing varies - plan according to your visa timeline" }
