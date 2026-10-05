@@ -14,8 +14,7 @@ import fs from "fs";
 import compression from "compression";
 import { fileURLToPath } from "url";
 import { db } from "./db";
-import { sql, eq, and, desc } from "drizzle-orm";
-import { blogPosts, seoAutomationPlans } from "../shared/schema";
+import { sql } from "drizzle-orm";
 
 // Get __dirname equivalent for ESM (works in Node 18+)
 const __filename = fileURLToPath(import.meta.url);
