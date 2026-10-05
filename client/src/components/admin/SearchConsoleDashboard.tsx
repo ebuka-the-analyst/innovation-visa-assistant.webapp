@@ -274,6 +274,19 @@ export default function SearchConsoleDashboard() {
     .slice(0, 15);
 
   const missionAction = (row: SearchConsoleQueryRow) => {
+    const dedicatedIntent = ["business-plan", "endorsement", "eligibility"].includes(
+      row.cluster,
+    );
+    const misaligned =
+      dedicatedIntent &&
+      Boolean(row.path) &&
+      Boolean(row.recommendedPath) &&
+      row.path !== row.recommendedPath;
+
+    if (misaligned) {
+      return `Strengthen ${row.recommendedPath} and link to it from ${row.path}. Do not reinforce the wrong landing page.`;
+    }
+
     if (row.contentDecision === "optimise-existing") {
       if (row.position <= 8 && row.ctr < 0.03 && row.impressions >= 20) {
         return "Optimise the ranking page: improve snippet CTR, relevance and internal links. Do not create a competing article.";

@@ -64,7 +64,7 @@ export async function setupVite(app: Express, server: Server) {
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`,
       );
-      template = renderSeoHtml(template, req);
+      template = await renderSeoHtml(template, req);
       const page = await vite.transformIndexHtml(url, template);
       const profile = getSeoProfile(req);
       res.setHeader("X-Robots-Tag", profile.robots);
@@ -128,7 +128,7 @@ export function serveStatic(app: Express) {
       setApplicationShellHeaders(res);
       const template = await fs.promises.readFile(path.resolve(distPath, "index.html"), "utf-8");
       const profile = getSeoProfile(req);
-      const page = renderSeoHtml(template, req);
+      const page = await renderSeoHtml(template, req);
       res.setHeader("X-Robots-Tag", profile.robots);
       res.status(200).type("html").send(page);
     } catch (error) {
