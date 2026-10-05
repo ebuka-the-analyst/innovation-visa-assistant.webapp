@@ -12,6 +12,14 @@ import { db } from "./db.js";
 import { blogGenerationQueue, seoAutomationPlans } from "../shared/schema.js";
 import { eq } from "drizzle-orm";
 import { GoogleAuth } from "google-auth-library";
+import {
+  analyseSeoQuery,
+  chooseSeoContentDecision,
+  normaliseSearchConsolePath,
+  type SeoContentDecision,
+  type SeoIntentCluster,
+  type SeoSearchIntent,
+} from "./seoQueryIntelligence";
 
 const MAX_POSTS_PER_WEEK = 2;
 
@@ -21,28 +29,16 @@ type SearchQueryRow = {
   impressions: number;
   ctr: number;
   position: number;
+  page: string;
+  path: string;
+  qualified: boolean;
+  qualificationReason: string;
+  cluster: SeoIntentCluster;
+  intent: SeoSearchIntent;
+  recommendedPath: string;
+  pageMatchesRecommendation: boolean;
+  contentDecision: SeoContentDecision;
 };
-
-const COMMERCIAL_TERMS = [
-  "innovator",
-  "founder",
-  "visa",
-  "business plan",
-  "endorsement",
-  "endorsing",
-  "application",
-  "support",
-  "assistance",
-  "requirements",
-  "eligibility",
-  "interview",
-];
-
-function isCommercialQuery(query: string): boolean {
-  const value = query.toLowerCase().trim();
-  if (!value || value.length < 4) return false;
-  return COMMERCIAL_TERMS.some((term) => value.includes(term));
-}
 
 function normalizePrivateKey(value: string | undefined): string {
   if (!value) return "";
@@ -93,10 +89,10 @@ async function fetchCommercialSearchQueries(days = 28): Promise<SearchQueryRow[]
       body: JSON.stringify({
         startDate: iso(start),
         endDate: iso(end),
-        dimensions: ["query"],
+        dimensions: ["query", "page"],
         type: "web",
         dataState: "all",
-        rowLimit: 250,
+        rowLimit: 500,
       }),
     },
   );
@@ -106,15 +102,81 @@ async function fetchCommercialSearchQueries(days = 28): Promise<SearchQueryRow[]
   }
 
   const payload: any = await response.json();
-  return (payload.rows || [])
-    .map((row: any) => ({
-      query: String(row.keys?.[0] || "").trim(),
-      clicks: Number(row.clicks || 0),
-      impressions: Number(row.impressions || 0),
-      ctr: Number(row.ctr || 0),
-      position: Number(row.position || 0),
-    }))
-    .filter((row: SearchQueryRow) => isCommercialQuery(row.query));
+  const grouped = new Map<
+    string,
+    {
+      query: string;
+      clicks: number;
+      impressions: number;
+      weightedPosition: number;
+      bestPage: string;
+      bestPageImpressions: number;
+      bestPageClicks: number;
+    }
+  >();
+
+  for (const row of payload.rows || []) {
+    const query = String(row.keys?.[0] || "").trim();
+    const page = String(row.keys?.[1] || "").trim();
+    if (!query) continue;
+
+    const clicks = Number(row.clicks || 0);
+    const impressions = Number(row.impressions || 0);
+    const position = Number(row.position || 0);
+    const current = grouped.get(query) || {
+      query,
+      clicks: 0,
+      impressions: 0,
+      weightedPosition: 0,
+      bestPage: "",
+      bestPageImpressions: -1,
+      bestPageClicks: -1,
+    };
+
+    current.clicks += clicks;
+    current.impressions += impressions;
+    current.weightedPosition += position * impressions;
+
+    if (
+      page &&
+      (impressions > current.bestPageImpressions ||
+        (impressions === current.bestPageImpressions && clicks > current.bestPageClicks))
+    ) {
+      current.bestPage = page;
+      current.bestPageImpressions = impressions;
+      current.bestPageClicks = clicks;
+    }
+
+    grouped.set(query, current);
+  }
+
+  return Array.from(grouped.values())
+    .map((row): SearchQueryRow => {
+      const position = row.impressions
+        ? row.weightedPosition / row.impressions
+        : 0;
+      const intelligence = analyseSeoQuery(row.query);
+      const path = normaliseSearchConsolePath(row.bestPage);
+      return {
+        query: row.query,
+        clicks: row.clicks,
+        impressions: row.impressions,
+        ctr: row.impressions ? row.clicks / row.impressions : 0,
+        position,
+        page: row.bestPage,
+        path,
+        ...intelligence,
+        pageMatchesRecommendation: Boolean(
+          path && path === intelligence.recommendedPath,
+        ),
+        contentDecision: chooseSeoContentDecision({
+          ...intelligence,
+          actualPath: path,
+          position,
+        }),
+      };
+    })
+    .filter((row) => row.qualified);
 }
 
 function buildTop5Mission(rows: SearchQueryRow[]) {
@@ -145,7 +207,14 @@ function buildTop5Mission(rows: SearchQueryRow[]) {
 
 async function queueAutopilotSupportContent(planId: string, mission: ReturnType<typeof buildTop5Mission>) {
   const candidates = mission
-    .filter((item) => item.position > 10 && item.position <= 50 && item.impressions >= 10)
+    .filter(
+      (item) =>
+        item.position > 10 &&
+        item.position <= 50 &&
+        item.impressions >= 10 &&
+        (item.contentDecision === "support-existing" ||
+          item.contentDecision === "new-content"),
+    )
     .slice(0, 2);
 
   let queued = 0;
@@ -229,7 +298,9 @@ function buildApprovalQueue(
     if (existing) return existing;
 
     const keywordTitle = titleCaseQuery(item.query);
-    const path = preferredPathForQuery(item.query);
+    // Apply snippet changes to the page Google is actually ranking. Only fall
+    // back to the intent target when Search Console did not return a page.
+    const path = item.path || item.recommendedPath || preferredPathForQuery(item.query);
     const proposedTitle = `${keywordTitle} | UK Innovator Founder Visa 2026`.slice(0, 62);
     const proposedDescription =
       `Explore ${item.query} with practical UK Innovator Founder Visa guidance, eligibility support, endorsement preparation and AI-powered application tools.`.slice(0, 158);
