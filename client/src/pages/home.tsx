@@ -13,7 +13,7 @@ import LawyerCTA from "@/components/LawyerCTA";
 import FAQSection from "@/components/FAQSection";
 import Disclaimer from "@/components/Disclaimer";
 import Footer from "@/components/Footer";
-import { SEOHead } from "@/components/SEOHead";
+import { SEOHead } from "@/components/SEOHead";\nimport { SeoTopicLinks } from "@/components/SeoTopicLinks";
 import { organizationSchema, softwareApplicationSchema, visaFAQSchema, websiteSchema } from "@/lib/seo-schemas";
 import { GlobalNavButton } from "@/components/global-nav-button";
 import { useLanguage } from "@/contexts/LanguageContext";
