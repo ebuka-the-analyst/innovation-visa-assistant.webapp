@@ -101,9 +101,33 @@ export function SEOHead({
       canonicalLink.rel = 'canonical';
       document.head.appendChild(canonicalLink);
     }
-    const fullCanonical =
-      canonical || (path ? `${window.location.origin}${path}` : window.location.href);
+    const innovatorOrigin = "https://innovatorfoundervisaassistant.co.uk";
+    const isGlobalHost = window.location.hostname.includes("visaassistant.global");
+    const innovatorOwnedPaths = new Set([
+      "/guide",
+      "/faq",
+      "/eligibility",
+      "/endorsing-bodies",
+      "/business-plan-template",
+      "/guide/ultimate-uk-innovator-founder-visa-guide",
+      "/blog",
+    ]);
+    const canonicalPath =
+      path ||
+      (window.location.pathname.length > 1 &&
+      window.location.pathname.endsWith("/")
+        ? window.location.pathname.slice(0, -1)
+        : window.location.pathname);
+    const isInnovatorOwnedOnGlobal =
+      isGlobalHost &&
+      (innovatorOwnedPaths.has(canonicalPath) ||
+        canonicalPath.startsWith("/blog/"));
+    const fullCanonical = isInnovatorOwnedOnGlobal
+      ? `${innovatorOrigin}${canonicalPath}`
+      : canonical ||
+        (path ? `${window.location.origin}${path}` : window.location.href);
     canonicalLink.href = fullCanonical;
+    setMeta('og:url', fullCanonical, true);
 
     // Schema.org structured data
     const schemaData = schemas || (schema ? [schema] : []);
