@@ -41,6 +41,23 @@ type MetricChange = {
   position: number;
 };
 
+type SearchConsoleQueryRow = {
+  query: string;
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+  qualified: boolean;
+  qualificationReason: string;
+  cluster: string;
+  intent: string;
+  recommendedPath: string;
+  page: string;
+  path: string;
+  pageMatchesRecommendation: boolean;
+  contentDecision: "ignore" | "optimise-existing" | "support-existing" | "new-content";
+};
+
 type SearchConsoleData = {
   configured: boolean;
   siteUrl: string;
@@ -53,9 +70,16 @@ type SearchConsoleData = {
     changes: MetricChange;
   };
   daily: Array<{ date: string; clicks: number; impressions: number; ctr: number; position: number }>;
-  queries: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
+  queries: SearchConsoleQueryRow[];
+  queryQuality?: {
+    qualified: number;
+    excluded: number;
+    top5Qualified: number;
+    top10Qualified: number;
+    top20Qualified: number;
+  };
   pages: Array<{ page: string; clicks: number; impressions: number; ctr: number; position: number }>;
-  opportunities: Array<{ query: string; clicks: number; impressions: number; ctr: number; position: number }>;
+  opportunities: SearchConsoleQueryRow[];
   fetchedAt: string;
 };
 
@@ -198,12 +222,14 @@ export default function SearchConsoleDashboard() {
 
   const summary = data.summary;
 
-  const top5Count = data.queries.filter((row) => row.position > 0 && row.position <= 5).length;
-  const top10Count = data.queries.filter((row) => row.position > 5 && row.position <= 10).length;
-  const top20Count = data.queries.filter((row) => row.position > 10 && row.position <= 20).length;
-  const top50Count = data.queries.filter((row) => row.position > 20 && row.position <= 50).length;
+  const qualifiedQueries = data.queries.filter((row) => row.qualified);
+  const excludedQueryCount = data.queryQuality?.excluded ?? data.queries.length - qualifiedQueries.length;
+  const top5Count = qualifiedQueries.filter((row) => row.position > 0 && row.position <= 5).length;
+  const top10Count = qualifiedQueries.filter((row) => row.position > 5 && row.position <= 10).length;
+  const top20Count = qualifiedQueries.filter((row) => row.position > 10 && row.position <= 20).length;
+  const top50Count = qualifiedQueries.filter((row) => row.position > 20 && row.position <= 50).length;
 
-  const top5Mission = data.queries
+  const top5Mission = qualifiedQueries
     .filter((row) => row.position > 5 && row.position <= 20 && row.impressions >= 5)
     .sort((a, b) => {
       const positionPriority = a.position - b.position;
@@ -212,13 +238,20 @@ export default function SearchConsoleDashboard() {
     })
     .slice(0, 15);
 
-  const missionAction = (position: number, ctr: number, impressions: number) => {
-    if (position <= 8) {
-      if (ctr < 0.03 && impressions >= 20) return "Improve title/meta CTR + strengthen internal links";
-      return "Strengthen on-page relevance + internal links";
+  const missionAction = (row: SearchConsoleQueryRow) => {
+    if (row.contentDecision === "optimise-existing") {
+      if (row.position <= 8 && row.ctr < 0.03 && row.impressions >= 20) {
+        return "Optimise the ranking page: improve snippet CTR, relevance and internal links. Do not create a competing article.";
+      }
+      return "Optimise the existing ranking page and strengthen internal links. Do not create a competing article.";
     }
-    if (position <= 12) return "Expand page depth + add supporting content";
-    return "Build dedicated supporting content + authority links";
+    if (row.contentDecision === "support-existing") {
+      return "Strengthen the ranking page and add one distinct supporting content item for this intent cluster.";
+    }
+    if (row.contentDecision === "new-content") {
+      return "Create a distinct page only if the intent is not already served by an existing public route.";
+    }
+    return "Exclude from the Top 5 mission.";
   };
 
   return (
@@ -296,7 +329,8 @@ export default function SearchConsoleDashboard() {
               </CardDescription>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="w-fit">Target: Top 5</Badge>
+              <Badge variant="outline" className="w-fit">Target: Top 5 qualified queries</Badge>
+              <Badge variant="secondary" className="w-fit">{excludedQueryCount} noise queries excluded</Badge>
               {lifetimeActive ? (
                 <Badge className="w-fit">Lifetime Autopilot Active</Badge>
               ) : (
@@ -328,7 +362,7 @@ export default function SearchConsoleDashboard() {
             <div className="rounded-lg border p-3">
               <div className="flex items-center gap-2 text-xs text-muted-foreground"><Trophy className="h-4 w-4" />Top 5</div>
               <div className="mt-1 text-2xl font-semibold">{top5Count}</div>
-              <div className="text-[11px] text-muted-foreground">queries already achieved</div>
+              <div className="text-[11px] text-muted-foreground">qualified queries already achieved</div>
             </div>
             <div className="rounded-lg border p-3">
               <div className="flex items-center gap-2 text-xs text-muted-foreground"><Rocket className="h-4 w-4" />Positions 6–10</div>
@@ -352,6 +386,8 @@ export default function SearchConsoleDashboard() {
               <thead>
                 <tr className="border-b text-left text-muted-foreground">
                   <th className="py-2">Keyword</th>
+                  <th>Cluster</th>
+                  <th>Ranking page</th>
                   <th>Current</th>
                   <th>Target</th>
                   <th>Gap</th>
@@ -365,20 +401,27 @@ export default function SearchConsoleDashboard() {
                 {top5Mission.map((row) => (
                   <tr key={row.query} className="border-b last:border-0">
                     <td className="py-2 pr-3 font-medium">{row.query || "(not provided)"}</td>
+                    <td><Badge variant="outline">{row.cluster.replace(/-/g, " ")}</Badge></td>
+                    <td className="min-w-[150px]">
+                      <span className="font-medium">{row.path || row.recommendedPath}</span>
+                      {row.path && row.path !== row.recommendedPath && (
+                        <div className="text-[10px] text-amber-600">Intent target: {row.recommendedPath}</div>
+                      )}
+                    </td>
                     <td>{row.position.toFixed(1)}</td>
                     <td>5.0</td>
                     <td>{Math.max(0, row.position - 5).toFixed(1)}</td>
                     <td>{row.impressions.toLocaleString()}</td>
                     <td>{row.clicks.toLocaleString()}</td>
                     <td>{formatPercent(row.ctr)}</td>
-                    <td className="min-w-[260px] text-muted-foreground">{missionAction(row.position, row.ctr, row.impressions)}</td>
+                    <td className="min-w-[320px] text-muted-foreground">{missionAction(row)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             {top5Mission.length === 0 && (
               <div className="py-6 text-center text-sm text-muted-foreground">
-                No queries between positions 6 and 20 met the current impression threshold in this period.
+                No qualified Innovator Founder queries between positions 6 and 20 met the current impression threshold in this period.
               </div>
             )}
           </div>
@@ -552,15 +595,24 @@ export default function SearchConsoleDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="text-sm">Top Google queries</CardTitle>
-              <CardDescription>Queries currently generating visibility for the site.</CardDescription>
+              <CardDescription>
+                Queries currently generating visibility for the site. Qualified mission terms are separated from low-signal noise.
+              </CardDescription>
             </CardHeader>
             <CardContent className="overflow-x-auto">
               <table className="w-full text-xs">
-                <thead><tr className="border-b text-left text-muted-foreground"><th className="py-2">Query</th><th>Position</th><th>Clicks</th><th>Impressions</th><th>CTR</th></tr></thead>
+                <thead><tr className="border-b text-left text-muted-foreground"><th className="py-2">Query</th><th>Mission</th><th>Cluster</th><th>Landing page</th><th>Position</th><th>Clicks</th><th>Impressions</th><th>CTR</th></tr></thead>
                 <tbody>
                   {data.queries.slice(0, 50).map((row) => (
                     <tr key={row.query} className="border-b last:border-0">
                       <td className="py-2 pr-3 font-medium">{row.query || "(not provided)"}</td>
+                      <td>
+                        <Badge variant={row.qualified ? "default" : "secondary"}>
+                          {row.qualified ? "Qualified" : "Excluded"}
+                        </Badge>
+                      </td>
+                      <td>{row.qualified ? row.cluster.replace(/-/g, " ") : "—"}</td>
+                      <td className="min-w-[160px]">{row.path || "—"}</td>
                       <td>{row.position.toFixed(1)}</td>
                       <td>{row.clicks.toLocaleString()}</td>
                       <td>{row.impressions.toLocaleString()}</td>

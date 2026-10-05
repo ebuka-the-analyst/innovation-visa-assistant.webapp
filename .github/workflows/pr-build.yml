@@ -157,5 +157,8 @@ jobs:
           node scripts/prepare-customer360-auth-order.cjs
           node scripts/validate-customer360-auth-order.cjs
 
+      - name: Test SEO query intelligence
+        run: node --import tsx --test tests/seo-query-intelligence.test.ts
+
       - name: Production build
         run: npm run build
