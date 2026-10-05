@@ -1,4 +1,4 @@
-import { SEOHead } from "@/components/SEOHead";
+import { SEOHead } from "@/components/SEOHead";\nimport { SeoTopicLinks } from "@/components/SeoTopicLinks";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -187,7 +187,7 @@ export default function FAQ() {
             ))}
           </div>
 
-          {/* CTA Section */}
+          <SeoTopicLinks excludePath="/faq" heading="Explore the main Innovator Founder topics" />\n\n          {/* CTA Section */}
           <Card className="mt-12 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
             <CardContent className="p-8 text-center">
               <h2 className="text-lg font-bold mb-4">Still Have Questions?</h2>
