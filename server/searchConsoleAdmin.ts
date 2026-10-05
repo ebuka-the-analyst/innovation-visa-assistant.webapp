@@ -401,7 +401,7 @@ export function registerSearchConsoleAdminRoutes(app: Express) {
             actionType = "landing-page-alignment";
             action =
               `Strengthen ${row.recommendedPath} for "${row.query}" and add contextual links from ${row.path}. Avoid creating a competing page.`;
-          } else if (row.position <= 10 && row.ctr < 0.03 && row.impressions >= 20) {
+          } else if (row.position <= 10 && row.ctr < 0.03 && row.impressions >= 5) {
             actionType = "snippet-ctr";
             approvalRequired = true;
             action =

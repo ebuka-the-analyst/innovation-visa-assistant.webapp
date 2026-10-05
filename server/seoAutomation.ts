@@ -289,7 +289,13 @@ function buildApprovalQueue(
 ): SeoApprovalAction[] {
   const previousByKey = new Map(previous.map((item) => [`${item.type}:${item.keyword.toLowerCase()}`, item]));
   const candidates = mission
-    .filter((item) => item.position > 5 && item.position <= 20 && item.impressions >= 15)
+    .filter(
+      (item) =>
+        item.position > 5 &&
+        item.position <= 20 &&
+        ((item.position <= 10 && item.impressions >= 5 && item.ctr < 0.04) ||
+          (item.position > 10 && item.impressions >= 15)),
+    )
     .slice(0, 12);
 
   const next: SeoApprovalAction[] = candidates.map((item) => {
