@@ -153,7 +153,7 @@ const GLOBAL_PUBLIC_PAGE_META: Record<
   },
 };
 
-const INNOVATOR_PUBLIC_PAGE_META: Record<
+export const INNOVATOR_PUBLIC_PAGE_META: Record<
   string,
   { title: string; description: string }
 > = {
