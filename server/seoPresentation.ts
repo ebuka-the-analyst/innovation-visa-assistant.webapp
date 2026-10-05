@@ -1,6 +1,6 @@
 import type { Express, Request } from "express";
 import { desc, eq } from "drizzle-orm";
-import { seoAutomationPlans } from "@shared/schema";
+import { blogPosts, seoAutomationPlans } from "@shared/schema";
 import { db } from "./db";
 
 const GLOBAL_HOSTS = new Set(["visaassistant.global", "www.visaassistant.global"]);
@@ -101,30 +101,20 @@ const GLOBAL_PUBLIC_PAGE_META: Record<
     description:
       "Explore AI-assisted document, preparation, evidence and workflow tools available through Visa Assistant Global.",
   },
+  "/tools": {
+    title: "Visa Preparation Tools | Visa Assistant Global",
+    description:
+      "Explore Visa Assistant Global preparation tools for documents, evidence, planning and structured application workflows.",
+  },
   "/about": {
     title: "About Visa Assistant Global",
     description:
       "Learn about Visa Assistant Global, a technology platform providing AI-assisted visa application preparation tools and structured workflows.",
   },
-  "/eligibility": {
-    title: "UK Innovator Founder Eligibility Preparation | Visa Assistant Global",
+  "/contact": {
+    title: "Contact Visa Assistant Global",
     description:
-      "Structured preparation resources for understanding and organising information relevant to the UK Innovator Founder route.",
-  },
-  "/endorsing-bodies": {
-    title: "UK Innovator Founder Endorsing Bodies | Visa Assistant Global",
-    description:
-      "Preparation resources covering UK Innovator Founder endorsing bodies and application-readiness considerations.",
-  },
-  "/business-plan-template": {
-    title: "Innovator Founder Business Plan Template | Visa Assistant Global",
-    description:
-      "A structured business-plan preparation resource for UK Innovator Founder applicants, including innovation, viability and scalability evidence planning.",
-  },
-  "/guide/ultimate-uk-innovator-founder-visa-guide": {
-    title: "UK Innovator Founder Visa Preparation Guide | Visa Assistant Global",
-    description:
-      "A detailed preparation guide for the UK Innovator Founder route, covering business planning, evidence organisation and application readiness.",
+      "Contact Visa Assistant Global for platform, account and product support.",
   },
   "/blog": {
     title: "Visa Preparation Blog | Visa Assistant Global",
@@ -177,10 +167,20 @@ export const INNOVATOR_PUBLIC_PAGE_META: Record<
     description:
       "Explore AI-assisted business-plan, evidence, document, interview and application-preparation tools for the UK Innovator Founder route.",
   },
+  "/tools": {
+    title: "UK Innovator Founder Visa Tools | Application Preparation",
+    description:
+      "Explore AI-assisted business-plan, evidence, financial, document and application-preparation tools for the UK Innovator Founder route.",
+  },
   "/about": {
     title: "About | UK Innovator Founder Visa Assistant",
     description:
       "Learn about the UK Innovator Founder Visa Assistant, a technology platform for structured business planning, evidence and application preparation.",
+  },
+  "/contact": {
+    title: "Contact | UK Innovator Founder Visa Assistant",
+    description:
+      "Contact the UK Innovator Founder Visa Assistant team for platform, account and product support.",
   },
   "/eligibility": {
     title: "UK Innovator Founder Visa Eligibility 2026 | Requirements",
@@ -228,6 +228,23 @@ export const INNOVATOR_PUBLIC_PAGE_META: Record<
       "Learn how AI-assisted features are used, their limitations and the role of human verification in application preparation.",
   },
 };
+
+const INNOVATOR_SHARED_PATHS = new Set([
+  "/guide",
+  "/faq",
+  "/eligibility",
+  "/endorsing-bodies",
+  "/business-plan-template",
+  "/guide/ultimate-uk-innovator-founder-visa-guide",
+]);
+
+function isInnovatorSharedPath(pathname: string) {
+  return (
+    INNOVATOR_SHARED_PATHS.has(pathname) ||
+    pathname === "/blog" ||
+    pathname.startsWith("/blog/")
+  );
+}
 
 export interface SeoProfile {
   title: string;
@@ -515,13 +532,13 @@ export function getSeoProfile(req: Request): SeoProfile {
     };
   }
 
-  if (isGlobal && pathname.startsWith("/blog/")) {
+  if (isGlobal && isInnovatorSharedPath(pathname)) {
     return {
-      title: "Visa Preparation Article | Visa Assistant Global",
+      title: "UK Innovator Founder Visa Preparation | Visa Assistant Global",
       description:
-        "Visa preparation guidance and application-readiness resources from Visa Assistant Global.",
-      canonical: `${GLOBAL_ORIGIN}${pathname}`,
-      robots: INDEX_ROBOTS,
+        "This Innovator Founder resource is canonically maintained on the dedicated UK Innovator Founder Visa Assistant website.",
+      canonical: `${INNOVATOR_ORIGIN}${pathname}`,
+      robots: "noindex,follow",
       siteName: "Visa Assistant Global",
       jsonLd: [],
     };
@@ -672,8 +689,131 @@ function buildSeoMarkup(profile: SeoProfile) {
     <!-- SEO_DYNAMIC_END -->`;
 }
 
+async function resolveBlogSeoProfile(
+  req: Request,
+  baseProfile: SeoProfile,
+): Promise<SeoProfile> {
+  const host = cleanHost(req);
+  const pathname = cleanPath(req);
+  const isInnovator = INNOVATOR_HOSTS.has(host);
+  const match = pathname.match(/^\/blog\/([^/]+)$/);
+
+  if (!match || !isInnovator) return baseProfile;
+
+  try {
+    const [post] = await db
+      .select({
+        title: blogPosts.title,
+        metaTitle: blogPosts.metaTitle,
+        metaDescription: blogPosts.metaDescription,
+        excerpt: blogPosts.excerpt,
+        slug: blogPosts.slug,
+        publishedAt: blogPosts.publishedAt,
+        updatedAt: blogPosts.updatedAt,
+        author: blogPosts.author,
+        category: blogPosts.category,
+        featuredImage: blogPosts.featuredImage,
+        readingTime: blogPosts.readingTime,
+        tags: blogPosts.tags,
+      })
+      .from(blogPosts)
+      .where(eq(blogPosts.slug, match[1]))
+      .limit(1);
+
+    if (!post) return baseProfile;
+
+    const canonical = `${INNOVATOR_ORIGIN}/blog/${post.slug}`;
+    const title = post.metaTitle
+      ? `${post.metaTitle} | UK Innovator Founder Visa Assistant`
+      : `${post.title} | UK Innovator Founder Visa Assistant`;
+    const description =
+      post.metaDescription ||
+      post.excerpt ||
+      "UK Innovator Founder Visa preparation guidance. Verify important immigration requirements against current official GOV.UK sources.";
+    const image = post.featuredImage
+      ? post.featuredImage.startsWith("http")
+        ? post.featuredImage
+        : `${INNOVATOR_ORIGIN}${post.featuredImage}`
+      : `${INNOVATOR_ORIGIN}/og-image.webp`;
+    const published = post.publishedAt
+      ? new Date(post.publishedAt).toISOString()
+      : undefined;
+    const modified = post.updatedAt
+      ? new Date(post.updatedAt).toISOString()
+      : published;
+
+    return {
+      title,
+      description,
+      canonical,
+      robots: INDEX_ROBOTS,
+      siteName: "UK Innovator Founder Visa Assistant",
+      jsonLd: [
+        {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "BlogPosting",
+              headline: post.title,
+              description,
+              image,
+              author: {
+                "@type": "Organization",
+                name: post.author || "UK Innovator Founder Visa Assistant Team",
+                url: INNOVATOR_ORIGIN,
+              },
+              publisher: {
+                "@type": "Organization",
+                name: "UK Innovator Founder Visa Assistant",
+                url: INNOVATOR_ORIGIN,
+              },
+              datePublished: published,
+              dateModified: modified,
+              mainEntityOfPage: {
+                "@type": "WebPage",
+                "@id": canonical,
+              },
+              articleSection: post.category || "Innovator Founder Visa",
+              keywords: Array.isArray(post.tags)
+                ? post.tags.join(", ")
+                : "UK Innovator Founder Visa",
+              timeRequired: `PT${post.readingTime || 8}M`,
+            },
+            {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: "Home",
+                  item: INNOVATOR_ORIGIN,
+                },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: "Blog",
+                  item: `${INNOVATOR_ORIGIN}/blog`,
+                },
+                {
+                  "@type": "ListItem",
+                  position: 3,
+                  name: post.title,
+                  item: canonical,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+  } catch (error) {
+    console.warn("[SEO] Unable to resolve blog metadata:", error);
+    return baseProfile;
+  }
+}
+
 export async function renderSeoHtml(template: string, req: Request) {
-  const baseProfile = getSeoProfile(req);
+  const baseProfile = await resolveBlogSeoProfile(req, getSeoProfile(req));
   const profile = await applyApprovedSeoOverride(baseProfile, req);
   return template.replace(
     /<!-- SEO_DYNAMIC_START -->[\s\S]*?<!-- SEO_DYNAMIC_END -->/,
@@ -740,10 +880,6 @@ function globalSitemapXml() {
   return buildSitemapXml(GLOBAL_ORIGIN, [
     ["/", "1.0"],
     [GLOBAL_INNOVATOR_PATH, "0.95"],
-    ["/guide/ultimate-uk-innovator-founder-visa-guide", "0.85"],
-    ["/eligibility", "0.8"],
-    ["/endorsing-bodies", "0.8"],
-    ["/business-plan-template", "0.8"],
     ["/features", "0.75"],
     ["/pricing", "0.7"],
     ["/faq", "0.7"],
