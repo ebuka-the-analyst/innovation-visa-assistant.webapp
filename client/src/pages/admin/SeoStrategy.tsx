@@ -570,6 +570,7 @@ function BacklinkEngine() {
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editNotes, setEditNotes] = useState<Record<string, string>>({});
+  const [editLiveUrls, setEditLiveUrls] = useState<Record<string, string>>({});
 
   const {
     data: targets = [],
@@ -697,8 +698,9 @@ function BacklinkEngine() {
       apiRequest("POST", `/api/seo/backlink-check/${id}`).then((r) => r.json()),
     onSuccess: (data) => {
       toast({
-        title: data.isLive ? "Link is Live!" : "Not Live Yet",
-        description: `Status code: ${data.statusCode}`,
+        title: data.isLive ? "Backlink Verified" : "Backlink Not Verified",
+        description:
+          data.verificationReason || `Status code: ${data.statusCode}`,
         variant: data.isLive ? "default" : "destructive",
       });
       qc.invalidateQueries({ queryKey: ["/api/seo/backlink-targets"] });
@@ -711,8 +713,8 @@ function BacklinkEngine() {
     onSuccess: (data) => {
       const live = data.results.filter((r: any) => r.isLive).length;
       toast({
-        title: `Bulk Check Complete`,
-        description: `${live} of ${data.checked} submitted links confirmed live.`,
+        title: "Backlink Verification Complete",
+        description: `${live} of ${data.checked} submitted/live targets contain a verified direct backlink.`,
       });
       qc.invalidateQueries({ queryKey: ["/api/seo/backlink-targets"] });
     },
@@ -728,6 +730,9 @@ function BacklinkEngine() {
   ).length;
   const pending = targets.filter(
     (t) => t.status === "pending" && t.isLive !== true,
+  ).length;
+  const recheckable = targets.filter(
+    (t) => t.status === "submitted" || t.status === "live",
   ).length;
   const avgDA =
     targets.length > 0
@@ -773,7 +778,7 @@ function BacklinkEngine() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {submitted > 0 && (
+          {recheckable > 0 && (
             <Button
               variant="outline"
               size="sm"
@@ -784,7 +789,7 @@ function BacklinkEngine() {
               <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
               {checkAllMutation.isPending
                 ? "Checking..."
-                : `Check ${submitted} Submitted`}
+                : `Reverify ${recheckable} Submitted/Live`}
             </Button>
           )}
           <Button
@@ -811,10 +816,10 @@ function BacklinkEngine() {
             sub: "discovered",
           },
           {
-            label: "Live Backlinks",
+            label: "Verified Backlinks",
             value: live,
             color: "text-green-600",
-            sub: "confirmed live",
+            sub: "direct link confirmed",
           },
           {
             label: "Submitted",
@@ -971,12 +976,12 @@ function BacklinkEngine() {
                         </Badge>
                         {t.isLive === true && (
                           <Badge className="text-xs px-1.5 py-0 bg-green-100 text-green-700">
-                            ✓ Live
+                            ✓ Verified
                           </Badge>
                         )}
                         {t.isLive === false && t.liveCheckedAt && (
                           <Badge className="text-xs px-1.5 py-0 bg-red-100 text-red-700">
-                            ✗ Not live
+                            ✗ Unverified
                           </Badge>
                         )}
                       </div>
@@ -1136,6 +1141,51 @@ function BacklinkEngine() {
                             </a>
                           </div>
                         )}
+                        <div className="col-span-2 md:col-span-4">
+                          <span className="font-medium text-muted-foreground">
+                            Exact Live URL
+                          </span>
+                          <div className="mt-1 flex gap-2">
+                            <Input
+                              value={
+                                editLiveUrls[t.id] !== undefined
+                                  ? editLiveUrls[t.id]
+                                  : t.liveUrl || ""
+                              }
+                              onChange={(e) =>
+                                setEditLiveUrls((urls) => ({
+                                  ...urls,
+                                  [t.id]: e.target.value,
+                                }))
+                              }
+                              placeholder="Paste the exact published page/post URL containing the backlink"
+                              className="h-8 text-xs"
+                              data-testid={`input-live-url-${t.id}`}
+                            />
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8"
+                              onClick={() =>
+                                updateMutation.mutate({
+                                  id: t.id,
+                                  updates: {
+                                    liveUrl:
+                                      editLiveUrls[t.id] !== undefined
+                                        ? editLiveUrls[t.id].trim()
+                                        : t.liveUrl || "",
+                                  },
+                                })
+                              }
+                              data-testid={`button-save-live-url-${t.id}`}
+                            >
+                              Save URL
+                            </Button>
+                          </div>
+                          <p className="mt-1 text-[11px] text-muted-foreground">
+                            Verification only passes when this page's HTML contains a direct link to innovatorfoundervisaassistant.co.uk.
+                          </p>
+                        </div>
                         {t.submittedAt && (
                           <div>
                             <span className="font-medium text-muted-foreground">
@@ -1814,7 +1864,7 @@ export default function SeoStrategy() {
                   <Input
                     className="h-8 text-sm"
                     type="number"
-                    placeholder="5000"
+                    placeholder="Leave blank if unverified"
                     value={form.currentMonthlyTraffic}
                     onChange={(e) =>
                       setForm((f) => ({
@@ -1832,7 +1882,7 @@ export default function SeoStrategy() {
                   <Input
                     className="h-8 text-sm"
                     type="number"
-                    placeholder="24"
+                    placeholder="Leave blank if unverified"
                     value={form.googleReviewCount}
                     onChange={(e) =>
                       setForm((f) => ({
@@ -1853,7 +1903,7 @@ export default function SeoStrategy() {
                     step="0.1"
                     min="1"
                     max="5"
-                    placeholder="4.8"
+                    placeholder="Leave blank if unverified"
                     value={form.averageRating}
                     onChange={(e) =>
                       setForm((f) => ({ ...f, averageRating: e.target.value }))
@@ -1961,7 +2011,7 @@ export default function SeoStrategy() {
                   </label>
                   <Input
                     className="h-8 text-sm"
-                    placeholder="/blog/guide, /tools/checker"
+                    placeholder="Leave blank if unverified"
                     value={form.topPerformingPages}
                     onChange={(e) =>
                       setForm((f) => ({
@@ -1978,7 +2028,7 @@ export default function SeoStrategy() {
                   </label>
                   <Input
                     className="h-8 text-sm"
-                    placeholder="slow mobile, no schema, missing alt tags"
+                    placeholder="Leave blank if none verified"
                     value={form.knownTechnicalIssues}
                     onChange={(e) =>
                       setForm((f) => ({
@@ -2000,7 +2050,7 @@ export default function SeoStrategy() {
                     type="number"
                     min="0"
                     max="100"
-                    placeholder="25"
+                    placeholder="Leave blank"
                     value={form.domainAuthority}
                     onChange={(e) =>
                       setForm((f) => ({
@@ -2018,7 +2068,7 @@ export default function SeoStrategy() {
                   <Input
                     className="h-8 text-sm"
                     type="number"
-                    placeholder="500"
+                    placeholder="Leave blank"
                     value={form.estimatedBacklinks}
                     onChange={(e) =>
                       setForm((f) => ({
