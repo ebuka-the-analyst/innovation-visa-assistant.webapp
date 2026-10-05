@@ -17,15 +17,46 @@ export function SEOHead({
   description,
   canonical,
   path,
-  ogImage = 'https://innovatorfoundervisaassistant.co.uk/og-image.webp',
+  ogImage,
   ogType = 'website',
   keywords,
   schema,
   schemas
 }: SEOHeadProps) {
   useEffect(() => {
-    // Set title
-    document.title = title;
+    const currentPath =
+      window.location.pathname.length > 1 && window.location.pathname.endsWith("/")
+        ? window.location.pathname.slice(0, -1)
+        : window.location.pathname;
+    const approvedPath = document
+      .querySelector('meta[name="seo-autopilot-path"]')
+      ?.getAttribute("content");
+    const approvedTitle = document
+      .querySelector('meta[name="seo-autopilot-title"]')
+      ?.getAttribute("content");
+    const approvedDescription = document
+      .querySelector('meta[name="seo-autopilot-description"]')
+      ?.getAttribute("content");
+
+    const useApprovedOverride =
+      Boolean(approvedPath) &&
+      approvedPath === currentPath &&
+      Boolean(approvedTitle) &&
+      Boolean(approvedDescription);
+
+    const effectiveTitle = useApprovedOverride ? approvedTitle! : title;
+    const effectiveDescription = useApprovedOverride
+      ? approvedDescription!
+      : description;
+    const resolvedOgImage =
+      ogImage || `${window.location.origin}/og-image.webp`;
+    const siteName = window.location.hostname.includes("visaassistant.global")
+      ? "Visa Assistant Global"
+      : "UK Innovator Founder Visa Assistant";
+
+    // Set title. Approved autopilot metadata wins when the server marked this
+    // exact path with an approved override.
+    document.title = effectiveTitle;
 
     // Set or update meta tags
     const setMeta = (name: string, content: string, isProperty = false) => {
@@ -42,7 +73,7 @@ export function SEOHead({
     };
 
     // Basic meta tags
-    setMeta('description', description);
+    setMeta('description', effectiveDescription);
     if (keywords) {
       setMeta('keywords', keywords);
     }
@@ -50,18 +81,18 @@ export function SEOHead({
     setMeta('googlebot', 'index, follow');
     
     // Open Graph tags
-    setMeta('og:title', title, true);
-    setMeta('og:description', description, true);
+    setMeta('og:title', effectiveTitle, true);
+    setMeta('og:description', effectiveDescription, true);
     setMeta('og:type', ogType, true);
     setMeta('og:url', canonical || window.location.href, true);
-    setMeta('og:image', ogImage, true);
-    setMeta('og:site_name', 'UK Innovator Founder Visa Assistant', true);
+    setMeta('og:image', resolvedOgImage, true);
+    setMeta('og:site_name', siteName, true);
     
     // Twitter Card tags
     setMeta('twitter:card', 'summary_large_image');
-    setMeta('twitter:title', title);
-    setMeta('twitter:description', description);
-    setMeta('twitter:image', ogImage);
+    setMeta('twitter:title', effectiveTitle);
+    setMeta('twitter:description', effectiveDescription);
+    setMeta('twitter:image', resolvedOgImage);
     
     // Canonical link
     let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
@@ -70,7 +101,8 @@ export function SEOHead({
       canonicalLink.rel = 'canonical';
       document.head.appendChild(canonicalLink);
     }
-    const fullCanonical = canonical || (path ? `https://innovatorfoundervisaassistant.co.uk${path}` : window.location.href);
+    const fullCanonical =
+      canonical || (path ? `${window.location.origin}${path}` : window.location.href);
     canonicalLink.href = fullCanonical;
 
     // Schema.org structured data
