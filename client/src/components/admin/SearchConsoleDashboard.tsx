@@ -28,6 +28,7 @@ import {
   CheckCircle2,
   XCircle,
   Settings2,
+  Link2,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -80,6 +81,40 @@ type SearchConsoleData = {
   };
   pages: Array<{ page: string; clicks: number; impressions: number; ctr: number; position: number }>;
   opportunities: SearchConsoleQueryRow[];
+  alignmentIssues?: Array<{
+    query: string;
+    cluster: string;
+    currentPath: string;
+    recommendedPath: string;
+    position: number;
+    impressions: number;
+    clicks: number;
+    ctr: number;
+    priorityScore: number;
+    reason: string;
+  }>;
+  internalLinkSuggestions?: Array<{
+    fromPath: string;
+    toPath: string;
+    anchorText: string;
+    cluster: string;
+    query: string;
+    reason: string;
+  }>;
+  top5ActionQueue?: Array<{
+    query: string;
+    cluster: string;
+    path: string;
+    recommendedPath: string;
+    position: number;
+    impressions: number;
+    clicks: number;
+    ctr: number;
+    actionType: "landing-page-alignment" | "snippet-ctr" | "internal-links" | "content-depth";
+    action: string;
+    priorityScore: number;
+    approvalRequired: boolean;
+  }>;
   fetchedAt: string;
 };
 
@@ -425,6 +460,102 @@ export default function SearchConsoleDashboard() {
               </div>
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-amber-500/20">
+        <CardHeader>
+          <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Link2 className="h-5 w-5" />
+                Landing Page Alignment & Top-5 Actions
+              </CardTitle>
+              <CardDescription>
+                Uses the page Google is actually ranking, the intended topic page, CTR and impressions to decide the next SEO action.
+              </CardDescription>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline">{data.alignmentIssues?.length || 0} alignment issues</Badge>
+              <Badge variant="outline">{data.internalLinkSuggestions?.length || 0} link actions</Badge>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {(data.alignmentIssues?.length || 0) > 0 && (
+            <div>
+              <div className="mb-2 text-sm font-medium">Highest-impact alignment issues</div>
+              <div className="grid gap-2 lg:grid-cols-2">
+                {(data.alignmentIssues || []).slice(0, 6).map((item) => (
+                  <div key={`${item.query}-${item.currentPath}`} className="rounded-lg border p-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-semibold">{item.query}</span>
+                      <Badge variant="outline">#{item.position.toFixed(1)}</Badge>
+                      <Badge variant="secondary">{item.impressions} impressions</Badge>
+                    </div>
+                    <div className="mt-2 text-xs">
+                      <span className="text-muted-foreground">Google ranks:</span>{" "}
+                      <span className="font-medium">{item.currentPath}</span>
+                      <span className="mx-2 text-muted-foreground">→</span>
+                      <span className="text-muted-foreground">Intent page:</span>{" "}
+                      <span className="font-medium text-primary">{item.recommendedPath}</span>
+                    </div>
+                    <p className="mt-2 text-[11px] text-muted-foreground">{item.reason}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <div className="mb-2 text-sm font-medium">Prioritised action queue</div>
+            <div className="space-y-2">
+              {(data.top5ActionQueue || []).slice(0, 8).map((item, index) => (
+                <div key={`${item.query}-${item.actionType}`} className="rounded-lg border p-3">
+                  <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge>{index + 1}</Badge>
+                        <span className="text-sm font-semibold">{item.query}</span>
+                        <Badge variant="outline">{item.actionType.replace(/-/g, " ")}</Badge>
+                        {item.approvalRequired && <Badge variant="secondary">approval required</Badge>}
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">{item.action}</p>
+                    </div>
+                    <div className="shrink-0 text-right text-[11px] text-muted-foreground">
+                      <div>Position {item.position.toFixed(1)}</div>
+                      <div>{item.impressions} impressions · {formatPercent(item.ctr)} CTR</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {(data.top5ActionQueue?.length || 0) === 0 && (
+                <div className="rounded-md border bg-muted/30 p-4 text-sm text-muted-foreground">
+                  No qualified Top-5 actions meet the current thresholds in this period.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {(data.internalLinkSuggestions?.length || 0) > 0 && (
+            <div>
+              <div className="mb-2 text-sm font-medium">Internal-link actions</div>
+              <div className="grid gap-2 md:grid-cols-2">
+                {(data.internalLinkSuggestions || []).slice(0, 8).map((item) => (
+                  <div key={`${item.fromPath}-${item.toPath}`} className="rounded-lg border bg-muted/20 p-3 text-xs">
+                    <div>
+                      <span className="font-medium">{item.fromPath}</span>
+                      <span className="mx-2 text-muted-foreground">→</span>
+                      <span className="font-medium text-primary">{item.toPath}</span>
+                    </div>
+                    <div className="mt-1 text-muted-foreground">
+                      Anchor: “{item.anchorText}”
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
