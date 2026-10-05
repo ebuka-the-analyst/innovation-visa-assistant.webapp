@@ -14,6 +14,7 @@ import FAQSection from "@/components/FAQSection";
 import Disclaimer from "@/components/Disclaimer";
 import Footer from "@/components/Footer";
 import { SEOHead } from "@/components/SEOHead";
+import { SeoTopicLinks } from "@/components/SeoTopicLinks";
 import { organizationSchema, softwareApplicationSchema, visaFAQSchema, websiteSchema } from "@/lib/seo-schemas";
 import { GlobalNavButton } from "@/components/global-nav-button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -58,6 +59,7 @@ export default function Home() {
         </div>
         <TestimonialsSection />
         <LawyerCTA />
+        <SeoTopicLinks heading="Explore the main Innovator Founder topics" />
         <div id="faq">
           <FAQSection />
         </div>

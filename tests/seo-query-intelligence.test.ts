@@ -54,3 +54,26 @@ test("allows support content for broader qualified growth queries", () => {
   });
   assert.equal(decision, "optimise-existing");
 });
+
+
+test("keeps high-impression business-plan searches on the dedicated existing page", () => {
+  const intelligence = analyseSeoQuery("innovator founder visa business plan");
+  assert.equal(intelligence.recommendedPath, "/business-plan-template");
+  const decision = chooseSeoContentDecision({
+    ...intelligence,
+    actualPath: "/",
+    position: 33.3,
+  });
+  assert.equal(decision, "optimise-existing");
+});
+
+test("maps endorsement and eligibility intent to their dedicated public pages", () => {
+  assert.equal(
+    analyseSeoQuery("innovator founder visa endorsement support").recommendedPath,
+    "/endorsing-bodies",
+  );
+  assert.equal(
+    analyseSeoQuery("innovator founder visa requirements uk").recommendedPath,
+    "/eligibility",
+  );
+});

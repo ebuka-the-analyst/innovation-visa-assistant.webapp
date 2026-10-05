@@ -23350,9 +23350,20 @@ Return ONLY the final submission content. Do not include labels, markdown fences
         isLive = false;
       }
 
+      const nextStatus = isLive
+        ? "live"
+        : target.status === "live"
+          ? "submitted"
+          : target.status;
+
       const [updated] = await db
         .update(backlinkTargets)
-        .set({ isLive, liveCheckedAt: new Date(), updatedAt: new Date() })
+        .set({
+          isLive,
+          status: nextStatus,
+          liveCheckedAt: new Date(),
+          updatedAt: new Date(),
+        })
         .where(eq(backlinkTargets.id, req.params.id))
         .returning();
 
@@ -23386,12 +23397,18 @@ Return ONLY the final submission content. Do not include labels, markdown fences
             isLive = false;
           }
 
+          const nextStatus = isLive ? "live" : "submitted";
           await db
             .update(backlinkTargets)
-            .set({ isLive, liveCheckedAt: new Date(), updatedAt: new Date() })
+            .set({
+              isLive,
+              status: nextStatus,
+              liveCheckedAt: new Date(),
+              updatedAt: new Date(),
+            })
             .where(eq(backlinkTargets.id, target.id));
 
-          return { id: target.id, name: target.name, isLive };
+          return { id: target.id, name: target.name, isLive, status: nextStatus };
         }),
       );
 

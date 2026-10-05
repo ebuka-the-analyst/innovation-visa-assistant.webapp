@@ -720,9 +720,15 @@ function BacklinkEngine() {
 
   // Stats
   const total = targets.length;
-  const live = targets.filter((t) => t.status === "live").length;
-  const submitted = targets.filter((t) => t.status === "submitted").length;
-  const pending = targets.filter((t) => t.status === "pending").length;
+  const live = targets.filter(
+    (t) => t.status === "live" || t.isLive === true,
+  ).length;
+  const submitted = targets.filter(
+    (t) => t.status === "submitted" && t.isLive !== true,
+  ).length;
+  const pending = targets.filter(
+    (t) => t.status === "pending" && t.isLive !== true,
+  ).length;
   const avgDA =
     targets.length > 0
       ? Math.round(
@@ -1436,9 +1442,9 @@ export default function SeoStrategy() {
     competitors:
       "ukbf.com, bizadvice.co.uk, sableinternational.com, workpermit.com",
     targetLocations: "London, UK, Global",
-    currentMonthlyTraffic: "5000",
-    googleReviewCount: "24",
-    averageRating: "4.8",
+    currentMonthlyTraffic: "",
+    googleReviewCount: "",
+    averageRating: "",
     currentRankingKeywords:
       "UK Innovator Founder Visa, innovator founder visa assistant",
     biggestSEOProblem:
@@ -1446,11 +1452,10 @@ export default function SeoStrategy() {
     // Extended fields
     domainAuthority: "",
     estimatedBacklinks: "",
-    topPerformingPages:
-      "/tools/compliance-checker, /blog/uk-innovator-visa-guide, /business-plan-generator",
+    topPerformingPages: "",
     publishingFrequency: "weekly",
     uniqueSellingProposition:
-      "109 AI-powered tools, quad-AI verification, 100% UK visa compliance accuracy",
+      "AI-assisted Innovator Founder application-preparation workspace with structured business planning, evidence, document and readiness tools",
     businessStage: "growing",
     socialMediaChannels: "LinkedIn, Twitter/X, YouTube",
     knownTechnicalIssues: "",
@@ -1877,6 +1882,9 @@ export default function SeoStrategy() {
             <div className="pt-1 border-t">
               <p className="text-xs font-semibold text-muted-foreground mb-2">
                 Extended Context (for richer report)
+              </p>
+              <p className="text-xs text-muted-foreground mb-3">
+                Use verified figures only. Leave traffic, reviews, authority, backlink counts and technical issues blank when they have not been measured.
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">

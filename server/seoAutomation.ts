@@ -298,9 +298,19 @@ function buildApprovalQueue(
     if (existing) return existing;
 
     const keywordTitle = titleCaseQuery(item.query);
-    // Apply snippet changes to the page Google is actually ranking. Only fall
-    // back to the intent target when Search Console did not return a page.
-    const path = item.path || item.recommendedPath || preferredPathForQuery(item.query);
+    const dedicatedIntent = ["business-plan", "endorsement", "eligibility"].includes(
+      item.cluster,
+    );
+    const pageIsMisaligned =
+      dedicatedIntent &&
+      Boolean(item.path) &&
+      Boolean(item.recommendedPath) &&
+      item.path !== item.recommendedPath;
+    // If Google is ranking the wrong page for a dedicated intent, optimise the
+    // intended page instead of reinforcing the accidental ranking page.
+    const path = pageIsMisaligned
+      ? item.recommendedPath
+      : item.path || item.recommendedPath || preferredPathForQuery(item.query);
     const proposedTitle = `${keywordTitle} | UK Innovator Founder Visa 2026`.slice(0, 62);
     const proposedDescription =
       `Explore ${item.query} with practical UK Innovator Founder Visa guidance, eligibility support, endorsement preparation and AI-powered application tools.`.slice(0, 158);
@@ -312,8 +322,9 @@ function buildApprovalQueue(
       status: "pending",
       keyword: item.query,
       path,
-      reason:
-        item.position <= 10
+      reason: pageIsMisaligned
+        ? `Google currently ranks ${item.path} at position ${item.position.toFixed(1)}, but ${item.recommendedPath} is the dedicated ${item.cluster.replace(/-/g, " ")} page. Optimise the intended page rather than reinforcing the wrong URL.`
+        : item.position <= 10
           ? `Position ${item.position.toFixed(1)} with ${item.impressions} impressions. A stronger search snippet may help move this query toward the Top 5.`
           : `Position ${item.position.toFixed(1)} with ${item.impressions} impressions. Improve relevance before pushing for page-one and Top 5 visibility.`,
       proposedTitle,
@@ -403,6 +414,26 @@ async function buildExecutionState(
     Array.isArray(previousExecution?.approvalQueue) ? previousExecution.approvalQueue : [],
   );
 
+  const alignmentQueue = mission
+    .filter(
+      (item) =>
+        ["business-plan", "endorsement", "eligibility"].includes(item.cluster) &&
+        Boolean(item.path) &&
+        item.path !== item.recommendedPath &&
+        item.impressions >= 3,
+    )
+    .map((item) => ({
+      keyword: item.query,
+      cluster: item.cluster,
+      currentPath: item.path,
+      recommendedPath: item.recommendedPath,
+      position: item.position,
+      impressions: item.impressions,
+      action: `Strengthen ${item.recommendedPath} and link to it contextually from ${item.path}. Do not create a competing page.`,
+    }))
+    .sort((a, b) => b.impressions - a.impressions)
+    .slice(0, 20);
+
   const automaticActions = [
     {
       id: "daily-rank-refresh",
@@ -419,8 +450,15 @@ async function buildExecutionState(
       lastRunAt: new Date().toISOString(),
     },
     {
+      id: "internal-link-hubs",
+      label: "Maintain contextual links between guide, business plan, endorsement and eligibility pages",
+      status: "active",
+      cadence: "daily",
+      activeAlignmentIssues: alignmentQueue.length,
+    },
+    {
       id: "support-content",
-      label: "Queue supporting content for high-impression growth queries",
+      label: "Queue supporting content only when an existing intent page is not enough",
       status: "active",
       cadence: "weekly",
       maxPerWeek: 2,
@@ -431,6 +469,7 @@ async function buildExecutionState(
     lastAuditAt: new Date().toISOString(),
     audit,
     automaticActions,
+    alignmentQueue,
     approvalQueue,
   };
 }

@@ -1,4 +1,5 @@
 import { SEOHead } from "@/components/SEOHead";
+import { SeoTopicLinks } from "@/components/SeoTopicLinks";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -660,6 +661,8 @@ export default function Guide() {
                     </ul>
                   </div>
                 </div>
+
+                <SeoTopicLinks excludePath="/guide" heading="Continue your Innovator Founder preparation" />
 
                 <div className="bg-accent/20 p-6 rounded mt-6">
                   <h3 className="text-lg font-bold mb-4 text-center">Ready to Start Your Journey?</h3>

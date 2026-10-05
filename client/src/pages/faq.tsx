@@ -1,4 +1,5 @@
 import { SEOHead } from "@/components/SEOHead";
+import { SeoTopicLinks } from "@/components/SeoTopicLinks";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -186,6 +187,8 @@ export default function FAQ() {
               </Card>
             ))}
           </div>
+
+          <SeoTopicLinks excludePath="/faq" heading="Explore the main Innovator Founder topics" />
 
           {/* CTA Section */}
           <Card className="mt-12 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">

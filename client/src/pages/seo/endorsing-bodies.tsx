@@ -1,4 +1,5 @@
 import { SEOHead } from "@/components/SEOHead";
+import { SeoTopicLinks } from "@/components/SeoTopicLinks";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -305,6 +306,8 @@ export default function EndorsingBodiesPage() {
               ...and many more university and accelerator-based bodies now classified as legacy.
             </p>
           </section>
+
+          <SeoTopicLinks excludePath="/endorsing-bodies" heading="Related Innovator Founder preparation resources" />
 
           <Card className="bg-gradient-to-r from-primary to-[#41B6E6] text-white">
             <CardContent className="py-8 text-center">
