@@ -20,6 +20,7 @@ import {
   type SeoIntentCluster,
   type SeoSearchIntent,
 } from "./seoQueryIntelligence";
+import { INNOVATOR_PUBLIC_PAGE_META } from "./seoPresentation.js";
 
 const MAX_POSTS_PER_WEEK = 2;
 
@@ -304,7 +305,7 @@ function buildApprovalQueue(
     )
     .slice(0, 12);
 
-  const next: SeoApprovalAction[] = candidates.map((item) => {
+  const next = candidates.map((item): SeoApprovalAction | null => {
     const key = `meta-refresh:${item.query.toLowerCase()}`;
     const existing = previousByKey.get(key);
     if (existing && existing.status !== "pending") return existing;
@@ -336,6 +337,15 @@ function buildApprovalQueue(
       ? "See UK Endorsing Services (UKES) alongside the authorised Innovator Founder endorsing bodies, endorsement fees and contact-point requirements."
       : `Explore ${item.query} with practical UK Innovator Founder Visa guidance, eligibility support, endorsement preparation and AI-powered application tools.`.slice(0, 158);
 
+    const deployedMeta = INNOVATOR_PUBLIC_PAGE_META[path];
+    if (
+      deployedMeta &&
+      deployedMeta.title === proposedTitle &&
+      deployedMeta.description === proposedDescription
+    ) {
+      return null;
+    }
+
     return {
       id: `meta-${Buffer.from(item.query).toString("base64url").slice(0, 20)}`,
       type: "meta-refresh",
@@ -352,7 +362,7 @@ function buildApprovalQueue(
       proposedDescription,
       createdAt: new Date().toISOString(),
     };
-  });
+  }).filter((item): item is SeoApprovalAction => item !== null);
 
   // Keep previously decided actions for audit history even if they no longer qualify.
   const decided = previous.filter((item) => item.status !== "pending");
