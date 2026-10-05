@@ -1,4 +1,5 @@
-import { SEOHead } from "@/components/SEOHead";\nimport { SeoTopicLinks } from "@/components/SeoTopicLinks";
+import { SEOHead } from "@/components/SEOHead";
+import { SeoTopicLinks } from "@/components/SeoTopicLinks";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -661,7 +662,9 @@ export default function Guide() {
                   </div>
                 </div>
 
-                <SeoTopicLinks excludePath="/guide" heading="Continue your Innovator Founder preparation" />\n\n                <div className="bg-accent/20 p-6 rounded mt-6">
+                <SeoTopicLinks excludePath="/guide" heading="Continue your Innovator Founder preparation" />
+
+                <div className="bg-accent/20 p-6 rounded mt-6">
                   <h3 className="text-lg font-bold mb-4 text-center">Ready to Start Your Journey?</h3>
                   <p className="text-center mb-4">
                     Access our 100+ professional-level tools designed specifically for UK Innovator Founder Visa applicants.
