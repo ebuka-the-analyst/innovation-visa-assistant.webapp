@@ -23320,6 +23320,72 @@ Return ONLY the final submission content. Do not include labels, markdown fences
     }
   });
 
+  async function verifyBacklink(target: typeof backlinkTargets.$inferSelect) {
+    const checkUrl = target.liveUrl || target.submissionUrl || target.url;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
+    try {
+      const resp = await fetch(checkUrl, {
+        method: "GET",
+        redirect: "follow",
+        signal: controller.signal,
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (compatible; InnovatorFounderBacklinkVerifier/1.0; +https://innovatorfoundervisaassistant.co.uk)",
+          Accept: "text/html,application/xhtml+xml",
+        },
+      });
+
+      const statusCode = resp.status;
+      const contentType = resp.headers.get("content-type") || "";
+      if (!resp.ok) {
+        return {
+          isLive: false,
+          statusCode,
+          verificationReason: "HTTP " + statusCode + "; page could not be verified.",
+          checkedUrl: checkUrl,
+        };
+      }
+
+      if (!/text\/html|application\/xhtml\+xml/i.test(contentType)) {
+        return {
+          isLive: false,
+          statusCode,
+          verificationReason:
+            "The target responded, but it did not return an HTML page containing a verifiable backlink.",
+          checkedUrl: checkUrl,
+        };
+      }
+
+      const html = (await resp.text()).slice(0, 2_000_000);
+      const directHref =
+        /href\s*=\s*["'][^"']*innovatorfoundervisaassistant\.co\.uk[^"']*["']/i;
+      const verified = directHref.test(html);
+
+      return {
+        isLive: verified,
+        statusCode,
+        verificationReason: verified
+          ? "Verified: the fetched page contains a direct link to innovatorfoundervisaassistant.co.uk."
+          : "Page is reachable, but no direct backlink to innovatorfoundervisaassistant.co.uk was found in the returned HTML.",
+        checkedUrl: checkUrl,
+      };
+    } catch (error: any) {
+      return {
+        isLive: false,
+        statusCode: 0,
+        verificationReason:
+          error?.name === "AbortError"
+            ? "Verification timed out."
+            : error?.message || "Backlink verification failed.",
+        checkedUrl: checkUrl,
+      };
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
   // POST check if a submitted backlink is live
   app.post("/api/seo/backlink-check/:id", requireAdmin, async (req, res) => {
     try {
@@ -23330,25 +23396,8 @@ Return ONLY the final submission content. Do not include labels, markdown fences
         .limit(1);
       if (!target) return res.status(404).json({ error: "Target not found" });
 
-      const checkUrl = target.liveUrl || target.submissionUrl || target.url;
-      let isLive = false;
-      let statusCode = 0;
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
-        const resp = await fetch(checkUrl, {
-          method: "HEAD",
-          signal: controller.signal,
-          headers: {
-            "User-Agent": "Mozilla/5.0 (compatible; LinkChecker/1.0)",
-          },
-        });
-        clearTimeout(timeout);
-        statusCode = resp.status;
-        isLive = resp.status >= 200 && resp.status < 400;
-      } catch {
-        isLive = false;
-      }
+      const verification = await verifyBacklink(target);
+      const { isLive, statusCode, verificationReason, checkedUrl } = verification;
 
       const nextStatus = isLive
         ? "live"
@@ -23367,7 +23416,13 @@ Return ONLY the final submission content. Do not include labels, markdown fences
         .where(eq(backlinkTargets.id, req.params.id))
         .returning();
 
-      res.json({ isLive, statusCode, target: updated });
+      res.json({
+        isLive,
+        statusCode,
+        verificationReason,
+        checkedUrl,
+        target: updated,
+      });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
@@ -23379,36 +23434,32 @@ Return ONLY the final submission content. Do not include labels, markdown fences
       const submitted = await db
         .select()
         .from(backlinkTargets)
-        .where(eq(backlinkTargets.status, "submitted"));
+        .where(inArray(backlinkTargets.status, ["submitted", "live"]));
 
       const results = await Promise.all(
         submitted.map(async (target) => {
-          const checkUrl = target.liveUrl || target.submissionUrl || target.url;
-          let isLive = false;
-          try {
-            const controller = new AbortController();
-            setTimeout(() => controller.abort(), 5000);
-            const resp = await fetch(checkUrl, {
-              method: "HEAD",
-              signal: controller.signal,
-            });
-            isLive = resp.status >= 200 && resp.status < 400;
-          } catch {
-            isLive = false;
-          }
+          const verification = await verifyBacklink(target);
+          const nextStatus = verification.isLive ? "live" : "submitted";
 
-          const nextStatus = isLive ? "live" : "submitted";
           await db
             .update(backlinkTargets)
             .set({
-              isLive,
+              isLive: verification.isLive,
               status: nextStatus,
               liveCheckedAt: new Date(),
               updatedAt: new Date(),
             })
             .where(eq(backlinkTargets.id, target.id));
 
-          return { id: target.id, name: target.name, isLive, status: nextStatus };
+          return {
+            id: target.id,
+            name: target.name,
+            isLive: verification.isLive,
+            status: nextStatus,
+            statusCode: verification.statusCode,
+            verificationReason: verification.verificationReason,
+            checkedUrl: verification.checkedUrl,
+          };
         }),
       );
 
