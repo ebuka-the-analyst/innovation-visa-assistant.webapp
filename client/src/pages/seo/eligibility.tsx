@@ -1,4 +1,4 @@
-import { SEOHead } from "@/components/SEOHead";
+import { SEOHead } from "@/components/SEOHead";\nimport { SeoTopicLinks } from "@/components/SeoTopicLinks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -331,7 +331,7 @@ export default function EligibilityPage() {
             </Card>
           </section>
 
-          <Card className="bg-gradient-to-r from-primary to-[#41B6E6] text-white mb-8">
+          <SeoTopicLinks excludePath="/eligibility" heading="Related Innovator Founder preparation resources" />\n\n          <Card className="bg-gradient-to-r from-primary to-[#41B6E6] text-white mb-8">
             <CardContent className="py-8 text-center">
               <h2 className="text-2xl font-bold mb-4">Check Your Eligibility Now</h2>
               <p className="mb-6 opacity-90">
