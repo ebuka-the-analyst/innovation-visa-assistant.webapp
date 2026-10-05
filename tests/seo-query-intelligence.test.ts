@@ -77,3 +77,11 @@ test("maps endorsement and eligibility intent to their dedicated public pages", 
     "/eligibility",
   );
 });
+
+
+test("maps UKES query to endorsement intent and dedicated endorsing-bodies page", () => {
+  const intelligence = analyseSeoQuery("ukes innovator founder");
+  assert.equal(intelligence.qualified, true);
+  assert.equal(intelligence.cluster, "endorsement");
+  assert.equal(intelligence.recommendedPath, "/endorsing-bodies");
+});

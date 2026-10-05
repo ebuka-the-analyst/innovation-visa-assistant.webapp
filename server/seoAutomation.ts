@@ -267,7 +267,13 @@ type SeoApprovalAction = {
 function preferredPathForQuery(query: string): string {
   const q = query.toLowerCase();
   if (q.includes("business plan")) return "/business-plan-template";
-  if (q.includes("endors")) return "/endorsing-bodies";
+  if (
+    q.includes("endors") ||
+    q.includes("ukes") ||
+    q.includes("uk endorsing services")
+  ) {
+    return "/endorsing-bodies";
+  }
   if (q.includes("eligib") || q.includes("requirement")) return "/eligibility";
   if (q.includes("guide") || q.includes("overview")) return "/guide";
   if (q.includes("support") || q.includes("assist")) return "/";
@@ -301,9 +307,15 @@ function buildApprovalQueue(
   const next: SeoApprovalAction[] = candidates.map((item) => {
     const key = `meta-refresh:${item.query.toLowerCase()}`;
     const existing = previousByKey.get(key);
-    if (existing) return existing;
+    if (existing && existing.status !== "pending") return existing;
 
-    const keywordTitle = titleCaseQuery(item.query);
+    const normalisedQuery = item.query.toLowerCase();
+    const isUKESQuery =
+      normalisedQuery.includes("ukes") ||
+      normalisedQuery.includes("uk endorsing services");
+    const keywordTitle = isUKESQuery
+      ? "UKES & UK Innovator Founder Endorsing Bodies"
+      : titleCaseQuery(item.query);
     const dedicatedIntent = ["business-plan", "endorsement", "eligibility"].includes(
       item.cluster,
     );
@@ -317,9 +329,12 @@ function buildApprovalQueue(
     const path = pageIsMisaligned
       ? item.recommendedPath
       : item.path || item.recommendedPath || preferredPathForQuery(item.query);
-    const proposedTitle = `${keywordTitle} | UK Innovator Founder Visa 2026`.slice(0, 62);
-    const proposedDescription =
-      `Explore ${item.query} with practical UK Innovator Founder Visa guidance, eligibility support, endorsement preparation and AI-powered application tools.`.slice(0, 158);
+    const proposedTitle = isUKESQuery
+      ? "UKES & UK Innovator Founder Endorsing Bodies 2026"
+      : `${keywordTitle} | UK Innovator Founder Visa 2026`.slice(0, 62);
+    const proposedDescription = isUKESQuery
+      ? "See UK Endorsing Services (UKES) alongside the authorised Innovator Founder endorsing bodies, endorsement fees and contact-point requirements."
+      : `Explore ${item.query} with practical UK Innovator Founder Visa guidance, eligibility support, endorsement preparation and AI-powered application tools.`.slice(0, 158);
 
     return {
       id: `meta-${Buffer.from(item.query).toString("base64url").slice(0, 20)}`,
