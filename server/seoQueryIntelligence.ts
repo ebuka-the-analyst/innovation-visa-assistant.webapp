@@ -46,6 +46,8 @@ const DOMAIN_TERMS = [
   "business plan",
   "endorsement",
   "endorsing",
+  "ukes",
+  "uk endorsing services",
 ];
 
 const COMMERCIAL_TERMS = [
@@ -99,7 +101,13 @@ export function normaliseSearchConsolePath(page: string): string {
 
 function clusterForQuery(value: string): SeoIntentCluster {
   if (value.includes("business plan")) return "business-plan";
-  if (value.includes("endors")) return "endorsement";
+  if (
+    value.includes("endors") ||
+    value.includes("ukes") ||
+    value.includes("uk endorsing services")
+  ) {
+    return "endorsement";
+  }
   if (
     value.includes("eligib") ||
     value.includes("requirement") ||
