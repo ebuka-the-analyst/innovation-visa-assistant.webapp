@@ -77,8 +77,8 @@ export default function EndorsingBodiesPage() {
   return (
     <>
       <SEOHead
-        title="UK Innovator Founder Visa Endorsing Bodies 2026 | UKES & Official List"
-        description="Current Innovator Founder endorsing bodies for 2026, including UK Endorsing Services (UKES), Innovator International, Envestors and invitation-only GEP."
+        title="UKES & UK Innovator Founder Endorsing Bodies 2026"
+        description="See UK Endorsing Services (UKES) alongside the authorised Innovator Founder endorsing bodies, endorsement fees and contact-point requirements."
         path="/endorsing-bodies"
         keywords="UKES innovator founder, UK Endorsing Services, UK endorsing bodies 2026, Innovator Visa endorsement, Envestors endorsement, Innovator International, UK visa endorsing bodies list"
         schemas={[endorsingBodiesListSchema, breadcrumbSchema]}
@@ -148,6 +148,27 @@ export default function EndorsingBodiesPage() {
                 <strong> at least two contact point meetings</strong> during your period of permission. Home Office guidance says endorsing bodies should hold these as close as practicably possible to 12 and 24 months after permission is granted or after arrival in the UK following that grant.
               </p>
             </div>
+          </section>
+
+          <section id="ukes" className="mb-12">
+            <Card className="border-primary/30 bg-primary/5">
+              <CardContent className="pt-6">
+                <h2 className="text-2xl font-bold mb-4">
+                  UK Endorsing Services (UKES) and the Innovator Founder Visa
+                </h2>
+                <div className="space-y-3 text-muted-foreground">
+                  <p>
+                    <strong>UK Endorsing Services (UKES)</strong> is listed by GOV.UK as one of the current Business Endorsing Bodies that can issue endorsements for the Innovator Founder route.
+                  </p>
+                  <p>
+                    UKES sits alongside Envestors and Innovator International on the current Business Endorsing Bodies list. The Global Entrepreneurs Programme (GEP) can also issue Innovator Founder endorsements for invited participants.
+                  </p>
+                  <p>
+                    The route-wide endorsement fee is £1,000 per person, excluding VAT where chargeable, and successful visa applicants must attend at least two contact-point meetings at £500 per meeting. Compare each body's current published process before deciding where to apply.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </section>
 
           <section className="mb-12">
