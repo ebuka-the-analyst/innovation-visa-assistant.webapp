@@ -16,8 +16,8 @@ const TOPIC_LINKS = [
   },
   {
     href: "/endorsing-bodies",
-    label: "Endorsement preparation",
-    description: "Review endorsement-readiness information and preparation resources.",
+    label: "UKES & Innovator Founder endorsing bodies",
+    description: "Review the current endorsing bodies, endorsement fees and contact-point requirements.",
     icon: Building2,
   },
   {
