@@ -26,22 +26,22 @@ const sections = [
 export default function Guide() {
   const breadcrumbItems = [
     { name: "Home", url: "https://innovatorfoundervisaassistant.co.uk/" },
-    { name: "Complete Guide 2025", url: "https://innovatorfoundervisaassistant.co.uk/guide" }
+    { name: "Complete Guide 2026", url: "https://innovatorfoundervisaassistant.co.uk/guide" }
   ];
 
   return (
     <>
       <SEOHead
-        title="UK Innovator Founder Visa Complete Guide 2025 | Requirements, Process & Timeline"
-        description="Comprehensive expert guide to the UK Innovator Founder Visa. Learn requirements, endorsement process, innovation criteria, financial planning, and path to settlement. Updated for 2025."
+        title="UK Innovator Founder Visa Complete Guide 2026 | Requirements, Process & Timeline"
+        description="2026 guide to the UK Innovator Founder Visa covering eligibility, endorsement, innovation, viability, scalability, financial requirements and settlement preparation."
         path="/guide"
-        keywords="UK Innovator Founder Visa 2025, Innovator Founder Visa guide, UK visa requirements, endorsement process, settlement pathway, visa application timeline"
+        keywords="UK Innovator Founder Visa 2026, Innovator Founder Visa guide, UK visa requirements, endorsement process, UKES, endorsing bodies, settlement pathway, visa application timeline"
         ogType="article"
         schemas={[
           createArticleSchema(
-            "UK Innovator Founder Visa Complete Guide 2025",
+            "UK Innovator Founder Visa Complete Guide 2026",
             "Comprehensive guide covering all aspects of the UK Innovator Founder Visa application process, requirements, and success strategies.",
-            "2025-01-01"
+            "2026-01-01"
           ),
           createBreadcrumbSchema(breadcrumbItems)
         ]}
@@ -55,7 +55,7 @@ export default function Guide() {
               <GraduationCap className="w-20 h-20 mx-auto mb-6 text-primary" />
               <h1 className="text-2xl font-bold mb-6">
                 UK Innovator Founder Visa
-                <span className="block text-primary mt-2">Complete Guide 2025</span>
+                <span className="block text-primary mt-2">Complete Guide 2026</span>
               </h1>
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
                 The definitive expert resource for understanding and successfully navigating the UK Innovator Founder Visa application process. Everything you need to know about requirements, endorsement, innovation assessment, and settlement.
@@ -116,7 +116,7 @@ export default function Guide() {
             <Card>
               <CardContent className="pt-6 space-y-4 text-muted-foreground leading-relaxed">
                 <p className="text-lg">
-                  The <strong>UK Innovator Founder Visa</strong> is a immigration route designed for experienced entrepreneurs who want to establish an innovative, viable, and scalable business in the United Kingdom. Launched in April 2023 as a replacement for the previous Innovator visa, it offers a streamlined pathway to UK residency and eventual settlement (Indefinite Leave to Remain) for founders with genuinely transformative business ideas.
+                  The <strong>UK Innovator Founder Visa</strong> is an immigration route for entrepreneurs who want to establish an innovative, viable, and scalable business in the United Kingdom. Launched in April 2023 as a replacement for the previous Innovator visa, it offers a streamlined pathway to UK residency and eventual settlement (Indefinite Leave to Remain) for founders with genuinely transformative business ideas.
                 </p>
                 <p>
                   Unlike employment-based visas, the Innovator Founder route recognizes that entrepreneurship drives economic growth. It attracts global talent by offering successful applicants the ability to build businesses in one of the world's leading economies, with access to:
@@ -134,10 +134,10 @@ export default function Guide() {
                 <div className="bg-primary/10 border-l-4 border-primary p-4 rounded">
                   <p className="font-semibold flex items-center gap-2">
                     <AlertCircle className="w-5 h-5" />
-                    Critical Update for 2025
+                    Current route position for 2026
                   </p>
                   <p className="mt-2">
-                    As of 2025, the UK Home Office has streamlined the endorsement process with clearer innovation criteria and faster processing times. Success rates for well-prepared applications with strong endorsing body support now exceed 75%, compared to 60% in 2023.
+                    The route still requires endorsement from an approved endorsing body and evidence that the business is innovative, viable and scalable. Always check current GOV.UK requirements before relying on figures, fees or process details.
                   </p>
                 </div>
               </CardContent>
@@ -160,7 +160,7 @@ export default function Guide() {
                 </CardHeader>
                 <CardContent className="space-y-3 text-muted-foreground">
                   <p>
-                    Your business idea must be endorsed by a Home Office-approved endorsing body. These organizations assess whether your business meets the three core criteria: <strong>Innovation, Viability, and Scalability</strong>. Current endorsing bodies (November 2025) include Envestors, UK Endorsing Services (UKES), Innovator International, and the Global Entrepreneurs Programme (GEP).
+                    Your business idea must be endorsed by a Home Office-approved endorsing body. These organizations assess whether your business meets the three core criteria: <strong>Innovation, Viability, and Scalability</strong>. The current 2026 list includes Envestors, UK Endorsing Services (UKES), Innovator International, and the Global Entrepreneurs Programme (GEP). For the dedicated current list, fees and contact-point requirements, see our <Link href="/endorsing-bodies" className="font-medium text-primary hover:underline">UKES and Innovator Founder endorsing bodies guide</Link>.
                   </p>
                   <p className="font-semibold">What they evaluate:</p>
                   <ul className="list-disc pl-6 space-y-1">
@@ -193,7 +193,7 @@ export default function Guide() {
                     <li>Corporate investment or strategic partnerships</li>
                   </ul>
                   <p className="italic bg-accent/20 p-3 rounded">
-                    <strong>Practical guidance:</strong> While there's no fixed minimum, most endorsing bodies expect £50,000-£100,000 for credible business development and viability. Funds must be held in a regulated financial institution, be freely transferable to the UK, and you must provide evidence of the source. The endorsing body will assess whether your funding is realistic for your specific business plan.
+                    <strong>Practical guidance:</strong> There is no fixed minimum investment amount for the route. If you are setting up a new business, you must be able to show your endorsing body that you have enough funding for the business and explain where that funding comes from.
                   </p>
                 </CardContent>
               </Card>
@@ -255,15 +255,11 @@ export default function Guide() {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-xl font-bold mb-3">Step 1: Choose Your Endorsing Body</h3>
-                    <p>Not all endorsing bodies are created equal. Each has specific focus areas, success rates, and support offerings:</p>
-                    <ul className="list-disc pl-6 space-y-2 mt-2">
-                      <li><strong>Envestors:</strong> Best for investment-ready businesses with strong investor network access.</li>
-                      <li><strong>UK Endorsing Services (UKES):</strong> Diverse sector support from consortium of 6 UK businesses.</li>
-                      <li><strong>Innovator International:</strong> Broad sector coverage supporting 700+ global entrepreneurs.</li>
-                      <li><strong>Global Entrepreneurs Programme (GEP):</strong> Government-backed, ideal for exceptional serial founders.</li>
-                    </ul>
+                    <p>
+                      Start with the current GOV.UK list and compare each body's published application process, eligibility expectations and commercial terms. The authorised 2026 list includes Envestors, UK Endorsing Services (UKES), Innovator International and the invitation-only Global Entrepreneurs Programme (GEP).
+                    </p>
                     <p className="mt-3 bg-primary/10 p-3 rounded">
-                      <strong>Pro tip:</strong> Choose based on sector expertise, not just application fees. A body with experience in your industry provides better feedback and higher approval chances.
+                      <strong>Next step:</strong> Review the dedicated <Link href="/endorsing-bodies" className="font-medium text-primary hover:underline">Innovator Founder endorsement and UKES page</Link> before choosing where to apply.
                     </p>
                   </div>
 
