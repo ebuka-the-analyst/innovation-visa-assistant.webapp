@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import { rejectExecutableProbes } from "./security/executableProbeGuard";
 import { registerRoutes } from "./routes";
 import { startBusinessPlanGenerationWorker } from "./services/businessPlanGenerationService";
 import { registerBusinessPlanRevisionRoutes } from "./businessPlanRevisionRoutes";
@@ -105,6 +106,9 @@ function serveStatic(app: ExpressType) {
   });
 }
 const app = express();
+
+// Audit and reject PHP/WordPress reconnaissance before any SPA fallback.
+app.use(rejectExecutableProbes);
 
 declare module 'http' {
   interface IncomingMessage {
