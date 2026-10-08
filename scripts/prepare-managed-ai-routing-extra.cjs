@@ -31,6 +31,18 @@ update('server/routes.ts', (source) => {
     next = next.slice(0, indentStart) + replacement + next.slice(end);
   }
 
+
+  // All remaining Gemini paths must use the central OpenAI-compatible managed gateway.
+  // Preserve the existing prompt, JSON parsing and response contract; avoid direct provider SDK bypasses.
+  next = next.replace('import { GoogleGenAI } from "@google/genai";\\n', '');
+  next = next.replace(/const geminiAI = new GoogleGenAI\\(\\{[\\s\\S]*?\\}\\);\\n/, '');
+  // Existing localisation and backlink workflows use the centrally routed OpenAI SDK.
+  next = next.replace(/\\s*const geminiKeys = \\[([\\s\\S]*?)\\]\\.filter\\(Boolean\\) as string\\[\\];\\n\\s*if \\(!translationsFromProvider\\) \\{[\\s\\S]*?\\n        \\}\\n\\n        if \\(!translationsFromProvider\\)/, '\\n        if (!translationsFromProvider)');
+  next = next.replace(/\\s*const geminiKeys = \\[([\\s\\S]*?)\\]\\.filter\\(Boolean\\) as string\\[\\];\\n\\s*if \\(!translated\\) \\{[\\s\\S]*?\\n      \\}\\n\\n      if \\(!translated\\)/, '\\n      if (!translated)');
+  next = next.replace(/const aiResult = await geminiAI\\.models\\.generateContent\\(\\{\\s*model: "gemini-2\\.5-flash",\\s*contents: prompt,\\s*\\}\\);\\s*let text = \\(aiResult\\.text \\?\\? ""\\)\\.trim\\(\\);/, 'const aiResult = await openaiClient.chat.completions.create({ model: "gpt-4o", messages: [{ role: "user", content: prompt }], temperature: 0.2 });\\n      let text = (aiResult.choices[0]?.message?.content ?? "").trim();');
+  next = next.replace(/const aiContent = await geminiAI\\.models\\.generateContent\\(\\{\\s*model: "gemini-2\\.5-flash",\\s*contents: prompt,\\s*\\}\\);\\s*content = \\(aiContent\\.text \\?\\? ""\\)\\.trim\\(\\);/, 'const aiContent = await openaiClient.chat.completions.create({ model: "gpt-4o", messages: [{ role: "user", content: prompt }], max_tokens: 1200 });\\n        content = (aiContent.choices[0]?.message?.content ?? "").trim();');
+  if (/@google\\/genai|new\\s+GoogleGenAI\\s*\\(|geminiAI\\./.test(next)) throw new Error('Direct Gemini paths remain after managed AI preparation');
+
   return next;
 });
 
