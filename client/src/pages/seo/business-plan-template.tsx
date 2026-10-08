@@ -74,8 +74,8 @@ export default function BusinessPlanTemplatePage() {
             </h1>
 
             <p className="text-xl text-muted-foreground mb-8">
-              The complete guide to writing a business plan that gets endorsed. Includes template structure, 
-              examples, and our AI-powered generator that creates professional plans in minutes.
+              Need Innovator Founder Visa business plan help? Explore a structured template covering innovation, viability, scalability and financial evidence, 
+              with examples and AI-assisted drafting tools. Endorsement decisions remain with the approved endorsing body.
             </p>
 
             <div className="flex flex-wrap gap-4">
@@ -338,7 +338,7 @@ export default function BusinessPlanTemplatePage() {
             <CardContent className="py-8 text-center">
               <h2 className="text-2xl font-bold mb-4">Ready to Create Your Business Plan?</h2>
               <p className="mb-6 opacity-90">
-                Join 1,200+ entrepreneurs who have successfully created their business plans with our platform.
+                Prepare your Innovator Founder business plan with structured guidance and AI-assisted tools. No endorsement or visa outcome is guaranteed.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Button size="lg" variant="secondary" asChild>
