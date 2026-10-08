@@ -10,14 +10,14 @@ const TOPIC_LINKS = [
   },
   {
     href: "/business-plan-template",
-    label: "Business plan preparation",
-    description: "Structure innovation, viability, scalability, market and financial evidence.",
+    label: "Innovator Founder Visa business plan preparation",
+    description: "Get business plan help with a structured template for innovation, viability, scalability, market research and financial evidence.",
     icon: FileText,
   },
   {
     href: "/endorsing-bodies",
-    label: "UKES & Innovator Founder endorsing bodies",
-    description: "Review the current endorsing bodies, endorsement fees and contact-point requirements.",
+    label: "UKES Innovator Founder endorsement and endorsing bodies",
+    description: "Find UKES endorsement information, current endorsing bodies, fees and contact-point requirements.",
     icon: Building2,
   },
   {
