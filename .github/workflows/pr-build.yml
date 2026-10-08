@@ -160,5 +160,8 @@ jobs:
       - name: Test SEO query intelligence
         run: node --import tsx --test tests/seo-query-intelligence.test.ts
 
+      - name: Test executable probe guard
+        run: node --import tsx --test tests/executable-probe-guard.test.ts
+
       - name: Production build
         run: npm run build
