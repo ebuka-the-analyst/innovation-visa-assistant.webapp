@@ -1,0 +1,44 @@
+name: Phase 2 Offline Benchmark Reflow
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  reflow-pr116:
+    if: ${{ github.event.pull_request.number == 116 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install benchmark dependencies
+        run: npm install --no-audit --no-fund
+      - name: Download previously generated fictional benchmark (no API calls)
+        uses: actions/download-artifact@v4
+        with:
+          name: fictional-founder-pro-benchmark
+          run-id: 38178211038
+          repository: ebuka-the-analyst/innovation-visa-assistant.webapp
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/previous-benchmark
+      - name: Re-render the exact failed fictional Markdown with corrected PDFKit layout
+        shell: bash
+        run: |
+          node --import tsx scripts/reflow-existing-fictional-benchmark.ts \
+            "${{ runner.temp }}/previous-benchmark" \
+            "${{ runner.temp }}/benchmark-reflow"
+      - name: Upload corrected PDF and quality report, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fictional-founder-pro-offline-reflow
+          path: ${{ runner.temp }}/benchmark-reflow/
+          retention-days: 7
+          if-no-files-found: warn
