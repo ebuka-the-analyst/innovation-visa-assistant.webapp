@@ -20,6 +20,7 @@ export function gatewayUsageEvent(
   operation: "responses" | "chat_completions",
   workload: GatewayWorkload,
   durationMs: number,
+  jobId?: unknown,
 ) {
   const usage = response?.usage;
   const inputTokens = finiteNonNegativeTokenCount(usage?.input_tokens ?? usage?.prompt_tokens);
@@ -32,6 +33,9 @@ export function gatewayUsageEvent(
     event: "ai.gateway.usage",
     timestamp: new Date().toISOString(),
     workload,
+    // Correlation ID is accepted only in UUID format. Never record names,
+    // prompts or user-supplied arbitrary tracking strings.
+    jobId: typeof jobId === "string" && /^[0-9a-f-]{36}$/i.test(jobId) ? jobId : null,
     operation,
     provider: response?.provider === "anthropic" ? "anthropic" : response?.provider === "openai" ? "openai" : "unknown",
     model: typeof response?.model === "string" ? response.model.slice(0, 160) : null,
