@@ -52,7 +52,7 @@ test("phase 2 migrations can be applied, rolled back and replayed in an isolated
     }
     await client.query("ROLLBACK");
 
-    const leaked = await pool.query("SELECT to_regnamespace($1) AS id", [identifier]);
+    const leaked = await client.query("SELECT to_regnamespace($1) AS id", [identifier]);
     assert.equal(leaked.rows[0].id, null, "Staging rehearsal schema must not persist");
   } finally {
     await client.query("ROLLBACK").catch(() => {});
