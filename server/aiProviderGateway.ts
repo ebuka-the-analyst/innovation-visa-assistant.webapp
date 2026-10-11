@@ -348,7 +348,7 @@ export function registerAIProviderGatewayRoutes(app: Express): void {
       const startedAt = Date.now();
       const strictPrimary = req.get("x-ai-quality-policy") === "strict-primary";
       const result = await withProviderFallback((setting) => callChatWithProvider(setting, req.body || {}), strictPrimary);
-      console.info(JSON.stringify(gatewayUsageEvent(result, "chat_completions", gatewayWorkload(req.get("x-ai-workload")), Date.now() - startedAt)));
+      console.info(JSON.stringify(gatewayUsageEvent(result, "chat_completions", gatewayWorkload(req.get("x-ai-workload")), Date.now() - startedAt, req.get("x-ai-job-id"))));
       res.setHeader("x-ai-provider", String(result?.provider || "managed"));
       res.setHeader("x-ai-model", String(result?.model || ""));
       res.json(result);
@@ -363,7 +363,7 @@ export function registerAIProviderGatewayRoutes(app: Express): void {
       const startedAt = Date.now();
       const strictPrimary = req.get("x-ai-quality-policy") === "strict-primary";
       const result = await withProviderFallback((setting) => callResponseWithProvider(setting, req.body || {}), strictPrimary);
-      console.info(JSON.stringify(gatewayUsageEvent(result, "responses", gatewayWorkload(req.get("x-ai-workload")), Date.now() - startedAt)));
+      console.info(JSON.stringify(gatewayUsageEvent(result, "responses", gatewayWorkload(req.get("x-ai-workload")), Date.now() - startedAt, req.get("x-ai-job-id"))));
       res.setHeader("x-ai-provider", String(result?.provider || "managed"));
       res.setHeader("x-ai-model", String(result?.model || ""));
       res.json(result);
