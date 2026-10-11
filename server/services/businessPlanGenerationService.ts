@@ -625,6 +625,8 @@ async function markJobFailed(job: JobRow, error: any, permanent: boolean): Promi
         current_generation_stage = ${userFacingStage}
     WHERE id = ${job.plan_id}
   `);
+  // A permanently failed membership job must not consume the customer's quota.
+  await transitionMemberAiReservation(db as any, "generation", job.plan_id, "released");
 }
 
 async function requeueTransientFailure(job: JobRow, error: any): Promise<void> {
@@ -744,6 +746,7 @@ ${generatedSections.join("\n\n---\n\n")}`;
           updated_at = NOW()
       WHERE id = ${job.id} AND lease_token = ${job.lease_token}
     `);
+    await transitionMemberAiReservation(tx, "generation", job.plan_id, "committed");
   });
 
   try {
