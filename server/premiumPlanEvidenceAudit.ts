@@ -17,9 +17,9 @@ export function auditPremiumPlanEvidence(content: string): EditorialEvidenceAudi
 
   const unverifiedSourceMentions: string[] = [];
   // SVG namespace URLs identify the XML format, not a cited research source.
-  const researchText = raw.replace(/<svg\\b[\\s\\S]*?<\\/svg>/gi, " ");
+  const researchText = raw.replace(/<svg\b[\s\S]*?<\/svg>/gi, " ");
   const hasAcademicNames = /(?:\bet\s+al\.|\bjournal of\b|\bpublished in\b|\bpeer.reviewed\b|\b[A-Z][a-z]+\s+and colleagues\b)/i.test(researchText);
-  const hasResolvableReferences = /https?:\/\/[^\s<>"]+|\bdoi:\s*10\.\d{4,9}\//i.test(raw);
+  const hasResolvableReferences = /https?:\/\/[^\s<>"]+|\bdoi:\s*10\.\d{4,9}\//i.test(researchText);
   if (hasAcademicNames && !hasResolvableReferences) {
     unverifiedSourceMentions.push(
       "Named academic or research references lack a URL/DOI in the source. Check exact authors, titles, dates and applicability independently.",
