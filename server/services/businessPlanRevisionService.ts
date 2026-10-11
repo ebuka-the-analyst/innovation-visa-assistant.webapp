@@ -6,6 +6,7 @@ import { db } from "../db";
 import { storage } from "../storage";
 import { BUSINESS_PLAN_MODEL } from "../aiModelConfig";
 import { hasCurrentPaidEntitlement } from "../security/paidEntitlement";
+import { isMembershipSku, MembershipQuotaError, reserveMemberAiQuota, transitionMemberAiReservation } from "./memberAiQuota";
 import { getSectionsForTier, getSectionSystemPrompt } from "../aiPrompts";
 import { generatePDFUrl, sanitizeBusinessPlanOutputText } from "../pdf";
 import {
@@ -522,6 +523,19 @@ export async function createRevisionForUser(
       RETURNING *
     `));
     if (!revision) throw new Error("Failed to create revision request");
+
+    // Legacy entitlements retain their existing rules. New memberships receive
+    // a payment-period-bound reservation in the SAME transaction as the job.
+    if (isMembershipSku(currentUser.subscriptionTier)) {
+      try {
+        await reserveMemberAiQuota(tx, userId, currentUser.subscriptionTier, "revision", revision.id);
+      } catch (error) {
+        if (error instanceof MembershipQuotaError) {
+          throw new RevisionServiceError(403, { error: error.message, code: error.code });
+        }
+        throw error;
+      }
+    }
 
     for (const sectionIndex of sectionIndexes) {
       const section = byIndex.get(sectionIndex)!;
