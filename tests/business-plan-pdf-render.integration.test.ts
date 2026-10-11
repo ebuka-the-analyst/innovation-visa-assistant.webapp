@@ -190,3 +190,27 @@ test("PDF paragraph pagination leaves no almost-empty interior pages", async () 
   assert.deepEqual(inspection.nearEmptyInteriorPages, []);
   assert.deepEqual(inspection.visibleHtmlTagPages, []);
 });
+
+test("colspan financial notes remain explanatory, not fabricated annual forecasts", () => {
+  const source = '<table><tr><th>Metric</th><th>Year 1</th><th>Year 2</th><th>Year 3</th></tr>' +
+    '<tr><td>Revenue</td><td>£5,400</td><td>£34,800</td><td>£92,400</td></tr>' +
+    '<tr><td>LTV:CAC target, not an annual figure</td><td colspan="3">Target >3:1; not measured</td></tr></table>';
+  const prepared = htmlFinancialTablesToMarkdown(source);
+  assert.match(prepared, /\| Revenue \| £5,400 \| £34,800 \| £92,400 \|/);
+  assert.match(prepared, /LTV:CAC target, not an annual figure: Target >3:1; not measured/);
+  assert.doesNotMatch(prepared, /<table|colspan=/i);
+  assert.doesNotMatch(prepared, /\| LTV:CAC target[^\n]*Year 1/i);
+  const qa = assessBusinessPlanDocument(
+    "founder_pro",
+    getSectionsForTier("founder_pro").map(section =>
+      "## " + section.title + "\n" + "Evidence remains unverified. ".repeat(40)
+    ).join("\n\n") + "\n" + source,
+    60,
+    {
+      pageCount: 60, pageWordCounts: Array(60).fill(300),
+      nearEmptyInteriorPages: [], substantivePageCount: 60,
+      lowContentFinalPage: false, visibleHtmlTagPages: [],
+    },
+  );
+  assert.equal(qa.releaseGatePassed, true);
+});
