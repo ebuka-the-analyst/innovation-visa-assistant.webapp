@@ -5,6 +5,7 @@ import { normalisePdfPlanContent, renderBusinessPlanPdf } from "../server/busine
 import { assessBusinessPlanDocument } from "../server/businessPlanDocumentDiagnostics";
 import { getSectionsForTier } from "../server/aiPrompts";
 import { htmlFinancialTablesToMarkdown } from "../server/businessPlanTables";
+import { parsePdfTable } from "../server/businessPlanPdfTables";
 import { readFileSync } from "node:fs";
 
 test("HTML financial tables are converted to legible text instead of raw markup", () => {
@@ -83,4 +84,42 @@ test("malformed financial tables are never silently turned into invalid Word row
   const escaped = "<table><tr><th>Year</th><th>Revenue</th></tr><tr><td>2027</td><td>£1|2</td></tr></table>";
   const output = htmlFinancialTablesToMarkdown(escaped);
   assert.match(output, /\| 2027 \| £1\/2 \|/);
+});
+
+
+test("valid financial Markdown tables are parsed with consistent columns", () => {
+  const rows = ["| Metric | Year 1 | Year 2 |", "| --- | --- | --- |", "| Revenue | £50,000 | £95,000 |", "| Operating cost | £28,000 | £55,000 |", "", "More prose"];
+  const table = parsePdfTable(rows, 0);
+  assert.equal(table?.consumed, 4);
+  assert.equal(table?.rows[2][2], "£95,000");
+  assert.equal(parsePdfTable(["| Metric | Sales |", "| metric | not-divider |"], 0), null);
+});
+
+test("PDF financial tables paginate and preserve every amount in a real PDF", async () => {
+  const cells = Array.from({length: 58}, (_, index) => {
+    const n = index + 1;
+    return "<tr><td>Category " + n + "</td><td>GBP " + n * 1000 + "</td><td>GBP " + n * 1500 + "</td></tr>";
+  }).join("\n");
+  const data = '<table class="financial-table"><thead><tr><th>Category</th><th>Year 1</th><th>Year 2</th></tr></thead><tbody>' + cells + '</tbody></table>';
+  const { buffer, pageCount } = await renderBusinessPlanPdf({
+    businessName: "Financial Table QA",
+    tier: "founder_pro",
+    generatedContent: "## FINANCIAL PROJECTIONS\n\n" + data,
+  });
+  assert.ok(pageCount >= 2);
+  const pdf = await getDocument({data: new Uint8Array(buffer), useSystemFonts: true}).promise;
+  try {
+    assert.equal(pdf.numPages, pageCount);
+    let allText = "";
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+      const page = await pdf.getPage(pageNumber);
+      allText += " " + (await page.getTextContent()).items.map((item: any) => item.str || "").join(" ");
+    }
+    assert.match(allText, /Category 1/);
+    assert.match(allText, /Category 58/);
+    assert.match(allText, /GBP 87000/);
+    assert.doesNotMatch(allText, /<table|<td|<tr|&pound;/i);
+  } finally {
+    await pdf.destroy();
+  }
 });
