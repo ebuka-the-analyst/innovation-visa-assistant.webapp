@@ -3372,35 +3372,13 @@ Respond ONLY with valid JSON in this exact format:
     }
   });
 
-  app.post("/api/credits/award-referral", isAuthenticated, async (req, res) => {
-    try {
-      const { referredUserId } = req.body;
-      const user = req.user as any;
-
-      // Award 1 bonus credit for successful referral
-      await db
-        .update(users)
-        .set({
-          bonusCredits: sql`${users.bonusCredits} + 1`,
-        })
-        .where(eq(users.id, user.id));
-
-      // Log the transaction
-      const newBalance = (user.planCredits || 0) + (user.bonusCredits || 0) + 1;
-      await db.execute(sql`
-        INSERT INTO credit_transactions (id, user_id, type, credits_change, credits_type, balance_after, reference_id, reference_type, description)
-        VALUES (gen_random_uuid(), ${user.id}, 'referral_reward', 1, 'bonus', ${newBalance}, ${referredUserId}, 'referral', 'Referral reward: +1 credit')
-      `);
-
-      res.json({
-        success: true,
-        creditsAwarded: 1,
-        newBalance,
-      });
-    } catch (error) {
-      console.error("Award referral credit error:", error);
-      res.status(500).json({ error: "Failed to award referral credit" });
-    }
+  // Retired: client-supplied referredUserId cannot prove a qualifying referral.
+  // Real referral rewards are issued by the verified purchase/referral workflow.
+  app.post("/api/credits/award-referral", isAuthenticated, (_req, res) => {
+    res.status(410).json({
+      error: "Endpoint retired",
+      message: "Referral rewards are issued only after a verified qualifying event.",
+    });
   });
 
   // Grant initial plan credits when user subscribes to a tier - PhD-Level: ALL FINITE
