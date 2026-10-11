@@ -32,7 +32,9 @@ try {
 Using only these fictional sample facts: founder has a proposed UK software product; no customers, patents, contracts or verified revenue.
 Return a short evidence-led paragraph identifying one innovation hypothesis, two evidence gaps and a non-guarantee of endorsement. Do not invent supporting evidence.`,
     reasoning: { effort: "high" },
-    max_output_tokens: 1500,
+    // High reasoning consumes part of the output budget before visible prose.
+    // Maximum spend remains bounded at 4,000 output tokens.
+    max_output_tokens: 4000,
     text: { verbosity: "medium" },
     store: false,
   } as any);
