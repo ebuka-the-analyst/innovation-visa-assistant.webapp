@@ -169,6 +169,9 @@ jobs:
         run: node --import tsx --test tests/business-plan-pdf-render.integration.test.ts
       - name: Verify full-plan benchmark financial arithmetic and no-spend controls
         run: node --import tsx --test tests/phase2-full-plan-benchmark.test.ts
+
+      - name: Verify previous-versus-current full-plan comparison without API calls
+        run: node --import tsx --test tests/phase2-compare-benchmarks.test.ts
       - name: Validate premium evidence-first prompts and content QA
         run: node --import tsx --test tests/phase2-premium-content-quality.test.ts
 
