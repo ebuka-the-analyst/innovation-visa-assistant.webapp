@@ -18,6 +18,8 @@ test("paid access checks status, expiry and legacy nonexpiring entitlements", ()
   assert.equal(hasCurrentPaidEntitlement({ subscriptionTier: "premium", subscriptionStatus: "cancelled" }, now), false);
   assert.equal(hasCurrentPaidEntitlement({ subscriptionTier: "premium", subscriptionStatus: "active", tierExpiresAt: "bad-date" }, now), false);
   assert.equal(hasCurrentPaidEntitlement({ subscriptionTier: "free", subscriptionStatus: "inactive" }, now), true);
+  assert.equal(hasCurrentPaidEntitlement({ subscriptionTier: "founder", subscriptionStatus: "active" }, now), false);
+  assert.equal(hasCurrentPaidEntitlement({ subscriptionTier: "founder", subscriptionStatus: "active", tierExpiresAt: "2026-11-11T00:00:00Z" }, now), true);
 });
 
 test("gateway usage metadata excludes inputs and uses reported tokens", () => {
@@ -48,6 +50,9 @@ test("Free tier uses a limited preview template instead of Enterprise sections",
   assert.ok(free.length > 0 && free.length < enterprise.length);
   assert.ok(free.reduce((sum, section) => sum + section.maxTokens, 0) <= 10000);
   assert.ok(free.every((section) => section.pageTarget && section.requirements.length > 0));
+  assert.equal(getSectionsForTier("founder").length, getSectionsForTier("premium").length);
+  assert.equal(getSectionsForTier("founder_pro").length, getSectionsForTier("enterprise").length);
+  assert.equal(getSectionsForTier("founder_pass_90d").length, getSectionsForTier("enterprise").length);
 });
 
 test("business-plan inference is pinned to flagship without silently falling back", () => {
