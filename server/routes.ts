@@ -16528,16 +16528,36 @@ Return a JSON object with:
           return res.status(404).json({ error: "User not found" });
         }
 
-        // Delete all sessions for this user from the session store
-        // The session table stores sessions with user info in the 'sess' JSONB column
+        // Invalidate Passport credentials in the server-side session store.
+        // Passport serializes the user ID into sess.passport.user.
         const result = await db.execute(
           sql`DELETE FROM sessions WHERE sess::jsonb->'passport'->>'user' = ${userId}`,
         );
+        const sessionsTerminated = Number((result as any).rowCount || 0);
 
+        // user_sessions is an analytics ledger, distinct from the credential store.
+        // Mark previously active records ended so Customer 360 no longer reports
+        // stale sessions as active after a successful administrator logout.
+        try {
+          await db.execute(sql`
+            UPDATE user_sessions
+            SET is_active = false,
+                session_ended_at = COALESCE(session_ended_at, NOW()),
+                last_seen_at = COALESCE(last_seen_at, NOW())
+            WHERE user_id = ${userId} AND is_active = true
+          `);
+        } catch (trackingError) {
+          console.error("Force logout tracking reconciliation failed:", trackingError);
+        }
+
+        console.info("[Security] Admin force logout completed", {
+          targetUserId: userId,
+          sessionsTerminated,
+        });
         res.json({
           success: true,
           message: "User sessions terminated",
-          sessionsTerminated: (result as any).rowCount || 0,
+          sessionsTerminated,
         });
       } catch (error) {
         console.error("Force logout error:", error);

@@ -163,5 +163,8 @@ jobs:
       - name: Test executable probe guard
         run: node --import tsx --test tests/executable-probe-guard.test.ts
 
+      - name: Test administrative force logout reconciliation
+        run: node --import tsx --test tests/force-logout-session-audit.test.ts
+
       - name: Production build
         run: npm run build
