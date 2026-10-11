@@ -65,8 +65,8 @@ export function assessBusinessPlanDocument(
     if (editorialAudit.repeatedCrossSectionPhrases.length) {
       reviewAdvisories.push("Substantial phrasing is repeated across multiple sections; review for unnecessary duplication.");
     }
-    if (editorialAudit.sectionWordCounts.some(row => row.words < 250)) {
-      formattingWarnings.push("One or more premium plan sections contain fewer than 250 words.");
+    if (editorialAudit.sectionWordCounts.some(row => row.words < 100)) {
+      formattingWarnings.push("One or more premium plan sections have fewer than 100 words; check for incomplete generation.");
     }
   }
   if (/<table\b/i.test(source)) {
