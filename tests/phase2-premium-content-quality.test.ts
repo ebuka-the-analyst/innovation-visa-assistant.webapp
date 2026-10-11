@@ -44,6 +44,11 @@ test("unrendered diagrams and poorly sourced research trigger independent eviden
   ].join("\n\n");
   const result = auditPremiumPlanEvidence(source);
   assert.equal(result.blockedMediaMarkup.length,1);
+  const namespaceOnly = auditPremiumPlanEvidence(
+    '<svg xmlns="http://www.w3.org/2000/svg"><title>Architecture</title></svg> ' +
+    'The proposal references a study by Gebru et al. but provides no DOI.'
+  );
+  assert.ok(namespaceOnly.unverifiedSourceMentions.length >= 1);
   assert.ok(result.unverifiedSourceMentions.length >= 1);
   const diag = assessBusinessPlanDocument("founder_pro",source,60);
   assert.equal(diag.releaseGatePassed,false);
