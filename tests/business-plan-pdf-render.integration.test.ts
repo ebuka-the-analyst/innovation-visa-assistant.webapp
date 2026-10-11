@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { normalisePdfPlanContent, renderBusinessPlanPdf } from "../server/businessPlanPdf";
+import { assessBusinessPlanDocument } from "../server/businessPlanDocumentDiagnostics";
+import { getSectionsForTier } from "../server/aiPrompts";
 
 test("HTML financial tables are converted to legible text instead of raw markup", () => {
   const output = normalisePdfPlanContent(`## FINANCIALS
@@ -35,4 +37,20 @@ test("actual PDF page count agrees with independent PDF parser and contains no l
   } finally {
     await pdf.destroy();
   }
+});
+
+test("document diagnostics require real pages and all mandatory sections", () => {
+  const content = getSectionsForTier("founder_pro")
+    .map(section => `## ${section.title}\n` + "Evidence is not yet verified. ".repeat(35)).join("\n\n");
+  const pass = assessBusinessPlanDocument("founder_pro", content, 60);
+  assert.equal(pass.actualPdfPages, 60);
+  assert.equal(pass.sections.missing.length, 0);
+  assert.equal(pass.releaseGatePassed, true);
+  assert.equal(pass.manualEvidenceReviewRequired, true);
+  const short = assessBusinessPlanDocument("founder_pro", content, 22);
+  assert.equal(short.releaseGatePassed, false);
+  assert.ok(short.formattingWarnings.some(warning => /below the advertised/i.test(warning)));
+  const missing = assessBusinessPlanDocument("founder_pro", content.split("\n\n").slice(0, 1).join(""), 60);
+  assert.equal(missing.releaseGatePassed, false);
+  assert.ok(missing.sections.missing.length > 0);
 });
