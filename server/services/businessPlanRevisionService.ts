@@ -906,7 +906,8 @@ MANDATORY REVISION RULES:
   let lastError: any;
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const result = await callRevisionAI(prompt, 8000, revisionId);
+      const revisionBudget = attempt === 1 ? 12_000 : 24_000;
+      const result = await callRevisionAI(prompt, revisionBudget, revisionId);
       const cleaned = stripDuplicateHeading(sectionDefinition.title, result);
       if (!cleaned) throw new Error("Revision model returned empty content");
       return sanitizeBusinessPlanOutputText(sanitizeBusinessPlanClaims(cleaned));
