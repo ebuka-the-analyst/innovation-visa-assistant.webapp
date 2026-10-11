@@ -165,6 +165,8 @@ jobs:
 
       - name: Validate Phase 2 premium AI and entitlement protections
         run: node --import tsx --test tests/phase2-premium-ai-entitlements.test.ts
+      - name: Validate measurable PDF page counts and financial table rendering
+        run: node --import tsx --test tests/business-plan-pdf-render.integration.test.ts
 
       - name: Production build
         run: npm run build
