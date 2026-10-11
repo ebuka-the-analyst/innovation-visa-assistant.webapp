@@ -7,6 +7,8 @@ import { resolve } from "node:path";
 import { renderBusinessPlanPdf } from "../server/businessPlanPdf";
 import { inspectRenderedBusinessPlanPdf } from "../server/businessPlanPdfInspection";
 import { assessBusinessPlanDocument } from "../server/businessPlanDocumentDiagnostics";
+import { deriveQaFinancials, QA_FOUNDER_CASES } from "../tests/fixtures/fictional-founder-cases";
+import { auditPremiumPlanEvidence } from "../server/premiumPlanEvidenceAudit";
 
 async function main() {
   const sourceDir = resolve(process.argv[2] || "");
@@ -26,8 +28,21 @@ async function main() {
   const rendered = await renderBusinessPlanPdf({ businessName, generatedContent, tier: "founder_pro" });
   const inspection = await inspectRenderedBusinessPlanPdf(rendered.buffer);
   const diagnostics = assessBusinessPlanDocument("founder_pro", generatedContent, rendered.pageCount, inspection);
+  const finance = deriveQaFinancials(QA_FOUNDER_CASES.marketplace);
+  const canonicalValues = finance.flatMap(year => [
+    year.revenueGbp, year.variableCostsGbp, year.fixedCostsGbp,
+    year.operatingSurplusGbp,
+  ]);
+  const absentBaselineValues = canonicalValues
+    .map(value => (value < 0 ? "-£" : "£") + Math.abs(value).toLocaleString("en-GB"))
+    .filter((value, index, array) => array.indexOf(value) === index)
+    .filter(value => !generatedContent.includes(value));
+  const evidenceAudit = auditPremiumPlanEvidence(generatedContent);
   const result = {
     benchmarkRun: "38178211038",
+    benchmarkCaseFinancials: finance,
+    absentCanonicalFinancialValues: absentBaselineValues,
+    sourceEvidenceAudit: evidenceAudit,
     generationApiCostUsd: 0,
     priorPageCount: previousPdfPages,
     newPageCount: rendered.pageCount,
