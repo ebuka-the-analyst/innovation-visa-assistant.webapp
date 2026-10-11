@@ -1,0 +1,69 @@
+name: Manual Founder Pro Full-Plan Benchmark 2
+run-name: Founder Pro benchmark 2 (reviewed premium prompts)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_paid_full_plan_test:
+        description: "I approve ONE fictional Founder Pro GPT-6 Astra test using a $15 estimated USD guard"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: founder-pro-benchmark-two
+  cancel-in-progress: false
+
+jobs:
+  founder-pro-benchmark-2:
+    if: ${{ inputs.confirm_paid_full_plan_test == true && github.repository == 'ebuka-the-analyst/innovation-visa-assistant.webapp' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    environment: premium-ai-staging
+    steps:
+      - name: Check out fixed CI-tested Phase 2 code
+        uses: actions/checkout@v4
+        with:
+          ref: 8fbe0ad98b3f116d649a49a0b218aa2ab826339a
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install reviewed benchmark dependencies
+        run: npm install --no-audit --no-fund
+      - name: Run ONE fictional Founder Pro full-plan benchmark with revised prompts
+        shell: bash
+        env:
+          IFVA_ENABLE_FULL_PLAN_BENCHMARK: "yes"
+          IFVA_STAGING_OPENAI_API_KEY: ${{ secrets.IFVA_STAGING_OPENAI_API_KEY }}
+        run: |
+          if [ -z "$IFVA_STAGING_OPENAI_API_KEY" ]; then
+            echo "BLOCKED: premium-ai-staging API key missing."
+            exit 1
+          fi
+          node --import tsx scripts/phase2-full-plan-benchmark.ts \
+            --live --case marketplace --tier founder_pro \
+            --max-usd 15 --output-dir "${RUNNER_TEMP}/benchmark-two"
+      - name: Compare new output with first benchmark using saved report only
+        if: always()
+        shell: bash
+        run: |
+          FILE="${RUNNER_TEMP}/benchmark-two/marketplace-founder_pro-report.json"
+          if [ -f "$FILE" ]; then
+            node --import tsx scripts/phase2-compare-benchmarks.ts \
+              "$FILE" "${RUNNER_TEMP}/benchmark-two"
+          else
+            echo "Comparison unavailable; no complete report. Inspect usage-partial.json if present."
+          fi
+      - name: Archive fictional PDF, Markdown, usage and comparison report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fictional-founder-pro-benchmark-two
+          path: ${{ runner.temp }}/benchmark-two/
+          retention-days: 7
+          if-no-files-found: warn
