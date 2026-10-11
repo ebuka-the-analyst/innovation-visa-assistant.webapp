@@ -1,0 +1,114 @@
+name: Manual GPT-6 Astra Staging Check
+run-name: Manual premium model capability test
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_paid_api_test:
+        description: "I authorise one paid GPT-6 Astra API request, up to 4,000 output tokens"
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: premium-astra-staging-probe
+  cancel-in-progress: false
+
+jobs:
+  capability:
+    if: ${{ inputs.confirm_paid_api_test == true && github.repository == 'ebuka-the-analyst/innovation-visa-assistant.webapp' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    environment: premium-ai-staging
+    env:
+      IFVA_STAGING_OPENAI_API_KEY: ${{ secrets.IFVA_STAGING_OPENAI_API_KEY }}
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify protected staging credential is present
+        shell: bash
+        run: |
+          if [ -z "$IFVA_STAGING_OPENAI_API_KEY" ]; then
+            echo "Blocked: IFVA_STAGING_OPENAI_API_KEY is not configured."
+            exit 1
+          fi
+      - name: Run one limited, direct GPT-6 Astra Responses API test
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const token = process.env.IFVA_STAGING_OPENAI_API_KEY;
+          const started = Date.now();
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 120000);
+          try {
+            const response = await fetch("https://api.openai.com/v1/responses", {
+              method: "POST",
+              headers: {
+                Authorization: "Bearer " + token,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                model: "gpt-6-astra",
+                input: "Fictional UK Innovator Founder SaaS idea: no customers, no revenue, no patent and no validated market research. Write a brief business-plan risk assessment explaining one testable innovation hypothesis, two missing evidence items, and why endorsement cannot be guaranteed. Do not invent supporting facts.",
+                reasoning: { effort: "high" },
+                max_output_tokens: 4000,
+                text: { verbosity: "medium" },
+                store: false
+              }),
+              signal: controller.signal
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+              console.error(JSON.stringify({
+                success: false,
+                httpStatus: response.status,
+                apiErrorType: String(data.error?.type || "unknown").slice(0, 90),
+                apiErrorCode: String(data.error?.code || "unknown").slice(0, 90)
+              }));
+              process.exitCode = 1;
+            } else {
+              const output = Array.isArray(data.output)
+                ? data.output.flatMap(item => item?.content || [])
+                    .filter(item => item?.type === "output_text")
+                    .map(item => item.text || "").join("")
+                : "";
+              const usage = data.usage || {};
+              const totalInput = Number(usage.input_tokens || 0);
+              const cachedInput = Number(usage.input_tokens_details?.cached_tokens || 0);
+              const totalOutput = Number(usage.output_tokens || 0);
+              const estimatedUsd = ((totalInput - cachedInput) * 10 +
+                cachedInput * 1 + totalOutput * 50) / 1000000;
+              const valid = data.status === "completed" &&
+                data.model === "gpt-6-astra" && output.trim().length > 70 &&
+                Number.isFinite(totalInput) && Number.isFinite(totalOutput) &&
+                totalInput > 0 && totalOutput > 0;
+              console.log(JSON.stringify({
+                success: valid,
+                model: String(data.model || ""),
+                status: String(data.status || ""),
+                elapsedMs: Date.now() - started,
+                inputTokens: totalInput,
+                cachedInputTokens: cachedInput,
+                outputTokens: totalOutput,
+                reasoningTokens: usage.output_tokens_details?.reasoning_tokens ?? null,
+                estimatedStandardUsd: Number(estimatedUsd.toFixed(6)),
+                note: "Short capability test only; not a full business-plan benchmark or provider invoice."
+              }, null, 2));
+              if (!valid) process.exitCode = 1;
+            }
+          } catch (error) {
+            console.error(JSON.stringify({
+              success: false,
+              category: error?.name === "AbortError" ? "timeout" : "request_failed",
+              note: "No API key or generated content is printed."
+            }));
+            process.exitCode = 1;
+          } finally {
+            clearTimeout(timeout);
+          }
+          NODE
