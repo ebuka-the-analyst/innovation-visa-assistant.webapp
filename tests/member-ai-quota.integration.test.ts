@@ -21,6 +21,11 @@ before(async () => {
   await pool.query('CREATE TABLE users (id VARCHAR PRIMARY KEY)');
   const migration = readFileSync(new URL("../migrations/app/20261011_member_ai_entitlements.sql", import.meta.url), "utf8");
   await pool.query(migration);
+  // Both production migrations must execute together on the disposable DB.
+  const inferenceMigration = readFileSync(
+    new URL("../migrations/app/20261011_ai_inference_usage.sql", import.meta.url), "utf8",
+  );
+  await pool.query(inferenceMigration);
   await pool.query('INSERT INTO users (id) VALUES ($1)', [userId]);
   await pool.query(
     `INSERT INTO member_ai_entitlements
@@ -77,4 +82,31 @@ test("revisions have independent monthly slots and do not affect generation usag
   const revisions = Array.from({ length: 15 }, () => randomUUID());
   for (const revision of revisions) assert.deepEqual(await reserve(revision, now, "revision"), { duplicate: false });
   await assert.rejects(() => reserve(randomUUID(), now, "revision"), (error: any) => error?.code === "PERIOD_QUOTA_EXHAUSTED");
+});
+
+test("AI inference migration stores usage and prevents duplicate provider responses", async () => {
+  const responseId = "resp_test_" + randomUUID().replaceAll("-", "");
+  const write = async () => pool.query(
+    `INSERT INTO ai_inference_usage (
+      provider, provider_response_id, model, operation, workload, job_id,
+      input_tokens, cached_input_tokens, output_tokens, reasoning_tokens,
+      latency_ms, cost_usd_estimated, cost_pricing_version
+    ) VALUES ('openai',$1,'gpt-6-astra','responses','business_plan_generation',
+      $2,200000,10000,50000,3000,4000,4.49000000,'openai-gpt-6-astra-standard-2026-10-11')
+    ON CONFLICT (provider, provider_response_id)
+      WHERE provider_response_id IS NOT NULL DO NOTHING`,
+    [responseId, randomUUID()],
+  );
+  await write();
+  await write();
+  const result = await pool.query(
+    "SELECT COUNT(*)::integer AS total, SUM(cost_usd_estimated)::numeric AS estimated_cost FROM ai_inference_usage WHERE provider_response_id = $1",
+    [responseId],
+  );
+  assert.equal(result.rows[0].total, 1);
+  assert.equal(Number(result.rows[0].estimated_cost), 4.49);
+  await assert.rejects(
+    () => pool.query("INSERT INTO ai_inference_usage (provider,operation,workload,latency_ms,input_tokens) VALUES ('openai','responses','business_plan_generation',100,-1)"),
+    (error: any) => error?.code === "23514",
+  );
 });
