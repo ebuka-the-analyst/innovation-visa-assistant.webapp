@@ -1,0 +1,57 @@
+name: Manual Founder Pro Full-Plan Benchmark
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_paid_full_plan_test:
+        description: "I authorise ONE fictional Founder Pro plan benchmark with a $15 estimated USD spending guard"
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: one-founder-pro-astra-benchmark
+  cancel-in-progress: false
+
+jobs:
+  founder-pro-benchmark:
+    if: ${{ inputs.confirm_paid_full_plan_test == true && github.repository == 'ebuka-the-analyst/innovation-visa-assistant.webapp' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    environment: premium-ai-staging
+    steps:
+      - name: Check out reviewed and CI-tested benchmark source (fixed commit)
+        uses: actions/checkout@v4
+        with:
+          ref: 353ae58261a1ca8ae4a185c1f18bf9093075b214
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install reviewed benchmark dependencies
+        run: npm install --no-audit --no-fund
+      - name: Run ONE fictional Founder Pro full-plan benchmark
+        env:
+          IFVA_ENABLE_FULL_PLAN_BENCHMARK: "yes"
+          IFVA_STAGING_OPENAI_API_KEY: ${{ secrets.IFVA_STAGING_OPENAI_API_KEY }}
+        shell: bash
+        run: |
+          if [ -z "$IFVA_STAGING_OPENAI_API_KEY" ]; then
+            echo "BLOCKED: the premium-ai-staging secret is missing."
+            exit 1
+          fi
+          node --import tsx scripts/phase2-full-plan-benchmark.ts \
+            --live --case marketplace --tier founder_pro \
+            --max-usd 15 --output-dir "${RUNNER_TEMP}/ifva-benchmark"
+      - name: Archive fictional plan, actual PDF and usage diagnostics for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fictional-founder-pro-benchmark
+          path: ${{ runner.temp }}/ifva-benchmark/
+          retention-days: 7
+          if-no-files-found: warn
