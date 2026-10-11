@@ -765,6 +765,7 @@ export async function cancelQueuedRevisionForUser(planId: string, revisionId: st
         SET status = 'cancelled', updated_at = NOW()
         WHERE revision_id = ${revisionId} AND status = 'queued'
       `);
+      await transitionMemberAiReservation(tx, "revision", revisionId, "released");
       await addEvent(tx, revisionId, planId, "customer", "revision_cancelled", userId, null);
       return { success: true, status: "cancelled", duplicate: false };
     }
@@ -1153,6 +1154,7 @@ async function processRevisionJob(job: RevisionJob): Promise<void> {
             heartbeat_at = NULL, updated_at = NOW()
         WHERE id = ${job.id} AND lease_token = ${job.lease_token}
       `);
+      await transitionMemberAiReservation(tx, "revision", revision.id, "committed");
       await addEvent(tx, revision.id, revision.plan_id, "worker", "revision_ready_for_review", null, {
         targetVersionNumber: nextVersionNumber,
         revisedSectionIndexes: Array.from(revisedByIndex.keys()),
@@ -1180,6 +1182,7 @@ async function markRevisionJobFailed(job: RevisionJob, error: any, permanent: bo
     SET status = 'failed', last_error = ${message}, updated_at = NOW()
     WHERE id = ${job.revision_id} AND status = 'in_progress'
   `);
+  await transitionMemberAiReservation(db as any, "revision", job.revision_id, "released");
   const revision = firstRow<any>(await db.execute(sql`
     SELECT plan_id FROM business_plan_revisions WHERE id = ${job.revision_id}
   `));
