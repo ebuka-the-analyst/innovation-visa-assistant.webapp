@@ -49,6 +49,7 @@ import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { generatePDFContent, generatePDFUrl, sanitizeBusinessPlanOutputText } from "./pdf";
 import { generatePDFWithPDFKit } from "./businessPlanPdf";
 import { htmlFinancialTablesToMarkdown } from "./businessPlanTables";
+import { buildBusinessPlanWordTable } from "./businessPlanWordTableExporter";
 import { z } from "zod";
 import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
@@ -4148,45 +4149,8 @@ Respond ONLY with valid JSON in this exact format:
       };
 
       const addMarkdownTableToDoc = (rows: string[][]) => {
-        const columnCount = Math.min(Math.max(...rows.map((row) => row.length)), 5);
-        const normalizedRows = rows.map((row) =>
-          Array.from({ length: columnCount }, (_, index) => row[index] || ""),
-        );
-        const columnWidth = Math.floor(9000 / columnCount);
-
         children.push(
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: normalizedRows.map(
-              (row, rowIndex) =>
-                new TableRow({
-                  tableHeader: rowIndex === 0,
-                  children: row.map(
-                    (cell) =>
-                      new TableCell({
-                        width: { size: columnWidth, type: WidthType.DXA },
-                        shading:
-                          rowIndex === 0
-                            ? { type: ShadingType.CLEAR, fill: "005EB8", color: "auto" }
-                            : undefined,
-                        children: [
-                          new Paragraph({
-                            children: [
-                              new TextRun({
-                                text: cleanWordText(cell),
-                                size: rowIndex === 0 ? 20 : 19,
-                                bold: rowIndex === 0,
-                                color: rowIndex === 0 ? "FFFFFF" : "111827",
-                              }),
-                            ],
-                            spacing: { before: 80, after: 80 },
-                          }),
-                        ],
-                      }),
-                  ),
-                }),
-            ),
-          }),
+          buildBusinessPlanWordTable(rows),
           new Paragraph({ text: "", spacing: { after: 160 } }),
         );
       };
