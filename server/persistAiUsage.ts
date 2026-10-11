@@ -20,7 +20,9 @@ export async function persistPremiumAiUsage(event: AiUsageEvent): Promise<void> 
       cachedInputTokens: event.cachedInputTokens,
       outputTokens: event.outputTokens,
       serviceTier: event.serviceTier,
-      apiBaseUrl: event.apiBaseUrl,
+      apiBaseUrl: process.env.UPSTREAM_OPENAI_API_KEY
+        ? "https://api.openai.com/v1"
+        : process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || "https://api.openai.com/v1",
     });
     await (dbPool as any).query(
       `INSERT INTO ai_inference_usage
