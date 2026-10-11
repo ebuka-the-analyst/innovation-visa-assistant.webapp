@@ -27,7 +27,13 @@ const REQUEST_TYPES = new Set([
   "section_regeneration",
 ]);
 
-const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
+const openaiClient = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || "",
+  defaultHeaders: {
+    "x-ai-quality-policy": "strict-primary",
+    "x-ai-workload": "business_plan_revision",
+  },
+});
 
 type RevisionJob = {
   id: string;
@@ -108,12 +114,12 @@ async function callRevisionAI(prompt: string, maxTokens = 8000): Promise<string>
     throw new PermanentRevisionError("OPENAI_API_KEY is not configured");
   }
 
-  if (/^gpt-5/i.test(BUSINESS_PLAN_MODEL)) {
+  if (/^gpt-(?:5|6)/i.test(BUSINESS_PLAN_MODEL)) {
     const response = await openaiClient.responses.create({
       model: BUSINESS_PLAN_MODEL as any,
       input: prompt,
       max_output_tokens: maxTokens,
-      reasoning: { effort: "medium" },
+      reasoning: { effort: "high" },
       text: { verbosity: "high" },
     } as any);
     const responseAny = response as any;
