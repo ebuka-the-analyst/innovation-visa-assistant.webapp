@@ -21,7 +21,13 @@ const HEARTBEAT_INTERVAL_MS = 20_000;
 const IDLE_POLL_MS = 2_000;
 const MAX_TRANSIENT_FAILURES = 5;
 
-const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
+const openaiClient = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || "",
+  defaultHeaders: {
+    "x-ai-quality-policy": "strict-primary",
+    "x-ai-workload": "business_plan_generation",
+  },
+});
 
 export class GenerationStartError extends Error {
   constructor(
@@ -100,14 +106,14 @@ function isPermanentProviderError(error: any): boolean {
 }
 
 async function callBusinessPlanAI(prompt: string, maxTokens = 8000): Promise<string> {
-  const isLatestGptFamily = /^gpt-5/i.test(BUSINESS_PLAN_MODEL);
+  const isLatestGptFamily = /^gpt-(?:5|6)/i.test(BUSINESS_PLAN_MODEL);
 
   if (isLatestGptFamily) {
     const response = await openaiClient.responses.create({
       model: BUSINESS_PLAN_MODEL as any,
       input: prompt,
       max_output_tokens: maxTokens,
-      reasoning: { effort: "medium" },
+      reasoning: { effort: "high" },
       text: { verbosity: "high" },
     } as any);
 
