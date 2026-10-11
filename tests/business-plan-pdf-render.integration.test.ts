@@ -91,7 +91,8 @@ test("valid financial Markdown tables are parsed with consistent columns", () =>
   const rows = ["| Metric | Year 1 | Year 2 |", "| --- | --- | --- |", "| Revenue | £50,000 | £95,000 |", "| Operating cost | £28,000 | £55,000 |", "", "More prose"];
   const table = parsePdfTable(rows, 0);
   assert.equal(table?.consumed, 4);
-  assert.equal(table?.rows[2][2], "£95,000");
+  assert.equal(table?.rows[1][2], "£95,000");
+  assert.equal(table?.rows[2][2], "£55,000");
   assert.equal(parsePdfTable(["| Metric | Sales |", "| metric | not-divider |"], 0), null);
 });
 
