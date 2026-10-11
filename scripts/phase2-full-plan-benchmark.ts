@@ -17,6 +17,7 @@ import { benchmarkOutputBudget, reserveBenchmarkRequest, assertBenchmarkSpendLim
 import { QA_FOUNDER_CASES, type QaCaseId, deriveQaFinancials } from "../tests/fixtures/fictional-founder-cases";
 import { assessBusinessPlanDocument } from "../server/businessPlanDocumentDiagnostics";
 import { renderBusinessPlanPdf } from "../server/businessPlanPdf";
+import { inspectRenderedBusinessPlanPdf } from "../server/businessPlanPdfInspection";
 
 type Tier = "founder" | "founder_pro" | "founder_pass_90d";
 type Input = { caseId: QaCaseId; tier: Tier; live: boolean; budgetUsd: number | null; outputDir: string | null };
@@ -179,7 +180,10 @@ async function main(): Promise<void> {
   const generatedContent="# FICTIONAL BUSINESS PLAN: "+fixture.businessName+
     "\n\nQA DOCUMENT - NOT A REAL APPLICATION\n\n"+completed.join("\n\n---\n\n");
   const pdf=await renderBusinessPlanPdf({businessName:fixture.businessName,tier:input.tier,generatedContent});
-  const diagnostics=assessBusinessPlanDocument(input.tier,generatedContent,pdf.pageCount);
+  const independentPdfInspection=await inspectRenderedBusinessPlanPdf(pdf.buffer);
+  const diagnostics=assessBusinessPlanDocument(
+    input.tier,generatedContent,pdf.pageCount,independentPdfInspection,
+  );
   const prefix=input.caseId+"-"+input.tier;
   await Promise.all([
     writeFile(resolve(outputDir,prefix+".pdf"),pdf.buffer),
