@@ -2,6 +2,7 @@ import { getSectionsForTier } from "./aiPrompts";
 import { sanitizeBusinessPlanOutputText } from "./pdf";
 import { htmlFinancialTablesToMarkdown } from "./businessPlanTables";
 import type { RenderedPdfInspection } from "./businessPlanPdfInspection";
+import { auditPremiumPlanEvidence, type EditorialEvidenceAudit } from "./premiumPlanEvidenceAudit";
 
 export interface BusinessPlanDocumentDiagnostics {
   tier: string;
@@ -11,6 +12,7 @@ export interface BusinessPlanDocumentDiagnostics {
   sections: { expected: number; located: number; missing: string[] };
   formattingWarnings: string[];
   reviewAdvisories: string[];
+  editorialAudit: EditorialEvidenceAudit | null;
   pdfInspection: RenderedPdfInspection | null;
   releaseGatePassed: boolean;
   manualEvidenceReviewRequired: true;
@@ -54,6 +56,19 @@ export function assessBusinessPlanDocument(
     .filter(title => !headings.includes(canonical(title)));
   const formattingWarnings: string[] = [];
   const reviewAdvisories: string[] = [];
+  const editorialAudit = ["founder", "founder_pro", "founder_pass_90d"].includes(tier)
+    ? auditPremiumPlanEvidence(source)
+    : null;
+  if (editorialAudit) {
+    formattingWarnings.push(...editorialAudit.blockedMediaMarkup);
+    reviewAdvisories.push(...editorialAudit.unverifiedSourceMentions);
+    if (editorialAudit.repeatedCrossSectionPhrases.length) {
+      reviewAdvisories.push("Substantial phrasing is repeated across multiple sections; review for unnecessary duplication.");
+    }
+    if (editorialAudit.sectionWordCounts.some(row => row.words < 250)) {
+      formattingWarnings.push("One or more premium plan sections contain fewer than 250 words.");
+    }
+  }
   if (/<table\b/i.test(source)) {
     // HTML tables are a legitimate generator output and both exporters
     // convert supported tables. Do not fail merely because HTML was used.
@@ -106,6 +121,7 @@ export function assessBusinessPlanDocument(
     sections: { expected: definitions.length, located: definitions.length - missing.length, missing },
     formattingWarnings,
     reviewAdvisories,
+    editorialAudit,
     pdfInspection,
     releaseGatePassed: formattingWarnings.length === 0,
     manualEvidenceReviewRequired: true,
