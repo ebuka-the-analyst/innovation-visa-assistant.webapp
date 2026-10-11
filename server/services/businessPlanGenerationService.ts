@@ -571,11 +571,17 @@ async function persistCheckpoint(
   });
 }
 
-async function generateSectionWithRetries(prompt: string, sectionLabel: string, jobId: string): Promise<string> {
+async function generateSectionWithRetries(prompt: string, sectionLabel: string, jobId: string, targetOutputTokens: number): Promise<string> {
   let lastError: any;
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const content = await callBusinessPlanAI(prompt, 8000, jobId);
+      // High reasoning consumes output tokens before visible prose appears.
+      // Give the flagship model sufficient room, increasing only on a retry.
+      const budget = Math.min(32_000, Math.max(
+        attempt === 1 ? 10_000 : 20_000,
+        targetOutputTokens * (attempt === 1 ? 3 : 6),
+      ));
+      const content = await callBusinessPlanAI(prompt, budget, jobId);
       if (!content.trim()) throw new Error("OpenAI returned empty section content");
       return content;
     } catch (error: any) {
@@ -856,6 +862,7 @@ Remember: Write FULL prose content for this section. No outlines or placeholders
         `${sectionSystemPrompt}\n\n${sectionUserPrompt}`,
         `section ${sectionNumber}/${sections.length}`,
         job.plan_id,
+        section.maxTokens,
       );
 
       const heartbeatOk = await heartbeatJob(job);
