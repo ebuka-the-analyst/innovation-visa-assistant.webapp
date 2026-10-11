@@ -5,6 +5,7 @@ import { sql } from "drizzle-orm";
 import { db } from "../db";
 import { storage } from "../storage";
 import { BUSINESS_PLAN_MODEL } from "../aiModelConfig";
+import { hasCurrentPaidEntitlement } from "../security/paidEntitlement";
 import { getSectionsForTier, getSectionSystemPrompt } from "../aiPrompts";
 import { generatePDFUrl, sanitizeBusinessPlanOutputText } from "../pdf";
 import {
@@ -424,6 +425,19 @@ export async function createRevisionForUser(
   if (!plan || plan.userId !== userId) throw new RevisionServiceError(404, { error: "Business plan not found" });
   if (plan.status !== "completed") {
     throw new RevisionServiceError(409, { error: "This business plan is not ready for revision." });
+  }
+
+  const currentUser = await storage.getUser(userId);
+  if (!currentUser) {
+    throw new RevisionServiceError(404, { error: "Account not found." });
+  }
+  // Previously completed documents stay readable; new premium AI revisions
+  // require a current entitlement. Legacy one-time paid access is honoured.
+  if (!hasCurrentPaidEntitlement(currentUser)) {
+    throw new RevisionServiceError(403, {
+      error: "Your paid access has expired or is inactive. Renew before requesting AI revisions.",
+      code: "PAID_ENTITLEMENT_REQUIRED",
+    });
   }
 
   const transactionalDb = db as any;
