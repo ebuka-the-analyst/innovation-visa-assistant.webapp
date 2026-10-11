@@ -1,4 +1,6 @@
 import { sanitizeBusinessPlanOutputText } from "./pdf";
+import { htmlFinancialTablesToMarkdown } from "./businessPlanTables";
+import { parsePdfTable, renderPdfTable } from "./businessPlanPdfTables";
 
 function shouldSkipPlanArtifactLine(line: string): boolean {
   const trimmed = line.trim();
@@ -49,7 +51,7 @@ export async function renderBusinessPlanPdf(businessPlan: any): Promise<{buffer:
       doc.on("error", reject);
     });
 
-    const content = normalisePdfPlanContent(sanitizeBusinessPlanOutputText(businessPlan.generatedContent || ""));
+    const content = normalisePdfPlanContent(htmlFinancialTablesToMarkdown(sanitizeBusinessPlanOutputText(businessPlan.generatedContent || "")));
     const tierName =
       (businessPlan.tier || "free").charAt(0).toUpperCase() +
       (businessPlan.tier || "free").slice(1);
@@ -79,7 +81,14 @@ export async function renderBusinessPlanPdf(businessPlan: any): Promise<{buffer:
     const lines = content.split("\n");
     let currentY = 220;
 
-    for (const line of lines) {
+    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+      const line = lines[lineIndex];
+      const table = parsePdfTable(lines, lineIndex);
+      if (table) {
+        currentY = renderPdfTable(doc, table.rows, currentY);
+        lineIndex += table.consumed - 1;
+        continue;
+      }
       const trimmed = line.trim();
       if (shouldSkipPlanArtifactLine(trimmed)) continue;
       if (!trimmed) {
