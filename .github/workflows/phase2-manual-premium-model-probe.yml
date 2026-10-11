@@ -1,0 +1,41 @@
+name: Manual Premium Model Staging Probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_paid_api_test:
+        description: "I authorise one limited, paid GPT-6 Astra API capability request using staging credentials"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  premium-model-probe:
+    if: ${{ inputs.confirm_paid_api_test == true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment: premium-ai-staging
+    env:
+      IFVA_ENABLE_PAID_AI_PROBE: "yes"
+      UPSTREAM_OPENAI_API_KEY: ${{ secrets.IFVA_STAGING_OPENAI_API_KEY }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify staging API credential is configured
+        shell: bash
+        run: |
+          if [ -z "$UPSTREAM_OPENAI_API_KEY" ]; then
+            echo "Blocked: configure IFVA_STAGING_OPENAI_API_KEY in the protected premium-ai-staging environment."
+            exit 1
+          fi
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Run one limited paid model capability probe
+        run: node --import tsx scripts/probe-premium-business-model.ts --live
