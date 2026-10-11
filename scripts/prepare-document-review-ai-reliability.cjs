@@ -34,7 +34,7 @@ update('server/aiProviderGateway.ts', (source) => {
     return source;
   }
 
-  const anchor = `    if (payload.max_tokens != null && payload.max_completion_tokens == null) {\n      payload.max_completion_tokens = payload.max_tokens;\n      delete payload.max_tokens;\n    }\n    if (/^gpt-5/i.test(model)) delete payload.temperature;\n    const result: any = await client.chat.completions.create(payload);\n    result.provider = "openai";\n    return result;`;
+  const anchor = `    if (payload.max_tokens != null && payload.max_completion_tokens == null) {\n      payload.max_completion_tokens = payload.max_tokens;\n      delete payload.max_tokens;\n    }\n    if (/^gpt-(?:5|6)/i.test(model)) delete payload.temperature;\n    const result: any = await client.chat.completions.create(payload);\n    result.provider = "openai";\n    return result;`;
 
   if (!source.includes(anchor)) {
     throw new Error('Managed OpenAI chat gateway anchor not found');
