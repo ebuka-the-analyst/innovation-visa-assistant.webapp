@@ -6,6 +6,7 @@ import { assessBusinessPlanDocument } from "../server/businessPlanDocumentDiagno
 import { getSectionsForTier } from "../server/aiPrompts";
 import { htmlFinancialTablesToMarkdown } from "../server/businessPlanTables";
 import { parsePdfTable } from "../server/businessPlanPdfTables";
+import { inspectRenderedBusinessPlanPdf } from "../server/businessPlanPdfInspection";
 import { readFileSync } from "node:fs";
 
 test("HTML financial tables are converted to legible text instead of raw markup", () => {
@@ -123,4 +124,69 @@ test("PDF financial tables paginate and preserve every amount in a real PDF", as
   } finally {
     await pdf.destroy();
   }
+});
+
+test("successful HTML-to-table conversion is advisory, not an automatic document failure", () => {
+  const sections = getSectionsForTier("founder_pro")
+    .map(section => "## " + section.title + "\n" + "Fictional evidence remains unverified. ".repeat(32))
+    .join("\n\n");
+  const table = '<table><tr><th>Item</th><th>Year 1</th></tr><tr><td>Revenue</td><td>£5,400</td></tr></table>';
+  const source = sections + "\n\n" + table;
+  const inspection = {
+    pageCount: 60,
+    pageWordCounts: Array(60).fill(300),
+    nearEmptyInteriorPages: [],
+    substantivePageCount: 60,
+    lowContentFinalPage: false,
+    visibleHtmlTagPages: [],
+  };
+  const result = assessBusinessPlanDocument("founder_pro", source, 60, inspection);
+  assert.equal(result.releaseGatePassed, true);
+  assert.ok(result.reviewAdvisories.some(w => /converted/i.test(w)));
+  assert.equal(result.formattingWarnings.length, 0);
+
+  const malformed = source.replace("<td>£5,400</td>", "");
+  const blocked = assessBusinessPlanDocument("founder_pro", malformed, 60, inspection);
+  assert.equal(blocked.releaseGatePassed, false);
+  assert.ok(blocked.formattingWarnings.some(w => /could not be structurally converted/i.test(w)));
+});
+
+test("independent PDF quality checks block inflated length from sparse overflow pages", () => {
+  const sections = getSectionsForTier("founder_pro")
+    .map(section => "## " + section.title + "\n" + "Fictional review content. ".repeat(32))
+    .join("\n\n");
+  const density = {
+    pageCount: 60,
+    pageWordCounts: [320, ...Array(58).fill(290), 16],
+    nearEmptyInteriorPages: [4, 7, 18],
+    substantivePageCount: 48,
+    lowContentFinalPage: true,
+    visibleHtmlTagPages: [],
+  };
+  const report = assessBusinessPlanDocument("founder_pro", sections, 60, density);
+  assert.equal(report.releaseGatePassed, false);
+  assert.ok(report.formattingWarnings.some(w => /nearly empty interior/i.test(w)));
+  assert.ok(report.formattingWarnings.some(w => /substantive PDF page count/i.test(w)));
+  assert.ok(report.reviewAdvisories.some(w => /Final PDF page/i.test(w)));
+});
+
+test("PDF paragraph pagination leaves no almost-empty interior pages", async () => {
+  const paragraph =
+    "The fictional UK venture has no established commercial traction, patent rights or verified customer interviews. " +
+    "Its proposed innovation must be tested under consented research conditions before endorsement preparation can rely on its results. " +
+    "Financial assumptions are illustrative and require independent verification of market demand and operating costs. ";
+  const content = Array.from({ length: 8 }, (_, index) =>
+    "## " + (index + 1) + ". QUALITY SECTION\n\n" +
+    Array.from({ length: 13 }, () => paragraph.repeat(3)).join("\n\n")
+  ).join("\n\n");
+  const result = await renderBusinessPlanPdf({
+    businessName: "Fictional PDF Page Overflow Test",
+    generatedContent: content,
+    tier: "founder_pro",
+  });
+  const inspection = await inspectRenderedBusinessPlanPdf(result.buffer);
+  assert.ok(inspection.pageCount >= 8);
+  assert.equal(inspection.pageCount, result.pageCount);
+  assert.deepEqual(inspection.nearEmptyInteriorPages, []);
+  assert.deepEqual(inspection.visibleHtmlTagPages, []);
 });
