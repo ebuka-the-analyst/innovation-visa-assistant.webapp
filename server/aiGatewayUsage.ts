@@ -25,6 +25,7 @@ export function gatewayUsageEvent(
   const usage = response?.usage;
   const inputTokens = finiteNonNegativeTokenCount(usage?.input_tokens ?? usage?.prompt_tokens);
   const outputTokens = finiteNonNegativeTokenCount(usage?.output_tokens ?? usage?.completion_tokens);
+  const cachedInputTokens = finiteNonNegativeTokenCount(usage?.input_tokens_details?.cached_tokens ?? usage?.prompt_tokens_details?.cached_tokens);
   const reasoningTokens = finiteNonNegativeTokenCount(
     usage?.output_tokens_details?.reasoning_tokens ??
     usage?.completion_tokens_details?.reasoning_tokens,
@@ -39,7 +40,12 @@ export function gatewayUsageEvent(
     operation,
     provider: response?.provider === "anthropic" ? "anthropic" : response?.provider === "openai" ? "openai" : "unknown",
     model: typeof response?.model === "string" ? response.model.slice(0, 160) : null,
+    providerResponseId:
+      typeof response?.id === "string" && /^[a-zA-Z0-9_-]{1,160}$/.test(response.id)
+        ? response.id
+        : null,
     inputTokens,
+    cachedInputTokens,
     outputTokens,
     reasoningTokens,
     durationMs: Math.max(0, Math.floor(durationMs)),
