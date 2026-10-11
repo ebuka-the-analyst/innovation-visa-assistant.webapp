@@ -105,7 +105,7 @@ function isPermanentProviderError(error: any): boolean {
   );
 }
 
-async function callBusinessPlanAI(prompt: string, maxTokens = 8000): Promise<string> {
+async function callBusinessPlanAI(prompt: string, maxTokens = 8000, jobId?: string): Promise<string> {
   const isLatestGptFamily = /^gpt-(?:5|6)/i.test(BUSINESS_PLAN_MODEL);
 
   if (isLatestGptFamily) {
@@ -115,7 +115,7 @@ async function callBusinessPlanAI(prompt: string, maxTokens = 8000): Promise<str
       max_output_tokens: maxTokens,
       reasoning: { effort: "high" },
       text: { verbosity: "high" },
-    } as any);
+    } as any, { headers: jobId ? { "x-ai-job-id": jobId } : {} });
 
     const responseAny = response as any;
     const outputText = typeof responseAny.output_text === "string" ? responseAny.output_text : "";
@@ -140,7 +140,7 @@ async function callBusinessPlanAI(prompt: string, maxTokens = 8000): Promise<str
     messages: [{ role: "user", content: prompt }],
     max_tokens: maxTokens,
     temperature: 0.7,
-  } as any);
+  } as any, { headers: jobId ? { "x-ai-job-id": jobId } : {} });
   const content = response.choices[0]?.message?.content?.trim();
   if (!content) throw new Error("OpenAI returned empty response");
   return content;
@@ -559,11 +559,11 @@ async function persistCheckpoint(
   });
 }
 
-async function generateSectionWithRetries(prompt: string, sectionLabel: string): Promise<string> {
+async function generateSectionWithRetries(prompt: string, sectionLabel: string, jobId: string): Promise<string> {
   let lastError: any;
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const content = await callBusinessPlanAI(prompt, 8000);
+      const content = await callBusinessPlanAI(prompt, 8000, jobId);
       if (!content.trim()) throw new Error("OpenAI returned empty section content");
       return content;
     } catch (error: any) {
@@ -840,6 +840,7 @@ Remember: Write FULL prose content for this section. No outlines or placeholders
       const rawContent = await generateSectionWithRetries(
         `${sectionSystemPrompt}\n\n${sectionUserPrompt}`,
         `section ${sectionNumber}/${sections.length}`,
+        job.plan_id,
       );
 
       const heartbeatOk = await heartbeatJob(job);
