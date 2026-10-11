@@ -33,7 +33,14 @@ export function estimateStandardAstraUsd(input: InferencePricingInput): {
   const cached = input.cachedInputTokens ?? 0;
   if (!Number.isSafeInteger(cached) || cached < 0 || cached > input.inputTokens) return unavailable;
   // An external integration/proxy may have different commercial billing.
-  if (input.apiBaseUrl && new URL(input.apiBaseUrl).host !== "api.openai.com") return unavailable;
+  if (input.apiBaseUrl) {
+    try {
+      const url = new URL(input.apiBaseUrl);
+      if (url.protocol !== "https:" || url.host !== "api.openai.com") return unavailable;
+    } catch {
+      return unavailable;
+    }
+  }
   if (input.serviceTier && !["default", "auto", "standard"].includes(input.serviceTier)) return unavailable;
 
   const largeContext = input.inputTokens > 272_000;
