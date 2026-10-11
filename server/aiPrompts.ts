@@ -10,6 +10,17 @@ export interface Section {
 }
 
 export const getSectionsForTier = (tier: string): Section[] => {
+  // Free previews are intentionally shorter. Never fall through to Enterprise.
+  if (tier === "free") {
+    return [
+      { title: "1. EXECUTIVE OVERVIEW", pageTarget: "2 pages", maxTokens: 1500, requirements: ["Business idea summary", "Founder objectives", "Clearly identify unverified assumptions"] },
+      { title: "2. INNOVATION AND DIFFERENTIATION", pageTarget: "2-3 pages", maxTokens: 1700, requirements: ["The problem being solved", "Potential innovation", "Key evidence gaps"] },
+      { title: "3. CUSTOMER AND MARKET OPPORTUNITY", pageTarget: "2-3 pages", maxTokens: 1700, requirements: ["Likely customers", "Competitor landscape from supplied data", "Research still needed"] },
+      { title: "4. INITIAL VIABILITY ASSESSMENT", pageTarget: "2-3 pages", maxTokens: 1700, requirements: ["Revenue assumptions", "Core costs", "Financial uncertainties", "Avoid invented figures"] },
+      { title: "5. SCALABILITY AND EXECUTION", pageTarget: "2-3 pages", maxTokens: 1700, requirements: ["First milestones", "Operational needs", "Hiring assumptions", "Scale risks"] },
+      { title: "6. READINESS CHECKLIST", pageTarget: "1-2 pages", maxTokens: 1100, requirements: ["Document gaps", "Evidence checklist", "Next steps", "Not an endorsement or visa decision"] },
+    ];
+  }
   if (tier === 'basic') {
     return [
       {
