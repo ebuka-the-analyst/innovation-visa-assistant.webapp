@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getSectionsForTier, getSectionSystemPrompt } from "../server/aiPrompts";
+import { getSectionsForTier, getSectionSystemPrompt, getSystemPrompt, getUserPromptInstructions } from "../server/aiPrompts";
 import { auditPremiumPlanEvidence } from "../server/premiumPlanEvidenceAudit";
 import { assessBusinessPlanDocument } from "../server/businessPlanDocumentDiagnostics";
 
@@ -61,4 +61,16 @@ test("extensive repeated prose is reported across different business-plan sectio
   const content = Array.from({length:5},(_,i)=>"## "+(i+1)+". SECTION "+i+"\n\n"+repeated.repeat(5)).join("\n\n");
   const result = auditPremiumPlanEvidence(content);
   assert.ok(result.repeatedCrossSectionPhrases.some(x=>x.sectionCount>=4));
+});
+
+test("all premium prompt entry points avoid generic, industry-inappropriate proof claims", () => {
+  for (const tier of ["founder", "founder_pro", "founder_pass_90d"]) {
+    const full = getSystemPrompt(tier);
+    const instructions = getUserPromptInstructions(tier);
+    assert.match(full, /NEW-PAID-MEMBERSHIP FULL-PLAN POLICY/);
+    assert.match(full, /separating verified claims/i);
+    assert.match(full, /Do not force FinTech benchmarks/i);
+    assert.ok(instructions.some(line => /industry-appropriate validation measures/i.test(line)));
+    assert.ok(instructions.some(line => /never promise endorsement/i.test(line)));
+  }
 });
