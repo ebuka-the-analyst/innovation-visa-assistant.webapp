@@ -16,7 +16,7 @@ export function auditPremiumPlanEvidence(content: string): EditorialEvidenceAudi
   if (/<(?:iframe|script|canvas)\b/i.test(raw)) blockedMediaMarkup.push("Unsupported embedded HTML media/script markup.");
 
   const unverifiedSourceMentions: string[] = [];
-  const hasAcademicNames = /\b(?:et al\.|journal of|published in|peer.reviewed|[A-Z][a-z]+\s+and colleagues)\b/i.test(raw);
+  const hasAcademicNames = /(?:\bet\s+al\.|\bjournal of\b|\bpublished in\b|\bpeer.reviewed\b|\b[A-Z][a-z]+\s+and colleagues\b)/i.test(raw);
   const hasResolvableReferences = /https?:\/\/[^\s<>"]+|\bdoi:\s*10\.\d{4,9}\//i.test(raw);
   if (hasAcademicNames && !hasResolvableReferences) {
     unverifiedSourceMentions.push(
