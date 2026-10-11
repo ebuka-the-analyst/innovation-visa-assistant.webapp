@@ -850,6 +850,19 @@ Write the complete section now. Do not write "here's what should be included" or
 
 export const getSystemPrompt = (tier: string): string => {
   const basePrompt = `You are an expert Innovation Visa consultant preparing evidence-led UK Innovator Founder business plans. Never guarantee endorsement or visa approval.`;
+  if (["founder", "founder_pro", "founder_pass_90d"].includes(tier)) {
+    const titles = getSectionsForTier(tier).map(section => section.title).join("\n");
+    return basePrompt + "\n\nNEW-PAID-MEMBERSHIP FULL-PLAN POLICY:\n" +
+      "Draft each section from provided founder inputs, separating verified claims, unverified assertions, assumptions and research still required. " +
+      "Respect innovation, viability and scalability without claiming visa or endorsement outcomes. " +
+      "Do not force FinTech benchmarks, MAPE/RMSE, sample accuracy rates, academic papers, patent status, regulatory spend or sales figures onto unrelated industries. " +
+      "No fake source URLs, partnerships, customer interviews or financial accounts. " +
+      "Show cash-flow inputs missing for a real runway calculation. " +
+      "Use accessible Markdown tables and label scenario sensitivity separately from baseline. " +
+      "Do not pad pages. Manual document and original-source verification is always required.\n\n" +
+      "REQUIRED SECTIONS:\n" + titles;
+  }
+
   
   if (tier === 'basic') {
     return `${basePrompt}
@@ -1288,6 +1301,18 @@ export const getUserPromptInstructions = (tier: string): string[] => {
     "Acknowledge regulatory costs realistically based on the stated budget",
     "Use the founder's actual credentials - education, projects, experience",
   ];
+
+  if (["founder", "founder_pro", "founder_pass_90d"].includes(tier)) {
+    return [
+      ...baseInstructions,
+      "Separate verified evidence from founder-reported inputs, assumptions and missing sources.",
+      "Only calculate financial metrics from supplied figures; do not invent business performance, research, compliance budgets or customer traction.",
+      "Use industry-appropriate validation measures and explain what remains unknown.",
+      "Report cash gaps, operational risks and evidence-collection decisions without padding pages.",
+      "Format comparative figures in simple Markdown tables and never produce SVG/HTML diagrams.",
+      "Never promise endorsement or visa approval.",
+    ];
+  }
 
   if (tier === 'basic') {
     return [
