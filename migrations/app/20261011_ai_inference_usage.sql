@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS ai_inference_usage (
   output_tokens BIGINT,
   reasoning_tokens BIGINT,
   latency_ms INTEGER NOT NULL CHECK (latency_ms >= 0),
-  cost_usd NUMERIC(16,8),
+  cost_usd_estimated NUMERIC(16,8),
   cost_pricing_version VARCHAR(100),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CONSTRAINT ai_inference_usage_positive_tokens CHECK (
