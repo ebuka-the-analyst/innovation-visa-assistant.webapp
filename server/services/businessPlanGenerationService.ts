@@ -5,6 +5,7 @@ import { sql } from "drizzle-orm";
 import { db } from "../db";
 import { storage } from "../storage";
 import { BUSINESS_PLAN_MODEL } from "../aiModelConfig";
+import { isMembershipSku, MembershipQuotaError, reserveMemberAiQuota, transitionMemberAiReservation } from "./memberAiQuota";
 import { getSectionsForTier, getSectionSystemPrompt } from "../aiPrompts";
 import { generatePDFUrl, sanitizeBusinessPlanOutputText } from "../pdf";
 import {
@@ -338,9 +339,9 @@ export async function startBusinessPlanGenerationForUser(
     // A legacy process may have deducted a credit before dying. The durable start
     // path treats an existing per-plan generation transaction as proof that this
     // plan has already been charged and never deducts a second credit.
-    if (!isFreePlanGeneration && !hasExistingGenerationCharge) {
+    if (!isFreePlanGeneration) {
       const userResult = await tx.execute(sql`
-        SELECT id, plan_credits, bonus_credits
+        SELECT id, plan_credits, bonus_credits, subscription_tier
         FROM users
         WHERE id = ${userId}
         FOR UPDATE
@@ -348,6 +349,16 @@ export async function startBusinessPlanGenerationForUser(
       const user = firstRow<any>(userResult);
       if (!user) throw new GenerationStartError(404, { error: "User not found" });
 
+      if (isMembershipSku(user.subscription_tier)) {
+        try {
+          await reserveMemberAiQuota(tx, userId, user.subscription_tier, "generation", planId);
+        } catch (error) {
+          if (error instanceof MembershipQuotaError) {
+            throw new GenerationStartError(403, { code: error.code, error: error.message });
+          }
+          throw error;
+        }
+      } else if (!hasExistingGenerationCharge) {
       const planCredits = Number(user.plan_credits || 0);
       const bonusCredits = Number(user.bonus_credits || 0);
       const totalCredits = planCredits + bonusCredits;
@@ -380,6 +391,7 @@ export async function startBusinessPlanGenerationForUser(
           'Business plan generation'
         )
       `);
+      }
     }
 
     await tx.execute(sql`
