@@ -35,3 +35,5 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Exercise quota locking and reservation against PostgreSQL
         run: node --import tsx --test tests/member-ai-quota.integration.test.ts
+      - name: Rehearse Phase 2 migration rollback and idempotent replay
+        run: node --import tsx --test tests/phase2-schema-rollback.integration.test.ts
