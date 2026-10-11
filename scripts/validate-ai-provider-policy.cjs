@@ -44,11 +44,10 @@ for (const relative of walk('server')) {
       relative === 'server/aiInferencePricing.ts' ||
       relative === 'server/persistAiUsage.ts'
     );
-    // These two files only identify the official provider billing origin.
-    // They must not create their own HTTP clients or bypass the gateway.
-    const directOpenAiCall = /(?:fetch|axios|https\\.request)\\s*\\(/i.test(source) ||
-      /new\\s+OpenAI\\s*\\(/.test(source);
-    if (/api\\.openai\\.com/i.test(source) && (!documentedPricingOrigin || directOpenAiCall)) {
+    // These two files identify billing origins only, and cannot open HTTP clients.
+    const directOpenAiCall = /(?:fetch|axios|https\.request)\s*\(/i.test(source) ||
+      /new\s+OpenAI\s*\(/.test(source);
+    if (/api\.openai\.com/i.test(source) && (!documentedPricingOrigin || directOpenAiCall)) {
       runtimeViolations.add(`Direct OpenAI endpoint bypass: ${relative}`);
     }
     if (/new\s+Anthropic\s*\(/.test(source)) runtimeViolations.add(`Direct Anthropic client bypass: ${relative}`);
