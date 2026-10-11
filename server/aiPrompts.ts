@@ -10,6 +10,10 @@ export interface Section {
 }
 
 export const getSectionsForTier = (tier: string): Section[] => {
+  // Current paid membership products reuse the corresponding validated
+  // legacy content depth until benchmark-specific templates are approved.
+  if (tier === "founder") tier = "premium";
+  if (tier === "founder_pro" || tier === "founder_pass_90d") tier = "enterprise";
   // Free previews are intentionally shorter. Never fall through to Enterprise.
   if (tier === "free") {
     return [
@@ -743,6 +747,8 @@ export const getSectionsForTier = (tier: string): Section[] => {
 
 // Generate system prompt for a specific section
 export const getSectionSystemPrompt = (tier: string, section: Section, sectionNumber: number, totalSections: number): string => {
+  if (tier === "founder") tier = "premium";
+  if (tier === "founder_pro" || tier === "founder_pass_90d") tier = "enterprise";
   const qualityLevel = tier === 'ultimate' ? 'ULTIMATE ENDORSER-READINESS REVIEW' :
                        tier === 'enterprise' ? 'EXPERT-LEVEL ENDORSER-READY' : 
                        tier === 'premium' ? 'ENHANCED PROFESSIONAL' : 'PROFESSIONAL';
