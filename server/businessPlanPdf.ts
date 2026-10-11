@@ -77,14 +77,38 @@ export async function renderBusinessPlanPdf(businessPlan: any): Promise<{buffer:
     doc.moveDown(8);
     doc.fillColor("#000000");
 
-    // Parse and render content - skip duplicate titles
+    // Always derive the next position from PDFKit's actual doc.y.
+    // Manually adding a precomputed paragraph height after PDFKit has already
+    // auto-paginated can create nearly blank pages and inflate paid page counts.
     const lines = content.split("\n");
     let currentY = 220;
+    const topMargin = 60;
+    const bottomMargin = 65;
+    const usablePageBody = doc.page.height - topMargin - bottomMargin;
+    const ensureRoom = (height: number): void => {
+      if (height <= usablePageBody && currentY + height > doc.page.height - bottomMargin) {
+        doc.addPage();
+        currentY = topMargin;
+      }
+    };
+    const writeText = (
+      value: string, x: number, width: number,
+      fontSize: number, color: string, font: string,
+      after: number, options: Record<string, unknown> = {},
+    ): void => {
+      doc.font(font).fontSize(fontSize).fillColor(color);
+      const height = doc.heightOfString(value, { width, ...options });
+      ensureRoom(height + after);
+      doc.text(value, x, currentY, { width, ...options });
+      // The accurate position includes any automatic page breaks.
+      currentY = doc.y + after;
+    };
 
     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
       const line = lines[lineIndex];
       const table = parsePdfTable(lines, lineIndex);
       if (table) {
+        ensureRoom(65);
         currentY = renderPdfTable(doc, table.rows, currentY);
         lineIndex += table.consumed - 1;
         continue;
@@ -95,75 +119,40 @@ export async function renderBusinessPlanPdf(businessPlan: any): Promise<{buffer:
         currentY += 10;
         continue;
       }
-
-      // Skip duplicate numbered section headers and separators
-      // Match patterns like "1. EXECUTIVE SUMMARY", "2. FOUNDER CREDENTIALS & VALIDATION"
       if (/^\d+\.\s+[A-Z][A-Z\s&]+$/.test(trimmed)) continue;
-      if (
-        /^\d+\.\s+[A-Z]{2,}/.test(trimmed) &&
-        !trimmed.includes("(") &&
-        trimmed.length < 60
-      )
-        continue;
-      if (trimmed === "---") continue;
-
-      // Skip main title (# ) as it's already on cover page
-      if (trimmed.startsWith("# ")) {
-        continue;
-      }
-
-      // Check if we need a new page
-      if (currentY > doc.page.height - 80) {
-        doc.addPage();
-        currentY = 60;
-      }
+      if (/^\d+\.\s+[A-Z]{2,}/.test(trimmed) && !trimmed.includes("(") && trimmed.length < 60) continue;
+      if (trimmed === "---" || trimmed.startsWith("# ")) continue;
 
       if (trimmed.startsWith("## ")) {
-        // Section heading - blue with underline
+        const value = trimmed.slice(3);
+        doc.font("Helvetica-Bold").fontSize(16);
+        const headingHeight = doc.heightOfString(value, { width: 495 });
+        // Keep the heading, underline and the start of the next paragraph together.
+        ensureRoom(headingHeight + 75);
         currentY += 15;
-        doc.fontSize(16).fillColor("#005EB8").font("Helvetica-Bold");
-        doc.text(trimmed.slice(3), 50, currentY);
-        currentY += 28;
-        // Add underline
-        doc
-          .moveTo(50, currentY - 8)
-          .lineTo(545, currentY - 8)
-          .strokeColor("#005EB8")
-          .lineWidth(1)
-          .stroke();
-        currentY += 5;
+        writeText(value, 50, 495, 16, "#005EB8", "Helvetica-Bold", 8);
+        doc.moveTo(50, currentY)
+          .lineTo(545, currentY)
+          .strokeColor("#005EB8").lineWidth(1).stroke();
+        currentY += 14;
       } else if (trimmed.startsWith("### ")) {
-        // Subsection heading - blue
+        const value = trimmed.slice(4);
+        doc.font("Helvetica-Bold").fontSize(13);
+        const headingHeight = doc.heightOfString(value, { width: 495 });
+        ensureRoom(headingHeight + 55);
         currentY += 8;
-        doc.fontSize(13).fillColor("#005EB8").font("Helvetica-Bold");
-        doc.text(trimmed.slice(4), 50, currentY);
-        currentY += 22;
+        writeText(value, 50, 495, 13, "#005EB8", "Helvetica-Bold", 13);
       } else if (trimmed.startsWith("#### ")) {
-        // Sub-subsection heading
-        doc.fontSize(12).fillColor("#333333").font("Helvetica-Bold");
-        doc.text(trimmed.slice(5), 50, currentY);
-        currentY += 20;
+        writeText(trimmed.slice(5), 50, 495, 12, "#333333", "Helvetica-Bold", 10);
       } else if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
-        // Bullet point
-        doc.fontSize(11).fillColor("#444444").font("Helvetica");
-        const bulletText = trimmed.slice(2).replace(/\*\*([^*]+)\*\*/g, "$1");
-        doc.text("•  " + bulletText, 60, currentY, { width: 480 });
-        currentY += doc.heightOfString("•  " + bulletText, { width: 480 }) + 6;
-      } else if (
-        /^\d+\.\s/.test(trimmed) &&
-        !/^\d+\.\s+[A-Z]{2,}/.test(trimmed)
-      ) {
-        // Numbered list item (but not section headers)
-        doc.fontSize(11).fillColor("#444444").font("Helvetica");
-        const listText = trimmed.replace(/\*\*([^*]+)\*\*/g, "$1");
-        doc.text(listText, 60, currentY, { width: 480 });
-        currentY += doc.heightOfString(listText, { width: 480 }) + 6;
+        const value = "•  " + trimmed.slice(2).replace(/\*\*([^*]+)\*\*/g, "$1");
+        writeText(value, 60, 480, 11, "#444444", "Helvetica", 6);
+      } else if (/^\d+\.\s/.test(trimmed) && !/^\d+\.\s+[A-Z]{2,}/.test(trimmed)) {
+        const value = trimmed.replace(/\*\*([^*]+)\*\*/g, "$1");
+        writeText(value, 60, 480, 11, "#444444", "Helvetica", 6);
       } else {
-        // Regular paragraph
-        doc.fontSize(11).fillColor("#444444").font("Helvetica");
-        const cleanText = trimmed.replace(/\*\*([^*]+)\*\*/g, "$1");
-        doc.text(cleanText, 50, currentY, { width: 495, align: "justify" });
-        currentY += doc.heightOfString(cleanText, { width: 495 }) + 8;
+        const value = trimmed.replace(/\*\*([^*]+)\*\*/g, "$1");
+        writeText(value, 50, 495, 11, "#444444", "Helvetica", 8, { align: "justify" });
       }
     }
 
