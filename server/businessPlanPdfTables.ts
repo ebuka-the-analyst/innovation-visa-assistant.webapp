@@ -74,7 +74,7 @@ export function renderPdfTable(
       doc.font(header ? "Helvetica-Bold" : "Helvetica")
         .fontSize(header ? 10 : 9)
         .fillColor(header ? "#FFFFFF" : "#172337")
-        .text(row[i], x + 8, y + 7, { width: width - 16, lineBreak: false });
+        .text(row[i], x + 8, y + 7, { width: width - 16 });
       doc.restore();
       x += width;
     }
