@@ -1,0 +1,37 @@
+name: Phase 2 Membership Quota Integration
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  member-quota-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: quota
+          POSTGRES_PASSWORD: quota
+          POSTGRES_DB: quota
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U quota -d quota"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      QUOTA_TEST_DATABASE_URL: postgresql://quota:quota@localhost:5432/quota
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Exercise quota locking and reservation against PostgreSQL
+        run: node --import tsx --test tests/member-ai-quota.integration.test.ts
