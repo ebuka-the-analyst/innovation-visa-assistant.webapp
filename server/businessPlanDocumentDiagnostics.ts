@@ -1,5 +1,7 @@
 import { getSectionsForTier } from "./aiPrompts";
 import { sanitizeBusinessPlanOutputText } from "./pdf";
+import { htmlFinancialTablesToMarkdown } from "./businessPlanTables";
+import type { RenderedPdfInspection } from "./businessPlanPdfInspection";
 
 export interface BusinessPlanDocumentDiagnostics {
   tier: string;
@@ -8,6 +10,8 @@ export interface BusinessPlanDocumentDiagnostics {
   target: { minPages: number; maxPages: number | null };
   sections: { expected: number; located: number; missing: string[] };
   formattingWarnings: string[];
+  reviewAdvisories: string[];
+  pdfInspection: RenderedPdfInspection | null;
   releaseGatePassed: boolean;
   manualEvidenceReviewRequired: true;
 }
@@ -35,6 +39,7 @@ function canonical(value: string): string {
  */
 export function assessBusinessPlanDocument(
   tier: string, generatedContent: string, actualPdfPages: number,
+  pdfInspection: RenderedPdfInspection | null = null,
 ): BusinessPlanDocumentDiagnostics {
   const target = TARGETS[tier] || { minPages: 0, maxPages: null };
   const source = sanitizeBusinessPlanOutputText(String(generatedContent || ""));
@@ -48,8 +53,16 @@ export function assessBusinessPlanDocument(
     .map(section => section.title)
     .filter(title => !headings.includes(canonical(title)));
   const formattingWarnings: string[] = [];
-  if (/<\/?(?:table|tbody|thead|tr|td|th)\b/i.test(source)) {
-    formattingWarnings.push("Source contains HTML tables; verify their appearance in both PDF and Word exports.");
+  const reviewAdvisories: string[] = [];
+  if (/<table\b/i.test(source)) {
+    // HTML tables are a legitimate generator output and both exporters
+    // convert supported tables. Do not fail merely because HTML was used.
+    const converted = htmlFinancialTablesToMarkdown(source);
+    if (/<table\b/i.test(converted)) {
+      formattingWarnings.push("One or more HTML tables could not be structurally converted; inspect both exports.");
+    } else {
+      reviewAdvisories.push("Converted source HTML tables: manually inspect PDF and Word financial layouts.");
+    }
   }
   if (/\b(?:TBD|PLACEHOLDER|LOREM IPSUM)\b/i.test(plainText)) {
     formattingWarnings.push("Document contains possible placeholders requiring human review.");
@@ -65,6 +78,25 @@ export function assessBusinessPlanDocument(
   }
   if (missing.length > 0) formattingWarnings.push("One or more required document sections are missing.");
   if (words.length < 250) formattingWarnings.push("Document contains too little substantive text.");
+  if (pdfInspection) {
+    if (pdfInspection.pageCount !== actualPdfPages) {
+      formattingWarnings.push("PDF page count disagrees with independent PDF parser.");
+    }
+    if (pdfInspection.visibleHtmlTagPages.length) {
+      formattingWarnings.push("Rendered PDF contains visible HTML markup.");
+    }
+    if (pdfInspection.nearEmptyInteriorPages.length) {
+      formattingWarnings.push("PDF has nearly empty interior pages: " + pdfInspection.nearEmptyInteriorPages.join(", "));
+    }
+    if (target.minPages > 0 && pdfInspection.substantivePageCount < target.minPages) {
+      formattingWarnings.push("Substantive PDF page count is below the advertised minimum.");
+    }
+    if (pdfInspection.lowContentFinalPage) {
+      reviewAdvisories.push("Final PDF page contains fewer than 30 words; review unnecessary page breaks.");
+    }
+  } else {
+    reviewAdvisories.push("Independent PDF page-content inspection was not supplied.");
+  }
 
   return {
     tier,
@@ -73,6 +105,8 @@ export function assessBusinessPlanDocument(
     target,
     sections: { expected: definitions.length, located: definitions.length - missing.length, missing },
     formattingWarnings,
+    reviewAdvisories,
+    pdfInspection,
     releaseGatePassed: formattingWarnings.length === 0,
     manualEvidenceReviewRequired: true,
   };
