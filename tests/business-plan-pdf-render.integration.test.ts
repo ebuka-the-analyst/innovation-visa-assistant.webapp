@@ -4,6 +4,8 @@ import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { normalisePdfPlanContent, renderBusinessPlanPdf } from "../server/businessPlanPdf";
 import { assessBusinessPlanDocument } from "../server/businessPlanDocumentDiagnostics";
 import { getSectionsForTier } from "../server/aiPrompts";
+import { htmlFinancialTablesToMarkdown } from "../server/businessPlanTables";
+import { readFileSync } from "node:fs";
 
 test("HTML financial tables are converted to legible text instead of raw markup", () => {
   const output = normalisePdfPlanContent(`## FINANCIALS
@@ -53,4 +55,32 @@ test("document diagnostics require real pages and all mandatory sections", () =>
   const missing = assessBusinessPlanDocument("founder_pro", content.split("\n\n").slice(0, 1).join(""), 60);
   assert.equal(missing.releaseGatePassed, false);
   assert.ok(missing.sections.missing.length > 0);
+});
+
+
+test("Word export retains financial HTML as structured table rows", () => {
+  const source = `## FINANCIAL PROJECTIONS
+<table class="financial-table" style="width:100%">
+<thead><tr><th>Metric</th><th>Year 1</th><th>Year 2</th></tr></thead>
+<tbody>
+<tr><td>Revenue</td><td>&pound;50,000</td><td>&pound;100,000</td></tr>
+<tr><td>Costs</td><td>&pound;40,000</td><td>&pound;70,000</td></tr>
+</tbody></table>
+`;
+  const prepared = htmlFinancialTablesToMarkdown(source);
+  assert.match(prepared, /\| Metric \| Year 1 \| Year 2 \|/);
+  assert.match(prepared, /\| --- \| --- \| --- \|/);
+  assert.match(prepared, /\| Revenue \| £50,000 \| £100,000 \|/);
+  assert.match(prepared, /\| Costs \| £40,000 \| £70,000 \|/);
+  assert.doesNotMatch(prepared, /<(?:table|td|tr|th)/i);
+  const appRoutes = readFileSync(new URL("../server/routes.ts", import.meta.url), "utf8");
+  assert.match(appRoutes, /parseWordBlocks\(htmlFinancialTablesToMarkdown\(content\)\)/);
+});
+
+test("malformed financial tables are never silently turned into invalid Word rows", () => {
+  const malformed = "<table><tr><th>Year</th><th>Revenue</th></tr><tr><td>2027</td></tr></table>";
+  assert.equal(htmlFinancialTablesToMarkdown(malformed), malformed);
+  const escaped = "<table><tr><th>Year</th><th>Revenue</th></tr><tr><td>2027</td><td>£1|2</td></tr></table>";
+  const output = htmlFinancialTablesToMarkdown(escaped);
+  assert.match(output, /\| 2027 \| £1\/2 \|/);
 });
