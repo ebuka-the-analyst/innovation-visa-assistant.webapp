@@ -5,6 +5,7 @@ import { dbPool } from "./db";
 import { isAuthenticated, requireAdmin } from "./auth";
 import { gatewayUsageEvent, gatewayWorkload } from "./aiGatewayUsage";
 import { BUSINESS_PLAN_MODEL } from "./aiModelConfig";
+import { persistPremiumAiUsage } from "./persistAiUsage";
 
 export const PLATFORM_LATEST_OPENAI_MODEL = "gpt-5.6";
 export const DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-20250514";
@@ -348,7 +349,9 @@ export function registerAIProviderGatewayRoutes(app: Express): void {
       const startedAt = Date.now();
       const strictPrimary = req.get("x-ai-quality-policy") === "strict-primary";
       const result = await withProviderFallback((setting) => callChatWithProvider(setting, req.body || {}), strictPrimary);
-      console.info(JSON.stringify(gatewayUsageEvent(result, "chat_completions", gatewayWorkload(req.get("x-ai-workload")), Date.now() - startedAt, req.get("x-ai-job-id"))));
+      const usageEvent = gatewayUsageEvent(result, "chat_completions", gatewayWorkload(req.get("x-ai-workload")), Date.now() - startedAt, req.get("x-ai-job-id"));
+      console.info(JSON.stringify(usageEvent));
+      await persistPremiumAiUsage(usageEvent);
       res.setHeader("x-ai-provider", String(result?.provider || "managed"));
       res.setHeader("x-ai-model", String(result?.model || ""));
       res.json(result);
@@ -363,7 +366,9 @@ export function registerAIProviderGatewayRoutes(app: Express): void {
       const startedAt = Date.now();
       const strictPrimary = req.get("x-ai-quality-policy") === "strict-primary";
       const result = await withProviderFallback((setting) => callResponseWithProvider(setting, req.body || {}), strictPrimary);
-      console.info(JSON.stringify(gatewayUsageEvent(result, "responses", gatewayWorkload(req.get("x-ai-workload")), Date.now() - startedAt, req.get("x-ai-job-id"))));
+      const usageEvent = gatewayUsageEvent(result, "responses", gatewayWorkload(req.get("x-ai-workload")), Date.now() - startedAt, req.get("x-ai-job-id"));
+      console.info(JSON.stringify(usageEvent));
+      await persistPremiumAiUsage(usageEvent);
       res.setHeader("x-ai-provider", String(result?.provider || "managed"));
       res.setHeader("x-ai-model", String(result?.model || ""));
       res.json(result);
