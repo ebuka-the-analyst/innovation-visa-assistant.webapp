@@ -109,7 +109,7 @@ function isPermanentProviderError(error: any): boolean {
   );
 }
 
-async function callRevisionAI(prompt: string, maxTokens = 8000): Promise<string> {
+async function callRevisionAI(prompt: string, maxTokens = 8000, jobId?: string): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
     throw new PermanentRevisionError("OPENAI_API_KEY is not configured");
   }
@@ -121,7 +121,7 @@ async function callRevisionAI(prompt: string, maxTokens = 8000): Promise<string>
       max_output_tokens: maxTokens,
       reasoning: { effort: "high" },
       text: { verbosity: "high" },
-    } as any);
+    } as any, { headers: jobId ? { "x-ai-job-id": jobId } : {} });
     const responseAny = response as any;
     const outputText = typeof responseAny.output_text === "string" ? responseAny.output_text : "";
     const fallbackText = Array.isArray(responseAny.output)
@@ -140,7 +140,7 @@ async function callRevisionAI(prompt: string, maxTokens = 8000): Promise<string>
     messages: [{ role: "user", content: prompt }],
     max_tokens: maxTokens,
     temperature: 0.35,
-  } as any);
+  } as any, { headers: jobId ? { "x-ai-job-id": jobId } : {} });
   const content = response.choices[0]?.message?.content?.trim();
   if (!content) throw new Error("OpenAI returned an empty revision response");
   return content;
@@ -841,6 +841,7 @@ async function generateRevisedSection(
   originalContent: string,
   requestType: string,
   instructions: string,
+  revisionId: string,
 ): Promise<string> {
   const sectionSystemPrompt = getSectionSystemPrompt(
     plan.tier || "basic",
@@ -876,7 +877,7 @@ MANDATORY REVISION RULES:
   let lastError: any;
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const result = await callRevisionAI(prompt, 8000);
+      const result = await callRevisionAI(prompt, 8000, revisionId);
       const cleaned = stripDuplicateHeading(sectionDefinition.title, result);
       if (!cleaned) throw new Error("Revision model returned empty content");
       return sanitizeBusinessPlanOutputText(sanitizeBusinessPlanClaims(cleaned));
@@ -1020,6 +1021,7 @@ async function processRevisionJob(job: RevisionJob): Promise<void> {
         row.original_content,
         revision.request_type,
         revision.instructions,
+        job.revision_id,
       );
       if (!(await heartbeatRevisionJob(job))) throw new LostRevisionLeaseError();
       const revisedHash = sha256(revised);
