@@ -169,6 +169,11 @@ jobs:
         run: node --import tsx --test tests/business-plan-pdf-render.integration.test.ts
       - name: Verify full-plan benchmark financial arithmetic and no-spend controls
         run: node --import tsx --test tests/phase2-full-plan-benchmark.test.ts
+      - name: Validate premium evidence-first prompts and content QA
+        run: node --import tsx --test tests/phase2-premium-content-quality.test.ts
+
+      - name: Validate actual Word financial tables in DOCX output
+        run: node --import tsx --test tests/phase2-word-export.integration.test.ts
 
       - name: Dry-run full-plan flagship benchmark without an API key
         run: node --import tsx scripts/phase2-full-plan-benchmark.ts --case marketplace --tier founder_pro --max-usd 30
