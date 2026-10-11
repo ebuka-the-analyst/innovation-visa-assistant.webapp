@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { dbPool } from "./db";
 import { isAuthenticated, requireAdmin } from "./auth";
 import { gatewayUsageEvent, gatewayWorkload } from "./aiGatewayUsage";
+import { BUSINESS_PLAN_MODEL } from "./aiModelConfig";
 
 export const PLATFORM_LATEST_OPENAI_MODEL = "gpt-5.6";
 export const DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-20250514";
@@ -263,9 +264,17 @@ async function callResponseWithProvider(setting: ProviderSetting, body: any): Pr
 }
 
 async function withProviderFallback(operation: (setting: ProviderSetting) => Promise<any>, strictPrimary = false): Promise<any> {
-  const settings = (await readSettings())
+  const configuredSettings = (await readSettings())
     .filter((setting) => setting.enabled && configured(setting.provider))
     .sort((a, b) => a.priority - b.priority);
+  // Business-plan workloads are pinned to the verified flagship *candidate*.
+  // Never silently route them to an unbenchmarked or cheaper fallback model.
+  const settings = strictPrimary
+    ? configuredSettings
+        .filter((setting) => setting.provider === "openai")
+        .slice(0, 1)
+        .map((setting) => ({ ...setting, model: BUSINESS_PLAN_MODEL }))
+    : configuredSettings;
   if (!settings.length) {
     const error: any = new Error("No enabled AI provider has a configured server-side API key");
     error.status = 503;
