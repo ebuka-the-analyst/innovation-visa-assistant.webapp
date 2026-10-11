@@ -47,6 +47,7 @@ export function gatewayUsageEvent(
     inputTokens,
     cachedInputTokens,
     outputTokens,
+    serviceTier: typeof response?.service_tier === "string" ? response.service_tier.slice(0, 30) : null,
     reasoningTokens,
     durationMs: Math.max(0, Math.floor(durationMs)),
     // Prices are not fabricated: Phase 2 cost ledger will use an audited
