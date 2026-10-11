@@ -753,7 +753,11 @@ export const getSectionSystemPrompt = (tier: string, section: Section, sectionNu
   const newMembership = ["founder", "founder_pro", "founder_pass_90d"].includes(tier);
   if (tier === "founder") tier = "premium";
   if (tier === "founder_pro" || tier === "founder_pass_90d") tier = "enterprise";
-  const qualityLevel = tier === 'ultimate' ? 'ULTIMATE ENDORSER-READINESS REVIEW' :
+  const membershipSectionRequirements = newMembership
+    ? section.requirements.filter(req => !/\b(?:MAPE|RMSE|FinTech|forecasting\s+accuracy|2\.8M\s+transactions|£101K|3-5\s+academic\s+papers)\b/i.test(req))
+    : section.requirements;
+  const qualityLevel = newMembership ? 'EVIDENCE-LED PREMIUM DRAFT REQUIRING VERIFICATION' :
+                       tier === 'ultimate' ? 'ULTIMATE ENDORSER-READINESS REVIEW' :
                        tier === 'enterprise' ? 'EXPERT-LEVEL ENDORSER-READY' : 
                        tier === 'premium' ? 'ENHANCED PROFESSIONAL' : 'PROFESSIONAL';
   
@@ -837,7 +841,7 @@ ULTIMATE TIER - ENDORSER-READINESS FOCUS:
 ` : ''}
 
 REQUIREMENTS FOR THIS SECTION:
-${section.requirements.map((req, idx) => `${idx + 1}. ${req}`).join('\n')}
+${membershipSectionRequirements.map((req, idx) => `${idx + 1}. ${req}`).join('\n')}
 
 ${newMembership ? getPremiumSectionEditorialGuidance(membershipTier, sectionNumber) : ""}
 
