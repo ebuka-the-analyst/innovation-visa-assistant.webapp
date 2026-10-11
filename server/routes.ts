@@ -48,6 +48,7 @@ import {
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { generatePDFContent, generatePDFUrl, sanitizeBusinessPlanOutputText } from "./pdf";
 import { generatePDFWithPDFKit } from "./businessPlanPdf";
+import { htmlFinancialTablesToMarkdown } from "./businessPlanTables";
 import { z } from "zod";
 import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
@@ -4473,7 +4474,7 @@ Respond ONLY with valid JSON in this exact format:
 
       let lastH2Title = "";
       const seenMajorHeadings = new Set<string>();
-      const blocks = parseWordBlocks(content);
+      const blocks = parseWordBlocks(htmlFinancialTablesToMarkdown(content));
 
       for (const block of blocks) {
         if (block.kind === "heading") {
