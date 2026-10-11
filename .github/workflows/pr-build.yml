@@ -167,6 +167,12 @@ jobs:
         run: node --import tsx --test tests/phase2-premium-ai-entitlements.test.ts
       - name: Validate measurable PDF page counts and financial table rendering
         run: node --import tsx --test tests/business-plan-pdf-render.integration.test.ts
+      - name: Verify full-plan benchmark financial arithmetic and no-spend controls
+        run: node --import tsx --test tests/phase2-full-plan-benchmark.test.ts
+
+      - name: Dry-run full-plan flagship benchmark without an API key
+        run: node --import tsx scripts/phase2-full-plan-benchmark.ts --case marketplace --tier founder_pro --max-usd 30
+
 
       - name: Production build
         run: npm run build
