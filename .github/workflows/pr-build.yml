@@ -163,5 +163,8 @@ jobs:
       - name: Test executable probe guard
         run: node --import tsx --test tests/executable-probe-guard.test.ts
 
+      - name: Validate Phase 2 premium AI and entitlement protections
+        run: node --import tsx --test tests/phase2-premium-ai-entitlements.test.ts
+
       - name: Production build
         run: npm run build
