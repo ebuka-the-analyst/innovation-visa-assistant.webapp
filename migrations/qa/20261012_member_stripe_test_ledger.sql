@@ -74,3 +74,22 @@ CREATE TABLE IF NOT EXISTS member_stripe_test_unmatched_events (
 );
 CREATE INDEX IF NOT EXISTS idx_member_stripe_test_unmatched_pending
  ON member_stripe_test_unmatched_events(status,first_seen_at);
+
+
+-- TEST-ONLY invoice-to-PaymentIntent map. One provider-confirmed invoice
+-- must have exactly one automatically collected, paid GBP PaymentIntent.
+-- Store every renewal, not merely the initial subscription checkout intent.
+CREATE TABLE IF NOT EXISTS member_stripe_test_invoice_payments (
+  stripe_invoice_id VARCHAR(255) PRIMARY KEY,
+  stripe_invoice_payment_id VARCHAR(255) NOT NULL UNIQUE,
+  stripe_payment_intent_id VARCHAR(255) NOT NULL UNIQUE,
+  order_id UUID NOT NULL REFERENCES member_stripe_test_orders(id) ON DELETE RESTRICT,
+  amount_paid INTEGER NOT NULL CHECK(amount_paid>0),
+  currency VARCHAR(3) NOT NULL CHECK(currency='gbp'),
+  period_start TIMESTAMPTZ NOT NULL,
+  period_end TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT member_invoice_paid_period CHECK(period_end > period_start)
+);
+CREATE INDEX IF NOT EXISTS idx_member_stripe_test_invoice_payments_order
+ ON member_stripe_test_invoice_payments(order_id,period_end);
