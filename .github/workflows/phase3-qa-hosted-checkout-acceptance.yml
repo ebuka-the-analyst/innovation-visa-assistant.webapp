@@ -1,0 +1,38 @@
+name: Isolated QA Stripe Checkout Acceptance
+on:
+  pull_request:
+    branches:
+      - phase2/premium-ai-entitlements-20261011
+  push:
+    branches:
+      - qa/stripe-hosted-checkout-acceptance-20261012
+permissions:
+  contents: read
+jobs:
+  qa-acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install application
+        run: npm ci --no-audit --no-fund
+      - name: Syntax-check strict QA seed and readiness scripts
+        run: |
+          node --check server/scripts/seed-qa-stripe-founders.cjs
+          node --check server/scripts/check-qa-stripe-provider-readiness.cjs
+      - name: Test staging-only page and login isolation
+        run: node --import tsx --test tests/phase3-qa-hosted-checkout-page.test.ts
+      - name: Regress original Stripe gateway and consent tests
+        run: |
+          node --import tsx --test tests/phase3-provider-test-gateway.test.ts
+          node --import tsx --test tests/phase3-new-purchase-consent.test.ts
+      - name: Prepare build
+        run: |
+          node scripts/prepare-platform-trust-hardening.cjs
+          node scripts/prepare-public-client-copy.cjs
+          node scripts/prepare-server-public-seo.cjs
+      - name: Build application
+        run: npm run build
