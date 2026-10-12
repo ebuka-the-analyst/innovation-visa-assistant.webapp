@@ -7,7 +7,7 @@
  * Production must separately reconcile live Stripe API records and entitlements.
  */
 import Stripe from "stripe";
-import type { Pool } from "pg";
+import type { Pool, PoolClient } from "pg";
 import {
   decideVerifiedTestMembershipEvent,
   type CandidateSku, type LedgerState, type MemberDecision,
@@ -20,6 +20,12 @@ export type RecordedTestDecision = MemberDecision & {
   duplicate: boolean;
   eventId: string;
 };
+
+/** Called only after signature and trusted-order checks, within the same TX. */
+export type VerifiedTestEffect = (
+  client: PoolClient, trustedOrder: PendingCheckout,
+  decision: MemberDecision, eventCreated: number,
+) => Promise<void>;
 
 type TestOrderRow = {
   id: string;
@@ -63,6 +69,7 @@ export async function processSignedTestStripeEvent(
   rawBody: Buffer | string,
   stripeSignature: string,
   testWebhookSecret: string,
+  onApplied?: VerifiedTestEffect,
 ): Promise<RecordedTestDecision> {
   if (!/^whsec_/.test(testWebhookSecret)) {
     throw new Error("A dedicated TEST-MODE webhook signing secret is required");
@@ -84,17 +91,18 @@ export async function processSignedTestStripeEvent(
       return { action: "review", reason: "Missing trusted test order", duplicate: false, eventId: event.id };
     }
     const order = found.rows[0];
-    const prior = await client.query<{ order_id: string }>(
-      "SELECT order_id FROM member_stripe_test_events WHERE stripe_event_id = $1",
+    const prior = await client.query<{ order_id: string; decision: MemberDecision["action"] }>(
+      "SELECT order_id,decision FROM member_stripe_test_events WHERE stripe_event_id = $1",
       [event.id],
     );
     if (prior.rowCount) {
       await client.query("COMMIT");
+      const sameOrder=prior.rows[0].order_id===trustedOrderId;
       return {
-        action: prior.rows[0].order_id === trustedOrderId ? "ignore" : "review",
-        reason: prior.rows[0].order_id === trustedOrderId
-          ? "Already processed (durable event ID)"
-          : "Event ID belongs to a different order",
+        action: sameOrder && prior.rows[0].decision !== "review" ? "ignore" : "review",
+        reason: !sameOrder ? "Event ID belongs to a different order"
+          : prior.rows[0].decision === "review" ? "Requires manual provider reconciliation"
+          : "Already processed (durable event ID)",
         duplicate: true,
         eventId: event.id,
       };
@@ -134,6 +142,13 @@ export async function processSignedTestStripeEvent(
              updated_at = NOW() WHERE id = $2`,
         [event.created, trustedOrderId],
       );
+    }
+    // A second effect can write to QA member entitlement/users tables, but
+    // only inside the SAME transaction. An exception rolls back event ID,
+    // simulated state AND any account changes; Stripe can safely retry.
+    if (onApplied && (decision.action === "activate" ||
+        decision.action === "suspend" || decision.action === "expire")) {
+      await onApplied(client, toPending(order), decision, event.created);
     }
     // "review"/"ignore" remain recorded, but NEVER change paid membership.
     await client.query("COMMIT");
