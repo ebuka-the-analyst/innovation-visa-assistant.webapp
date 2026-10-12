@@ -214,3 +214,36 @@ test("colspan financial notes remain explanatory, not fabricated annual forecast
   );
   assert.equal(qa.releaseGatePassed, true);
 });
+
+
+test("six-column financial rows retain the year, units and operating losses in actual PDF", async () => {
+  const rows = [
+    "| Year | Billable units | Revenue GBP | Variable costs GBP | Fixed costs GBP | Operating loss GBP |",
+    "| --- | ---: | ---: | ---: | ---: | ---: |",
+    "| 1 | 450 | 5400 | 1350 | 36000 | -31950 |",
+    "| 2 | 2900 | 34800 | 8700 | 61000 | -34900 |",
+    "| 3 | 7700 | 92400 | 23100 | 105000 | -35700 |",
+  ];
+  const parsed = parsePdfTable(rows, 0);
+  assert.equal(parsed?.rows[0].length, 6);
+  assert.equal(parsed?.rows[3][5], "-35700");
+  const rendered = await renderBusinessPlanPdf({
+    businessName: "Fictional Six Column Benchmark",
+    tier: "founder_pro",
+    generatedContent: "## FINANCIAL VIABILITY\n\n" + rows.join("\n") + "\n\nSource assumptions only.",
+  });
+  const pdf = await getDocument({data:new Uint8Array(rendered.buffer),useSystemFonts:true}).promise;
+  try {
+    let extracted = "";
+    for (let n=1;n<=pdf.numPages;n++) {
+      const page=await pdf.getPage(n);
+      extracted += " " + (await page.getTextContent()).items.map((i:any)=>i.str||"").join(" ");
+    }
+    assert.match(extracted,/Billable units/);
+    assert.match(extracted,/Operating loss GBP/);
+    assert.match(extracted,/-35700/);
+    assert.match(extracted,/105000/);
+  } finally {
+    await pdf.destroy();
+  }
+});
