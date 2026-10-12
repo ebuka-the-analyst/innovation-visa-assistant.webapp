@@ -52,9 +52,13 @@ export async function renderBusinessPlanPdf(businessPlan: any): Promise<{buffer:
     });
 
     const content = normalisePdfPlanContent(htmlFinancialTablesToMarkdown(sanitizeBusinessPlanOutputText(businessPlan.generatedContent || "")));
-    const tierName =
-      (businessPlan.tier || "free").charAt(0).toUpperCase() +
-      (businessPlan.tier || "free").slice(1);
+    const tierLabels: Record<string, string> = {
+      free: "Free", founder: "Founder", founder_pro: "Founder Pro",
+      founder_pass_90d: "90-Day Founder Pass",
+    };
+    const tierCode = String(businessPlan.tier || "free");
+    const tierName = tierLabels[tierCode] ||
+      tierCode.replace(/[_-]+/g, " ").replace(/\b\w/g, character => character.toUpperCase());
 
     // Cover page
     doc.rect(0, 0, doc.page.width, 200).fill("#005EB8");
