@@ -37,3 +37,5 @@ jobs:
         run: node --import tsx --test tests/member-ai-quota.integration.test.ts
       - name: Rehearse Phase 2 migration rollback and idempotent replay
         run: node --import tsx --test tests/phase2-schema-rollback.integration.test.ts
+      - name: Exercise test-only signed Stripe event ledger against PostgreSQL
+        run: node --import tsx --test tests/phase3-durable-stripe-test-ledger.integration.test.ts
