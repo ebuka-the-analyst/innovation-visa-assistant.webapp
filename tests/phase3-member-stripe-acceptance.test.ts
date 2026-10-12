@@ -53,6 +53,10 @@ test("paid one-time pass activates exactly 90 days with trusted order, but never
   assert.equal(accepted.paidThroughEpoch!-accepted.periodStartEpoch!,90*86400);
   applySimulatedDecision(paid,status,accepted);
   assert.equal(decideVerifiedTestMembershipEvent(paid,o,status).action,"ignore");
+  const asyncSecondEvent=signed("checkout.session.async_payment_succeeded",
+    session(o.sku),1800000100,"evt_second_success");
+  assert.equal(decideVerifiedTestMembershipEvent(asyncSecondEvent,o,status).action,"ignore",
+    "Two different success event IDs must not extend a one-time pass");
   const unpaid=signed("checkout.session.completed",session(o.sku,false),1800000001,"evt_test_unpaid");
   assert.equal(decideVerifiedTestMembershipEvent(unpaid,o,ledger()).action,"review");
   const wrongPrice={...o,expectedPence:1};
