@@ -50,6 +50,7 @@ import { generatePDFContent, generatePDFUrl, sanitizeBusinessPlanOutputText } fr
 import { generatePDFWithPDFKit } from "./businessPlanPdf";
 import { htmlFinancialTablesToMarkdown } from "./businessPlanTables";
 import { buildBusinessPlanWordTable } from "./businessPlanWordTableExporter";
+import { guardedBusinessPlanDownload } from "./businessPlanDownloadGuard";
 import { z } from "zod";
 import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
@@ -3462,66 +3463,25 @@ Respond ONLY with valid JSON in this exact format:
     }
   });
 
-  app.get("/api/download/pdf/:planId", isAuthenticated, async (req, res) => {
-    try {
-      const { planId } = req.params;
-      const user = req.user as any;
-
-      const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan || businessPlan.userId !== user.id) {
-        return res.status(404).json({ error: "Business plan not found" });
-      }
-
-      if (businessPlan.status !== "completed") {
-        return res.status(400).json({
-          error: "Business plan not ready yet",
-          status: businessPlan.status,
-        });
-      }
-
-      if (!businessPlan.generatedContent) {
-        return res
-          .status(500)
-          .json({ error: "Business plan content is missing" });
-      }
-
+  app.get("/api/download/pdf/:planId", isAuthenticated, guardedBusinessPlanDownload({
+    lookup: (planId) => storage.getBusinessPlan(planId),
+    includeStatusOnNotReady: true,
+    logLabel: "PDF download",
+    failureMessage: "Failed to generate PDF",
+    render: async (businessPlan, _req, res) => {
       await generatePDFWithPDFKit(businessPlan, "attachment", res);
-    } catch (error) {
-      console.error("PDF download error:", error);
-      res.status(500).json({ error: "Failed to generate PDF" });
-    }
-  });
+    },
+  }));
 
-  // PDF view endpoint (opens in browser)
-  app.get("/api/view/pdf/:planId", isAuthenticated, async (req, res) => {
-    try {
-      const { planId } = req.params;
-      const user = req.user as any;
-
-      const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan || businessPlan.userId !== user.id) {
-        return res.status(404).json({ error: "Business plan not found" });
-      }
-
-      if (businessPlan.status !== "completed") {
-        return res.status(400).json({
-          error: "Business plan not ready yet",
-          status: businessPlan.status,
-        });
-      }
-
-      if (!businessPlan.generatedContent) {
-        return res
-          .status(500)
-          .json({ error: "Business plan content is missing" });
-      }
-
+  app.get("/api/view/pdf/:planId", isAuthenticated, guardedBusinessPlanDownload({
+    lookup: (planId) => storage.getBusinessPlan(planId),
+    includeStatusOnNotReady: true,
+    logLabel: "PDF view",
+    failureMessage: "Failed to generate PDF",
+    render: async (businessPlan, _req, res) => {
       await generatePDFWithPDFKit(businessPlan, "inline", res);
-    } catch (error) {
-      console.error("PDF view error:", error);
-      res.status(500).json({ error: "Failed to generate PDF" });
-    }
-  });
+    },
+  }));
 
   // HTML view endpoint - serves rich HTML with SVG charts for browser viewing/printing
   app.get("/api/view/html/:planId", isAuthenticated, async (req, res) => {
@@ -3901,26 +3861,12 @@ Respond ONLY with valid JSON in this exact format:
   });
 
   // Word document download endpoint
-  app.get("/api/download/word/:planId", isAuthenticated, async (req, res) => {
-    try {
-      const { planId } = req.params;
-      const user = req.user as any;
-
-      const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan || (businessPlan.userId !== user.id && !user.isAdmin)) {
-        return res.status(404).json({ error: "Business plan not found" });
-      }
-
-      if (businessPlan.status !== "completed") {
-        return res.status(400).json({ error: "Business plan not ready yet" });
-      }
-
-      if (!businessPlan.generatedContent) {
-        return res
-          .status(500)
-          .json({ error: "Business plan content is missing" });
-      }
-
+  app.get("/api/download/word/:planId", isAuthenticated, guardedBusinessPlanDownload({
+    lookup: (planId) => storage.getBusinessPlan(planId),
+    allowAdmin: true,
+    logLabel: "Word download",
+    failureMessage: "Failed to generate Word document",
+    render: async (businessPlan, req, res) => {
       const {
         Document,
         Packer,
@@ -4548,11 +4494,8 @@ Respond ONLY with valid JSON in this exact format:
         `attachment; filename="${encodeURIComponent(businessPlan.businessName)}-business-plan.docx"`,
       );
       res.send(Buffer.from(buffer));
-    } catch (error) {
-      console.error("Word download error:", error);
-      res.status(500).json({ error: "Failed to generate Word document" });
-    }
-  });
+    },
+  }));
 
   // ============ ADVANCED FEATURES API ENDPOINTS ============
 
