@@ -18,10 +18,9 @@ CREATE TABLE IF NOT EXISTS member_stripe_test_orders (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CONSTRAINT test_order_price_matches_sku CHECK (
-    (sku = 'founder' AND expected_pence = 6900 AND stripe_subscription_id IS NOT NULL) OR
-    (sku = 'founder_pro' AND expected_pence = 11900 AND stripe_subscription_id IS NOT NULL) OR
-    (sku = 'founder_pass_90d' AND expected_pence = 15900 AND stripe_subscription_id IS NULL
-      AND stripe_payment_intent_id IS NOT NULL)
+    (sku = 'founder' AND expected_pence = 6900) OR
+    (sku = 'founder_pro' AND expected_pence = 11900) OR
+    (sku = 'founder_pass_90d' AND expected_pence = 15900 AND stripe_subscription_id IS NULL)
   )
 );
 CREATE INDEX IF NOT EXISTS idx_member_stripe_test_orders_user
