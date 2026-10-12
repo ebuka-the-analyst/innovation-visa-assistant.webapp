@@ -163,11 +163,19 @@ test("subscription cancellation disables only its matching paid entitlement and 
 test("legacy paid accounts fail closed; event audit and account changes roll back together",async()=>{
   const o=await order("founder","premium");
   const s=sign("invoice.paid",invoice(o),TIME+1);
-  await assert.rejects(()=>processSignedTestStripeEvent(pool,o.id,s.payload,s.signature,secret,
-    applyVerifiedTestMembershipEntitlement),/Existing customer tier needs review/);
+  const decision=await processSignedTestStripeEvent(pool,o.id,s.payload,s.signature,secret,
+    applyVerifiedTestMembershipEntitlement);
+  assert.equal(decision.action,"review");
+  assert.match(decision.reason,/Existing customer tier needs review/);
   const actual=await state(o);
   assert.equal(actual.ent.length,0);
-  assert.equal(actual.audit.length,0);
+  assert.equal(actual.audit.length,1);
+  assert.equal(actual.audit[0].decision,"review");
+  const queued=await pool.query(
+    "SELECT status,reason FROM member_stripe_test_reviews WHERE stripe_event_id=$1",
+    [decision.eventId]);
+  assert.equal(queued.rows[0].status,"pending");
+  assert.match(queued.rows[0].reason,/Existing customer tier needs review/);
   assert.equal(actual.user.subscription_tier,"premium");
   assert.equal(actual.user.subscription_status,"active");
 });
@@ -182,6 +190,55 @@ test("wrong user, amount or provider reference can never grant a membership",asy
   assert.equal((await state(o)).ent.length,0);
 });
 
+
+test("unreconciled partial refund freezes later paid-invoice grants and produces durable admin review",async()=>{
+  const o=await order("founder");
+  const paid=await send(o,"invoice.paid",invoice(o),TIME+1);
+  assert.equal(paid.action,"activate");
+  const dispute=await send(o,"charge.refunded",{
+    customer:o.customer,payment_intent:o.intent,
+    amount:o.amount,amount_refunded:100,currency:"gbp",
+  },TIME+100);
+  assert.equal(dispute.action,"review");
+  const queued=await pool.query("SELECT status,reason FROM member_stripe_test_reviews WHERE stripe_event_id=$1",
+    [dispute.eventId]);
+  assert.equal(queued.rowCount,1);
+  assert.equal(queued.rows[0].status,"pending");
+  assert.match(queued.rows[0].reason,/Partial refund/);
+  const next=await send(o,"invoice.paid",invoice(o,TIME+30*DAY),TIME+30*DAY+1);
+  assert.equal(next.action,"review");
+  assert.match(next.reason,/Unresolved billing dispute/);
+  const after=await state(o);
+  assert.equal(after.ent.length,1);
+  assert.equal(after.ent[0].ends_at.getTime(),(TIME+30*DAY)*1000);
+  assert.equal(after.user.tier_expires_at?.getTime(),(TIME+30*DAY)*1000);
+  const retry=await send(o,"invoice.paid",invoice(o,TIME+30*DAY),TIME+30*DAY+10);
+  assert.equal(retry.action,"review");
+});
+
+test("full pass refund atomically suspends membership, while dispute without verified customer is held for review",async()=>{
+  const o=await order("founder_pass_90d");
+  await send(o,"checkout.session.completed",pass(o),TIME);
+  const chargeback=await send(o,"charge.dispute.created",{
+    id:"du_test_without_customer",payment_intent:o.intent,
+    amount:o.amount,currency:"gbp",
+  },TIME+10);
+  assert.equal(chargeback.action,"review");
+  assert.equal((await state(o)).user.subscription_status,"active",
+    "An unattributed dispute must not be used for automatic access changes");
+  const o2=await order("founder_pass_90d");
+  await send(o2,"checkout.session.completed",pass(o2),TIME);
+  const refunded=await send(o2,"charge.refunded",{
+    id:"ch_test_refunded",customer:o2.customer,payment_intent:o2.intent,
+    amount:o2.amount,amount_refunded:o2.amount,currency:"gbp",
+  },TIME+100);
+  assert.equal(refunded.action,"suspend");
+  const state2=await state(o2);
+  assert.equal(state2.ent.length,1);
+  assert.equal(state2.ent[0].status,"past_due");
+  assert.equal(state2.user.subscription_status,"past_due");
+  assert.equal(state2.user.tier_expires_at.getTime(),(TIME+90*DAY)*1000);
+});
 
 test("parallel Checkout requests reserve only one chargeable session per founder",async()=>{
   const user="founder_"+randomUUID().replaceAll("-","");
