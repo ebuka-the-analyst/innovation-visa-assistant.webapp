@@ -58,3 +58,19 @@ CREATE TABLE IF NOT EXISTS member_stripe_test_reviews (
 );
 CREATE INDEX IF NOT EXISTS idx_member_stripe_test_reviews_pending
   ON member_stripe_test_reviews(status,created_at);
+
+
+-- Signed webhook events that cannot yet be joined to ONE trusted order
+-- must be visible to QA ops, never discarded silently or granted access.
+CREATE TABLE IF NOT EXISTS member_stripe_test_unmatched_events (
+  stripe_event_id VARCHAR(255) PRIMARY KEY,
+  event_type VARCHAR(100) NOT NULL,
+  reason TEXT NOT NULL,
+  first_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  retries INTEGER NOT NULL DEFAULT 1 CHECK(retries >= 1),
+  status VARCHAR(16) NOT NULL DEFAULT 'pending'
+    CHECK(status IN ('pending','resolved','dismissed'))
+);
+CREATE INDEX IF NOT EXISTS idx_member_stripe_test_unmatched_pending
+ ON member_stripe_test_unmatched_events(status,first_seen_at);
