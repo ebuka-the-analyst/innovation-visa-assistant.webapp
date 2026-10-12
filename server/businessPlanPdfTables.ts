@@ -11,7 +11,7 @@ function cellsOf(line: string): string[] | null {
   const trimmed = line.trim();
   if (!trimmed.startsWith("|") || !trimmed.endsWith("|")) return null;
   const parts = trimmed.slice(1, -1).split("|").map(cell => cell.trim());
-  return parts.length >= 2 && parts.length <= 5 ? parts : null;
+  return parts.length >= 2 && parts.length <= 6 ? parts : null;
 }
 
 function isDivider(row: string[]): boolean {
@@ -42,7 +42,7 @@ export function renderPdfTable(
 ): number {
   const totalWidth = 495;
   const startX = 50;
-  const firstWidth = Math.round(totalWidth * (rows[0].length <= 2 ? 0.47 : 0.34));
+  const firstWidth = Math.round(totalWidth * (rows[0].length <= 2 ? 0.47 : rows[0].length >= 6 ? 0.24 : 0.34));
   const remainingWidth = totalWidth - firstWidth;
   const widths = rows[0].map((_, i) =>
     i === 0 ? firstWidth : remainingWidth / (rows[0].length - 1)
@@ -52,11 +52,14 @@ export function renderPdfTable(
   let y = startY;
 
   const drawRow = (row: string[], header: boolean): void => {
+    const dense = rows[0].length >= 6;
+    const cellPad = dense ? 6 : 8;
+    const fontSize = dense ? 8 : header ? 10 : 9;
     const textHeight = row.map((cell, i) => {
-      doc.font(header ? "Helvetica-Bold" : "Helvetica").fontSize(header ? 10 : 9);
-      return doc.heightOfString(cell, { width: widths[i] - 16 });
+      doc.font(header ? "Helvetica-Bold" : "Helvetica").fontSize(fontSize);
+      return doc.heightOfString(cell, { width: widths[i] - cellPad * 2 });
     });
-    const h = Math.max(27, ...textHeight.map(n => n + 14));
+    const h = Math.max(dense ? 25 : 27, ...textHeight.map(n => n + cellPad * 2));
     if (h > usableBottom() - topMargin) {
       throw new Error("A financial table cell is too large to render on one page");
     }
@@ -72,9 +75,9 @@ export function renderPdfTable(
       doc.rect(x, y, width, h).fill(header ? "#005EB8" : "#FFFFFF");
       doc.rect(x, y, width, h).strokeColor("#CBD5E1").lineWidth(0.6).stroke();
       doc.font(header ? "Helvetica-Bold" : "Helvetica")
-        .fontSize(header ? 10 : 9)
+        .fontSize(fontSize)
         .fillColor(header ? "#FFFFFF" : "#172337")
-        .text(row[i], x + 8, y + 7, { width: width - 16 });
+        .text(row[i], x + cellPad, y + cellPad, { width: width - cellPad * 2 });
       doc.restore();
       x += width;
     }
