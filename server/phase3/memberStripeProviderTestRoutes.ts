@@ -3,7 +3,8 @@
  *
  * This module must NEVER run against the production Railway project. It
  * uses separate sk_test_/whsec_ credentials and QA-only SQL tables, and
- * records only a simulated paid state (never users or member entitlements).
+ * projects test-paid state into QA-only users and member entitlements in one
+ * database transaction. Never points at live customer tables.
  *
  * Real test-mode Checkout and webhook signatures can be exercised when a
  * dedicated Stripe TEST account configuration is supplied to clean QA.
@@ -18,6 +19,7 @@ import {
 import {
   EXPECTED_GBP_PENCE, type CandidateSku,
 } from "./memberStripeAcceptance";
+import { applyVerifiedTestMembershipEntitlement } from "./memberEntitlementFulfilmentQa";
 
 type Config = {
   stripe: Stripe;
@@ -226,7 +228,8 @@ export function registerMemberStripeTestRoutes(
       }
       if(event.type==="invoice.paid"){
         // Only accept an invoice re-fetched directly from Stripe, not solely
-        // the event envelope. Never grant a user entitlement in QA.
+        // the event envelope. A paid QA entitlement still requires the
+        // separate signed-event decision and transactional membership writer.
         const fresh=await cfg.stripe.invoices.retrieve(obj.id);
         if(invoiceSub(fresh)!==order.stripe_subscription_id ||
             asId(fresh.customer)!==order.stripe_customer_id)
@@ -235,7 +238,10 @@ export function registerMemberStripeTestRoutes(
         const isPaid=fresh.status==="paid" && fresh.amount_remaining===0;
         if(!isPaid)return res.status(409).send("Provider invoice not settled");
       }
-      const decision=await processSignedTestStripeEvent(pool,order.id,rawBody,signature,cfg.secret);
+      const decision=await processSignedTestStripeEvent(
+        pool,order.id,rawBody,signature,cfg.secret,
+        applyVerifiedTestMembershipEntitlement,
+      );
       if(decision.action==="review")return res.status(409).send("Reconciliation review required");
       return res.status(200).json({received:true,decision:decision.action,sandboxOnly:true});
     }catch(e){
