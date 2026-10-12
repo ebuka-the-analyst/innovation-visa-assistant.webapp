@@ -5,6 +5,7 @@ import test from "node:test";
 import { Pool } from "pg";
 import Stripe from "stripe";
 import { getEffectiveTestPaidState, processSignedTestStripeEvent } from "../server/phase3/durableStripeTestLedger";
+import { recordUnmatchedSignedTestEvent } from "../server/phase3/memberStripeUnmatchedQa";
 
 const connectionString = process.env.QUOTA_TEST_DATABASE_URL;
 if (!connectionString) throw new Error("Disposable QUOTA_TEST_DATABASE_URL required");
@@ -129,6 +130,37 @@ test("newer cancellation beats old paid invoices; mismatches go to durable revie
     "SELECT decision FROM member_stripe_test_events WHERE order_id=$1 ORDER BY event_created",[o.id],
   );
   assert.deepEqual(audits.rows.map(r=>r.decision),["activate","ignore","expire","review"]);
+});
+
+test("unmatched real-format signed Stripe events are durably retried without ever granting access",async()=>{
+  const signed=sign("charge.dispute.created",{
+    id:"du_unmatched_no_customer",charge:"ch_test_no_order",
+    payment_intent:"pi_no_matching_order",
+  },"evt_"+randomUUID());
+  const id=await recordUnmatchedSignedTestEvent(
+    pool,signed.payload,signed.signature,secret,
+    "Signed dispute cannot match a trusted order");
+  await recordUnmatchedSignedTestEvent(
+    pool,signed.payload,signed.signature,secret,
+    "Retry still cannot match trusted order");
+  const record=await pool.query<{retries:number;status:string;event_type:string}>(`
+    SELECT retries,status,event_type FROM member_stripe_test_unmatched_events
+    WHERE stripe_event_id=$1`,[id]);
+  assert.equal(record.rowCount,1);
+  assert.equal(record.rows[0].retries,2);
+  assert.equal(record.rows[0].status,"pending");
+  assert.equal(record.rows[0].event_type,"charge.dispute.created");
+  await assert.rejects(()=>recordUnmatchedSignedTestEvent(pool,
+    signed.payload.replace("ch_test_no_order","ch_test_injected"),signed.signature,secret,
+    "Untrusted event"),/signature/i);
+  const another=sign("charge.dispute.created",{id:"du_live",charge:"ch_live"},"evt_"+randomUUID(),TIME,true);
+  await assert.rejects(()=>recordUnmatchedSignedTestEvent(
+    pool,another.payload,another.signature,secret,"Never trust LIVE event"),
+    /Production Stripe events forbidden/);
+  const total=await pool.query(`
+    SELECT COUNT(*)::integer AS n FROM member_stripe_test_orders
+    WHERE stripe_payment_intent_id='pi_no_matching_order'`);
+  assert.equal(total.rows[0].n,0);
 });
 
 test.after(async()=>{
