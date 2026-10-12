@@ -81,6 +81,7 @@ function invoiceSub(invoice:any):string | null {
  */
 export function registerMemberStripeTestRoutes(
   app: Express, isAuthenticated: RequestHandler, pool: Pool,
+  requireAdmin: RequestHandler,
 ): void {
   if(!isMemberTestGatewayAllowed())return;
 
@@ -146,6 +147,20 @@ export function registerMemberStripeTestRoutes(
     const state=await getEffectiveTestPaidState(pool,req.params.orderId);
     res.setHeader("Cache-Control","no-store");
     res.json({orderId:req.params.orderId,testOnly:true,active:state.active,paidThrough:state.paidThrough});
+  });
+
+  app.get("/api/member-stripe-test/reviews",isAuthenticated,requireAdmin,async(_req,res)=>{
+    try {
+      const pending=await pool.query<{
+        stripe_event_id:string;event_type:string;reason:string;created_at:Date;order_id:string;
+      }>(`SELECT stripe_event_id,order_id,event_type,reason,created_at
+          FROM member_stripe_test_reviews WHERE status='pending'
+          ORDER BY created_at ASC LIMIT 100`);
+      res.setHeader("Cache-Control","no-store");
+      res.json({testOnly:true,count:pending.rows.length,reviews:pending.rows});
+    } catch {
+      res.status(503).json({error:"QA billing review inbox unavailable"});
+    }
   });
 
   app.post("/api/member-stripe-test/webhook",async(req,res)=>{
@@ -245,8 +260,13 @@ export function registerMemberStripeTestRoutes(
         pool,order.id,rawBody,signature,cfg.secret,
         applyVerifiedTestMembershipEntitlement,
       );
-      if(decision.action==="review")return res.status(409).send("Reconciliation review required");
-      return res.status(200).json({received:true,decision:decision.action,sandboxOnly:true});
+      // Reviewed decisions are transactionally audited and visible to the
+      // authenticated QA admin inbox. Acknowledge to avoid endless retries
+      // of identical provider events without changing customer entitlements.
+      return res.status(200).json({
+        received:true,decision:decision.action,
+        manualReviewRequired:decision.action==="review",sandboxOnly:true,
+      });
     }catch(e){
       console.error("[Membership QA] webhook failed",orderId||"unknown",
         e instanceof Error?e.message:"unknown");
