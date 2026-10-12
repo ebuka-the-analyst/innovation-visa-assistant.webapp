@@ -15,6 +15,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { TIER_CREDITS, REFERRAL_REWARDS } from "@/hooks/useTierAccess";
 import { useCommercialCatalog, type PlanId } from "@/hooks/useCommercialCatalog";
+import UpcomingMemberships from "@/components/UpcomingMemberships";
 import logoLight from "@assets/official_logo.webp";
 import logoDark from "@assets/logo_dark.webp";
 
@@ -240,6 +241,8 @@ export default function Pricing() {
                   Select the tier that best matches your business complexity for your Innovator Founder Visa application
                 </p>
               </div>
+
+        <UpcomingMemberships />
 
         {/* Horizontal scrollable container on mobile/tablet, grid on larger screens */}
         <div className="w-full overflow-x-auto pb-4 -mx-4 px-4 lg:overflow-visible lg:mx-0 lg:px-0">

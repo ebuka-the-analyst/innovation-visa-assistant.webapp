@@ -5,6 +5,7 @@ import { Link } from "wouter";
 import { useCommercialCatalog, type PlanId } from "@/hooks/useCommercialCatalog";
 import { TIER_CREDITS } from "@/hooks/useTierAccess";
 import { innovatorFounderPath } from "@/lib/innovator-founder-routes";
+import UpcomingMemberships from "@/components/UpcomingMemberships";
 
 const PLAN_PAGE_COPY: Record<PlanId, string> = {
   free: "10-15 page plan",
@@ -109,6 +110,8 @@ export default function PricingSection() {
             </Card>
           ))}
         </div>
+
+        <UpcomingMemberships />
 
         <div className="mt-16 text-center">
           <div className="flex flex-wrap justify-center gap-8 items-center text-sm text-muted-foreground">
