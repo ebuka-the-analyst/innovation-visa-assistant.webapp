@@ -15,7 +15,7 @@ test("Founder membership preview is visible on home and pricing and cannot initi
  for(const key of ["founder","founder_pro","founder_pass_90d"])assert.ok(ui.includes(key));
  assert.match(ui,/Not yet available to purchase/);
  assert.match(ui,/Preview only\. No payment or automatic enrolment/);
- assert.doesNotMatch(ui,/apiRequest|fetch\(|useMutation|checkout|window\.location|stripe\.checkout|stripe\.subscriptions|<Link|<Button/);
+ assert.doesNotMatch(ui,/apiRequest|fetch\(|useMutation|\/api\/payment|window\.location|stripe\.checkout|stripe\.subscriptions|<Link|<Button/);
 });
 
 test("the existing paid catalogue and Stripe checkout flow are still present and untouched",()=>{
