@@ -240,7 +240,7 @@ test("six-column financial rows retain the year, units and operating losses in a
       extracted += " " + (await page.getTextContent()).items.map((i:any)=>i.str||"").join(" ");
     }
     assert.match(extracted,/Billable units/);
-    assert.match(extracted,/Operating loss GBP/);
+    assert.match(extracted,/Operating\s+loss\s+GBP/);
     assert.match(extracted,/-35700/);
     assert.match(extracted,/105000/);
   } finally {
