@@ -2,7 +2,9 @@ import type { Express, Request, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import type { ChartDataPayload, ChartType } from "./chartGenerator";
 import { storage } from "./storage";
-import { db } from "./db";
+import { db, dbPool } from "./db";
+import { registerMemberStripeTestRoutes } from "./phase3/memberStripeProviderTestRoutes";
+import type { Pool as PgPool } from "pg";
 import {
   questionnaireSchema,
   successStories,
@@ -326,6 +328,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google OAuth authentication (must be before routes)
   await setupAuth(app);
   registerLoginSecurityAuditRoutes(app);
+  // Isolated QA only: protected by Railway project/environment + TEST keys.
+  // No live entitlement or legacy checkout code is modified by this route.
+  registerMemberStripeTestRoutes(app, isAuthenticated, dbPool as PgPool);
 
   app.post("/api/translate", async (req, res) => {
     try {
