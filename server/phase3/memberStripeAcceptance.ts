@@ -52,6 +52,26 @@ const nonempty = (value: unknown): value is string =>
   typeof value === "string" && value.length > 3 && value.length < 255;
 const number = (value: unknown): value is number =>
   typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+const stripeId = (value: any): string | undefined =>
+  typeof value === "string" ? value : typeof value?.id === "string" ? value.id : undefined;
+
+/**
+ * Stripe 2025-03-31.basil+ moved invoice.subscription to
+ * parent.subscription_details.subscription and line price to
+ * pricing.price_details.price. If both shapes appear but conflict, fail shut.
+ */
+function invoiceSubscriptionId(invoice: any): string | null {
+  const legacy = stripeId(invoice?.subscription);
+  const modern = stripeId(invoice?.parent?.subscription_details?.subscription);
+  if (legacy && modern && legacy !== modern) return null;
+  return legacy || modern || null;
+}
+function invoicePriceId(line: any): string | null {
+  const legacy = stripeId(line?.price);
+  const modern = stripeId(line?.pricing?.price_details?.price);
+  if (legacy && modern && legacy !== modern) return null;
+  return legacy || modern || null;
+}
 
 export function decideVerifiedTestMembershipEvent(
   event: any,
@@ -110,21 +130,24 @@ export function decideVerifiedTestMembershipEvent(
     case "invoice.paid": {
       if (pending.sku === "founder_pass_90d") return review("One-time pass cannot renew by invoice");
       if (obj.status !== "paid" || obj.paid_out_of_band === true ||
+          obj.collection_method !== "charge_automatically" ||
+          obj.amount_remaining !== 0 ||
           obj.currency !== "gbp" || obj.amount_paid !== pending.expectedPence) {
-        return review("Subscription renewal requires a fully paid, non-manual GBP invoice");
+        return review("Subscription renewal requires an automatically charged, fully paid GBP invoice");
       }
-      const subscription = typeof obj.subscription === "string"
-        ? obj.subscription : obj.subscription?.id;
+      // Subscription status must additionally be verified via Stripe API by
+      // the future production adapter; this offline contract never grants access.
+      const subscription = invoiceSubscriptionId(obj);
       if (!nonempty(subscription) || subscription !== pending.subscriptionId) {
         return review("Invoice subscription does not match server-created purchase");
       }
-      // In API versions that place subscription information under
-      // parent.subscription_details, the adaptation layer must normalise it
-      // from a freshly fetched provider invoice; do not guess.
       const items = obj.lines?.data;
       if (!Array.isArray(items) || items.length !== 1 ||
-          items[0]?.price?.id !== pending.priceId) {
-        return review("Expected one matching membership price; prorations require review");
+          obj.lines?.has_more === true ||
+          (typeof obj.lines?.total_count === "number" && obj.lines.total_count !== 1) ||
+          invoicePriceId(items[0]) !== pending.priceId ||
+          items[0]?.parent?.invoice_item_details?.proration === true) {
+        return review("Expected one complete matching membership price; prorations require review");
       }
       const start = items[0]?.period?.start;
       const end = items[0]?.period?.end;
@@ -141,8 +164,7 @@ export function decideVerifiedTestMembershipEvent(
     }
     case "invoice.payment_failed": {
       if (pending.sku === "founder_pass_90d") return ignore("Pass is not recurring");
-      const subscription = typeof obj.subscription === "string"
-        ? obj.subscription : obj.subscription?.id;
+      const subscription = invoiceSubscriptionId(obj);
       if (subscription !== pending.subscriptionId) return review("Failed invoice subscription mismatch");
       return ledger.paidThroughEpoch != null && ledger.paidThroughEpoch > event.created
         ? ignore("Preserve an already paid-through period; do not create new quota")
