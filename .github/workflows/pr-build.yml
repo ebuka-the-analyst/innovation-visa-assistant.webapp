@@ -181,6 +181,9 @@ jobs:
       - name: Verify isolated authenticated download paths and actual PDF/Word bytes
         run: node --import tsx --test tests/phase2-business-plan-download.integration.test.ts
 
+      - name: Dry-run signed Stripe membership events without a Stripe API key
+        run: node --import tsx --test tests/phase3-member-stripe-acceptance.test.ts
+
       - name: Dry-run full-plan flagship benchmark without an API key
         run: node --import tsx scripts/phase2-full-plan-benchmark.ts --case marketplace --tier founder_pro --max-usd 30
 
