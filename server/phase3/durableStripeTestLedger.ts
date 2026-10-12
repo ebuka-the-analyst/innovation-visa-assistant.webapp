@@ -8,6 +8,7 @@
  */
 import Stripe from "stripe";
 import type { Pool, PoolClient } from "pg";
+import { MembershipFulfilmentReviewRequired } from "./memberEntitlementFulfilmentQa";
 import {
   decideVerifiedTestMembershipEvent,
   type CandidateSku, type LedgerState, type MemberDecision,
@@ -117,40 +118,76 @@ export async function processSignedTestStripeEvent(
       currentlyActive: order.currently_active,
       paidThroughEpoch,
     };
-    const decision = decideVerifiedTestMembershipEvent(event, toPending(order), ledger);
+    let decision = decideVerifiedTestMembershipEvent(event, toPending(order), ledger);
+    // Unresolved chargebacks/refunds or conflicting plans freeze new
+    // activations. A later paid invoice must not silently bypass a dispute.
+    if (decision.action === "activate") {
+      const blocked = await client.query(
+        "SELECT stripe_event_id FROM member_stripe_test_reviews WHERE order_id=$1 AND status='pending' LIMIT 1",
+        [trustedOrderId],
+      );
+      if (blocked.rowCount) {
+        decision = {
+          action: "review",
+          reason: "Unresolved billing dispute/review; do not re-activate automatically",
+        };
+      }
+    }
     await client.query(
       `INSERT INTO member_stripe_test_events
          (stripe_event_id, order_id, event_type, event_created, decision, reason)
        VALUES ($1, $2, $3, $4, $5, $6)`,
       [event.id, trustedOrderId, event.type, event.created, decision.action, decision.reason],
     );
-    if (decision.action === "activate") {
-      if (!decision.paidThroughEpoch || !decision.periodStartEpoch) {
-        throw new Error("Activation missing signed, verified service period");
+    await client.query("SAVEPOINT member_effect");
+    try {
+      if (decision.action === "activate") {
+        if (!decision.paidThroughEpoch || !decision.periodStartEpoch) {
+          throw new MembershipFulfilmentReviewRequired("Activation missing validated service period");
+        }
+        await client.query(
+          `UPDATE member_stripe_test_orders
+           SET currently_active = TRUE, paid_through = to_timestamp($1),
+               last_applied_event_created = $2, updated_at = NOW()
+           WHERE id = $3`,
+          [decision.paidThroughEpoch, event.created, trustedOrderId],
+        );
+      } else if (decision.action === "suspend" || decision.action === "expire") {
+        await client.query(
+          `UPDATE member_stripe_test_orders
+           SET currently_active = FALSE, last_applied_event_created = $1,
+               updated_at = NOW() WHERE id = $2`,
+          [event.created, trustedOrderId],
+        );
       }
+      if (onApplied && ["activate","suspend","expire"].includes(decision.action)) {
+        await onApplied(client, toPending(order), decision, event.created);
+      }
+      await client.query("RELEASE SAVEPOINT member_effect");
+    } catch (error) {
+      // A business-rule conflict is not a transient Stripe error. Undo
+      // simulated access and user/entitlement changes, but commit the
+      // review audit and queue instead of sending infinite 5xx retries.
+      await client.query("ROLLBACK TO SAVEPOINT member_effect");
+      await client.query("RELEASE SAVEPOINT member_effect");
+      if (!(error instanceof MembershipFulfilmentReviewRequired)) throw error;
+      decision = {action:"review",reason:error.message};
       await client.query(
-        `UPDATE member_stripe_test_orders
-         SET currently_active = TRUE, paid_through = to_timestamp($1),
-             last_applied_event_created = $2, updated_at = NOW()
-         WHERE id = $3`,
-        [decision.paidThroughEpoch, event.created, trustedOrderId],
-      );
-    } else if (decision.action === "suspend" || decision.action === "expire") {
-      await client.query(
-        `UPDATE member_stripe_test_orders
-         SET currently_active = FALSE, last_applied_event_created = $1,
-             updated_at = NOW() WHERE id = $2`,
-        [event.created, trustedOrderId],
+        "UPDATE member_stripe_test_events SET decision='review',reason=$2 WHERE stripe_event_id=$1",
+        [event.id,error.message],
       );
     }
-    // A second effect can write to QA member entitlement/users tables, but
-    // only inside the SAME transaction. An exception rolls back event ID,
-    // simulated state AND any account changes; Stripe can safely retry.
-    if (onApplied && (decision.action === "activate" ||
-        decision.action === "suspend" || decision.action === "expire")) {
-      await onApplied(client, toPending(order), decision, event.created);
+    if (decision.action === "review") {
+      await client.query(
+        `INSERT INTO member_stripe_test_reviews
+          (stripe_event_id,order_id,event_type,reason)
+         VALUES($1,$2,$3,$4)
+         ON CONFLICT(stripe_event_id) DO NOTHING`,
+        [event.id,trustedOrderId,event.type,decision.reason],
+      );
     }
-    // "review"/"ignore" remain recorded, but NEVER change paid membership.
+    // "review"/"ignore" never change paid access. Both are durably
+    // acknowledged after this commit; admins must resolve pending reviews.
     await client.query("COMMIT");
     return { ...decision, duplicate: false, eventId: event.id };
   } catch (error) {
