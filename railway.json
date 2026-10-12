@@ -18,6 +18,9 @@
         "preDeployCommand": [
           "node server/scripts/bootstrap-isolated-qa-schema.cjs base && node server/scripts/preflight-app-schema.cjs && node server/scripts/run-app-migrations.cjs && node server/scripts/bootstrap-isolated-qa-schema.cjs ledger && node server/scripts/verify-application-context-schema.cjs && node server/scripts/verify-app-schema.cjs"
         ]
+      },
+      "build": {
+        "buildCommand": "npm ci --include=dev && npm run build"
       }
     }
   }
