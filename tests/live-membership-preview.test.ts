@@ -1,29 +1,54 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readFileSync } from "node:fs";
+import {readFileSync,existsSync} from "node:fs";
 
-const read=(p:string)=>readFileSync(new URL("../"+p,import.meta.url),"utf8");
+const root=new URL("../",import.meta.url);
+const read=(path:string)=>readFileSync(new URL(path,root),"utf8");
 
-test("Founder membership preview is visible on home and pricing and cannot initiate checkout",()=>{
- const ui=read("client/src/components/UpcomingMemberships.tsx");
- const home=read("client/src/components/PricingSection.tsx");
+test("homepage and pricing share exactly one API-fed Founder membership component",()=>{
+ const component=read("client/src/components/FounderMembershipPlans.tsx");
+ const homepage=read("client/src/components/PricingSection.tsx");
  const pricing=read("client/src/pages/pricing.tsx");
- assert.match(home,/<UpcomingMemberships\s*\/>/);
- assert.match(pricing,/<UpcomingMemberships\s*\/>/);
- for(const name of ["Founder","Founder Pro","90-Day Pass"])assert.ok(ui.includes(name));
- for(const price of ["£69","£119","£159"])assert.ok(ui.includes(price));
- for(const key of ["founder","founder_pro","founder_pass_90d"])assert.ok(ui.includes(key));
- assert.match(ui,/Not yet available to purchase/);
- assert.match(ui,/Preview only\. No payment or automatic enrolment/);
- assert.doesNotMatch(ui,/apiRequest|fetch\(|useMutation|\/api\/payment|window\.location|stripe\.checkout|stripe\.subscriptions|<Link|<Button/);
+ assert.match(homepage,/<FounderMembershipPlans\s*\/>/);
+ assert.match(pricing,/<FounderMembershipPlans\s*\/>/);
+ assert.match(component,/fetch\("\/api\/member-offers"/);
+ assert.match(component,/data\.offers\.map/);
+ assert.match(component,/offer\.benefits\.map/);
+ assert.match(component,/offer\.pricePence/);
+ assert.match(component,/offer\.billingLabel/);
+ assert.match(component,/offer\.ctaText/);
+ for(const old of ["Free Plan","Basic Plan","Premium Plan","Enterprise Plan","Ultimate Plan"]){
+   assert.ok(!component.includes(old) && !homepage.includes(old) && !pricing.includes(old),
+     "Old sales tier appears in updated view: "+old);
+ }
+ assert.equal(existsSync(new URL("client/src/components/UpcomingMemberships.tsx",root)),false);
+ assert.doesNotMatch(component,/£69|£119|£159|Coming soon|upcomingMemberships/);
+ assert.doesNotMatch(homepage,/useCommercialCatalog|PLAN_FEATURE_COPY|TIER_CREDITS/);
+ assert.doesNotMatch(pricing,/useCommercialCatalog|PLAN_PAGES|directSubscribeMutation|checkoutMutation/);
 });
 
-test("the existing paid catalogue and Stripe checkout flow are still present and untouched",()=>{
- const pricing=read("client/src/pages/pricing.tsx");
- const home=read("client/src/components/PricingSection.tsx");
- assert.match(pricing,/\/api\/payment\/create-checkout/);
- assert.match(pricing,/useCommercialCatalog/);
- assert.match(home,/useCommercialCatalog/);
- assert.match(ui(),/unused plan and add-on credits/);
+test("missing live gateway cannot silently create Stripe checkout or revive old purchases",()=>{
+ const catalogue=read("server/services/memberOfferCatalogue.ts");
+ const routes=read("server/routes.ts");
+ const component=read("client/src/components/FounderMembershipPlans.tsx");
+ assert.match(catalogue,/IFVA_MEMBERSHIP_PAYMENTS_LIVE_ENABLED/);
+ assert.match(catalogue,/IFVA_MEMBERSHIP_LIVE_WEBHOOK_VERIFIED/);
+ assert.match(catalogue,/IFVA_MEMBERSHIP_LIVE_FULFILMENT_VERIFIED/);
+ assert.match(component,/disabled=\{!data\.purchasable\}/);
+ assert.match(routes,/app\.get\("\/api\/member-offers"/);
+ assert.match(routes,/app\.get\("\/api\/admin\/member-migration-audit"/);
+ assert.match(routes,/IFVA_LEGACY_NEW_PURCHASES_DISABLED === "true"/);
+ assert.doesNotMatch(component,/sk_live_|price_1UP/);
 });
-function ui(){return read("client/src/components/UpcomingMemberships.tsx");}
+
+test("new pricing and consumer-facing benefits originate from the server only",()=>{
+ const server=read("server/services/memberOfferCatalogue.ts");
+ assert.match(server,/pricePence:6900/);
+ assert.match(server,/pricePence:11900/);
+ assert.match(server,/pricePence:15900/);
+ assert.match(server,/MEMBER_OFFER_CATALOG_KEY/);
+ assert.match(server,/systemSettings/);
+ assert.match(server,/parseMemberOfferCatalogue/);
+ assert.match(server,/legacyNotice/);
+ assert.match(server,/purchasable:canStartLiveMembershipCheckout/);
+});
