@@ -97,6 +97,12 @@ export function decideVerifiedTestMembershipEvent(
       if (!nonempty(intent) || intent !== pending.paymentIntentId) {
         return review("PaymentIntent does not match server purchase ledger");
       }
+      // Stripe may deliver both completed and async_payment_succeeded for one
+      // checkout. A second event ID MUST NOT start another 90-day period.
+      // Keep paidThrough after a refund/cancellation to prevent resurrection.
+      if (ledger.paidThroughEpoch != null) {
+        return ignore("One-time pass already fulfilled; never extend a paid period twice");
+      }
       return {action:"activate",reason:"Paid one-time pass with verified server-side purchase",
         ...base,providerReference:pending.checkoutSessionId,
         periodStartEpoch:event.created,paidThroughEpoch:event.created+NINETY_DAYS};
