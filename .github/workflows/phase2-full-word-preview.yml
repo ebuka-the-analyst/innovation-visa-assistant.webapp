@@ -1,0 +1,59 @@
+name: Phase 2 Full Fictional Word Preview
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  full-word-preview:
+    if: ${{ github.event.pull_request.number == 116 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install existing preview dependencies (no AI or staging secrets)
+        run: npm install --no-audit --no-fund
+      - name: Download already-paid fictional Benchmark 2 output
+        uses: actions/download-artifact@v4
+        with:
+          name: fictional-founder-pro-benchmark-two
+          run-id: 38183334852
+          repository: ebuka-the-analyst/innovation-visa-assistant.webapp
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/existing-benchmark-two
+      - name: Generate offline DOCX using production Word financial-table renderer
+        shell: bash
+        run: |
+          mkdir -p "${{ runner.temp }}/word-qa"
+          node --import tsx scripts/phase2-benchmark-word-preview.ts \
+            "${{ runner.temp }}/existing-benchmark-two/marketplace-founder_pro.md" \
+            "${{ runner.temp }}/word-qa/fictional-founder-pro-benchmark-two.docx"
+          python3 - <<'PY'
+          import zipfile, os
+          p=os.path.join(os.environ['RUNNER_TEMP'],'word-qa','fictional-founder-pro-benchmark-two.docx')
+          with zipfile.ZipFile(p) as z:
+              xml=z.read('word/document.xml').decode('utf-8')
+              assert xml.count('<w:tbl>') >= 30
+              assert 'ENDORSING BODY STRATEGY' in xml
+              assert 'FINANCIAL VIABILITY' in xml
+              for required in ('-31,950','-34,900','-35,700','11,667','7,700'):
+                  assert required in xml, f'Missing financial value: {required}'
+              assert 'Operating surplus' in xml or 'Operating loss' in xml
+              assert '&lt;table' not in xml
+              print('Verified full DOCX includes tables, 13 sections and baseline financial values.')
+          PY
+      - name: Archive offline fictional Word preview for visual inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fictional-founder-pro-benchmark-two-word-preview
+          path: ${{ runner.temp }}/word-qa/
+          retention-days: 7
+          if-no-files-found: warn
