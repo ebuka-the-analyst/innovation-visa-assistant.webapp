@@ -50,6 +50,7 @@ test("QA acceptance page is signed-in and scoped to synthetic non-admin founder 
  const anonymous=response();
  callback({isAuthenticated:()=>false},anonymous);
  assert.equal(anonymous.statusCode,401);
+ assert.match(anonymous.body,/href="\/uk\/innovatorfoundervisaassistant\/login"/);
  const unauthorised=response();
  callback({isAuthenticated:()=>true,user:{email:"other@example.com",isAdmin:false}},unauthorised);
  assert.equal(unauthorised.statusCode,403);
@@ -60,6 +61,10 @@ test("QA acceptance page is signed-in and scoped to synthetic non-admin founder 
  callback({isAuthenticated:()=>true,user:{email:"ifva-qa-founder-20261012@example.com",isAdmin:false}},tester);
  assert.equal(tester.statusCode,200);
  assert.match(tester.body,/4242 4242 4242 4242/);
+ assert.match(tester.body,/href="\/api\/logout"/);
+ assert.doesNotMatch(tester.body,/href="\/api\/auth\/logout"/);
+ const authSource=readFileSync(new URL("../server/auth.ts",import.meta.url),"utf8");
+ assert.match(authSource,/app\.get\("\/api\/logout", handleLogout\)/);
  assert.match(tester.body,/acknowledgeNewPayment:true/);
  assert.match(tester.body,/acknowledgeMonthlyRenewal:recurring/);
  assert.match(tester.body,/\/api\/member-stripe-test\/order\//);
