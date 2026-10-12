@@ -148,7 +148,8 @@ export function decideVerifiedTestMembershipEvent(
           obj.lines?.has_more === true ||
           (typeof obj.lines?.total_count === "number" && obj.lines.total_count !== 1) ||
           invoicePriceId(items[0]) !== pending.priceId ||
-          items[0]?.parent?.invoice_item_details?.proration === true) {
+          (items[0]?.parent?.invoice_item_details?.proration === true ||
+           items[0]?.parent?.subscription_item_details?.proration === true)) {
         return review("Expected one complete matching membership price; prorations require review");
       }
       const start = items[0]?.period?.start;
