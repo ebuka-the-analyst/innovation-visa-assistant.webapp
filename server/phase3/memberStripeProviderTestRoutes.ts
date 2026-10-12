@@ -21,6 +21,7 @@ import {
 } from "./memberStripeAcceptance";
 import { applyVerifiedTestMembershipEntitlement } from "./memberEntitlementFulfilmentQa";
 import { reserveTestCheckout, recordCreatedTestCheckout, TestCheckoutConflict } from "./memberStripeCheckoutReservationQa";
+import {chargeIdForSignedEvent,reconcileSignedChargeToProvider,ProviderChargeMismatch} from "./stripeChargeReconciliationQa";
 
 type Config = {
   stripe: Stripe;
@@ -176,6 +177,7 @@ export function registerMemberStripeTestRoutes(
     const obj=event.data.object as any;
     let orderId:string|null=null;
     try{
+      let verifiedChargeCustomer:string|null=null;
       let rows:{id:string;user_id:string;stripe_customer_id:string;stripe_subscription_id:string|null;stripe_checkout_session_id:string;stripe_price_id:string;sku:CandidateSku;}[]=[];
       if(event.type==="checkout.session.completed" || event.type==="checkout.session.async_payment_succeeded"){
         const r=await pool.query(`
@@ -214,14 +216,22 @@ export function registerMemberStripeTestRoutes(
           }
         }
       }else if(event.type==="charge.refunded"||event.type==="charge.dispute.created"){
+        // Stripe dispute objects do not necessarily include customer. A
+        // signed dispute is matched using a freshly fetched TEST Charge,
+        // never email, browser metadata or a guessed account ID.
+        const chargeId=chargeIdForSignedEvent(event.type,obj);
+        const providerCharge=await cfg.stripe.charges.retrieve(chargeId);
+        const confirmed=reconcileSignedChargeToProvider(event.type,obj,providerCharge);
+        verifiedChargeCustomer=confirmed.customerId;
         const r=await pool.query(`
           SELECT id,user_id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,stripe_price_id,sku
-          FROM member_stripe_test_orders WHERE stripe_payment_intent_id=$1`,[obj.payment_intent]);
+          FROM member_stripe_test_orders WHERE stripe_payment_intent_id=$1`,
+          [confirmed.paymentIntentId]);
         rows=r.rows;
       }else{return res.json({received:true,ignored:true});}
       if(rows.length!==1) return res.status(503).send("Trusted QA order not yet reconciled; retry");
       const order=rows[0];orderId=order.id;
-      if(asId(obj.customer)!==order.stripe_customer_id)
+      if((verifiedChargeCustomer ?? asId(obj.customer))!==order.stripe_customer_id)
         return res.status(409).send("Stripe customer mismatch");
       if(event.type==="checkout.session.completed" ||
           event.type==="checkout.session.async_payment_succeeded"){
@@ -268,6 +278,8 @@ export function registerMemberStripeTestRoutes(
         manualReviewRequired:decision.action==="review",sandboxOnly:true,
       });
     }catch(e){
+      if (e instanceof ProviderChargeMismatch)
+        return res.status(409).send("Provider charge requires reconciliation");
       console.error("[Membership QA] webhook failed",orderId||"unknown",
         e instanceof Error?e.message:"unknown");
       return res.status(503).send("Transient QA reconciliation failure");
