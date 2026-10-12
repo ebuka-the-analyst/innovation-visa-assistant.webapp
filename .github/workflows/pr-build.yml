@@ -186,6 +186,8 @@ jobs:
 
       - name: Confirm real Stripe provider QA gateway cannot run on production
         run: node --import tsx --test tests/phase3-provider-test-gateway.test.ts
+      - name: Check new membership purchase and renewal consent safety
+        run: node --import tsx --test tests/phase3-new-purchase-consent.test.ts
       - name: Verify Stripe chargeback provider correlation and refund protections
         run: node --import tsx --test tests/phase3-charge-reconciliation.test.ts
       - name: Verify Stripe Basil invoice-to-payment intent settlement
