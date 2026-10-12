@@ -1867,6 +1867,9 @@ Respond ONLY with valid JSON in this exact format:
     "/api/payment/create-checkout",
     isAuthenticated,
     async (req, res) => {
+      if (process.env.IFVA_LEGACY_NEW_PURCHASES_DISABLED === "true") {
+        return res.status(410).json({error:"Previous one-time plans are no longer available for new purchases"});
+      }
       try {
         const {
           businessPlanId,
@@ -2196,6 +2199,9 @@ Respond ONLY with valid JSON in this exact format:
     "/api/payment/direct-subscribe",
     isAuthenticated,
     async (req, res) => {
+      if (process.env.IFVA_LEGACY_NEW_PURCHASES_DISABLED === "true") {
+        return res.status(410).json({error:"Previous one-time plans are no longer available for new purchases"});
+      }
       try {
         const { planId, tier: legacyTier, expectedRevision, promoCode } = req.body;
         const tier = planId || legacyTier;
