@@ -38,6 +38,13 @@ export function auditPremiumPlanEvidence(content: string): EditorialEvidenceAudi
       "Named academic or research references lack a URL/DOI in the source. Check exact authors, titles, dates and applicability independently.",
     );
   }
+  const mentionsUkRules = /\b(?:innovator founder|endorsing bod(?:y|ies)|endorsement criteria|immigration rules|UK GDPR|Data Protection Act|FCA authorisation)\b/i.test(researchText);
+  const officialUkSource = /https?:\/\/(?:www\.)?(?:gov\.uk|legislation\.gov\.uk)(?:\/|[\s"')]|$)/i.test(researchText);
+  if (mentionsUkRules && !officialUkSource) {
+    unverifiedSourceMentions.push(
+      "UK immigration, endorsement or regulatory rules are discussed without a linked official GOV.UK or legislation.gov.uk source. Verify relevant current guidance before submission.",
+    );
+  }
   if (/\b(?:according to (?:a |the )?(?:report|study|research)|industry reports show|studies show)\b/i.test(raw)) {
     unverifiedSourceMentions.push(
       "Reported research findings require an independently checked publication and precise supporting passage.",
