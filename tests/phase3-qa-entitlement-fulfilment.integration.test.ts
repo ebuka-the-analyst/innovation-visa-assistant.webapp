@@ -133,6 +133,102 @@ test("subscription Checkout alone grants nothing, but paid invoices set monthly 
     (TIME+30*DAY)*1000);
 });
 
+test("provider-confirmed invoice payments map every renewal to a distinct PaymentIntent in the same transaction",async()=>{
+  const o=await order("founder_pro");
+  const first=invoice(o);
+  const event1=sign("invoice.paid",first,TIME+1);
+  const p1={
+    invoiceId:first.id,invoicePaymentId:"inpay_"+randomUUID().replaceAll("-",""),
+    paymentIntentId:"pi_"+randomUUID().replaceAll("-",""),
+    amountPence:o.amount,currency:"gbp" as const,
+    periodStartEpoch:TIME,periodEndEpoch:TIME+30*DAY,
+  };
+  const result1=await processSignedTestStripeEvent(
+    pool,o.id,event1.payload,event1.signature,secret,
+    applyVerifiedTestMembershipEntitlement,p1);
+  assert.equal(result1.action,"activate");
+  const second=invoice(o,TIME+30*DAY);
+  const event2=sign("invoice.paid",second,TIME+30*DAY+1);
+  const p2={
+    ...p1,invoiceId:second.id,
+    invoicePaymentId:"inpay_"+randomUUID().replaceAll("-",""),
+    paymentIntentId:"pi_"+randomUUID().replaceAll("-",""),
+    periodStartEpoch:TIME+30*DAY,periodEndEpoch:TIME+60*DAY,
+  };
+  const result2=await processSignedTestStripeEvent(
+    pool,o.id,event2.payload,event2.signature,secret,
+    applyVerifiedTestMembershipEntitlement,p2);
+  assert.equal(result2.action,"activate");
+  const paid=await pool.query<{stripe_invoice_id:string;stripe_payment_intent_id:string}>(
+    `SELECT stripe_invoice_id,stripe_payment_intent_id
+       FROM member_stripe_test_invoice_payments WHERE order_id=$1
+       ORDER BY period_start ASC`,[o.id]);
+  assert.equal(paid.rows.length,2);
+  assert.deepEqual(paid.rows.map(x=>x.stripe_payment_intent_id),
+    [p1.paymentIntentId,p2.paymentIntentId]);
+  const exact=await pool.query(
+    `SELECT o.id FROM member_stripe_test_orders o
+       WHERE o.stripe_payment_intent_id=$1 OR
+         o.id IN (SELECT p.order_id FROM member_stripe_test_invoice_payments p
+                  WHERE p.stripe_payment_intent_id=$1)`,[p1.paymentIntentId]);
+  assert.equal(exact.rows[0].id,o.id);
+  assert.equal(exact.rowCount,1);
+  assert.equal((await state(o)).ent[0].ends_at.getTime(),(TIME+60*DAY)*1000);
+});
+
+test("duplicate renewal PaymentIntent cannot extend access or corrupt paid invoice map",async()=>{
+  const o=await order("founder");
+  const first=invoice(o);
+  const p1={
+    invoiceId:first.id,invoicePaymentId:"inpay_"+randomUUID().replaceAll("-",""),
+    paymentIntentId:"pi_"+randomUUID().replaceAll("-",""),
+    amountPence:o.amount,currency:"gbp" as const,
+    periodStartEpoch:TIME,periodEndEpoch:TIME+30*DAY,
+  };
+  const ev=sign("invoice.paid",first,TIME+1);
+  assert.equal((await processSignedTestStripeEvent(pool,o.id,ev.payload,ev.signature,secret,
+    applyVerifiedTestMembershipEntitlement,p1)).action,"activate");
+  const second=invoice(o,TIME+30*DAY);
+  const secondEv=sign("invoice.paid",second,TIME+30*DAY+1);
+  const duplicate={...p1,invoiceId:second.id,
+    invoicePaymentId:"inpay_"+randomUUID().replaceAll("-",""),
+    periodStartEpoch:TIME+30*DAY,periodEndEpoch:TIME+60*DAY};
+  const denied=await processSignedTestStripeEvent(
+    pool,o.id,secondEv.payload,secondEv.signature,secret,
+    applyVerifiedTestMembershipEntitlement,duplicate);
+  assert.equal(denied.action,"review");
+  assert.match(denied.reason,/already allocated/);
+  assert.equal((await state(o)).ent[0].ends_at.getTime(),(TIME+30*DAY)*1000);
+  const mappings=await pool.query(
+    "SELECT stripe_invoice_id FROM member_stripe_test_invoice_payments WHERE order_id=$1",[o.id]);
+  assert.equal(mappings.rows.length,1);
+  const reviews=await pool.query(
+    "SELECT id FROM member_stripe_test_orders WHERE id=$1 AND currently_active=TRUE",[o.id]);
+  assert.equal(reviews.rowCount,1,"Already-paid access is preserved, not extended");
+  const reviewQueue=await pool.query(
+    "SELECT status FROM member_stripe_test_reviews WHERE stripe_event_id=$1",[denied.eventId]);
+  assert.equal(reviewQueue.rows[0].status,"pending");
+});
+
+test("mismatching invoice amount or period does not write provider payment mapping",async()=>{
+  const o=await order("founder");
+  const data=invoice(o),evt=sign("invoice.paid",data,TIME+1);
+  const invalid={
+    invoiceId:data.id,invoicePaymentId:"inpay_"+randomUUID().replaceAll("-",""),
+    paymentIntentId:"pi_"+randomUUID().replaceAll("-",""),
+    amountPence:o.amount,currency:"gbp" as const,
+    periodStartEpoch:TIME,periodEndEpoch:TIME+31*DAY,
+  };
+  const result=await processSignedTestStripeEvent(
+    pool,o.id,evt.payload,evt.signature,secret,
+    applyVerifiedTestMembershipEntitlement,invalid);
+  assert.equal(result.action,"review");
+  assert.equal((await state(o)).ent.length,0);
+  const mappings=await pool.query(
+    "SELECT stripe_invoice_id FROM member_stripe_test_invoice_payments WHERE order_id=$1",[o.id]);
+  assert.equal(mappings.rowCount,0);
+});
+
 test("failed renewal respects already-paid period, then atomically suspends access on expiration",async()=>{
   const o=await order("founder");
   await send(o,"invoice.paid",invoice(o),TIME+1);
