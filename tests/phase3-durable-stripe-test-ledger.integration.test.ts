@@ -67,8 +67,13 @@ test("real PostgreSQL transaction makes simultaneous retries grant exactly once"
   const results=await Promise.all(Array.from({length:6},()=>send(o,"checkout.session.completed",paidPass(o),id)));
   assert.equal(results.filter(r=>r.action==="activate").length,1);
   assert.equal(results.filter(r=>r.duplicate).length,5);
+  const another=await send(o,"checkout.session.async_payment_succeeded",
+    paidPass(o),"evt_"+randomUUID(),TIME+600);
+  assert.equal(another.action,"ignore","Second success event must not restart 90-day pass");
   const count=await pool.query("SELECT COUNT(*)::int AS n FROM member_stripe_test_events WHERE order_id=$1",[o.id]);
-  assert.equal(count.rows[0].n,1);
+  assert.equal(count.rows[0].n,2);
+  const window=await pool.query("SELECT EXTRACT(EPOCH FROM paid_through)::bigint AS expiry FROM member_stripe_test_orders WHERE id=$1",[o.id]);
+  assert.equal(Number(window.rows[0].expiry),TIME+90*86400,"Expiry cannot shift from a follow-on event");
   assert.equal((await getEffectiveTestPaidState(pool,o.id,new Date((TIME+10)*1000))).active,true);
   assert.equal((await getEffectiveTestPaidState(pool,o.id,new Date((TIME+90*86400)*1000))).active,false);
 });
