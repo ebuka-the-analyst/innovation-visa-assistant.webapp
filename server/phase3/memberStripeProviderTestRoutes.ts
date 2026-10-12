@@ -23,6 +23,7 @@ import { applyVerifiedTestMembershipEntitlement } from "./memberEntitlementFulfi
 import { reserveTestCheckout, recordCreatedTestCheckout, TestCheckoutConflict } from "./memberStripeCheckoutReservationQa";
 import {chargeIdForSignedEvent,reconcileSignedChargeToProvider,ProviderChargeMismatch} from "./stripeChargeReconciliationQa";
 import {recordUnmatchedSignedTestEvent} from "./memberStripeUnmatchedQa";
+import {validatePaidInvoicePayment,PaidInvoiceMismatch,type VerifiedPaidInvoicePayment} from "./stripePaidInvoiceMappingQa";
 
 type Config = {
   stripe: Stripe;
@@ -186,10 +187,11 @@ export function registerMemberStripeTestRoutes(
     let orderId:string|null=null;
     try{
       let verifiedChargeCustomer:string|null=null;
-      let rows:{id:string;user_id:string;stripe_customer_id:string;stripe_subscription_id:string|null;stripe_checkout_session_id:string;stripe_price_id:string;sku:CandidateSku;}[]=[];
+      let verifiedInvoicePayment:VerifiedPaidInvoicePayment|undefined;
+      let rows:{id:string;user_id:string;stripe_customer_id:string;stripe_subscription_id:string|null;stripe_checkout_session_id:string;stripe_price_id:string;expected_pence:number;sku:CandidateSku;}[]=[];
       if(event.type==="checkout.session.completed" || event.type==="checkout.session.async_payment_succeeded"){
         const r=await pool.query(`
-          SELECT id,user_id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,stripe_price_id,sku
+          SELECT id,user_id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,stripe_price_id,expected_pence,sku
           FROM member_stripe_test_orders WHERE stripe_checkout_session_id=$1`,[obj.id]);
         rows=r.rows;
       }else if(event.type==="invoice.paid"||event.type==="invoice.payment_failed"||
@@ -197,7 +199,7 @@ export function registerMemberStripeTestRoutes(
         const sub=event.type==="customer.subscription.deleted"?obj.id:invoiceSub(obj);
         if(sub){
           const r=await pool.query(`
-            SELECT id,user_id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,stripe_price_id,sku
+            SELECT id,user_id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,stripe_price_id,expected_pence,sku
             FROM member_stripe_test_orders WHERE stripe_subscription_id=$1`,[sub]);
           rows=r.rows;
           if(rows.length===0){
@@ -207,7 +209,7 @@ export function registerMemberStripeTestRoutes(
             const subscription=await cfg.stripe.subscriptions.retrieve(sub);
             const id=subscription.metadata?.ifvaTestOrderId;
             const r2=orderIdPattern.test(id||"") ? await pool.query(`
-              SELECT id,user_id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,stripe_price_id,sku
+              SELECT id,user_id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,stripe_price_id,expected_pence,sku
               FROM member_stripe_test_orders WHERE id=$1`,[id]) : {rows:[]};
             if(r2.rows.length===1){
               const candidate=r2.rows[0];
@@ -232,8 +234,10 @@ export function registerMemberStripeTestRoutes(
         const confirmed=reconcileSignedChargeToProvider(event.type,obj,providerCharge);
         verifiedChargeCustomer=confirmed.customerId;
         const r=await pool.query(`
-          SELECT id,user_id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,stripe_price_id,sku
-          FROM member_stripe_test_orders WHERE stripe_payment_intent_id=$1`,
+          SELECT id,user_id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,stripe_price_id,expected_pence,sku
+          FROM member_stripe_test_orders WHERE stripe_payment_intent_id=$1
+          OR id IN (SELECT order_id FROM member_stripe_test_invoice_payments
+                    WHERE stripe_payment_intent_id=$1)`,
           [confirmed.paymentIntentId]);
         rows=r.rows;
       }else{return res.json({received:true,ignored:true});}
@@ -270,17 +274,31 @@ export function registerMemberStripeTestRoutes(
         // Only accept an invoice re-fetched directly from Stripe, not solely
         // the event envelope. A paid QA entitlement still requires the
         // separate signed-event decision and transactional membership writer.
-        const fresh=await cfg.stripe.invoices.retrieve(obj.id);
+        const fresh=await cfg.stripe.invoices.retrieve(obj.id,{expand:["payments"]});
         if(invoiceSub(fresh)!==order.stripe_subscription_id ||
             asId(fresh.customer)!==order.stripe_customer_id)
           return res.status(409).send("Provider invoice mismatch");
         // If provider API invoice changed since the event, refuse to confirm.
         const isPaid=fresh.status==="paid" && fresh.amount_remaining===0;
         if(!isPaid)return res.status(409).send("Provider invoice not settled");
+        const p=(fresh as any).payments;
+        // The 2025 Basil API associates invoices and PaymentIntents through
+        // the expanded invoice.payments InvoicePayment objects.
+        const paymentId=asId(p?.data?.[0]?.payment?.payment_intent);
+        if(!paymentId)return res.status(409).send("Invoice PaymentIntent not verifiable");
+        const intent=await cfg.stripe.paymentIntents.retrieve(paymentId);
+        verifiedInvoicePayment=validatePaidInvoicePayment(fresh,intent,{
+          userId:order.user_id,sku:order.sku,
+          customerId:order.stripe_customer_id,
+          checkoutSessionId:order.stripe_checkout_session_id,
+          subscriptionId:order.stripe_subscription_id||undefined,
+          priceId:order.stripe_price_id,expectedPence:order.expected_pence,
+          currency:"gbp",
+        });
       }
       const decision=await processSignedTestStripeEvent(
         pool,order.id,rawBody,signature,cfg.secret,
-        applyVerifiedTestMembershipEntitlement,
+        applyVerifiedTestMembershipEntitlement,verifiedInvoicePayment,
       );
       // Reviewed decisions are transactionally audited and visible to the
       // authenticated QA admin inbox. Acknowledge to avoid endless retries
@@ -290,8 +308,8 @@ export function registerMemberStripeTestRoutes(
         manualReviewRequired:decision.action==="review",sandboxOnly:true,
       });
     }catch(e){
-      if (e instanceof ProviderChargeMismatch)
-        return res.status(409).send("Provider charge requires reconciliation");
+      if (e instanceof ProviderChargeMismatch || e instanceof PaidInvoiceMismatch)
+        return res.status(409).send("Provider payment requires manual reconciliation");
       console.error("[Membership QA] webhook failed",orderId||"unknown",
         e instanceof Error?e.message:"unknown");
       return res.status(503).send("Transient QA reconciliation failure");
