@@ -36,6 +36,11 @@ test("full refund requires provider-confirmed charged identity and state",()=>{
   assert.throws(()=>reconcileSignedChargeToProvider("charge.refunded",
     {...signed,amount_refunded:15900},{...fresh,amount_refunded:100,refunded:false}),
     ProviderChargeMismatch);
+  const partialSigned={...signed,amount_refunded:100};
+  const partialFresh={...fresh,amount_refunded:100,refunded:false};
+  assert.equal(reconcileSignedChargeToProvider("charge.refunded",
+    partialSigned,partialFresh).paymentIntentId,fresh.payment_intent,
+    "Real partial refunds are reconciled and forwarded for manual review");
 });
 test("missing charge and provider payment references fail shut",()=>{
   assert.throws(()=>chargeIdForSignedEvent("charge.dispute.created",{id:"du_1"}),
