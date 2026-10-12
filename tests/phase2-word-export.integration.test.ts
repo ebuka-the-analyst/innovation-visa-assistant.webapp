@@ -57,3 +57,33 @@ test("production Word financial table builder emits correct real DOCX XML", asyn
     await rm(dir,{recursive:true,force:true});
   }
 });
+
+
+test("six-column financial benchmark survives production DOCX table builder", async () => {
+  const six = [
+    ["Year","Units","Revenue","Variable costs","Fixed costs","Operating loss"],
+    ["1","450","5400","1350","36000","-31950"],
+    ["2","2900","34800","8700","61000","-34900"],
+    ["3","7700","92400","23100","105000","-35700"],
+  ];
+  const word = new Document({sections:[{children:[
+    new Paragraph({text:"All six columns must be present"}),
+    buildBusinessPlanWordTable(six),
+  ]}]});
+  const buffer = await Packer.toBuffer(word);
+  const dir = await mkdtemp(join(tmpdir(),"ifva-six-col-docx-"));
+  try {
+    const file = join(dir,"six.docx");
+    await writeFile(file,buffer);
+    const xml = execFileSync("unzip",["-p",file,"word/document.xml"],{encoding:"utf8"});
+    const tableRows = [...xml.matchAll(/<w:tr(?:\s[^>]*)?>([\s\S]*?)<\/w:tr>/g)];
+    assert.equal(tableRows.length,4);
+    for(const row of tableRows){
+      assert.equal((row[1].match(/<w:tc>/g)||[]).length,6);
+    }
+    assert.match(xml, /Operating loss/);
+    assert.match(xml, /-35700/);
+  } finally {
+    await rm(dir,{recursive:true,force:true});
+  }
+});
