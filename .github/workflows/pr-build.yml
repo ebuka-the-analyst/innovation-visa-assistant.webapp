@@ -163,5 +163,43 @@ jobs:
       - name: Test executable probe guard
         run: node --import tsx --test tests/executable-probe-guard.test.ts
 
+      - name: Validate Phase 2 premium AI and entitlement protections
+        run: node --import tsx --test tests/phase2-premium-ai-entitlements.test.ts
+      - name: Validate measurable PDF page counts and financial table rendering
+        run: node --import tsx --test tests/business-plan-pdf-render.integration.test.ts
+      - name: Verify full-plan benchmark financial arithmetic and no-spend controls
+        run: node --import tsx --test tests/phase2-full-plan-benchmark.test.ts
+
+      - name: Verify previous-versus-current full-plan comparison without API calls
+        run: node --import tsx --test tests/phase2-compare-benchmarks.test.ts
+      - name: Validate premium evidence-first prompts and content QA
+        run: node --import tsx --test tests/phase2-premium-content-quality.test.ts
+
+      - name: Validate actual Word financial tables in DOCX output
+        run: node --import tsx --test tests/phase2-word-export.integration.test.ts
+
+      - name: Verify isolated authenticated download paths and actual PDF/Word bytes
+        run: node --import tsx --test tests/phase2-business-plan-download.integration.test.ts
+
+      - name: Dry-run signed Stripe membership events without a Stripe API key
+        run: node --import tsx --test tests/phase3-member-stripe-acceptance.test.ts
+
+      - name: Confirm real Stripe provider QA gateway cannot run on production
+        run: node --import tsx --test tests/phase3-provider-test-gateway.test.ts
+      - name: Check new membership purchase and renewal consent safety
+        run: node --import tsx --test tests/phase3-new-purchase-consent.test.ts
+      - name: Check grandfathered purchase conversion cannot create subscriptions or reset credits
+        run: node --import tsx --test tests/legacy-purchase-carryover.test.ts
+      - name: Verify Stripe chargeback provider correlation and refund protections
+        run: node --import tsx --test tests/phase3-charge-reconciliation.test.ts
+      - name: Verify Stripe Basil invoice-to-payment intent settlement
+        run: node --import tsx --test tests/phase3-stripe-paid-invoice-mapping.test.ts
+      - name: Restrict fresh schema bootstrap to isolated Railway QA
+        run: node --test tests/phase3-qa-schema-bootstrap.test.cjs
+
+      - name: Dry-run full-plan flagship benchmark without an API key
+        run: node --import tsx scripts/phase2-full-plan-benchmark.ts --case marketplace --tier founder_pro --max-usd 30
+
+
       - name: Production build
         run: npm run build

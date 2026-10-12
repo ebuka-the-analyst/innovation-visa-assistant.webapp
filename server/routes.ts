@@ -2,7 +2,9 @@ import type { Express, Request, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import type { ChartDataPayload, ChartType } from "./chartGenerator";
 import { storage } from "./storage";
-import { db } from "./db";
+import { db, dbPool } from "./db";
+import { registerMemberStripeTestRoutes } from "./phase3/memberStripeProviderTestRoutes";
+import type { Pool as PgPool } from "pg";
 import {
   questionnaireSchema,
   successStories,
@@ -47,6 +49,10 @@ import {
 } from "./blogGenerator";
 import { eq, and, sql, desc, inArray } from "drizzle-orm";
 import { generatePDFContent, generatePDFUrl, sanitizeBusinessPlanOutputText } from "./pdf";
+import { generatePDFWithPDFKit } from "./businessPlanPdf";
+import { htmlFinancialTablesToMarkdown } from "./businessPlanTables";
+import { buildBusinessPlanWordTable } from "./businessPlanWordTableExporter";
+import { guardedBusinessPlanDownload } from "./businessPlanDownloadGuard";
 import { z } from "zod";
 import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
@@ -322,6 +328,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google OAuth authentication (must be before routes)
   await setupAuth(app);
   registerLoginSecurityAuditRoutes(app);
+  // Isolated QA only: protected by Railway project/environment + TEST keys.
+  // No live entitlement or legacy checkout code is modified by this route.
+  registerMemberStripeTestRoutes(app, isAuthenticated, dbPool as PgPool, requireAdmin);
 
   app.post("/api/translate", async (req, res) => {
     try {
@@ -3372,35 +3381,13 @@ Respond ONLY with valid JSON in this exact format:
     }
   });
 
-  app.post("/api/credits/award-referral", isAuthenticated, async (req, res) => {
-    try {
-      const { referredUserId } = req.body;
-      const user = req.user as any;
-
-      // Award 1 bonus credit for successful referral
-      await db
-        .update(users)
-        .set({
-          bonusCredits: sql`${users.bonusCredits} + 1`,
-        })
-        .where(eq(users.id, user.id));
-
-      // Log the transaction
-      const newBalance = (user.planCredits || 0) + (user.bonusCredits || 0) + 1;
-      await db.execute(sql`
-        INSERT INTO credit_transactions (id, user_id, type, credits_change, credits_type, balance_after, reference_id, reference_type, description)
-        VALUES (gen_random_uuid(), ${user.id}, 'referral_reward', 1, 'bonus', ${newBalance}, ${referredUserId}, 'referral', 'Referral reward: +1 credit')
-      `);
-
-      res.json({
-        success: true,
-        creditsAwarded: 1,
-        newBalance,
-      });
-    } catch (error) {
-      console.error("Award referral credit error:", error);
-      res.status(500).json({ error: "Failed to award referral credit" });
-    }
+  // Retired: client-supplied referredUserId cannot prove a qualifying referral.
+  // Real referral rewards are issued by the verified purchase/referral workflow.
+  app.post("/api/credits/award-referral", isAuthenticated, (_req, res) => {
+    res.status(410).json({
+      error: "Endpoint retired",
+      message: "Referral rewards are issued only after a verified qualifying event.",
+    });
   });
 
   // Grant initial plan credits when user subscribes to a tier - PhD-Level: ALL FINITE
@@ -3481,214 +3468,25 @@ Respond ONLY with valid JSON in this exact format:
     }
   });
 
-  // Helper function to generate PDF using PDFKit (lightweight, no Chromium)
-  async function generatePDFWithPDFKit(
-    businessPlan: any,
-    disposition: "attachment" | "inline",
-    res: any,
-  ) {
-    const PDFDocument = (await import("pdfkit")).default;
-
-    const doc = new PDFDocument({
-      size: "A4",
-      margins: { top: 60, bottom: 60, left: 50, right: 50 },
-      info: {
-        Title: `${businessPlan.businessName} - Business Plan`,
-        Author: "UK Innovator Founder Visa Assistant",
-        Subject: "Business Plan for UK Innovator Founder Visa",
-      },
-    });
-
-    const chunks: Buffer[] = [];
-    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
-    doc.on("end", () => {
-      const pdfBuffer = Buffer.concat(chunks);
-      const sanitizedName = businessPlan.businessName
-        .replace(/[^a-zA-Z0-9\s-]/g, "")
-        .replace(/\s+/g, "_");
-      const filename = `${sanitizedName}-business-plan.pdf`;
-
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader(
-        "Content-Disposition",
-        `${disposition}; filename="${filename}"`,
-      );
-      res.send(pdfBuffer);
-    });
-
-    const content = sanitizeBusinessPlanOutputText(businessPlan.generatedContent || "");
-    const tierName =
-      (businessPlan.tier || "free").charAt(0).toUpperCase() +
-      (businessPlan.tier || "free").slice(1);
-
-    // Cover page
-    doc.rect(0, 0, doc.page.width, 200).fill("#005EB8");
-    doc
-      .fontSize(28)
-      .fillColor("#FFFFFF")
-      .text(businessPlan.businessName, 50, 80, { align: "center" });
-    doc.fontSize(14).text("UK Innovator Founder Visa Business Plan", 50, 120, {
-      align: "center",
-    });
-    doc
-      .fontSize(12)
-      .text(
-        `${tierName} Plan | Generated ${new Date().toLocaleDateString("en-GB")}`,
-        50,
-        145,
-        { align: "center" },
-      );
-
-    doc.moveDown(8);
-    doc.fillColor("#000000");
-
-    // Parse and render content - skip duplicate titles
-    const lines = content.split("\n");
-    let currentY = 220;
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (shouldSkipPlanArtifactLine(trimmed)) continue;
-      if (!trimmed) {
-        currentY += 10;
-        continue;
-      }
-
-      // Skip duplicate numbered section headers and separators
-      // Match patterns like "1. EXECUTIVE SUMMARY", "2. FOUNDER CREDENTIALS & VALIDATION"
-      if (/^\d+\.\s+[A-Z][A-Z\s&]+$/.test(trimmed)) continue;
-      if (
-        /^\d+\.\s+[A-Z]{2,}/.test(trimmed) &&
-        !trimmed.includes("(") &&
-        trimmed.length < 60
-      )
-        continue;
-      if (trimmed === "---") continue;
-
-      // Skip main title (# ) as it's already on cover page
-      if (trimmed.startsWith("# ")) {
-        continue;
-      }
-
-      // Check if we need a new page
-      if (currentY > doc.page.height - 80) {
-        doc.addPage();
-        currentY = 60;
-      }
-
-      if (trimmed.startsWith("## ")) {
-        // Section heading - blue with underline
-        currentY += 15;
-        doc.fontSize(16).fillColor("#005EB8").font("Helvetica-Bold");
-        doc.text(trimmed.slice(3), 50, currentY);
-        currentY += 28;
-        // Add underline
-        doc
-          .moveTo(50, currentY - 8)
-          .lineTo(545, currentY - 8)
-          .strokeColor("#005EB8")
-          .lineWidth(1)
-          .stroke();
-        currentY += 5;
-      } else if (trimmed.startsWith("### ")) {
-        // Subsection heading - blue
-        currentY += 8;
-        doc.fontSize(13).fillColor("#005EB8").font("Helvetica-Bold");
-        doc.text(trimmed.slice(4), 50, currentY);
-        currentY += 22;
-      } else if (trimmed.startsWith("#### ")) {
-        // Sub-subsection heading
-        doc.fontSize(12).fillColor("#333333").font("Helvetica-Bold");
-        doc.text(trimmed.slice(5), 50, currentY);
-        currentY += 20;
-      } else if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
-        // Bullet point
-        doc.fontSize(11).fillColor("#444444").font("Helvetica");
-        const bulletText = trimmed.slice(2).replace(/\*\*([^*]+)\*\*/g, "$1");
-        doc.text("•  " + bulletText, 60, currentY, { width: 480 });
-        currentY += doc.heightOfString("•  " + bulletText, { width: 480 }) + 6;
-      } else if (
-        /^\d+\.\s/.test(trimmed) &&
-        !/^\d+\.\s+[A-Z]{2,}/.test(trimmed)
-      ) {
-        // Numbered list item (but not section headers)
-        doc.fontSize(11).fillColor("#444444").font("Helvetica");
-        const listText = trimmed.replace(/\*\*([^*]+)\*\*/g, "$1");
-        doc.text(listText, 60, currentY, { width: 480 });
-        currentY += doc.heightOfString(listText, { width: 480 }) + 6;
-      } else {
-        // Regular paragraph
-        doc.fontSize(11).fillColor("#444444").font("Helvetica");
-        const cleanText = trimmed.replace(/\*\*([^*]+)\*\*/g, "$1");
-        doc.text(cleanText, 50, currentY, { width: 495, align: "justify" });
-        currentY += doc.heightOfString(cleanText, { width: 495 }) + 8;
-      }
-    }
-
-    // Finalize the PDF (footer not supported without buffering all pages)
-    doc.end();
-  }
-
-  app.get("/api/download/pdf/:planId", isAuthenticated, async (req, res) => {
-    try {
-      const { planId } = req.params;
-      const user = req.user as any;
-
-      const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan || businessPlan.userId !== user.id) {
-        return res.status(404).json({ error: "Business plan not found" });
-      }
-
-      if (businessPlan.status !== "completed") {
-        return res.status(400).json({
-          error: "Business plan not ready yet",
-          status: businessPlan.status,
-        });
-      }
-
-      if (!businessPlan.generatedContent) {
-        return res
-          .status(500)
-          .json({ error: "Business plan content is missing" });
-      }
-
+  app.get("/api/download/pdf/:planId", isAuthenticated, guardedBusinessPlanDownload({
+    lookup: (planId) => storage.getBusinessPlan(planId),
+    includeStatusOnNotReady: true,
+    logLabel: "PDF download",
+    failureMessage: "Failed to generate PDF",
+    render: async (businessPlan, _req, res) => {
       await generatePDFWithPDFKit(businessPlan, "attachment", res);
-    } catch (error) {
-      console.error("PDF download error:", error);
-      res.status(500).json({ error: "Failed to generate PDF" });
-    }
-  });
+    },
+  }));
 
-  // PDF view endpoint (opens in browser)
-  app.get("/api/view/pdf/:planId", isAuthenticated, async (req, res) => {
-    try {
-      const { planId } = req.params;
-      const user = req.user as any;
-
-      const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan || businessPlan.userId !== user.id) {
-        return res.status(404).json({ error: "Business plan not found" });
-      }
-
-      if (businessPlan.status !== "completed") {
-        return res.status(400).json({
-          error: "Business plan not ready yet",
-          status: businessPlan.status,
-        });
-      }
-
-      if (!businessPlan.generatedContent) {
-        return res
-          .status(500)
-          .json({ error: "Business plan content is missing" });
-      }
-
+  app.get("/api/view/pdf/:planId", isAuthenticated, guardedBusinessPlanDownload({
+    lookup: (planId) => storage.getBusinessPlan(planId),
+    includeStatusOnNotReady: true,
+    logLabel: "PDF view",
+    failureMessage: "Failed to generate PDF",
+    render: async (businessPlan, _req, res) => {
       await generatePDFWithPDFKit(businessPlan, "inline", res);
-    } catch (error) {
-      console.error("PDF view error:", error);
-      res.status(500).json({ error: "Failed to generate PDF" });
-    }
-  });
+    },
+  }));
 
   // HTML view endpoint - serves rich HTML with SVG charts for browser viewing/printing
   app.get("/api/view/html/:planId", isAuthenticated, async (req, res) => {
@@ -4068,26 +3866,12 @@ Respond ONLY with valid JSON in this exact format:
   });
 
   // Word document download endpoint
-  app.get("/api/download/word/:planId", isAuthenticated, async (req, res) => {
-    try {
-      const { planId } = req.params;
-      const user = req.user as any;
-
-      const businessPlan = await storage.getBusinessPlan(planId);
-      if (!businessPlan || (businessPlan.userId !== user.id && !user.isAdmin)) {
-        return res.status(404).json({ error: "Business plan not found" });
-      }
-
-      if (businessPlan.status !== "completed") {
-        return res.status(400).json({ error: "Business plan not ready yet" });
-      }
-
-      if (!businessPlan.generatedContent) {
-        return res
-          .status(500)
-          .json({ error: "Business plan content is missing" });
-      }
-
+  app.get("/api/download/word/:planId", isAuthenticated, guardedBusinessPlanDownload({
+    lookup: (planId) => storage.getBusinessPlan(planId),
+    allowAdmin: true,
+    logLabel: "Word download",
+    failureMessage: "Failed to generate Word document",
+    render: async (businessPlan, req, res) => {
       const {
         Document,
         Packer,
@@ -4316,45 +4100,8 @@ Respond ONLY with valid JSON in this exact format:
       };
 
       const addMarkdownTableToDoc = (rows: string[][]) => {
-        const columnCount = Math.min(Math.max(...rows.map((row) => row.length)), 5);
-        const normalizedRows = rows.map((row) =>
-          Array.from({ length: columnCount }, (_, index) => row[index] || ""),
-        );
-        const columnWidth = Math.floor(9000 / columnCount);
-
         children.push(
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: normalizedRows.map(
-              (row, rowIndex) =>
-                new TableRow({
-                  tableHeader: rowIndex === 0,
-                  children: row.map(
-                    (cell) =>
-                      new TableCell({
-                        width: { size: columnWidth, type: WidthType.DXA },
-                        shading:
-                          rowIndex === 0
-                            ? { type: ShadingType.CLEAR, fill: "005EB8", color: "auto" }
-                            : undefined,
-                        children: [
-                          new Paragraph({
-                            children: [
-                              new TextRun({
-                                text: cleanWordText(cell),
-                                size: rowIndex === 0 ? 20 : 19,
-                                bold: rowIndex === 0,
-                                color: rowIndex === 0 ? "FFFFFF" : "111827",
-                              }),
-                            ],
-                            spacing: { before: 80, after: 80 },
-                          }),
-                        ],
-                      }),
-                  ),
-                }),
-            ),
-          }),
+          buildBusinessPlanWordTable(rows),
           new Paragraph({ text: "", spacing: { after: 160 } }),
         );
       };
@@ -4642,7 +4389,7 @@ Respond ONLY with valid JSON in this exact format:
 
       let lastH2Title = "";
       const seenMajorHeadings = new Set<string>();
-      const blocks = parseWordBlocks(content);
+      const blocks = parseWordBlocks(htmlFinancialTablesToMarkdown(content));
 
       for (const block of blocks) {
         if (block.kind === "heading") {
@@ -4752,11 +4499,8 @@ Respond ONLY with valid JSON in this exact format:
         `attachment; filename="${encodeURIComponent(businessPlan.businessName)}-business-plan.docx"`,
       );
       res.send(Buffer.from(buffer));
-    } catch (error) {
-      console.error("Word download error:", error);
-      res.status(500).json({ error: "Failed to generate Word document" });
-    }
-  });
+    },
+  }));
 
   // ============ ADVANCED FEATURES API ENDPOINTS ============
 

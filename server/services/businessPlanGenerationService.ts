@@ -5,6 +5,7 @@ import { sql } from "drizzle-orm";
 import { db } from "../db";
 import { storage } from "../storage";
 import { BUSINESS_PLAN_MODEL } from "../aiModelConfig";
+import { isMembershipSku, MembershipQuotaError, reserveMemberAiQuota, transitionMemberAiReservation } from "./memberAiQuota";
 import { getSectionsForTier, getSectionSystemPrompt } from "../aiPrompts";
 import { generatePDFUrl, sanitizeBusinessPlanOutputText } from "../pdf";
 import {
@@ -21,7 +22,13 @@ const HEARTBEAT_INTERVAL_MS = 20_000;
 const IDLE_POLL_MS = 2_000;
 const MAX_TRANSIENT_FAILURES = 5;
 
-const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
+const openaiClient = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || "",
+  defaultHeaders: {
+    "x-ai-quality-policy": "strict-primary",
+    "x-ai-workload": "business_plan_generation",
+  },
+});
 
 export class GenerationStartError extends Error {
   constructor(
@@ -99,17 +106,17 @@ function isPermanentProviderError(error: any): boolean {
   );
 }
 
-async function callBusinessPlanAI(prompt: string, maxTokens = 8000): Promise<string> {
-  const isLatestGptFamily = /^gpt-5/i.test(BUSINESS_PLAN_MODEL);
+async function callBusinessPlanAI(prompt: string, maxTokens = 8000, jobId?: string): Promise<string> {
+  const isLatestGptFamily = /^gpt-(?:5|6)/i.test(BUSINESS_PLAN_MODEL);
 
   if (isLatestGptFamily) {
     const response = await openaiClient.responses.create({
       model: BUSINESS_PLAN_MODEL as any,
       input: prompt,
       max_output_tokens: maxTokens,
-      reasoning: { effort: "medium" },
+      reasoning: { effort: "high" },
       text: { verbosity: "high" },
-    } as any);
+    } as any, { headers: jobId ? { "x-ai-job-id": jobId } : {} });
 
     const responseAny = response as any;
     const outputText = typeof responseAny.output_text === "string" ? responseAny.output_text : "";
@@ -134,7 +141,7 @@ async function callBusinessPlanAI(prompt: string, maxTokens = 8000): Promise<str
     messages: [{ role: "user", content: prompt }],
     max_tokens: maxTokens,
     temperature: 0.7,
-  } as any);
+  } as any, { headers: jobId ? { "x-ai-job-id": jobId } : {} });
   const content = response.choices[0]?.message?.content?.trim();
   if (!content) throw new Error("OpenAI returned empty response");
   return content;
@@ -332,9 +339,9 @@ export async function startBusinessPlanGenerationForUser(
     // A legacy process may have deducted a credit before dying. The durable start
     // path treats an existing per-plan generation transaction as proof that this
     // plan has already been charged and never deducts a second credit.
-    if (!isFreePlanGeneration && !hasExistingGenerationCharge) {
+    if (!isFreePlanGeneration) {
       const userResult = await tx.execute(sql`
-        SELECT id, plan_credits, bonus_credits
+        SELECT id, plan_credits, bonus_credits, subscription_tier
         FROM users
         WHERE id = ${userId}
         FOR UPDATE
@@ -342,6 +349,16 @@ export async function startBusinessPlanGenerationForUser(
       const user = firstRow<any>(userResult);
       if (!user) throw new GenerationStartError(404, { error: "User not found" });
 
+      if (isMembershipSku(user.subscription_tier)) {
+        try {
+          await reserveMemberAiQuota(tx, userId, user.subscription_tier, "generation", planId);
+        } catch (error) {
+          if (error instanceof MembershipQuotaError) {
+            throw new GenerationStartError(403, { code: error.code, error: error.message });
+          }
+          throw error;
+        }
+      } else if (!hasExistingGenerationCharge) {
       const planCredits = Number(user.plan_credits || 0);
       const bonusCredits = Number(user.bonus_credits || 0);
       const totalCredits = planCredits + bonusCredits;
@@ -374,6 +391,7 @@ export async function startBusinessPlanGenerationForUser(
           'Business plan generation'
         )
       `);
+      }
     }
 
     await tx.execute(sql`
@@ -553,11 +571,17 @@ async function persistCheckpoint(
   });
 }
 
-async function generateSectionWithRetries(prompt: string, sectionLabel: string): Promise<string> {
+async function generateSectionWithRetries(prompt: string, sectionLabel: string, jobId: string, targetOutputTokens: number): Promise<string> {
   let lastError: any;
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const content = await callBusinessPlanAI(prompt, 8000);
+      // High reasoning consumes output tokens before visible prose appears.
+      // Give the flagship model sufficient room, increasing only on a retry.
+      const budget = Math.min(32_000, Math.max(
+        attempt === 1 ? 10_000 : 20_000,
+        targetOutputTokens * (attempt === 1 ? 3 : 6),
+      ));
+      const content = await callBusinessPlanAI(prompt, budget, jobId);
       if (!content.trim()) throw new Error("OpenAI returned empty section content");
       return content;
     } catch (error: any) {
@@ -607,6 +631,8 @@ async function markJobFailed(job: JobRow, error: any, permanent: boolean): Promi
         current_generation_stage = ${userFacingStage}
     WHERE id = ${job.plan_id}
   `);
+  // A permanently failed membership job must not consume the customer's quota.
+  await transitionMemberAiReservation(db as any, "generation", job.plan_id, "released");
 }
 
 async function requeueTransientFailure(job: JobRow, error: any): Promise<void> {
@@ -726,6 +752,7 @@ ${generatedSections.join("\n\n---\n\n")}`;
           updated_at = NOW()
       WHERE id = ${job.id} AND lease_token = ${job.lease_token}
     `);
+    await transitionMemberAiReservation(tx, "generation", job.plan_id, "committed");
   });
 
   try {
@@ -834,6 +861,8 @@ Remember: Write FULL prose content for this section. No outlines or placeholders
       const rawContent = await generateSectionWithRetries(
         `${sectionSystemPrompt}\n\n${sectionUserPrompt}`,
         `section ${sectionNumber}/${sections.length}`,
+        job.plan_id,
+        section.maxTokens,
       );
 
       const heartbeatOk = await heartbeatJob(job);

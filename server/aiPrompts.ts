@@ -2,6 +2,8 @@
 // Goal: endorser-ready, evidence-led plans that address major rejection triggers without guaranteeing outcomes
 
 // Section definitions for multi-pass generation
+import { getPremiumSectionEditorialGuidance } from "./premiumPlanEditorialPolicy";
+
 export interface Section {
   title: string;
   pageTarget: string;
@@ -10,6 +12,21 @@ export interface Section {
 }
 
 export const getSectionsForTier = (tier: string): Section[] => {
+  // Current paid membership products reuse the corresponding validated
+  // legacy content depth until benchmark-specific templates are approved.
+  if (tier === "founder") tier = "premium";
+  if (tier === "founder_pro" || tier === "founder_pass_90d") tier = "enterprise";
+  // Free previews are intentionally shorter. Never fall through to Enterprise.
+  if (tier === "free") {
+    return [
+      { title: "1. EXECUTIVE OVERVIEW", pageTarget: "2 pages", maxTokens: 1500, requirements: ["Business idea summary", "Founder objectives", "Clearly identify unverified assumptions"] },
+      { title: "2. INNOVATION AND DIFFERENTIATION", pageTarget: "2-3 pages", maxTokens: 1700, requirements: ["The problem being solved", "Potential innovation", "Key evidence gaps"] },
+      { title: "3. CUSTOMER AND MARKET OPPORTUNITY", pageTarget: "2-3 pages", maxTokens: 1700, requirements: ["Likely customers", "Competitor landscape from supplied data", "Research still needed"] },
+      { title: "4. INITIAL VIABILITY ASSESSMENT", pageTarget: "2-3 pages", maxTokens: 1700, requirements: ["Revenue assumptions", "Core costs", "Financial uncertainties", "Avoid invented figures"] },
+      { title: "5. SCALABILITY AND EXECUTION", pageTarget: "2-3 pages", maxTokens: 1700, requirements: ["First milestones", "Operational needs", "Hiring assumptions", "Scale risks"] },
+      { title: "6. READINESS CHECKLIST", pageTarget: "1-2 pages", maxTokens: 1100, requirements: ["Document gaps", "Evidence checklist", "Next steps", "Not an endorsement or visa decision"] },
+    ];
+  }
   if (tier === 'basic') {
     return [
       {
@@ -732,7 +749,15 @@ export const getSectionsForTier = (tier: string): Section[] => {
 
 // Generate system prompt for a specific section
 export const getSectionSystemPrompt = (tier: string, section: Section, sectionNumber: number, totalSections: number): string => {
-  const qualityLevel = tier === 'ultimate' ? 'ULTIMATE ENDORSER-READINESS REVIEW' :
+  const membershipTier = tier;
+  const newMembership = ["founder", "founder_pro", "founder_pass_90d"].includes(tier);
+  if (tier === "founder") tier = "premium";
+  if (tier === "founder_pro" || tier === "founder_pass_90d") tier = "enterprise";
+  const membershipSectionRequirements = newMembership
+    ? section.requirements.filter(req => !/\b(?:MAPE|RMSE|FinTech|forecasting\s+accuracy|2\.8M\s+transactions|£101K|3-5\s+academic\s+papers)\b/i.test(req))
+    : section.requirements;
+  const qualityLevel = newMembership ? 'EVIDENCE-LED PREMIUM DRAFT REQUIRING VERIFICATION' :
+                       tier === 'ultimate' ? 'ULTIMATE ENDORSER-READINESS REVIEW' :
                        tier === 'enterprise' ? 'EXPERT-LEVEL ENDORSER-READY' : 
                        tier === 'premium' ? 'ENHANCED PROFESSIONAL' : 'PROFESSIONAL';
   
@@ -741,14 +766,14 @@ export const getSectionSystemPrompt = (tier: string, section: Section, sectionNu
 TASK: Write section ${sectionNumber} of ${totalSections} for a ${qualityLevel} business plan.
 
 SECTION: ${section.title}
-TARGET LENGTH: ${section.pageTarget} (~${section.maxTokens * 0.4} words)
+${newMembership ? `DEPTH AIM: ${section.pageTarget} is aspirational and must be earned by evidence and useful analysis. Do not pad or invent results to fill pages.` : `TARGET LENGTH: ${section.pageTarget} (~${section.maxTokens * 0.4} words)`}
 
 CRITICAL INSTRUCTIONS:
 1. Write the COMPLETE NARRATIVE for this section - no outlines, no meta-commentary
 2. Use ALL relevant data provided - don't add fictional details
 3. Write in professional, persuasive prose suitable for endorsing body reviewers
 4. Include specific numbers, metrics, and evidence from the data
-5. Be thorough and detailed - fill the target page count
+5. ${newMembership ? "Use case-specific detail and show uncertainty, evidence methods and calculations. Never pad to a page count." : "Be thorough and detailed - fill the target page count"}
 6. If tier is premium/enterprise, address expert critique requirements listed below
 7. Never guarantee endorsement, visa approval, or a fixed approval probability
 8. Do not invent citations, patents, customer names, letters of intent, certifications, or research sources
@@ -761,14 +786,17 @@ FORMATTING REQUIREMENTS:
 - Do not use em dashes, en dashes, non-breaking hyphens, or other Unicode dash characters. Use a normal ASCII hyphen only when a dash is needed.
 - Do not create visual charts inside the prose. If exact source data exists, present it as a clear table; otherwise explain the evidence gap in prose.
 - When a section includes financial projections, market sizing, milestones, SWOT, or marketing-channel evidence, label the values clearly in text or tables so the renderer can create charts from those exact values only.
-- For ALL financial data (Year 1, Year 2, Year 3 projections, revenue, costs, team size, customer counts), use HTML tables with proper styling:
+${newMembership ? `- For supplied numeric multi-year or competitor comparisons, use simple, accessible Markdown tables with clearly labelled units and years. Do not output HTML or SVG markup.
+- Never include a numeric year/metric column that does not have actual supplied values; label assumptions rather than filling missing cells.
+- Avoid financial tables in unrelated sections unless they add distinct analysis or reconcile an existing baseline.
+- Do not mistake an illustrative sensitivity scenario for the founder's baseline financial projection.` : `- For ALL financial data (Year 1, Year 2, Year 3 projections, revenue, costs, team size, customer counts), use HTML tables with proper styling:
   <table class="financial-table" style="width:100%; border-collapse:collapse; margin:20px 0;">
     <thead><tr style="background:#005EB8; color:white;"><th style="padding:12px; border:1px solid #ddd;">Category</th><th style="padding:12px; border:1px solid #ddd;">Year 1</th><th style="padding:12px; border:1px solid #ddd;">Year 2</th><th style="padding:12px; border:1px solid #ddd;">Year 3</th></tr></thead>
     <tbody><tr><td style="padding:10px; border:1px solid #ddd;">Revenue</td><td style="padding:10px; border:1px solid #ddd;">£X</td><td style="padding:10px; border:1px solid #ddd;">£Y</td><td style="padding:10px; border:1px solid #ddd;">£Z</td></tr></tbody>
   </table>
 - Use tables for: financial projections, team hiring plans, competitor comparisons, milestone timelines, pricing tiers, and any multi-year data
 - Tables should have NHS Blue (#005EB8) header background with white text
-- Include proper borders and padding for readability
+- Include proper borders and padding for readability`}
 
 ${tier === 'basic' ? `
 BASIC TIER GUIDANCE:
@@ -777,7 +805,7 @@ BASIC TIER GUIDANCE:
 - Keep claims evidence-based
 ` : ''}
 
-${tier === 'premium' ? `
+${tier === 'premium' && !newMembership ? `
 PREMIUM TIER REQUIREMENTS:
 - State accuracy metrics with SPECIFIC types (MAPE, RMSE) and time horizons
 - Explain data provenance where applicable  
@@ -786,7 +814,7 @@ PREMIUM TIER REQUIREMENTS:
 - Show realistic financial projections that add up mathematically
 ` : ''}
 
-${tier === 'enterprise' ? `
+${tier === 'enterprise' && !newMembership ? `
 ENTERPRISE TIER - CRITICAL REQUIREMENTS:
 - MANDATORY accuracy metrics: Type (MAPE/RMSE), time horizon (30-day), validation method, test set size
 - MANDATORY data provenance: Explain exactly where data came from (licensed/partnered/public/synthetic)
@@ -813,13 +841,28 @@ ULTIMATE TIER - ENDORSER-READINESS FOCUS:
 ` : ''}
 
 REQUIREMENTS FOR THIS SECTION:
-${section.requirements.map((req, idx) => `${idx + 1}. ${req}`).join('\n')}
+${membershipSectionRequirements.map((req, idx) => `${idx + 1}. ${req}`).join('\n')}
+
+${newMembership ? getPremiumSectionEditorialGuidance(membershipTier, sectionNumber) : ""}
 
 Write the complete section now. Do not write "here's what should be included" or provide an outline. Write the actual business plan content.`;
 };
 
 export const getSystemPrompt = (tier: string): string => {
   const basePrompt = `You are an expert Innovation Visa consultant preparing evidence-led UK Innovator Founder business plans. Never guarantee endorsement or visa approval.`;
+  if (["founder", "founder_pro", "founder_pass_90d"].includes(tier)) {
+    const titles = getSectionsForTier(tier).map(section => section.title).join("\n");
+    return basePrompt + "\n\nNEW-PAID-MEMBERSHIP FULL-PLAN POLICY:\n" +
+      "Draft each section from provided founder inputs, separating verified claims, unverified assertions, assumptions and research still required. " +
+      "Respect innovation, viability and scalability without claiming visa or endorsement outcomes. " +
+      "Do not force FinTech benchmarks, MAPE/RMSE, sample accuracy rates, academic papers, patent status, regulatory spend or sales figures onto unrelated industries. " +
+      "No fake source URLs, partnerships, customer interviews or financial accounts. " +
+      "Show cash-flow inputs missing for a real runway calculation. " +
+      "Use accessible Markdown tables and label scenario sensitivity separately from baseline. " +
+      "Do not pad pages. Manual document and original-source verification is always required.\n\n" +
+      "REQUIRED SECTIONS:\n" + titles;
+  }
+
   
   if (tier === 'basic') {
     return `${basePrompt}
@@ -1258,6 +1301,18 @@ export const getUserPromptInstructions = (tier: string): string[] => {
     "Acknowledge regulatory costs realistically based on the stated budget",
     "Use the founder's actual credentials - education, projects, experience",
   ];
+
+  if (["founder", "founder_pro", "founder_pass_90d"].includes(tier)) {
+    return [
+      ...baseInstructions,
+      "Separate verified evidence from founder-reported inputs, assumptions and missing sources.",
+      "Only calculate financial metrics from supplied figures; do not invent business performance, research, compliance budgets or customer traction.",
+      "Use industry-appropriate validation measures and explain what remains unknown.",
+      "Report cash gaps, operational risks and evidence-collection decisions without padding pages.",
+      "Format comparative figures in simple Markdown tables and never produce SVG/HTML diagrams.",
+      "Never promise endorsement or visa approval.",
+    ];
+  }
 
   if (tier === 'basic') {
     return [
