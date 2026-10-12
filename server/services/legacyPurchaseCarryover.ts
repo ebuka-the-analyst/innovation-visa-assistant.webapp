@@ -55,6 +55,11 @@ export function assessLegacyPurchaseCarryover(
      return {action:"review",reason:"Recorded legacy expiry has passed"};
    paidThrough=end.toISOString();
  }
+ // A refund or refund adjustment for the same tier must be reconciled to
+ // the underlying charge before any automatic carry-forward.
+ if(proofs.some(p=>p.tier?.toLowerCase()===tier &&
+    (p.status==="refunded" || p.type==="refund")))
+   return {action:"review",reason:"Potential refunded legacy purchase requires reconciliation"};
  const settled=proofs.filter(p=>
    p.tier?.toLowerCase()===tier &&
    ["one_time","upgrade"].includes(p.type) &&
