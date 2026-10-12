@@ -45,13 +45,17 @@ export function reconcileSignedChargeToProvider(
     throw new ProviderChargeMismatch("Signed provider event and fetched charge disagree");
   }
   if(eventType==="charge.refunded" &&
-      (provider.refunded!==true ||
-       !Number.isSafeInteger(provider.amount_refunded) ||
-       provider.amount_refunded<0 ||
+      (!Number.isSafeInteger(provider.amount_refunded) ||
+       provider.amount_refunded<=0 ||
+       provider.amount_refunded>provider.amount ||
        (Number.isSafeInteger(signed?.amount_refunded) &&
-        provider.amount_refunded<signed.amount_refunded))) {
+        provider.amount_refunded<signed.amount_refunded) ||
+       (signed?.amount_refunded === signed?.amount && provider.refunded!==true))) {
     throw new ProviderChargeMismatch("Refund not confirmed by fresh test Charge");
   }
+  // A partially refunded Charge reports refunded=false. Allow the
+  // provider-verified event through so the signed-event policy can queue a
+  // manual review; NEVER mistake it for an entirely reversed purchase.
   // Never infer a subscription ID or customer membership from a dispute
   // event alone. The caller must locate ONE trusted Stripe test order.
   return {customerId,paymentIntentId,chargeId:expectedId};
