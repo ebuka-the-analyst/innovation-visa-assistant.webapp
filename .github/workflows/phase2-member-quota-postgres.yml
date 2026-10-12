@@ -39,3 +39,5 @@ jobs:
         run: node --import tsx --test tests/phase2-schema-rollback.integration.test.ts
       - name: Exercise test-only signed Stripe event ledger against PostgreSQL
         run: node --import tsx --test tests/phase3-durable-stripe-test-ledger.integration.test.ts
+      - name: Verify atomic Stripe event to real QA membership fulfilment
+        run: node --import tsx --test tests/phase3-qa-entitlement-fulfilment.integration.test.ts
