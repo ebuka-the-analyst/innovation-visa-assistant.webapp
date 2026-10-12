@@ -119,6 +119,10 @@ test("modern Stripe invoice schema works while conflicts, manual or incomplete p
     ...modern.lines.data[0],
     parent:{invoice_item_details:{proration:true}},
   }]}},"evt_proration_details");
+  fail({...modern,lines:{data:[{
+    ...modern.lines.data[0],
+    parent:{type:"subscription_item_details",subscription_item_details:{proration:true}},
+  }]}},"evt_subscription_proration_details");
   const failed={customer:o.customerId,
     parent:{type:"subscription_details",subscription_details:{subscription:o.subscriptionId}}};
   assert.equal(decideVerifiedTestMembershipEvent(
