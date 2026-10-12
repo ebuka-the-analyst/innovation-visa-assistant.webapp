@@ -53,7 +53,7 @@ async function main(){
   try{
     const names=["users","sessions","member_ai_entitlements","member_stripe_test_orders",
       "member_stripe_test_events","member_stripe_test_invoice_payments"];
-    const results=await pool.query("SELECT unnest($1::text[]) as name,to_regclass('public.' || unnest($1::text[])) as relation",[names]);
+    const results=await pool.query("SELECT name,to_regclass('public.' || name) AS relation FROM unnest($1::text[]) AS t(name)",[names]);
     for(const row of results.rows)if(!row.relation)throw Error("Missing QA table: "+row.name);
     console.log("[QA STRIPE READINESS] Isolated payment and membership tables present");
   }finally{await pool.end();}
