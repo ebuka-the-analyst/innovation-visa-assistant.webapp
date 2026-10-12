@@ -49,6 +49,13 @@ jobs:
               assert '&lt;table' not in xml
               print('Verified full DOCX includes tables, 13 sections and baseline financial values.')
           PY
+      - name: Re-render the saved flagship PDF using corrected six-column tables
+        shell: bash
+        run: |
+          node --import tsx scripts/phase2-reflow-benchmark-two.ts \
+            "${{ runner.temp }}/existing-benchmark-two/marketplace-founder_pro.md" \
+            "${{ runner.temp }}/word-qa"
+
       - name: Archive offline fictional Word preview for visual inspection
         if: always()
         uses: actions/upload-artifact@v4
