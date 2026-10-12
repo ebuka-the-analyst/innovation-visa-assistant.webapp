@@ -37,6 +37,8 @@ test("missing live gateway cannot silently create Stripe checkout or revive old 
  assert.match(component,/disabled=\{!data\.purchasable\}/);
  assert.match(routes,/app\.get\("\/api\/member-offers"/);
  assert.match(routes,/app\.get\("\/api\/admin\/member-migration-audit"/);
+ assert.equal((routes.match(/app\.get\("\/api\/admin\/member-migration-audit"/g)||[]).length,1,"Duplicate legacy credit audit route");
+ assert.equal((routes.match(/app\.get\("\/api\/pricing"/g)||[]).length,1,"Duplicate original pricing API route");
  assert.match(routes,/IFVA_LEGACY_NEW_PURCHASES_DISABLED === "true"/);
  assert.doesNotMatch(component,/sk_live_|price_1UP/);
 });
