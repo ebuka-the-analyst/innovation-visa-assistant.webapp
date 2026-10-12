@@ -16,7 +16,7 @@ export async function recordUnmatchedSignedTestEvent(
   // reconstructed JSON object or metadata into an unmatched order queue.
   const event=offlineStripe.webhooks.constructEvent(raw,signature,testSecret);
   if(event.livemode!==false)throw Error("Production Stripe events forbidden in QA inbox");
-  if(!event.id || !/^evt_[a-zA-Z0-9_]+$/.test(event.id))
+  if(!event.id || !/^evt_[a-zA-Z0-9_-]+$/.test(event.id))
     throw Error("Invalid provider event ID");
   const safeReason=String(reason).slice(0,400);
   await pool.query(`
