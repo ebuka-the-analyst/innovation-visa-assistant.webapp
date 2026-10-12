@@ -24,6 +24,7 @@ import { reserveTestCheckout, recordCreatedTestCheckout, TestCheckoutConflict } 
 import {chargeIdForSignedEvent,reconcileSignedChargeToProvider,ProviderChargeMismatch} from "./stripeChargeReconciliationQa";
 import {recordUnmatchedSignedTestEvent} from "./memberStripeUnmatchedQa";
 import {validatePaidInvoicePayment,PaidInvoiceMismatch,type VerifiedPaidInvoicePayment} from "./stripePaidInvoiceMappingQa";
+import { confirmedNewTestMembershipPurchase } from "./memberStripeCheckoutIntentQa";
 
 type Config = {
   stripe: Stripe;
@@ -90,8 +91,8 @@ export function registerMemberStripeTestRoutes(
 
   app.post("/api/member-stripe-test/checkout",isAuthenticated,async(req,res)=>{
     const user=req.user as any;
-    const sku=skuOf(req.body?.sku);
-    if(!user?.id || !sku) return res.status(400).json({error:"Authenticated account and valid membership required"});
+    const sku=confirmedNewTestMembershipPurchase(req.body);
+    if(!user?.id || !sku) return res.status(400).json({error:"Signed-in founder must explicitly confirm new payment, exact price, and monthly renewal"});
     const email=String(user.email||"").trim();
     if(!/^\S+@\S+\.\S+$/.test(email))return res.status(400).json({error:"Verified email required"});
     try{
