@@ -6,6 +6,7 @@ import Stripe from "stripe";
 import { Pool } from "pg";
 import { processSignedTestStripeEvent } from "../server/phase3/durableStripeTestLedger";
 import { applyVerifiedTestMembershipEntitlement } from "../server/phase3/memberEntitlementFulfilmentQa";
+import { reserveTestCheckout, recordCreatedTestCheckout, TestCheckoutConflict } from "../server/phase3/memberStripeCheckoutReservationQa";
 import { currentQuotaWindow } from "../server/services/memberAiQuota";
 
 const url=process.env.QUOTA_TEST_DATABASE_URL;
@@ -179,4 +180,44 @@ test("wrong user, amount or provider reference can never grant a membership",asy
   await assert.rejects(()=>processSignedTestStripeEvent(pool,o.id,tamper.payload.replace(o.amount.toString(),"9"),
     tamper.signature,secret,applyVerifiedTestMembershipEntitlement),/signature/i);
   assert.equal((await state(o)).ent.length,0);
+});
+
+
+test("parallel Checkout requests reserve only one chargeable session per founder",async()=>{
+  const user="founder_"+randomUUID().replaceAll("-","");
+  await pool.query("INSERT INTO users(id) VALUES($1)",[user]);
+  const newOrder={
+    orderId:randomUUID(),userId:user,sku:"founder" as const,
+    customerId:"cus_"+randomUUID().replaceAll("-"),
+    priceId:"price_"+randomUUID().replaceAll("-"),
+    expectedPence:6900,currency:"gbp" as const,
+  };
+  const result=await Promise.allSettled(Array.from({length:5},(_,i)=>
+    reserveTestCheckout(pool,{...newOrder,orderId:randomUUID()})));
+  assert.equal(result.filter(x=>x.status==="fulfilled").length,1);
+  assert.equal(result.filter(x=>x.status==="rejected").length,4);
+  for(const rejected of result.filter(x=>x.status==="rejected") as PromiseRejectedResult[]){
+    assert.ok(rejected.reason instanceof TestCheckoutConflict);
+  }
+  const stored=await pool.query<{id:string;stripe_checkout_session_id:string}>(
+    "SELECT id,stripe_checkout_session_id FROM member_stripe_test_orders WHERE user_id=$1",[user]);
+  assert.equal(stored.rows.length,1);
+  assert.equal(stored.rows[0].stripe_checkout_session_id,"cs_pending_"+stored.rows[0].id);
+  await recordCreatedTestCheckout(pool,stored.rows[0].id,"cs_test_qa_recorded");
+  const bound=await pool.query("SELECT stripe_checkout_session_id FROM member_stripe_test_orders WHERE id=$1",
+    [stored.rows[0].id]);
+  assert.equal(bound.rows[0].stripe_checkout_session_id,"cs_test_qa_recorded");
+  await assert.rejects(()=>recordCreatedTestCheckout(pool,stored.rows[0].id,"cs_test_again"),
+    /could not be bound/);
+});
+
+test("legacy paid member cannot start Stripe QA checkout",async()=>{
+  const user="legacy_"+randomUUID().replaceAll("-","");
+  await pool.query("INSERT INTO users(id,subscription_tier,subscription_status) VALUES($1,'premium','active')",[user]);
+  await assert.rejects(()=>reserveTestCheckout(pool,{
+    orderId:randomUUID(),userId:user,sku:"founder",customerId:"cus_test_legacy",
+    priceId:"price_test_legacy",expectedPence:6900,currency:"gbp",
+  }),/Existing membership must be reconciled/);
+  const found=await pool.query("SELECT id FROM member_stripe_test_orders WHERE user_id=$1",[user]);
+  assert.equal(found.rowCount,0);
 });
