@@ -31,6 +31,7 @@ const session=(sku:PendingCheckout["sku"],paid=true)=>({
 const invoice=(sku:PendingCheckout["sku"],start=1800000000)=>({
   id:"in_test_offline_01",customer:"cus_test_offline_01",
   status:"paid",currency:"gbp",amount_paid:EXPECTED_GBP_PENCE[sku],
+  amount_remaining:0,collection_method:"charge_automatically",
   subscription:"sub_test_offline_01",paid_out_of_band:false,
   lines:{data:[{price:{id:"price_test_fixture_exact"},period:{start,end:start+30*86400}}]},
 });
@@ -84,6 +85,44 @@ test("subscription Checkout does not grant paid access; invoices must reconcile 
   }
   const proration=signed("invoice.paid",{...invoice(o.sku),lines:{data:[...invoice(o.sku).lines.data,...invoice(o.sku).lines.data]}},1800000000,"evt_proration");
   assert.equal(decideVerifiedTestMembershipEvent(proration,o,ledger()).action,"review");
+});
+
+test("modern Stripe invoice schema works while conflicts, manual or incomplete payments fail closed",()=>{
+  const o=order("founder_pro");
+  const old=invoice(o.sku);
+  const modern={
+    id:old.id,customer:old.customer,status:"paid",
+    currency:"gbp",amount_paid:11900,amount_remaining:0,
+    collection_method:"charge_automatically",
+    parent:{type:"subscription_details",subscription_details:{subscription:o.subscriptionId}},
+    lines:{data:[{
+      pricing:{type:"price_details",price_details:{price:o.priceId}},
+      period:{start:1800000000,end:1800000000+30*86400},
+    }],has_more:false,total_count:1},
+  };
+  assert.equal(decideVerifiedTestMembershipEvent(
+    signed("invoice.paid",modern,1800000001,"evt_modern"),o,ledger()).action,"activate");
+
+  const fail=(obj:any,id:string)=>assert.equal(decideVerifiedTestMembershipEvent(
+    signed("invoice.paid",obj,1800000001,id),o,ledger()).action,"review");
+  fail({...modern,subscription:"sub_conflicting"},"evt_conflicting_sub");
+  fail({...modern,lines:{data:[{
+    price:{id:"price_wrong_legacy"},
+    pricing:{type:"price_details",price_details:{price:o.priceId}},
+    period:{start:1800000000,end:1800000000+30*86400},
+  }]}},"evt_conflicting_price");
+  fail({...modern,collection_method:"send_invoice"},"evt_manual_collection");
+  fail({...modern,amount_remaining:11900},"evt_unpaid_remaining");
+  fail({...modern,lines:{...modern.lines,has_more:true}},"evt_unfetched_lines");
+  fail({...modern,lines:{...modern.lines,total_count:2}},"evt_extra_lines");
+  fail({...modern,lines:{data:[{
+    ...modern.lines.data[0],
+    parent:{invoice_item_details:{proration:true}},
+  }]}},"evt_proration_details");
+  const failed={customer:o.customerId,
+    parent:{type:"subscription_details",subscription_details:{subscription:o.subscriptionId}}};
+  assert.equal(decideVerifiedTestMembershipEvent(
+    signed("invoice.payment_failed",failed,1800000002,"evt_modern_failed"),o,ledger()).action,"suspend");
 });
 
 test("old paid invoices never restore cancelled or refunded entitlements",()=>{
