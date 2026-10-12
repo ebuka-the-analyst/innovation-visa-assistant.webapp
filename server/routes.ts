@@ -330,7 +330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerLoginSecurityAuditRoutes(app);
   // Isolated QA only: protected by Railway project/environment + TEST keys.
   // No live entitlement or legacy checkout code is modified by this route.
-  registerMemberStripeTestRoutes(app, isAuthenticated, dbPool as PgPool);
+  registerMemberStripeTestRoutes(app, isAuthenticated, dbPool as PgPool, requireAdmin);
 
   app.post("/api/translate", async (req, res) => {
     try {
