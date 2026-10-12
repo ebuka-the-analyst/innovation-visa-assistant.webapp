@@ -1,0 +1,220 @@
+/**
+ * PHASE 3: isolated, real-Stripe TEST-MODE acceptance gateway.
+ *
+ * This module must NEVER run against the production Railway project. It
+ * uses separate sk_test_/whsec_ credentials and QA-only SQL tables, and
+ * records only a simulated paid state (never users or member entitlements).
+ *
+ * Real test-mode Checkout and webhook signatures can be exercised when a
+ * dedicated Stripe TEST account configuration is supplied to clean QA.
+ */
+import type { Express, RequestHandler } from "express";
+import Stripe from "stripe";
+import type { Pool } from "pg";
+import {
+  processSignedTestStripeEvent, getEffectiveTestPaidState,
+} from "./durableStripeTestLedger";
+import {
+  EXPECTED_GBP_PENCE, type CandidateSku,
+} from "./memberStripeAcceptance";
+
+type Config = {
+  stripe: Stripe;
+  secret: string;
+  publicUrl: string;
+  prices: Record<CandidateSku,string>;
+};
+const memberSkus: CandidateSku[] = ["founder","founder_pro","founder_pass_90d"];
+const orderIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function isMemberTestGatewayAllowed(env: NodeJS.ProcessEnv = process.env): boolean {
+  // Require BOTH a separate QA project and staging environment. Never use
+  // this in the long-lived live app or the legacy production environment.
+  return env.IFVA_MEMBER_STRIPE_QA_ENABLED === "true" &&
+    env.RAILWAY_PROJECT_NAME === "IFVA Phase 2 Isolated QA" &&
+    env.RAILWAY_ENVIRONMENT_NAME === "staging" &&
+    env.NODE_ENV === "production";
+}
+
+function config(): Config {
+  const key=process.env.IFVA_MEMBER_STRIPE_TEST_SECRET_KEY || "";
+  const secret=process.env.IFVA_MEMBER_STRIPE_TEST_WEBHOOK_SECRET || "";
+  const publicUrl=process.env.IFVA_MEMBER_STRIPE_TEST_PUBLIC_URL || "";
+  const prices: Record<CandidateSku,string>={
+    founder:process.env.IFVA_MEMBER_STRIPE_TEST_FOUNDER_PRICE_ID || "",
+    founder_pro:process.env.IFVA_MEMBER_STRIPE_TEST_PRO_PRICE_ID || "",
+    founder_pass_90d:process.env.IFVA_MEMBER_STRIPE_TEST_PASS_PRICE_ID || "",
+  };
+  if (!key.startsWith("sk_test_") || !secret.startsWith("whsec_") ||
+      !Object.values(prices).every(v=>/^price_[a-zA-Z0-9]+$/.test(v))) {
+    throw new Error("Dedicated TEST-ONLY Stripe key, webhook secret and three price IDs are required");
+  }
+  const url=new URL(publicUrl);
+  if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash ||
+      url.pathname !== "/" || !url.hostname.endsWith(".up.railway.app")) {
+    throw new Error("Test-return host must be an isolated HTTPS Railway QA domain");
+  }
+  return {stripe:new Stripe(key,{apiVersion:"2025-08-27.basil"}),secret,
+    publicUrl:url.origin,prices};
+}
+function skuOf(value:unknown): CandidateSku | null {
+  return typeof value==="string" && memberSkus.includes(value as CandidateSku)
+    ? value as CandidateSku : null;
+}
+function asId(value:any):string | null {
+  return typeof value==="string" ? value : typeof value?.id==="string" ? value.id : null;
+}
+function invoiceSub(invoice:any):string | null {
+  const old=asId(invoice?.subscription);
+  const modern=asId(invoice?.parent?.subscription_details?.subscription);
+  if(old&&modern&&old!==modern)return null;
+  return modern || old;
+}
+
+/**
+ * Only when explicitly enabled in fresh isolated QA. This does not change
+ * the existing application Stripe client and cannot enable live membership.
+ */
+export function registerMemberStripeTestRoutes(
+  app: Express, isAuthenticated: RequestHandler, pool: Pool,
+): void {
+  if(!isMemberTestGatewayAllowed())return;
+
+  app.post("/api/member-stripe-test/checkout",isAuthenticated,async(req,res)=>{
+    const user=req.user as any;
+    const sku=skuOf(req.body?.sku);
+    if(!user?.id || !sku) return res.status(400).json({error:"Authenticated account and valid membership required"});
+    const email=String(user.email||"").trim();
+    if(!/^\S+@\S+\.\S+$/.test(email))return res.status(400).json({error:"Verified email required"});
+    try{
+      const cfg=config();
+      const price=await cfg.stripe.prices.retrieve(cfg.prices[sku]);
+      const expectedRecurring=sku!=="founder_pass_90d";
+      if(!price.active || price.currency!=="gbp" ||
+          price.unit_amount!==EXPECTED_GBP_PENCE[sku] ||
+          (expectedRecurring && (price.type!=="recurring" ||
+            price.recurring?.interval!=="month" || price.recurring?.interval_count!==1)) ||
+          (!expectedRecurring && price.type!=="one_time")) {
+        return res.status(503).json({error:"Stripe test price and advertised membership do not match"});
+      }
+      const customer=await cfg.stripe.customers.create({email,metadata:{ifvaMembershipTest:"true"}});
+      const session=await cfg.stripe.checkout.sessions.create({
+        mode:expectedRecurring?"subscription":"payment",
+        customer:customer.id,
+        client_reference_id:user.id,
+        line_items:[{price:cfg.prices[sku],quantity:1}],
+        billing_address_collection:"required",
+        // Never present an unverified final VAT calculation as correct.
+        success_url:cfg.publicUrl+"/?membership_test=return&session_id={CHECKOUT_SESSION_ID}",
+        cancel_url:cfg.publicUrl+"/?membership_test=cancelled",
+        metadata:{ifvaMembershipTest:"true"},
+      });
+      if(!session.id || !session.url)throw new Error("Stripe did not return a hosted checkout URL");
+      // If a webhook beats this insert, return 503 to Stripe so it retries;
+      // the event handler cannot fall back to client supplied metadata.
+      const recorded=await pool.query<{id:string}>(`
+        INSERT INTO member_stripe_test_orders
+          (user_id,sku,stripe_customer_id,stripe_checkout_session_id,stripe_price_id,expected_pence)
+        VALUES($1,$2,$3,$4,$5,$6) RETURNING id`,
+        [user.id,sku,customer.id,session.id,cfg.prices[sku],EXPECTED_GBP_PENCE[sku]],
+      );
+      res.status(201).json({orderId:recorded.rows[0].id,sessionId:session.id,url:session.url,
+        sandboxOnly:true});
+    }catch(e){
+      console.error("[Membership QA] Checkout creation failed",e instanceof Error?e.message:"unknown");
+      return res.status(503).json({error:"Stripe QA Checkout unavailable; no membership activated"});
+    }
+  });
+
+  app.get("/api/member-stripe-test/order/:orderId",isAuthenticated,async(req,res)=>{
+    const user=req.user as any;
+    if(!orderIdPattern.test(req.params.orderId||""))return res.status(404).end();
+    const result=await pool.query<{id:string}>(`
+      SELECT id FROM member_stripe_test_orders WHERE id=$1 AND user_id=$2`,
+      [req.params.orderId,user?.id||""]);
+    if(!result.rowCount)return res.status(404).end();
+    const state=await getEffectiveTestPaidState(pool,req.params.orderId);
+    res.setHeader("Cache-Control","no-store");
+    res.json({orderId:req.params.orderId,testOnly:true,active:state.active,paidThrough:state.paidThrough});
+  });
+
+  app.post("/api/member-stripe-test/webhook",async(req,res)=>{
+    const rawBody=(req as any).rawBody;
+    const signature=req.header("stripe-signature");
+    if(!Buffer.isBuffer(rawBody) || !signature)return res.status(400).send("Missing signed raw event");
+    let cfg:Config;let event:Stripe.Event;
+    try{
+      cfg=config();
+      event=cfg.stripe.webhooks.constructEvent(rawBody,signature,cfg.secret);
+      if(event.livemode!==false)throw new Error("Not a Stripe test-mode event");
+    }catch{return res.status(400).send("Invalid signed test event");}
+    const obj=event.data.object as any;
+    let orderId:string|null=null;
+    try{
+      let rows:{id:string;stripe_customer_id:string;stripe_subscription_id:string|null;stripe_checkout_session_id:string;sku:CandidateSku;}[]=[];
+      if(event.type==="checkout.session.completed" || event.type==="checkout.session.async_payment_succeeded"){
+        const r=await pool.query(`
+          SELECT id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,sku
+          FROM member_stripe_test_orders WHERE stripe_checkout_session_id=$1`,[obj.id]);
+        rows=r.rows;
+      }else if(event.type==="invoice.paid"||event.type==="invoice.payment_failed"||
+          event.type==="customer.subscription.deleted"){
+        const sub=event.type==="customer.subscription.deleted"?obj.id:invoiceSub(obj);
+        if(sub){
+          const r=await pool.query(`
+            SELECT id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,sku
+            FROM member_stripe_test_orders WHERE stripe_subscription_id=$1`,[sub]);
+          rows=r.rows;
+        }
+        // On initial subscription the paid invoice may arrive before checkout.
+        // Let Stripe retry rather than guessing a founder from email/metadata.
+      }else if(event.type==="charge.refunded"||event.type==="charge.dispute.created"){
+        const r=await pool.query(`
+          SELECT id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,sku
+          FROM member_stripe_test_orders WHERE stripe_payment_intent_id=$1`,[obj.payment_intent]);
+        rows=r.rows;
+      }else{return res.json({received:true,ignored:true});}
+      if(rows.length!==1) return res.status(503).send("Trusted QA order not yet reconciled; retry");
+      const order=rows[0];orderId=order.id;
+      if(asId(obj.customer)!==order.stripe_customer_id)
+        return res.status(409).send("Stripe customer mismatch");
+      if(event.type==="checkout.session.completed" ||
+          event.type==="checkout.session.async_payment_succeeded"){
+        // Stripe is authoritative for subscription or PaymentIntent, not
+        // event metadata. Fetch to avoid trusting stale test payload fields.
+        const session=await cfg.stripe.checkout.sessions.retrieve(order.stripe_checkout_session_id);
+        if(session.customer!==order.stripe_customer_id || session.id!==obj.id)
+          return res.status(409).send("Provider checkout mismatch");
+        const sub=asId(session.subscription);
+        const intent=asId(session.payment_intent);
+        if(order.sku==="founder_pass_90d" && intent){
+          await pool.query(`UPDATE member_stripe_test_orders
+            SET stripe_payment_intent_id=$1 WHERE id=$2 AND
+            (stripe_payment_intent_id IS NULL OR stripe_payment_intent_id=$1)`,[intent,order.id]);
+        }else if(order.sku!=="founder_pass_90d" && sub){
+          await pool.query(`UPDATE member_stripe_test_orders
+            SET stripe_subscription_id=$1 WHERE id=$2 AND
+            (stripe_subscription_id IS NULL OR stripe_subscription_id=$1)`,[sub,order.id]);
+        }
+      }
+      if(event.type==="invoice.paid"){
+        // Only accept an invoice re-fetched directly from Stripe, not solely
+        // the event envelope. Never grant a user entitlement in QA.
+        const fresh=await cfg.stripe.invoices.retrieve(obj.id);
+        if(invoiceSub(fresh)!==order.stripe_subscription_id ||
+            fresh.customer!==order.stripe_customer_id)
+          return res.status(409).send("Provider invoice mismatch");
+        // If provider API invoice changed since the event, refuse to confirm.
+        const isPaid=fresh.status==="paid" && fresh.amount_remaining===0;
+        if(!isPaid)return res.status(409).send("Provider invoice not settled");
+      }
+      const decision=await processSignedTestStripeEvent(pool,order.id,rawBody,signature,cfg.secret);
+      if(decision.action==="review")return res.status(409).send("Reconciliation review required");
+      return res.status(200).json({received:true,decision:decision.action,sandboxOnly:true});
+    }catch(e){
+      console.error("[Membership QA] webhook failed",orderId||"unknown",
+        e instanceof Error?e.message:"unknown");
+      return res.status(503).send("Transient QA reconciliation failure");
+    }
+  });
+}
