@@ -190,6 +190,8 @@ jobs:
         run: node --import tsx --test tests/phase3-charge-reconciliation.test.ts
       - name: Verify Stripe Basil invoice-to-payment intent settlement
         run: node --import tsx --test tests/phase3-stripe-paid-invoice-mapping.test.ts
+      - name: Restrict fresh schema bootstrap to isolated Railway QA
+        run: node --test tests/phase3-qa-schema-bootstrap.test.cjs
 
       - name: Dry-run full-plan flagship benchmark without an API key
         run: node --import tsx scripts/phase2-full-plan-benchmark.ts --case marketplace --tier founder_pro --max-usd 30
