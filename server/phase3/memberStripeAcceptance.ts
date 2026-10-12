@@ -95,9 +95,11 @@ export function decideVerifiedTestMembershipEvent(
   if (!obj || typeof obj !== "object") return review("Missing provider event object");
   const customer = typeof obj.customer === "string" ? obj.customer : obj.customer?.id;
   if (customer !== pending.customerId) return review("Stripe customer mismatch");
-  if (ledger.lastAppliedEventCreated != null && event.created < ledger.lastAppliedEventCreated) {
-    // A stale paid invoice must NEVER resurrect a revoked account.
-    return ignore("Out-of-order older event; reconcile authoritative provider state");
+  if (ledger.lastAppliedEventCreated != null && event.created <= ledger.lastAppliedEventCreated) {
+    // Stripe timestamps are second-granularity: two distinct events at the
+    // same timestamp have no guaranteed order. Fail closed and reconcile
+    // against fresh provider state rather than reactivating revoked access.
+    return ignore("Out-of-order or same-second event; reconcile authoritative provider state");
   }
 
   const base = {userId:pending.userId,sku:pending.sku};
