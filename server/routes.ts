@@ -104,6 +104,7 @@ import {
   getPublicCommercialCatalog,
   saveCommercialCatalog,
 } from "./services/commercialCatalogService";
+import { getPublicMemberOffers } from "./services/memberOfferCatalogue";
 import { requireToolAccess } from "./middleware/requireToolAccess";
 import { BUSINESS_PLAN_MODEL } from "./aiModelConfig";
 import {
@@ -591,6 +592,47 @@ ${JSON.stringify(unique)}`;
     } catch (error: any) {
       console.error("Static catalogue export error:", error);
       return res.status(500).json({ error: error?.message || "Static catalogue export failed" });
+    }
+  });
+
+  app.get("/api/member-offers", async (_req, res) => {
+    try {
+      res.set("Cache-Control","no-store");
+      res.json(await getPublicMemberOffers());
+    } catch (error) {
+      console.error("[Membership] Catalogue unavailable",error);
+      res.status(503).json({error:"Membership pricing is temporarily unavailable"});
+    }
+  });
+
+  app.get("/api/admin/member-migration-audit",isAuthenticated,requireAdmin,async (_req,res)=>{
+    try{
+      const result=await db.execute(sql`
+        SELECT
+          count(*)::int AS "activeLegacyAccounts",
+          count(*) FILTER (WHERE
+            greatest(
+              coalesce(plan_credits,0) + coalesce(bonus_credits,0) - coalesce(credits_used,0),
+              0
+            ) > 0
+          )::int AS "accountsWithApparentCreditsRemaining",
+          count(*) FILTER (WHERE stripe_subscription_id IS NOT NULL)::int
+            AS "accountsWithRecordedStripeSubscription",
+          count(*) FILTER (WHERE tier_expires_at IS NOT NULL
+            AND tier_expires_at > NOW())::int AS "accountsWithValidFutureExpiry",
+          count(*) FILTER (WHERE plan_credits<0 OR bonus_credits<0 OR credits_used<0)::int
+            AS "accountsWithAnomalousBalances"
+        FROM users
+        WHERE subscription_tier IN ('basic','premium','enterprise','ultimate')
+          AND subscription_status='active'
+      `);
+      res.set("Cache-Control","private, no-store");
+      res.json({mode:"read-only",destructive:false,
+        caution:"Balances are indicative, not independently reconciled payment/credit proof.",
+        summary:(result as any).rows?.[0] ?? (result as any)[0] ?? {}});
+    }catch(err){
+      console.error("[Membership] Legacy audit unavailable",err);
+      res.status(503).json({error:"Legacy credit audit unavailable"});
     }
   });
 
