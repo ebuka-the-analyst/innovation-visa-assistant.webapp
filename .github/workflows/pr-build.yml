@@ -163,5 +163,8 @@ jobs:
       - name: Test executable probe guard
         run: node --import tsx --test tests/executable-probe-guard.test.ts
 
+      - name: Verify preview offers cannot charge existing customers
+        run: node --import tsx --test tests/live-membership-preview.test.ts
+
       - name: Production build
         run: npm run build
