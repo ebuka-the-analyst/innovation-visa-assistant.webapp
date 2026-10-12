@@ -58,7 +58,7 @@ test.before(async()=>{
   await admin.query('CREATE SCHEMA "' + schema + '"');
   await pool.query("CREATE TABLE users (id VARCHAR PRIMARY KEY)");
   await pool.query("INSERT INTO users (id) VALUES ('test-user')");
-  await pool.query(readFileSync(new URL("../migrations/app/20261012_member_stripe_test_ledger.sql", import.meta.url),"utf8"));
+  await pool.query(readFileSync(new URL("../migrations/qa/20261012_member_stripe_test_ledger.sql", import.meta.url),"utf8"));
 });
 
 test("real PostgreSQL transaction makes simultaneous retries grant exactly once", async()=>{
