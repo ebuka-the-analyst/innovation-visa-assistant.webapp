@@ -38,6 +38,15 @@ async function main(){
  const apply=process.argv.includes("--apply");
  if(process.argv.some(a=>a.startsWith("--")&&a!=="--apply"))throw Error("Unknown option");
  if(apply&&!canApplyIsolatedCarryover())throw Error("Refusing to write outside explicitly enabled isolated QA");
+ if(apply){
+   let target:URL;
+   try{target=new URL(process.env.DATABASE_URL||"");}
+   catch{throw Error("QA database URL is required for write");}
+   if(!["postgres:","postgresql:"].includes(target.protocol) ||
+      !target.hostname.endsWith(".railway.internal")){
+     throw Error("Refusing to write to any external or production database");
+   }
+ }
  if(!process.env.DATABASE_URL)throw Error("DATABASE_URL required");
  const pool=new Pool({connectionString:process.env.DATABASE_URL,max:1,connectionTimeoutMillis:12000});
  const counts={evaluated:0,eligible:0,applied:0,alreadyRecorded:0,review:0,skipped:0};
@@ -52,7 +61,7 @@ async function main(){
    SELECT id,subscription_tier,subscription_status,tier_expires_at,
       plan_credits,bonus_credits,credits_used,stripe_subscription_id,tier_override_by
    FROM users WHERE subscription_tier IN ('basic','premium','enterprise','ultimate')
-   ORDER BY id FOR UPDATE`.replace(apply?" FOR UPDATE":" FOR UPDATE",""+(apply?" FOR UPDATE":"")));
+   ORDER BY id ${apply ? "FOR UPDATE" : ""}`);
   for(const row of accounts.rows){
    counts.evaluated++;
    const paid=await client.query(`
@@ -89,4 +98,6 @@ async function main(){
  }catch(e){await client.query("ROLLBACK").catch(()=>{});throw e;}
  finally{client.release();await pool.end();}
 }
-main().catch(err=>{console.error("[Legacy carryover]",err instanceof Error?err.message:"Unknown error");process.exitCode=1;});
+if(process.argv[1]?.endsWith("reconcile-legacy-purchases.ts")){
+ main().catch(err=>{console.error("[Legacy carryover]",err instanceof Error?err.message:"Unknown error");process.exitCode=1;});
+}
