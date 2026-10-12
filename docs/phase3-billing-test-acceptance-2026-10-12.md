@@ -1,7 +1,7 @@
 # IFVA Founder Memberships — Phase 3 payment acceptance and commercial gate
 
 **Review date:** 12 October 2026  
-**Status:** TEST-ONLY POLICY PASSES — NO CUSTOMER BILLING ACTIVATED.
+**Status:** TEST-ONLY POLICY AND PERSISTENT ACCEPTANCE HARNESS IMPLEMENTED — CI PENDING; NO CUSTOMER BILLING ACTIVATED.
 
 ## 1. Current verified state
 
@@ -44,10 +44,18 @@ Source: `server/phase3/memberStripeAcceptance.ts`, exercised by `tests/phase3-me
 
 See [Stripe events](https://docs.stripe.com/api/events) and [Stripe's subscription guidance](https://docs.stripe.com/billing/subscriptions/webhooks).
 
+### 3A. Additional isolated PostgreSQL acceptance harness (12 October 2026)
+
+- Added `migrations/app/20261012_member_stripe_test_ledger.sql`, `server/phase3/durableStripeTestLedger.ts` and `tests/phase3-durable-stripe-test-ledger.integration.test.ts`.
+- Stores **test-only** Stripe purchase orders and webhook decisions with a unique event-ID audit table. It uses a row lock and a database transaction so concurrent test deliveries cannot grant access twice. Authenticated signature verification is required **before** querying the database, and live-mode events are rejected.
+- CI rehearses simultaneous duplicates, tampering, wrong customer, old invoices after cancellation, failed renewal, 90-day expiration, migration replay and rollback.
+- Only the **simulated test-order paid flag** is changed. No real customer access is granted, no Stripe API call is made, no checkout route is enabled, and no production migrations have run.
+- This is preparatory evidence **not** proof of a real Stripe test-mode checkout, a production entitlement grant, an actual subscription renewal or safe payment settlement.
+
 ## 4. Hard blockers before public checkout
 
 1. A live application connector with dedicated **Stripe TEST MODE** checkout product/price IDs, a signed webhook endpoint, test payment methods and canonical Stripe invoice/subscription reconciliation. The current `server/stripeClient.ts` explicitly enforces LIVE keys; do not weaken it globally or copy real payment credentials.
-2. Durable PostgreSQL event idempotency, atomic paid-fulfilment transactions and replay-order tests. The test ledger is in-memory only.
+2. Production-grade PostgreSQL event idempotency and atomic **actual customer entitlement fulfilment**. An isolated test-only persistent event audit and replay-order tests now exist, but have never been connected to real payments or customer membership rows.
 3. Test card flows for successful initial subscription, recurring renewal, failed payment, account recovery, immediate and end-of-term cancellation, full/partial refund, dispute, webhook retry, duplicate/out-of-order events, downgrade and upgrade.
 4. Verify legacy credits and subscribers do not change when introducing new SKUs. Automatic quota reset must be tied to confirmed paid periods. Fixed-duration passes must expire without renewal.
 5. Final VAT and UK consumer terms review; receipt/terms/cancellation/refund handling, provider invoice cost reconciliation, FX and all-in economics, including paid revisions.
@@ -58,7 +66,8 @@ See [Stripe events](https://docs.stripe.com/api/events) and [Stripe's subscripti
 
 - **Staging real login/PDF/Word access**: PASSED, isolated Railway resources removed.
 - **Database quota/migration simulation**: PASSED in disposable PostgreSQL CI.
-- **Signed offline webhook decision simulation**: PASSED CI (subject to latest overall workflow completion).
+- **Signed offline webhook decision simulation**: PASSED prior CI.
+- **Durable test-only PostgreSQL event ledger**: IMPLEMENTED; new CI integration verification pending.
 - **Real Stripe test-mode payment and recurring fulfilment**: **NOT RUN**.
 - **Invoice-verified economics and full external source audit**: **NOT DONE**.
 - **Production SKU release**: **NOT AUTHORISED**.
