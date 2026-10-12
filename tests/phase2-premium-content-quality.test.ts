@@ -93,3 +93,22 @@ test("legal and endorsement statements without traceable sources require manual 
   assert.doesNotMatch(supplied.unverifiedSourceMentions.join(" "),/without any cited source URLs/);
   // A URL is not proof that its quoted claims were validated; human review still applies.
 });
+
+
+test("premium UK legal assertions require official-source review rather than fabricated citations", () => {
+  const unsupported = auditPremiumPlanEvidence(
+    "## 1. ENDORSEMENT STRATEGY\n\n" +
+    "The Innovator Founder visa is assessed by an endorsing body. Envestors is the proposed assessor."
+  );
+  assert.ok(unsupported.unverifiedSourceMentions.some(item => /GOV\.UK/i.test(item)));
+  const anchored = auditPremiumPlanEvidence(
+    "## 1. ENDORSEMENT STRATEGY\n\n" +
+    "The UK rules will be checked against https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-innovator-founder."
+  );
+  assert.equal(anchored.unverifiedSourceMentions.some(item => /without a linked official GOV/i.test(item)),false);
+  const unauthoritative = auditPremiumPlanEvidence(
+    "## 1. ENDORSEMENT STRATEGY\n\n" +
+    "An unknown endorsing body claims approval. More details: https://example.com/guaranteed-visa."
+  );
+  assert.ok(unauthoritative.unverifiedSourceMentions.some(item => /GOV\.UK/i.test(item)));
+});
