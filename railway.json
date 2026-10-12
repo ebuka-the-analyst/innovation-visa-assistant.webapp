@@ -20,7 +20,7 @@
         ]
       },
       "build": {
-        "buildCommand": "npm ci --include=dev && npm run build"
+        "buildCommand": "npm install --include=dev --no-audit --no-fund && npm run build"
       }
     }
   }
