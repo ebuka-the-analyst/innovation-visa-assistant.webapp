@@ -21,6 +21,7 @@ test("phase 2 migrations can be applied, rolled back and replayed in an isolated
     const sqlFiles = [
       "../migrations/app/20261011_ai_inference_usage.sql",
       "../migrations/app/20261011_member_ai_entitlements.sql",
+      "../migrations/app/20261012_member_stripe_test_ledger.sql",
     ];
     for (const path of sqlFiles) {
       await client.query(readFileSync(new URL(path, import.meta.url), "utf8"));
@@ -29,6 +30,8 @@ test("phase 2 migrations can be applied, rolled back and replayed in an isolated
       "ai_inference_usage",
       "member_ai_entitlements",
       "member_ai_quota_reservations",
+      "member_stripe_test_orders",
+      "member_stripe_test_events",
     ];
     for (const name of names) {
       const exists = await client.query("SELECT to_regclass($1) AS id", [identifier + "." + name]);
