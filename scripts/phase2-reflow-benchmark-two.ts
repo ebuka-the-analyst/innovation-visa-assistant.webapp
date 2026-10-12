@@ -42,8 +42,9 @@ async function main(){
       const page=await parsedPdf.getPage(n);
       combined+="\n"+(await page.getTextContent()).items.map((item:any)=>item.str||"").join(" ");
     }
+    const numericText = combined.replace(/[,£\s]/g,"");
     for(const value of ["450","2900","7700","-31950","-34900","-35700","105000"]){
-      if(!combined.includes(value))throw new Error("Required financial figure missing from PDF extraction: "+value);
+      if(!numericText.includes(value))throw new Error("Required financial figure missing from PDF extraction: "+value);
     }
     if(!combined.includes("Billable units"))throw new Error("Six-column table header missing from PDF extraction");
   }finally {await parsedPdf.destroy();}
