@@ -25,6 +25,7 @@ import {chargeIdForSignedEvent,reconcileSignedChargeToProvider,ProviderChargeMis
 import {recordUnmatchedSignedTestEvent} from "./memberStripeUnmatchedQa";
 import {validatePaidInvoicePayment,PaidInvoiceMismatch,type VerifiedPaidInvoicePayment} from "./stripePaidInvoiceMappingQa";
 import { confirmedNewTestMembershipPurchase } from "./memberStripeCheckoutIntentQa";
+import {registerMemberStripeTestPage} from "./memberStripeTestPage";
 
 type Config = {
   stripe: Stripe;
@@ -88,6 +89,7 @@ export function registerMemberStripeTestRoutes(
   requireAdmin: RequestHandler,
 ): void {
   if(!isMemberTestGatewayAllowed())return;
+  registerMemberStripeTestPage(app);
 
   app.post("/api/member-stripe-test/checkout",isAuthenticated,async(req,res)=>{
     const user=req.user as any;
@@ -119,8 +121,8 @@ export function registerMemberStripeTestRoutes(
         line_items:[{price:cfg.prices[sku],quantity:1}],
         billing_address_collection:"required",
         // Never present an unverified final VAT calculation as correct.
-        success_url:cfg.publicUrl+"/?membership_test=return&session_id={CHECKOUT_SESSION_ID}",
-        cancel_url:cfg.publicUrl+"/?membership_test=cancelled",
+        success_url:cfg.publicUrl+"/qa/membership-test?orderId="+encodeURIComponent(orderId)+"&result=return&session_id={CHECKOUT_SESSION_ID}",
+        cancel_url:cfg.publicUrl+"/qa/membership-test?orderId="+encodeURIComponent(orderId)+"&result=cancelled",
         metadata:{ifvaMembershipTest:"true",ifvaTestOrderId:orderId},
         ...(expectedRecurring ? {
           subscription_data:{metadata:{ifvaMembershipTest:"true",ifvaTestOrderId:orderId}},
