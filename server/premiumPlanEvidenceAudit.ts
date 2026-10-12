@@ -5,6 +5,7 @@
 export interface EditorialEvidenceAudit {
   blockedMediaMarkup: string[];
   unverifiedSourceMentions: string[];
+  referenceCoverage: { suppliedSourceUrls: number; legalOrPolicyTopicsDetected: string[] };
   repeatedCrossSectionPhrases: Array<{ phrase: string; sectionCount: number }>;
   sectionWordCounts: Array<{ section: string; words: number }>;
 }
@@ -18,6 +19,18 @@ export function auditPremiumPlanEvidence(content: string): EditorialEvidenceAudi
   const unverifiedSourceMentions: string[] = [];
   // SVG namespace URLs identify the XML format, not a cited research source.
   const researchText = raw.replace(/<svg\b[\s\S]*?<\/svg>/gi, " ");
+  const sourceUrls = [...researchText.matchAll(/https?:\/\/[^\s<>"]+/g)];
+  const topics: Array<{pattern:RegExp;topic:string}> = [
+    { pattern:/\b(?:UK GDPR|Data Protection Act|Article 9)\b/i,topic:"Data protection" },
+    { pattern:/\bEquality Act(?: 2010)?\b/i,topic:"Equality legislation" },
+    { pattern:/\b(?:Innovator Founder|endorsing body|endorsement letter)\b/i,topic:"Innovator Founder endorsement rules" },
+    { pattern:/\b(?:WCAG|ISO 27001|SOC 2)\b/i,topic:"Accessibility and certification" },
+  ];
+  const legalOrPolicyTopicsDetected = topics.filter(x=>x.pattern.test(researchText)).map(x=>x.topic);
+  if(legalOrPolicyTopicsDetected.length && sourceUrls.length===0){
+    unverifiedSourceMentions.push("Legal, immigration, accessibility or certification topics appear without any cited source URLs. Verify current official text and add traceable references before client delivery.");
+  }
+  const referenceCoverage = {suppliedSourceUrls:sourceUrls.length,legalOrPolicyTopicsDetected};
   const hasAcademicNames = /(?:\bet\s+al\.|\bjournal of\b|\bpublished in\b|\bpeer.reviewed\b|\b[A-Z][a-z]+\s+and colleagues\b)/i.test(researchText);
   const hasResolvableReferences = /https?:\/\/[^\s<>"]+|\bdoi:\s*10\.\d{4,9}\//i.test(researchText);
   if (hasAcademicNames && !hasResolvableReferences) {
@@ -59,5 +72,5 @@ export function auditPremiumPlanEvidence(content: string): EditorialEvidenceAudi
     .sort((a,b)=>b[1].size-a[1].size)
     .slice(0,12)
     .map(([phrase,ids])=>({phrase,sectionCount:ids.size}));
-  return { blockedMediaMarkup, unverifiedSourceMentions, repeatedCrossSectionPhrases, sectionWordCounts };
+  return { blockedMediaMarkup, unverifiedSourceMentions, referenceCoverage, repeatedCrossSectionPhrases, sectionWordCounts };
 }
