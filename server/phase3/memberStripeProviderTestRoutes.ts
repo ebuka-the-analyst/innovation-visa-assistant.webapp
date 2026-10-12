@@ -20,6 +20,7 @@ import {
   EXPECTED_GBP_PENCE, type CandidateSku,
 } from "./memberStripeAcceptance";
 import { applyVerifiedTestMembershipEntitlement } from "./memberEntitlementFulfilmentQa";
+import { reserveTestCheckout, recordCreatedTestCheckout, TestCheckoutConflict } from "./memberStripeCheckoutReservationQa";
 
 type Config = {
   stripe: Stripe;
@@ -102,6 +103,10 @@ export function registerMemberStripeTestRoutes(
       }
       const orderId=randomUUID();
       const customer=await cfg.stripe.customers.create({email,metadata:{ifvaMembershipTest:"true"}});
+      await reserveTestCheckout(pool,{
+        orderId,userId:user.id,sku,customerId:customer.id,
+        priceId:cfg.prices[sku],expectedPence:EXPECTED_GBP_PENCE[sku],currency:"gbp",
+      });
       const session=await cfg.stripe.checkout.sessions.create({
         mode:expectedRecurring?"subscription":"payment",
         customer:customer.id,
@@ -117,17 +122,15 @@ export function registerMemberStripeTestRoutes(
         } : {}),
       });
       if(!session.id || !session.url)throw new Error("Stripe did not return a hosted checkout URL");
-      // If a webhook beats this insert, return 503 to Stripe so it retries;
-      // the event handler cannot fall back to client supplied metadata.
-      const recorded=await pool.query<{id:string}>(`
-        INSERT INTO member_stripe_test_orders
-          (id,user_id,sku,stripe_customer_id,stripe_checkout_session_id,stripe_price_id,expected_pence)
-        VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
-        [orderId,user.id,sku,customer.id,session.id,cfg.prices[sku],EXPECTED_GBP_PENCE[sku]],
-      );
-      res.status(201).json({orderId:recorded.rows[0].id,sessionId:session.id,url:session.url,
+      // A trusted order exists BEFORE returning a chargeable Stripe URL.
+      // If a webhook beats the session-ID update, return 503 so Stripe retries.
+      await recordCreatedTestCheckout(pool,orderId,session.id);
+      res.status(201).json({orderId,sessionId:session.id,url:session.url,
         sandboxOnly:true});
     }catch(e){
+      if(e instanceof TestCheckoutConflict) {
+        return res.status(409).json({error:e.message});
+      }
       console.error("[Membership QA] Checkout creation failed",e instanceof Error?e.message:"unknown");
       return res.status(503).json({error:"Stripe QA Checkout unavailable; no membership activated"});
     }
