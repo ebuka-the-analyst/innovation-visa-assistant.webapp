@@ -80,8 +80,12 @@ export async function getMemberOfferCatalogue():Promise<MemberOfferCatalogue>{
  if(!records.length)return safeDefaultMemberOffers();
  return parseMemberOfferCatalogue(records[0].value);
 }
+// Deliberate hard gate: no production webhook/fulfilment route exists yet.
+// Environment variables alone must NEVER make this UI offer chargeable.
+const VERIFIED_LIVE_MEMBERSHIP_GATEWAY_IMPLEMENTED=false;
 export function canStartLiveMembershipCheckout(env:NodeJS.ProcessEnv=process.env):boolean{
- return env.NODE_ENV==="production" &&
+ return VERIFIED_LIVE_MEMBERSHIP_GATEWAY_IMPLEMENTED &&
+   env.NODE_ENV==="production" &&
    env.RAILWAY_ENVIRONMENT_NAME==="production" &&
    env.IFVA_MEMBERSHIP_PAYMENTS_LIVE_ENABLED==="true" &&
    env.IFVA_MEMBERSHIP_LIVE_WEBHOOK_VERIFIED==="true" &&
