@@ -611,11 +611,11 @@ ${JSON.stringify(unique)}`;
         SELECT
           count(*)::int AS "activeLegacyAccounts",
           count(*) FILTER (WHERE
-            greatest(
-              coalesce(plan_credits,0) + coalesce(bonus_credits,0) - coalesce(credits_used,0),
-              0
-            ) > 0
-          )::int AS "accountsWithApparentCreditsRemaining",
+            coalesce(plan_credits,0) + coalesce(bonus_credits,0) > 0
+          )::int AS "accountsWithCreditsRemaining",
+          count(*) FILTER (WHERE
+            coalesce(plan_credits,0) + coalesce(bonus_credits,0) = 0
+          )::int AS "accountsWithZeroCreditsRemaining",
           count(*) FILTER (WHERE stripe_subscription_id IS NOT NULL)::int
             AS "accountsWithRecordedStripeSubscription",
           count(*) FILTER (WHERE tier_expires_at IS NOT NULL
@@ -628,7 +628,7 @@ ${JSON.stringify(unique)}`;
       `);
       res.set("Cache-Control","private, no-store");
       res.json({mode:"read-only",destructive:false,
-        caution:"Balances are indicative, not independently reconciled payment/credit proof.",
+        caution:"Current balance is plan_credits plus bonus_credits; credits_used is cumulative historical spending and must not be subtracted again. Cross-check payment and credit ledgers before any migration.",
         summary:(result as any).rows?.[0] ?? (result as any)[0] ?? {}});
     }catch(err){
       console.error("[Membership] Legacy audit unavailable",err);
