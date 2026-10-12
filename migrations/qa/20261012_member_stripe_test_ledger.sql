@@ -37,3 +37,24 @@ CREATE TABLE IF NOT EXISTS member_stripe_test_events (
 );
 CREATE INDEX IF NOT EXISTS idx_member_stripe_test_events_order
   ON member_stripe_test_events(order_id, event_created);
+
+
+-- A durable manual-review inbox for provider events that cannot be safely
+-- applied automatically. NEVER transform these into paid entitlements.
+CREATE TABLE IF NOT EXISTS member_stripe_test_reviews (
+  stripe_event_id VARCHAR(255) PRIMARY KEY
+    REFERENCES member_stripe_test_events(stripe_event_id) ON DELETE CASCADE,
+  order_id UUID NOT NULL REFERENCES member_stripe_test_orders(id) ON DELETE RESTRICT,
+  event_type VARCHAR(100) NOT NULL,
+  reason TEXT NOT NULL,
+  status VARCHAR(16) NOT NULL DEFAULT 'pending'
+    CHECK(status IN ('pending','resolved','dismissed')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  resolved_at TIMESTAMPTZ,
+  CONSTRAINT test_review_resolution_consistent CHECK (
+    (status = 'pending' AND resolved_at IS NULL) OR
+    (status <> 'pending' AND resolved_at IS NOT NULL)
+  )
+);
+CREATE INDEX IF NOT EXISTS idx_member_stripe_test_reviews_pending
+  ON member_stripe_test_reviews(status,created_at);
