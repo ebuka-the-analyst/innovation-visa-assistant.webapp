@@ -22,6 +22,7 @@ import {
 import { applyVerifiedTestMembershipEntitlement } from "./memberEntitlementFulfilmentQa";
 import { reserveTestCheckout, recordCreatedTestCheckout, TestCheckoutConflict } from "./memberStripeCheckoutReservationQa";
 import {chargeIdForSignedEvent,reconcileSignedChargeToProvider,ProviderChargeMismatch} from "./stripeChargeReconciliationQa";
+import {recordUnmatchedSignedTestEvent} from "./memberStripeUnmatchedQa";
 
 type Config = {
   stripe: Stripe;
@@ -158,7 +159,14 @@ export function registerMemberStripeTestRoutes(
           FROM member_stripe_test_reviews WHERE status='pending'
           ORDER BY created_at ASC LIMIT 100`);
       res.setHeader("Cache-Control","no-store");
-      res.json({testOnly:true,count:pending.rows.length,reviews:pending.rows});
+      const unmatched=await pool.query<{
+        stripe_event_id:string;event_type:string;reason:string;
+        first_seen_at:Date;last_seen_at:Date;retries:number;
+      }>(`SELECT stripe_event_id,event_type,reason,first_seen_at,last_seen_at,retries
+          FROM member_stripe_test_unmatched_events WHERE status='pending'
+          ORDER BY first_seen_at ASC LIMIT 100`);
+      res.json({testOnly:true,count:pending.rows.length+unmatched.rows.length,
+        reviews:pending.rows,unmatched:unmatched.rows});
     } catch {
       res.status(503).json({error:"QA billing review inbox unavailable"});
     }
@@ -229,7 +237,11 @@ export function registerMemberStripeTestRoutes(
           [confirmed.paymentIntentId]);
         rows=r.rows;
       }else{return res.json({received:true,ignored:true});}
-      if(rows.length!==1) return res.status(503).send("Trusted QA order not yet reconciled; retry");
+      if(rows.length!==1) {
+        await recordUnmatchedSignedTestEvent(pool,rawBody,signature,cfg.secret,
+          "No single trusted order for verified provider event");
+        return res.status(503).send("Trusted QA order not yet reconciled; retry");
+      }
       const order=rows[0];orderId=order.id;
       if((verifiedChargeCustomer ?? asId(obj.customer))!==order.stripe_customer_id)
         return res.status(409).send("Stripe customer mismatch");
