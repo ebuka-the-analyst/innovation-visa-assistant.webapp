@@ -166,5 +166,8 @@ jobs:
       - name: Verify preview offers cannot charge existing customers
         run: node --import tsx --test tests/live-membership-preview.test.ts
 
+      - name: Test legacy membership migration audit is admin-only and read-only
+        run: node --import tsx --test tests/member-migration-audit-safety.test.ts
+
       - name: Production build
         run: npm run build
