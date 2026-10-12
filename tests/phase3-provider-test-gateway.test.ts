@@ -39,7 +39,10 @@ test("QA integration requires dedicated test Stripe credentials, server-side pri
   assert.match(source,/sandboxOnly:true/);
   assert.doesNotMatch(source,/getUncachableStripeClient|STRIPE_SECRET_KEY[^_]/);
   assert.match(index,/req\.rawBody = buf/);
-  assert.match(routes,/registerMemberStripeTestRoutes\(app, isAuthenticated, dbPool as PgPool\)/);
+  assert.match(routes,/registerMemberStripeTestRoutes\(app, isAuthenticated, dbPool as PgPool, requireAdmin\)/);
+  assert.match(source,/isAuthenticated,requireAdmin,async\(_req,res\)=>/);
+  assert.match(source,/\/api\/member-stripe-test\/reviews/);
+  assert.match(source,/manualReviewRequired:decision\.action==="review"/);
   const legacy=readFileSync(new URL("../server/stripeClient.ts",import.meta.url),"utf8");
   assert.match(legacy,/ENFORCE_LIVE_MODE = true/);
 });
@@ -51,4 +54,5 @@ test("test order schema stays outside automatic production app migrations",()=>{
   const schema=readFileSync(new URL("../migrations/qa/20261012_member_stripe_test_ledger.sql",import.meta.url),"utf8");
   assert.match(schema,/CREATE TABLE IF NOT EXISTS member_stripe_test_events/);
   assert.match(schema,/stripe_event_id VARCHAR\(255\) PRIMARY KEY/);
+  assert.match(schema,/CREATE TABLE IF NOT EXISTS member_stripe_test_reviews/);
 });
