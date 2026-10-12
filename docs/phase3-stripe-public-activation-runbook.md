@@ -1,0 +1,60 @@
+# IFVA memberships — provider-connected test acceptance and public release gate
+Date: 12 October 2026
+Status: BUILD-ONLY, QA CONNECTOR INACTIVE. Not a production release approval.
+
+## Current offering (proposed)
+| SKU | Advertised price GBP | Period | Allowance |
+| --- | ---: | --- | --- |
+| founder | £69 | Monthly recurring | 2 generations + 15 revisions per paid period |
+| founder_pro | £119 | Monthly recurring | 4 generations + 30 revisions per paid period |
+| founder_pass_90d | £159 | One-time, 90 days | 2 generations + 15 revisions per 30-day window; maximum 6 plans |
+
+Do not publish prices or claim tax treatment until the UK consumer/VAT review is completed.
+
+## Work implemented
+- Isolated provider-connected Stripe **test-mode only** Checkout/webhook gateway at `server/phase3/memberStripeProviderTestRoutes.ts`.
+- All test routes are absent unless ALL of the following match:
+  - `IFVA_MEMBER_STRIPE_QA_ENABLED=true`
+  - `RAILWAY_PROJECT_NAME=IFVA Phase 2 Isolated QA`
+  - `RAILWAY_ENVIRONMENT_NAME=staging`
+  - `NODE_ENV=production`
+- Gateway reads independent `sk_test_` and `whsec_` secrets. No production Stripe client or Stripe price is ever used.
+- Only `migrations/qa/20261012_member_stripe_test_ledger.sql` supplies event/order tables. This SQL is **not** included in the application's automatic production migration directory.
+- `POST /api/member-stripe-test/checkout` (authenticated) selects server-owned price ID, validates GBP, price, type and monthly interval before creating a Stripe-hosted Checkout session. The client cannot submit an amount or a Stripe price ID. A server-created order UUID is embedded in test checkout/subscription metadata.
+- `POST /api/member-stripe-test/webhook` verifies the exact raw-byte signature. First subscription invoices can be reconciled against a freshly fetched Stripe subscription with matching server order ID, customer and price. Signed provider events update only the isolated PostgreSQL **simulated** order state, not real user entitlements.
+- `GET /api/member-stripe-test/order/:orderId` requires authentication and strict ownership, and reads effective access bounded by the paid-through timestamp. No account membership changes.
+- Duplicate event IDs are blocked with a unique key and row lock, already-paid passes cannot be extended by a second success event, and cancelled memberships cannot be restored using older or same-second events.
+
+## Information required from the Stripe test account (never place secrets in GitHub text)
+Provision THREE distinct **test-mode** Stripe prices and dedicated TEST-mode API/webhook credentials:
+- `IFVA_MEMBER_STRIPE_TEST_SECRET_KEY` (sk_test_...)
+- `IFVA_MEMBER_STRIPE_TEST_WEBHOOK_SECRET` (whsec_...)
+- `IFVA_MEMBER_STRIPE_TEST_FOUNDER_PRICE_ID` (GBP 6900 pence, recurring monthly)
+- `IFVA_MEMBER_STRIPE_TEST_PRO_PRICE_ID` (GBP 11900 pence, recurring monthly)
+- `IFVA_MEMBER_STRIPE_TEST_PASS_PRICE_ID` (GBP 15900 pence, one-time)
+- `IFVA_MEMBER_STRIPE_TEST_PUBLIC_URL` (https://<isolated-railway-qa-host>.up.railway.app)
+- `IFVA_MEMBER_STRIPE_QA_ENABLED=true` only in clean QA.
+
+Provision an isolated PostgreSQL instance, baseline application schema and the QA test-ledger SQL before enabling the test gateway. No access to existing production customers or data. The provider's test webhook URL is:
+`https://<isolated-railway-qa-host>.up.railway.app/api/member-stripe-test/webhook`.
+Use test cards only. Invalid webhook signatures and events from `livemode:true` must not succeed.
+
+## Mandatory test cases before even considering public activation
+1. Real Stripe test Checkout for all three SKUs, with exact matching server-owned price, tax presentation and destination.
+2. Provider-signed first paid invoice; no subscription entitlement from checkout alone.
+3. Provider-signed recurring paid invoice and separate period advancement.
+4. Failed renewal without removing access to a previous fully paid period.
+5. Cancellation effective now and at end of term, duplicate and out-of-order events.
+6. Full and partial refunds, disputes, upgrades/downgrades, retries and manual reconciliation.
+7. One-time pass 90-day expiry with no auto-renewal; six-plan lifetime cap.
+8. Actual `member_ai_entitlements` atomic writes and user status updates **remain unimplemented**. Existing gateway never grants users access, so its completion alone is not a launch signal.
+9. Confirm existing paid customers and their credits remain unchanged.
+10. Production-origin signature/price-mode mismatch checks and non-public feature flag, then staged readiness plus rollback review.
+
+## Financial/regulatory sign-off
+- Provider's actual invoice and metered inference spend, **including revisions**, converted with documented FX and tax basis. Previous $4.62083 is an estimated one-plan software rate, NOT billed all-in cost or a cap.
+- Confirm whether £69/£119/£159 are VAT-inclusive and whether tax logic varies by customer's location. Do not take orders until the final displayed total, invoices and customer documents agree. Relevant HMRC sources: https://www.gov.uk/how-vat-works and https://www.gov.uk/guidance/the-vat-rules-if-you-supply-digital-services-to-private-consumers
+- Clearly disclose automatic renewal, cancellation and refund rights; no endorsement or visa-outcome guarantees. Current government consultation on subscription contracts: https://www.gov.uk/government/consultations/consultation-on-the-implementation-of-the-new-subscription-contracts-regime/outcome/government-response-to-consultation-on-the-implementation-of-the-new-subscription-contracts-regime-web-accessible-version
+- Substantiate original 13-section business-plan market/legal claims against dated primary sources; original fictional benchmark contains no traceable source URLs.
+
+**Do not merge PR #116 or activate public SKUs based on test success alone.**
