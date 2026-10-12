@@ -46,7 +46,7 @@ See [Stripe events](https://docs.stripe.com/api/events) and [Stripe's subscripti
 
 ### 3A. Additional isolated PostgreSQL acceptance harness (12 October 2026)
 
-- Added `migrations/app/20261012_member_stripe_test_ledger.sql`, `server/phase3/durableStripeTestLedger.ts` and `tests/phase3-durable-stripe-test-ledger.integration.test.ts`.
+- Added `migrations/qa/20261012_member_stripe_test_ledger.sql`, `server/phase3/durableStripeTestLedger.ts` and `tests/phase3-durable-stripe-test-ledger.integration.test.ts`.
 - Stores **test-only** Stripe purchase orders and webhook decisions with a unique event-ID audit table. It uses a row lock and a database transaction so concurrent test deliveries cannot grant access twice. Authenticated signature verification is required **before** querying the database, and live-mode events are rejected.
 - CI rehearses simultaneous duplicates, tampering, wrong customer, old invoices after cancellation, failed renewal, 90-day expiration, migration replay and rollback.
 - Only the **simulated test-order paid flag** is changed. No real customer access is granted, no Stripe API call is made, no checkout route is enabled, and no production migrations have run.
