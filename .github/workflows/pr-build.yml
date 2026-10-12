@@ -186,6 +186,8 @@ jobs:
 
       - name: Confirm real Stripe provider QA gateway cannot run on production
         run: node --import tsx --test tests/phase3-provider-test-gateway.test.ts
+      - name: Verify Stripe chargeback provider correlation and refund protections
+        run: node --import tsx --test tests/phase3-charge-reconciliation.test.ts
 
       - name: Dry-run full-plan flagship benchmark without an API key
         run: node --import tsx scripts/phase2-full-plan-benchmark.ts --case marketplace --tier founder_pro --max-usd 30
