@@ -9,6 +9,7 @@
 import Stripe from "stripe";
 import type { Pool, PoolClient } from "pg";
 import { MembershipFulfilmentReviewRequired } from "./memberEntitlementFulfilmentQa";
+import type { VerifiedPaidInvoicePayment } from "./stripePaidInvoiceMappingQa";
 import {
   decideVerifiedTestMembershipEvent,
   type CandidateSku, type LedgerState, type MemberDecision,
@@ -71,6 +72,7 @@ export async function processSignedTestStripeEvent(
   stripeSignature: string,
   testWebhookSecret: string,
   onApplied?: VerifiedTestEffect,
+  providerPaidInvoice?: VerifiedPaidInvoicePayment,
 ): Promise<RecordedTestDecision> {
   if (!/^whsec_/.test(testWebhookSecret)) {
     throw new Error("A dedicated TEST-MODE webhook signing secret is required");
@@ -162,6 +164,31 @@ export async function processSignedTestStripeEvent(
       }
       if (onApplied && ["activate","suspend","expire"].includes(decision.action)) {
         await onApplied(client, toPending(order), decision, event.created);
+      }
+      if (decision.action === "activate" && event.type === "invoice.paid" && providerPaidInvoice) {
+        // Verified by Stripe's expanded InvoicePayment and a separate
+        // succeeded PaymentIntent API lookup before entering this transaction.
+        if(providerPaidInvoice.invoiceId !== (event.data.object as any)?.id ||
+           providerPaidInvoice.amountPence !== order.expected_pence ||
+           providerPaidInvoice.currency !== order.currency ||
+           providerPaidInvoice.periodStartEpoch !== decision.periodStartEpoch ||
+           providerPaidInvoice.periodEndEpoch !== decision.paidThroughEpoch) {
+          throw new MembershipFulfilmentReviewRequired("Verified invoice payment differs from signed paid period");
+        }
+        const mapped=await client.query(`
+          INSERT INTO member_stripe_test_invoice_payments (
+            stripe_invoice_id,stripe_invoice_payment_id,stripe_payment_intent_id,
+            order_id,amount_paid,currency,period_start,period_end
+          ) VALUES ($1,$2,$3,$4,$5,'gbp',to_timestamp($6),to_timestamp($7))
+          ON CONFLICT(stripe_invoice_id) DO NOTHING
+          RETURNING stripe_invoice_id`,
+          [providerPaidInvoice.invoiceId,providerPaidInvoice.invoicePaymentId,
+            providerPaidInvoice.paymentIntentId,trustedOrderId,
+            providerPaidInvoice.amountPence,providerPaidInvoice.periodStartEpoch,
+            providerPaidInvoice.periodEndEpoch],
+        );
+        if(mapped.rowCount!==1)
+          throw new MembershipFulfilmentReviewRequired("Invoice payment was already allocated; reconcile provider reference");
       }
       await client.query("RELEASE SAVEPOINT member_effect");
     } catch (error) {
