@@ -62,3 +62,10 @@ test("invalid balances or expired legacy rights cannot be silently converted",()
  assert.equal(assessLegacyPurchaseCarryover({...account,tierExpiresAt:"2025-01-01"},[payment],now).action,"review");
  assert.equal(assessLegacyPurchaseCarryover({...account,tierExpiresAt:"not-a-date"},[payment],now).action,"review");
 });
+
+test("refunded purchase cannot be carried over even when another settled payment exists",()=>{
+ const r=assessLegacyPurchaseCarryover(account,[
+   payment,{...payment,id:"pay_refunded",status:"refunded",createdAt:"2026-10-01T00:00:00Z"},
+ ],now);
+ assert.equal(r.action,"review");
+});
