@@ -197,11 +197,16 @@ export async function processSignedTestStripeEvent(
       // review audit and queue instead of sending infinite 5xx retries.
       await client.query("ROLLBACK TO SAVEPOINT member_effect");
       await client.query("RELEASE SAVEPOINT member_effect");
-      if (!(error instanceof MembershipFulfilmentReviewRequired)) throw error;
-      decision = {action:"review",reason:error.message};
+      const reviewError = error instanceof MembershipFulfilmentReviewRequired ? error
+        : (event.type === "invoice.paid" && providerPaidInvoice &&
+           (error as any)?.code === "23505")
+          ? new MembershipFulfilmentReviewRequired("Invoice/PaymentIntent already allocated to a different paid period")
+          : null;
+      if (!reviewError) throw error;
+      decision = {action:"review",reason:reviewError.message};
       await client.query(
         "UPDATE member_stripe_test_events SET decision='review',reason=$2 WHERE stripe_event_id=$1",
-        [event.id,error.message],
+        [event.id,reviewError.message],
       );
     }
     if (decision.action === "review") {
