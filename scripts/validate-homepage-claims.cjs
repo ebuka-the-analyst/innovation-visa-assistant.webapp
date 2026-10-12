@@ -78,11 +78,16 @@ const required = [
   "Official GOV.UK source",
   "EXAMPLE ONLY",
   "Example preparation score",
-  "Featured Plan",
 ];
 
 for (const phrase of required) {
   if (!combined.includes(phrase)) throw new Error(`Homepage claim regression: required safety wording missing: ${phrase}`);
 }
 
-console.log(JSON.stringify({ ok: true, filesChecked: files.length, forbiddenClaimsChecked: forbidden.length, requiredSafetyMarkersChecked: required.length }, null, 2));
+const pricingComponent=fs.readFileSync(path.join(process.cwd(),"client/src/components/PricingSection.tsx"),"utf8");
+const membershipComponent=fs.readFileSync(path.join(process.cwd(),"client/src/components/FounderMembershipPlans.tsx"),"utf8");
+if(!pricingComponent.includes("FounderMembershipPlans") ||
+   !membershipComponent.includes('/api/member-offers')){
+ throw new Error("Homepage must use the verified server-owned membership pricing catalogue");
+}
+console.log(JSON.stringify({ ok: true, filesChecked: files.length, forbiddenClaimsChecked: forbidden.length, requiredSafetyMarkersChecked: required.length, membershipCatalogueLinked:true }, null, 2));

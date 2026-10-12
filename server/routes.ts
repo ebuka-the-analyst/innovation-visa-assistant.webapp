@@ -104,6 +104,7 @@ import {
   getPublicCommercialCatalog,
   saveCommercialCatalog,
 } from "./services/commercialCatalogService";
+import { getPublicMemberOffers } from "./services/memberOfferCatalogue";
 import { requireToolAccess } from "./middleware/requireToolAccess";
 import { BUSINESS_PLAN_MODEL } from "./aiModelConfig";
 import {
@@ -591,6 +592,82 @@ ${JSON.stringify(unique)}`;
     } catch (error: any) {
       console.error("Static catalogue export error:", error);
       return res.status(500).json({ error: error?.message || "Static catalogue export failed" });
+    }
+  });
+
+  app.get("/api/member-offers", async (_req, res) => {
+    try {
+      res.set("Cache-Control","no-store");
+      res.json(await getPublicMemberOffers());
+    } catch (error) {
+      console.error("[Membership] Catalogue unavailable",error);
+      res.status(503).json({error:"Membership pricing is temporarily unavailable"});
+    }
+  });
+
+  app.get("/api/admin/member-migration-audit",isAuthenticated,requireAdmin,async (_req,res)=>{
+    try{
+      // Read-only, aggregate audit. Do not query/export names, email or IDs.
+      // plan_credits and bonus_credits are CURRENT balances. credits_used is
+      // cumulative historical consumption, never subtract it twice.
+      const result=await db.execute(sql`
+        WITH legacy AS (
+          SELECT id,subscription_tier,subscription_status,plan_credits,
+            bonus_credits,credits_used,stripe_subscription_id,
+            tier_expires_at,tier_override_by
+          FROM users WHERE subscription_tier IN ('basic','premium','enterprise','ultimate')
+            AND subscription_status='active'
+        ), purchase_proof AS (
+          SELECT user_id,
+            count(*) FILTER (WHERE status='succeeded'
+              AND type IN ('one_time','upgrade') AND amount>0
+              AND upper(currency)='GBP')::int AS successful_paid_purchases,
+            count(*) FILTER (WHERE status='refunded' OR type='refund')::int AS refund_records
+          FROM payment_transactions
+          WHERE user_id IN (SELECT id FROM legacy)
+          GROUP BY user_id
+        ), ledger AS (
+          SELECT user_id,coalesce(sum(credits_change),0)::int AS ledger_balance
+          FROM credit_transactions
+          WHERE user_id IN (SELECT id FROM legacy)
+          GROUP BY user_id
+        )
+        SELECT count(*)::int AS "activeLegacyAccounts",
+          count(*) FILTER (WHERE l.plan_credits + l.bonus_credits > 0)::int
+            AS "accountsWithCreditsRemaining",
+          count(*) FILTER (WHERE l.plan_credits + l.bonus_credits = 0)::int
+            AS "accountsWithZeroCreditsRemaining",
+          coalesce(sum(greatest(l.plan_credits + l.bonus_credits,0)),0)::int
+            AS "totalCurrentCreditBalance",
+          count(*) FILTER (WHERE coalesce(p.successful_paid_purchases,0)=0)::int
+            AS "accountsWithoutRecordedPaidPurchaseProof",
+          count(*) FILTER (WHERE coalesce(p.refund_records,0)>0)::int
+            AS "accountsWithRefundEvidence",
+          count(*) FILTER (WHERE l.stripe_subscription_id IS NOT NULL)::int
+            AS "accountsWithRecordedStripeSubscription",
+          count(*) FILTER (WHERE l.tier_expires_at IS NOT NULL
+            AND l.tier_expires_at>now())::int AS "accountsWithFutureExpiry",
+          count(*) FILTER (WHERE l.tier_override_by IS NOT NULL)::int
+            AS "accountsWithAdminOverride",
+          count(*) FILTER (WHERE l.plan_credits<0 OR l.bonus_credits<0
+            OR l.credits_used<0)::int AS "accountsWithInvalidBalances",
+          count(*) FILTER (WHERE cd.user_id IS NOT NULL AND
+            cd.ledger_balance<>(l.plan_credits+l.bonus_credits))::int
+            AS "accountsWithLedgerBalanceMismatch"
+        FROM legacy l
+        LEFT JOIN purchase_proof p ON p.user_id=l.id
+        LEFT JOIN ledger cd ON cd.user_id=l.id
+      `);
+      res.set("Cache-Control","private, no-store");
+      res.json({
+        mode:"read-only",
+        destructive:false,
+        caveat:"The credit ledger can be incomplete for historical accounts. All balances and payment proofs must be reconciled before changing customer entitlements.",
+        summary:(result as any).rows?.[0] ?? (result as any)[0] ?? {}
+      });
+    }catch(err){
+      console.error("[Membership] Legacy audit unavailable",err);
+      res.status(503).json({error:"Legacy credit audit unavailable"});
     }
   });
 
@@ -1901,6 +1978,9 @@ Respond ONLY with valid JSON in this exact format:
     "/api/payment/create-checkout",
     isAuthenticated,
     async (req, res) => {
+      if (process.env.IFVA_LEGACY_NEW_PURCHASES_DISABLED === "true") {
+        return res.status(410).json({error:"Previous one-time plans are no longer available for new purchases"});
+      }
       try {
         const {
           businessPlanId,
@@ -2230,6 +2310,9 @@ Respond ONLY with valid JSON in this exact format:
     "/api/payment/direct-subscribe",
     isAuthenticated,
     async (req, res) => {
+      if (process.env.IFVA_LEGACY_NEW_PURCHASES_DISABLED === "true") {
+        return res.status(410).json({error:"Previous one-time plans are no longer available for new purchases"});
+      }
       try {
         const { planId, tier: legacyTier, expectedRevision, promoCode } = req.body;
         const tier = planId || legacyTier;
