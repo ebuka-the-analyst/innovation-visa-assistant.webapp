@@ -10,6 +10,7 @@
  */
 import type { Express, RequestHandler } from "express";
 import Stripe from "stripe";
+import { randomUUID } from "node:crypto";
 import type { Pool } from "pg";
 import {
   processSignedTestStripeEvent, getEffectiveTestPaidState,
@@ -97,6 +98,7 @@ export function registerMemberStripeTestRoutes(
           (!expectedRecurring && price.type!=="one_time")) {
         return res.status(503).json({error:"Stripe test price and advertised membership do not match"});
       }
+      const orderId=randomUUID();
       const customer=await cfg.stripe.customers.create({email,metadata:{ifvaMembershipTest:"true"}});
       const session=await cfg.stripe.checkout.sessions.create({
         mode:expectedRecurring?"subscription":"payment",
@@ -107,16 +109,19 @@ export function registerMemberStripeTestRoutes(
         // Never present an unverified final VAT calculation as correct.
         success_url:cfg.publicUrl+"/?membership_test=return&session_id={CHECKOUT_SESSION_ID}",
         cancel_url:cfg.publicUrl+"/?membership_test=cancelled",
-        metadata:{ifvaMembershipTest:"true"},
+        metadata:{ifvaMembershipTest:"true",ifvaTestOrderId:orderId},
+        ...(expectedRecurring ? {
+          subscription_data:{metadata:{ifvaMembershipTest:"true",ifvaTestOrderId:orderId}},
+        } : {}),
       });
       if(!session.id || !session.url)throw new Error("Stripe did not return a hosted checkout URL");
       // If a webhook beats this insert, return 503 to Stripe so it retries;
       // the event handler cannot fall back to client supplied metadata.
       const recorded=await pool.query<{id:string}>(`
         INSERT INTO member_stripe_test_orders
-          (user_id,sku,stripe_customer_id,stripe_checkout_session_id,stripe_price_id,expected_pence)
-        VALUES($1,$2,$3,$4,$5,$6) RETURNING id`,
-        [user.id,sku,customer.id,session.id,cfg.prices[sku],EXPECTED_GBP_PENCE[sku]],
+          (id,user_id,sku,stripe_customer_id,stripe_checkout_session_id,stripe_price_id,expected_pence)
+        VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
+        [orderId,user.id,sku,customer.id,session.id,cfg.prices[sku],EXPECTED_GBP_PENCE[sku]],
       );
       res.status(201).json({orderId:recorded.rows[0].id,sessionId:session.id,url:session.url,
         sandboxOnly:true});
@@ -151,10 +156,10 @@ export function registerMemberStripeTestRoutes(
     const obj=event.data.object as any;
     let orderId:string|null=null;
     try{
-      let rows:{id:string;stripe_customer_id:string;stripe_subscription_id:string|null;stripe_checkout_session_id:string;sku:CandidateSku;}[]=[];
+      let rows:{id:string;user_id:string;stripe_customer_id:string;stripe_subscription_id:string|null;stripe_checkout_session_id:string;stripe_price_id:string;sku:CandidateSku;}[]=[];
       if(event.type==="checkout.session.completed" || event.type==="checkout.session.async_payment_succeeded"){
         const r=await pool.query(`
-          SELECT id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,sku
+          SELECT id,user_id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,stripe_price_id,sku
           FROM member_stripe_test_orders WHERE stripe_checkout_session_id=$1`,[obj.id]);
         rows=r.rows;
       }else if(event.type==="invoice.paid"||event.type==="invoice.payment_failed"||
@@ -162,15 +167,35 @@ export function registerMemberStripeTestRoutes(
         const sub=event.type==="customer.subscription.deleted"?obj.id:invoiceSub(obj);
         if(sub){
           const r=await pool.query(`
-            SELECT id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,sku
+            SELECT id,user_id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,stripe_price_id,sku
             FROM member_stripe_test_orders WHERE stripe_subscription_id=$1`,[sub]);
           rows=r.rows;
+          if(rows.length===0){
+            // A first paid invoice may arrive before checkout.session.completed.
+            // Re-fetch the provider subscription and validate its server-set
+            // order reference, customer, and price BEFORE attaching it.
+            const subscription=await cfg.stripe.subscriptions.retrieve(sub);
+            const id=subscription.metadata?.ifvaTestOrderId;
+            const r2=orderIdPattern.test(id||"") ? await pool.query(`
+              SELECT id,user_id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,stripe_price_id,sku
+              FROM member_stripe_test_orders WHERE id=$1`,[id]) : {rows:[]};
+            if(r2.rows.length===1){
+              const candidate=r2.rows[0];
+              const activePrice=subscription.items?.data?.find(
+                item=>item.price?.id===candidate.stripe_price_id);
+              if(asId(subscription.customer)===candidate.stripe_customer_id &&
+                 activePrice && candidate.sku!=="founder_pass_90d"){
+                const bound=await pool.query(`
+                  UPDATE member_stripe_test_orders SET stripe_subscription_id=$1
+                  WHERE id=$2 AND stripe_subscription_id IS NULL`,[sub,candidate.id]);
+                if(bound.rowCount===1) rows=[{...candidate,stripe_subscription_id:sub}];
+              }
+            }
+          }
         }
-        // On initial subscription the paid invoice may arrive before checkout.
-        // Let Stripe retry rather than guessing a founder from email/metadata.
       }else if(event.type==="charge.refunded"||event.type==="charge.dispute.created"){
         const r=await pool.query(`
-          SELECT id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,sku
+          SELECT id,user_id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,stripe_price_id,sku
           FROM member_stripe_test_orders WHERE stripe_payment_intent_id=$1`,[obj.payment_intent]);
         rows=r.rows;
       }else{return res.json({received:true,ignored:true});}
@@ -183,7 +208,9 @@ export function registerMemberStripeTestRoutes(
         // Stripe is authoritative for subscription or PaymentIntent, not
         // event metadata. Fetch to avoid trusting stale test payload fields.
         const session=await cfg.stripe.checkout.sessions.retrieve(order.stripe_checkout_session_id);
-        if(session.customer!==order.stripe_customer_id || session.id!==obj.id)
+        if(asId(session.customer)!==order.stripe_customer_id ||
+            session.id!==obj.id || session.client_reference_id!==order.user_id ||
+            session.metadata?.ifvaTestOrderId!==order.id)
           return res.status(409).send("Provider checkout mismatch");
         const sub=asId(session.subscription);
         const intent=asId(session.payment_intent);
@@ -202,7 +229,7 @@ export function registerMemberStripeTestRoutes(
         // the event envelope. Never grant a user entitlement in QA.
         const fresh=await cfg.stripe.invoices.retrieve(obj.id);
         if(invoiceSub(fresh)!==order.stripe_subscription_id ||
-            fresh.customer!==order.stripe_customer_id)
+            asId(fresh.customer)!==order.stripe_customer_id)
           return res.status(409).send("Provider invoice mismatch");
         // If provider API invoice changed since the event, refuse to confirm.
         const isPaid=fresh.status==="paid" && fresh.amount_remaining===0;
