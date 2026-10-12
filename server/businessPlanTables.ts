@@ -40,7 +40,7 @@ export function htmlFinancialTablesToMarkdown(source: string): string {
           return { value: cellText(cell[3]), colspan };
         });
       if (!cells.length) continue;
-      if (cells.some(cell => !Number.isInteger(cell.colspan) || cell.colspan < 1 || cell.colspan > 5)) {
+      if (cells.some(cell => !Number.isInteger(cell.colspan) || cell.colspan < 1 || cell.colspan > 6)) {
         return whole;
       }
       const totalColumns = cells.reduce((total, cell) => total + cell.colspan, 0);
@@ -64,7 +64,7 @@ export function htmlFinancialTablesToMarkdown(source: string): string {
       }
     }
 
-    if (width == null || width < 2 || width > 5 ||
+    if (width == null || width < 2 || width > 6 ||
         rows.length < 2 || rows.some(row => row.length !== width)) {
       return whole;
     }
