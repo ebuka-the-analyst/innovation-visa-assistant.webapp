@@ -1,6 +1,6 @@
 # IFVA memberships — provider-connected test acceptance and public release gate
 Date: 12 October 2026
-Status: BUILD-ONLY, QA CONNECTOR INACTIVE. Not a production release approval.
+Status: QA CODE AND DATABASE INTEGRATION TESTED; STRIPE TEST-CREDENTIAL PROVIDER ACCEPTANCE STILL NOT RUN. Not a production release approval.
 
 ## Current offering (proposed)
 | SKU | Advertised price GBP | Period | Allowance |
@@ -19,6 +19,8 @@ Do not publish prices or claim tax treatment until the UK consumer/VAT review is
   - `RAILWAY_ENVIRONMENT_NAME=staging`
   - `NODE_ENV=production`
 - Gateway reads independent `sk_test_` and `whsec_` secrets. No production Stripe client or Stripe price is ever used.
+- `server/phase3/memberEntitlementFulfilmentQa.ts` now applies fully verified, non-duplicate activate/suspend/expire decisions to the **QA** `member_ai_entitlements` and `users` tables. This callback runs inside the signed-event ledger transaction so the event audit, paid window, quota basis and user status either ALL commit or ALL roll back.
+- `tests/phase3-qa-entitlement-fulfilment.integration.test.ts` exercises genuine disposable PostgreSQL transactions, concurrent signed retries, founder/founder-pro recurring invoices, pass expiry, cancellation, renewal failure, user status and refusal to overwrite legacy plans. It is not a real Stripe payment test.
 - Only `migrations/qa/20261012_member_stripe_test_ledger.sql` supplies event/order tables. This SQL is **not** included in the application's automatic production migration directory.
 - `POST /api/member-stripe-test/checkout` (authenticated) selects server-owned price ID, validates GBP, price, type and monthly interval before creating a Stripe-hosted Checkout session. The client cannot submit an amount or a Stripe price ID. A server-created order UUID is embedded in test checkout/subscription metadata.
 - `POST /api/member-stripe-test/webhook` verifies the exact raw-byte signature. First subscription invoices can be reconciled against a freshly fetched Stripe subscription with matching server order ID, customer and price. Signed provider events update only the isolated PostgreSQL **simulated** order state, not real user entitlements.
@@ -47,7 +49,7 @@ Use test cards only. Invalid webhook signatures and events from `livemode:true` 
 5. Cancellation effective now and at end of term, duplicate and out-of-order events.
 6. Full and partial refunds, disputes, upgrades/downgrades, retries and manual reconciliation.
 7. One-time pass 90-day expiry with no auto-renewal; six-plan lifetime cap.
-8. Actual `member_ai_entitlements` atomic writes and user status updates **remain unimplemented**. Existing gateway never grants users access, so its completion alone is not a launch signal.
+8. Atomic changes to the real account/entitlement columns are **implemented only for fictional QA customers**, with a disabled QA-only gateway and database tests. Production lifecycle adapter, replay reconciliation/alerting and independently confirmed provider state must pass before public release.
 9. Confirm existing paid customers and their credits remain unchanged.
 10. Production-origin signature/price-mode mismatch checks and non-public feature flag, then staged readiness plus rollback review.
 
