@@ -74,3 +74,22 @@ test("all premium prompt entry points avoid generic, industry-inappropriate proo
     assert.ok(instructions.some(line => /never promise endorsement/i.test(line)));
   }
 });
+
+
+test("legal and endorsement statements without traceable sources require manual review",()=>{
+  const unsourced = auditPremiumPlanEvidence(
+    "## 1. EXECUTIVE SUMMARY\n\nUK GDPR and the Equality Act 2010 may apply. " +
+    "Innovator Founder endorsement requirements must be independently checked."
+  );
+  assert.equal(unsourced.referenceCoverage.suppliedSourceUrls,0);
+  assert.ok(unsourced.referenceCoverage.legalOrPolicyTopicsDetected.length>=2);
+  assert.match(unsourced.unverifiedSourceMentions.join(" "),/without any cited source URLs/);
+
+  const supplied = auditPremiumPlanEvidence(
+    "## 1. EXECUTIVE SUMMARY\n\nCheck current Innovator Founder guidance: " +
+    "https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-innovator-founder"
+  );
+  assert.equal(supplied.referenceCoverage.suppliedSourceUrls,1);
+  assert.doesNotMatch(supplied.unverifiedSourceMentions.join(" "),/without any cited source URLs/);
+  // A URL is not proof that its quoted claims were validated; human review still applies.
+});
