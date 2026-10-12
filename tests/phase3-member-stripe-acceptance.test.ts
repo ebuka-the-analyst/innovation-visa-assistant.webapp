@@ -137,6 +137,9 @@ test("old paid invoices never restore cancelled or refunded entitlements",()=>{
   assert.equal(l.currentlyActive,false);
   const retry=signed("invoice.paid",invoice(o.sku),1800000050,"evt_old_invoice");
   assert.equal(decideVerifiedTestMembershipEvent(retry,o,l).action,"ignore");
+  const sameSecond=signed("invoice.paid",invoice(o.sku),1800000100,"evt_same_second_replay");
+  assert.equal(decideVerifiedTestMembershipEvent(sameSecond,o,l).action,"ignore",
+    "Same-second invoice must not resurrect a cancelled membership");
   assert.equal(l.currentlyActive,false);
 });
 
