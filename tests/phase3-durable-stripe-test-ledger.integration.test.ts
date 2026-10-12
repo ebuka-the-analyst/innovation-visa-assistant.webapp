@@ -47,6 +47,7 @@ function paidPass(o:Order) {
 function invoice(o:Order) {
   return { id:"in_" + randomUUID(), customer:o.customer, subscription:o.subscription,
     status:"paid", paid_out_of_band:false, currency:"gbp", amount_paid:o.pence,
+    collection_method:"charge_automatically",amount_remaining:0,
     lines:{ data:[{price:{id:o.price},period:{start:TIME,end:TIME+30*86400}}] } };
 }
 async function send(o:Order,type:string,obj:Record<string,unknown>,id:string,created=TIME,livemode=false) {
