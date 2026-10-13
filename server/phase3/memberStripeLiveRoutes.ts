@@ -1,13 +1,10 @@
 /**
  * Production live membership gateway. All routes fail closed unless explicitly approved.
  *
- * This module must NEVER run against the production Railway project. It
- * uses separate sk_live_/whsec_ credentials and QA-only SQL tables, and
- * projects test-paid state into QA-only users and member entitlements in one
- * database transaction. Never points at live customer tables.
- *
- * Real test-mode Checkout and webhook signatures can be exercised when a
- * dedicated Stripe TEST account configuration is supplied to clean QA.
+ * Only the canonical production Railway service may use this module, and
+ * only after explicit tax, consumer-terms and release flags. Stripe credentials,
+ * event ledgers, and order IDs are separate from the tested sandbox gateway.
+ * Signed live events are the sole route to live membership fulfilment.
  */
 import type { Express, RequestHandler } from "express";
 import Stripe from "stripe";
@@ -67,7 +64,7 @@ function config(): Config {
   const url=new URL(publicUrl);
   if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash ||
       url.pathname !== "/" || url.hostname !== "innovatorfoundervisaassistant.co.uk") {
-    throw new Error("Live-return host must be an isolated HTTPS Railway QA domain");
+    throw new Error("Live-return host must match the exact authorised production domain");
   }
   return {stripe:new Stripe(key,{apiVersion:"2025-08-27.basil"}),secret,
     publicUrl:url.origin,prices};
@@ -87,8 +84,8 @@ function invoiceSub(invoice:any):string | null {
 }
 
 /**
- * Only when explicitly enabled in fresh isolated QA. This does not change
- * the existing application Stripe client and cannot enable live membership.
+ * Mount only on the exact approved production service. No live route is
+ * exposed without the complete release/consumer/tax gate.
  */
 export function registerMemberStripeLiveRoutes(
   app: Express, isAuthenticated: RequestHandler, pool: Pool,
