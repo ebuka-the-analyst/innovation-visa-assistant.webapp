@@ -1,4 +1,5 @@
 import FounderMembershipCheckout from "./FounderMembershipCheckout";
+import {useState} from "react";
 import MyFounderMembership from "./MyFounderMembership";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Check } from "lucide-react";
@@ -26,6 +27,12 @@ function isCatalogue(value:unknown):value is OfferCatalogue {
   typeof x.purchasable==="boolean" && typeof x.legacyNotice==="string";
 }
 export default function FounderMembershipPlans(){
+ const isPricingPage=typeof window!=="undefined"&&window.location.pathname==="/pricing";
+ const [chosenSku,setChosenSku]=useState<MembershipOffer["id"]|null>(()=>{
+  if(typeof window==="undefined"||window.location.pathname!=="/pricing")return null;
+  const value=new URLSearchParams(window.location.search).get("membership_sku");
+  return value==="founder"||value==="founder_pro"||value==="founder_pass_90d"?value:null;
+ });
  const {data,error,isPending}=useQuery({
   queryKey:["/api/member-offers"],
   queryFn:async()=>{
@@ -64,7 +71,9 @@ export default function FounderMembershipPlans(){
     </ul>
     <div className="mt-auto pt-8">
      <Button disabled={!data.purchasable} className="w-full"
-      onClick={()=>{if(data.purchasable)window.location.assign(`/pricing?membership_sku=${encodeURIComponent(offer.id)}#membership-checkout`);}}
+      onClick={()=>{if(!data.purchasable)return;
+        if(isPricingPage)setChosenSku(offer.id);
+        else window.location.assign(`/pricing?membership_sku=${encodeURIComponent(offer.id)}`);}}
       data-testid={`membership-action-${offer.id}`}>
        {offer.ctaText}
      </Button>
@@ -72,9 +81,18 @@ export default function FounderMembershipPlans(){
     </div>
    </Card>)}
   </div>
-  {typeof window!=="undefined" && window.location.pathname==="/pricing" && <>
-    {data.purchasable && <div id="membership-checkout"><FounderMembershipCheckout/></div>}
-    <MyFounderMembership/>
+  {isPricingPage&&<>
+   <FounderMembershipCheckout
+    offer={data.purchasable?data.offers.find(o=>o.id===chosenSku)||null:null}
+    open={data.purchasable&&chosenSku!==null}
+    onOpenChange={open=>{
+     if(open)return;
+     setChosenSku(null);
+     const url=new URL(window.location.href);
+     url.searchParams.delete("membership_sku");
+     window.history.replaceState(null,"",url.pathname+url.search+url.hash);
+    }}/>
+   <MyFounderMembership/>
   </>}
  </section>;
 }
