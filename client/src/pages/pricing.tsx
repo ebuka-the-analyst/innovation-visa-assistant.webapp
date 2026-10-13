@@ -40,7 +40,7 @@ export default function Pricing(){
       description="Founder, Founder Pro and fixed-duration membership options for AI-assisted UK Innovator Founder business preparation."
       canonical="https://innovatorfoundervisaassistant.co.uk/pricing"
       schema={{"@context":"https://schema.org","@graph":[organizationSchema]}}/>
-     <main className="responsive-container"><FounderMembershipPlans/></main>
+     <main className="responsive-container"><FounderMembershipPlans/><MyFounderMembership/>{(new URLSearchParams(window.location.search).has("membership")||new URLSearchParams(window.location.search).has("membership_order"))&&<div id="membership-checkout"><FounderMembershipCheckout/></div>}</main>
     </div>
    </SidebarInset>
   </div>
