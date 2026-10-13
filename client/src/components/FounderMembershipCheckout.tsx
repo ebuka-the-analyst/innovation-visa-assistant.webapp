@@ -29,7 +29,7 @@ export default function FounderMembershipCheckout(){
     method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({sku,confirmedPricePence:price,acknowledgeNewPayment:true,
       acknowledgeMonthlyRenewal:sku!=="founder_pass_90d"?renew:false,
-      acknowledgeLivePayment:true,acknowledgeVatPrice:true,
+      acknowledgeLivePayment:true,acknowledgeNoVatPrice:true,
       acknowledgeConsumerTerms:true,consumerTermsVersion:termsVersion})
    });
    const body=await response.json();
