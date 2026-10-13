@@ -6,8 +6,8 @@ test("Customer return never grants or claims membership access from query parame
  assert.match(s,/orderId/);
  assert.match(s,/fetch\("\/api\/member-stripe-live\/order\//);
  assert.match(s,/payload\.active===true/);
- assert.match(s,/payload\.liveMode===true/);
- assert.match(s,/payload\.orderId===orderId/);
+ assert.match(s,/payload\?\.liveMode===true/);
+ assert.match(s,/payload\?\.orderId===orderId/);
  assert.match(s,/Do not pay again/);
  assert.match(s,/response\.status===404\|\|response\.status===401/);
 });
