@@ -29,6 +29,10 @@ jobs:
         run: |
           node --import tsx --test tests/phase3-provider-test-gateway.test.ts
           node --import tsx --test tests/phase3-new-purchase-consent.test.ts
+      - name: Validate lifecycle audit guard and access invariants
+        run: |
+          node --check server/scripts/audit-member-lifecycle-qa.cjs
+          node --test tests/phase3-lifecycle-audit.test.cjs
       - name: Prepare build
         run: |
           node scripts/prepare-platform-trust-hardening.cjs
