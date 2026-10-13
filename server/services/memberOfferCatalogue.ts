@@ -28,7 +28,7 @@ const offerSchema=z.object({
  revisionsPerPeriod:z.number().int().min(1).max(300),
  periodDays:z.number().int().min(1).max(90).nullable(),
  maximumGenerations:z.number().int().min(1).max(200).nullable(),
- benefits:z.array(z.string().trim().min(5).max(180)).min(1).max(8),
+ benefits:z.array(z.string().trim().min(5).max(180)).min(1).max(12),
  ctaText:z.string().trim().min(3).max(60),
  sortOrder:z.number().int().min(0).max(10),
 }).strict();
@@ -69,6 +69,69 @@ const defaultCatalogue:MemberOfferCatalogue={
   {id:"founder_pass_90d",name:"90-Day Pass",description:"A fixed-duration membership without automatic renewal.",pricePence:15900,currency:"GBP",billingKind:"one_time",billingLabel:"one-time payment",generationsPerPeriod:2,revisionsPerPeriod:15,periodDays:30,maximumGenerations:6,benefits:["2 generations and 15 revisions per 30-day window","6 generations maximum over 90 days","No automatic renewal"],ctaText:"Choose 90-Day Pass",sortOrder:2},
  ],
 };
+/**
+ * Approved customer-facing membership copy. This is NOT an entitlement check:
+ * access is granted only from signed, paid Stripe events and the tool gate.
+ * Stored offer overrides cannot silently reintroduce obsolete marketing claims.
+ */
+export const APPROVED_MEMBER_PRESENTATION = {
+ founder: {
+  tag:"For founders getting started",
+  headline:"Turn your business idea into a structured, compelling plan.",
+  description:"Get the essential AI-powered tools to develop your idea, explore its commercial potential and strengthen your business-plan preparation.",
+  bestFor:"Perfect for first-time founders developing a promising business idea.",
+  buttonNote:"Monthly subscription · Cancel future renewals",
+  benefits:[
+   "Essential business-planning tools",
+   "2 AI business-plan generations per month",
+   "15 AI plan revisions per month",
+   "Innovation, viability and scalability planning",
+   "Financial forecasting and market research tools",
+   "Business-plan PDF exports",
+   "Standard email support",
+  ],
+  ctaText:"Start Building My Future",
+ },
+ founder_pro: {
+  tag:"For ambitious founders",
+  headline:"Your complete AI-powered founder preparation suite.",
+  description:"Go beyond writing a business plan. Access advanced analysis, interview preparation and intelligent tools to help develop a stronger business case.",
+  bestFor:"Ideal for serious founders who want the most comprehensive toolkit and additional support.",
+  buttonNote:"Monthly subscription · Cancel future renewals",
+  benefits:[
+   "Everything in Founder",
+   "Full access to all available premium AI preparation tools",
+   "4 AI business-plan generations per month",
+   "30 AI plan revisions per month",
+   "Advanced competitor, market and financial analysis",
+   "AI mock interviews and pitch-deck preparation",
+   "Advanced evidence and preparation-gap reviews",
+   "AI Command Centre and specialist AI assistants",
+   "VIP priority customer support",
+  ],
+  ctaText:"Unlock My Full Potential",
+ },
+ founder_pass_90d: {
+  tag:"For a complete 90-day journey",
+  headline:"Three months to turn your vision into a stronger business case.",
+  description:"Work at your own pace with a fixed-price preparation package. No monthly charges, no automatic renewal and no recurring subscription to manage.",
+  bestFor:"Perfect for founders who want a defined preparation period with one upfront payment.",
+  buttonNote:"Pay once · Access ends after 90 days",
+  benefits:[
+   "90 days of preparation-platform access",
+   "Full self-service AI preparation toolkit",
+   "2 AI business-plan generations every 30 days",
+   "15 AI plan revisions every 30 days",
+   "Up to 6 business plans and 45 revisions over 90 days",
+   "Financial, market and innovation analysis",
+   "AI interview practice and evidence preparation",
+   "Document exports and standard email support",
+   "No automatic renewal",
+  ],
+  ctaText:"Begin My 90-Day Journey",
+ },
+} as const;
+
 export function parseMemberOfferCatalogue(value:unknown):MemberOfferCatalogue{
  return catalogueSchema.parse(value);
 }
@@ -90,5 +153,8 @@ export function canStartLiveMembershipCheckout(env:NodeJS.ProcessEnv=process.env
 export async function getPublicMemberOffers(){
  const catalog=await getMemberOfferCatalogue();
  return {...catalog,purchasable:canStartLiveMembershipCheckout(),
-  offers:catalog.offers.slice().sort((a,b)=>a.sortOrder-b.sortOrder).map(o=>({...o}))};
+  offers:catalog.offers.slice().sort((a,b)=>a.sortOrder-b.sortOrder).map(o=>({
+   ...o,...APPROVED_MEMBER_PRESENTATION[o.id],
+   benefits:[...APPROVED_MEMBER_PRESENTATION[o.id].benefits],
+  }))};
 }
