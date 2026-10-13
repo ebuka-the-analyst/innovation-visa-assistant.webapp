@@ -1,6 +1,10 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { rejectExecutableProbes } from "./security/executableProbeGuard";
 import { registerRoutes } from "./routes";
+import { registerMemberStripeLiveRoutes } from "./phase3/memberStripeLiveRoutes";
+import { isAuthenticated, requireAdmin } from "./auth";
+import { dbPool } from "./db";
+import type { Pool as PgPool } from "pg";
 import { startBusinessPlanGenerationWorker } from "./services/businessPlanGenerationService";
 import { registerBusinessPlanRevisionRoutes } from "./businessPlanRevisionRoutes";
 import { registerAdminBusinessPlanRevisionRoutes } from "./adminBusinessPlanRevisionRoutes";
@@ -338,6 +342,10 @@ app.get("/health", (_req, res) => {
 
 (async () => {
   const server = await registerRoutes(app);
+  // Live membership is registered with fail-closed 503 handlers unless all
+  // independent production, tax, terms and release gates are approved.
+  // The legacy expert booking checkout and existing plans remain independent.
+  registerMemberStripeLiveRoutes(app, isAuthenticated, dbPool as PgPool, requireAdmin);
   registerAIProviderGatewayRoutes(app);
   registerAIProviderAdminRoutes(app);
   registerSearchConsoleAdminRoutes(app);
