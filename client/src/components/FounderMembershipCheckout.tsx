@@ -1,3 +1,4 @@
+import FounderMembershipPaymentReturn from "./FounderMembershipPaymentReturn";
 import {useEffect,useState} from "react";
 import {Link} from "wouter";
 type Sku="founder"|"founder_pro"|"founder_pass_90d";
@@ -38,7 +39,7 @@ export default function FounderMembershipCheckout(){
    window.location.assign(body.url);
   }catch(e){setMessage(e instanceof Error?e.message:"Checkout unavailable");setBusy(null);}
  }
- return <section aria-label="Founder memberships" className="my-12 space-y-5">
+ return <><FounderMembershipPaymentReturn /><section aria-label="Founder memberships" className="my-12 space-y-5">
   <h2 className="text-2xl font-semibold">Founder memberships</h2>
   <p className="text-sm text-muted-foreground">Separate from existing pay-per-plan packages. Digital AI preparation only, not immigration advice, endorsement or guaranteed visa outcomes.</p>
   <div className="grid gap-4 md:grid-cols-3">{products.map(p=><div key={p.sku} className="rounded-lg border p-5 space-y-3">
@@ -60,5 +61,5 @@ export default function FounderMembershipCheckout(){
   </div>}
   {!available&&<p className="text-sm text-muted-foreground">New memberships are not accepting live payments yet. Existing services and purchases remain available.</p>}
   {message&&<p role="alert" className="text-sm text-destructive">{message}</p>}
- </section>;
+ </section></>;
 }
