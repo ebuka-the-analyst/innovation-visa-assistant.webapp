@@ -52,6 +52,14 @@ export function isMemberLiveGatewayAllowed(env: NodeJS.ProcessEnv = process.env)
     env.NODE_ENV === "production";
 }
 
+/** Separately reviewed business readiness is NOT itself permission to sell publicly. */
+export function isMemberPublicCheckoutAllowed(env:NodeJS.ProcessEnv=process.env):boolean {
+  return isMemberLiveGatewayAllowed(env) &&
+    env.IFVA_MEMBERSHIP_PAYMENTS_LIVE_ENABLED==="true" &&
+    env.IFVA_MEMBERSHIP_LIVE_WEBHOOK_VERIFIED==="true" &&
+    env.IFVA_MEMBERSHIP_LIVE_FULFILMENT_VERIFIED==="true";
+}
+
 function config(): Config {
   const key=process.env.IFVA_MEMBER_STRIPE_LIVE_SECRET_KEY || "";
   const secret=process.env.IFVA_MEMBER_STRIPE_LIVE_WEBHOOK_SECRET || "";
@@ -97,8 +105,8 @@ export function registerMemberStripeLiveRoutes(
 ): void {
   app.get("/api/member-stripe-live/availability",(_req,res)=>{
     res.setHeader("Cache-Control","no-store");
-    return res.json({available:isMemberLiveGatewayAllowed(),
-      termsVersion:isMemberLiveGatewayAllowed()?process.env.IFVA_MEMBER_LIVE_TERMS_VERSION:null});
+    return res.json({available:isMemberPublicCheckoutAllowed(),
+      termsVersion:isMemberPublicCheckoutAllowed()?process.env.IFVA_MEMBER_LIVE_TERMS_VERSION:null});
   });
   if(!isMemberLiveGatewayAllowed()){
     // An unmounted POST falls through to the SPA handler, which could return
@@ -119,6 +127,9 @@ export function registerMemberStripeLiveRoutes(
   }
 
   app.post("/api/member-stripe-live/checkout",isAuthenticated,async(req,res)=>{
+    // Keep the live signed webhook mounted while the public customer gateway
+    // remains closed until independent payment, receipt and fulfilment QA.
+    if(!isMemberPublicCheckoutAllowed())return res.status(503).json({error:"New membership Checkout is still undergoing live payment verification"});
     const user=req.user as any;
     const sku=confirmedNewLiveMembershipPurchase(req.body);
     if(!user?.id || !sku || user.isEmailVerified !== true || user.isAdmin === true ||
