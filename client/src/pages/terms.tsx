@@ -25,7 +25,7 @@ export default function TermsOfService() {
               </div>
               <div>
                 <h1 className="text-xl font-bold" data-testid="heading-terms">Terms of Service</h1>
-                <p className="text-muted-foreground">Last Updated: August 12, 2026</p>
+                <p className="text-muted-foreground">Last Updated: 13 October 2026</p>
               </div>
             </div>
             <p className="text-muted-foreground max-w-2xl">
@@ -113,12 +113,12 @@ export default function TermsOfService() {
 
                   <h3 className="font-semibold mb-2">4.2 Payment Terms</h3>
                   <p className="text-muted-foreground mb-3">
-                    Paid plans are charged once at the price shown at checkout. All payments are processed securely through Stripe. By providing payment information, you authorize us to charge the applicable one-time fee.
+                    Existing pay-per-plan purchases are charged once at the displayed price. Separate Founder (£69/month) and Founder Pro (£119/month) memberships renew automatically each month until cancelled. The £159 90-Day Pass is a one-time payment and does not renew. Memberships include stated generation and revision allowances. The total price and renewal frequency are confirmed before payment. The listed UK membership prices currently have no VAT charged. Payments are processed securely through Stripe.
                   </p>
 
                   <h3 className="font-semibold mb-2">4.3 Refund Policy</h3>
                   <p className="text-muted-foreground">
-                    We offer a 14-day money-back guarantee for first-time paid-plan purchases. Where a plan expressly includes a Success Guarantee, its stated conditions also apply. Refund requests must be submitted to <a href="mailto:billing@innovatorfoundervisaassistant.co.uk" className="text-primary hover:underline">billing@innovatorfoundervisaassistant.co.uk</a>.
+                    We offer a 14-day money-back guarantee for first-time paid-plan purchases where the offer applies. Statutory rights under applicable consumer law are not limited by this guarantee. For digital content or services supplied during a statutory cancellation period, rights may depend on explicit consent, the type of supply and when delivery begins. Where a plan expressly includes a Success Guarantee, its stated conditions also apply. Refund requests must be submitted to <a href="mailto:billing@innovatorfoundervisaassistant.co.uk" className="text-primary hover:underline">billing@innovatorfoundervisaassistant.co.uk</a>.
                   </p>
                 </div>
               </div>
@@ -242,7 +242,7 @@ export default function TermsOfService() {
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-3">10. Termination</h2>
               <p className="text-muted-foreground mb-3">
-                We reserve the right to suspend or terminate your account at any time for violations of these Terms or fraudulent activity. Current plan purchases are one-time payments rather than recurring subscriptions.
+                We may suspend or terminate access for material Terms violations or fraud where lawful. Existing pay-per-plan purchases are one-time charges, whereas Founder and Founder Pro are separate automatically renewing monthly memberships. A member may cancel future renewals through the membership dashboard while retaining access for the current paid period unless law or a separate valid termination requires otherwise. The 90-Day Pass expires without auto-renewal. Cancellation of renewal is not itself a refund request. Statutory consumer cancellation and refund rights remain unaffected.
               </p>
               <p className="text-muted-foreground">
                 Upon termination, your access to paid features will cease, but your data will be retained according to our Privacy Policy.
