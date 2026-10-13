@@ -54,3 +54,17 @@ test("new pricing and consumer-facing benefits originate from the server only",(
  assert.match(server,/legacyNotice/);
  assert.match(server,/purchasable:canStartLiveMembershipCheckout/);
 });
+
+
+test("pricing cards omit extra VAT, legacy and renewal callouts while checkout retains required disclosures",()=>{
+ const layout=read("client/src/components/FounderMembershipPlans.tsx");
+ const checkout=read("client/src/components/FounderMembershipCheckout.tsx");
+ const terms=read("client/src/pages/terms.tsx");
+ assert.ok(!layout.includes("<strong>No VAT charged</strong>"));
+ for(const removed of ["ShieldCheck","data.legacyTitle","data.legacyNotice","data.billingNotice"])assert.ok(!layout.includes(removed));
+ assert.ok(layout.includes("data.offers.map"));
+ assert.match(checkout,/acknowledgeMonthlyRenewal/);
+ assert.match(checkout,/acknowledgeConsumerTerms/);
+ assert.match(checkout,/acknowledgeNoVatPrice/);
+ assert.match(terms,/Founder Pro/);
+});
