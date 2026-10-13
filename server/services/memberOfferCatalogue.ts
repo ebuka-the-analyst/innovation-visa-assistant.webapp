@@ -10,6 +10,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "../db";
 import { systemSettings } from "@shared/schema";
+import { isMemberLiveGatewayAllowed } from "../phase3/memberStripeLiveRoutes";
 
 export const MEMBER_OFFER_CATALOG_KEY="commercial.founder-offers.v1";
 export const MEMBER_OFFER_IDS=["founder","founder_pro","founder_pass_90d"] as const;
@@ -60,7 +61,7 @@ const defaultCatalogue:MemberOfferCatalogue={
  introduction:"Choose a membership for AI-assisted business-plan preparation. Full billing terms and tax treatment are shown before any new purchase.",
  legacyTitle:"Your previous purchase stays yours",
  legacyNotice:"Any valid credits and plan access already purchased under Basic, Premium, Enterprise or Ultimate remain subject to their original terms. Previous one-time purchases are not automatically converted into new monthly subscriptions. Used credits are not replenished by the pricing change.",
- billingNotice:"A monthly plan renews automatically until cancelled. The 90-Day Pass is a single purchase with no automatic renewal. No payment is taken without a confirmed Stripe checkout.",
+ billingNotice:"A monthly plan renews automatically until cancelled. The 90-Day Pass is a single purchase with no automatic renewal. No VAT charged for eligible UK sales. No payment is taken without a confirmed Stripe checkout.",
  unavailableLabel:"Online checkout is being verified; no payment can be taken for this membership yet.",
  offers:[
   {id:"founder",name:"Founder",description:"An essential monthly membership for founder preparation.",pricePence:6900,currency:"GBP",billingKind:"monthly",billingLabel:"per month",generationsPerPeriod:2,revisionsPerPeriod:15,periodDays:null,maximumGenerations:null,benefits:["2 AI business-plan generations in each paid month","15 revisions in each paid month"],ctaText:"Choose Founder",sortOrder:0},
@@ -82,9 +83,9 @@ export async function getMemberOfferCatalogue():Promise<MemberOfferCatalogue>{
 }
 // Deliberate hard gate: no production webhook/fulfilment route exists yet.
 // Environment variables alone must NEVER make this UI offer chargeable.
-const VERIFIED_LIVE_MEMBERSHIP_GATEWAY_IMPLEMENTED=false;
+
 export function canStartLiveMembershipCheckout(env:NodeJS.ProcessEnv=process.env):boolean{
- return VERIFIED_LIVE_MEMBERSHIP_GATEWAY_IMPLEMENTED &&
+ return isMemberLiveGatewayAllowed(env) &&
    env.NODE_ENV==="production" &&
    env.RAILWAY_ENVIRONMENT_NAME==="production" &&
    env.IFVA_MEMBERSHIP_PAYMENTS_LIVE_ENABLED==="true" &&
