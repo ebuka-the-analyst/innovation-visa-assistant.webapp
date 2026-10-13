@@ -11,6 +11,7 @@ function approved(e=env){
  return e.IFVA_MEMBER_LIVE_ENABLED==="true" &&
  e.IFVA_MEMBER_LIVE_RELEASE_APPROVED==="true" &&
  e.IFVA_MEMBER_LIVE_TAX_SIGNOFF==="approved" &&
+ e.IFVA_MEMBER_LIVE_TAX_BASIS==="uk_not_vat_registered" &&
  e.IFVA_MEMBER_LIVE_CONSUMER_TERMS_SIGNOFF==="approved" &&
  typeof e.IFVA_MEMBER_LIVE_TERMS_VERSION==="string" &&
  e.IFVA_MEMBER_LIVE_TERMS_VERSION.length>=6 &&
@@ -37,6 +38,8 @@ async function main(){
  const stripe=new Stripe(key,{apiVersion:"2025-08-27.basil"});
  const acct=await stripe.accounts.retrieve();
  if(acct.id!=="acct_1SdAGzK9BSTYpDOq")throw Error("Wrong live Stripe account");
+ // Do not interpret zero tax calculated by Stripe as proof of tax compliance.
+ // Only the separately reviewed non-VAT UK trading basis can authorise this release.
  const prices=[
   ["founder",env.IFVA_MEMBER_STRIPE_LIVE_FOUNDER_PRICE_ID,6900,true],
   ["founder_pro",env.IFVA_MEMBER_STRIPE_LIVE_PRO_PRICE_ID,11900,true],
@@ -48,12 +51,12 @@ async function main(){
    throw Error(sku+" missing/duplicate live Stripe price");
   seen.add(priceId);
   const p=await stripe.prices.retrieve(priceId,{expand:["product"]});
-  if(!p.livemode||!p.active||p.tax_behavior!=="inclusive"||
+  if(!p.livemode||!p.active||p.tax_behavior!=="unspecified"||
       p.currency!=="gbp"||p.unit_amount!==amount||
       (recurring && !(p.type==="recurring"&&p.recurring?.interval==="month"&&p.recurring?.interval_count===1))||
       (!recurring && p.type!=="one_time")||
       !p.product||typeof p.product==="string"||(p.product).active!==true)
-    throw Error(sku+" not an active VAT-inclusive approved live membership price/product");
+    throw Error(sku+" not an active reviewed no-VAT live membership price/product");
   console.log("[MEMBER LIVE PREFLIGHT] Verified live price for "+sku);
  }
  const hooks=await stripe.webhookEndpoints.list({limit:100});
