@@ -22,6 +22,7 @@ import {chargeIdForSignedEvent,reconcileSignedChargeToProvider,ProviderChargeMis
 import {recordUnmatchedSignedLiveEvent} from "./memberStripeLiveUnmatched";
 import {validatePaidInvoicePayment,PaidInvoiceMismatch,type VerifiedPaidInvoicePayment} from "./stripeLivePaidInvoiceMapping";
 import { confirmedNewLiveMembershipPurchase } from "./memberStripeLiveCheckoutIntent";
+import { isVerifiedUkMembershipCheckout } from "./memberUkOnlyCheckout";
 
 type Config = {
   stripe: Stripe;
@@ -36,6 +37,7 @@ export function isMemberLiveGatewayAllowed(env: NodeJS.ProcessEnv = process.env)
   // Requiring exact production Railway IDs blocks staging/preview or a typo in a flag.
   // Tax and published consumer-terms sign-off are additional hard launch gates.
   return env.IFVA_MEMBER_LIVE_ENABLED === "true" &&
+    env.IFVA_MEMBER_UK_ONLY_ENABLED === "true" &&
     env.IFVA_MEMBER_LIVE_RELEASE_APPROVED === "true" &&
     env.IFVA_MEMBER_LIVE_TAX_SIGNOFF === "approved" &&
     env.IFVA_MEMBER_LIVE_TAX_BASIS === "uk_not_vat_registered" &&
@@ -122,6 +124,7 @@ export function registerMemberStripeLiveRoutes(
        req.body?.acknowledgeLivePayment !== true ||
        req.body?.acknowledgeNoVatPrice !== true ||
        req.body?.acknowledgeConsumerTerms !== true ||
+       req.body?.acknowledgeUkOnly !== true ||
        req.body?.consumerTermsVersion !== process.env.IFVA_MEMBER_LIVE_TERMS_VERSION)
       return res.status(400).json({error:"Verified non-admin customer must acknowledge total price, no VAT charged and current consumer terms"});
     const email=String(user.email||"").trim();
@@ -155,6 +158,10 @@ export function registerMemberStripeLiveRoutes(
         client_reference_id:user.id,
         line_items:[{price:cfg.prices[sku],quantity:1}],
         billing_address_collection:"required",
+        // Checkout restricts the collected service/delivery address to GB.
+        // Billing address is separately required and checked on the Stripe-signed
+        // payment event before granting access. No physical goods are shipped.
+        shipping_address_collection:{allowed_countries:["GB"]},
         automatic_tax:{enabled:false},
         customer_update:{address:"auto"},
         // No VAT is charged in the approved UK non-VAT-registered release mode.
@@ -368,6 +375,22 @@ export function registerMemberStripeLiveRoutes(
             SET stripe_subscription_id=$1 WHERE id=$2 AND
             (stripe_subscription_id IS NULL OR stripe_subscription_id=$1)`,[sub,order.id]);
         }
+      }
+      // Never fulfil a paid membership for a non-GB billing address, or if
+      // Checkout has not yet captured both verified UK addresses. An initial
+      // invoice can arrive before checkout.session.completed, so return 503
+      // for Stripe to retry after checkout is complete. This check applies to
+      // renewals as well as initial payments, without blocking cancellation,
+      // disputes, refunds or payment-failure revocations.
+      if(event.type==="invoice.paid" ||
+         event.type==="checkout.session.completed" ||
+         event.type==="checkout.session.async_payment_succeeded"){
+        const verifiedSession=await cfg.stripe.checkout.sessions.retrieve(order.stripe_checkout_session_id);
+        if(!isVerifiedUkMembershipCheckout(verifiedSession))
+          return res.status(503).send("UK-only membership address verification incomplete; manual review required");
+        const verifiedCustomer=await cfg.stripe.customers.retrieve(order.stripe_customer_id);
+        if(verifiedCustomer.deleted || verifiedCustomer.address?.country!=="GB")
+          return res.status(503).send("UK-only customer billing country cannot be verified");
       }
       if(event.type==="invoice.paid"){
         // Only accept an invoice re-fetched directly from Stripe, not solely
