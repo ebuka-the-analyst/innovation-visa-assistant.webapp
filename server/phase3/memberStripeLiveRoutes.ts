@@ -24,6 +24,7 @@ import {validatePaidInvoicePayment,PaidInvoiceMismatch,type VerifiedPaidInvoiceP
 import { confirmedNewLiveMembershipPurchase } from "./memberStripeLiveCheckoutIntent";
 import { isVerifiedUkMembershipCheckout } from "./memberUkOnlyCheckout";
 import { isVerifiedMemberLegalSeller } from "./memberLegalSeller";
+import { memberCheckoutEligibilityError } from "./memberLiveCheckoutEligibility";
 
 type Config = {
   stripe: Stripe;
@@ -132,12 +133,10 @@ export function registerMemberStripeLiveRoutes(
     if(!isMemberPublicCheckoutAllowed())return res.status(503).json({error:"New membership Checkout is still undergoing live payment verification"});
     const user=req.user as any;
     const sku=confirmedNewLiveMembershipPurchase(req.body);
-    if(!user?.id || !sku || user.isEmailVerified !== true || user.isAdmin === true ||
-       req.body?.acknowledgeLivePayment !== true ||
-       req.body?.acknowledgeNoVatPrice !== true ||
-       req.body?.acknowledgeConsumerTerms !== true ||
-       req.body?.consumerTermsVersion !== process.env.IFVA_MEMBER_LIVE_TERMS_VERSION)
-      return res.status(400).json({error:"Verified non-admin customer must acknowledge total price, no VAT charged and current consumer terms"});
+    const eligibility=memberCheckoutEligibilityError(
+      user,sku,req.body,process.env.IFVA_MEMBER_LIVE_TERMS_VERSION,
+    );
+    if(eligibility)return res.status(eligibility.status).json({error:eligibility.error});
     const email=String(user.email||"").trim();
     if(!/^\S+@\S+\.\S+$/.test(email))return res.status(400).json({error:"Verified email required"});
     try{
