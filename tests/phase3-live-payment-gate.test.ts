@@ -6,6 +6,7 @@ const base={
  IFVA_MEMBER_LIVE_ENABLED:"true",
  IFVA_MEMBER_LIVE_RELEASE_APPROVED:"true",
  IFVA_MEMBER_LIVE_TAX_SIGNOFF:"approved",
+ IFVA_MEMBER_LIVE_TAX_BASIS:"uk_not_vat_registered",
  IFVA_MEMBER_LIVE_CONSUMER_TERMS_SIGNOFF:"approved",
  IFVA_MEMBER_LIVE_TERMS_VERSION:"consumer-2026-10-v1",
  RAILWAY_PROJECT_ID:"22a033f9-9732-4499-ae97-b509b17354d9",
@@ -33,10 +34,10 @@ test("live route uses separate production tables, keys, verified customer consen
  assert.match(source,/IFVA_MEMBER_STRIPE_LIVE_PASS_PRICE_ID/);
  assert.match(source,/account\.id!=="acct_1SdAGzK9BSTYpDOq"/);
  assert.match(source,/req\.body\?\.acknowledgeLivePayment !== true/);
- assert.match(source,/req\.body\?\.acknowledgeVatPrice !== true/);
+ assert.match(source,/req\.body\?\.acknowledgeNoVatPrice !== true/);
  assert.match(source,/req\.body\?\.acknowledgeConsumerTerms !== true/);
- assert.match(source,/price\.tax_behavior!=="inclusive"/);
- assert.match(source,/automatic_tax:\{enabled:true\}/);
+ assert.match(source,/price\.tax_behavior!=="unspecified"/);
+ assert.match(source,/automatic_tax:\{enabled:false\}/);
  assert.match(source,/customer_update:\{address:"auto"\}/);
  assert.match(source,/constructEvent\(rawBody,signature,cfg\.secret\)/);
  assert.match(source,/event\.livemode!==true/);
