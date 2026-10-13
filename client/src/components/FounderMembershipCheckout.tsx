@@ -56,7 +56,7 @@ export default function FounderMembershipCheckout(){
     I understand the stated live prices, VAT treatment and current membership consumer terms. I authorise a new payment.</label>
    <label className="flex gap-2"><input type="checkbox" checked={renew} onChange={e=>setRenew(e.target.checked)}/>
     I understand that Founder and Founder Pro renew automatically each month until cancelled. The 90-Day Pass does not renew.</label>
-   <p>Please read the <Link href="/terms" className="underline">terms</Link> and <Link href="/refund-policy" className="underline">refund policy</Link> before purchase. Membership cancellation and refund requests can also be made through support.</p>
+   <p>Please read the <Link href="/terms" className="underline">terms</Link> and <Link href="/support" className="underline">support and refund enquiries</Link> before purchase. Membership cancellation and refund requests can also be made through support.</p>
   </div>}
   {!available&&<p className="text-sm text-muted-foreground">New memberships are not accepting live payments yet. Existing services and purchases remain available.</p>}
   {message&&<p role="alert" className="text-sm text-destructive">{message}</p>}
