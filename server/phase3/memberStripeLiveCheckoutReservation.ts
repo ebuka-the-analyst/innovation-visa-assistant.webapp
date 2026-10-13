@@ -3,9 +3,9 @@
  * Feature gated; never expose live Checkout before independent release approval.
  */
 /**
- * QA-only pre-checkout reservation. Locks the account row before creating a
+ * Production pre-checkout reservation. Locks the account row before creating a
  * Stripe Checkout Session, so rapid retries and parallel requests cannot
- * produce two chargeable sessions for one founder. No live customer use.
+ * produce two chargeable sessions for one founder. Requires the live release gate.
  */
 import type { Pool } from "pg";
 import type { PendingCheckout } from "./memberStripeLiveAcceptance";
@@ -54,8 +54,8 @@ export async function reserveLiveCheckout(
 export async function recordCreatedLiveCheckout(
   pool: Pool, orderId: string, sessionId: string,
 ): Promise<void> {
-  if(!/^cs_test_[a-zA-Z0-9_]+$/.test(sessionId)){
-    throw new Error("Expected real Stripe TEST Checkout Session ID");
+  if(!/^cs_live_[a-zA-Z0-9_]+$/.test(sessionId)){
+    throw new Error("Expected Stripe LIVE Checkout Session ID");
   }
   const updated=await pool.query(`
     UPDATE member_stripe_live_orders SET stripe_checkout_session_id=$2,
