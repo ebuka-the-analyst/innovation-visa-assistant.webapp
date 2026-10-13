@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/SEOHead";
 import { organizationSchema } from "@/lib/seo-schemas";
 import FounderMembershipPlans from "@/components/FounderMembershipPlans";
+import FounderMembershipCheckout from "@/components/FounderMembershipCheckout";
+import MyFounderMembership from "@/components/MyFounderMembership";
 import logoLight from "@assets/official_logo.webp";
 import logoDark from "@assets/logo_dark.webp";
 
