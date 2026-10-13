@@ -5,7 +5,7 @@
     "buildCommand": "npm install && npm run build"
   },
   "deploy": {
-    "preDeployCommand": "node server/scripts/preflight-app-schema.cjs && node server/scripts/run-app-migrations.cjs && node server/scripts/verify-application-context-schema.cjs && node server/scripts/verify-app-schema.cjs",
+    "preDeployCommand": "node server/scripts/preflight-app-schema.cjs && node server/scripts/run-app-migrations.cjs && node server/scripts/verify-application-context-schema.cjs && node server/scripts/verify-app-schema.cjs && if [ \"$RAILWAY_SERVICE_ID\" = \"a1aa2612-9af3-481a-8e67-4ddb488c56a0\" ] && [ \"$RAILWAY_ENVIRONMENT_NAME\" = \"production\" ] && [ \"$IFVA_MEMBER_NOCHARGE_SMOKE_RUN\" = \"true\" ]; then node server/scripts/check-member-precharge-readiness.cjs && node server/scripts/check-member-live-checkout-nocharge.cjs; fi",
     "startCommand": "BASE_URL=${BASE_URL:-https://$RAILWAY_PUBLIC_DOMAIN} npm run start",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 300,
