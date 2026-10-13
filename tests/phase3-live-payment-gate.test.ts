@@ -10,6 +10,7 @@ const base={
  IFVA_MEMBER_LIVE_TERMS_VERSION:"consumer-2026-10-v1",
  RAILWAY_PROJECT_ID:"22a033f9-9732-4499-ae97-b509b17354d9",
  RAILWAY_ENVIRONMENT_ID:"3a9754e3-575c-4e29-b9a3-8af50a5ef823",
+ RAILWAY_SERVICE_ID:"a1aa2612-9af3-481a-8e67-4ddb488c56a0",
  RAILWAY_ENVIRONMENT_NAME:"production",
  NODE_ENV:"production",
 };
@@ -20,6 +21,7 @@ test("live membership is off by default and fails closed without any independent
  }
  assert.equal(isMemberLiveGatewayAllowed({...base,RAILWAY_PROJECT_ID:"dbec1752-9b2a-4473-8fab-ddae38310c26"} as any),false);
  assert.equal(isMemberLiveGatewayAllowed({...base,RAILWAY_ENVIRONMENT_NAME:"staging"} as any),false);
+ assert.equal(isMemberLiveGatewayAllowed({...base,RAILWAY_SERVICE_ID:"af33a267-7266-4893-b310-5f63c6275dbe"} as any),false);
  assert.equal(isMemberLiveGatewayAllowed(base as any),true);
 });
 test("live route uses separate production tables, keys, verified customer consent and live signature",()=>{
