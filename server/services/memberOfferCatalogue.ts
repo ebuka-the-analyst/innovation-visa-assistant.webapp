@@ -9,7 +9,7 @@
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "../db";
-import { isMemberLiveGatewayAllowed } from "../phase3/memberStripeLiveRoutes";
+import { isMemberPublicCheckoutAllowed } from "../phase3/memberStripeLiveRoutes";
 import { systemSettings } from "@shared/schema";
 
 export const MEMBER_OFFER_CATALOG_KEY="commercial.founder-offers.v1";
@@ -85,10 +85,7 @@ export async function getMemberOfferCatalogue():Promise<MemberOfferCatalogue>{
 // a public membership CTA becomes available. Preserve three additional
 // operational approvals from the original read-only pricing release.
 export function canStartLiveMembershipCheckout(env:NodeJS.ProcessEnv=process.env):boolean{
- return isMemberLiveGatewayAllowed(env) &&
-   env.IFVA_MEMBERSHIP_PAYMENTS_LIVE_ENABLED==="true" &&
-   env.IFVA_MEMBERSHIP_LIVE_WEBHOOK_VERIFIED==="true" &&
-   env.IFVA_MEMBERSHIP_LIVE_FULFILMENT_VERIFIED==="true";
+ return isMemberPublicCheckoutAllowed(env);
 }
 export async function getPublicMemberOffers(){
  const catalog=await getMemberOfferCatalogue();
