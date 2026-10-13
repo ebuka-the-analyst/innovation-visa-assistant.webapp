@@ -103,6 +103,7 @@ export function registerMemberStripeLiveRoutes(
     };
     app.post("/api/member-stripe-live/webhook",unavailable);
     app.post("/api/member-stripe-live/checkout",unavailable);
+    app.post("/api/member-stripe-live/cancel",unavailable);
     app.get("/api/member-stripe-live/order/:orderId",unavailable);
     return;
   }
@@ -183,6 +184,39 @@ export function registerMemberStripeLiveRoutes(
     const state=await getEffectiveLivePaidState(pool,req.params.orderId);
     res.setHeader("Cache-Control","no-store");
     res.json({orderId:req.params.orderId,liveMode:true,active:state.active,paidThrough:state.paidThrough});
+  });
+
+  // Customer-controlled cancellation preserves access until the period already paid for.
+  // Only a provider-verified subscription owned by the authenticated account is eligible.
+  app.post("/api/member-stripe-live/cancel",isAuthenticated,async(req,res)=>{
+    const user=req.user as any;
+    if(!user?.id)return res.status(401).end();
+    const id=typeof req.body?.orderId==="string"?req.body.orderId:"";
+    if(!orderIdPattern.test(id))return res.status(400).json({error:"Invalid membership order"});
+    try{
+      const found=await pool.query<{
+        id:string;stripe_subscription_id:string|null;stripe_customer_id:string;sku:CandidateSku;
+      }>(`SELECT id,stripe_subscription_id,stripe_customer_id,sku FROM member_stripe_live_orders
+           WHERE id=$1 AND user_id=$2 AND currently_active=true`,[id,user.id]);
+      if(found.rowCount!==1||!found.rows[0].stripe_subscription_id||
+         found.rows[0].sku==="founder_pass_90d")
+        return res.status(404).json({error:"No cancellable monthly membership found"});
+      const cfg=config();
+      const order=found.rows[0];
+      const sub=await cfg.stripe.subscriptions.retrieve(order.stripe_subscription_id);
+      if(sub.livemode!==true||asId(sub.customer)!==order.stripe_customer_id)
+        return res.status(409).json({error:"Provider subscription mismatch"});
+      const cancelled=await cfg.stripe.subscriptions.update(sub.id,{
+        cancel_at_period_end:true,proration_behavior:"none"
+      },{idempotencyKey:"ifva-member-end-of-term-cancel-"+order.id});
+      res.setHeader("Cache-Control","no-store");
+      return res.json({cancelAtPeriodEnd:cancelled.cancel_at_period_end===true,
+        status:cancelled.status,cancelAt:cancelled.cancel_at,
+        message:"Renewal cancelled. Paid access continues through the current paid term."});
+    }catch(e){
+      console.error("[Membership LIVE] cancellation unavailable",e instanceof Error?e.message:"unknown");
+      return res.status(503).json({error:"Could not verify cancellation. Contact support; do not assume it is complete."});
+    }
   });
 
   app.get("/api/member-stripe-live/reviews",isAuthenticated,requireAdmin,async(_req,res)=>{
