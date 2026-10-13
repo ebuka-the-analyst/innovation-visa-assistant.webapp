@@ -11,6 +11,22 @@ permissions:
 jobs:
   qa-acceptance:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: ifva_qa_ci
+          POSTGRES_USER: ifva_qa_ci
+          POSTGRES_PASSWORD: isolated_ci_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ifva_qa_ci -d ifva_qa_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      QUOTA_TEST_DATABASE_URL: postgres://ifva_qa_ci:isolated_ci_only@localhost:5432/ifva_qa_ci
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,6 +49,11 @@ jobs:
         run: |
           node --check server/scripts/audit-member-lifecycle-qa.cjs
           node --test tests/phase3-lifecycle-audit.test.cjs
+      - name: Verify durable member entitlements against isolated PostgreSQL
+        run: |
+          node --import tsx --test tests/member-ai-quota.integration.test.ts
+          node --import tsx --test tests/phase3-durable-stripe-test-ledger.integration.test.ts
+          node --import tsx --test tests/phase3-qa-entitlement-fulfilment.integration.test.ts
       - name: Prepare build
         run: |
           node scripts/prepare-platform-trust-hardening.cjs
