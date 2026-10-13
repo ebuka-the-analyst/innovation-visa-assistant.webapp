@@ -110,6 +110,7 @@ export function registerMemberStripeLiveRoutes(
     app.post("/api/member-stripe-live/checkout",unavailable);
     app.post("/api/member-stripe-live/cancel",unavailable);
     app.get("/api/member-stripe-live/order/:orderId",unavailable);
+    app.get("/api/member-stripe-live/my-membership",unavailable);
     return;
   }
 
@@ -193,6 +194,31 @@ export function registerMemberStripeLiveRoutes(
 
   // Customer-controlled cancellation preserves access until the period already paid for.
   // Only a provider-verified subscription owned by the authenticated account is eligible.
+  app.get("/api/member-stripe-live/my-membership",isAuthenticated,async(req,res)=>{
+    const user=req.user as any;
+    if(!user?.id)return res.status(401).end();
+    try{
+      const result=await pool.query<{id:string;sku:CandidateSku;stripe_subscription_id:string|null;paid_through:Date|null;currently_active:boolean}>(`
+        SELECT id,sku,stripe_subscription_id,paid_through,currently_active
+        FROM member_stripe_live_orders WHERE user_id=$1
+        ORDER BY currently_active DESC, created_at DESC LIMIT 1`,[user.id]);
+      if(!result.rowCount)return res.json({membership:null});
+      const order=result.rows[0];
+      let cancellationPending=false;
+      if(order.currently_active&&order.stripe_subscription_id){
+        const cfg=config();
+        const sub=await cfg.stripe.subscriptions.retrieve(order.stripe_subscription_id);
+        cancellationPending=sub.livemode===true && sub.cancel_at_period_end===true;
+      }
+      res.setHeader("Cache-Control","no-store");
+      return res.json({membership:{
+        orderId:order.id,sku:order.sku,active:order.currently_active,
+        paidThrough:order.paid_through,cancellationPending,
+        canCancel:order.currently_active&&!!order.stripe_subscription_id&&!cancellationPending,
+      }});
+    }catch{return res.status(503).json({error:"Unable to retrieve verified membership status"});}
+  });
+
   app.post("/api/member-stripe-live/cancel",isAuthenticated,async(req,res)=>{
     const user=req.user as any;
     if(!user?.id)return res.status(401).end();
