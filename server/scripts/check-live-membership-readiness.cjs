@@ -29,7 +29,7 @@ async function main(){
  }
  const key=env.IFVA_MEMBER_STRIPE_LIVE_SECRET_KEY||"";
  const signing=env.IFVA_MEMBER_STRIPE_LIVE_WEBHOOK_SECRET||"";
- if(!key.startsWith("sk_live_")||!signing.startsWith("whsec_"))
+ if(!/^(?:sk|rk)_live_/.test(key)||!signing.startsWith("whsec_"))
   throw Error("Dedicated LIVE Stripe API/signature credentials missing");
  if(env.IFVA_MEMBER_STRIPE_LIVE_PUBLIC_URL!=="https://innovatorfoundervisaassistant.co.uk")
   throw Error("Live membership checkout must return only to the canonical domain");
