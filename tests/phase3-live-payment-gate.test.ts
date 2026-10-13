@@ -37,9 +37,9 @@ test("live route uses separate production tables, keys, verified customer consen
  assert.match(source,/IFVA_MEMBER_STRIPE_LIVE_PRO_PRICE_ID/);
  assert.match(source,/IFVA_MEMBER_STRIPE_LIVE_PASS_PRICE_ID/);
  assert.match(source,/isVerifiedMemberLegalSeller\(account\)/);
- assert.match(eligibility,/body\\?\\.acknowledgeLivePayment!==true/);
- assert.match(eligibility,/body\\?\\.acknowledgeNoVatPrice!==true/);
- assert.match(eligibility,/body\\?\\.acknowledgeConsumerTerms!==true/);
+ assert.ok(eligibility.includes("body?.acknowledgeLivePayment!==true"));
+ assert.ok(eligibility.includes("body?.acknowledgeNoVatPrice!==true"));
+ assert.ok(eligibility.includes("body?.acknowledgeConsumerTerms!==true"));
  assert.match(source,/price\.tax_behavior!=="unspecified"/);
  assert.match(source,/automatic_tax:\{enabled:false\}/);
  assert.match(source,/shipping_address_collection:\{allowed_countries:\["GB"\]\}/);
