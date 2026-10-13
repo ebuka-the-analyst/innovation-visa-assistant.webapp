@@ -91,6 +91,11 @@ export function registerMemberStripeLiveRoutes(
   app: Express, isAuthenticated: RequestHandler, pool: Pool,
   requireAdmin: RequestHandler,
 ): void {
+  app.get("/api/member-stripe-live/availability",(_req,res)=>{
+    res.setHeader("Cache-Control","no-store");
+    return res.json({available:isMemberLiveGatewayAllowed(),
+      termsVersion:isMemberLiveGatewayAllowed()?process.env.IFVA_MEMBER_LIVE_TERMS_VERSION:null});
+  });
   if(!isMemberLiveGatewayAllowed()){
     // An unmounted POST falls through to the SPA handler, which could return
     // HTTP 200 and permanently acknowledge a paid Stripe event without
