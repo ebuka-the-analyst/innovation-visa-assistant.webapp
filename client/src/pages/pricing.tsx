@@ -1,3 +1,4 @@
+import MyFounderMembership from "@/components/MyFounderMembership";
 import FounderMembershipCheckout from "@/components/FounderMembershipCheckout";
 import { useState } from "react";
 import { useLocation, Link } from "wouter";
@@ -420,6 +421,7 @@ export default function Pricing() {
           </div>
         )}
 
+              <MyFounderMembership />
               <FounderMembershipCheckout />
               <div className="mt-8 lg:mt-12 text-center text-xs lg:text-sm text-muted-foreground px-4">
                 <p>Paid plans include business plan generation features for UK Innovator Founder Visa preparation</p>
