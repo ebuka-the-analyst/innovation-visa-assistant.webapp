@@ -4,6 +4,7 @@ import {readFileSync} from "node:fs";
 import {isMemberLiveGatewayAllowed} from "../server/phase3/memberStripeLiveRoutes";
 const base={
  IFVA_MEMBER_LIVE_ENABLED:"true",
+ IFVA_MEMBER_UK_ONLY_ENABLED:"true",
  IFVA_MEMBER_LIVE_RELEASE_APPROVED:"true",
  IFVA_MEMBER_LIVE_TAX_SIGNOFF:"approved",
  IFVA_MEMBER_LIVE_TAX_BASIS:"uk_not_vat_registered",
@@ -38,6 +39,8 @@ test("live route uses separate production tables, keys, verified customer consen
  assert.match(source,/req\.body\?\.acknowledgeConsumerTerms !== true/);
  assert.match(source,/price\.tax_behavior!=="unspecified"/);
  assert.match(source,/automatic_tax:\{enabled:false\}/);
+ assert.match(source,/shipping_address_collection:\{allowed_countries:\["GB"\]\}/);
+ assert.match(source,/acknowledgeUkOnly/);
  assert.match(source,/customer_update:\{address:"auto"\}/);
  assert.match(source,/constructEvent\(rawBody,signature,cfg\.secret\)/);
  assert.match(source,/event\.livemode!==true/);
