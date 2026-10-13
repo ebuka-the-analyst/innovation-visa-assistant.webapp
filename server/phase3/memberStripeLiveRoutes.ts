@@ -136,6 +136,8 @@ export function registerMemberStripeLiveRoutes(
         client_reference_id:user.id,
         line_items:[{price:cfg.prices[sku],quantity:1}],
         billing_address_collection:"required",
+        automatic_tax:{enabled:true},
+        customer_update:{address:"auto"},
         // Never present an unverified final VAT calculation as correct.
         success_url:cfg.publicUrl+"/uk/innovatorfoundervisaassistant/dashboard?membership_order="+encodeURIComponent(orderId)+"&payment=return",
         cancel_url:cfg.publicUrl+"/uk/innovatorfoundervisaassistant/dashboard?membership_order="+encodeURIComponent(orderId)+"&payment=cancelled",
