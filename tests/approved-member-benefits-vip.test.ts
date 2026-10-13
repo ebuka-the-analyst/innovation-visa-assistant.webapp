@@ -73,3 +73,11 @@ test("real checkout remains behind legal/tax gates; presentation cannot trigger 
  assert.match(c,/IFVA_MEMBER_LIVE_TAX_SIGNOFF/);
  assert.match(c,/shipping_address_collection:\{allowed_countries:\["GB"\]\}/);
 });
+
+test("legacy advanced plan style and AI interview endpoints use current paid membership mapping",()=>{
+ const routes=read("server/routes.ts");
+ assert.match(routes,/stylingUser\.subscriptionTier, hasCurrentPaidEntitlement\(stylingUser\)/);
+ assert.equal((routes.match(/const verifiedUserForTool = await storage\.getUser\(user\.id\);/g)||[]).length,3);
+ assert.equal((routes.match(/hasCurrentPaidEntitlement\(verifiedUserForTool\)/g)||[]).length,3);
+ assert.doesNotMatch(routes,/const userTier = user\?\.subscriptionTier\?\.toLowerCase\(\) \|\| "free"/);
+});
