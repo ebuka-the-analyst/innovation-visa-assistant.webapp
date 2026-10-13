@@ -1109,7 +1109,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllSupportTickets(): Promise<SupportTicket[]> {
-    return db.select().from(supportTickets).orderBy(desc(supportTickets.createdAt));
+    // Open VIP tickets precede standard tickets; preserve recency within each group.
+    return db.select().from(supportTickets).orderBy(
+      sql`CASE WHEN ${supportTickets.status} IN ('open','in_progress') AND ${supportTickets.priority} = 'high' THEN 0 ELSE 1 END`,
+      desc(supportTickets.createdAt),
+    );
   }
 
   async updateSupportTicket(id: string, updates: Partial<SupportTicket>): Promise<SupportTicket | undefined> {
