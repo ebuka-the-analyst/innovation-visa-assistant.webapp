@@ -1,3 +1,5 @@
+import FounderMembershipCheckout from "./FounderMembershipCheckout";
+import MyFounderMembership from "./MyFounderMembership";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Check, ShieldCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -62,7 +64,7 @@ export default function FounderMembershipPlans(){
     </ul>
     <div className="mt-auto pt-8">
      <Button disabled={!data.purchasable} className="w-full"
-      onClick={()=>{if(data.purchasable)window.location.assign(`/membership/checkout?sku=${encodeURIComponent(offer.id)}`);}}
+      onClick={()=>{if(data.purchasable)window.location.assign(`/pricing?membership_sku=${encodeURIComponent(offer.id)}#membership-checkout`);}}
       data-testid={`membership-action-${offer.id}`}>
        {offer.ctaText}
      </Button>
@@ -81,5 +83,9 @@ export default function FounderMembershipPlans(){
    </div>
   </div>
   <p className="mx-auto mt-6 max-w-4xl text-center text-sm text-muted-foreground">{data.billingNotice}</p>
+  {typeof window!=="undefined" && window.location.pathname==="/pricing" && <>
+    {data.purchasable && <div id="membership-checkout"><FounderMembershipCheckout/></div>}
+    <MyFounderMembership/>
+  </>}
  </section>;
 }
