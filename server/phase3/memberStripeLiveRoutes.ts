@@ -91,7 +91,21 @@ export function registerMemberStripeLiveRoutes(
   app: Express, isAuthenticated: RequestHandler, pool: Pool,
   requireAdmin: RequestHandler,
 ): void {
-  if(!isMemberLiveGatewayAllowed())return;
+  if(!isMemberLiveGatewayAllowed()){
+    // An unmounted POST falls through to the SPA handler, which could return
+    // HTTP 200 and permanently acknowledge a paid Stripe event without
+    // reconciling it. Always fail CLOSED so Stripe retries if routed here.
+    const unavailable=(_req:any,res:any)=>{
+      res.setHeader("Cache-Control","no-store");
+      return res.status(503).json({
+        received:false,error:"Membership live gateway is not approved or deployed",
+      });
+    };
+    app.post("/api/member-stripe-live/webhook",unavailable);
+    app.post("/api/member-stripe-live/checkout",unavailable);
+    app.get("/api/member-stripe-live/order/:orderId",unavailable);
+    return;
+  }
 
   app.post("/api/member-stripe-live/checkout",isAuthenticated,async(req,res)=>{
     const user=req.user as any;
