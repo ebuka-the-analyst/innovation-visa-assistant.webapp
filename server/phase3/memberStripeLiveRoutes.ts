@@ -38,6 +38,7 @@ export function isMemberLiveGatewayAllowed(env: NodeJS.ProcessEnv = process.env)
   return env.IFVA_MEMBER_LIVE_ENABLED === "true" &&
     env.IFVA_MEMBER_LIVE_RELEASE_APPROVED === "true" &&
     env.IFVA_MEMBER_LIVE_TAX_SIGNOFF === "approved" &&
+    env.IFVA_MEMBER_LIVE_TAX_BASIS === "uk_not_vat_registered" &&
     env.IFVA_MEMBER_LIVE_CONSUMER_TERMS_SIGNOFF === "approved" &&
     typeof env.IFVA_MEMBER_LIVE_TERMS_VERSION === "string" &&
     env.IFVA_MEMBER_LIVE_TERMS_VERSION.length >= 6 &&
@@ -119,10 +120,10 @@ export function registerMemberStripeLiveRoutes(
     const sku=confirmedNewLiveMembershipPurchase(req.body);
     if(!user?.id || !sku || user.isEmailVerified !== true || user.isAdmin === true ||
        req.body?.acknowledgeLivePayment !== true ||
-       req.body?.acknowledgeVatPrice !== true ||
+       req.body?.acknowledgeNoVatPrice !== true ||
        req.body?.acknowledgeConsumerTerms !== true ||
        req.body?.consumerTermsVersion !== process.env.IFVA_MEMBER_LIVE_TERMS_VERSION)
-      return res.status(400).json({error:"Verified non-admin customer must acknowledge exact live payment, VAT and current consumer terms"});
+      return res.status(400).json({error:"Verified non-admin customer must acknowledge total price, no VAT charged and current consumer terms"});
     const email=String(user.email||"").trim();
     if(!/^\S+@\S+\.\S+$/.test(email))return res.status(400).json({error:"Verified email required"});
     try{
@@ -132,10 +133,9 @@ export function registerMemberStripeLiveRoutes(
       const account=await cfg.stripe.accounts.retrieve();
       if(account.id!=="acct_1SdAGzK9BSTYpDOq")
         return res.status(503).json({error:"Wrong Stripe LIVE account"});
-      // Pricing must be VAT-inclusive at the displayed £69/£119/£159 amount.
-      // Existing Stripe live prices are currently unspecified and MUST be
-      // checked/approved before payments can be exposed.
-      if(price.tax_behavior!=="inclusive")return res.status(503).json({error:"Unapproved VAT-inclusive live price"});
+      // Non-VAT-registered UK supplier: no VAT is collected or represented as included.
+      // Reject legacy tax-inclusive candidate prices and never silently reuse them.
+      if(price.tax_behavior!=="unspecified")return res.status(503).json({error:"Incorrect tax behaviour for approved non-VAT-registered checkout price"});
       if(!price.active || price.currency!=="gbp" ||
           price.unit_amount!==EXPECTED_GBP_PENCE[sku] ||
           (expectedRecurring && (price.type!=="recurring" ||
@@ -155,9 +155,10 @@ export function registerMemberStripeLiveRoutes(
         client_reference_id:user.id,
         line_items:[{price:cfg.prices[sku],quantity:1}],
         billing_address_collection:"required",
-        automatic_tax:{enabled:true},
+        automatic_tax:{enabled:false},
         customer_update:{address:"auto"},
-        // Never present an unverified final VAT calculation as correct.
+        // No VAT is charged in the approved UK non-VAT-registered release mode.
+        // Do not open overseas digital-service sales until destination-tax obligations are reviewed.
         success_url:cfg.publicUrl+"/uk/innovatorfoundervisaassistant/dashboard?membership_order="+encodeURIComponent(orderId)+"&payment=return",
         cancel_url:cfg.publicUrl+"/uk/innovatorfoundervisaassistant/dashboard?membership_order="+encodeURIComponent(orderId)+"&payment=cancelled",
         metadata:{ifvaMembershipLive:"true",ifvaLiveOrderId:orderId,consumerTermsVersion:process.env.IFVA_MEMBER_LIVE_TERMS_VERSION||""},

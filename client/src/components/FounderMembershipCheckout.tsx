@@ -29,7 +29,7 @@ export default function FounderMembershipCheckout(){
     method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({sku,confirmedPricePence:price,acknowledgeNewPayment:true,
       acknowledgeMonthlyRenewal:sku!=="founder_pass_90d"?renew:false,
-      acknowledgeLivePayment:true,acknowledgeVatPrice:true,
+      acknowledgeLivePayment:true,acknowledgeNoVatPrice:true,
       acknowledgeConsumerTerms:true,consumerTermsVersion:termsVersion})
    });
    const body=await response.json();
@@ -44,6 +44,7 @@ export default function FounderMembershipCheckout(){
   <div className="grid gap-4 md:grid-cols-3">{products.map(p=><div key={p.sku} className="rounded-lg border p-5 space-y-3">
    <h3 className="font-semibold">{p.name}</h3>
    <p className="text-2xl font-bold">£{(p.price/100).toFixed(0)} <span className="text-sm font-normal">/{p.interval}</span></p>
+   <p className="text-sm font-medium">No VAT charged</p>
    <p className="text-sm">{p.description}</p>
    <button type="button" disabled={!available||!termsVersion||!acknowledge||(p.interval==="month"&&!renew)||busy!==null}
     onClick={()=>buy(p.sku,p.price)}
@@ -53,7 +54,7 @@ export default function FounderMembershipCheckout(){
   </div>)}</div>
   {available&&termsVersion&&<div className="space-y-3 text-sm">
    <label className="flex gap-2"><input type="checkbox" checked={acknowledge} onChange={e=>setAcknowledge(e.target.checked)}/>
-    I understand the stated live prices, VAT treatment and current membership consumer terms. I authorise a new payment.</label>
+    I understand the displayed total price, payment terms and membership consumer terms. I authorise a new payment.</label>
    <label className="flex gap-2"><input type="checkbox" checked={renew} onChange={e=>setRenew(e.target.checked)}/>
     I understand that Founder and Founder Pro renew automatically each month until cancelled. The 90-Day Pass does not renew.</label>
    <p>Please read the <Link href="/terms" className="underline">terms</Link> and <Link href="/support" className="underline">support and refund enquiries</Link> before purchase. Membership cancellation and refund requests can also be made through support.</p>
