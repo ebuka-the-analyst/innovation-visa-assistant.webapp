@@ -8,6 +8,8 @@ const products:{sku:Sku;name:string;price:number;interval:string;description:str
  {sku:"founder_pass_90d",name:"90-Day Pass",price:15900,interval:"once",description:"2 generations and 15 revisions per 30 days; 6 plans maximum in 90 days"},
 ];
 export default function FounderMembershipCheckout(){
+ const requestedSku=new URLSearchParams(window.location.search).get("membership_sku");
+ const displayedProducts=products.filter(p=>!requestedSku||p.sku===requestedSku);
  const [available,setAvailable]=useState(false);
  const [termsVersion,setTermsVersion]=useState<string|null>(null);
  const [busy,setBusy]=useState<Sku|null>(null);
@@ -39,10 +41,10 @@ export default function FounderMembershipCheckout(){
    window.location.assign(body.url);
   }catch(e){setMessage(e instanceof Error?e.message:"Checkout unavailable");setBusy(null);}
  }
- return <><FounderMembershipPaymentReturn /><section aria-label="Founder memberships" className="my-12 space-y-5">
+ return <><FounderMembershipPaymentReturn /><section aria-label="Founder memberships" className="my-12 space-y-5" id="membership-purchase-options">
   <h2 className="text-2xl font-semibold">Founder memberships</h2>
   <p className="text-sm text-muted-foreground">Separate from existing pay-per-plan packages. Digital AI preparation only, not immigration advice, endorsement or guaranteed visa outcomes.</p>
-  <div className="grid gap-4 md:grid-cols-3">{products.map(p=><div key={p.sku} className="rounded-lg border p-5 space-y-3">
+  <div className="grid gap-4 md:grid-cols-3">{displayedProducts.map(p=><div key={p.sku} className="rounded-lg border p-5 space-y-3">
    <h3 className="font-semibold">{p.name}</h3>
    <p className="text-2xl font-bold">£{(p.price/100).toFixed(0)} <span className="text-sm font-normal">/{p.interval}</span></p>
    <p className="text-sm font-medium">No VAT charged</p>
