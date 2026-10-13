@@ -3,10 +3,9 @@
  * Feature gated; never expose live Checkout before independent release approval.
  */
 /**
- * Phase 3, REVIEW-ONLY: deterministic acceptance contract for membership
- * webhook events. Not mounted in routes, never calls Stripe, and never
- * grants a live customer entitlement. Every event MUST first be verified by
- * stripe.webhooks.constructEvent(rawBody, signature, webhookSecret).
+ * Deterministic LIVE membership event decision policy. Pure rules only.
+ * The production HTTP handler verifies Stripe's raw signature and fresh
+ * provider objects before applying any decision transactionally.
  *
  * Pending orders are created server-side and authoritative: event metadata,
  * client user IDs, product text or price alone are never sufficient.
@@ -205,9 +204,8 @@ export function decideVerifiedLiveMembershipEvent(
 }
 
 /**
- * In-memory event simulation only; production must replace this with atomic
- * Stripe event-ID unique indexes, serialisable DB transitions, and a durable
- * provider-reconciliation queue. No DB mutation is performed here.
+ * Offline-only fixture helper. The real live ledger uses atomic SQL writes,
+ * durable event-ID uniqueness and a provider-reconciliation queue.
  */
 export function applySimulatedDecision(
   event: any, ledger: LedgerState, decision: MemberDecision,
