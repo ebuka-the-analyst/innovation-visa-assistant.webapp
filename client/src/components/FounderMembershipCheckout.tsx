@@ -15,6 +15,7 @@ export default function FounderMembershipCheckout(){
  const [busy,setBusy]=useState<Sku|null>(null);
  const [acknowledge,setAcknowledge]=useState(false);
  const [renew,setRenew]=useState(false);
+ const [ukOnly,setUkOnly]=useState(false);
  const [message,setMessage]=useState("");
  useEffect(()=>{
   let mounted=true;
@@ -25,7 +26,7 @@ export default function FounderMembershipCheckout(){
   return ()=>{mounted=false};
  },[]);
  async function buy(sku:Sku,price:number){
-  if(!available||!termsVersion||!acknowledge||(sku!=="founder_pass_90d"&&!renew))return;
+  if(!available||!termsVersion||!acknowledge||!ukOnly||(sku!=="founder_pass_90d"&&!renew))return;
   setBusy(sku);setMessage("");
   try{
    const response=await fetch("/api/member-stripe-live/checkout",{
@@ -33,7 +34,7 @@ export default function FounderMembershipCheckout(){
     body:JSON.stringify({sku,confirmedPricePence:price,acknowledgeNewPayment:true,
       acknowledgeMonthlyRenewal:sku!=="founder_pass_90d"?renew:false,
       acknowledgeLivePayment:true,acknowledgeNoVatPrice:true,
-      acknowledgeConsumerTerms:true,consumerTermsVersion:termsVersion})
+      acknowledgeConsumerTerms:true,acknowledgeUkOnly:ukOnly,consumerTermsVersion:termsVersion})
    });
    const body=await response.json();
    if(!response.ok||body.liveMode!==true||typeof body.url!=="string"||
@@ -43,13 +44,13 @@ export default function FounderMembershipCheckout(){
  }
  return <><FounderMembershipPaymentReturn /><section aria-label="Founder memberships" className="my-12 space-y-5" id="membership-purchase-options">
   <h2 className="text-2xl font-semibold">Founder memberships</h2>
-  <p className="text-sm text-muted-foreground">Separate from existing pay-per-plan packages. Digital AI preparation only, not immigration advice, endorsement or guaranteed visa outcomes.</p>
+  <p className="text-sm text-muted-foreground">Available to UK customers only. Digital AI preparation, not immigration advice, endorsement or a guaranteed visa outcome. Stripe will verify your UK billing and service address; no goods are shipped.</p>
   <div className="grid gap-4 md:grid-cols-3">{displayedProducts.map(p=><div key={p.sku} className="rounded-lg border p-5 space-y-3">
    <h3 className="font-semibold">{p.name}</h3>
    <p className="text-2xl font-bold">£{(p.price/100).toFixed(0)} <span className="text-sm font-normal">/{p.interval}</span></p>
    <p className="text-sm font-medium">No VAT charged</p>
    <p className="text-sm">{p.description}</p>
-   <button type="button" disabled={!available||!termsVersion||!acknowledge||(p.interval==="month"&&!renew)||busy!==null}
+   <button type="button" disabled={!available||!termsVersion||!acknowledge||!ukOnly||(p.interval==="month"&&!renew)||busy!==null}
     onClick={()=>buy(p.sku,p.price)}
     className="rounded bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50">
     {busy===p.sku?"Opening secure checkout…":available?"Continue to Stripe":"Not yet available"}
@@ -58,6 +59,8 @@ export default function FounderMembershipCheckout(){
   {available&&termsVersion&&<div className="space-y-3 text-sm">
    <label className="flex gap-2"><input type="checkbox" checked={acknowledge} onChange={e=>setAcknowledge(e.target.checked)}/>
     I understand the displayed total price, payment terms and membership consumer terms. I authorise a new payment.</label>
+   <label className="flex gap-2"><input type="checkbox" checked={ukOnly} onChange={e=>setUkOnly(e.target.checked)}/>
+    I confirm that I am based in the United Kingdom and will enter my genuine UK billing and service address in Stripe Checkout. Memberships are currently available to UK customers only. No physical product is shipped.</label>
    <label className="flex gap-2"><input type="checkbox" checked={renew} onChange={e=>setRenew(e.target.checked)}/>
     I understand that Founder and Founder Pro renew automatically each month until cancelled. The 90-Day Pass does not renew.</label>
    <p>Please read the <Link href="/terms" className="underline">terms</Link> and <Link href="/support" className="underline">support and refund enquiries</Link> before purchase. Membership cancellation and refund requests can also be made through support.</p>
