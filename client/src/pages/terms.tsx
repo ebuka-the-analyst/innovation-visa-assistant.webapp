@@ -113,7 +113,7 @@ export default function TermsOfService() {
 
                   <h3 className="font-semibold mb-2">4.2 Payment Terms</h3>
                   <p className="text-muted-foreground mb-3">
-                    Existing pay-per-plan purchases are charged once at the displayed price. Separate Founder (£69/month) and Founder Pro (£119/month) memberships renew automatically each month until cancelled. The £159 90-Day Pass is a one-time payment and does not renew. Memberships include stated generation and revision allowances. The full VAT-inclusive price, renewal frequency and any applicable taxes are confirmed before payment. Payments are processed securely through Stripe.
+                    Existing pay-per-plan purchases are charged once at the displayed price. Separate Founder (£69/month) and Founder Pro (£119/month) memberships renew automatically each month until cancelled. The £159 90-Day Pass is a one-time payment and does not renew. Memberships include stated generation and revision allowances. The total price and renewal frequency are confirmed before payment. The listed UK membership prices currently have no VAT charged. Payments are processed securely through Stripe.
                   </p>
 
                   <h3 className="font-semibold mb-2">4.3 Refund Policy</h3>
