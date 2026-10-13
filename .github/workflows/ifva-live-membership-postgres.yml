@@ -1,0 +1,37 @@
+name: IFVA Live Membership Offline Acceptance
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  signed-payment-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: founder
+          POSTGRES_PASSWORD: founder
+          POSTGRES_DB: founder
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U founder -d founder"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      QUOTA_TEST_DATABASE_URL: postgresql://founder:founder@localhost:5432/founder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Prove signed live-mode fixture events never grant unverified access
+        run: node --import tsx --test tests/phase3-live-entitlement-fulfilment.integration.test.ts
