@@ -171,7 +171,7 @@ jobs:
 
       - name: Verify gated Founder membership payment and consumer flows
         run: |
-          node --import tsx --test tests/phase3-live-checkout-session.test.ts tests/phase3-live-disabled-routes.test.ts tests/phase3-live-member-customer-flows.test.ts tests/phase3-live-membership-return.test.ts tests/phase3-live-payment-gate.test.ts tests/phase3-live-uk-only.test.ts tests/phase3-live-seller.test.ts tests/phase3-live-webhook-isolation.test.ts tests/phase3-live-precharge-readonly.test.cjs tests/phase3-public-checkout-gate.test.ts tests/phase3-live-nocharge-smoke.test.cjs tests/phase3-non-vat-disclosure.test.ts
+          node --import tsx --test tests/phase3-live-checkout-session.test.ts tests/phase3-live-disabled-routes.test.ts tests/phase3-live-member-customer-flows.test.ts tests/phase3-live-membership-return.test.ts tests/phase3-live-payment-gate.test.ts tests/phase3-live-uk-only.test.ts tests/phase3-live-seller.test.ts tests/phase3-live-webhook-isolation.test.ts tests/phase3-live-precharge-readonly.test.cjs tests/phase3-public-checkout-gate.test.ts tests/phase3-live-nocharge-smoke.test.cjs tests/phase3-railway-nocharge-config.test.cjs tests/phase3-non-vat-disclosure.test.ts
           node --test tests/phase3-live-readiness.test.cjs
 
       - name: Production build
