@@ -46,6 +46,9 @@ export default function TermsOfService() {
                   <p className="text-muted-foreground">
                     By accessing or using UK Innovator Founder Visa Assistant ("the Platform"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of these terms, you may not access the Platform.
                   </p>
+                  <p className="mt-3 text-muted-foreground">
+                    This Platform operates under STACKRISE LTD, a private limited company registered in England and Wales under company number 16909181. STACKRISE LTD is the intended legal supplier of Founder, Founder Pro and 90-Day Pass memberships.
+                  </p>
                 </div>
               </div>
             </Card>
