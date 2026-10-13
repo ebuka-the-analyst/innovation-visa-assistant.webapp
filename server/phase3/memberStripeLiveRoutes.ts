@@ -60,7 +60,7 @@ function config(): Config {
     founder_pro:process.env.IFVA_MEMBER_STRIPE_LIVE_PRO_PRICE_ID || "",
     founder_pass_90d:process.env.IFVA_MEMBER_STRIPE_LIVE_PASS_PRICE_ID || "",
   };
-  if (!key.startsWith("sk_live_") || !secret.startsWith("whsec_") ||
+  if (!/^(?:sk|rk)_live_/.test(key) || !secret.startsWith("whsec_") ||
       !Object.values(prices).every(v=>/^price_[a-zA-Z0-9]+$/.test(v))) {
     throw new Error("Dedicated LIVE Stripe key, webhook secret and three price IDs are required");
   }
