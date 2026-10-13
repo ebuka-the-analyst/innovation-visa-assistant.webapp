@@ -66,6 +66,8 @@ jobs:
         run: node --import tsx --test tests/phase3-live-member-customer-flows.test.ts
       - name: Verify consumer renewal and one-time pass disclosures
         run: node --import tsx --test tests/phase3-member-disclosure.test.ts
+      - name: Verify Stripe payment return from server record
+        run: node --import tsx --test tests/phase3-live-membership-return.test.ts
       - name: Live gateway isolation and release-approval guards
         run: node --import tsx --test tests/phase3-live-payment-gate.test.ts
       - name: Live-format signed webhook lifecycle with disposable PostgreSQL
