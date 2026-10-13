@@ -4,6 +4,7 @@ const {approved}=require("../server/scripts/check-live-membership-readiness.cjs"
 const complete={
  IFVA_MEMBER_LIVE_ENABLED:"true",IFVA_MEMBER_LIVE_RELEASE_APPROVED:"true",
  IFVA_MEMBER_LIVE_TAX_SIGNOFF:"approved",IFVA_MEMBER_LIVE_CONSUMER_TERMS_SIGNOFF:"approved",
+ IFVA_MEMBER_LIVE_TAX_BASIS:"uk_not_vat_registered",
  IFVA_MEMBER_LIVE_TERMS_VERSION:"consumer-2026-10-v1",
  RAILWAY_PROJECT_ID:"22a033f9-9732-4499-ae97-b509b17354d9",
  RAILWAY_ENVIRONMENT_ID:"3a9754e3-575c-4e29-b9a3-8af50a5ef823",
