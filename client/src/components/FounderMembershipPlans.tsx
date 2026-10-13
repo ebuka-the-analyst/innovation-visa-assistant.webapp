@@ -70,7 +70,10 @@ export default function FounderMembershipPlans(){
     </div>
    </Card>)}
   </div>
-  <p className="mx-auto mt-5 max-w-5xl text-center text-sm text-muted-foreground">\n   <strong>No VAT charged</strong> on the listed UK memberships. Purchases outside the UK may be subject to different tax rules.\n  </p>\n  <div className="mx-auto mt-9 flex max-w-5xl items-start gap-3 rounded-xl border bg-muted/30 px-5 py-5">
+  <p className="mx-auto mt-5 max-w-5xl text-center text-sm text-muted-foreground">
+   <strong>No VAT charged</strong> on the listed UK memberships. Purchases outside the UK may be subject to different tax rules.
+  </p>
+  <div className="mx-auto mt-9 flex max-w-5xl items-start gap-3 rounded-xl border bg-muted/30 px-5 py-5">
    <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true"/>
    <div>
     <h3 className="font-semibold">{data.legacyTitle}</h3>
