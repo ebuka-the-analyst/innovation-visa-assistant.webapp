@@ -1196,7 +1196,10 @@ ${JSON.stringify(unique)}`;
         const planId = req.params.id;
         const { tocStyle } = req.body;
 
-        if (user.subscriptionTier !== "ultimate") {
+        const stylingUser = await storage.getUser(user.id);
+        if (!stylingUser || effectiveMemberToolPlan(
+          stylingUser.subscriptionTier, hasCurrentPaidEntitlement(stylingUser),
+        ) !== "ultimate") {
           return res.status(403).json({
             error: "Visual style customisation requires Ultimate tier",
           });
@@ -14009,7 +14012,11 @@ END:VEVENT
     async (req, res) => {
       try {
         const user = req.user as any;
-        const userTier = user?.subscriptionTier?.toLowerCase() || "free";
+        const verifiedUserForTool = await storage.getUser(user.id);
+        const userTier = effectiveMemberToolPlan(
+          verifiedUserForTool?.subscriptionTier,
+          !!verifiedUserForTool && hasCurrentPaidEntitlement(verifiedUserForTool),
+        );
         const premiumTiers = ["premium", "enterprise", "ultimate"];
 
         if (!premiumTiers.includes(userTier)) {
@@ -14078,7 +14085,11 @@ OUTPUT: Return ONLY the enhanced answer text, ready to submit. Do not include ex
     async (req, res) => {
       try {
         const user = req.user as any;
-        const userTier = user?.subscriptionTier?.toLowerCase() || "free";
+        const verifiedUserForTool = await storage.getUser(user.id);
+        const userTier = effectiveMemberToolPlan(
+          verifiedUserForTool?.subscriptionTier,
+          !!verifiedUserForTool && hasCurrentPaidEntitlement(verifiedUserForTool),
+        );
         const premiumTiers = ["premium", "enterprise", "ultimate"];
 
         if (!premiumTiers.includes(userTier)) {
@@ -14198,7 +14209,11 @@ OUTPUT FORMAT:
     async (req, res) => {
       try {
         const user = req.user as any;
-        const userTier = user?.subscriptionTier?.toLowerCase() || "free";
+        const verifiedUserForTool = await storage.getUser(user.id);
+        const userTier = effectiveMemberToolPlan(
+          verifiedUserForTool?.subscriptionTier,
+          !!verifiedUserForTool && hasCurrentPaidEntitlement(verifiedUserForTool),
+        );
         const premiumTiers = ["premium", "enterprise", "ultimate"];
 
         if (!premiumTiers.includes(userTier)) {
