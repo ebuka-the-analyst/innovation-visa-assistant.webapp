@@ -60,9 +60,9 @@ test("pricing cards omit extra VAT, legacy and renewal callouts while checkout r
  const layout=read("client/src/components/FounderMembershipPlans.tsx");
  const checkout=read("client/src/components/FounderMembershipCheckout.tsx");
  const terms=read("client/src/pages/terms.tsx");
- assert.doesNotMatch(layout,/<strong>No VAT charged<\\/strong>/);
- assert.doesNotMatch(layout,/ShieldCheck|data\\.legacyTitle|data\\.legacyNotice|data\\.billingNotice/);
- assert.match(layout,/data\\.offers\\.map/);
+ assert.ok(!layout.includes("<strong>No VAT charged</strong>"));
+ for(const removed of ["ShieldCheck","data.legacyTitle","data.legacyNotice","data.billingNotice"])assert.ok(!layout.includes(removed));
+ assert.ok(layout.includes("data.offers.map"));
  assert.match(checkout,/acknowledgeMonthlyRenewal/);
  assert.match(checkout,/acknowledgeConsumerTerms/);
  assert.match(checkout,/acknowledgeNoVatPrice/);
