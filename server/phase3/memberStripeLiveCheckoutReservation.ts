@@ -54,8 +54,8 @@ export async function reserveLiveCheckout(
 export async function recordCreatedLiveCheckout(
   pool: Pool, orderId: string, sessionId: string,
 ): Promise<void> {
-  if(!/^cs_test_[a-zA-Z0-9_]+$/.test(sessionId)){
-    throw new Error("Expected real Stripe TEST Checkout Session ID");
+  if(!/^cs_live_[a-zA-Z0-9_]+$/.test(sessionId)){
+    throw new Error("Expected real Stripe LIVE Checkout Session ID");
   }
   const updated=await pool.query(`
     UPDATE member_stripe_live_orders SET stripe_checkout_session_id=$2,
