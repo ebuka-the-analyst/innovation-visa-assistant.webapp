@@ -58,6 +58,8 @@ jobs:
         run: |
           node --check server/scripts/check-live-membership-readiness.cjs
           node --test tests/phase3-live-readiness.test.cjs
+      - name: Reject sandbox IDs in real Stripe live Checkout reservation
+        run: node --import tsx --test tests/phase3-live-checkout-session.test.ts
       - name: Live gateway isolation and release-approval guards
         run: node --import tsx --test tests/phase3-live-payment-gate.test.ts
       - name: Live-format signed webhook lifecycle with disposable PostgreSQL
