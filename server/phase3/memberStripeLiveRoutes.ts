@@ -46,6 +46,7 @@ export function isMemberLiveGatewayAllowed(env: NodeJS.ProcessEnv = process.env)
     env.IFVA_MEMBER_LIVE_TERMS_VERSION.length >= 6 &&
     env.RAILWAY_PROJECT_ID === "22a033f9-9732-4499-ae97-b509b17354d9" &&
     env.RAILWAY_ENVIRONMENT_ID === "3a9754e3-575c-4e29-b9a3-8af50a5ef823" &&
+    env.RAILWAY_SERVICE_ID === "a1aa2612-9af3-481a-8e67-4ddb488c56a0" &&
     env.RAILWAY_ENVIRONMENT_NAME === "production" &&
     env.NODE_ENV === "production";
 }
