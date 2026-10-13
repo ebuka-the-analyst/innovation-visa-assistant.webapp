@@ -1,3 +1,5 @@
+import { hasCurrentPaidEntitlement } from "../security/paidEntitlement";
+import { isMembershipSku, MembershipQuotaError, reserveMemberAiQuota, transitionMemberAiReservation } from "./memberAiQuota";
 import crypto from "crypto";
 import os from "os";
 import OpenAI from "openai";
@@ -420,6 +422,19 @@ export async function createRevisionForUser(
     throw new RevisionServiceError(409, { error: "This business plan is not ready for revision." });
   }
 
+  const currentUser = await storage.getUser(userId);
+  if (!currentUser) {
+    throw new RevisionServiceError(404, { error: "Account not found." });
+  }
+  // Previously completed documents stay readable; new premium AI revisions
+  // require a current entitlement. Legacy one-time paid access is honoured.
+  if (!hasCurrentPaidEntitlement(currentUser)) {
+    throw new RevisionServiceError(403, {
+      error: "Your paid access has expired or is inactive. Renew before requesting AI revisions.",
+      code: "PAID_ENTITLEMENT_REQUIRED",
+    });
+  }
+
   const transactionalDb = db as any;
   return transactionalDb.transaction(async (tx: any) => {
     const planLock = firstRow<any>(await tx.execute(sql`
@@ -502,6 +517,19 @@ export async function createRevisionForUser(
       RETURNING *
     `));
     if (!revision) throw new Error("Failed to create revision request");
+
+    // Legacy entitlements retain their existing rules. New memberships receive
+    // a payment-period-bound reservation in the SAME transaction as the job.
+    if (isMembershipSku(currentUser.subscriptionTier)) {
+      try {
+        await reserveMemberAiQuota(tx, userId, currentUser.subscriptionTier, "revision", revision.id);
+      } catch (error) {
+        if (error instanceof MembershipQuotaError) {
+          throw new RevisionServiceError(403, { error: error.message, code: error.code });
+        }
+        throw error;
+      }
+    }
 
     for (const sectionIndex of sectionIndexes) {
       const section = byIndex.get(sectionIndex)!;
@@ -731,6 +759,7 @@ export async function cancelQueuedRevisionForUser(planId: string, revisionId: st
         SET status = 'cancelled', updated_at = NOW()
         WHERE revision_id = ${revisionId} AND status = 'queued'
       `);
+      await transitionMemberAiReservation(tx, "revision", revisionId, "released");
       await addEvent(tx, revisionId, planId, "customer", "revision_cancelled", userId, null);
       return { success: true, status: "cancelled", duplicate: false };
     }
@@ -1117,6 +1146,7 @@ async function processRevisionJob(job: RevisionJob): Promise<void> {
             heartbeat_at = NULL, updated_at = NOW()
         WHERE id = ${job.id} AND lease_token = ${job.lease_token}
       `);
+      await transitionMemberAiReservation(tx, "revision", revision.id, "committed");
       await addEvent(tx, revision.id, revision.plan_id, "worker", "revision_ready_for_review", null, {
         targetVersionNumber: nextVersionNumber,
         revisedSectionIndexes: Array.from(revisedByIndex.keys()),
@@ -1144,6 +1174,7 @@ async function markRevisionJobFailed(job: RevisionJob, error: any, permanent: bo
     SET status = 'failed', last_error = ${message}, updated_at = NOW()
     WHERE id = ${job.revision_id} AND status = 'in_progress'
   `);
+  await transitionMemberAiReservation(db as any, "revision", job.revision_id, "released");
   const revision = firstRow<any>(await db.execute(sql`
     SELECT plan_id FROM business_plan_revisions WHERE id = ${job.revision_id}
   `));

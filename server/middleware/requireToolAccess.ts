@@ -7,6 +7,7 @@ import {
   type PlanId,
 } from "@shared/commercialCatalog";
 import { getCommercialCatalog } from "../services/commercialCatalogService";
+import { hasCurrentPaidEntitlement } from "../security/paidEntitlement";
 
 type ToolIdResolver = (request: Request) => string | undefined | Promise<string | undefined>;
 
@@ -39,7 +40,20 @@ export function requireToolAccess(toolIdOrResolver: string | ToolIdResolver): Re
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      const userPlanId: PlanId = isPlanId(user.subscriptionTier) ? user.subscriptionTier : "free";
+      // Never grant premium tools from a stale tier label alone.
+      // Legacy one-time purchases with no expiry retain access while active.
+      // New membership SKUs inherit the validated legacy tool access ladder
+      // until the catalogue migration in Phase 3. Expired plans map to Free.
+      const membershipToolTier: Record<string, PlanId> = {
+        founder: "premium",
+        founder_pro: "enterprise",
+        founder_pass_90d: "enterprise",
+      };
+      const effectiveTier = membershipToolTier[user.subscriptionTier] || user.subscriptionTier;
+      const userPlanId: PlanId =
+        hasCurrentPaidEntitlement(user) && isPlanId(effectiveTier)
+          ? effectiveTier
+          : "free";
       if (!hasToolAccess(catalog, userPlanId, toolId)) {
         return res.status(403).json({
           error: "Your current plan does not include this tool",
