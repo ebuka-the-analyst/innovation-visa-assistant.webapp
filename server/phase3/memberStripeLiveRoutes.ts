@@ -159,8 +159,8 @@ export function registerMemberStripeLiveRoutes(
         customer_update:{address:"auto"},
         // No VAT is charged in the approved UK non-VAT-registered release mode.
         // Do not open overseas digital-service sales until destination-tax obligations are reviewed.
-        success_url:cfg.publicUrl+"/uk/innovatorfoundervisaassistant/dashboard?membership_order="+encodeURIComponent(orderId)+"&payment=return",
-        cancel_url:cfg.publicUrl+"/uk/innovatorfoundervisaassistant/dashboard?membership_order="+encodeURIComponent(orderId)+"&payment=cancelled",
+        success_url:cfg.publicUrl+"/uk/innovatorfoundervisaassistant/pricing?membership_order="+encodeURIComponent(orderId)+"&payment=return",
+        cancel_url:cfg.publicUrl+"/uk/innovatorfoundervisaassistant/pricing?membership_order="+encodeURIComponent(orderId)+"&payment=cancelled",
         metadata:{ifvaMembershipLive:"true",ifvaLiveOrderId:orderId,consumerTermsVersion:process.env.IFVA_MEMBER_LIVE_TERMS_VERSION||""},
         ...(expectedRecurring ? {
           subscription_data:{metadata:{ifvaMembershipLive:"true",ifvaLiveOrderId:orderId}},
