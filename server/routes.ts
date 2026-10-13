@@ -4,6 +4,7 @@ import type { ChartDataPayload, ChartType } from "./chartGenerator";
 import { storage } from "./storage";
 import { db, dbPool } from "./db";
 import { registerMemberStripeTestRoutes } from "./phase3/memberStripeProviderTestRoutes";
+import { registerMemberStripeLiveRoutes } from "./phase3/memberStripeLiveRoutes";
 import type { Pool as PgPool } from "pg";
 import {
   questionnaireSchema,
@@ -331,6 +332,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Isolated QA only: protected by Railway project/environment + TEST keys.
   // No live entitlement or legacy checkout code is modified by this route.
   registerMemberStripeTestRoutes(app, isAuthenticated, dbPool as PgPool, requireAdmin);
+  // Live routes mount ONLY after independent release, tax and terms sign-off flags.
+  registerMemberStripeLiveRoutes(app, isAuthenticated, dbPool as PgPool, requireAdmin);
 
   app.post("/api/translate", async (req, res) => {
     try {
