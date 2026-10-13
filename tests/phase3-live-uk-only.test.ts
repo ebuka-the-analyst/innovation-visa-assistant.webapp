@@ -21,13 +21,13 @@ test("UK-only checkout is enforced by Stripe billing country, not by a second UI
  const route=readFileSync(new URL("../server/phase3/memberStripeLiveRoutes.ts",import.meta.url),"utf8");
  const ui=readFileSync(new URL("../client/src/components/FounderMembershipCheckout.tsx",import.meta.url),"utf8");
  assert.match(route,/IFVA_MEMBER_UK_ONLY_ENABLED === "true"/);
- assert.doesNotMatch(route,/req\\.body\\?\\.acknowledgeUkOnly !== true/);
- assert.match(route,/shipping_address_collection:\\{allowed_countries:\\["GB"\\]\\}/);
+ assert.doesNotMatch(route,/req\.body\?\.acknowledgeUkOnly !== true/);
+ assert.match(route,/shipping_address_collection:\{allowed_countries:\["GB"\]\}/);
  assert.match(route,/billing_address_collection:"required"/);
- assert.match(route,/isVerifiedUkMembershipCheckout\\(verifiedSession\\)/);
- assert.match(route,/verifiedCustomer\\.address\\?\\.country!=="GB"/);
+ assert.match(route,/isVerifiedUkMembershipCheckout\(verifiedSession\)/);
+ assert.match(route,/verifiedCustomer\.address\?\.country!=="GB"/);
  assert.doesNotMatch(ui,/acknowledgeUkOnly|ukOnly,setUkOnly|based in the United Kingdom|Available to UK customers only/i);
- assert.doesNotMatch(ui,/displayedProducts|products\\.map/);
+ assert.doesNotMatch(ui,/displayedProducts|products\.map/);
  const checkIndex=route.indexOf("isVerifiedUkMembershipCheckout(verifiedSession)");
  const ledgerIndex=route.lastIndexOf("processSignedLiveStripeEvent(");
  assert.ok(checkIndex>0&&ledgerIndex>checkIndex,"Provider verification precedes applying ledger event");
