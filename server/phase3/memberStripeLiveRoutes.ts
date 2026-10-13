@@ -23,6 +23,7 @@ import {recordUnmatchedSignedLiveEvent} from "./memberStripeLiveUnmatched";
 import {validatePaidInvoicePayment,PaidInvoiceMismatch,type VerifiedPaidInvoicePayment} from "./stripeLivePaidInvoiceMapping";
 import { confirmedNewLiveMembershipPurchase } from "./memberStripeLiveCheckoutIntent";
 import { isVerifiedUkMembershipCheckout } from "./memberUkOnlyCheckout";
+import { isVerifiedMemberLegalSeller } from "./memberLegalSeller";
 
 type Config = {
   stripe: Stripe;
@@ -134,8 +135,8 @@ export function registerMemberStripeLiveRoutes(
       const price=await cfg.stripe.prices.retrieve(cfg.prices[sku]);
       const expectedRecurring=sku!=="founder_pass_90d";
       const account=await cfg.stripe.accounts.retrieve();
-      if(account.id!=="acct_1SdAGzK9BSTYpDOq")
-        return res.status(503).json({error:"Wrong Stripe LIVE account"});
+      if(!isVerifiedMemberLegalSeller(account))
+        return res.status(503).json({error:"Stripe legal seller must be verified as STACKRISE LTD, UK company before live Checkout"});
       // Non-VAT-registered UK supplier: no VAT is collected or represented as included.
       // Reject legacy tax-inclusive candidate prices and never silently reuse them.
       if(price.tax_behavior!=="unspecified")return res.status(503).json({error:"Incorrect tax behaviour for approved non-VAT-registered checkout price"});

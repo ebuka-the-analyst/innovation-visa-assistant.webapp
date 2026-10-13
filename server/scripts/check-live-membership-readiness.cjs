@@ -38,7 +38,10 @@ async function main(){
   throw Error("Expected production private PostgreSQL");
  const stripe=new Stripe(key,{apiVersion:"2025-08-27.basil"});
  const acct=await stripe.accounts.retrieve();
- if(acct.id!=="acct_1SdAGzK9BSTYpDOq")throw Error("Wrong live Stripe account");
+ if(acct.id!=="acct_1SdAGzK9BSTYpDOq" ||
+    acct.country!=="GB" || acct.business_type!=="company" ||
+    (acct.company?.name||"").trim().replace(/\s+/g," ").toUpperCase()!=="STACKRISE LTD")
+   throw Error("Stripe live merchant must be UK company STACKRISE LTD (Companies House 16909181)");
  // Do not interpret zero tax calculated by Stripe as proof of tax compliance.
  // Only the separately reviewed non-VAT UK trading basis can authorise this release.
  const prices=[

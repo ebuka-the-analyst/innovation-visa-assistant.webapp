@@ -35,7 +35,7 @@ test("live route uses separate production tables, keys, verified customer consen
  assert.match(source,/IFVA_MEMBER_STRIPE_LIVE_FOUNDER_PRICE_ID/);
  assert.match(source,/IFVA_MEMBER_STRIPE_LIVE_PRO_PRICE_ID/);
  assert.match(source,/IFVA_MEMBER_STRIPE_LIVE_PASS_PRICE_ID/);
- assert.match(source,/account\.id!=="acct_1SdAGzK9BSTYpDOq"/);
+ assert.match(source,/isVerifiedMemberLegalSeller\(account\)/);
  assert.match(source,/req\.body\?\.acknowledgeLivePayment !== true/);
  assert.match(source,/req\.body\?\.acknowledgeNoVatPrice !== true/);
  assert.match(source,/req\.body\?\.acknowledgeConsumerTerms !== true/);
