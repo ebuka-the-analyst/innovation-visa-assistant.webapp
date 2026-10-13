@@ -28,7 +28,9 @@ test("live membership is off by default and fails closed without any independent
 });
 test("live route uses separate production tables, keys, verified customer consent and live signature",()=>{
  const source=readFileSync(new URL("../server/phase3/memberStripeLiveRoutes.ts",import.meta.url),"utf8");
- assert.match(source,/sk_live_/);
+ assert.match(source,/\(\?:sk\|rk\)_live_/);
+ const preflight=readFileSync(new URL("../server/scripts/check-live-membership-readiness.cjs",import.meta.url),"utf8");
+ assert.match(preflight,/\(\?:sk\|rk\)_live_/);
  assert.match(source,/IFVA_MEMBER_STRIPE_LIVE_WEBHOOK_SECRET/);
  assert.match(source,/IFVA_MEMBER_STRIPE_LIVE_FOUNDER_PRICE_ID/);
  assert.match(source,/IFVA_MEMBER_STRIPE_LIVE_PRO_PRICE_ID/);
