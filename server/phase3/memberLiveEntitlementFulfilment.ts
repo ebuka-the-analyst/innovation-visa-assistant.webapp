@@ -3,9 +3,9 @@
  * Feature gated; never expose live Checkout before independent release approval.
  */
 /**
- * QA-ONLY verified membership fulfilment. Does not expose HTTP or accept
- * unverified Stripe objects. The ONLY caller is the isolated signed-event
- * transaction hook; production must get a separate audited release adapter.
+ * LIVE fulfilment callback. The only caller is the LIVE signed-event ledger
+ * inside a single PostgreSQL transaction; it never accepts browser claims.
+ * Checkout remains disabled until release checks are independently approved.
  *
  * This writes the same entitlement and user columns consumed by the app, so
  * test checkout can prove actual paid access without mutating live customers.
