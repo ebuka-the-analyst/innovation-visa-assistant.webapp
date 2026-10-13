@@ -64,6 +64,8 @@ jobs:
         run: node --import tsx --test tests/phase3-live-disabled-routes.test.ts
       - name: Confirm customer live purchase, account ownership and renewal cancellation controls
         run: node --import tsx --test tests/phase3-live-member-customer-flows.test.ts
+      - name: Verify consumer renewal and one-time pass disclosures
+        run: node --import tsx --test tests/phase3-member-disclosure.test.ts
       - name: Live gateway isolation and release-approval guards
         run: node --import tsx --test tests/phase3-live-payment-gate.test.ts
       - name: Live-format signed webhook lifecycle with disposable PostgreSQL
