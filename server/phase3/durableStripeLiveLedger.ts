@@ -3,12 +3,9 @@
  * Feature gated; never expose live Checkout before independent release approval.
  */
 /**
- * Phase 3 acceptance HARNESS ONLY. No HTTP route or live entitlement mutation.
- * Requires a signature-verified Stripe TEST MODE event, an order ID selected
- * by trusted server code, and a disposable PostgreSQL database.
- *
- * Never derive trustedOrderId from webhook metadata, the browser, or a request.
- * Production must separately reconcile live Stripe API records and entitlements.
+ * LIVE payment event transaction ledger. Receives only Stripe live-signed
+ * events and server-resolved order IDs after fresh provider reconciliation.
+ * Never select a trusted order from unverified browser or event metadata.
  */
 import Stripe from "stripe";
 import type { Pool, PoolClient } from "pg";
@@ -64,7 +61,7 @@ function toPending(order: TestOrderRow): PendingCheckout {
 }
 
 /**
- * Commit the event audit and simulated state change in ONE transaction.
+ * Commit the event audit and effective paid membership change in ONE transaction.
  * The order lock serialises rival deliveries across worker processes. The
  * event primary key prevents double-application even after restarts.
  * This is intentionally NOT mapped to production member entitlements.
@@ -84,7 +81,7 @@ export async function processSignedLiveStripeEvent(
   // Signature verification MUST precede all database reads or writes.
   const event = offlineStripe.webhooks.constructEvent(rawBody, stripeSignature, testWebhookSecret);
   if (event.livemode !== true) {
-    throw new Error("Live Stripe events forbidden in test-only acceptance harness");
+    throw new Error("Sandbox Stripe events forbidden in live payment ledger");
   }
   const client = await pool.connect();
   try {
