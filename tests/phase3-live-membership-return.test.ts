@@ -14,7 +14,7 @@ test("Customer return never grants or claims membership access from query parame
 test("Stripe success and cancellation redirect to pricing and show verification",()=>{
  const routes=readFileSync(new URL("../server/phase3/memberStripeLiveRoutes.ts",import.meta.url),"utf8");
  const client=readFileSync(new URL("../client/src/components/FounderMembershipCheckout.tsx",import.meta.url),"utf8");
- assert.match(routes,/\/uk\/innovatorfoundervisaassistant\/pricing\?membership_order=/);
+ assert.match(routes,/\/pricing\?membership_order=/);
  assert.doesNotMatch(routes,/\/uk\/innovatorfoundervisaassistant\/dashboard\?membership_order=/);
  assert.match(client,/FounderMembershipPaymentReturn/);
 });
