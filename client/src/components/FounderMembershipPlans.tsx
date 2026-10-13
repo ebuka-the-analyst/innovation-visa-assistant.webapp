@@ -62,7 +62,7 @@ export default function FounderMembershipPlans(){
     </ul>
     <div className="mt-auto pt-8">
      <Button disabled={!data.purchasable} className="w-full"
-      onClick={()=>{if(data.purchasable)window.location.assign(`/membership/checkout?sku=${encodeURIComponent(offer.id)}`);}}
+      onClick={()=>{if(data.purchasable)window.location.assign(`/pricing?membership=${encodeURIComponent(offer.id)}#membership-checkout`);}}
       data-testid={`membership-action-${offer.id}`}>
        {offer.ctaText}
      </Button>
