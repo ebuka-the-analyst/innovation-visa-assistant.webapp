@@ -76,7 +76,7 @@ export default function FounderMembershipPlans() {
      <span className="ifva-amount">{new Intl.NumberFormat("en-GB",{
       style:"currency",currency:offer.currency,maximumFractionDigits:0,
      }).format(offer.pricePence/100)}</span>
-     <span className="ifva-period">{offer.billingKind==="monthly"?"/month":"one-time"}</span>
+     <span className="ifva-period" aria-label={offer.billingLabel}>{offer.billingKind==="monthly"?"/month":"one-time"}</span>
     </div>
     <p className="ifva-promise">{offer.headline}</p>
     <p className="ifva-description">{offer.description}</p>
