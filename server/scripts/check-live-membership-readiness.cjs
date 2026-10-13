@@ -9,6 +9,7 @@ const Stripe=require("stripe");
 const env=process.env;
 function approved(e=env){
  return e.IFVA_MEMBER_LIVE_ENABLED==="true" &&
+ e.IFVA_MEMBER_UK_ONLY_ENABLED==="true" &&
  e.IFVA_MEMBER_LIVE_RELEASE_APPROVED==="true" &&
  e.IFVA_MEMBER_LIVE_TAX_SIGNOFF==="approved" &&
  e.IFVA_MEMBER_LIVE_TAX_BASIS==="uk_not_vat_registered" &&
