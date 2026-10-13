@@ -108,6 +108,8 @@ import {
 } from "./services/commercialCatalogService";
 import { getPublicMemberOffers } from "./services/memberOfferCatalogue";
 import { requireToolAccess } from "./middleware/requireToolAccess";
+import { hasCurrentPaidEntitlement } from "./security/paidEntitlement";
+import { effectiveMemberToolPlan } from "@shared/memberToolPlan";
 import { BUSINESS_PLAN_MODEL } from "./aiModelConfig";
 import {
   GenerationStartError,
@@ -691,9 +693,9 @@ ${JSON.stringify(unique)}`;
       const freshUser = await storage.getUser(sessionUser.id);
       if (!freshUser) return res.status(401).json({ error: "Unauthorized" });
 
-      const userPlanId: PlanId = isPlanId(freshUser.subscriptionTier)
-        ? freshUser.subscriptionTier
-        : "free";
+      const userPlanId = effectiveMemberToolPlan(
+        freshUser.subscriptionTier, hasCurrentPaidEntitlement(freshUser),
+      );
       const { catalog } = await getCommercialCatalog();
       const accessByTool = Object.fromEntries(
         MANAGED_TOOL_DEFINITIONS.map((tool) => [
@@ -10995,13 +10997,19 @@ EXAMPLES OF GOOD RESPONSES:
           .json({ error: "Topic, subject, and message are required" });
       }
 
-      // Store the support ticket
+      // Server-verifiable priority only: browser-submitted VIP flags are ignored.
+      const freshSupportUser = await storage.getUser(user.id);
+      if (!freshSupportUser) return res.status(401).json({ error: "Unauthorized" });
+      const isVip = freshSupportUser.subscriptionTier === "founder_pro"
+        && hasCurrentPaidEntitlement(freshSupportUser);
+      // Store priority so the team actually sees VIP requests first.
       const ticket = await storage.createSupportTicket({
         userId: user.id,
         email: user.email,
         topic,
         subject,
         message,
+        priority: isVip ? "high" : "normal",
         status: "open",
       });
 
@@ -11011,7 +11019,7 @@ EXAMPLES OF GOOD RESPONSES:
         user.email,
         user.firstName || "User",
         topic,
-        subject,
+        isVip ? "[VIP PRIORITY] " + subject : subject,
         message,
       );
 
