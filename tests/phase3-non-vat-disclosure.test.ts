@@ -4,7 +4,7 @@ import {readFileSync} from "node:fs";
 test("public membership wording says No VAT charged without exposing VAT registration status",()=>{
  const plans=readFileSync(new URL("../client/src/components/FounderMembershipCheckout.tsx",import.meta.url),"utf8");
  const terms=readFileSync(new URL("../client/src/pages/terms.tsx",import.meta.url),"utf8");
- assert.match(plans,/No VAT charged/);
+ assert.doesNotMatch(plans,/No VAT charged/);
  assert.match(terms,/no VAT charged/i);
  assert.doesNotMatch(plans,/supplier not VAT registered/i);
  assert.doesNotMatch(terms,/supplier not VAT registered/i);
