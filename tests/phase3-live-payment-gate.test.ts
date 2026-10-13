@@ -28,6 +28,7 @@ test("live membership is off by default and fails closed without any independent
 });
 test("live route uses separate production tables, keys, verified customer consent and live signature",()=>{
  const source=readFileSync(new URL("../server/phase3/memberStripeLiveRoutes.ts",import.meta.url),"utf8");
+ const eligibility=readFileSync(new URL("../server/phase3/memberLiveCheckoutEligibility.ts",import.meta.url),"utf8");
  assert.match(source,/\(\?:sk\|rk\)_live_/);
  const preflight=readFileSync(new URL("../server/scripts/check-live-membership-readiness.cjs",import.meta.url),"utf8");
  assert.match(preflight,/\(\?:sk\|rk\)_live_/);
@@ -36,9 +37,9 @@ test("live route uses separate production tables, keys, verified customer consen
  assert.match(source,/IFVA_MEMBER_STRIPE_LIVE_PRO_PRICE_ID/);
  assert.match(source,/IFVA_MEMBER_STRIPE_LIVE_PASS_PRICE_ID/);
  assert.match(source,/isVerifiedMemberLegalSeller\(account\)/);
- assert.match(source,/req\.body\?\.acknowledgeLivePayment !== true/);
- assert.match(source,/req\.body\?\.acknowledgeNoVatPrice !== true/);
- assert.match(source,/req\.body\?\.acknowledgeConsumerTerms !== true/);
+ assert.ok(eligibility.includes("body?.acknowledgeLivePayment!==true"));
+ assert.ok(eligibility.includes("body?.acknowledgeNoVatPrice!==true"));
+ assert.ok(eligibility.includes("body?.acknowledgeConsumerTerms!==true"));
  assert.match(source,/price\.tax_behavior!=="unspecified"/);
  assert.match(source,/automatic_tax:\{enabled:false\}/);
  assert.match(source,/shipping_address_collection:\{allowed_countries:\["GB"\]\}/);

@@ -70,7 +70,6 @@ export default function FounderMembershipCheckout({offer,open,onOpenChange}:Prop
       {new Intl.NumberFormat("en-GB",{style:"currency",currency:offer.currency,maximumFractionDigits:0}).format(offer.pricePence/100)}
       <span className="ml-2 text-sm font-normal text-muted-foreground">{offer.billingLabel}</span>
      </p>
-     <p className="text-sm font-medium">No VAT charged</p>
      <p className="text-sm text-muted-foreground">
       AI-assisted business-plan preparation software, not regulated immigration advice, endorsement or a guaranteed visa outcome.
      </p>

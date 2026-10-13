@@ -22,7 +22,7 @@ test("checkout dialog keeps payment and monthly renewal consent but no UK-only c
  assert.match(checkout,/acknowledgeLivePayment:true/);
  assert.match(checkout,/acknowledgeMonthlyRenewal:/);
  assert.match(checkout,/acknowledgeConsumerTerms:true/);
- assert.match(checkout,/No VAT charged/);
+ assert.doesNotMatch(checkout,/No VAT charged/);
  assert.doesNotMatch(checkout,/acknowledgeUkOnly|setUkOnly|No physical product is shipped|available to UK customers only|United Kingdom/i);
  assert.doesNotMatch(routes,/acknowledgeUkOnly/);
  assert.match(routes,/shipping_address_collection:\{allowed_countries:\["GB"\]\}/);
