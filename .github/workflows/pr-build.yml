@@ -169,5 +169,10 @@ jobs:
       - name: Test legacy membership migration audit is admin-only and read-only
         run: node --import tsx --test tests/member-migration-audit-safety.test.ts
 
+      - name: Verify gated Founder membership payment and consumer flows
+        run: |
+          node --import tsx --test tests/phase3-live-checkout-session.test.ts tests/phase3-live-disabled-routes.test.ts tests/phase3-live-member-customer-flows.test.ts tests/phase3-live-membership-return.test.ts tests/phase3-live-payment-gate.test.ts tests/phase3-non-vat-disclosure.test.ts
+          node --test tests/phase3-live-readiness.test.cjs
+
       - name: Production build
         run: npm run build
