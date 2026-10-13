@@ -136,7 +136,6 @@ export function registerMemberStripeLiveRoutes(
        req.body?.acknowledgeLivePayment !== true ||
        req.body?.acknowledgeNoVatPrice !== true ||
        req.body?.acknowledgeConsumerTerms !== true ||
-       req.body?.acknowledgeUkOnly !== true ||
        req.body?.consumerTermsVersion !== process.env.IFVA_MEMBER_LIVE_TERMS_VERSION)
       return res.status(400).json({error:"Verified non-admin customer must acknowledge total price, no VAT charged and current consumer terms"});
     const email=String(user.email||"").trim();
@@ -170,9 +169,9 @@ export function registerMemberStripeLiveRoutes(
         client_reference_id:user.id,
         line_items:[{price:cfg.prices[sku],quantity:1}],
         billing_address_collection:"required",
-        // Checkout restricts the collected service/delivery address to GB.
-        // Billing address is separately required and checked on the Stripe-signed
-        // payment event before granting access. No physical goods are shipped.
+        // Current UK-only tax rollout verifies both UK billing and collected
+        // service address after payment. This is enforced by Stripe and signed
+        // events, not a customer-facing checkbox. Overseas tax rollout is separate.
         shipping_address_collection:{allowed_countries:["GB"]},
         automatic_tax:{enabled:false},
         customer_update:{address:"auto"},

@@ -42,7 +42,7 @@ test("live route uses separate production tables, keys, verified customer consen
  assert.match(source,/price\.tax_behavior!=="unspecified"/);
  assert.match(source,/automatic_tax:\{enabled:false\}/);
  assert.match(source,/shipping_address_collection:\{allowed_countries:\["GB"\]\}/);
- assert.match(source,/acknowledgeUkOnly/);
+ assert.doesNotMatch(source,/acknowledgeUkOnly/);
  assert.match(source,/customer_update:\{address:"auto"\}/);
  assert.match(source,/constructEvent\(rawBody,signature,cfg\.secret\)/);
  assert.match(source,/event\.livemode!==true/);
