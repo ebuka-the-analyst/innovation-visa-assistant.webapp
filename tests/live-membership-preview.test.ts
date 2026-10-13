@@ -29,11 +29,13 @@ test("homepage and pricing share exactly one API-fed Founder membership componen
 
 test("missing live gateway cannot silently create Stripe checkout or revive old purchases",()=>{
  const catalogue=read("server/services/memberOfferCatalogue.ts");
+ const gateway=read("server/phase3/memberStripeLiveRoutes.ts");
  const routes=read("server/routes.ts");
  const component=read("client/src/components/FounderMembershipPlans.tsx");
- assert.match(catalogue,/IFVA_MEMBERSHIP_PAYMENTS_LIVE_ENABLED/);
- assert.match(catalogue,/IFVA_MEMBERSHIP_LIVE_WEBHOOK_VERIFIED/);
- assert.match(catalogue,/IFVA_MEMBERSHIP_LIVE_FULFILMENT_VERIFIED/);
+ assert.match(catalogue,/isMemberPublicCheckoutAllowed/);
+ assert.match(gateway,/IFVA_MEMBERSHIP_PAYMENTS_LIVE_ENABLED/);
+ assert.match(gateway,/IFVA_MEMBERSHIP_LIVE_WEBHOOK_VERIFIED/);
+ assert.match(gateway,/IFVA_MEMBERSHIP_LIVE_FULFILMENT_VERIFIED/);
  assert.match(component,/disabled=\{!data\.purchasable\}/);
  assert.match(routes,/app\.get\("\/api\/member-offers"/);
  assert.match(routes,/app\.get\("\/api\/admin\/member-migration-audit"/);
