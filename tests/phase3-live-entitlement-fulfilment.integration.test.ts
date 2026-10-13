@@ -357,15 +357,15 @@ test("parallel Checkout requests reserve only one chargeable session per founder
     "SELECT id,stripe_checkout_session_id FROM member_stripe_live_orders WHERE user_id=$1",[user]);
   assert.equal(stored.rows.length,1);
   assert.equal(stored.rows[0].stripe_checkout_session_id,"cs_pending_"+stored.rows[0].id);
-  await recordCreatedLiveCheckout(pool,stored.rows[0].id,"cs_test_qa_recorded");
+  await recordCreatedLiveCheckout(pool,stored.rows[0].id,"cs_live_qa_recorded");
   const bound=await pool.query("SELECT stripe_checkout_session_id FROM member_stripe_live_orders WHERE id=$1",
     [stored.rows[0].id]);
-  assert.equal(bound.rows[0].stripe_checkout_session_id,"cs_test_qa_recorded");
-  await assert.rejects(()=>recordCreatedLiveCheckout(pool,stored.rows[0].id,"cs_test_again"),
+  assert.equal(bound.rows[0].stripe_checkout_session_id,"cs_live_qa_recorded");
+  await assert.rejects(()=>recordCreatedLiveCheckout(pool,stored.rows[0].id,"cs_live_again"),
     /could not be bound/);
 });
 
-test("legacy paid member cannot start Stripe QA checkout",async()=>{
+test("legacy paid member cannot start Stripe live checkout",async()=>{
   const user="legacy_"+randomUUID().replaceAll("-","");
   await pool.query("INSERT INTO users(id,subscription_tier,subscription_status) VALUES($1,'premium','active')",[user]);
   await assert.rejects(()=>reserveLiveCheckout(pool,{
