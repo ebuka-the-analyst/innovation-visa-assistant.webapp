@@ -158,8 +158,8 @@ export function registerMemberStripeLiveRoutes(
         automatic_tax:{enabled:true},
         customer_update:{address:"auto"},
         // Never present an unverified final VAT calculation as correct.
-        success_url:cfg.publicUrl+"/uk/innovatorfoundervisaassistant/dashboard?membership_order="+encodeURIComponent(orderId)+"&payment=return",
-        cancel_url:cfg.publicUrl+"/uk/innovatorfoundervisaassistant/dashboard?membership_order="+encodeURIComponent(orderId)+"&payment=cancelled",
+        success_url:cfg.publicUrl+"/uk/innovatorfoundervisaassistant/pricing?membership_order="+encodeURIComponent(orderId)+"&payment=return",
+        cancel_url:cfg.publicUrl+"/uk/innovatorfoundervisaassistant/pricing?membership_order="+encodeURIComponent(orderId)+"&payment=cancelled",
         metadata:{ifvaMembershipLive:"true",ifvaLiveOrderId:orderId,consumerTermsVersion:process.env.IFVA_MEMBER_LIVE_TERMS_VERSION||""},
         ...(expectedRecurring ? {
           subscription_data:{metadata:{ifvaMembershipLive:"true",ifvaLiveOrderId:orderId}},
