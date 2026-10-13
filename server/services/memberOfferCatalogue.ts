@@ -9,6 +9,7 @@
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "../db";
+import { isMemberLiveGatewayAllowed } from "../phase3/memberStripeLiveRoutes";
 import { systemSettings } from "@shared/schema";
 
 export const MEMBER_OFFER_CATALOG_KEY="commercial.founder-offers.v1";
@@ -80,13 +81,11 @@ export async function getMemberOfferCatalogue():Promise<MemberOfferCatalogue>{
  if(!records.length)return safeDefaultMemberOffers();
  return parseMemberOfferCatalogue(records[0].value);
 }
-// Deliberate hard gate: no production webhook/fulfilment route exists yet.
-// Environment variables alone must NEVER make this UI offer chargeable.
-const VERIFIED_LIVE_MEMBERSHIP_GATEWAY_IMPLEMENTED=false;
+// All independently-approved Stripe, tax and legal gates must match before
+// a public membership CTA becomes available. Preserve three additional
+// operational approvals from the original read-only pricing release.
 export function canStartLiveMembershipCheckout(env:NodeJS.ProcessEnv=process.env):boolean{
- return VERIFIED_LIVE_MEMBERSHIP_GATEWAY_IMPLEMENTED &&
-   env.NODE_ENV==="production" &&
-   env.RAILWAY_ENVIRONMENT_NAME==="production" &&
+ return isMemberLiveGatewayAllowed(env) &&
    env.IFVA_MEMBERSHIP_PAYMENTS_LIVE_ENABLED==="true" &&
    env.IFVA_MEMBERSHIP_LIVE_WEBHOOK_VERIFIED==="true" &&
    env.IFVA_MEMBERSHIP_LIVE_FULFILMENT_VERIFIED==="true";
