@@ -294,6 +294,10 @@ export function registerMemberStripeLiveRoutes(
     try{
       let verifiedChargeCustomer:string|null=null;
       let verifiedInvoicePayment:VerifiedPaidInvoicePayment|undefined;
+      // Stripe sends account-wide events to every enabled webhook endpoint.
+      // Ignore events for expert bookings/other products; never claim them as
+      // membership failures or make Stripe retry unrelated customer payments.
+      let looksLikeMemberEvent=obj.metadata?.ifvaMembershipLive==="true";
       let rows:{id:string;user_id:string;stripe_customer_id:string;stripe_subscription_id:string|null;stripe_checkout_session_id:string;stripe_price_id:string;expected_pence:number;sku:CandidateSku;}[]=[];
       if(event.type==="checkout.session.completed" || event.type==="checkout.session.async_payment_succeeded"){
         const r=await pool.query(`
@@ -313,6 +317,7 @@ export function registerMemberStripeLiveRoutes(
             // Re-fetch the provider subscription and validate its server-set
             // order reference, customer, and price BEFORE attaching it.
             const subscription=await cfg.stripe.subscriptions.retrieve(sub);
+            looksLikeMemberEvent ||= subscription.metadata?.ifvaMembershipLive==="true";
             const id=subscription.metadata?.ifvaLiveOrderId;
             const r2=orderIdPattern.test(id||"") ? await pool.query(`
               SELECT id,user_id,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,stripe_price_id,expected_pence,sku
@@ -346,7 +351,16 @@ export function registerMemberStripeLiveRoutes(
                     WHERE stripe_payment_intent_id=$1)`,
           [confirmed.paymentIntentId]);
         rows=r.rows;
+        if(rows.length===0 && confirmed.customerId){
+          // The membership purchase creates a dedicated Stripe Customer with
+          // this server-set marker. Keep a matching but not-yet-bound refund
+          // or dispute retryable; ignore unrelated account-wide Charge events.
+          const customer=await cfg.stripe.customers.retrieve(confirmed.customerId);
+          looksLikeMemberEvent ||= !customer.deleted && customer.metadata?.ifvaMembershipLive==="true";
+        }
       }else{return res.json({received:true,ignored:true});}
+      if(rows.length===0 && !looksLikeMemberEvent)
+        return res.json({received:true,ignored:true});
       if(rows.length!==1) {
         await recordUnmatchedSignedLiveEvent(pool,rawBody,signature,cfg.secret,
           "No single trusted order for verified provider event");
