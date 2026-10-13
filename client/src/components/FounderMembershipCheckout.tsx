@@ -1,71 +1,97 @@
 import FounderMembershipPaymentReturn from "./FounderMembershipPaymentReturn";
 import {useEffect,useState} from "react";
 import {Link} from "wouter";
+import {Dialog,DialogContent,DialogDescription,DialogHeader,DialogTitle} from "@/components/ui/dialog";
+import {Button} from "@/components/ui/button";
+
 type Sku="founder"|"founder_pro"|"founder_pass_90d";
-const products:{sku:Sku;name:string;price:number;interval:string;description:string}[]=[
- {sku:"founder",name:"Founder",price:6900,interval:"month",description:"2 plan generations and 15 revisions per paid month"},
- {sku:"founder_pro",name:"Founder Pro",price:11900,interval:"month",description:"4 plan generations and 30 revisions per paid month"},
- {sku:"founder_pass_90d",name:"90-Day Pass",price:15900,interval:"once",description:"2 generations and 15 revisions per 30 days; 6 plans maximum in 90 days"},
-];
-export default function FounderMembershipCheckout(){
- const requestedSku=new URLSearchParams(window.location.search).get("membership_sku");
- const displayedProducts=products.filter(p=>!requestedSku||p.sku===requestedSku);
+export type SelectedFounderOffer={
+ id:Sku;
+ name:string;
+ pricePence:number;
+ currency:"GBP";
+ billingKind:"monthly"|"one_time";
+ billingLabel:string;
+};
+
+type Props={offer:SelectedFounderOffer|null;open:boolean;onOpenChange:(open:boolean)=>void};
+/**
+ * ONE plan selector lives in FounderMembershipPlans. Its card opens this small
+ * payment-confirmation dialog, never a second plan/pricing grid.
+ * The dialog preserves explicit payment, terms and recurring consent.
+ */
+export default function FounderMembershipCheckout({offer,open,onOpenChange}:Props){
  const [available,setAvailable]=useState(false);
  const [termsVersion,setTermsVersion]=useState<string|null>(null);
- const [busy,setBusy]=useState<Sku|null>(null);
+ const [busy,setBusy]=useState(false);
  const [acknowledge,setAcknowledge]=useState(false);
  const [renew,setRenew]=useState(false);
- const [ukOnly,setUkOnly]=useState(false);
  const [message,setMessage]=useState("");
  useEffect(()=>{
+  if(!open)return;
+  setAcknowledge(false);setRenew(false);setBusy(false);setMessage("");
   let mounted=true;
   fetch("/api/member-stripe-live/availability",{credentials:"include",cache:"no-store"})
    .then(r=>r.ok?r.json():null).then(d=>{
-     if(mounted){setAvailable(d?.available===true);setTermsVersion(typeof d?.termsVersion==="string"?d.termsVersion:null);}
+    if(mounted){setAvailable(d?.available===true);setTermsVersion(typeof d?.termsVersion==="string"?d.termsVersion:null);}
    }).catch(()=>{if(mounted)setAvailable(false);});
   return ()=>{mounted=false};
- },[]);
- async function buy(sku:Sku,price:number){
-  if(!available||!termsVersion||!acknowledge||!ukOnly||(sku!=="founder_pass_90d"&&!renew))return;
-  setBusy(sku);setMessage("");
+ },[open,offer?.id]);
+ async function buy(){
+  if(!offer||!available||!termsVersion||!acknowledge||
+    (offer.billingKind==="monthly"&&!renew)||busy)return;
+  setBusy(true);setMessage("");
   try{
    const response=await fetch("/api/member-stripe-live/checkout",{
     method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({sku,confirmedPricePence:price,acknowledgeNewPayment:true,
-      acknowledgeMonthlyRenewal:sku!=="founder_pass_90d"?renew:false,
+    body:JSON.stringify({sku:offer.id,confirmedPricePence:offer.pricePence,acknowledgeNewPayment:true,
+      acknowledgeMonthlyRenewal:offer.billingKind==="monthly"?renew:false,
       acknowledgeLivePayment:true,acknowledgeNoVatPrice:true,
-      acknowledgeConsumerTerms:true,acknowledgeUkOnly:ukOnly,consumerTermsVersion:termsVersion})
+      acknowledgeConsumerTerms:true,consumerTermsVersion:termsVersion})
    });
    const body=await response.json();
    if(!response.ok||body.liveMode!==true||typeof body.url!=="string"||
       !body.url.startsWith("https://checkout.stripe.com/"))throw Error(body.error||"Checkout unavailable");
    window.location.assign(body.url);
-  }catch(e){setMessage(e instanceof Error?e.message:"Checkout unavailable");setBusy(null);}
+  }catch(e){setMessage(e instanceof Error?e.message:"Checkout unavailable");setBusy(false);}
  }
- return <><FounderMembershipPaymentReturn /><section aria-label="Founder memberships" className="my-12 space-y-5" id="membership-purchase-options">
-  <h2 className="text-2xl font-semibold">Founder memberships</h2>
-  <p className="text-sm text-muted-foreground">Available to UK customers only. Digital AI preparation, not immigration advice, endorsement or a guaranteed visa outcome. Stripe will verify your UK billing and service address; no goods are shipped.</p>
-  <div className="grid gap-4 md:grid-cols-3">{displayedProducts.map(p=><div key={p.sku} className="rounded-lg border p-5 space-y-3">
-   <h3 className="font-semibold">{p.name}</h3>
-   <p className="text-2xl font-bold">£{(p.price/100).toFixed(0)} <span className="text-sm font-normal">/{p.interval}</span></p>
-   <p className="text-sm font-medium">No VAT charged</p>
-   <p className="text-sm">{p.description}</p>
-   <button type="button" disabled={!available||!termsVersion||!acknowledge||!ukOnly||(p.interval==="month"&&!renew)||busy!==null}
-    onClick={()=>buy(p.sku,p.price)}
-    className="rounded bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50">
-    {busy===p.sku?"Opening secure checkout…":available?"Continue to Stripe":"Not yet available"}
-   </button>
-  </div>)}</div>
-  {available&&termsVersion&&<div className="space-y-3 text-sm">
-   <label className="flex gap-2"><input type="checkbox" checked={acknowledge} onChange={e=>setAcknowledge(e.target.checked)}/>
-    I understand the displayed total price, payment terms and membership consumer terms. I authorise a new payment.</label>
-   <label className="flex gap-2"><input type="checkbox" checked={ukOnly} onChange={e=>setUkOnly(e.target.checked)}/>
-    I confirm that I am based in the United Kingdom and will enter my genuine UK billing and service address in Stripe Checkout. Memberships are currently available to UK customers only. No physical product is shipped.</label>
-   <label className="flex gap-2"><input type="checkbox" checked={renew} onChange={e=>setRenew(e.target.checked)}/>
-    I understand that Founder and Founder Pro renew automatically each month until cancelled. The 90-Day Pass does not renew.</label>
-   <p>Please read the <Link href="/terms" className="underline">terms</Link> and <Link href="/support" className="underline">support and refund enquiries</Link> before purchase. Membership cancellation and refund requests can also be made through support.</p>
-  </div>}
-  {!available&&<p className="text-sm text-muted-foreground">New memberships are not accepting live payments yet. Existing services and purchases remain available.</p>}
-  {message&&<p role="alert" className="text-sm text-destructive">{message}</p>}
- </section></>;
+ return <>
+  <FounderMembershipPaymentReturn/>
+  <Dialog open={open&&!!offer} onOpenChange={onOpenChange}>
+   <DialogContent aria-describedby="member-checkout-summary">
+    {offer&&<>
+     <DialogHeader>
+      <DialogTitle>Confirm {offer.name}</DialogTitle>
+      <DialogDescription id="member-checkout-summary">
+       Please review your membership before opening secure Stripe Checkout.
+      </DialogDescription>
+     </DialogHeader>
+     <p className="text-2xl font-semibold">
+      {new Intl.NumberFormat("en-GB",{style:"currency",currency:offer.currency,maximumFractionDigits:0}).format(offer.pricePence/100)}
+      <span className="ml-2 text-sm font-normal text-muted-foreground">{offer.billingLabel}</span>
+     </p>
+     <p className="text-sm text-muted-foreground">
+      AI-assisted business-plan preparation software, not regulated immigration advice, endorsement or a guaranteed visa outcome.
+     </p>
+     <div className="space-y-4 text-sm">
+      <label className="flex items-start gap-2"><input type="checkbox" className="mt-1" checked={acknowledge}
+        onChange={e=>setAcknowledge(e.target.checked)}/>
+       <span>I understand the displayed total price and applicable membership terms, and I authorise a new payment.</span>
+      </label>
+      {offer.billingKind==="monthly"&&<label className="flex items-start gap-2">
+       <input type="checkbox" className="mt-1" checked={renew} onChange={e=>setRenew(e.target.checked)}/>
+       <span>I agree that this membership renews automatically every month until cancelled.</span>
+      </label>}
+      <p>Read our <Link href="/terms" className="underline">terms</Link> and
+       {" "}<Link href="/support" className="underline">support and refund information</Link> before paying.</p>
+     </div>
+     <Button type="button" disabled={!available||!termsVersion||!acknowledge||
+       (offer.billingKind==="monthly"&&!renew)||busy} onClick={buy} className="w-full">
+      {busy?"Opening secure checkout…":available?"Continue to Stripe":"Not yet available"}
+     </Button>
+     {message&&<p role="alert" className="text-sm text-destructive">{message}</p>}
+    </>}
+   </DialogContent>
+  </Dialog>
+ </>;
 }
