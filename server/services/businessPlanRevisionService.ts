@@ -5,6 +5,8 @@ import { sql } from "drizzle-orm";
 import { db } from "../db";
 import { storage } from "../storage";
 import { BUSINESS_PLAN_MODEL } from "../aiModelConfig";
+import { hasCurrentPaidEntitlement } from "../security/paidEntitlement";
+import { isMembershipSku, MembershipQuotaError, reserveMemberAiQuota, transitionMemberAiReservation } from "./memberAiQuota";
 import { getSectionsForTier, getSectionSystemPrompt } from "../aiPrompts";
 import { generatePDFUrl, sanitizeBusinessPlanOutputText } from "../pdf";
 import {
@@ -27,7 +29,13 @@ const REQUEST_TYPES = new Set([
   "section_regeneration",
 ]);
 
-const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "" });
+const openaiClient = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || "",
+  defaultHeaders: {
+    "x-ai-quality-policy": "strict-primary",
+    "x-ai-workload": "business_plan_revision",
+  },
+});
 
 type RevisionJob = {
   id: string;
@@ -103,19 +111,19 @@ function isPermanentProviderError(error: any): boolean {
   );
 }
 
-async function callRevisionAI(prompt: string, maxTokens = 8000): Promise<string> {
+async function callRevisionAI(prompt: string, maxTokens = 8000, jobId?: string): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
     throw new PermanentRevisionError("OPENAI_API_KEY is not configured");
   }
 
-  if (/^gpt-5/i.test(BUSINESS_PLAN_MODEL)) {
+  if (/^gpt-(?:5|6)/i.test(BUSINESS_PLAN_MODEL)) {
     const response = await openaiClient.responses.create({
       model: BUSINESS_PLAN_MODEL as any,
       input: prompt,
       max_output_tokens: maxTokens,
-      reasoning: { effort: "medium" },
+      reasoning: { effort: "high" },
       text: { verbosity: "high" },
-    } as any);
+    } as any, { headers: jobId ? { "x-ai-job-id": jobId } : {} });
     const responseAny = response as any;
     const outputText = typeof responseAny.output_text === "string" ? responseAny.output_text : "";
     const fallbackText = Array.isArray(responseAny.output)
@@ -134,7 +142,7 @@ async function callRevisionAI(prompt: string, maxTokens = 8000): Promise<string>
     messages: [{ role: "user", content: prompt }],
     max_tokens: maxTokens,
     temperature: 0.35,
-  } as any);
+  } as any, { headers: jobId ? { "x-ai-job-id": jobId } : {} });
   const content = response.choices[0]?.message?.content?.trim();
   if (!content) throw new Error("OpenAI returned an empty revision response");
   return content;
@@ -420,6 +428,19 @@ export async function createRevisionForUser(
     throw new RevisionServiceError(409, { error: "This business plan is not ready for revision." });
   }
 
+  const currentUser = await storage.getUser(userId);
+  if (!currentUser) {
+    throw new RevisionServiceError(404, { error: "Account not found." });
+  }
+  // Previously completed documents stay readable; new premium AI revisions
+  // require a current entitlement. Legacy one-time paid access is honoured.
+  if (!hasCurrentPaidEntitlement(currentUser)) {
+    throw new RevisionServiceError(403, {
+      error: "Your paid access has expired or is inactive. Renew before requesting AI revisions.",
+      code: "PAID_ENTITLEMENT_REQUIRED",
+    });
+  }
+
   const transactionalDb = db as any;
   return transactionalDb.transaction(async (tx: any) => {
     const planLock = firstRow<any>(await tx.execute(sql`
@@ -502,6 +523,19 @@ export async function createRevisionForUser(
       RETURNING *
     `));
     if (!revision) throw new Error("Failed to create revision request");
+
+    // Legacy entitlements retain their existing rules. New memberships receive
+    // a payment-period-bound reservation in the SAME transaction as the job.
+    if (isMembershipSku(currentUser.subscriptionTier)) {
+      try {
+        await reserveMemberAiQuota(tx, userId, currentUser.subscriptionTier, "revision", revision.id);
+      } catch (error) {
+        if (error instanceof MembershipQuotaError) {
+          throw new RevisionServiceError(403, { error: error.message, code: error.code });
+        }
+        throw error;
+      }
+    }
 
     for (const sectionIndex of sectionIndexes) {
       const section = byIndex.get(sectionIndex)!;
@@ -731,6 +765,7 @@ export async function cancelQueuedRevisionForUser(planId: string, revisionId: st
         SET status = 'cancelled', updated_at = NOW()
         WHERE revision_id = ${revisionId} AND status = 'queued'
       `);
+      await transitionMemberAiReservation(tx, "revision", revisionId, "released");
       await addEvent(tx, revisionId, planId, "customer", "revision_cancelled", userId, null);
       return { success: true, status: "cancelled", duplicate: false };
     }
@@ -835,6 +870,7 @@ async function generateRevisedSection(
   originalContent: string,
   requestType: string,
   instructions: string,
+  revisionId: string,
 ): Promise<string> {
   const sectionSystemPrompt = getSectionSystemPrompt(
     plan.tier || "basic",
@@ -870,7 +906,8 @@ MANDATORY REVISION RULES:
   let lastError: any;
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const result = await callRevisionAI(prompt, 8000);
+      const revisionBudget = attempt === 1 ? 12_000 : 24_000;
+      const result = await callRevisionAI(prompt, revisionBudget, revisionId);
       const cleaned = stripDuplicateHeading(sectionDefinition.title, result);
       if (!cleaned) throw new Error("Revision model returned empty content");
       return sanitizeBusinessPlanOutputText(sanitizeBusinessPlanClaims(cleaned));
@@ -1014,6 +1051,7 @@ async function processRevisionJob(job: RevisionJob): Promise<void> {
         row.original_content,
         revision.request_type,
         revision.instructions,
+        job.revision_id,
       );
       if (!(await heartbeatRevisionJob(job))) throw new LostRevisionLeaseError();
       const revisedHash = sha256(revised);
@@ -1117,6 +1155,7 @@ async function processRevisionJob(job: RevisionJob): Promise<void> {
             heartbeat_at = NULL, updated_at = NOW()
         WHERE id = ${job.id} AND lease_token = ${job.lease_token}
       `);
+      await transitionMemberAiReservation(tx, "revision", revision.id, "committed");
       await addEvent(tx, revision.id, revision.plan_id, "worker", "revision_ready_for_review", null, {
         targetVersionNumber: nextVersionNumber,
         revisedSectionIndexes: Array.from(revisedByIndex.keys()),
@@ -1144,6 +1183,7 @@ async function markRevisionJobFailed(job: RevisionJob, error: any, permanent: bo
     SET status = 'failed', last_error = ${message}, updated_at = NOW()
     WHERE id = ${job.revision_id} AND status = 'in_progress'
   `);
+  await transitionMemberAiReservation(db as any, "revision", job.revision_id, "released");
   const revision = firstRow<any>(await db.execute(sql`
     SELECT plan_id FROM business_plan_revisions WHERE id = ${job.revision_id}
   `));

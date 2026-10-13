@@ -3,6 +3,9 @@ import OpenAI from "openai";
 import Anthropic from "@anthropic-ai/sdk";
 import { dbPool } from "./db";
 import { isAuthenticated, requireAdmin } from "./auth";
+import { gatewayUsageEvent, gatewayWorkload } from "./aiGatewayUsage";
+import { BUSINESS_PLAN_MODEL } from "./aiModelConfig";
+import { persistPremiumAiUsage } from "./persistAiUsage";
 
 export const PLATFORM_LATEST_OPENAI_MODEL = "gpt-5.6";
 export const DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-20250514";
@@ -214,7 +217,7 @@ async function callChatWithProvider(setting: ProviderSetting, body: any): Promis
       payload.max_completion_tokens = payload.max_tokens;
       delete payload.max_tokens;
     }
-    if (/^gpt-5/i.test(model)) delete payload.temperature;
+    if (/^gpt-(?:5|6)/i.test(model)) delete payload.temperature;
     const result: any = await client.chat.completions.create(payload);
     result.provider = "openai";
     return result;
@@ -261,10 +264,18 @@ async function callResponseWithProvider(setting: ProviderSetting, body: any): Pr
   return responseFromAnthropic(result, model);
 }
 
-async function withProviderFallback(operation: (setting: ProviderSetting) => Promise<any>): Promise<any> {
-  const settings = (await readSettings())
+async function withProviderFallback(operation: (setting: ProviderSetting) => Promise<any>, strictPrimary = false): Promise<any> {
+  const configuredSettings = (await readSettings())
     .filter((setting) => setting.enabled && configured(setting.provider))
     .sort((a, b) => a.priority - b.priority);
+  // Business-plan workloads are pinned to the verified flagship *candidate*.
+  // Never silently route them to an unbenchmarked or cheaper fallback model.
+  const settings = strictPrimary
+    ? configuredSettings
+        .filter((setting) => setting.provider === "openai")
+        .slice(0, 1)
+        .map((setting) => ({ ...setting, model: BUSINESS_PLAN_MODEL }))
+    : configuredSettings;
   if (!settings.length) {
     const error: any = new Error("No enabled AI provider has a configured server-side API key");
     error.status = 503;
@@ -272,7 +283,9 @@ async function withProviderFallback(operation: (setting: ProviderSetting) => Pro
   }
 
   let lastError: any = null;
-  for (const setting of settings) {
+  // Premium plan workflows must not silently downgrade if the chosen flagship
+  // model is unavailable. Other non-plan workloads retain their configured fallback.
+  for (const setting of strictPrimary ? settings.slice(0, 1) : settings) {
     try {
       return await operation(setting);
     } catch (error: any) {
@@ -333,7 +346,12 @@ export function registerAIProviderGatewayRoutes(app: Express): void {
   app.post("/internal-ai-gateway/v1/chat/completions", async (req, res) => {
     if (!internalGatewayAuthorised(req)) return res.status(401).json({ error: { message: "Unauthorised internal AI gateway request" } });
     try {
-      const result = await withProviderFallback((setting) => callChatWithProvider(setting, req.body || {}));
+      const startedAt = Date.now();
+      const strictPrimary = req.get("x-ai-quality-policy") === "strict-primary";
+      const result = await withProviderFallback((setting) => callChatWithProvider(setting, req.body || {}), strictPrimary);
+      const usageEvent = gatewayUsageEvent(result, "chat_completions", gatewayWorkload(req.get("x-ai-workload")), Date.now() - startedAt, req.get("x-ai-job-id"));
+      console.info(JSON.stringify(usageEvent));
+      await persistPremiumAiUsage(usageEvent);
       res.setHeader("x-ai-provider", String(result?.provider || "managed"));
       res.setHeader("x-ai-model", String(result?.model || ""));
       res.json(result);
@@ -345,7 +363,12 @@ export function registerAIProviderGatewayRoutes(app: Express): void {
   app.post("/internal-ai-gateway/v1/responses", async (req, res) => {
     if (!internalGatewayAuthorised(req)) return res.status(401).json({ error: { message: "Unauthorised internal AI gateway request" } });
     try {
-      const result = await withProviderFallback((setting) => callResponseWithProvider(setting, req.body || {}));
+      const startedAt = Date.now();
+      const strictPrimary = req.get("x-ai-quality-policy") === "strict-primary";
+      const result = await withProviderFallback((setting) => callResponseWithProvider(setting, req.body || {}), strictPrimary);
+      const usageEvent = gatewayUsageEvent(result, "responses", gatewayWorkload(req.get("x-ai-workload")), Date.now() - startedAt, req.get("x-ai-job-id"));
+      console.info(JSON.stringify(usageEvent));
+      await persistPremiumAiUsage(usageEvent);
       res.setHeader("x-ai-provider", String(result?.provider || "managed"));
       res.setHeader("x-ai-model", String(result?.model || ""));
       res.json(result);

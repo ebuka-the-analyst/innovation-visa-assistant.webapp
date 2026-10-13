@@ -40,7 +40,16 @@ for (const relative of walk('server')) {
   }
 
   if (relative !== 'server/aiProviderGateway.ts') {
-    if (/api\.openai\.com/i.test(source)) runtimeViolations.add(`Direct OpenAI endpoint bypass: ${relative}`);
+    const documentedPricingOrigin = (
+      relative === 'server/aiInferencePricing.ts' ||
+      relative === 'server/persistAiUsage.ts'
+    );
+    // These two files identify billing origins only, and cannot open HTTP clients.
+    const directOpenAiCall = /(?:fetch|axios|https\.request)\s*\(/i.test(source) ||
+      /new\s+OpenAI\s*\(/.test(source);
+    if (/api\.openai\.com/i.test(source) && (!documentedPricingOrigin || directOpenAiCall)) {
+      runtimeViolations.add(`Direct OpenAI endpoint bypass: ${relative}`);
+    }
     if (/new\s+Anthropic\s*\(/.test(source)) runtimeViolations.add(`Direct Anthropic client bypass: ${relative}`);
   }
 
@@ -57,13 +66,15 @@ const config = read('server/aiModelConfig.ts');
 if (!config.includes('PLATFORM_LATEST_OPENAI_MODEL = "gpt-5.6"')) {
   throw new Error('Platform latest OpenAI model is not pinned to the approved gpt-5.6 default.');
 }
-if (!config.includes('BUSINESS_PLAN_MODEL = PLATFORM_LATEST_OPENAI_MODEL')) {
-  throw new Error('Business plan generation is not using the platform latest model policy.');
+if (!config.includes('BUSINESS_PLAN_MODEL = "gpt-6-astra"')) {
+  throw new Error('Premium business-plan generation must use the approved GPT-6 Astra candidate.');
 }
 
 const gateway = read('server/aiProviderGateway.ts');
 for (const snippet of [
   'PLATFORM_LATEST_OPENAI_MODEL = "gpt-5.6"',
+  'model: BUSINESS_PLAN_MODEL',
+  'strictPrimary ? settings.slice(0, 1) : settings',
   'provider: "openai", enabled: true, priority: 1',
   'provider: "anthropic", enabled: false, priority: 2',
   'registerAIProviderGatewayRoutes',
