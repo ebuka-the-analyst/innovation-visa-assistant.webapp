@@ -11,10 +11,14 @@
  */
 import { EXPECTED_GBP_PENCE, type CandidateSku } from "./memberStripeLiveAcceptance";
 import { inspectManagedCheckoutAmount } from "./memberManagedPaymentsCheckout";
+import { MANAGED_BUYER_TAX_CODES, type ManagedBuyerKind } from "./memberManagedBuyerVariants";
 
 type TrustedManagedOrder = {
   sku:CandidateSku;
   livemode:boolean;
+  buyerKind:ManagedBuyerKind;
+  taxCode:string;
+  productId:string;
   userId:string;
   customerId:string;
   priceId:string;
@@ -53,6 +57,9 @@ const allowedCountry=(v:unknown):v is string=>
 function trusted(order:TrustedManagedOrder):number{
   if(!Object.hasOwn(EXPECTED_GBP_PENCE,order?.sku))review("Unknown IFVA product");
   const expected=EXPECTED_GBP_PENCE[order.sku];
+  if(!["individual","business"].includes(order.buyerKind) ||
+     order.taxCode!==MANAGED_BUYER_TAX_CODES[order.buyerKind] ||
+     !/^prod_[A-Za-z0-9]+$/.test(order.productId))review("Untrusted buyer tax classification");
   if(typeof order.livemode!=="boolean")review("Untrusted Stripe environment");
   if(order.livemode!==order.checkoutSessionId.startsWith("cs_live_"))review("Provider environment mismatch");
   if(!/^price_[A-Za-z0-9]+$/.test(order.priceId) ||
@@ -72,6 +79,7 @@ function inspectPriceLine(line:any,order:TrustedManagedOrder,expected:number):vo
   same(line?.quantity,1,"Price line quantity does not match membership");
   same(providerId(line?.price),order.priceId,"Price ID differs from approved membership");
   const p=line?.price;
+  same(providerId(p?.product),order.productId,"Checkout price product differs from buyer variant");
   if(!p || p.active!==true || p.currency!=="gbp" ||
      p.unit_amount!==expected)review("Incorrect Stripe catalogue price or currency");
   same(line?.amount_subtotal,expected,"Base price has been discounted or altered");
@@ -98,6 +106,8 @@ function originSession(session:any,order:TrustedManagedOrder):void{
      session?.client_reference_id!==order.userId ||
      session?.metadata?.ifvaLiveOrderId!==order.orderId ||
      session?.metadata?.ifvaMerchantMode!=="stripe_managed_payments" ||
+     session?.metadata?.ifvaBuyerKind!==order.buyerKind ||
+     session?.metadata?.ifvaTaxCode!==order.taxCode ||
      session?.managed_payments?.enabled!==true){
     review("Managed Payments Checkout Session does not match trusted order");
   }
@@ -186,7 +196,8 @@ export function verifyManagedInvoiceEvidence(
      invoiceSubscriptionId(invoice)!==order.subscriptionId)
     review("Provider invoice is not a fully paid recurring membership");
   const line=exactSingleLine(invoice.lines);
-  if(invoicePriceId(line)!==order.priceId ||
+  if(providerId(line?.pricing?.price_details?.product)!==order.productId ||
+     invoicePriceId(line)!==order.priceId ||
      line?.parent?.invoice_item_details?.proration===true ||
      line?.parent?.subscription_item_details?.proration===true)
     review("Unapproved or prorated invoice line");
