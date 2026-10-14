@@ -110,6 +110,7 @@ import { getPublicMemberOffers } from "./services/memberOfferCatalogue";
 import { requireToolAccess } from "./middleware/requireToolAccess";
 import { hasCurrentPaidEntitlement } from "./security/paidEntitlement";
 import { effectiveMemberToolPlan } from "@shared/memberToolPlan";
+import { qualifiesForFounderProPriority } from "./security/founderVipSupport";
 import { BUSINESS_PLAN_MODEL } from "./aiModelConfig";
 import {
   GenerationStartError,
@@ -11003,8 +11004,7 @@ EXAMPLES OF GOOD RESPONSES:
       // Server-verifiable priority only: browser-submitted VIP flags are ignored.
       const freshSupportUser = await storage.getUser(user.id);
       if (!freshSupportUser) return res.status(401).json({ error: "Unauthorized" });
-      const isVip = freshSupportUser.subscriptionTier === "founder_pro"
-        && hasCurrentPaidEntitlement(freshSupportUser);
+      const isVip = qualifiesForFounderProPriority(freshSupportUser, topic);
       // Store priority so the team actually sees VIP requests first.
       const ticket = await storage.createSupportTicket({
         userId: user.id,
