@@ -15,9 +15,12 @@ import { SEOHead } from "@/components/SEOHead";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { trackLogin, trackFormStart, trackFormSubmit, trackError } from "@/lib/analytics";
 import { innovatorFounderPath } from "@/lib/innovator-founder-routes";
+import { safeMembershipReturn } from "@/lib/memberPurchaseNavigation";
 
 export default function Login() {
   const { isAuthenticated, isLoading, user } = useAuth();
+  const membershipReturn=typeof window==="undefined"?null:safeMembershipReturn(window.location.search);
+  const signupLink=membershipReturn?"/signup?next="+encodeURIComponent(membershipReturn):innovatorFounderPath("/signup");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,7 +37,7 @@ export default function Login() {
       if (user?.isAdmin) {
         window.location.href = "/admin-dashboard";
       } else {
-        window.location.href = innovatorFounderPath("/dashboard");
+        window.location.href = membershipReturn || innovatorFounderPath("/dashboard");
       }
     }
   }, [isAuthenticated, isLoading, user]);
@@ -93,7 +96,7 @@ export default function Login() {
       if (data.user?.isAdmin) {
         window.location.href = "/admin-dashboard";
       } else {
-        window.location.href = innovatorFounderPath("/dashboard");
+        window.location.href = membershipReturn || innovatorFounderPath("/dashboard");
       }
     } catch (error: any) {
       // Network or other error
@@ -270,7 +273,7 @@ export default function Login() {
 
           <div className="pt-2 text-center">
             <p className="text-xs text-muted-foreground">
-              No account? <Link href={innovatorFounderPath("/signup")} className="text-primary hover:underline font-medium" data-testid="link-signup">Create one</Link>
+              No account? <Link href={signupLink} className="text-primary hover:underline font-medium" data-testid="link-signup">Create one</Link>
               {" · "}
               <Link href={innovatorFounderPath("/")} className="text-primary hover:underline" data-testid="link-home">Home</Link>
             </p>
