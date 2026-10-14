@@ -7,6 +7,7 @@
  */
 import type Stripe from "stripe";
 import { EXPECTED_GBP_PENCE, type CandidateSku } from "./memberStripeLiveAcceptance";
+import { MANAGED_BUYER_TAX_CODES, type ManagedBuyerKind, type VerifiedManagedVariant } from "./memberManagedBuyerVariants";
 
 export const IFVA_MANAGED_PAYMENTS_API_MIN = "2025-03-31.basil";
 export const IFVA_MANAGED_PAYMENTS_TAX_CODE = "txcd_10105002";
@@ -16,7 +17,9 @@ type TrustedManagedCheckout = {
   customerId: string;
   userId: string;
   orderId: string;
-  priceId: string;
+  // This must be returned by verifyManagedBuyerVariant after fresh Stripe lookups.
+  verifiedVariant: VerifiedManagedVariant;
+  buyerKind: ManagedBuyerKind;
   publicUrl: string;
   consumerTermsVersion: string;
 };
@@ -33,7 +36,13 @@ export function prepareManagedCheckoutParams(
   if (!(input.sku in EXPECTED_GBP_PENCE))
     throw Error("Unapproved membership SKU");
   requireTrustedText(input.customerId, "customer", /^cus_[a-zA-Z0-9]+$/);
-  requireTrustedText(input.priceId, "price", /^price_[a-zA-Z0-9]+$/);
+  if (!input.verifiedVariant || input.verifiedVariant.sku!==input.sku ||
+      input.verifiedVariant.buyerKind!==input.buyerKind ||
+      input.verifiedVariant.taxCode!==MANAGED_BUYER_TAX_CODES[input.buyerKind] ||
+      input.verifiedVariant.expectedPence!==EXPECTED_GBP_PENCE[input.sku] ||
+      !/^prod_[A-Za-z0-9]+$/.test(input.verifiedVariant.productId))
+    throw Error("Managed Payments buyer product was not verified for this membership");
+  requireTrustedText(input.verifiedVariant.priceId, "price", /^price_[a-zA-Z0-9]+$/);
   requireTrustedText(input.userId, "user", /^[A-Za-z0-9_-]{5,128}$/);
   requireTrustedText(input.orderId, "order", /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
   requireTrustedText(input.consumerTermsVersion, "terms", /^[a-zA-Z0-9_.-]{6,120}$/);
@@ -46,6 +55,8 @@ export function prepareManagedCheckoutParams(
     ifvaMembershipLive:"true",
     ifvaLiveOrderId:input.orderId,
     consumerTermsVersion:input.consumerTermsVersion,
+    ifvaBuyerKind:input.buyerKind,
+    ifvaTaxCode:input.verifiedVariant.taxCode,
     ifvaMerchantMode:"stripe_managed_payments",
   };
   // The current Stripe SDK typings may lag the Managed Payments API. The
@@ -55,7 +66,7 @@ export function prepareManagedCheckoutParams(
     mode:isSubscription?"subscription":"payment",
     customer:input.customerId,
     client_reference_id:input.userId,
-    line_items:[{price:input.priceId,quantity:1}],
+    line_items:[{price:input.verifiedVariant.priceId,quantity:1}],
     billing_address_collection:"required",
     managed_payments:{enabled:true},
     success_url:url.origin+"/pricing?membership_order="+encodeURIComponent(input.orderId)+"&payment=return",
@@ -64,6 +75,7 @@ export function prepareManagedCheckoutParams(
     ...(isSubscription?{
       subscription_data:{metadata:{
         ifvaMembershipLive:"true",ifvaLiveOrderId:input.orderId,
+        ifvaBuyerKind:input.buyerKind,
         ifvaMerchantMode:"stripe_managed_payments",
       }},
     }:{}),
