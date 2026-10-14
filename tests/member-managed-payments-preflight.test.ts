@@ -2,25 +2,56 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
  prepareManagedCheckoutParams,inspectManagedCheckoutAmount,
- IFVA_MANAGED_PAYMENTS_API_MIN,IFVA_MANAGED_PAYMENTS_TAX_CODE,
+ IFVA_MANAGED_PAYMENTS_API_MIN,
 } from "../server/phase3/memberManagedPaymentsCheckout";
+import {
+ MANAGED_BUYER_TAX_CODES,verifyManagedBuyerVariant,type ManagedVariantCatalogue,
+} from "../server/phase3/memberManagedBuyerVariants";
 import {readFileSync} from "node:fs";
+
 const read=(p:string)=>readFileSync(new URL("../"+p,import.meta.url),"utf8");
+const catalogue:ManagedVariantCatalogue={
+ founder:{
+  individual:{priceId:"price_personalFounder",productId:"prod_personalFounder"},
+  business:{priceId:"price_businessFounder",productId:"prod_businessFounder"},
+ },
+ founder_pro:{
+  individual:{priceId:"price_personalPro",productId:"prod_personalPro"},
+  business:{priceId:"price_businessPro",productId:"prod_businessPro"},
+ },
+ founder_pass_90d:{
+  individual:{priceId:"price_personalPass",productId:"prod_personalPass"},
+  business:{priceId:"price_businessPass",productId:"prod_businessPass"},
+ },
+};
+const verified=(sku:"founder"|"founder_pro"|"founder_pass_90d",buyerKind:"individual"|"business")=>{
+ const row=catalogue[sku][buyerKind];
+ const isPass=sku==="founder_pass_90d";
+ const amount=sku==="founder"?6900:sku==="founder_pro"?11900:15900;
+ return verifyManagedBuyerVariant(catalogue,sku,buyerKind,
+  {id:row.priceId,product:row.productId,active:true,currency:"gbp",
+   unit_amount:amount,type:isPass?"one_time":"recurring",
+   recurring:isPass?null:{interval:"month",interval_count:1}},
+  {id:row.productId,active:true,tax_code:MANAGED_BUYER_TAX_CODES[buyerKind]});
+};
 const basic={
  sku:"founder" as const,customerId:"cus_testAbcd123",userId:"test_user_123",
  orderId:"f2dc426c-7fe4-4e23-8d10-091d8333465f",
- priceId:"price_testAbcd123",
+ buyerKind:"individual" as const,
+ verifiedVariant:verified("founder","individual"),
  publicUrl:"https://innovatorfoundervisaassistant.co.uk/",
  consumerTermsVersion:"consumer-2026-10-v1",
 };
-test("managed checkout request is digital-only with separate merchant marker",()=>{
+test("Managed checkout for personal buyer uses personal AIaaS Product and tax category",()=>{
  const req=prepareManagedCheckoutParams(basic) as any;
  assert.equal(req.mode,"subscription");
  assert.deepEqual(req.managed_payments,{enabled:true});
  assert.equal(req.billing_address_collection,"required");
  assert.equal(req.metadata.ifvaMerchantMode,"stripe_managed_payments");
- assert.equal(req.subscription_data.metadata.ifvaMerchantMode,"stripe_managed_payments");
- assert.deepEqual(req.line_items,[{price:basic.priceId,quantity:1}]);
+ assert.equal(req.metadata.ifvaBuyerKind,"individual");
+ assert.equal(req.metadata.ifvaTaxCode,"txcd_10105001");
+ assert.equal(req.subscription_data.metadata.ifvaBuyerKind,"individual");
+ assert.deepEqual(req.line_items,[{price:basic.verifiedVariant.priceId,quantity:1}]);
  for(const incompatible of [
   "automatic_tax","shipping_address_collection","shipping_options",
   "customer_update","tax_id_collection","adaptive_pricing",
@@ -28,17 +59,34 @@ test("managed checkout request is digital-only with separate merchant marker",()
  ]) assert.equal(Object.prototype.hasOwnProperty.call(req,incompatible),false,
     "Managed Payments disallows parameter: "+incompatible);
  assert.equal(IFVA_MANAGED_PAYMENTS_API_MIN,"2025-03-31.basil");
- assert.equal(IFVA_MANAGED_PAYMENTS_TAX_CODE,"txcd_10105002");
 });
-test("one-time pass uses payment mode and has no subscription data",()=>{
- const req=prepareManagedCheckoutParams({...basic,sku:"founder_pass_90d"}) as any;
- assert.equal(req.mode,"payment");
- assert.equal(req.subscription_data,undefined);
- assert.equal(req.metadata.ifvaMerchantMode,"stripe_managed_payments");
+test("Business buyer routes to distinct approved business-use Price, same public fee",()=>{
+ const item={...basic,buyerKind:"business" as const,
+  verifiedVariant:verified("founder","business")};
+ const req=prepareManagedCheckoutParams(item) as any;
+ assert.equal(req.metadata.ifvaBuyerKind,"business");
+ assert.equal(req.metadata.ifvaTaxCode,"txcd_10105002");
+ assert.deepEqual(req.line_items,[{price:"price_businessFounder",quantity:1}]);
+ assert.notEqual(req.line_items[0].price,basic.verifiedVariant.priceId);
 });
-test("merchant adapter rejects browser-controlled or untrusted checkout values",()=>{
+test("One-time pass uses payment mode for both buyers and has no subscription data",()=>{
+ for(const buyerKind of ["individual","business"] as const) {
+  const req=prepareManagedCheckoutParams({
+   ...basic,sku:"founder_pass_90d",buyerKind,
+   verifiedVariant:verified("founder_pass_90d",buyerKind),
+  }) as any;
+  assert.equal(req.mode,"payment");
+  assert.equal(req.subscription_data,undefined);
+  assert.equal(req.metadata.ifvaBuyerKind,buyerKind);
+ }
+});
+test("Fails closed if declared buyer does not match verified Product and Price",()=>{
  for(const params of [
-  {...basic,priceId:"sk_live_secret"},
+  {...basic,buyerKind:"business"},
+  {...basic,verifiedVariant:{...basic.verifiedVariant,taxCode:"txcd_10105002"}},
+  {...basic,verifiedVariant:{...basic.verifiedVariant,expectedPence:11900}},
+  {...basic,verifiedVariant:{...basic.verifiedVariant,priceId:"sk_live_secret"}},
+  {...basic,verifiedVariant:{...basic.verifiedVariant,productId:"prod-invalid"}},
   {...basic,publicUrl:"http://innovatorfoundervisaassistant.co.uk/"},
   {...basic,publicUrl:"https://not-our-domain.example/"},
   {...basic,publicUrl:"https://innovatorfoundervisaassistant.co.uk/evil"},
@@ -48,7 +96,7 @@ test("merchant adapter rejects browser-controlled or untrusted checkout values",
   {...basic,consumerTermsVersion:""},
  ]) assert.throws(()=>prepareManagedCheckoutParams(params as any));
 });
-test("preflight recognises valid tax-added Managed Payments amount but never implies paid",()=>{
+test("Preflight recognises tax-added total but never calls it a paid invoice",()=>{
  const base={currency:"gbp",amount_subtotal:11900,
   amount_total:14280,total_details:{amount_tax:2380,amount_discount:0}};
  assert.deepEqual(inspectManagedCheckoutAmount(base,11900),
@@ -57,15 +105,15 @@ test("preflight recognises valid tax-added Managed Payments amount but never imp
  const noTax={...base,amount_total:11900,total_details:{amount_tax:0,amount_discount:0}};
  assert.equal(inspectManagedCheckoutAmount(noTax,11900).valid,true);
  for(const s of [
-   {...base,amount_total:14800}, // invented charge
-   {...base,amount_subtotal:6900}, // mismatched plan
-   {...base,currency:"eur"}, // must reconcile original price separately
+   {...base,amount_total:14800},
+   {...base,amount_subtotal:6900},
+   {...base,currency:"eur"},
    {...base,total_details:{amount_tax:2380,amount_discount:10}},
-   {...base,total_details:{amount_discount:0}}, // cannot infer tax
+   {...base,total_details:{amount_discount:0}},
    {...base,amount_total:-1},
  ]) assert.equal(inspectManagedCheckoutAmount(s,11900).valid,false);
 });
-test("existing live checkout remains UK-only and never switches merchant of record",()=>{
+test("Existing UK-only live billing and webhook remain isolated",()=>{
  const live=read("server/phase3/memberStripeLiveRoutes.ts");
  assert.match(live,/shipping_address_collection:\{allowed_countries:\["GB"\]\}/);
  assert.match(live,/isVerifiedUkMembershipCheckout/);
