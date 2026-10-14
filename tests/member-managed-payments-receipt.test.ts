@@ -6,6 +6,7 @@ import {
 
 const order={
  sku:"founder_pass_90d" as const, livemode:false,userId:"account_test_user",
+ buyerKind:"individual" as const,taxCode:"txcd_10105001",productId:"prod_personalPass",
  customerId:"cus_test123",orderId:"00000000-0000-4000-8000-000000000001",
  priceId:"price_test123",checkoutSessionId:"cs_test_123456",
 };
@@ -13,13 +14,15 @@ const session={
  id:order.checkoutSessionId,livemode:false,mode:"payment",status:"complete",
  payment_status:"paid",customer:order.customerId,client_reference_id:order.userId,
  managed_payments:{enabled:true},
- metadata:{ifvaLiveOrderId:order.orderId,ifvaMerchantMode:"stripe_managed_payments"},
+ metadata:{ifvaLiveOrderId:order.orderId,ifvaMerchantMode:"stripe_managed_payments",
+  ifvaBuyerKind:"individual",ifvaTaxCode:"txcd_10105001"},
  customer_details:{address:{country:"FR"}},subscription:null,
  payment_intent:"pi_test123",currency:"gbp",amount_subtotal:15900,amount_total:18921,
  total_details:{amount_tax:3021,amount_discount:0},
 };
 const checkoutLines={
- data:[{quantity:1,price:{id:order.priceId,currency:"gbp",active:true,unit_amount:15900},
+ data:[{quantity:1,price:{id:order.priceId,product:order.productId,
+ currency:"gbp",active:true,unit_amount:15900},
  amount_subtotal:15900}],has_more:false,total_count:1,
 };
 const intent={
@@ -56,6 +59,10 @@ test("pass: untrusted Stripe session, tax, user, intent, country or price fails 
  rejects(()=>fake({currency:"eur"}));
  rejects(()=>fake({total_details:{amount_tax:3021,amount_discount:100}}));
  rejects(()=>fake({customer_details:{address:{country:"RU"}}}));
+ rejects(()=>verifyManagedPassEvidence({...order,buyerKind:"business"},session,checkoutLines,intent,customer));
+ rejects(()=>verifyManagedPassEvidence({...order,taxCode:"txcd_10105002"},session,checkoutLines,intent,customer));
+ rejects(()=>fake({metadata:{...session.metadata,ifvaBuyerKind:"business"}}));
+ rejects(()=>fake({metadata:{...session.metadata,ifvaTaxCode:"txcd_10105002"}}));
  rejects(()=>verifyManagedPassEvidence(order,session,
   {...checkoutLines,data:[{...checkoutLines.data[0],price:{...checkoutLines.data[0].price,id:"price_wrong"}}]},
   intent,customer));
@@ -68,7 +75,7 @@ test("pass: untrusted Stripe session, tax, user, intent, country or price fails 
  rejects(()=>verifyManagedPassEvidence({...order,livemode:true},session,checkoutLines,intent,customer));
 });
 
-const recurringOrder={...order,sku:"founder_pro" as const,subscriptionId:"sub_test123"};
+const recurringOrder={...order,sku:"founder_pro" as const,subscriptionId:"sub_test123",productId:"prod_personalPro"};
 const renewalCheckout={...session,mode:"subscription",subscription:recurringOrder.subscriptionId,
  amount_total:11900,amount_subtotal:11900,payment_intent:null,
  total_details:{amount_tax:0,amount_discount:0}};
@@ -78,7 +85,7 @@ const invoice={
  parent:{subscription_details:{subscription:recurringOrder.subscriptionId}},
  subtotal:11900,total:14280,amount_paid:14280,total_taxes:[{amount:2380}],
  total_discount_amounts:[],
- lines:{data:[{amount:11900,pricing:{price_details:{price:order.priceId}},
+ lines:{data:[{amount:11900,pricing:{price_details:{price:order.priceId,product:recurringOrder.productId}},
   period:{start:1790000000,end:1792592000},parent:{subscription_item_details:{proration:false}}}],
   has_more:false,total_count:1},
  payments:{data:[{id:"inpay_test123",object:"invoice_payment",livemode:false,
@@ -110,6 +117,8 @@ test("subscription: cannot activate with underpaid, proration, wrong SKU or miss
   {...invoice.lines.data[0],parent:{subscription_item_details:{proration:true}}}]}}));
  rejects(()=>attempt({...invoice,lines:{...invoice.lines,data:[
   {...invoice.lines.data[0],period:{start:1790000000,end:1790000001}}]}}));
+ rejects(()=>attempt({...invoice,lines:{...invoice.lines,data:[
+  {...invoice.lines.data[0],pricing:{price_details:{price:order.priceId,product:"prod_wrong"}}}]}}));
  rejects(()=>attempt({...invoice,paid_out_of_band:true}));
  rejects(()=>attempt({...invoice,payments:{...invoice.payments,data:[]}}));
  rejects(()=>attempt({...invoice,payments:{...invoice.payments,data:[
