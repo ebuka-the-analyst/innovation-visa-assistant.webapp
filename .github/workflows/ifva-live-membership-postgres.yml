@@ -35,5 +35,7 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Verify paid-period quota reservation and concurrency
         run: node --import tsx --test tests/member-ai-quota.integration.test.ts
+      - name: Validate isolated Managed Payments order and event tables
+        run: node --import tsx --test tests/member-managed-payments-schema.integration.test.ts
       - name: Prove signed live-mode fixture events never grant unverified access
         run: node --import tsx --test tests/phase3-live-entitlement-fulfilment.integration.test.ts
