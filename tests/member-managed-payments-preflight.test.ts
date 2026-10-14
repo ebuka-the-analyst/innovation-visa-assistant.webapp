@@ -83,6 +83,7 @@ test("One-time pass uses payment mode for both buyers and has no subscription da
 test("Fails closed if declared buyer does not match verified Product and Price",()=>{
  for(const params of [
   {...basic,buyerKind:"business"},
+  {...basic,buyerKind:"not_a_business" as any,verifiedVariant:{...basic.verifiedVariant,buyerKind:"not_a_business" as any,taxCode:undefined as any}},
   {...basic,verifiedVariant:{...basic.verifiedVariant,taxCode:"txcd_10105002"}},
   {...basic,verifiedVariant:{...basic.verifiedVariant,expectedPence:11900}},
   {...basic,verifiedVariant:{...basic.verifiedVariant,priceId:"sk_live_secret"}},
