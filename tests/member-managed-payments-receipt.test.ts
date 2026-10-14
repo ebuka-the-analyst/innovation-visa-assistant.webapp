@@ -93,7 +93,7 @@ test("subscription: verified paid invoice with tax and valid service period is i
   subscription,customer,renewalCheckout);
  assert.deepEqual(result,{basePence:11900,taxPence:2380,grossPence:14280,currency:"gbp",
   billingCountry:"FR",paymentIntentId:"pi_test123",
-  providerReference:"sub_test123",periodStartEpoch:1790000000,periodEndEpoch:1792592000});
+  providerReference:"sub_test123",invoiceId:"in_test123",periodStartEpoch:1790000000,periodEndEpoch:1792592000});
 });
 
 test("subscription: cannot activate with underpaid, proration, wrong SKU or missing tax details",()=>{
