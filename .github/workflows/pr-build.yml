@@ -186,5 +186,8 @@ jobs:
       - name: Validate duplicate-safe Managed Payments decisions (offline)
         run: node --import tsx --test tests/member-managed-payments-decision.test.ts
 
+      - name: Validate individual/business AIaaS product routing
+        run: node --import tsx --test tests/member-managed-buyer-variants.test.ts
+
       - name: Production build
         run: npm run build
