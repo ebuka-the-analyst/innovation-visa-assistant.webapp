@@ -22,7 +22,7 @@ test("isolated Managed Payments schema runs twice in PostgreSQL and cannot mix d
   ]);
   const cols=await client.query<{column_name:string;is_nullable:string}>(
     "SELECT column_name,is_nullable FROM information_schema.columns WHERE table_name='member_stripe_managed_orders'");
-  for(const name of ["provider_mode","livemode","base_pence","tax_pence","gross_pence","currency","customer_country","status"]){
+  for(const name of ["provider_mode","buyer_kind","product_tax_code","stripe_product_id","livemode","base_pence","tax_pence","gross_pence","currency","customer_country","status"]){
    assert.ok(cols.rows.some(c=>c.column_name===name),name);
   }
   const indexes=await client.query<{indexname:string;indexdef:string}>(
@@ -33,6 +33,7 @@ test("isolated Managed Payments schema runs twice in PostgreSQL and cannot mix d
   assert.match(single?.indexdef||"",/status.*reserved/);
   const checks=await client.query<{conname:string}>(
    "SELECT conname FROM pg_constraint WHERE conrelid='member_stripe_managed_orders'::regclass");
+  assert.ok(checks.rows.some(x=>x.conname==="managed_buyer_tax_code"));
   assert.ok(checks.rows.some(x=>x.conname==="managed_order_sku_price"));
   assert.ok(checks.rows.some(x=>x.conname==="managed_invoice_tax_arithmetic"));
   assert.doesNotMatch(migration,/ALTER TABLE member_stripe_live_orders|UPDATE member_stripe_live_orders/);
