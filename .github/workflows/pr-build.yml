@@ -180,5 +180,8 @@ jobs:
       - name: Test isolated Managed Payments checkout preflight (no charge)
         run: node --import tsx --test tests/member-managed-payments-preflight.test.ts
 
+      - name: Test tax-aware Managed Payments pass and subscription evidence
+        run: node --import tsx --test tests/member-managed-payments-receipt.test.ts
+
       - name: Production build
         run: npm run build
