@@ -7,6 +7,9 @@ CREATE TABLE IF NOT EXISTS member_stripe_managed_orders (
  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
  user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
  sku VARCHAR(32) NOT NULL CHECK (sku IN ('founder','founder_pro','founder_pass_90d')),
+ buyer_kind VARCHAR(16) NOT NULL CHECK (buyer_kind IN ('individual','business')),
+ product_tax_code VARCHAR(24) NOT NULL,
+ stripe_product_id VARCHAR(255) NOT NULL,
  livemode BOOLEAN NOT NULL,
  provider_mode VARCHAR(32) NOT NULL DEFAULT 'stripe_managed_payments'
     CHECK(provider_mode='stripe_managed_payments'),
@@ -26,6 +29,10 @@ CREATE TABLE IF NOT EXISTS member_stripe_managed_orders (
  paid_through TIMESTAMPTZ,
  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+ CONSTRAINT managed_buyer_tax_code CHECK (
+   (buyer_kind='individual' AND product_tax_code='txcd_10105001') OR
+   (buyer_kind='business' AND product_tax_code='txcd_10105002')
+ ),
  CONSTRAINT managed_order_sku_price CHECK(
    (sku='founder' AND base_pence=6900) OR
    (sku='founder_pro' AND base_pence=11900) OR
