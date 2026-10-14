@@ -13,10 +13,13 @@ import logoDarkImg from "@assets/logo_dark.webp";
 import { SEOHead } from "@/components/SEOHead";
 import VisaAssistantBrand from "@/components/VisaAssistantBrand";
 import { trackSignUp, trackFormStart, trackFormSubmit, trackError } from "@/lib/analytics";
+import {safeMembershipReturn} from "@/lib/memberPurchaseNavigation";
 
 export default function Signup() {
   const [, setLocation] = useLocation();
   const search = useSearch();
+  const membershipReturn=safeMembershipReturn(search);
+  const loginHref=membershipReturn?"/login?next="+encodeURIComponent(membershipReturn):"/login";
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState<{ email: string } | null>(null);
@@ -109,7 +112,7 @@ export default function Signup() {
         // Auto-redirect to login if they should use Google
         if (authMethod === "google") {
           setTimeout(() => {
-            setLocation("/login");
+            setLocation(loginHref);
           }, 3000);
         }
         
@@ -355,7 +358,7 @@ export default function Signup() {
 
           <div className="pt-2 text-center">
             <p className="text-xs text-muted-foreground">
-              Have an account? <Link href="/login" className="text-primary hover:underline font-medium" data-testid="link-login">Sign in</Link>
+              Have an account? <Link href={loginHref} className="text-primary hover:underline font-medium" data-testid="link-login">Sign in</Link>
               {" · "}
               <Link href="/" className="text-primary hover:underline" data-testid="link-home">Home</Link>
             </p>
