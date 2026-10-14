@@ -14,6 +14,7 @@ import { inspectManagedCheckoutAmount } from "./memberManagedPaymentsCheckout";
 
 type TrustedManagedOrder = {
   sku:CandidateSku;
+  livemode:boolean;
   userId:string;
   customerId:string;
   priceId:string;
@@ -39,7 +40,7 @@ export class ManagedPaymentReviewRequired extends Error {
 const review=(message:string):never=>{throw new ManagedPaymentReviewRequired(message);};
 const providerId=(o:any):string|null=>
   typeof o==="string"?o:typeof o?.id==="string"?o.id:null;
-const validMoney=(n:unknown):n is number=>Number.isSafeInteger(n) && typeof n==="number" && n>=0;
+const validMoney=(n:unknown):n is number=>typeof n==="number" && Number.isSafeInteger(n) && n>=0;
 const epoch=(v:unknown):v is number=>validMoney(v)&&v>0;
 const same=(a:unknown,b:unknown,message:string)=>{
   if(a!==b)review(message);
@@ -51,6 +52,8 @@ const allowedCountry=(v:unknown):v is string=>
 function trusted(order:TrustedManagedOrder):number{
   if(!Object.hasOwn(EXPECTED_GBP_PENCE,order?.sku))review("Unknown IFVA product");
   const expected=EXPECTED_GBP_PENCE[order.sku];
+  if(typeof order.livemode!=="boolean")review("Untrusted Stripe environment");
+  if(order.livemode!==order.checkoutSessionId.startsWith("cs_live_"))review("Provider environment mismatch");
   if(!/^price_[A-Za-z0-9]+$/.test(order.priceId) ||
      !/^cus_[A-Za-z0-9]+$/.test(order.customerId) ||
      !/^cs_(live|test)_[A-Za-z0-9_]+$/.test(order.checkoutSessionId) ||
@@ -80,16 +83,16 @@ function exactSingleLine(list:any):any {
   }
   return list.data[0];
 }
-function intentPaid(intent:any,id:string,customerId:string,gross:number):void {
+function intentPaid(intent:any,id:string,customerId:string,gross:number,livemode:boolean):void {
   same(intent?.id,id,"Provider payment intent ID mismatch");
-  if(intent?.status!=="succeeded" || intent?.currency!=="gbp" ||
+  if(intent?.livemode!==livemode || intent?.status!=="succeeded" || intent?.currency!=="gbp" ||
      intent?.amount_received!==gross ||
      providerId(intent?.customer)!==customerId){
     review("Provider did not confirm exact successful collected payment");
   }
 }
 function originSession(session:any,order:TrustedManagedOrder):void{
-  if(session?.id!==order.checkoutSessionId ||
+  if(session?.livemode!==order.livemode || session?.id!==order.checkoutSessionId ||
      providerId(session?.customer)!==order.customerId ||
      session?.client_reference_id!==order.userId ||
      session?.metadata?.ifvaLiveOrderId!==order.orderId ||
@@ -117,7 +120,7 @@ export function verifyManagedPassEvidence(
   const intentId=providerId(session.payment_intent);
   if(!intentId || !/^pi_[A-Za-z0-9_]+$/.test(intentId))
     review("Missing Checkout PaymentIntent");
-  intentPaid(intent,intentId,order.customerId,breakdown.grossPence);
+  intentPaid(intent,intentId,order.customerId,breakdown.grossPence,order.livemode);
   const billingCountry=countryOf(customer,session);
   return {
     basePence:expected,taxPence:breakdown.taxPence,
@@ -167,6 +170,7 @@ export function verifyManagedInvoiceEvidence(
   originSession(checkout,order);
   same(providerId(checkout.subscription),order.subscriptionId,"Checkout subscription does not match");
   if(checkout.mode!=="subscription" ||
+     subscription?.livemode!==order.livemode ||
      subscription?.id!==order.subscriptionId ||
      providerId(subscription?.customer)!==order.customerId ||
      subscription?.metadata?.ifvaLiveOrderId!==order.orderId ||
@@ -174,7 +178,7 @@ export function verifyManagedInvoiceEvidence(
     review("Provider subscription does not match managed membership");
   // For renewals a live subscription may legitimately have an open or past_due
   // state; only the actual paid invoice and its service period are authoritative.
-  if(invoice?.status!=="paid" || invoice?.collection_method!=="charge_automatically" ||
+  if(invoice?.livemode!==order.livemode || invoice?.status!=="paid" || invoice?.collection_method!=="charge_automatically" ||
      invoice?.paid_out_of_band===true || invoice?.amount_remaining!==0 ||
      invoice?.currency!=="gbp" || !invoice?.id ||
      providerId(invoice.customer)!==order.customerId ||
@@ -196,7 +200,7 @@ export function verifyManagedInvoiceEvidence(
   const payments=invoice.payments;
   const paid=exactSingleLine(payments);
   const intentId=providerId(paid?.payment?.payment_intent);
-  if(paid?.object!=="invoice_payment" ||
+  if(paid?.livemode!==order.livemode || paid?.object!=="invoice_payment" ||
      paid?.status!=="paid" ||
      paid?.payment?.type!=="payment_intent" ||
      paid?.currency!=="gbp" ||
@@ -205,7 +209,7 @@ export function verifyManagedInvoiceEvidence(
      !/^inpay_[A-Za-z0-9_]+$/.test(paid?.id||"") ||
      !intentId || !/^pi_[A-Za-z0-9_]+$/.test(intentId))
     review("Provider invoice payment is not verified");
-  intentPaid(paymentIntent,intentId,order.customerId,invoice.total);
+  intentPaid(paymentIntent,intentId,order.customerId,invoice.total,order.livemode);
   const from=line?.period?.start,to=line?.period?.end;
   if(!epoch(from)||!epoch(to)||to<=from||
      to-from<25*86400||to-from>35*86400)
