@@ -96,7 +96,7 @@ export const APPROVED_MEMBER_PRESENTATION = {
   tag:"For ambitious founders",
   headline:"Your complete AI-powered founder preparation suite.",
   description:"Go beyond writing a business plan. Access advanced analysis, interview preparation and intelligent tools to help develop a stronger business case.",
-  bestFor:"Ideal for serious founders who want the most comprehensive toolkit and additional support.",
+  bestFor:"Ideal for founders who want the complete AI toolkit and faster technical help, not personal advice.",
   buttonNote:"Monthly subscription · Cancel future renewals",
   benefits:[
    "Everything in Founder",
@@ -107,7 +107,7 @@ export const APPROVED_MEMBER_PRESENTATION = {
    "AI mock interviews and pitch-deck preparation",
    "Advanced evidence and preparation-gap reviews",
    "AI Command Centre and specialist AI assistants",
-   "VIP priority customer support",
+   "Priority platform, account and billing support (no personal consultations)",
   ],
   ctaText:"Unlock My Full Potential",
  },
