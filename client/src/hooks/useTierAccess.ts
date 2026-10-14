@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useCommercialCatalog } from "@/hooks/useCommercialCatalog";
+import { useCommercialCatalog, useToolAccess } from "@/hooks/useCommercialCatalog";
 
 export type UserTier = "free" | "basic" | "premium" | "enterprise" | "ultimate";
 export type ToolTier = "free" | "basic" | "premium" | "enterprise" | "ultimate";
@@ -48,12 +48,18 @@ interface UserWithCredits {
 
 export function useTierAccess() {
   const { getUpgradePlan, toolCounts, formatPrice } = useCommercialCatalog();
-  const { data: user, isLoading } = useQuery<UserWithCredits>({
+  const { data: user, isLoading: isUserLoading } = useQuery<UserWithCredits>({
     queryKey: ['/api/auth/user'],
     retry: false,
   });
 
-  const userTier: UserTier = (user?.subscriptionTier as UserTier) || "free";
+  // The server checks Stripe-verified payment status and paid-through dates.
+  // Never infer premium access from a client-side tier label.
+  const verifiedToolAccess = useToolAccess(!!user);
+  const isLoading = isUserLoading || (!!user && verifiedToolAccess.isLoading);
+  const approvedPlan = verifiedToolAccess.data?.userPlanId;
+  const userTier: UserTier = approvedPlan && approvedPlan in TIER_HIERARCHY
+    ? approvedPlan : "free";
   const userTierLevel = TIER_HIERARCHY[userTier];
   
   const planCredits = user?.planCredits ?? 0;

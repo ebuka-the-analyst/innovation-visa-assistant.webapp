@@ -1,0 +1,38 @@
+/* IFVA approved responsive membership cards – scoped to pricing only. */
+.ifva-memberships{--ifva-ink:#122540;--ifva-muted:#62728a;--ifva-blue:#255ac8;--ifva-line:#e3eaf3;--ifva-green:#0e9b72;background:#f5f8fc;color:var(--ifva-ink);margin:0 auto;padding:38px 24px 65px;border-radius:22px;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.ifva-memberships *{box-sizing:border-box}
+.ifva-memberships .ifva-intro{text-align:center;max-width:790px;margin:0 auto 43px}
+.ifva-memberships .ifva-eyebrow{font-size:11px;font-weight:800;letter-spacing:.16em;color:#215ac3;text-transform:uppercase}
+.ifva-memberships .ifva-intro h1{font-size:clamp(31px,4.2vw,53px);margin:14px 0 16px;letter-spacing:-.045em;line-height:1.12;font-weight:830}
+.ifva-memberships .ifva-intro p{font-size:16px;max-width:730px;line-height:1.6;color:var(--ifva-muted);margin:0 auto}
+.ifva-memberships .ifva-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;max-width:1240px;margin:0 auto;align-items:stretch}
+.ifva-memberships .ifva-card{background:#fff;border:1px solid var(--ifva-line);border-radius:22px;box-shadow:0 16px 40px #0e305511;padding:29px 25px 26px;display:flex;flex-direction:column;position:relative;min-width:0}
+.ifva-memberships .ifva-card.is-pro{border:2px solid var(--ifva-blue);padding:28px 24px 25px;box-shadow:0 22px 50px #1955bb1c;transform:translateY(-9px)}
+.ifva-memberships .ifva-tag{font-size:10px;font-weight:800;letter-spacing:.095em;color:#2b66c7;text-transform:uppercase;min-height:24px;display:flex;align-items:center}
+.ifva-memberships .ifva-featured{position:absolute;right:20px;top:-14px;font-size:11px;background:#1b54bd;color:#fff;padding:8px 13px;border-radius:40px;box-shadow:0 6px 12px #2259b336;font-weight:750}
+.ifva-memberships .ifva-plan-name{font-size:27px;letter-spacing:-.035em;margin:12px 0 11px;font-weight:800}
+.ifva-memberships .ifva-price{display:flex;align-items:baseline;gap:6px;margin:0 0 15px}
+.ifva-memberships .ifva-amount{font-size:43px;letter-spacing:-.06em;line-height:1;font-weight:850}
+.ifva-memberships .ifva-period{font-size:14px;color:var(--ifva-muted)}
+.ifva-memberships .ifva-promise{font-size:16px;line-height:1.38;font-weight:760;min-height:65px;margin:9px 0;letter-spacing:-.01em}
+.ifva-memberships .ifva-description{font-size:13px;line-height:1.62;color:#657389;min-height:88px;margin:0 0 17px}
+.ifva-memberships .ifva-rule{height:1px;background:#e9edf5;margin:0 0 21px}
+.ifva-memberships .ifva-included{font-size:12px;text-transform:uppercase;letter-spacing:.09em;font-weight:800;color:#657389;margin-bottom:14px}
+.ifva-memberships .ifva-benefits{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:14px}
+.ifva-memberships .ifva-benefits li{display:flex;gap:10px;align-items:flex-start;font-size:13.3px;line-height:1.48;color:#293d55}
+.ifva-memberships .ifva-check{width:19px;height:19px;border-radius:50%;background:#e8f8f0;display:grid;place-items:center;color:#078963;font-weight:900;font-size:12px;flex:none;margin-top:0}
+.ifva-memberships .is-pro .ifva-check{background:#e8f0ff;color:#1c56bd}
+.ifva-memberships .ifva-grow{flex:1;min-height:16px}
+.ifva-memberships .ifva-best{font-size:12px;font-weight:700;line-height:1.45;color:#26405c;padding:16px 0 14px;margin-top:20px}
+.ifva-memberships .ifva-select{width:100%;border:0;border-radius:12px;padding:15px 12px;font-family:inherit;font-weight:750;font-size:14px;color:#1b51ad;background:#eaf1ff;cursor:pointer;transition:transform .16s,filter .16s,box-shadow .16s}
+.ifva-memberships .ifva-select:not(:disabled):hover{filter:brightness(.97);transform:translateY(-1px)}
+.ifva-memberships .ifva-select:focus-visible{outline:3px solid #4c88ff;outline-offset:3px}
+.ifva-memberships .ifva-select.is-primary{color:#fff;background:linear-gradient(100deg,#225dd3,#16449a);box-shadow:0 9px 18px #2057bf26}
+.ifva-memberships .ifva-select:disabled{opacity:.6;cursor:not-allowed}
+.ifva-memberships .ifva-under{text-align:center;color:#718096;font-size:11px;margin-top:11px}
+.ifva-memberships .ifva-footer{margin:30px auto 0;color:#6e7c92;font-size:12px;line-height:1.6;text-align:center;max-width:850px}
+.ifva-memberships .ifva-bottom{margin:35px auto 0;text-align:center;color:#17304e;font-size:14px;font-weight:700}
+.ifva-memberships .ifva-bottom span{color:#456cc7}
+@media(max-width:1100px){.ifva-memberships .ifva-card{padding:25px 20px}.ifva-memberships .ifva-card.is-pro{padding:24px 19px}.ifva-memberships .ifva-promise{min-height:88px}.ifva-memberships .ifva-description{min-height:109px}.ifva-memberships .ifva-cards{gap:13px}.ifva-memberships .ifva-amount{font-size:38px}}
+@media(max-width:900px){.ifva-memberships .ifva-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.ifva-memberships .ifva-card.is-pro{transform:none}.ifva-memberships .ifva-promise,.ifva-memberships .ifva-description{min-height:0}.ifva-memberships .ifva-card:last-child{grid-column:1/-1}}
+@media(max-width:600px){.ifva-memberships{padding:30px 14px 44px;border-radius:12px}.ifva-memberships .ifva-intro h1{font-size:35px}.ifva-memberships .ifva-intro p{font-size:14px}.ifva-memberships .ifva-cards{grid-template-columns:1fr;gap:22px}.ifva-memberships .ifva-card{padding:26px 22px}.ifva-memberships .ifva-card.is-pro{padding:25px 21px}.ifva-memberships .ifva-card:last-child{grid-column:auto}.ifva-memberships .ifva-plan-name{font-size:25px}.ifva-memberships .ifva-amount{font-size:43px}.ifva-memberships .ifva-intro{margin-bottom:35px}}

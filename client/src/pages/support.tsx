@@ -32,6 +32,10 @@ const FAQ_CATEGORIES = [
         a: "The UK Innovator Founder Visa is for experienced entrepreneurs who want to establish a business in the UK. You need endorsement from an approved body and must meet innovation, viability, and scalability criteria."
       },
       {
+        q: "What does Founder Pro VIP support include?",
+        a: "Founder Pro gives qualifying members priority help with using the platform, technical problems, account access and billing. It does not include personal business-plan reviews, visa consultations, individual endorsement coaching or legal and immigration advice."
+      },
+      {
         q: "How does this platform help me?",
         a: "Our platform provides 100+ professional-level tools to guide you through every aspect of the visa application process, from business planning to endorser preparation. All tools are designed to meet official visa requirements."
       },
@@ -104,6 +108,7 @@ const CONTACT_TOPICS = [
   { value: "general", label: "General Inquiry" },
   { value: "technical", label: "Technical Support" },
   { value: "billing", label: "Billing Question" },
+  { value: "account", label: "Account and Membership Access" },
   { value: "visa", label: "Visa Process Help" },
   { value: "feedback", label: "Feedback/Suggestion" },
   { value: "partnership", label: "Partnership Inquiry" },

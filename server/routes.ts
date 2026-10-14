@@ -108,6 +108,9 @@ import {
 } from "./services/commercialCatalogService";
 import { getPublicMemberOffers } from "./services/memberOfferCatalogue";
 import { requireToolAccess } from "./middleware/requireToolAccess";
+import { hasCurrentPaidEntitlement } from "./security/paidEntitlement";
+import { effectiveMemberToolPlan } from "@shared/memberToolPlan";
+import { qualifiesForFounderProPriority } from "./security/founderVipSupport";
 import { BUSINESS_PLAN_MODEL } from "./aiModelConfig";
 import {
   GenerationStartError,
@@ -691,9 +694,9 @@ ${JSON.stringify(unique)}`;
       const freshUser = await storage.getUser(sessionUser.id);
       if (!freshUser) return res.status(401).json({ error: "Unauthorized" });
 
-      const userPlanId: PlanId = isPlanId(freshUser.subscriptionTier)
-        ? freshUser.subscriptionTier
-        : "free";
+      const userPlanId = effectiveMemberToolPlan(
+        freshUser.subscriptionTier, hasCurrentPaidEntitlement(freshUser),
+      );
       const { catalog } = await getCommercialCatalog();
       const accessByTool = Object.fromEntries(
         MANAGED_TOOL_DEFINITIONS.map((tool) => [
@@ -1194,7 +1197,10 @@ ${JSON.stringify(unique)}`;
         const planId = req.params.id;
         const { tocStyle } = req.body;
 
-        if (user.subscriptionTier !== "ultimate") {
+        const stylingUser = await storage.getUser(user.id);
+        if (!stylingUser || effectiveMemberToolPlan(
+          stylingUser.subscriptionTier, hasCurrentPaidEntitlement(stylingUser),
+        ) !== "ultimate") {
           return res.status(403).json({
             error: "Visual style customisation requires Ultimate tier",
           });
@@ -10995,13 +11001,18 @@ EXAMPLES OF GOOD RESPONSES:
           .json({ error: "Topic, subject, and message are required" });
       }
 
-      // Store the support ticket
+      // Server-verifiable priority only: browser-submitted VIP flags are ignored.
+      const freshSupportUser = await storage.getUser(user.id);
+      if (!freshSupportUser) return res.status(401).json({ error: "Unauthorized" });
+      const isVip = qualifiesForFounderProPriority(freshSupportUser, topic);
+      // Store priority so the team actually sees VIP requests first.
       const ticket = await storage.createSupportTicket({
         userId: user.id,
         email: user.email,
         topic,
         subject,
         message,
+        priority: isVip ? "high" : "normal",
         status: "open",
       });
 
@@ -11011,7 +11022,7 @@ EXAMPLES OF GOOD RESPONSES:
         user.email,
         user.firstName || "User",
         topic,
-        subject,
+        isVip ? "[VIP PRIORITY] " + subject : subject,
         message,
       );
 
@@ -14001,7 +14012,11 @@ END:VEVENT
     async (req, res) => {
       try {
         const user = req.user as any;
-        const userTier = user?.subscriptionTier?.toLowerCase() || "free";
+        const verifiedUserForTool = await storage.getUser(user.id);
+        const userTier = effectiveMemberToolPlan(
+          verifiedUserForTool?.subscriptionTier,
+          !!verifiedUserForTool && hasCurrentPaidEntitlement(verifiedUserForTool),
+        );
         const premiumTiers = ["premium", "enterprise", "ultimate"];
 
         if (!premiumTiers.includes(userTier)) {
@@ -14070,7 +14085,11 @@ OUTPUT: Return ONLY the enhanced answer text, ready to submit. Do not include ex
     async (req, res) => {
       try {
         const user = req.user as any;
-        const userTier = user?.subscriptionTier?.toLowerCase() || "free";
+        const verifiedUserForTool = await storage.getUser(user.id);
+        const userTier = effectiveMemberToolPlan(
+          verifiedUserForTool?.subscriptionTier,
+          !!verifiedUserForTool && hasCurrentPaidEntitlement(verifiedUserForTool),
+        );
         const premiumTiers = ["premium", "enterprise", "ultimate"];
 
         if (!premiumTiers.includes(userTier)) {
@@ -14190,7 +14209,11 @@ OUTPUT FORMAT:
     async (req, res) => {
       try {
         const user = req.user as any;
-        const userTier = user?.subscriptionTier?.toLowerCase() || "free";
+        const verifiedUserForTool = await storage.getUser(user.id);
+        const userTier = effectiveMemberToolPlan(
+          verifiedUserForTool?.subscriptionTier,
+          !!verifiedUserForTool && hasCurrentPaidEntitlement(verifiedUserForTool),
+        );
         const premiumTiers = ["premium", "enterprise", "ultimate"];
 
         if (!premiumTiers.includes(userTier)) {

@@ -23,6 +23,9 @@ type Props={offer:SelectedFounderOffer|null;open:boolean;onOpenChange:(open:bool
 export default function FounderMembershipCheckout({offer,open,onOpenChange}:Props){
  const [available,setAvailable]=useState(false);
  const [termsVersion,setTermsVersion]=useState<string|null>(null);
+ // Off until an independently approved merchant-of-record gateway advertises support.
+ const [managedBuyerChoiceAvailable,setManagedBuyerChoiceAvailable]=useState(false);
+ const [buyerKind,setBuyerKind]=useState<"individual"|"business"|null>(null);
  const [busy,setBusy]=useState(false);
  const [acknowledge,setAcknowledge]=useState(false);
  const [renew,setRenew]=useState(false);
@@ -30,15 +33,18 @@ export default function FounderMembershipCheckout({offer,open,onOpenChange}:Prop
  useEffect(()=>{
   if(!open)return;
   setAcknowledge(false);setRenew(false);setBusy(false);setMessage("");
+  setManagedBuyerChoiceAvailable(false);setBuyerKind(null);
   let mounted=true;
   fetch("/api/member-stripe-live/availability",{credentials:"include",cache:"no-store"})
    .then(r=>r.ok?r.json():null).then(d=>{
-    if(mounted){setAvailable(d?.available===true);setTermsVersion(typeof d?.termsVersion==="string"?d.termsVersion:null);}
+    if(mounted){setAvailable(d?.available===true);setTermsVersion(typeof d?.termsVersion==="string"?d.termsVersion:null);
+     setManagedBuyerChoiceAvailable(d?.managedBuyerChoiceAvailable===true);}
    }).catch(()=>{if(mounted)setAvailable(false);});
   return ()=>{mounted=false};
  },[open,offer?.id]);
  async function buy(){
   if(!offer||!available||!termsVersion||!acknowledge||
+    (managedBuyerChoiceAvailable&&!buyerKind)||
     (offer.billingKind==="monthly"&&!renew)||busy)return;
   setBusy(true);setMessage("");
   try{
@@ -47,7 +53,8 @@ export default function FounderMembershipCheckout({offer,open,onOpenChange}:Prop
     body:JSON.stringify({sku:offer.id,confirmedPricePence:offer.pricePence,acknowledgeNewPayment:true,
       acknowledgeMonthlyRenewal:offer.billingKind==="monthly"?renew:false,
       acknowledgeLivePayment:true,acknowledgeNoVatPrice:true,
-      acknowledgeConsumerTerms:true,consumerTermsVersion:termsVersion})
+      acknowledgeConsumerTerms:true,consumerTermsVersion:termsVersion,
+      ...(managedBuyerChoiceAvailable ? {buyerKind} : {})})
    });
    const body=await response.json();
    if(!response.ok||body.liveMode!==true||typeof body.url!=="string"||
@@ -73,6 +80,21 @@ export default function FounderMembershipCheckout({offer,open,onOpenChange}:Prop
      <p className="text-sm text-muted-foreground">
       AI-assisted business-plan preparation software, not regulated immigration advice, endorsement or a guaranteed visa outcome.
      </p>
+     {managedBuyerChoiceAvailable&&<fieldset className="rounded-lg border border-slate-200 p-3 text-sm" aria-required="true">
+      <legend className="px-1 font-semibold">Who is purchasing this membership?</legend>
+      <p className="mb-3 text-muted-foreground">Choose how this membership is being purchased so the correct Stripe product and tax classification are used.</p>
+      <div className="space-y-2">
+       <label className="flex items-center gap-2"><input type="radio" name="membership-buyer-kind"
+         checked={buyerKind==="individual"} onChange={()=>setBuyerKind("individual")} />
+         I'm paying personally (individual)
+       </label>
+       <label className="flex items-center gap-2"><input type="radio" name="membership-buyer-kind"
+         checked={buyerKind==="business"} onChange={()=>setBuyerKind("business")} />
+         A business is paying for this membership
+       </label>
+      </div>
+      <p className="mt-3 text-xs text-muted-foreground">The final amount, including any applicable taxes, is confirmed by Stripe before you pay. Choosing business does not establish tax exemption.</p>
+     </fieldset>}
      <div className="space-y-4 text-sm">
       <label className="flex items-start gap-2"><input type="checkbox" className="mt-1" checked={acknowledge}
         onChange={e=>setAcknowledge(e.target.checked)}/>
@@ -86,6 +108,7 @@ export default function FounderMembershipCheckout({offer,open,onOpenChange}:Prop
        {" "}<Link href="/support" className="underline">support and refund information</Link> before paying.</p>
      </div>
      <Button type="button" disabled={!available||!termsVersion||!acknowledge||
+       (managedBuyerChoiceAvailable&&!buyerKind)||
        (offer.billingKind==="monthly"&&!renew)||busy} onClick={buy} className="w-full">
       {busy?"Opening secure checkout…":available?"Continue to Stripe":"Not yet available"}
      </Button>
