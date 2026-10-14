@@ -105,6 +105,7 @@ export function decideManagedActivation(
   if((legacy&&modern&&legacy!==modern) ||
      (modern||legacy)!==order.subscriptionId || id(obj.id)==null ||
      obj.currency!=="gbp" || obj.status!=="paid" ||
+     obj.id!==evidence.invoiceId ||
      obj.amount_paid!==evidence.grossPence ||
      obj.amount_remaining!==0)
     return review("Signed invoice does not match paid subscription or amount");
