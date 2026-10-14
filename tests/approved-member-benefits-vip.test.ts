@@ -3,6 +3,7 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { effectiveMemberToolPlan } from "../shared/memberToolPlan";
 import { hasCurrentPaidEntitlement } from "../server/security/paidEntitlement";
+import { qualifiesForFounderProPriority } from "../server/security/founderVipSupport";
 
 const read=(path:string)=>readFileSync(new URL("../"+path,import.meta.url),"utf8");
 const future=new Date("2027-01-01T00:00:00Z");
@@ -40,7 +41,7 @@ test("server tool-list and run guard share paid-entitlement mapping",()=>{
 test("VIP support uses verified entitlement and a genuine priority-backed queue",()=>{
  const routes=read("server/routes.ts");
  const storage=read("server/storage.ts");
- assert.match(routes,/freshSupportUser.subscriptionTier === "founder_pro"/);
+ assert.match(routes,/qualifiesForFounderProPriority\(freshSupportUser, topic\)/);
  assert.match(routes,/hasCurrentPaidEntitlement\(freshSupportUser\)/);
  assert.match(routes,/priority: isVip \? "high" : "normal"/);
  assert.match(routes,/\[VIP PRIORITY\]/);
@@ -54,7 +55,7 @@ test("approved server-owned sales copy includes all 3 complete offers",()=>{
  const css=read("client/src/styles/ifvaMembershipPricing.css");
  for(const fragment of [
   "pricePence:6900","pricePence:11900","pricePence:15900",
-  "VIP priority customer support","Full access to all available premium AI preparation tools",
+  "Priority platform, account and billing support (no personal consultations)","Full access to all available premium AI preparation tools",
   "Up to 6 business plans and 45 revisions over 90 days",
   "Start Building My Future","Unlock My Full Potential","Begin My 90-Day Journey",
  ]) assert.ok(offer.includes(fragment),fragment);
@@ -80,4 +81,20 @@ test("legacy advanced plan style and AI interview endpoints use current paid mem
  assert.equal((routes.match(/const verifiedUserForTool = await storage\.getUser\(user\.id\);/g)||[]).length,3);
  assert.equal((routes.match(/hasCurrentPaidEntitlement\(verifiedUserForTool\)/g)||[]).length,3);
  assert.doesNotMatch(routes,/const userTier = user\?\.subscriptionTier\?\.toLowerCase\(\) \|\| "free"/);
+});
+
+test("VIP prioritises only platform help; no personalised visa or business consultations",()=>{
+ const paid={subscriptionTier:"founder_pro",subscriptionStatus:"active",tierExpiresAt:new Date("2027-01-01")};
+ const now=new Date("2026-10-14T00:00:00Z");
+ for(const topic of ["technical","account","billing"])
+  assert.equal(qualifiesForFounderProPriority(paid,topic,now),true,topic);
+ for(const topic of ["visa","general","partnership","feedback","business-plan-review","legal-consultation",null])
+  assert.equal(qualifiesForFounderProPriority(paid,topic,now),false,String(topic));
+ assert.equal(qualifiesForFounderProPriority({...paid,subscriptionTier:"founder"}, "technical",now),false);
+ assert.equal(qualifiesForFounderProPriority({...paid,subscriptionStatus:"cancelled"}, "technical",now),false);
+ assert.equal(qualifiesForFounderProPriority({...paid,tierExpiresAt:new Date("2026-01-01")}, "technical",now),false);
+ const support=read("client/src/pages/support.tsx");
+ assert.match(support,/Founder Pro VIP support include/);
+ assert.match(support,/does not include personal business-plan reviews/);
+ assert.match(support,/value: "account"/);
 });
