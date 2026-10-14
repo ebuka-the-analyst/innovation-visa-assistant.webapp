@@ -121,3 +121,16 @@ test("Existing UK-only live billing and webhook remain isolated",()=>{
  assert.doesNotMatch(live,/prepareManagedCheckoutParams\(/);
  assert.match(live,/IFVA_MEMBER_LIVE_TAX_BASIS === "uk_not_vat_registered"/);
 });
+
+test("buyer selection is shown only if the future verified Managed Payments gateway enables it",()=>{
+ const ui=read("client/src/components/FounderMembershipCheckout.tsx");
+ assert.match(ui,/setManagedBuyerChoiceAvailable\(d\?\.managedBuyerChoiceAvailable===true\)/);
+ assert.match(ui,/managedBuyerChoiceAvailable&&<fieldset/);
+ assert.match(ui,/buyerKind==="individual"/);
+ assert.match(ui,/buyerKind==="business"/);
+ assert.match(ui,/managedBuyerChoiceAvailable&&!buyerKind/);
+ assert.match(ui,/\.\.\.\(managedBuyerChoiceAvailable \? \{buyerKind\} : \{\}\)/);
+ const cards=read("client/src/components/FounderMembershipPlans.tsx");
+ assert.match(cards,/data\.offers\.map\(/);
+ assert.doesNotMatch(cards,/personalFounder|businessFounder/);
+});
