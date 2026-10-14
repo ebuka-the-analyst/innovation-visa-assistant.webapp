@@ -42,7 +42,7 @@ test("VIP support uses verified entitlement and a genuine priority-backed queue"
  const routes=read("server/routes.ts");
  const storage=read("server/storage.ts");
  assert.match(routes,/qualifiesForFounderProPriority\(freshSupportUser, topic\)/);
- assert.match(routes,/hasCurrentPaidEntitlement\(freshSupportUser\)/);
+ assert.match(read("server/security/founderVipSupport.ts"),/hasCurrentPaidEntitlement\(user,now\)/);
  assert.match(routes,/priority: isVip \? "high" : "normal"/);
  assert.match(routes,/\[VIP PRIORITY\]/);
  assert.match(storage,/supportTickets.priority/);
