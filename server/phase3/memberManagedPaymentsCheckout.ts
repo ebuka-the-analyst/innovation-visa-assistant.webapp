@@ -35,7 +35,8 @@ export function prepareManagedCheckoutParams(
   if (!(input.sku in EXPECTED_GBP_PENCE))
     throw Error("Unapproved membership SKU");
   requireTrustedText(input.customerId, "customer", /^cus_[a-zA-Z0-9]+$/);
-  if (!input.verifiedVariant || input.verifiedVariant.sku!==input.sku ||
+  if (!["individual","business"].includes(input.buyerKind) ||
+      !input.verifiedVariant || input.verifiedVariant.sku!==input.sku ||
       input.verifiedVariant.buyerKind!==input.buyerKind ||
       input.verifiedVariant.taxCode!==MANAGED_BUYER_TAX_CODES[input.buyerKind] ||
       input.verifiedVariant.expectedPence!==EXPECTED_GBP_PENCE[input.sku] ||
