@@ -10,7 +10,6 @@ import { EXPECTED_GBP_PENCE, type CandidateSku } from "./memberStripeLiveAccepta
 import { MANAGED_BUYER_TAX_CODES, type ManagedBuyerKind, type VerifiedManagedVariant } from "./memberManagedBuyerVariants";
 
 export const IFVA_MANAGED_PAYMENTS_API_MIN = "2025-03-31.basil";
-export const IFVA_MANAGED_PAYMENTS_TAX_CODE = "txcd_10105002";
 
 type TrustedManagedCheckout = {
   sku: CandidateSku;
