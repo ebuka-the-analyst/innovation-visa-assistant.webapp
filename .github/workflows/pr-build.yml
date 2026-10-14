@@ -183,5 +183,8 @@ jobs:
       - name: Test tax-aware Managed Payments pass and subscription evidence
         run: node --import tsx --test tests/member-managed-payments-receipt.test.ts
 
+      - name: Validate duplicate-safe Managed Payments decisions (offline)
+        run: node --import tsx --test tests/member-managed-payments-decision.test.ts
+
       - name: Production build
         run: npm run build
