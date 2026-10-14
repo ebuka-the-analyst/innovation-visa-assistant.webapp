@@ -13,9 +13,14 @@ choosing “Prebuilt checkout” in Stripe Dashboard completes the integration.
   “Business use” must not be selected merely because customers are planning a business.
 - Stripe Managed Payments has an add-on transaction fee and uses Stripe/Link
   as merchant of record for qualifying digital SaaS transactions.
-- Human coaching, consulting and professional tech-support services are excluded.
-  **Obtain Stripe confirmation** on whether Founder Pro’s advertised VIP priority
-  customer support remains eligible as an ancillary support channel.
+- Founder Pro VIP support is **only prioritised product-help routing** for
+  technical issues, account access and billing; the seller explicitly confirms
+  that it excludes personal business-plan reviews, visa consultations,
+  immigration/legal advice and personalised endorsement coaching.
+- Stripe's Managed Payments criteria exclude professional services, including
+  standalone paid technical support. **Confirm with Stripe** that this
+  incidental priority-help benefit within automated AI SaaS is eligible,
+  even though the product tax codes show "Eligible".
 - Stripe may add location-based tax above displayed GBP list prices; avoid
   implying those prices are universally tax-inclusive.
 
