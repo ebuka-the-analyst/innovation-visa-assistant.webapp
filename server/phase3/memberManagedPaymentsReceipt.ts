@@ -30,6 +30,7 @@ export type ManagedPaymentEvidence = {
   billingCountry:string;
   paymentIntentId:string;
   providerReference:string;
+  invoiceId?:string;
   periodStartEpoch?:number;
   periodEndEpoch?:number;
 };
@@ -218,7 +219,7 @@ export function verifyManagedInvoiceEvidence(
   return {
     basePence:expected,taxPence:tax,grossPence:invoice.total,
     currency:"gbp",billingCountry,paymentIntentId:intentId,
-    providerReference:order.subscriptionId,
+    providerReference:order.subscriptionId,invoiceId:invoice.id,
     periodStartEpoch:from,periodEndEpoch:to,
   };
 }
