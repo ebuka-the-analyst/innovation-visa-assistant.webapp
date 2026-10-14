@@ -177,5 +177,8 @@ jobs:
       - name: Verify approved membership benefits and VIP routing
         run: node --import tsx --test tests/approved-member-benefits-vip.test.ts
 
+      - name: Test isolated Managed Payments checkout preflight (no charge)
+        run: node --import tsx --test tests/member-managed-payments-preflight.test.ts
+
       - name: Production build
         run: npm run build
