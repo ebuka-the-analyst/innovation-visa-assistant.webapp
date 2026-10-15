@@ -1,19 +1,15 @@
 import type { Request, RequestHandler } from "express";
 import { storage } from "../storage";
 import {
-  PLAN_IDS,
   getMinimumPlanForTool,
   hasToolAccess,
   type PlanId,
 } from "@shared/commercialCatalog";
 import { getCommercialCatalog } from "../services/commercialCatalogService";
 import { hasCurrentPaidEntitlement } from "../security/paidEntitlement";
+import { effectiveMemberToolPlan } from "@shared/memberToolPlan";
 
 type ToolIdResolver = (request: Request) => string | undefined | Promise<string | undefined>;
-
-function isPlanId(value: unknown): value is PlanId {
-  return typeof value === "string" && PLAN_IDS.includes(value as PlanId);
-}
 
 export function requireToolAccess(toolIdOrResolver: string | ToolIdResolver): RequestHandler {
   return async (req, res, next) => {
@@ -44,16 +40,9 @@ export function requireToolAccess(toolIdOrResolver: string | ToolIdResolver): Re
       // Legacy one-time purchases with no expiry retain access while active.
       // New membership SKUs inherit the validated legacy tool access ladder
       // until the catalogue migration in Phase 3. Expired plans map to Free.
-      const membershipToolTier: Record<string, PlanId> = {
-        founder: "premium",
-        founder_pro: "enterprise",
-        founder_pass_90d: "enterprise",
-      };
-      const effectiveTier = membershipToolTier[user.subscriptionTier] || user.subscriptionTier;
-      const userPlanId: PlanId =
-        hasCurrentPaidEntitlement(user) && isPlanId(effectiveTier)
-          ? effectiveTier
-          : "free";
+      const userPlanId: PlanId = effectiveMemberToolPlan(
+        user.subscriptionTier,hasCurrentPaidEntitlement(user),
+      );
       if (!hasToolAccess(catalog, userPlanId, toolId)) {
         return res.status(403).json({
           error: "Your current plan does not include this tool",

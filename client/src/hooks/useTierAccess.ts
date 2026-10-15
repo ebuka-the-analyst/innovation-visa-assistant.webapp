@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useCommercialCatalog } from "@/hooks/useCommercialCatalog";
+import { useCommercialCatalog, useToolAccess } from "@/hooks/useCommercialCatalog";
 
 export type UserTier = "free" | "basic" | "premium" | "enterprise" | "ultimate";
 export type ToolTier = "free" | "basic" | "premium" | "enterprise" | "ultimate";
@@ -48,12 +48,17 @@ interface UserWithCredits {
 
 export function useTierAccess() {
   const { getUpgradePlan, toolCounts, formatPrice } = useCommercialCatalog();
-  const { data: user, isLoading } = useQuery<UserWithCredits>({
+  const { data: user, isLoading: isUserLoading } = useQuery<UserWithCredits>({
     queryKey: ['/api/auth/user'],
     retry: false,
   });
 
-  const userTier: UserTier = (user?.subscriptionTier as UserTier) || "free";
+  // The API checks stored payment status and expiry; do not trust browser tier labels.
+  const verifiedToolAccess = useToolAccess(!!user);
+  const isLoading = isUserLoading || (!!user && verifiedToolAccess.isLoading);
+  const verifiedPlanId = verifiedToolAccess.data?.userPlanId;
+  const userTier: UserTier = verifiedPlanId && verifiedPlanId in TIER_HIERARCHY
+    ? verifiedPlanId : "free";
   const userTierLevel = TIER_HIERARCHY[userTier];
   
   const planCredits = user?.planCredits ?? 0;
