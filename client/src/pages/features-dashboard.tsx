@@ -92,7 +92,7 @@ export default function FeaturesDashboard(){
           <h1 className="font-serif text-2xl font-bold tracking-tight sm:text-3xl">Your preparation journey</h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">
             Use these suggested steps to organise your UK Innovator Founder Visa business preparation.
-            Explore only the tools you need; this guide is not an official visa application process or a guarantee of endorsement.
+            Explore only the tools you need. This is not an official visa application process and does not guarantee endorsement or visa approval.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href={innovatorFounderPath("/tools-hub")}><Button size="sm" variant="outline">
