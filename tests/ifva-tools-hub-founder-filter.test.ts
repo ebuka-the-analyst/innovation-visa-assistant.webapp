@@ -20,7 +20,7 @@ test("Public Tools Hub contains only the current four membership options",()=>{
  assert.doesNotMatch(src,/<SelectItem value="basic"|<SelectItem value="premium"/);
  assert.doesNotMatch(src,/const tiers: ToolTier\[\]/);
  assert.doesNotMatch(src,/const tierLabels\s*=/);
- assert.match(src,/setMembershipFilter\\(""/);
+ assert.ok(src.includes('setMembershipFilter("")'));
 });
 
 test("For each legacy minimum plan, correct paid memberships include it, with no access grants",()=>{
