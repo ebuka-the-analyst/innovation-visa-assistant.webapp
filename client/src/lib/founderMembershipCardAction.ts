@@ -11,6 +11,8 @@ export type VerifiedMembershipSnapshot={
  sku:string;
  active:boolean;
  paidThrough:string|null;
+ source?:"stripe"|"admin_grant";
+ accessThrough?:string|null;
 };
 export type FounderCardAction={
  text:string;
