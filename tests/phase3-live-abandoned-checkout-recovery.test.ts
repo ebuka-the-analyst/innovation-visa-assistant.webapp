@@ -174,3 +174,11 @@ test("Existing server checkout always attempts resume before creating any new St
  assert.match(routes,/prior\.verifiedExpiredIds/);
  assert.match(routes,/e instanceof LiveCheckoutConflict \|\| e instanceof PendingCheckoutNeedsReview/);
 });
+
+test("An open Stripe Session cannot hide a second earlier paid or active order",async()=>{
+ const previous={...prior,id:"bb697ad-ad50-4d5e-a6d0-c6125a72b79e",
+  currently_active:true,paid_through:new Date("2026-11-15T00:00:00Z")};
+ const {pool,stripe}=fixtures([prior,previous]);
+ await assert.rejects(inspectPriorLiveCheckout(pool,stripe,userId,"founder"),
+  /membership\/payment requires verification/);
+});
