@@ -5507,7 +5507,7 @@ export default function AdminDashboard() {
                                   </TableCell>
                                   <TableCell className="text-[9px] font-medium">{user.email}</TableCell>
                                   <TableCell>
-                                    {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : '-'}
+                                    {[user.firstName?.trim(), user.lastName?.trim()].filter(Boolean).join(" ") || "Name not provided"}
                                   </TableCell>
                                   <TableCell>
                                     <Badge variant="outline" className="capitalize">
