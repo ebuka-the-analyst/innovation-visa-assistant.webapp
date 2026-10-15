@@ -16180,8 +16180,9 @@ export default function AdminDashboard() {
                 />
               )}
               <p className="text-xs text-muted-foreground">
-                Existing Stripe subscriptions and paid legacy memberships must be reviewed
-                in their respective billing workflows before a manual replacement.
+                Manual grants temporarily override tool access, including on administrator accounts.
+                Existing Stripe charges, subscriptions, refunds and grandfathered purchases are not altered.
+                After revocation or expiry, any still-valid original entitlement is restored.
               </p>
             </div>
             <DialogFooter>
