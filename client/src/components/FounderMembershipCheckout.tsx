@@ -119,6 +119,7 @@ export default function FounderMembershipCheckout({offer,open,onOpenChange}:Prop
        (offer.billingKind==="monthly"&&!renew)||busy} onClick={buy} className="w-full">
       {busy?"Opening secure checkout…":available?"Continue to Stripe":"Not yet available"}
      </Button>
+     <p className="text-xs text-muted-foreground">If you left an earlier unpaid Stripe Checkout, continuing will safely reopen that same session. You will not be charged twice for opening Checkout.</p>
      </>}
      {message&&<p role="alert" className="text-sm text-destructive">{message}</p>}
     </>}
