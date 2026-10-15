@@ -22,8 +22,8 @@ test("Manual grants use the same 30/90-day quota windows and allowances as membe
 test("Only admin with reason and explicit no-charge confirmation may grant, reassign or revoke",()=>{
   const server=read("server/routes.ts");
   assert.match(server,/app\.post\("\/api\/admin\/users\/:userId\/manual-membership", requireAdmin/);
-  assert.match(server,/z\.enum\(\["grant", "revoke"\]\)/);
-  assert.match(server,/z\.enum\(\["founder", "founder_pro", "founder_pass_90d"\]\)/);
+  assert.match(server,/z\.enum\(\["grant",\s*"revoke"\]\)/);
+  assert.match(server,/z\.enum\(\["founder",\s*"founder_pro",\s*"founder_pass_90d"\]\)/);
   assert.match(server,/z\.string\(\)\.trim\(\)\.min\(10\)\.max\(500\)/);
   assert.match(server,/z\.literal\("MANUAL_ACCESS_NO_CHARGE"\)/);
   assert.match(server,/selfChange:admin.id===customer.id/);
