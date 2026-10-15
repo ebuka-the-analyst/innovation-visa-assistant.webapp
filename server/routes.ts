@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { db, dbPool } from "./db";
 import { registerMemberStripeLiveRoutes } from "./phase3/memberStripeLiveRoutes";
 import { effectiveMemberToolPlan } from "@shared/memberToolPlan";
+import { getMemberAiQuotaSnapshot, isMembershipSku } from "./services/memberAiQuota";
 import { hasCurrentPaidEntitlement } from "./security/paidEntitlement";
 import type { Pool as PgPool } from "pg";
 import {
@@ -93,6 +94,7 @@ import { s3Storage } from "./services/s3Storage";
 import {
   MANAGED_TOOL_DEFINITIONS,
   PLAN_IDS,
+  PLAN_RANK,
   UNAVAILABLE_LISTED_TOOL_IDS,
   UNLISTED_RUNNABLE_TOOL_IDS,
   commercialCatalogSchema,
@@ -1411,7 +1413,9 @@ Respond ONLY with valid JSON in this exact format:
       });
       const user = req.user as any;
       const userId = user.id;
-      const userTier = String(user.subscriptionTier || "free").toLowerCase();
+      const currentAccount = await storage.getUser(userId);
+      if (!currentAccount) return res.status(404).json({ error: "User not found" });
+      const userTier = String(currentAccount.subscriptionTier || "free").toLowerCase();
 
       if (userTier === "free") {
         return res.status(403).json({
@@ -1421,6 +1425,17 @@ Respond ONLY with valid JSON in this exact format:
       }
 
       const data = questionnaireSchema.parse(req.body);
+      if (isMembershipSku(userTier)) {
+        const membershipQuota = await getMemberAiQuotaSnapshot(userId, userTier);
+        if (!membershipQuota.active || membershipQuota.remainingGenerations < 1) {
+          return res.status(403).json({ error: "No active Founder generation allowance for this period." });
+        }
+        const maximumTier = effectiveMemberToolPlan(userTier, true);
+        if (!(data.tier in PLAN_RANK) ||
+            PLAN_RANK[data.tier as PlanId] > PLAN_RANK[maximumTier]) {
+          return res.status(403).json({ error: "This business plan tier is not included in your membership." });
+        }
+      }
 
       console.log("[Questionnaire] Parsed theme data:", {
         themeId: data.themeId,
@@ -1908,9 +1923,6 @@ Respond ONLY with valid JSON in this exact format:
     "/api/payment/create-checkout",
     isAuthenticated,
     async (req, res) => {
-      if (process.env.IFVA_LEGACY_NEW_PURCHASES_DISABLED === "true") {
-        return res.status(410).json({error:"Previous one-time plans are no longer available for new purchases"});
-      }
       try {
         const {
           businessPlanId,
@@ -1959,6 +1971,32 @@ Respond ONLY with valid JSON in this exact format:
             skipCheckout: true,
             redirectUrl: `/generation?plan_id=${planId}&free=true`,
           });
+        }
+
+        // A verified Founder subscription covers this generation. Never route
+        // its customer into superseded one-time purchase Checkout.
+        const currentAccount = await storage.getUser(user.id);
+        if (currentAccount && isMembershipSku(currentAccount.subscriptionTier)) {
+          const membershipQuota = await getMemberAiQuotaSnapshot(user.id, currentAccount.subscriptionTier);
+          if (!membershipQuota.active || membershipQuota.remainingGenerations < 1) {
+            return res.status(403).json({
+              error: "No active Founder business-plan generations remain for this period.",
+              code: "MEMBERSHIP_GENERATION_UNAVAILABLE",
+            });
+          }
+          const memberPlan = effectiveMemberToolPlan(currentAccount.subscriptionTier, true);
+          if (!(businessPlan.tier in PLAN_RANK) ||
+              PLAN_RANK[businessPlan.tier as PlanId] > PLAN_RANK[memberPlan]) {
+            return res.status(403).json({ error: "This plan tier is not included in your Founder membership." });
+          }
+          await storage.updateBusinessPlan(planId, { status: "paid" });
+          return res.json({
+            skipCheckout: true,
+            redirectUrl: `/generation?plan_id=${encodeURIComponent(planId)}&membership=true`,
+          });
+        }
+        if (process.env.IFVA_LEGACY_NEW_PURCHASES_DISABLED === "true") {
+          return res.status(410).json({ error: "Previous one-time plans are no longer available for new purchases" });
         }
 
         // CRITICAL: Skip payment if user already has an active paid subscription
@@ -3154,6 +3192,22 @@ Respond ONLY with valid JSON in this exact format:
   // Credit System Routes - PhD-Level Implementation
   // ALL TIERS HAVE FINITE CREDIT LIMITS
   // SINGLE SOURCE OF TRUTH: Use getTierCredits() from shared/schema.ts everywhere
+
+  // Membership quotas are independent of legacy one-time credits.
+  app.get("/api/member-ai/quota", isAuthenticated, async (req, res) => {
+    try {
+      const user = await storage.getUser((req.user as any).id);
+      if (!user) return res.status(404).json({ error: "User not found" });
+      if (!isMembershipSku(user.subscriptionTier)) {
+        return res.status(404).json({ error: "No Founder membership on this account" });
+      }
+      res.setHeader("Cache-Control", "no-store");
+      return res.json(await getMemberAiQuotaSnapshot(user.id, user.subscriptionTier));
+    } catch (error) {
+      console.error("Membership quota read failed:", error);
+      return res.status(503).json({ error: "Membership allowance unavailable; please retry" });
+    }
+  });
 
   app.get("/api/credits/balance", isAuthenticated, async (req, res) => {
     try {
