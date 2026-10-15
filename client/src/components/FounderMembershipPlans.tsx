@@ -2,7 +2,10 @@ import FounderMembershipCheckout from "./FounderMembershipCheckout";
 import {useState} from "react";
 import MyFounderMembership from "./MyFounderMembership";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, CheckCircle2 } from "lucide-react";
+import { Link } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
+import { founderMembershipCardAction, FOUNDER_SKU_NAMES, type VerifiedMembershipSnapshot, type MembershipCheckState } from "@/lib/founderMembershipCardAction";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -28,6 +31,38 @@ function isCatalogue(value:unknown):value is OfferCatalogue {
 }
 export default function FounderMembershipPlans(){
  const isPricingPage=typeof window!=="undefined"&&window.location.pathname==="/pricing";
+ const auth=useAuth();
+ // One server-owned, authenticated membership snapshot drives both this
+ // catalogue and MyFounderMembership. QueryClient shares the same cache key.
+ const membershipQuery=useQuery<{membership:VerifiedMembershipSnapshot|null}>({
+  queryKey:["/api/member-stripe-live/my-membership"],
+  queryFn:async()=>{
+   const response=await fetch("/api/member-stripe-live/my-membership",{
+    credentials:"include",cache:"no-store",
+   });
+   if(!response.ok)throw Error("Could not verify your current membership.");
+   const payload:unknown=await response.json();
+   if(!payload||typeof payload!=="object"||!("membership" in payload))
+    throw Error("Invalid membership status.");
+   return payload as {membership:VerifiedMembershipSnapshot|null};
+  },
+  enabled:auth.isAuthenticated,
+  retry:false,
+  staleTime:0,
+  refetchOnMount:"always",
+  refetchOnWindowFocus:true,
+ });
+ const accountState:MembershipCheckState=auth.isLoading?"checking":
+  !auth.isAuthenticated?"guest":
+  membershipQuery.isPending||membershipQuery.isFetching?"checking":
+  membershipQuery.isError?"error":"ready";
+ const activeMembership=membershipQuery.data?.membership?.active===true
+  ?membershipQuery.data.membership:null;
+ const canPurchase=(sku:MembershipOffer["id"])=>founderMembershipCardAction({
+  offerSku:sku,offerCta:"Choose "+FOUNDER_SKU_NAMES[sku],
+  cataloguePurchasable:data?.purchasable===true,accountState,
+  membership:activeMembership,
+ }).canStartCheckout;
  const [chosenSku,setChosenSku]=useState<MembershipOffer["id"]|null>(()=>{
   if(typeof window==="undefined"||window.location.pathname!=="/pricing")return null;
   const value=new URLSearchParams(window.location.search).get("membership_sku");
@@ -54,9 +89,29 @@ export default function FounderMembershipPlans(){
   <header className="mx-auto mb-9 max-w-3xl text-center">
    <h1 id="membership-pricing-title" className="font-serif text-2xl font-bold md:text-3xl">{data.title}</h1>
    <p className="mt-4 text-muted-foreground">{data.introduction}</p>
+   {activeMembership&&<div role="status" className="mt-5 rounded-lg border border-primary/25 bg-primary/5 px-4 py-3 text-sm">
+    <p className="inline-flex items-center gap-2 font-semibold text-foreground">
+     <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true"/>
+     Your {FOUNDER_SKU_NAMES[activeMembership.sku as MembershipOffer["id"]]||"Founder"} membership is active.
+    </p>
+    <p className="mt-1 text-muted-foreground">
+     {activeMembership.paidThrough
+      ? `Access through ${new Date(activeMembership.paidThrough).toLocaleDateString("en-GB")}. `
+      : ""}
+     You do not need to purchase again. To change packages, contact support rather than opening a second checkout.
+    </p>
+    <a href="#your-founder-membership" className="mt-2 inline-block font-medium underline">Manage your membership</a>
+   </div>}
   </header>
   <div className="mx-auto grid max-w-6xl grid-cols-1 gap-5 md:grid-cols-3">
-   {data.offers.map(offer=><Card key={offer.id} className="flex flex-col p-6" data-testid={`membership-card-${offer.id}`}>
+   {data.offers.map(offer=>{
+    const action=founderMembershipCardAction({
+     offerSku:offer.id,offerCta:offer.ctaText,
+     cataloguePurchasable:data.purchasable,accountState,
+     membership:activeMembership,
+    });
+    return <Card key={offer.id} className={`flex flex-col p-6 ${action.current?"border-primary/50 bg-primary/[0.02]":""}`}
+     data-testid={`membership-card-${offer.id}`}>
     <h2 className="text-xl font-semibold">{offer.name}</h2>
     <p className="mt-2 min-h-12 text-sm text-muted-foreground">{offer.description}</p>
     <div className="mt-4">
@@ -70,21 +125,31 @@ export default function FounderMembershipPlans(){
      </li>)}
     </ul>
     <div className="mt-auto pt-8">
-     <Button disabled={!data.purchasable} className="w-full"
-      onClick={()=>{if(!data.purchasable)return;
+     <Button disabled={action.disabled} variant={action.current?"outline":"default"} className="w-full"
+      onClick={()=>{if(!action.canStartCheckout)return;
         if(isPricingPage)setChosenSku(offer.id);
         else window.location.assign(`/pricing?membership_sku=${encodeURIComponent(offer.id)}`);}}
       data-testid={`membership-action-${offer.id}`}>
-       {offer.ctaText}
+       {action.current&&<CheckCircle2 className="mr-2 h-4 w-4" aria-hidden="true"/>}
+       {action.text}
      </Button>
-     {!data.purchasable && <p className="mt-2 text-center text-xs text-muted-foreground">{data.unavailableLabel}</p>}
+     {action.help==="current"&&<p className="mt-2 text-center text-xs text-muted-foreground">
+      Your paid membership is already active.
+     </p>}
+     {action.help==="change"&&<p className="mt-2 text-center text-xs text-muted-foreground">
+      Already subscribed. <Link href="/support" className="underline">Contact support</Link> to discuss changing packages.
+     </p>}
+     {(action.help==="checking"||action.help==="error")&&<p className="mt-2 text-center text-xs text-muted-foreground" role="status">
+      {action.help==="error"?"Refresh to verify your membership before checkout.":"Verifying any existing paid membership…"}
+     </p>}
+     {action.help==="unavailable"&&<p className="mt-2 text-center text-xs text-muted-foreground">{data.unavailableLabel}</p>}
     </div>
-   </Card>)}
+   </Card>})}
   </div>
   {isPricingPage&&<>
    <FounderMembershipCheckout
-    offer={data.purchasable?data.offers.find(o=>o.id===chosenSku)||null:null}
-    open={data.purchasable&&chosenSku!==null}
+    offer={chosenSku&&canPurchase(chosenSku)?data.offers.find(o=>o.id===chosenSku)||null:null}
+    open={chosenSku!==null&&canPurchase(chosenSku)}
     onOpenChange={open=>{
      if(open)return;
      setChosenSku(null);
