@@ -35,7 +35,7 @@ test("Admin User membership and Pricing & Access show current server-owned packa
  assert.doesNotMatch(admin,/Set to Ultimate/);
  assert.match(display,/\/api\/member-offers/);
  assert.match(display,/No payment or access changes|payment-controlled|payment-controlled|payment-controlled|payment-controlled|payment-controlled/i);
- assert.match(display,/Existing Basic, Premium, Enterprise and\\s+Ultimate/);
+ assert.match(display,/Existing Basic, Premium, Enterprise and\s+Ultimate/);
 });
 
 test("Admin reads validated membership ledger and cannot bulk mint paid access",()=>{
