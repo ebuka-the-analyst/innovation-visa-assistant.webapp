@@ -177,5 +177,8 @@ jobs:
       - name: Verify customer membership checkout navigation and security
         run: node --import tsx --test tests/live-membership-customer-checkout-navigation.test.ts
 
+      - name: Verify paid Founder tool access and legacy upsell removal
+        run: node --import tsx --test tests/founder-membership-tool-access-20261015.test.ts
+
       - name: Production build
         run: npm run build
