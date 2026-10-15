@@ -27,6 +27,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { useAutoSave } from "@/hooks/useAutoSave";
+import { useMemberAiQuota } from "@/hooks/useMemberAiQuota";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -343,7 +344,8 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
     retry: false,
   });
   const isAdminUser = user?.isAdmin === true;
-  
+  const { isMembershipUser, quota: memberQuota } = useMemberAiQuota();
+
   // Check if user already has an active paid subscription (skip payment for them)
   const userHasActiveSubscription = user?.subscriptionStatus === 'active' && 
     user?.subscriptionTier && 
@@ -351,7 +353,8 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   
   // Free tier users can generate their basic plan directly (no payment needed)
   const isFreeTier = user?.subscriptionTier === 'free';
-  const canGenerateDirectly = userHasActiveSubscription || isFreeTier;
+  const canGenerateDirectly = userHasActiveSubscription || isFreeTier ||
+    (isMembershipUser && memberQuota?.active === true && memberQuota.remainingGenerations > 0);
   
   const {
     savedData,
@@ -802,7 +805,7 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
       setIsSubmitting(true);
       try {
         // Free tier users always get 'free' tier plan, paid users get the form's selected tier
-        const effectiveTier = isFreeTier ? 'free' : (formData.tier || 'premium');
+        const effectiveTier = isFreeTier ? 'free' : (isMembershipUser ? tier : (formData.tier || 'premium'));
         const data = {
           tier: effectiveTier,
           businessName: formData.businessName,
