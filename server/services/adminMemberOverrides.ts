@@ -34,6 +34,24 @@ export async function restoreMembershipAfterAdminGrant(
     `,[userId,original.package_id,original.ends_at]);
     return {packageId:original.package_id,expiresAt:original.ends_at};
   }
+  // Restore an earlier grandfathered purchase if it is still within its
+  // original validity window; do not delete or reset purchased legacy credits.
+  const audit=await client.query<{new_value:any}>(`
+    SELECT new_value FROM admin_audit_logs
+    WHERE target_id=$1 AND action='manual_member_grant'
+    ORDER BY created_at DESC,id DESC LIMIT 1
+  `,[userId]);
+  const prior=audit.rows[0]?.new_value?.originalAccountState;
+  const priorExpiry=prior?.tierExpiresAt==null ? null : new Date(prior.tierExpiresAt);
+  if(["basic","premium","enterprise","ultimate"].includes(prior?.subscriptionTier) &&
+     prior?.subscriptionStatus==="active" &&
+     (priorExpiry===null || (Number.isFinite(priorExpiry.getTime()) && priorExpiry>new Date()))) {
+    await client.query(`
+      UPDATE users SET subscription_tier=$2,subscription_status='active',
+        tier_expires_at=$3,updated_at=NOW() WHERE id=$1
+    `,[userId,prior.subscriptionTier,priorExpiry]);
+    return {packageId:prior.subscriptionTier,expiresAt:priorExpiry};
+  }
   await client.query(`
     UPDATE users SET subscription_tier='free',subscription_status='inactive',
       tier_expires_at=NULL,updated_at=NOW() WHERE id=$1
