@@ -32,7 +32,16 @@ import { useAuth } from "@/hooks/useAuth";
 const FAVORITES_KEY = "tools-favorites";
 const RECENT_KEY = "tools-recently-used";
 const unavailableToolIds = new Set<string>(UNAVAILABLE_LISTED_TOOL_IDS);
-const PUBLIC_TOOLS: Tool[] = ALL_TOOLS.filter((tool) => !unavailableToolIds.has(tool.id));
+const OPEN_ACCESS_TOOLS: Tool[] = [
+  { id: "expert-booking", name: "Expert Booking", description: "Browse verified professionals, choose a live time and book a paid consultation.", category: "documentation", stage: "before", tier: "free", icon: "CalendarCheck2" },
+  { id: "blog", name: "Blog", description: "Read practical Innovator Founder guides, updates and founder resources.", category: "documentation", stage: "before", tier: "free", icon: "Newspaper" },
+];
+const OPEN_ACCESS_ROUTES: Record<string, string> = { "expert-booking": "/expert-booking", blog: "/blog" };
+const OPEN_ACCESS_TOOL_IDS = new Set(OPEN_ACCESS_TOOLS.map((tool) => tool.id));
+const PUBLIC_TOOLS: Tool[] = [
+  ...OPEN_ACCESS_TOOLS,
+  ...ALL_TOOLS.filter((tool) => !unavailableToolIds.has(tool.id) && !OPEN_ACCESS_TOOL_IDS.has(tool.id)),
+];
 
 type IconName = keyof typeof Icons;
 
@@ -125,9 +134,9 @@ export default function ToolsHub() {
   const { recent, addRecent } = useRecentlyUsed();
 
   const getEffectiveTier = (tool: Tool): ToolTier | undefined =>
-    getToolAccess(tool.id)?.minimumPlanId;
+    OPEN_ACCESS_TOOL_IDS.has(tool.id) ? "free" : getToolAccess(tool.id)?.minimumPlanId;
   const canAccessManagedTool = (tool: Tool) =>
-    getToolAccess(tool.id)?.allowed === true;
+    OPEN_ACCESS_TOOL_IDS.has(tool.id) || getToolAccess(tool.id)?.allowed === true;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -168,6 +177,12 @@ export default function ToolsHub() {
   }, [toast]);
 
   const handleToolClick = (tool: Tool) => {
+    const openRoute = OPEN_ACCESS_ROUTES[tool.id];
+    if (openRoute) {
+      addRecent(tool.id);
+      setLocation(openRoute);
+      return;
+    }
     if (!auth.isLoading && !auth.isAuthenticated) {
       setLocation(`/login?redirect=${encodeURIComponent(`/tools/${tool.id}`)}`);
       return;
@@ -218,7 +233,7 @@ export default function ToolsHub() {
       const matchesCategory = !categoryFilter || tool.category === categoryFilter;
       const matchesStage = !stageFilter || tool.stage === stageFilter;
       const entitlement = getToolAccess(tool.id);
-      const matchesMembership = !membershipFilter || (
+      const matchesMembership = !membershipFilter || OPEN_ACCESS_TOOL_IDS.has(tool.id) || (
         !!entitlement && entitlement.available !== false && entitlement.listed !== false &&
         membershipIncludesMinimumPlan(entitlement.minimumPlanId,membershipFilter)
       );
@@ -485,8 +500,10 @@ export default function ToolsHub() {
                             {stageLabels[tool.stage]}
                           </div>
                           <div className="inline-flex items-center gap-1 max-w-full px-2 py-1 rounded-lg bg-muted text-xs font-medium whitespace-normal leading-5" data-testid={`badge-tier-${tool.id}`}>
-                            {entitlement && entitlement.available !== false && entitlement.listed !== false
-                              ? toolMembershipAvailability(effectiveTier) : "Sign in to check access"}
+                            {OPEN_ACCESS_TOOL_IDS.has(tool.id)
+                              ? "Free · Founder · Founder Pro · 90-Day Pass"
+                              : entitlement && entitlement.available !== false && entitlement.listed !== false
+                                ? toolMembershipAvailability(effectiveTier) : "Sign in to check access"}
                           </div>
                         </div>
                       </div>
