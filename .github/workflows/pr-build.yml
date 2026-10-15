@@ -210,5 +210,8 @@ jobs:
       - name: Verify Founder generation quota and questionnaire access
         run: node --import tsx --test tests/ifva-founder-generation-entitlements-ui.test.ts
 
+      - name: Verify unified current Founder packages and legacy migration safety
+        run: node --import tsx --test tests/ifva-unified-founder-memberships-admin.test.ts
+
       - name: Production build
         run: npm run build
