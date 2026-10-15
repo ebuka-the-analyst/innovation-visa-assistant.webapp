@@ -18,6 +18,7 @@ import {
 } from "./memberStripeLiveAcceptance";
 import { applyVerifiedLiveMembershipEntitlement } from "./memberLiveEntitlementFulfilment";
 import { reserveLiveCheckout, recordCreatedLiveCheckout, LiveCheckoutConflict } from "./memberStripeLiveCheckoutReservation";
+import {inspectPriorLiveCheckout,PendingCheckoutNeedsReview} from "./memberStripeLiveCheckoutRecovery";
 import {chargeIdForSignedEvent,reconcileSignedChargeToProvider,ProviderChargeMismatch} from "./stripeLiveChargeReconciliation";
 import {recordUnmatchedSignedLiveEvent} from "./memberStripeLiveUnmatched";
 import {validatePaidInvoicePayment,PaidInvoiceMismatch,type VerifiedPaidInvoicePayment} from "./stripeLivePaidInvoiceMapping";
@@ -156,12 +157,21 @@ export function registerMemberStripeLiveRoutes(
           (!expectedRecurring && price.type!=="one_time")) {
         return res.status(503).json({error:"Stripe live price and advertised membership do not match"});
       }
+      // Stripe open sessions survive a cancelled browser/tab. Resume the
+      // original unpaid session, rather than issuing a second chargeable URL.
+      // All prior sessions are reconciled, not just those < 1 hour old.
+      const prior=await inspectPriorLiveCheckout(pool,cfg.stripe,user.id,sku);
+      if(prior.kind==="resume"){
+        res.setHeader("Cache-Control","no-store");
+        return res.status(200).json({orderId:prior.orderId,sessionId:prior.sessionId,
+          url:prior.url,liveMode:true,resumed:true});
+      }
       const orderId=randomUUID();
       const customer=await cfg.stripe.customers.create({email,metadata:{ifvaMembershipLive:"true"}});
       await reserveLiveCheckout(pool,{
         orderId,userId:user.id,sku,customerId:customer.id,
         priceId:cfg.prices[sku],expectedPence:EXPECTED_GBP_PENCE[sku],currency:"gbp",
-      });
+      },prior.verifiedExpiredIds);
       const session=await cfg.stripe.checkout.sessions.create({
         mode:expectedRecurring?"subscription":"payment",
         customer:customer.id,
@@ -190,7 +200,7 @@ export function registerMemberStripeLiveRoutes(
       res.status(201).json({orderId,sessionId:session.id,url:session.url,
         liveMode:true});
     }catch(e){
-      if(e instanceof LiveCheckoutConflict) {
+      if(e instanceof LiveCheckoutConflict || e instanceof PendingCheckoutNeedsReview) {
         return res.status(409).json({error:e.message});
       }
       console.error("[Membership LIVE] Checkout creation failed",e instanceof Error?e.message:"unknown");

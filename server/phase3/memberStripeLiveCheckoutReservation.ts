@@ -9,6 +9,7 @@
  */
 import type { Pool } from "pg";
 import type { PendingCheckout } from "./memberStripeLiveAcceptance";
+import type { ClosedOrderId } from "./memberStripeLiveCheckoutRecovery";
 
 export class LiveCheckoutConflict extends Error {
   constructor(message: string) {
@@ -19,7 +20,7 @@ export class LiveCheckoutConflict extends Error {
 export type NewCheckoutOrder = Omit<PendingCheckout, "checkoutSessionId"|"subscriptionId"|"paymentIntentId"> & {orderId:string};
 
 export async function reserveLiveCheckout(
-  pool: Pool, order: NewCheckoutOrder,
+  pool: Pool, order: NewCheckoutOrder, verifiedExpiredIds:readonly ClosedOrderId[] = [],
 ): Promise<void> {
   const client=await pool.connect();
   try {
@@ -35,9 +36,9 @@ export async function reserveLiveCheckout(
     }
     const pending=await client.query(`
       SELECT id FROM member_stripe_live_orders WHERE user_id=$1
-        AND (currently_active OR created_at > NOW()-INTERVAL '1 hour')
-      LIMIT 1 FOR UPDATE`,[order.userId]);
-    if(pending.rowCount)throw new LiveCheckoutConflict("A checkout is already active or pending for this account");
+        AND (currently_active OR id <> ALL($2::uuid[]))
+      LIMIT 1 FOR UPDATE`,[order.userId,verifiedExpiredIds]);
+    if(pending.rowCount)throw new LiveCheckoutConflict("A previous checkout is active or awaiting verification. Resume it instead of making another payment.");
     await client.query(`
       INSERT INTO member_stripe_live_orders
        (id,user_id,sku,stripe_customer_id,stripe_checkout_session_id,
