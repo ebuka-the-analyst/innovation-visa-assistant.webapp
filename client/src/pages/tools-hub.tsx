@@ -321,7 +321,7 @@ export default function ToolsHub() {
                     <button
                       type="button"
                       onClick={(event) => handleFavoriteClick(event, tool.id)}
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background/95 text-muted-foreground opacity-100 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                       aria-label={`Remove ${tool.name} from favorites`}
                     >
                       <Heart className="h-4 w-4 text-red-500 fill-red-500" />
@@ -355,7 +355,7 @@ export default function ToolsHub() {
                     <button
                       type="button"
                       onClick={(event) => handleFavoriteClick(event, tool.id)}
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background/95 text-muted-foreground opacity-100 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                       aria-label={`${isFavorite(tool.id) ? "Remove" : "Add"} ${tool.name} ${isFavorite(tool.id) ? "from" : "to"} favorites`}
                     >
                       <Heart className={`h-4 w-4 ${isFavorite(tool.id) ? "text-red-500 fill-red-500" : "text-muted-foreground"}`} />
@@ -472,32 +472,36 @@ export default function ToolsHub() {
                       } ${!hasAccess ? "opacity-80" : ""}`}
                       data-testid={`card-tool-${tool.id}`}
                     >
-                      <div className="absolute top-3 right-3 flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={(event) => handleFavoriteClick(event, tool.id)}
-                          className="p-1.5 rounded-full bg-white/80 dark:bg-slate-800/80 opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
-                          aria-label={`${isFavorite(tool.id) ? "Remove" : "Add"} ${tool.name} ${isFavorite(tool.id) ? "from" : "to"} favorites`}
-                        >
-                          <Heart className={`w-3 h-3 ${isFavorite(tool.id) ? "text-red-500 fill-red-500" : "text-muted-foreground"}`} />
-                        </button>
-                        {!hasAccess ? (
-                          <div className="bg-orange-500 text-white p-1.5 rounded-full" data-testid={`lock-${tool.id}`}>
-                            <Lock className="w-3 h-3" />
-                          </div>
-                        ) : (
-                          <div className="bg-green-500 text-white p-1.5 rounded-full" data-testid={`unlocked-${tool.id}`}>
-                            <CheckCircle className="w-3 h-3" />
-                          </div>
-                        )}
+                      <div className="mb-4 flex w-full min-w-0 items-center justify-between gap-3" data-testid={`tool-icon-row-${tool.id}`}>
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary" data-testid={`tool-icon-${tool.id}`}>
+                          <GetIconComponent name={tool.icon} />
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2" data-testid={`tool-actions-${tool.id}`}>
+                          <button
+                            type="button"
+                            onClick={(event) => handleFavoriteClick(event, tool.id)}
+                            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground opacity-100 transition-colors hover:bg-muted hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                            aria-label={`${isFavorite(tool.id) ? "Remove" : "Add"} ${tool.name} ${isFavorite(tool.id) ? "from" : "to"} favorites`}
+                            aria-pressed={isFavorite(tool.id)}
+                            data-testid={`favorite-button-${tool.id}`}
+                          >
+                            <Heart className={`h-4 w-4 ${isFavorite(tool.id) ? "fill-red-600 text-red-600" : "text-current"}`} />
+                          </button>
+                          {!hasAccess ? (
+                            <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-600 text-white" aria-label="Locked tool" data-testid={`lock-${tool.id}`}>
+                              <Lock className="h-4 w-4" aria-hidden="true" />
+                            </div>
+                          ) : (
+                            <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-600 text-white" aria-label="Accessible tool" data-testid={`unlocked-${tool.id}`}>
+                              <CheckCircle className="h-4 w-4" aria-hidden="true" />
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                        <div className="flex flex-1 items-start justify-between gap-3 pb-5">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-lg mb-1" data-testid={`title-${tool.id}`}>{tool.name}</h3>
-                            <p className="text-sm text-muted-foreground">{tool.description}</p>
-                          </div>
-                          <div className="flex-shrink-0 text-primary"><GetIconComponent name={tool.icon} /></div>
+                        <div className="flex min-w-0 flex-1 flex-col pb-5">
+                          <h3 className="font-semibold text-lg mb-1" data-testid={`title-${tool.id}`}>{tool.name}</h3>
+                          <p className="text-sm text-muted-foreground">{tool.description}</p>
                         </div>
                         <div className="mt-auto flex min-w-0 flex-nowrap items-center gap-2 border-t pt-3" data-testid={`tool-footer-${tool.id}`}>
                           <div className="inline-flex shrink-0 items-center whitespace-nowrap px-2 py-1 rounded-full bg-primary/10 text-xs font-medium text-primary">

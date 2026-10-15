@@ -9,7 +9,8 @@ test("Tool cards align footer at bottom and stage and membership on the same row
   assert.match(hub,/grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6/);
   assert.match(hub,/flex h-full min-w-0 flex-col p-6 hover-elevate/);
   assert.match(hub,/flex min-h-0 min-w-0 flex-1 flex-col/);
-  assert.match(hub,/flex flex-1 items-start justify-between gap-3 pb-5/);
+  assert.match(hub,/mb-4 flex w-full min-w-0 items-center justify-between gap-3/);
+  assert.match(hub,/flex min-w-0 flex-1 flex-col pb-5/);
   assert.match(hub,/mt-auto flex min-w-0 flex-nowrap items-center gap-2 border-t pt-3/);
   assert.ok(hub.includes("data-testid={\`tool-footer-\${tool.id}\`}"));
   assert.match(hub,/inline-flex shrink-0 items-center whitespace-nowrap/);
