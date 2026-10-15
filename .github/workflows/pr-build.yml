@@ -201,5 +201,8 @@ jobs:
       - name: Test already-paid Founder package selection guard
         run: node --import tsx --test tests/ifva-active-founder-pricing-cards.test.ts
 
+      - name: Verify Google and email signup names in Admin Users
+        run: node --import tsx --test tests/ifva-google-user-name-capture.test.ts
+
       - name: Production build
         run: npm run build
