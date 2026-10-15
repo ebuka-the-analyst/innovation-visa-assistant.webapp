@@ -15923,7 +15923,7 @@ Return a JSON object with:
         `SELECT provider FROM member_ai_entitlements
           WHERE user_id=$1 AND package_id=$2 AND status='active'
             AND starts_at<=NOW() AND ends_at>NOW()
-          ORDER BY starts_at DESC LIMIT 1`,
+          ORDER BY CASE WHEN provider='admin' THEN 0 ELSE 1 END, starts_at DESC LIMIT 1`,
         [current.id,current.subscriptionTier],
       ) : null;
       return res.json({
