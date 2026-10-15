@@ -11,7 +11,7 @@ test("Tool cards align footer at bottom and stage and membership on the same row
   assert.match(hub,/flex min-h-0 min-w-0 flex-1 flex-col/);
   assert.match(hub,/flex flex-1 items-start justify-between gap-3 pb-5/);
   assert.match(hub,/mt-auto flex min-w-0 flex-nowrap items-center gap-2 border-t pt-3/);
-  assert.match(hub,/data-testid={`tool-footer-${tool.id}`}/);
+  assert.ok(hub.includes("data-testid={\`tool-footer-\${tool.id}\`}"));
   assert.match(hub,/inline-flex shrink-0 items-center whitespace-nowrap/);
 });
 
@@ -21,7 +21,7 @@ test("All full membership labels remain one line and accessible on narrow widths
   assert.match(hub,/aria-label={membershipLabel}/);
   assert.match(hub,/Free · Founder · Founder Pro · 90-Day Pass/);
   assert.match(hub,/toolMembershipAvailability\(effectiveTier\)/);
-  assert.match(hub,/data-testid={`badge-tier-${tool.id}`}/);
+  assert.ok(hub.includes("data-testid={\`badge-tier-\${tool.id}\`}"));
   assert.doesNotMatch(hub,/whitespace-normal leading-5/);
   assert.doesNotMatch(hub,/flex flex-wrap gap-2 pt-3 border-t/);
 });
