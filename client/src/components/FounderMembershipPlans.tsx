@@ -56,13 +56,8 @@ export default function FounderMembershipPlans(){
   !auth.isAuthenticated?"guest":
   membershipQuery.isPending||membershipQuery.isFetching?"checking":
   membershipQuery.isError?"error":"ready";
- const activeMembership=membershipQuery.data?.membership?.active===true
+ const activeMembership=accountState==="ready"&&membershipQuery.data?.membership?.active===true
   ?membershipQuery.data.membership:null;
- const canPurchase=(sku:MembershipOffer["id"])=>founderMembershipCardAction({
-  offerSku:sku,offerCta:"Choose "+FOUNDER_SKU_NAMES[sku],
-  cataloguePurchasable:data?.purchasable===true,accountState,
-  membership:activeMembership,
- }).canStartCheckout;
  const [chosenSku,setChosenSku]=useState<MembershipOffer["id"]|null>(()=>{
   if(typeof window==="undefined"||window.location.pathname!=="/pricing")return null;
   const value=new URLSearchParams(window.location.search).get("membership_sku");
@@ -78,6 +73,11 @@ export default function FounderMembershipPlans(){
    return body;
   },retry:1,staleTime:30_000,
  });
+ const canPurchase=(sku:MembershipOffer["id"])=>founderMembershipCardAction({
+  offerSku:sku,offerCta:"Choose "+FOUNDER_SKU_NAMES[sku],
+  cataloguePurchasable:data?.purchasable===true,accountState,
+  membership:activeMembership,
+ }).canStartCheckout;
  if(isPending)return <div className="flex justify-center py-20" role="status">
   <Loader2 className="h-7 w-7 animate-spin text-primary" aria-label="Loading membership pricing"/>
  </div>;
