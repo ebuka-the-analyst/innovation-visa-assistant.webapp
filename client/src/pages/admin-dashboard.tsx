@@ -5507,7 +5507,25 @@ export default function AdminDashboard() {
                                   </TableCell>
                                   <TableCell className="text-[9px] font-medium">{user.email}</TableCell>
                                   <TableCell>
-                                    {[user.firstName?.trim(), user.lastName?.trim()].filter(Boolean).join(" ") || "Name not provided"}
+                                    {[user.firstName?.trim(), user.lastName?.trim()].filter(Boolean).join(" ") || (
+                                      <Button
+                                        type="button"
+                                        variant="link"
+                                        size="sm"
+                                        className="h-auto p-0 text-xs text-amber-700 underline dark:text-amber-400"
+                                        onClick={() => {
+                                          setEditingUser(user);
+                                          setEditUserTier(user.subscriptionTier);
+                                          setEditUserIsAdmin(user.isAdmin);
+                                          setEditUserFirstName("");
+                                          setEditUserLastName("");
+                                          setEditUserEmailField(user.email || "");
+                                        }}
+                                        data-testid={`button-add-user-name-${user.id}`}
+                                      >
+                                        Name missing · Add name
+                                      </Button>
+                                    )}
                                   </TableCell>
                                   <TableCell>
                                     <Badge variant="outline" className="capitalize">
@@ -15280,9 +15298,7 @@ export default function AdminDashboard() {
                   <div>
                     <Label className="text-muted-foreground">Name</Label>
                     <p className="font-medium">
-                      {viewingUserDetails.firstName && viewingUserDetails.lastName
-                        ? `${viewingUserDetails.firstName} ${viewingUserDetails.lastName}`
-                        : 'N/A'}
+                      {[viewingUserDetails.firstName?.trim(), viewingUserDetails.lastName?.trim()].filter(Boolean).join(" ") || "Name not provided"}
                     </p>
                   </div>
                   <div>
