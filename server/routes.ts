@@ -15925,6 +15925,158 @@ Return a JSON object with:
     }
   });
 
+  /**
+   * Explicit, no-charge ADMIN access grant: never impersonates a Stripe payment.
+   * Atomically updates the user access marker, quota entitlement and audit log.
+   * Stripe subscriptions, payments, invoices and historical credits are untouched.
+   */
+  app.post("/api/admin/users/:userId/manual-membership", requireAdmin, async (req, res) => {
+    const admin = req.user as any;
+    const parsed = z.object({
+      action: z.enum(["grant", "revoke"]),
+      sku: z.enum(["founder", "founder_pro", "founder_pass_90d"]).optional(),
+      reason: z.string().trim().min(10).max(500),
+      confirmation: z.literal("MANUAL_ACCESS_NO_CHARGE"),
+    }).safeParse(req.body);
+    if (!parsed.success || (parsed.data.action === "grant" && !parsed.data.sku)) {
+      return res.status(400).json({ error: "Select a membership, supply a reason of at least 10 characters, and confirm the no-charge admin grant." });
+    }
+    if (!admin?.id || admin.id === req.params.userId) {
+      return res.status(403).json({ error: "An administrator cannot change their own membership." });
+    }
+    const { action, sku, reason } = parsed.data;
+    const client = await dbPool.connect();
+    try {
+      await client.query("BEGIN");
+      const found = await client.query(
+        "SELECT id,email,is_admin,subscription_tier,subscription_status,tier_expires_at FROM users WHERE id=$1 FOR UPDATE",
+        [req.params.userId],
+      );
+      if (found.rowCount !== 1) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ error: "Customer not found" });
+      }
+      const customer = found.rows[0];
+      if (customer.is_admin) {
+        await client.query("ROLLBACK");
+        return res.status(403).json({ error: "Admin membership grants are only available for customer accounts." });
+      }
+      // A paid Stripe subscription must be managed via its own real payment
+      // lifecycle; an admin grant must never mask a refund or double membership.
+      const stripe = await client.query(
+        `SELECT 1 FROM member_ai_entitlements
+          WHERE user_id=$1 AND provider='stripe' AND status='active'
+            AND ends_at>NOW() LIMIT 1`,
+        [customer.id],
+      );
+      const liveOrder = await client.query(
+        `SELECT 1 FROM member_stripe_live_orders
+          WHERE user_id=$1 AND currently_active=true LIMIT 1`,
+        [customer.id],
+      );
+      if (stripe.rowCount || liveOrder.rowCount) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({
+          code: "LIVE_STRIPE_MEMBERSHIP_REQUIRES_BILLING_REVIEW",
+          error: "This customer has an active Stripe membership record. Resolve their subscription, refund or payment status before changing access manually.",
+        });
+      }
+      // Preserve grandfathered legacy paid entitlements; do not silently
+      // convert a purchased Basic/Premium/Enterprise/Ultimate account.
+      if (["basic","premium","enterprise","ultimate"].includes(customer.subscription_tier) &&
+          customer.subscription_status === "active" &&
+          (!customer.tier_expires_at || new Date(customer.tier_expires_at) > new Date())) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({
+          code: "ACTIVE_LEGACY_PURCHASE",
+          error: "Existing paid legacy access must be reviewed and migrated separately before replacement.",
+        });
+      }
+      const previous = {
+        subscriptionTier: customer.subscription_tier,
+        subscriptionStatus: customer.subscription_status,
+        tierExpiresAt: customer.tier_expires_at,
+      };
+      const activeManual = await client.query(
+        `SELECT id,package_id,ends_at FROM member_ai_entitlements
+          WHERE user_id=$1 AND provider='admin' AND status='active'
+            AND ends_at>NOW() FOR UPDATE`,
+        [customer.id],
+      );
+      if (action === "revoke" && !activeManual.rowCount) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({ error: "No active manual membership exists for this customer." });
+      }
+      if (action === "revoke" && !isMembershipSku(customer.subscription_tier)) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({ error: "The customer no longer has an administrator-issued membership." });
+      }
+      // Old admin grants are retained as history but can never grant new access.
+      await client.query(
+        `UPDATE member_ai_entitlements SET status='cancelled',updated_at=NOW()
+          WHERE user_id=$1 AND provider='admin' AND status='active'`,
+        [customer.id],
+      );
+      let expiresAt: Date | null = null;
+      if (action === "grant") {
+        const durationDays = sku === "founder_pass_90d" ? 90 : 30;
+        const now = new Date();
+        expiresAt = new Date(now.getTime() + durationDays * 86400000);
+        const periodEnd = sku === "founder_pass_90d"
+          ? new Date(now.getTime() + 30 * 86400000) : expiresAt;
+        const reference = "admin_" + crypto.randomUUID();
+        await client.query(
+          `INSERT INTO member_ai_entitlements
+            (user_id,package_id,billing_kind,status,provider,provider_reference,
+             starts_at,ends_at,period_starts_at,period_ends_at)
+           VALUES ($1,$2,$3,'active','admin',$4,$5,$6,$5,$7)`,
+          [customer.id,sku,sku==="founder_pass_90d"?"pass":"subscription",
+           reference,now,expiresAt,periodEnd],
+        );
+        await client.query(
+          `UPDATE users SET subscription_tier=$2,subscription_status='active',
+             tier_expires_at=$3,previous_tier=subscription_tier,
+             tier_upgraded_at=NOW(),tier_override_by=$4,tier_override_reason=$5,
+             updated_at=NOW() WHERE id=$1`,
+          [customer.id,sku,expiresAt,admin.id,reason],
+        );
+      } else {
+        await client.query(
+          `UPDATE users SET subscription_tier='free',subscription_status='inactive',
+             tier_expires_at=NOW(),previous_tier=subscription_tier,
+             tier_override_by=$2,tier_override_reason=$3,updated_at=NOW()
+           WHERE id=$1`,
+          [customer.id,admin.id,reason],
+        );
+      }
+      await client.query(
+        `INSERT INTO admin_audit_logs
+          (admin_id,admin_email,action,action_category,target_type,target_id,target_email,
+           previous_value,new_value,reason,ip_address,user_agent)
+         VALUES ($1,$2,$3,'tier_management','user',$4,$5,$6::jsonb,$7::jsonb,$8,$9,$10)`,
+        [admin.id,String(admin.email || ""),action==="grant"?"manual_member_grant":"manual_member_revoke",
+         customer.id,customer.email,JSON.stringify(previous),
+         JSON.stringify({kind:"admin_grant",sku:action==="grant"?sku:null,
+           endsAt:expiresAt?.toISOString() || null,chargeCreated:false}),
+         reason,String(req.ip || "").slice(0,50),String(req.headers["user-agent"] || "")],
+      );
+      await client.query("COMMIT");
+      res.setHeader("Cache-Control","no-store");
+      return res.json({
+        success:true,
+        action,packageId:action==="grant"?sku:"free",
+        grantedByAdmin:true,autoRenews:false,charged:false,
+        expiresAt:expiresAt?.toISOString() || null,
+      });
+    } catch (error) {
+      try { await client.query("ROLLBACK"); } catch {}
+      console.error("Manual membership operation failed:",error);
+      return res.status(503).json({ error: "Membership change could not be completed. No partial grant was applied." });
+    } finally {
+      client.release();
+    }
+  });
+
   // Admin: Add/Remove/Set credits (supports mode: 'add' or 'set')
   app.post(
     "/api/admin/users/:userId/credits",
