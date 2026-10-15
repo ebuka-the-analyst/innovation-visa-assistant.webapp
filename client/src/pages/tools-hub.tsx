@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ALL_TOOLS, type Tool } from "@shared/tools-data";
-import { UNAVAILABLE_LISTED_TOOL_IDS, type PlanId } from "@shared/commercialCatalog";
+import { UNAVAILABLE_LISTED_TOOL_IDS } from "@shared/commercialCatalog";
 import {
   PUBLIC_MEMBER_FILTERS, membershipIncludesMinimumPlan, toolMembershipAvailability,
   type PublicMemberFilter,
@@ -484,7 +484,7 @@ export default function ToolsHub() {
                           <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-xs font-medium text-primary">
                             {stageLabels[tool.stage]}
                           </div>
-                          <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-muted text-xs font-medium" data-testid={`badge-tier-${tool.id}`}>
+                          <div className="inline-flex items-center gap-1 max-w-full px-2 py-1 rounded-lg bg-muted text-xs font-medium whitespace-normal leading-5" data-testid={`badge-tier-${tool.id}`}>
                             {entitlement && entitlement.available !== false && entitlement.listed !== false
                               ? toolMembershipAvailability(effectiveTier) : "Sign in to check access"}
                           </div>
