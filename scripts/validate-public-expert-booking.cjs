@@ -48,7 +48,11 @@ assert(publicUi.includes("overflow-x-auto"), "Schedule slider must support touch
 assert(toolsHub.includes('id: "expert-booking"'), "Expert Booking must appear in Tools Hub");
 assert(toolsHub.includes('id: "blog"'), "Blog must appear in Tools Hub");
 assert(toolsHub.includes("OPEN_ACCESS_ROUTES"), "Free public tool routes must bypass account entitlements");
-assert(toolsHub.includes('tierFilter === "free" ? OPEN_ACCESS_TOOL_IDS.has(tool.id)'), "Free filter must show the two open-access tools");
+assert(toolsHub.includes("const OPEN_ACCESS_TOOLS: Tool[] = ["), "Expert Booking and Blog must be present in the public registry");
+assert(toolsHub.includes("OPEN_ACCESS_TOOL_IDS.has(tool.id) ||"), "Every IFVA membership filter, including Free, must include the two open-access tools");
+assert(toolsHub.includes('const openRoute = OPEN_ACCESS_ROUTES[tool.id]'), "Guest users must still be able to open public tools without subscribing");
+assert(toolsHub.includes('membershipIncludesMinimumPlan(entitlement.minimumPlanId,membershipFilter)'), "Paid filters must derive tool inclusion from the verified catalogue minimum");
+assert(toolsHub.includes('OPEN_ACCESS_TOOL_IDS.has(tool.id) || getToolAccess(tool.id)?.allowed === true'), "Guest tools must be accessible independently of paid membership");
 
 assert(serverIndex.includes('registerPublicExpertBookingRoutes(app);'), "Public Expert Booking server routes must be registered");
 assert(guestRoutes.includes('app.post("/api/expert-booking/guest-bookings"'), "Guest booking creation endpoint is missing");
