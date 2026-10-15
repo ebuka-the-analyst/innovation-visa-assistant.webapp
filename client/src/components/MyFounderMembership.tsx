@@ -40,7 +40,7 @@ export default function MyFounderMembership(){
   finally{setBusy(false)}
  }
  if(!data||!membership)return null;
- return <section className="my-8 rounded-lg border p-5 space-y-3" aria-label="Manage Founder membership">
+ return <section id="your-founder-membership" className="my-8 rounded-lg border p-5 space-y-3" aria-label="Manage Founder membership">
   <h2 className="text-lg font-semibold">Your Founder membership</h2>
   <p className="text-sm">Package: {membership.sku.replaceAll("_"," ")} · {membership.active?"Active":isPaymentReturn?"Awaiting payment verification":"Inactive"}</p>
   {membership.paidThrough&&<p className="text-sm">Paid through: {new Date(membership.paidThrough).toLocaleDateString("en-GB")}</p>}
