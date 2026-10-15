@@ -62,17 +62,26 @@ export async function applyVerifiedLiveMembershipEntitlement(
       FROM users WHERE id = $1 FOR UPDATE`, [order.userId]);
   if (userResult.rowCount !== 1) throw new MembershipFulfilmentReviewRequired("Founder account not found");
   const user = userResult.rows[0];
+  // Admin-granted access takes priority for tools, while signed billing
+  // events continue to update their own provider records.
+  const manual=await client.query(`
+    SELECT 1 FROM member_ai_entitlements WHERE user_id=$1
+      AND provider='admin' AND status='active'
+      AND starts_at<=NOW() AND ends_at>NOW() LIMIT 1
+  `,[order.userId]);
+  const manualActive=Boolean(manual.rowCount);
 
   if (decision.action === "activate") {
     // Never silently upgrade a customer's existing legacy or independent
     // active plan. Manual migration/downgrade is a separate explicit flow.
-    if (!["free", order.sku].includes(user.subscription_tier || "free")) {
+    if (!manualActive && !["free", order.sku].includes(user.subscription_tier || "free")) {
       throw new MembershipFulfilmentReviewRequired("Existing customer tier needs review");
     }
     const others = await client.query(`
       SELECT id FROM member_ai_entitlements WHERE user_id=$1
         AND status='active' AND ends_at > to_timestamp($2)
         AND NOT (provider='stripe' AND provider_reference=$3)
+        AND provider<>'admin'
       FOR UPDATE`, [order.userId,eventCreated,ref]);
     if (others.rowCount) throw new MembershipFulfilmentReviewRequired("Conflicting active membership");
 
@@ -103,10 +112,12 @@ export async function applyVerifiedLiveMembershipEntitlement(
     if (upsert.rowCount!==1) {
       throw new MembershipFulfilmentReviewRequired("Payment is not a newer verified paid period");
     }
-    await client.query(`
-      UPDATE users SET subscription_tier=$2,
-        subscription_status='active',tier_expires_at=$3 WHERE id=$1`,
-      [order.userId,order.sku,end]);
+    if(!manualActive){
+      await client.query(`
+        UPDATE users SET subscription_tier=$2,
+          subscription_status='active',tier_expires_at=$3 WHERE id=$1`,
+        [order.userId,order.sku,end]);
+    }
     return;
   }
 
@@ -127,7 +138,7 @@ export async function applyVerifiedLiveMembershipEntitlement(
       AND ends_at > to_timestamp($2)
       AND NOT (provider='stripe' AND provider_reference=$3)
     LIMIT 1`,[order.userId,eventCreated,ref]);
-  if (!others.rowCount && user.subscription_tier===order.sku) {
+  if (!manualActive && !others.rowCount && user.subscription_tier===order.sku) {
     await client.query(`
       UPDATE users SET subscription_status=$2
       WHERE id=$1 AND subscription_tier=$3`,

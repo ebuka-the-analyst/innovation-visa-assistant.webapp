@@ -47,11 +47,15 @@ export function AdminManualMembershipControls({userId,userEmail,onSuccess}:Props
         queryClient.invalidateQueries({queryKey:["/api/admin/users"]}),
         queryClient.invalidateQueries({queryKey:["/api/admin/users/member-entitlement",userId]}),
         queryClient.invalidateQueries({queryKey:["/api/admin"]}),
+        queryClient.invalidateQueries({queryKey:["/api/auth/user"]}),
+        queryClient.invalidateQueries({queryKey:["/api/member-stripe-live/my-membership"]}),
+        queryClient.invalidateQueries({queryKey:["/api/member-ai/quota"]}),
+        queryClient.invalidateQueries({queryKey:["/api/tools/access"]}),
       ]);
       toast({title:result.action==="grant"?"Manual membership assigned":"Manual membership revoked",
         description:result.action==="grant"
           ? `${result.packageId.replaceAll("_"," ")} active until ${new Date(result.expiresAt!).toLocaleDateString("en-GB")}. No payment or renewal created.`
-          :"Manual access revoked. No Stripe subscription was changed."});
+          :"Manual access revoked; any valid prior paid or legacy entitlement was restored. No Stripe subscription was changed."});
       onSuccess();
     },
     onError:(error:Error)=>toast({title:"Membership change blocked",description:error.message,variant:"destructive"}),
@@ -62,8 +66,9 @@ export function AdminManualMembershipControls({userId,userEmail,onSuccess}:Props
     <div>
       <h3 className="font-semibold">Change membership manually</h3>
       <p className="mt-1 text-xs text-muted-foreground">
-        This is a time-limited administrator access grant, not a Stripe payment.
-        It will not start a subscription, charge the customer, or renew automatically.
+        Choose a temporary access level for any account, including administrators
+        and Stripe members. This does not charge the account, cancel an existing
+        subscription, issue a refund or renew automatically. Stripe billing continues separately.
       </p>
     </div>
     <div className="space-y-1">
@@ -78,8 +83,8 @@ export function AdminManualMembershipControls({userId,userEmail,onSuccess}:Props
         </SelectContent>
       </Select>
       <p className="text-xs text-muted-foreground">
-        {choice==="revoke"?"Only active admin grants can be revoked here.":
-          "A new allowance starts today. Monthly grants expire in 30 days; the pass expires in 90 days. No automatic renewal."}
+        {choice==="revoke"?"Revoke only the temporary admin grant; restore valid pre-existing paid or legacy access.":
+          "A new allowance starts today. Monthly grants expire after 30 days; the pass after 90 days. Valid original access is restored when this grant ends."}
       </p>
     </div>
     <div className="space-y-1">
@@ -94,7 +99,8 @@ export function AdminManualMembershipControls({userId,userEmail,onSuccess}:Props
         data-testid="admin-member-confirm"/>
       <span>I confirm this change for <strong>{userEmail}</strong> is authorised,
         is not a customer payment, and will be recorded in the admin audit log.
-        Existing active Stripe memberships cannot be overridden here.</span>
+        Active Stripe subscriptions are not changed. The temporary manual access
+        takes priority, even when the selected account is an administrator.</span>
     </label>
     <Button className="h-auto min-h-10 w-full whitespace-normal" onClick={()=>mutation.mutate()}
       disabled={mutation.isPending||reason.trim().length<10||!confirmed}

@@ -370,7 +370,18 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // User methods (supports both Google OAuth and email/password auth)
   async getUser(id: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    let result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    const user=result[0];
+    // A temporary admin grant must expire, and the original verified Stripe
+    // or grandfathered entitlement must become effective automatically.
+    if(user?.tierOverrideBy && user.subscriptionTier &&
+       ["founder","founder_pro","founder_pass_90d"].includes(user.subscriptionTier) &&
+       user.tierExpiresAt && user.tierExpiresAt.getTime() <= Date.now()) {
+      const { reconcileExpiredAdminMembership } = await import("./services/adminMemberOverrides");
+      if(await reconcileExpiredAdminMembership(id)){
+        result=await db.select().from(users).where(eq(users.id,id)).limit(1);
+      }
+    }
     return result[0];
   }
 
