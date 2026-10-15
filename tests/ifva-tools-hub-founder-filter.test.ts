@@ -52,8 +52,21 @@ test("Tools filter reads each tool minimum from server access, not tool metadata
  assert.match(src,/entitlement\.available !== false/);
  assert.match(src,/entitlement\.listed !== false/);
  assert.match(src,/const hasAccess = canAccessManagedTool\(tool\)/);
- assert.match(src,/getToolAccess\(tool\.id\)\?\.allowed === true/);
+ assert.match(src,/OPEN_ACCESS_TOOL_IDS\.has\(tool\.id\) \|\| getToolAccess\(tool\.id\)\?\.allowed === true/);
  assert.match(src,/setLockedToolInfo\(/);
  assert.match(src,/toolMembershipAvailability\(effectiveTier\)/);
  assert.doesNotMatch(src,/setLocation\(\x60\/checkout/);
+});
+
+test("Public Expert Booking and Blog stay visible in Free and every paid membership",()=>{
+ const src=read("client/src/pages/tools-hub.tsx");
+ const registry=src.match(/const OPEN_ACCESS_TOOLS: Tool\[\] = \[([\s\S]*?)\];/);
+ assert.ok(registry, "Public tools are not registered");
+ for(const id of ["expert-booking","blog"]) assert.ok(registry[1].includes(`id: "${id}"`));
+ assert.match(src,/!membershipFilter \|\| OPEN_ACCESS_TOOL_IDS\.has\(tool\.id\)/);
+ assert.match(src,/OPEN_ACCESS_TOOL_IDS\.has\(tool\.id\) \|\| getToolAccess\(tool\.id\)\?\.allowed === true/);
+ assert.match(src,/const openRoute = OPEN_ACCESS_ROUTES\[tool\.id\]/);
+ const script=read("scripts/validate-public-expert-booking.cjs");
+ assert.match(script,/Every IFVA membership filter, including Free/);
+ assert.doesNotMatch(script,/tierFilter === "free"/);
 });
