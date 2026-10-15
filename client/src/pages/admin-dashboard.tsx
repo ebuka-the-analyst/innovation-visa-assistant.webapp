@@ -30,6 +30,7 @@ import { AdminSidebar } from "@/components/AdminSidebar";
 import { PromoCodeGenerator } from "@/components/admin/PromoCodeGenerator";
 import { PricingAccessManagement } from "@/components/admin/PricingAccessManagement";
 import { FounderMembershipAdministration } from "@/components/admin/FounderMembershipAdministration";
+import { AdminVerifiedMembershipStatus } from "@/components/admin/AdminVerifiedMembershipStatus";
 import { AdminRevisionQueue } from "@/components/admin/AdminRevisionQueue";
 import { LoginSecurityAudit } from "@/components/admin/LoginSecurityAudit";
 import { 
