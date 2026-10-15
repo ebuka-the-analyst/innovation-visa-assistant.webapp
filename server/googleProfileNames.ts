@@ -6,7 +6,7 @@
  */
 type GoogleProfileName={name?:{givenName?:string|null;familyName?:string|null}|null;displayName?:string|null};
 const clean=(value:unknown):string=>typeof value==="string"
- ?value.trim().replace(/\\s+/g," ").slice(0,150):"";
+ ?value.trim().replace(/\s+/g," ").slice(0,150):"";
 
 export function namesFromGoogleProfile(
  profile:GoogleProfileName,
