@@ -51,7 +51,8 @@ test("grandfathered legacy subscribers require active status and get no silent u
 });
 test("tool API, tool-progress API and route middleware use the same verified paid access source",()=>{
  const api=read("server/routes.ts"),middleware=read("server/middleware/requireToolAccess.ts");
- assert.equal((api.match(/effectiveMemberToolPlan\(/g)||[]).length,2);
+ // Tool API + tool-progress, plus verified questionnaire and membership checkout.
+ assert.equal((api.match(/effectiveMemberToolPlan\(/g)||[]).length,4);
  assert.equal((api.match(/hasCurrentPaidEntitlement\(freshUser\)/g)||[]).length,2);
  assert.match(middleware,/effectiveMemberToolPlan\(/);
  assert.match(middleware,/hasCurrentPaidEntitlement\(user\)/);
