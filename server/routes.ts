@@ -4,6 +4,8 @@ import type { ChartDataPayload, ChartType } from "./chartGenerator";
 import { storage } from "./storage";
 import { db, dbPool } from "./db";
 import { registerMemberStripeLiveRoutes } from "./phase3/memberStripeLiveRoutes";
+import { effectiveMemberToolPlan } from "@shared/memberToolPlan";
+import { hasCurrentPaidEntitlement } from "./security/paidEntitlement";
 import type { Pool as PgPool } from "pg";
 import {
   questionnaireSchema,
@@ -691,9 +693,9 @@ ${JSON.stringify(unique)}`;
       const freshUser = await storage.getUser(sessionUser.id);
       if (!freshUser) return res.status(401).json({ error: "Unauthorized" });
 
-      const userPlanId: PlanId = isPlanId(freshUser.subscriptionTier)
-        ? freshUser.subscriptionTier
-        : "free";
+      const userPlanId: PlanId = effectiveMemberToolPlan(
+        freshUser.subscriptionTier,hasCurrentPaidEntitlement(freshUser),
+      );
       const { catalog } = await getCommercialCatalog();
       const accessByTool = Object.fromEntries(
         MANAGED_TOOL_DEFINITIONS.map((tool) => [
@@ -18508,9 +18510,9 @@ IMPORTANT RULES:
       const userId = (req.user as any).id;
       const freshUser = await storage.getUser(userId);
       if (!freshUser) return res.status(401).json({ error: "Unauthorized" });
-      const userPlanId: PlanId = isPlanId(freshUser.subscriptionTier)
-        ? freshUser.subscriptionTier
-        : "free";
+      const userPlanId: PlanId = effectiveMemberToolPlan(
+        freshUser.subscriptionTier,hasCurrentPaidEntitlement(freshUser),
+      );
       const { catalog } = await getCommercialCatalog();
 
       const result = await db.execute(
