@@ -84,7 +84,7 @@ export async function reserveMemberAiQuota(
     FROM member_ai_entitlements
     WHERE user_id = ${userId} AND package_id = ${packageId}
       AND status = 'active' AND starts_at <= ${now} AND ends_at > ${now}
-    ORDER BY starts_at DESC LIMIT 1 FOR UPDATE
+    ORDER BY CASE WHEN provider='admin' THEN 0 ELSE 1 END, starts_at DESC LIMIT 1 FOR UPDATE
   `);
   const entitlement = rowsOf(result)[0];
   if (!entitlement) throw new MembershipQuotaError("ENTITLEMENT_INACTIVE", "Active verified membership required.");
@@ -167,7 +167,7 @@ export async function getMemberAiQuotaSnapshot(userId: string, packageId: Member
     FROM member_ai_entitlements
     WHERE user_id = ${userId} AND package_id = ${packageId}
       AND status = 'active' AND starts_at <= ${now} AND ends_at > ${now}
-    ORDER BY starts_at DESC LIMIT 1
+    ORDER BY CASE WHEN provider='admin' THEN 0 ELSE 1 END, starts_at DESC LIMIT 1
   `))[0];
   if (!entitlement) return inactive;
   const window = currentQuotaWindow(entitlement, now);
