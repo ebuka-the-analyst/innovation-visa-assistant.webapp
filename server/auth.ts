@@ -256,14 +256,7 @@ export async function setupAuth(app: Express) {
       },
       async (email, password, done) => {
         try {
-          // Email-password registration requires names to avoid nameless users.
-       if (typeof firstName!=="string" || !firstName.trim() ||
-           typeof lastName!=="string" || !lastName.trim() ||
-           firstName.trim().length>150 || lastName.trim().length>150) {
-         return res.status(400).json({message:"Please provide your first and last name (up to 150 characters each)."});
-       }
-
-       // Normalize email to lowercase for case-insensitive lookup
+          // Normalize email to lowercase for case-insensitive lookup
           const normalizedEmail = email.toLowerCase().trim();
           const user = await storage.getUserByEmail(normalizedEmail);
           
@@ -428,6 +421,17 @@ export async function setupAuth(app: Express) {
       // Validate required fields
       if (!email || !password) {
         return res.status(400).json({ message: "Email and password required" });
+      }
+
+      // A Google sign-in uses provider-supplied names. Email registration
+      // must require its own name fields server-side even if the form is bypassed.
+      // Do not invent names from email addresses.
+      if (typeof firstName !== "string" || !firstName.trim() ||
+          typeof lastName !== "string" || !lastName.trim() ||
+          firstName.trim().length > 150 || lastName.trim().length > 150) {
+        return res.status(400).json({
+          message: "Please enter your first name and last name (up to 150 characters each).",
+        });
       }
 
       // Normalize email to lowercase
