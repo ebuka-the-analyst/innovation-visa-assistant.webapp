@@ -8,6 +8,7 @@ import bcrypt from "bcrypt";
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { storage } from "./storage";
 import { toPublicAuthUser } from "./publicAuthUser";
+import { namesFromGoogleProfile } from "./googleProfileNames";
 import { verifyTurnstileToken } from "./turnstile";
 import { generateVerificationToken, getTokenExpiry, sendVerificationEmail, sendPasswordResetEmail, getResetTokenExpiry, sendWelcomeEmail } from "./email";
 import { db } from "./db";
@@ -255,7 +256,14 @@ export async function setupAuth(app: Express) {
       },
       async (email, password, done) => {
         try {
-          // Normalize email to lowercase for case-insensitive lookup
+          // Email-password registration requires names to avoid nameless users.
+       if (typeof firstName!=="string" || !firstName.trim() ||
+           typeof lastName!=="string" || !lastName.trim() ||
+           firstName.trim().length>150 || lastName.trim().length>150) {
+         return res.status(400).json({message:"Please provide your first and last name (up to 150 characters each)."});
+       }
+
+       // Normalize email to lowercase for case-insensitive lookup
           const normalizedEmail = email.toLowerCase().trim();
           const user = await storage.getUserByEmail(normalizedEmail);
           
@@ -333,32 +341,34 @@ export async function setupAuth(app: Express) {
           }
 
           if (existingUser) {
+            const googleNames=namesFromGoogleProfile(profile,existingUser);
             // User exists - link Google account if not already linked
             if (!existingUser.googleId) {
               // Link Google account to existing email/password account
               const updatedUser = await storage.updateUserGoogleId(existingUser.id, profile.id, {
-                firstName: profile.name?.givenName || existingUser.firstName,
-                lastName: profile.name?.familyName || existingUser.lastName,
+                firstName: googleNames.firstName,
+                lastName: googleNames.lastName,
                 profileImageUrl: profile.photos?.[0]?.value || existingUser.profileImageUrl,
               });
               return done(null, updatedUser);
             } else {
               // Already has Google linked - just update profile info
               const updatedUser = await storage.updateUserGoogleId(existingUser.id, profile.id, {
-                firstName: profile.name?.givenName || existingUser.firstName,
-                lastName: profile.name?.familyName || existingUser.lastName,
+                firstName: googleNames.firstName,
+                lastName: googleNames.lastName,
                 profileImageUrl: profile.photos?.[0]?.value || existingUser.profileImageUrl,
               });
               return done(null, updatedUser);
             }
           }
 
-          // New user - create with Google OAuth (auto-verify Google accounts)
+          // New user - capture the name supplied by Google where available.
+          const googleNames=namesFromGoogleProfile(profile);
           const user = await storage.upsertUser({
             email: normalizedEmail,
             googleId: profile.id,
-            firstName: profile.name?.givenName || "",
-            lastName: profile.name?.familyName || "",
+            firstName: googleNames.firstName,
+            lastName: googleNames.lastName,
             profileImageUrl: profile.photos?.[0]?.value || "",
             isEmailVerified: true, // Google accounts are pre-verified
           });
