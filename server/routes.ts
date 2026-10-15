@@ -15918,7 +15918,19 @@ Return a JSON object with:
         return res.json({ packageId: current.subscriptionTier || "free", legacy: true, membership: null });
       }
       const membership = await getMemberAiQuotaSnapshot(current.id, current.subscriptionTier);
-      return res.json({ packageId: current.subscriptionTier, legacy: false, membership });
+      const source = membership.active ? await dbPool.query(
+        `SELECT provider FROM member_ai_entitlements
+          WHERE user_id=$1 AND package_id=$2 AND status='active'
+            AND starts_at<=NOW() AND ends_at>NOW()
+          ORDER BY starts_at DESC LIMIT 1`,
+        [current.id,current.subscriptionTier],
+      ) : null;
+      return res.json({
+        packageId: current.subscriptionTier, legacy:false,
+        membership,
+        source: source?.rows?.[0]?.provider === "admin" ? "admin_grant" :
+          source?.rows?.[0]?.provider === "stripe" ? "stripe" : "unverified",
+      });
     } catch (error) {
       console.error("Admin membership verification failed", error);
       return res.status(503).json({ error: "Membership verification unavailable" });
