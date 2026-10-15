@@ -80,6 +80,7 @@ export async function inspectPriorLiveCheckout(
    FROM member_stripe_live_orders WHERE user_id=$1
    ORDER BY created_at DESC,id DESC`,[userId]);
  const expired:ClosedOrderId[]=[];
+ let resumable:{kind:"resume";orderId:string;sessionId:string;url:string}|null=null;
  for(const order of rows.rows){
    if(order.user_id!==userId || order.currently_active || order.paid_through!==null ||
       order.stripe_subscription_id!==null || order.stripe_payment_intent_id!==null)
@@ -105,7 +106,9 @@ export async function inspectPriorLiveCheckout(
        blocked("You have an unfinished "+order.sku.replaceAll("_"," ")+" checkout. Select that package to resume it, or contact billing support to change packages.");
      if(!checkoutHost(session.url))
        blocked("Stripe did not provide a secure link for the previous checkout. Contact support.");
-     return {kind:"resume",orderId:order.id,sessionId:session.id,url:session.url};
+     if(resumable)blocked("Multiple unpaid checkout sessions require billing review before another payment.");
+     resumable={kind:"resume",orderId:order.id,sessionId:session.id,url:session.url};
+     continue;
    }
    if(session.status==="expired"&&session.payment_status==="unpaid"&&
       !session.subscription&&!session.payment_intent){
@@ -114,5 +117,6 @@ export async function inspectPriorLiveCheckout(
    }
    blocked("Your earlier checkout has reached payment processing. Do not start another payment until its status is verified.");
  }
+ if(resumable)return resumable;
  return {kind:"new",verifiedExpiredIds:expired};
 }
