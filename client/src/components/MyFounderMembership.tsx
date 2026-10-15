@@ -21,6 +21,8 @@ export default function MyFounderMembership(){
   refetchOnWindowFocus:true,
  });
  const membership=data?.membership??null;
+ const isPaymentReturn=typeof window!=="undefined" &&
+   new URLSearchParams(window.location.search).get("payment")==="return";
  async function refresh(){await refetch();}
  async function cancel(){
   if(!membership?.canCancel||!window.confirm("Cancel automatic monthly renewal? Your paid membership remains active until its paid-through date."))return;
@@ -40,7 +42,7 @@ export default function MyFounderMembership(){
  if(!data||!membership)return null;
  return <section className="my-8 rounded-lg border p-5 space-y-3" aria-label="Manage Founder membership">
   <h2 className="text-lg font-semibold">Your Founder membership</h2>
-  <p className="text-sm">Package: {membership.sku.replaceAll("_"," ")} · {membership.active?"Active":"Awaiting payment verification"}</p>
+  <p className="text-sm">Package: {membership.sku.replaceAll("_"," ")} · {membership.active?"Active":isPaymentReturn?"Awaiting payment verification":"Inactive"}</p>
   {membership.paidThrough&&<p className="text-sm">Paid through: {new Date(membership.paidThrough).toLocaleDateString("en-GB")}</p>}
   {membership.cancellationPending&&<p className="text-sm">Automatic renewal cancellation confirmed. Paid access remains until the end of your term.</p>}
   {membership.canCancel&&<button type="button" disabled={busy} onClick={cancel}
