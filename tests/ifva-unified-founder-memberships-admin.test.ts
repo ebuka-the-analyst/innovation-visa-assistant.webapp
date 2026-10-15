@@ -26,7 +26,8 @@ test("Admin User membership and Pricing & Access show current server-owned packa
  const display=read("client/src/components/admin/FounderMembershipAdministration.tsx");
  assert.match(admin,/<FounderMembershipAdministration \/>/);
  assert.match(admin,/<AdminVerifiedMembershipStatus userId=/);
- assert.match(admin,/View Membership/);
+ assert.match(admin,/Change Membership/);
+ assert.match(admin,/<AdminManualMembershipControls/);
  assert.match(admin,/Legacy Credits/);
  assert.match(admin,/Subscription Tier/); // only the read-only profile heading may remain
  assert.doesNotMatch(admin,/<SelectItem value="premium">Premium \(3 coins\)<\/SelectItem>/);
