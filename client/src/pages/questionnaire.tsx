@@ -24,6 +24,7 @@ import { queryClient } from "@/lib/queryClient";
 import QuestionnaireForm from "@/components/QuestionnaireForm";
 import FeatureNavigation from "@/components/FeatureNavigation";
 import { CreditBalanceDisplay } from "@/components/CreditBalanceDisplay";
+import { useMemberAiQuota } from "@/hooks/useMemberAiQuota";
 import AiInterviewChat from "@/components/AiInterviewChat";
 import VisaReadinessHUD from "@/components/VisaReadinessHUD";
 
@@ -51,24 +52,42 @@ export default function Questionnaire() {
   const [mode, setMode] = useState<'select' | 'form' | 'ai-interview'>('select');
   const [interviewSession, setInterviewSession] = useState<InterviewSession | null>(null);
   const { toast } = useToast();
+  const { isMembershipUser, quota: memberQuota, isLoading: memberQuotaLoading, isError: memberQuotaError } = useMemberAiQuota();
 
   const { data: creditBalance, isLoading: creditBalanceLoading } = useQuery<CreditBalanceResponse>({
     queryKey: ['/api/credits/balance'],
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !isMembershipUser,
   });
 
   // AI Interview requires Basic or higher tier
   const canAccessAiInterview = hasAccessToTier('basic');
 
-  // Traditional Form requires BOTH a paid tier and at least one live business-plan credit.
-  // Use the same live balance endpoint as CreditBalanceDisplay so an exhausted paid account
-  // immediately returns to the locked state instead of remaining unlocked because of its tier.
+  // Founder memberships use verified period allowances; existing one-time
+  // customers retain the separate legacy credit balance.
   const hasQuestionnaireTierAccess = hasAccessToTier('basic');
   const hasQuestionnaireCredits = (creditBalance?.totalCredits ?? 0) > 0;
-  const canAccessQuestionnaire = hasQuestionnaireTierAccess && hasQuestionnaireCredits;
-  const isPaidUserOutOfCredits =
+  const memberHasAllowance = memberQuota?.active === true &&
+    memberQuota.remainingGenerations > 0 && !memberQuotaError;
+  const canAccessQuestionnaire = hasQuestionnaireTierAccess &&
+    (isMembershipUser ? memberHasAllowance : hasQuestionnaireCredits);
+  const isPaidUserOutOfCredits = !isMembershipUser &&
     hasQuestionnaireTierAccess && !creditBalanceLoading && !hasQuestionnaireCredits;
-  const questionnaireAccessLoading = tierLoading || (isAuthenticated && creditBalanceLoading);
+  const questionnaireAccessLoading = tierLoading ||
+    (isAuthenticated && (isMembershipUser ? memberQuotaLoading : creditBalanceLoading));
+  const memberExhausted = isMembershipUser && memberQuota?.active === true &&
+    memberQuota.remainingGenerations === 0;
+  const lockedBadge = isMembershipUser
+    ? (memberExhausted ? "Allowance Used" : "Access Unavailable")
+    : (isPaidUserOutOfCredits ? "No Credits" : "Paid Plan Required");
+  const lockedDescription = isMembershipUser
+    ? memberQuotaError
+      ? "Your membership allowance could not be verified. Refresh this page."
+      : memberExhausted
+        ? "You have used this period's included plan generations. Check your membership for the next allowance period."
+        : "Your Founder generation entitlement is not active. Review your membership status."
+    : isPaidUserOutOfCredits
+      ? "You have used all your previous plan credits. Review your membership options."
+      : "A paid membership is required to generate a business plan.";
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -84,7 +103,7 @@ export default function Questionnaire() {
       setMode('form');
     }
     
-    if (upgraded === 'true' && sessionId) {
+    if (!isMembershipUser && upgraded === 'true' && sessionId) {
       // Call backend to confirm subscription and update user tier in database
       (async () => {
         try {
@@ -130,7 +149,7 @@ export default function Questionnaire() {
         window.history.replaceState({}, '', '/questionnaire');
       })();
     }
-  }, [toast, canAccessAiInterview, canAccessQuestionnaire, userTier]);
+  }, [toast, canAccessAiInterview, canAccessQuestionnaire, userTier, isMembershipUser]);
 
   const handleSessionUpdate = (session: InterviewSession) => {
     setInterviewSession(session);
@@ -243,16 +262,14 @@ export default function Questionnaire() {
                         {!canAccessQuestionnaire && !questionnaireAccessLoading && (
                           <Badge className="bg-red-500 text-white">
                             <Lock className="h-3 w-3 mr-1" />
-                            {isPaidUserOutOfCredits ? "No Credits" : "Paid Plan Required"}
+                            {lockedBadge}
                           </Badge>
                         )}
                       </div>
                       <p className="text-muted-foreground mb-4">
                         {canAccessQuestionnaire
                           ? "Fill out a comprehensive structured questionnaire at your own pace. Ideal if you prefer to review all questions upfront."
-                          : isPaidUserOutOfCredits
-                            ? "You have used all of your business plan credits. Add credits to start another business plan."
-                            : "Upgrade to a paid plan to use the business plan questionnaire and generate a complete application-ready plan."}
+                          : lockedDescription}
                       </p>
                       
                       <div className="space-y-3">
@@ -274,11 +291,19 @@ export default function Questionnaire() {
                         </div>
                       </div>
 
-                      {canAccessQuestionnaire ? (
+                      {questionnaireAccessLoading ? (
+                        <Button disabled className="w-full mt-6">Checking membership allowance...</Button>
+                      ) : canAccessQuestionnaire ? (
                         <Button className="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white" data-testid="button-start-form">
                           <FileText className="h-4 w-4 mr-2" />
                           Use Traditional Form
                         </Button>
+                      ) : isMembershipUser ? (
+                        <Link href="/pricing">
+                          <Button className="w-full mt-6" data-testid="button-review-membership-form">
+                            Review Membership
+                          </Button>
+                        </Link>
                       ) : isPaidUserOutOfCredits ? (
                         <Link href="/pricing">
                           <Button className="w-full mt-6" data-testid="button-get-credits-form">
@@ -387,17 +412,15 @@ export default function Questionnaire() {
         <Card className="p-8 max-w-md text-center">
           <Lock className="h-12 w-12 mx-auto text-destructive mb-4" />
           <h2 className="text-xl font-bold mb-2">
-            {isPaidUserOutOfCredits ? "Business Plan Credits Required" : "Paid Plan Required"}
+            {isMembershipUser ? "Membership Allowance Unavailable" : isPaidUserOutOfCredits ? "Business Plan Credits Required" : "Paid Plan Required"}
           </h2>
           <p className="text-muted-foreground mb-6">
-            {isPaidUserOutOfCredits
-              ? "You have used all of your business plan credits. Add credits to use the questionnaire again."
-              : "The business plan questionnaire is available on Basic and higher plans."}
+            {lockedDescription}
           </p>
           <div className="flex flex-col gap-3">
             <Link href="/pricing">
-              <Button className="w-full" data-testid={isPaidUserOutOfCredits ? "button-get-credits-questionnaire" : "button-upgrade-questionnaire"}>
-                {isPaidUserOutOfCredits ? "Get Credits" : "Upgrade to Unlock"}
+              <Button className="w-full" data-testid={isMembershipUser ? "button-review-membership-questionnaire" : isPaidUserOutOfCredits ? "button-get-credits-questionnaire" : "button-upgrade-questionnaire"}>
+                {isMembershipUser ? "Review Membership" : isPaidUserOutOfCredits ? "Review Memberships" : "Upgrade to Unlock"}
               </Button>
             </Link>
             <Button variant="outline" onClick={() => setMode('select')} data-testid="button-go-back-questionnaire">
