@@ -186,5 +186,8 @@ jobs:
       - name: Validate current Founder Tools Hub membership filter
         run: node --import tsx --test tests/ifva-tools-hub-founder-filter.test.ts
 
+      - name: Verify aligned IFVA Tool card footers
+        run: node --import tsx --test tests/ifva-tool-cards-inline-footer.test.ts
+
       - name: Production build
         run: npm run build
