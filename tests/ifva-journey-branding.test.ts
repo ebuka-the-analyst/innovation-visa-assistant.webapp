@@ -21,7 +21,7 @@ test("No legacy vendors, unverified outcomes, included human consultations or in
    assert.equal(combined.toLowerCase().includes(stale.toLowerCase()),false,stale);
  }
  assert.match(combined,/not included in any IFVA software membership/);
- assert.match(combined,/not a guarantee of endorsement/);
+ assert.match(combined,/does not guarantee endorsement or visa approval/);
  assert.match(combined,/not regulated immigration advice/);
  assert.match(combined,/not an immigration-compliance score/);
 });
