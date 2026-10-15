@@ -16321,7 +16321,18 @@ Return a JSON object with:
           affectedCount = safeUserIds.length;
           break;
 
-        case "add_credits":
+        case "add_credits": {
+          // Legacy bonus credits have no place in new membership allowances.
+          const memberCountResult = await db
+            .select({ id: users.id }).from(users)
+            .where(and(inArray(users.id, safeUserIds),
+              inArray(users.subscriptionTier, ["founder", "founder_pro", "founder_pass_90d"])));
+          if (memberCountResult.length > 0) {
+            return res.status(409).json({
+              error: "One or more selected users have a Founder membership; their allowances cannot be changed using legacy coins.",
+              code: "MEMBERSHIP_QUOTA_IS_SEPARATE",
+            });
+          }
           const creditAmount = data?.amount || 0;
           await db.execute(sql`
             UPDATE users 
@@ -16331,6 +16342,7 @@ Return a JSON object with:
           `);
           affectedCount = safeUserIds.length;
           break;
+        }
 
         case "change_tier":
           return res.status(409).json({ error: "Bulk membership changes are disabled. Use verified billing records for each customer.", code: "MEMBERSHIP_LEDGER_REQUIRED" });
