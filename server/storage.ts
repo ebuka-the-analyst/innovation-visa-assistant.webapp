@@ -479,9 +479,9 @@ export class DatabaseStorage implements IStorage {
           .update(users)
           .set({
             email: userData.email,
-            firstName: userData.firstName,
-            lastName: userData.lastName,
-            profileImageUrl: userData.profileImageUrl,
+            firstName: userData.firstName?.trim() || existingByGoogleId[0].firstName,
+            lastName: userData.lastName?.trim() || existingByGoogleId[0].lastName,
+            profileImageUrl: userData.profileImageUrl || existingByGoogleId[0].profileImageUrl,
             isEmailVerified: userData.isEmailVerified ?? existingByGoogleId[0].isEmailVerified,
             updatedAt: new Date(),
           })
@@ -504,9 +504,9 @@ export class DatabaseStorage implements IStorage {
         .update(users)
         .set({
           googleId: userData.googleId,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          profileImageUrl: userData.profileImageUrl,
+          firstName: userData.firstName?.trim() || existingByEmail[0].firstName,
+          lastName: userData.lastName?.trim() || existingByEmail[0].lastName,
+          profileImageUrl: userData.profileImageUrl || existingByEmail[0].profileImageUrl,
           isEmailVerified: userData.isEmailVerified ?? existingByEmail[0].isEmailVerified,
           updatedAt: new Date(),
         })
