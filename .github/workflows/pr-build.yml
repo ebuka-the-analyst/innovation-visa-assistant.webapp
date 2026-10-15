@@ -195,5 +195,8 @@ jobs:
       - name: Test safe LIVE abandoned checkout resume and duplicate charge prevention
         run: node --import tsx --test tests/phase3-live-abandoned-checkout-recovery.test.ts
 
+      - name: Verify paid membership and tool access refresh after Stripe return
+        run: node --import tsx --test tests/ifva-live-paid-membership-reactivity.test.ts
+
       - name: Production build
         run: npm run build
