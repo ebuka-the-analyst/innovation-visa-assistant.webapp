@@ -454,16 +454,20 @@ export default function ToolsHub() {
                 <p className="text-muted-foreground text-lg">No tools found matching your filters. Try adjusting your search.</p>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
                 {filteredTools.map((tool) => {
                   const entitlement = getToolAccess(tool.id);
                   const effectiveTier = entitlement?.minimumPlanId;
                   const hasAccess = canAccessManagedTool(tool);
+                  const membershipLabel = OPEN_ACCESS_TOOL_IDS.has(tool.id)
+                    ? "Free · Founder · Founder Pro · 90-Day Pass"
+                    : entitlement && entitlement.available !== false && entitlement.listed !== false
+                      ? toolMembershipAvailability(effectiveTier) : "Sign in to check access";
                   return (
                     <Card
                       key={tool.id}
                       onClick={() => handleToolClick(tool)}
-                      className={`p-6 hover-elevate cursor-pointer transition-all border-2 relative group ${
+                      className={`flex h-full min-w-0 flex-col p-6 hover-elevate cursor-pointer transition-all border-2 relative group ${
                         effectiveTier ? tierColors[effectiveTier] : "bg-muted/30 border-border"
                       } ${!hasAccess ? "opacity-80" : ""}`}
                       data-testid={`card-tool-${tool.id}`}
@@ -487,23 +491,25 @@ export default function ToolsHub() {
                           </div>
                         )}
                       </div>
-                      <div className="space-y-4">
-                        <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                        <div className="flex flex-1 items-start justify-between gap-3 pb-5">
                           <div className="flex-1">
                             <h3 className="font-semibold text-lg mb-1" data-testid={`title-${tool.id}`}>{tool.name}</h3>
                             <p className="text-sm text-muted-foreground">{tool.description}</p>
                           </div>
                           <div className="flex-shrink-0 text-primary"><GetIconComponent name={tool.icon} /></div>
                         </div>
-                        <div className="flex flex-wrap gap-2 pt-3 border-t">
-                          <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-xs font-medium text-primary">
+                        <div className="mt-auto flex min-w-0 flex-nowrap items-center gap-2 border-t pt-3" data-testid={`tool-footer-${tool.id}`}>
+                          <div className="inline-flex shrink-0 items-center whitespace-nowrap px-2 py-1 rounded-full bg-primary/10 text-xs font-medium text-primary">
                             {stageLabels[tool.stage]}
                           </div>
-                          <div className="inline-flex items-center gap-1 max-w-full px-2 py-1 rounded-lg bg-muted text-xs font-medium whitespace-normal leading-5" data-testid={`badge-tier-${tool.id}`}>
-                            {OPEN_ACCESS_TOOL_IDS.has(tool.id)
-                              ? "Free · Founder · Founder Pro · 90-Day Pass"
-                              : entitlement && entitlement.available !== false && entitlement.listed !== false
-                                ? toolMembershipAvailability(effectiveTier) : "Sign in to check access"}
+                          <div
+                            className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap rounded-lg bg-muted px-2 py-1 text-xs font-medium leading-5"
+                            title={membershipLabel}
+                            aria-label={membershipLabel}
+                            data-testid={`badge-tier-${tool.id}`}
+                          >
+                            {membershipLabel}
                           </div>
                         </div>
                       </div>
