@@ -280,6 +280,9 @@ export default function Signup() {
                   onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                   className="h-8 text-sm"
                   data-testid="input-first-name"
+                  autoComplete="given-name"
+                  required
+                  maxLength={150}
                 />
               </div>
               <div className="space-y-0.5">
@@ -292,6 +295,9 @@ export default function Signup() {
                   onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                   className="h-8 text-sm"
                   data-testid="input-last-name"
+                  autoComplete="family-name"
+                  required
+                  maxLength={150}
                 />
               </div>
             </div>
