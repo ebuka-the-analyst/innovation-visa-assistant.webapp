@@ -189,5 +189,8 @@ jobs:
       - name: Verify aligned IFVA Tool card footers
         run: node --import tsx --test tests/ifva-tool-cards-inline-footer.test.ts
 
+      - name: Verify tool card favourite and access icon separation
+        run: node --import tsx --test tests/ifva-tool-card-visible-actions.test.ts
+
       - name: Production build
         run: npm run build
