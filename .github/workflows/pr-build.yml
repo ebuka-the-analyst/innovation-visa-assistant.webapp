@@ -198,5 +198,8 @@ jobs:
       - name: Verify paid membership and tool access refresh after Stripe return
         run: node --import tsx --test tests/ifva-live-paid-membership-reactivity.test.ts
 
+      - name: Test already-paid Founder package selection guard
+        run: node --import tsx --test tests/ifva-active-founder-pricing-cards.test.ts
+
       - name: Production build
         run: npm run build
