@@ -1964,15 +1964,6 @@ Respond ONLY with valid JSON in this exact format:
         }
         const pricing = { amount: catalogPlan.pricePence, name: catalogPlan.displayName };
 
-        // Handle free tier - skip checkout entirely
-        if (pricing.amount === 0 || businessPlan.tier === "free") {
-          await storage.updateBusinessPlan(planId, { status: "paid" });
-          return res.json({
-            skipCheckout: true,
-            redirectUrl: `/generation?plan_id=${planId}&free=true`,
-          });
-        }
-
         // A verified Founder subscription covers this generation. Never route
         // its customer into superseded one-time purchase Checkout.
         const currentAccount = await storage.getUser(user.id);
@@ -1997,6 +1988,15 @@ Respond ONLY with valid JSON in this exact format:
         }
         if (process.env.IFVA_LEGACY_NEW_PURCHASES_DISABLED === "true") {
           return res.status(410).json({ error: "Previous one-time plans are no longer available for new purchases" });
+        }
+
+        // Handle free tier - skip checkout entirely
+        if (pricing.amount === 0 || businessPlan.tier === "free") {
+          await storage.updateBusinessPlan(planId, { status: "paid" });
+          return res.json({
+            skipCheckout: true,
+            redirectUrl: `/generation?plan_id=${planId}&free=true`,
+          });
         }
 
         // CRITICAL: Skip payment if user already has an active paid subscription
