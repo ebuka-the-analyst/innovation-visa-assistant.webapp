@@ -36,7 +36,11 @@ test("missing live gateway cannot silently create Stripe checkout or revive old 
  assert.match(gateway,/IFVA_MEMBERSHIP_PAYMENTS_LIVE_ENABLED/);
  assert.match(gateway,/IFVA_MEMBERSHIP_LIVE_WEBHOOK_VERIFIED/);
  assert.match(gateway,/IFVA_MEMBERSHIP_LIVE_FULFILMENT_VERIFIED/);
- assert.match(component,/disabled=\{!data\.purchasable\}/);
+ const policy=read("client/src/lib/founderMembershipCardAction.ts");
+ assert.match(component,/cataloguePurchasable:data\.purchasable/);
+ assert.match(component,/disabled=\{action\.disabled\}/);
+ assert.match(policy,/if\(!cataloguePurchasable\)/);
+ assert.match(policy,/canStartCheckout:false/);
  assert.match(routes,/app\.get\("\/api\/member-offers"/);
  assert.match(routes,/app\.get\("\/api\/admin\/member-migration-audit"/);
  assert.equal((routes.match(/app\.get\("\/api\/admin\/member-migration-audit"/g)||[]).length,1,"Duplicate legacy credit audit route");
