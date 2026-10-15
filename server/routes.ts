@@ -7630,12 +7630,16 @@ EXAMPLES OF GOOD RESPONSES:
         return res.status(400).json({ error: "No valid users to update" });
       }
 
+      // Verified Founder memberships are Stripe/ledger owned. Legacy tier
+      // columns must not be overridden through a generic admin bulk edit.
+      if (updates && ("subscriptionTier" in updates || "subscriptionStatus" in updates)) {
+        return res.status(409).json({ error: "Memberships must be managed through verified billing records. Historical tiers cannot be reassigned.", code: "MEMBERSHIP_LEDGER_REQUIRED" });
+      }
+
       // Build the update object with allowed fields
       const allowedFields = [
-        "subscriptionTier",
         "isAdmin",
         "isEmailVerified",
-        "subscriptionStatus",
       ];
       const updateData: any = { updatedAt: new Date() };
 
@@ -7742,11 +7746,13 @@ EXAMPLES OF GOOD RESPONSES:
         return res.status(404).json({ error: "User not found" });
       }
 
-      // Only allow specific fields to be updated
+      // Account profile permissions remain editable; financial entitlements
+      // and membership state belong to the verified Stripe event ledger.
+      if (updates && ("subscriptionTier" in updates || "subscriptionStatus" in updates)) {
+        return res.status(409).json({ error: "Use the verified membership and billing workflow to change paid access.", code: "MEMBERSHIP_LEDGER_REQUIRED" });
+      }
       const allowedFields = [
-        "subscriptionTier",
         "isAdmin",
-        "subscriptionStatus",
         "firstName",
         "lastName",
       ];
@@ -7779,6 +7785,8 @@ EXAMPLES OF GOOD RESPONSES:
 
   // Admin Reset All User Credits Based on Tier - 2026 PRICING
   app.post("/api/admin/reset-all-credits", requireAdmin, async (req, res) => {
+    // Never rewrite historical credit balances when rolling out new memberships.
+    return res.status(410).json({ error: "Mass credit resets are retired. Existing purchased credits remain unchanged.", code: "LEGACY_CREDIT_RESET_RETIRED" });
     try {
       // 2026 TIER CREDITS: free=0, basic=1, premium=3, enterprise=6, ultimate=12
       const tierCredits: Record<string, number> = {
@@ -15850,6 +15858,12 @@ Return a JSON object with:
     "/api/admin/users/:userId/tier-override",
     requireAdmin,
     async (req, res) => {
+      // A tier label is not payment evidence, and without an active ledger
+      // entry cannot create valid Founder membership or restore refunded access.
+      return res.status(409).json({
+        error: "Direct tier overrides are retired. Verify or correct the original Stripe membership and ledger record through the audited billing workflow.",
+        code: "MEMBERSHIP_LEDGER_REQUIRED",
+      });
       try {
         const { userId } = req.params;
         const { tier, reason, expiresAt, addCredits } = req.body;
@@ -15894,6 +15908,23 @@ Return a JSON object with:
     },
   );
 
+  // Read-only verified member record for the customer support/admin console.
+  app.get("/api/admin/users/:userId/member-entitlement", requireAdmin, async (req, res) => {
+    try {
+      const current = await storage.getUser(req.params.userId);
+      if (!current) return res.status(404).json({ error: "User not found" });
+      res.setHeader("Cache-Control", "no-store");
+      if (!isMembershipSku(current.subscriptionTier)) {
+        return res.json({ packageId: current.subscriptionTier || "free", legacy: true, membership: null });
+      }
+      const membership = await getMemberAiQuotaSnapshot(current.id, current.subscriptionTier);
+      return res.json({ packageId: current.subscriptionTier, legacy: false, membership });
+    } catch (error) {
+      console.error("Admin membership verification failed", error);
+      return res.status(503).json({ error: "Membership verification unavailable" });
+    }
+  });
+
   // Admin: Add/Remove/Set credits (supports mode: 'add' or 'set')
   app.post(
     "/api/admin/users/:userId/credits",
@@ -15910,6 +15941,13 @@ Return a JSON object with:
           .where(eq(users.id, userId));
         if (!targetUser) {
           return res.status(404).json({ error: "User not found" });
+        }
+
+        if (isMembershipSku(targetUser.subscriptionTier)) {
+          return res.status(409).json({
+            error: "Founder generations and revisions are managed by verified membership allowances, not legacy coin balances.",
+            code: "MEMBERSHIP_QUOTA_IS_SEPARATE",
+          });
         }
 
         let newCredits: number;
@@ -16283,7 +16321,18 @@ Return a JSON object with:
           affectedCount = safeUserIds.length;
           break;
 
-        case "add_credits":
+        case "add_credits": {
+          // Legacy bonus credits have no place in new membership allowances.
+          const memberCountResult = await db
+            .select({ id: users.id }).from(users)
+            .where(and(inArray(users.id, safeUserIds),
+              inArray(users.subscriptionTier, ["founder", "founder_pro", "founder_pass_90d"])));
+          if (memberCountResult.length > 0) {
+            return res.status(409).json({
+              error: "One or more selected users have a Founder membership; their allowances cannot be changed using legacy coins.",
+              code: "MEMBERSHIP_QUOTA_IS_SEPARATE",
+            });
+          }
           const creditAmount = data?.amount || 0;
           await db.execute(sql`
             UPDATE users 
@@ -16293,8 +16342,10 @@ Return a JSON object with:
           `);
           affectedCount = safeUserIds.length;
           break;
+        }
 
         case "change_tier":
+          return res.status(409).json({ error: "Bulk membership changes are disabled. Use verified billing records for each customer.", code: "MEMBERSHIP_LEDGER_REQUIRED" });
           const newTier = data?.tier || "free";
           await db
             .update(users)

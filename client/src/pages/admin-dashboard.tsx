@@ -29,6 +29,8 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/s
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { PromoCodeGenerator } from "@/components/admin/PromoCodeGenerator";
 import { PricingAccessManagement } from "@/components/admin/PricingAccessManagement";
+import { FounderMembershipAdministration } from "@/components/admin/FounderMembershipAdministration";
+import { AdminVerifiedMembershipStatus } from "@/components/admin/AdminVerifiedMembershipStatus";
 import { AdminRevisionQueue } from "@/components/admin/AdminRevisionQueue";
 import { LoginSecurityAudit } from "@/components/admin/LoginSecurityAudit";
 import { 
@@ -196,7 +198,7 @@ interface User {
   email: string;
   firstName?: string;
   lastName?: string;
-  subscriptionTier: 'free' | 'basic' | 'premium' | 'enterprise' | 'ultimate';
+  subscriptionTier: 'free' | 'basic' | 'premium' | 'enterprise' | 'ultimate' | 'founder' | 'founder_pro' | 'founder_pass_90d';
   isAdmin: boolean;
   createdAt: string;
   updatedAt?: string;
@@ -707,6 +709,9 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
     premium: 'bg-purple-500/10 text-purple-600',
     enterprise: 'bg-amber-500/10 text-amber-600',
     ultimate: 'bg-emerald-500/10 text-emerald-600',
+    founder: 'bg-blue-500/10 text-blue-600',
+    founder_pro: 'bg-emerald-500/10 text-emerald-600',
+    founder_pass_90d: 'bg-indigo-500/10 text-indigo-600',
   };
 
   // ---- USER LOOKUP ----
@@ -1002,42 +1007,10 @@ function CustomerSupportPanel({ activeSection }: { activeSection: string }) {
 
                 {/* Quick Fix Tab */}
                 <TabsContent value="actions" className="mt-3 space-y-4">
-                  {/* Tier Override */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium flex items-center gap-1.5">
-                      <Crown className="h-3.5 w-3.5 text-amber-500" />
-                      Override Subscription Tier
-                    </Label>
-                    <div className="flex flex-wrap gap-2">
-                      <Select value={tierOverride} onValueChange={setTierOverride}>
-                        <SelectTrigger className="flex-1 min-w-[140px]" data-testid="select-tier-override">
-                          <SelectValue placeholder="Select new tier..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="free">Free</SelectItem>
-                          <SelectItem value="basic">Basic</SelectItem>
-                          <SelectItem value="premium">Premium</SelectItem>
-                          <SelectItem value="enterprise">Enterprise</SelectItem>
-                          <SelectItem value="ultimate">Ultimate</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        placeholder="Reason (e.g. dispute resolution)..."
-                        value={overrideReason}
-                        onChange={(e) => setOverrideReason(e.target.value)}
-                        className="flex-1 min-w-[200px]"
-                        data-testid="input-override-reason"
-                      />
-                    </div>
-                    <Button
-                      size="sm"
-                      disabled={!tierOverride || tierMutation.isPending}
-                      onClick={() => tierMutation.mutate({ userId: u.id, tier: tierOverride, reason: overrideReason || 'Admin dispute resolution' })}
-                      data-testid="button-apply-tier"
-                    >
-                      {tierMutation.isPending ? <RefreshCw className="h-3.5 w-3.5 mr-1 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5 mr-1" />}
-                      Apply Tier Override
-                    </Button>
+                  {/* Membership checks: changing the tier label is not a payment. */}
+                  <div className="rounded-md border p-3 text-sm" data-testid="admin-billing-managed-membership">
+                    <p className="font-medium">Membership is billing managed</p>
+                    <p className="text-muted-foreground">Current packages are Founder, Founder Pro and 90-Day Pass. Verify the paid subscription and entitlement ledger before resolving access issues. Direct tier overrides are disabled.</p>
                   </div>
 
                   <Separator />
@@ -2856,8 +2829,8 @@ export default function AdminDashboard() {
 
   // Update user mutation
   const updateUserMutation = useMutation({
-    mutationFn: async ({ userId, tier, isAdmin }: { userId: string; tier: string; isAdmin: boolean }) => {
-      await apiRequest('PATCH', `/api/admin/users/${userId}`, { subscriptionTier: tier, isAdmin });
+    mutationFn: async ({ userId, isAdmin, firstName, lastName }: { userId: string; isAdmin: boolean; firstName: string; lastName: string }) => {
+      await apiRequest('PATCH', `/api/admin/users/${userId}`, { isAdmin, firstName, lastName });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
@@ -5351,26 +5324,9 @@ export default function AdminDashboard() {
                                 </DropdownMenuItem>
                                 
                                 <DropdownMenuSeparator />
-                                <DropdownMenuLabel>Change Tier</DropdownMenuLabel>
-                                <DropdownMenuItem onClick={() => bulkUpdateUsersMutation.mutate({ userIds: selectedUsers, updates: { subscriptionTier: 'free' } })}>
-                                  <Crown className="h-3 w-3 mr-2 text-gray-500" />
-                                  Set to Free
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => bulkUpdateUsersMutation.mutate({ userIds: selectedUsers, updates: { subscriptionTier: 'basic' } })}>
-                                  <Crown className="h-3 w-3 mr-2 text-blue-500" />
-                                  Set to Basic
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => bulkUpdateUsersMutation.mutate({ userIds: selectedUsers, updates: { subscriptionTier: 'premium' } })}>
-                                  <Crown className="h-3 w-3 mr-2 text-purple-500" />
-                                  Set to Premium
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => bulkUpdateUsersMutation.mutate({ userIds: selectedUsers, updates: { subscriptionTier: 'enterprise' } })}>
-                                  <Crown className="h-3 w-3 mr-2 text-amber-500" />
-                                  Set to Enterprise
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => bulkUpdateUsersMutation.mutate({ userIds: selectedUsers, updates: { subscriptionTier: 'ultimate' } })}>
-                                  <Crown className="h-3 w-3 mr-2 text-gradient" />
-                                  Set to Ultimate
+                                <DropdownMenuLabel>Membership Administration</DropdownMenuLabel>
+                                <DropdownMenuItem disabled>
+                                  Paid memberships require verified payment records. Bulk tier assignment is disabled.
                                 </DropdownMenuItem>
 
                                 <DropdownMenuSeparator />
@@ -5529,7 +5485,7 @@ export default function AdminDashboard() {
                                   </TableCell>
                                   <TableCell>
                                     <Badge variant="outline" className="capitalize">
-                                      {user.subscriptionTier}
+                                      {{founder:"Founder", founder_pro:"Founder Pro", founder_pass_90d:"90-Day Pass", basic:"Basic (Legacy)", premium:"Premium (Legacy)", enterprise:"Enterprise (Legacy)", ultimate:"Ultimate (Legacy)", free:"Free / No membership"}[user.subscriptionTier] || user.subscriptionTier}
                                     </Badge>
                                   </TableCell>
                                   <TableCell>
@@ -5624,12 +5580,14 @@ export default function AdminDashboard() {
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => setTierOverrideUser(user)}>
                                           <Crown className="h-3 w-3 mr-2 text-yellow-500" />
-                                          Change Tier
+                                          View Membership
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => setCreditsUser(user)}>
-                                          <Wallet className="h-3 w-3 mr-2 text-blue-500" />
-                                          Manage Credits
-                                        </DropdownMenuItem>
+                                        {!['founder','founder_pro','founder_pass_90d'].includes(user.subscriptionTier) && (
+                                          <DropdownMenuItem onClick={() => setCreditsUser(user)}>
+                                            <Wallet className="h-3 w-3 mr-2 text-blue-500" />
+                                            Legacy Credits
+                                          </DropdownMenuItem>
+                                        )}
                                         
                                         <DropdownMenuSeparator />
                                         <DropdownMenuLabel className="text-xs text-muted-foreground">Admin Tools</DropdownMenuLabel>
@@ -10749,7 +10707,7 @@ export default function AdminDashboard() {
                     >
                       {/* Pricing & Plan Access */}
                       {activeSection === 'content-pricing' && (
-                        <PricingAccessManagement />
+                        <FounderMembershipAdministration />
                       )}
 
                       {/* Blog Dashboard */}
@@ -14998,19 +14956,11 @@ export default function AdminDashboard() {
                 <Separator />
 
                 <div className="space-y-1">
-                  <Label htmlFor="edit-tier">Subscription Tier</Label>
-                  <Select value={editUserTier} onValueChange={setEditUserTier}>
-                    <SelectTrigger id="edit-tier" data-testid="select-edit-tier">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="free">Free</SelectItem>
-                      <SelectItem value="basic">Basic</SelectItem>
-                      <SelectItem value="premium">Premium</SelectItem>
-                      <SelectItem value="enterprise">Enterprise</SelectItem>
-                      <SelectItem value="ultimate">Ultimate</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label>Membership (payment controlled)</Label>
+                  <p className="rounded-md border p-3 text-sm" data-testid="edit-user-membership-readonly">
+                    {{founder:"Founder", founder_pro:"Founder Pro", founder_pass_90d:"90-Day Pass", free:"No membership", basic:"Basic (Legacy)", premium:"Premium (Legacy)", enterprise:"Enterprise (Legacy)", ultimate:"Ultimate (Legacy)"}[editingUser.subscriptionTier]}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Changes to paid access require a verified Stripe membership record. Profile edits do not alter the customer's membership.</p>
                 </div>
 
                 <Separator />
@@ -15048,7 +14998,6 @@ export default function AdminDashboard() {
                   if (editingUser) {
                     updateUserMutation.mutate({
                       userId: editingUser.id,
-                      tier: editUserTier,
                       isAdmin: editUserIsAdmin,
                       firstName: editUserFirstName,
                       lastName: editUserLastName,
@@ -16208,78 +16157,43 @@ export default function AdminDashboard() {
           </DialogContent>
         </Dialog>
 
-        {/* Tier Override Modal */}
+        {/* Read-only, verified Membership Review Modal. Billing updates must be provider-backed. */}
         <Dialog open={!!tierOverrideUser} onOpenChange={(open) => !open && setTierOverrideUser(null)}>
-          <DialogContent>
+          <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Crown className="h-3 w-3 text-yellow-500" />
-                Change User Tier
-              </DialogTitle>
-              <DialogDescription>
-                Override the subscription tier for {tierOverrideUser?.email}
-              </DialogDescription>
+              <DialogTitle>Customer Membership</DialogTitle>
+              <DialogDescription>Review the package for {tierOverrideUser?.email}. No payment or access changes are made here.</DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-1">
-              <div className="p-3 bg-muted rounded-lg">
-                <p className="text-[9px] text-muted-foreground">Current Tier</p>
-                <Badge variant="outline" className="mt-1 capitalize">
-                  {tierOverrideUser?.subscriptionTier}
-                </Badge>
+            <div className="space-y-4">
+              <p className="text-sm">Recorded package: <strong>{tierOverrideUser ? ({
+                founder:"Founder", founder_pro:"Founder Pro", founder_pass_90d:"90-Day Pass",
+                free:"No membership", basic:"Basic (Legacy)", premium:"Premium (Legacy)",
+                enterprise:"Enterprise (Legacy)", ultimate:"Ultimate (Legacy)"
+              }[tierOverrideUser.subscriptionTier] || tierOverrideUser.subscriptionTier) : "None"}</strong></p>
+              <p className="text-sm text-muted-foreground">The current Founder membership catalogue and prices are shown below directly from the live server.</p>
+              <div className="max-h-80 overflow-y-auto">
+                <FounderMembershipAdministration />
               </div>
-              <div className="space-y-0.5">
-                <Label htmlFor="new-tier">New Tier</Label>
-                <Select value={overrideTier} onValueChange={setOverrideTier}>
-                  <SelectTrigger id="new-tier" data-testid="select-new-tier">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="free">Free (0 coins)</SelectItem>
-                    <SelectItem value="basic">Basic (1 coin)</SelectItem>
-                    <SelectItem value="premium">Premium (3 coins)</SelectItem>
-                    <SelectItem value="enterprise">Enterprise (6 coins)</SelectItem>
-                    <SelectItem value="ultimate">Ultimate (12 coins)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-0.5">
-                <Label htmlFor="override-reason">Reason for Override</Label>
-                <Input
-                  id="override-reason"
-                  placeholder="e.g., Voucher applied, promotional upgrade, etc."
-                  value={overrideReason}
-                  onChange={(e) => setOverrideReason(e.target.value)}
-                  data-testid="input-override-reason"
-                />
-              </div>
+              <p className="rounded-lg border p-3 text-sm" role="status">
+                A new membership, upgrade or refund must be verified in Stripe and the membership ledger.
+                Manually changing a tier label or old coin total does not activate these benefits.
+                Existing legacy purchases remain on their original terms.
+              </p>
+              <AdminVerifiedMembershipStatus userId={tierOverrideUser?.id ?? null}/>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => { setTierOverrideUser(null); setOverrideReason(""); }}>
-                Cancel
-              </Button>
-              <Button
-                onClick={() => tierOverrideUser && tierOverrideMutation.mutate({ 
-                  userId: tierOverrideUser.id, 
-                  tier: overrideTier, 
-                  reason: overrideReason,
-                  addCredits: true
-                })}
-                disabled={tierOverrideMutation.isPending || !overrideReason}
-                data-testid="button-confirm-tier"
-              >
-                {tierOverrideMutation.isPending ? "Updating..." : "Update Tier"}
-              </Button>
+              <Button onClick={() => setTierOverrideUser(null)} data-testid="button-close-membership-review">Close</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Credits Management Modal */}
+                {/* Credits Management Modal */}
         <Dialog open={!!creditsUser} onOpenChange={(open) => !open && setCreditsUser(null)}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Wallet className="h-3 w-3 text-blue-500" />
-                Manage Credits
+                Manage Legacy Credits
               </DialogTitle>
               <DialogDescription>
                 Add or remove credits for {creditsUser?.email}
@@ -16348,7 +16262,7 @@ export default function AdminDashboard() {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  2026 Tier Defaults: Free=0, Basic=1, Premium=3, Enterprise=6, Ultimate=12
+                  Historical one-time credits only. Founder memberships use independent generation and revision quotas.
                 </p>
                 {creditsMode === 'set' && (
                   <p className="text-xs text-amber-600 mt-1 font-medium">
