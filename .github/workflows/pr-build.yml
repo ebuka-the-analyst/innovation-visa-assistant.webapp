@@ -183,5 +183,8 @@ jobs:
       - name: Validate branded IFVA preparation journey and protected feature routes
         run: node --import tsx --test tests/ifva-journey-branding.test.ts
 
+      - name: Validate current Founder Tools Hub membership filter
+        run: node --import tsx --test tests/ifva-tools-hub-founder-filter.test.ts
+
       - name: Production build
         run: npm run build

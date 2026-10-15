@@ -13,6 +13,10 @@ import {
 } from "@/components/ui/select";
 import { ALL_TOOLS, type Tool } from "@shared/tools-data";
 import { UNAVAILABLE_LISTED_TOOL_IDS } from "@shared/commercialCatalog";
+import {
+  PUBLIC_MEMBER_FILTERS, membershipIncludesMinimumPlan, toolMembershipAvailability,
+  type PublicMemberFilter,
+} from "@shared/memberToolVisibility";
 import { Search, Filter, Lock, CheckCircle, Loader2, Clock, Heart } from "lucide-react";
 import * as Icons from "lucide-react";
 import Footer from "@/components/Footer";
@@ -28,7 +32,16 @@ import { useAuth } from "@/hooks/useAuth";
 const FAVORITES_KEY = "tools-favorites";
 const RECENT_KEY = "tools-recently-used";
 const unavailableToolIds = new Set<string>(UNAVAILABLE_LISTED_TOOL_IDS);
-const PUBLIC_TOOLS: Tool[] = ALL_TOOLS.filter((tool) => !unavailableToolIds.has(tool.id));
+const OPEN_ACCESS_TOOLS: Tool[] = [
+  { id: "expert-booking", name: "Expert Booking", description: "Browse verified professionals, choose a live time and book a paid consultation.", category: "documentation", stage: "before", tier: "free", icon: "CalendarCheck2" },
+  { id: "blog", name: "Blog", description: "Read practical Innovator Founder guides, updates and founder resources.", category: "documentation", stage: "before", tier: "free", icon: "Newspaper" },
+];
+const OPEN_ACCESS_ROUTES: Record<string, string> = { "expert-booking": "/expert-booking", blog: "/blog" };
+const OPEN_ACCESS_TOOL_IDS = new Set(OPEN_ACCESS_TOOLS.map((tool) => tool.id));
+const PUBLIC_TOOLS: Tool[] = [
+  ...OPEN_ACCESS_TOOLS,
+  ...ALL_TOOLS.filter((tool) => !unavailableToolIds.has(tool.id) && !OPEN_ACCESS_TOOL_IDS.has(tool.id)),
+];
 
 type IconName = keyof typeof Icons;
 
@@ -106,7 +119,7 @@ export default function ToolsHub() {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [stageFilter, setStageFilter] = useState("");
-  const [tierFilter, setTierFilter] = useState("");
+  const [membershipFilter, setMembershipFilter] = useState<PublicMemberFilter | "">("");
   const [lockedToolInfo, setLockedToolInfo] = useState<LockedToolInfo | null>(null);
   const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
   const { toast } = useToast();
@@ -121,9 +134,9 @@ export default function ToolsHub() {
   const { recent, addRecent } = useRecentlyUsed();
 
   const getEffectiveTier = (tool: Tool): ToolTier | undefined =>
-    getToolAccess(tool.id)?.minimumPlanId;
+    OPEN_ACCESS_TOOL_IDS.has(tool.id) ? "free" : getToolAccess(tool.id)?.minimumPlanId;
   const canAccessManagedTool = (tool: Tool) =>
-    getToolAccess(tool.id)?.allowed === true;
+    OPEN_ACCESS_TOOL_IDS.has(tool.id) || getToolAccess(tool.id)?.allowed === true;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -164,6 +177,12 @@ export default function ToolsHub() {
   }, [toast]);
 
   const handleToolClick = (tool: Tool) => {
+    const openRoute = OPEN_ACCESS_ROUTES[tool.id];
+    if (openRoute) {
+      addRecent(tool.id);
+      setLocation(openRoute);
+      return;
+    }
     if (!auth.isLoading && !auth.isAuthenticated) {
       setLocation(`/login?redirect=${encodeURIComponent(`/tools/${tool.id}`)}`);
       return;
@@ -213,25 +232,21 @@ export default function ToolsHub() {
         || tool.description.toLowerCase().includes(normalizedSearch);
       const matchesCategory = !categoryFilter || tool.category === categoryFilter;
       const matchesStage = !stageFilter || tool.stage === stageFilter;
-      const matchesTier = !tierFilter || getEffectiveTier(tool) === tierFilter;
-      return matchesSearch && matchesCategory && matchesStage && matchesTier;
+      const entitlement = getToolAccess(tool.id);
+      const matchesMembership = !membershipFilter || OPEN_ACCESS_TOOL_IDS.has(tool.id) || (
+        !!entitlement && entitlement.available !== false && entitlement.listed !== false &&
+        membershipIncludesMinimumPlan(entitlement.minimumPlanId,membershipFilter)
+      );
+      return matchesSearch && matchesCategory && matchesStage && matchesMembership;
     });
-  }, [search, categoryFilter, stageFilter, tierFilter, getToolAccess]);
+  }, [search, categoryFilter, stageFilter, membershipFilter, getToolAccess]);
 
   const categories = Array.from(new Set(PUBLIC_TOOLS.map((tool) => tool.category)));
   const stages = Array.from(new Set(PUBLIC_TOOLS.map((tool) => tool.stage)));
-  const tiers: ToolTier[] = ["free", "basic", "premium", "enterprise", "ultimate"];
   const stageLabels = {
     before: "Before Applying",
     during: "During Application",
     after: "After Approval",
-  } as const;
-  const tierLabels = {
-    free: "Free",
-    basic: "Basic",
-    premium: "Premium",
-    enterprise: "Enterprise",
-    ultimate: "Ultimate",
   } as const;
   const tierColors: Record<ToolTier, string> = {
     free: "bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700",
@@ -284,7 +299,7 @@ export default function ToolsHub() {
               UK Innovator Founder Visa Tools
             </h1>
             <p className="text-sm text-muted-foreground">
-              Explore the tools currently available in your application workspace.
+              Explore IFVA tools by membership. Choose a package to see which tools it includes; locks show what your account can actually use.
             </p>
           </div>
 
@@ -395,12 +410,14 @@ export default function ToolsHub() {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Tier</label>
-                  <Select value={tierFilter || "all"} onValueChange={(value) => setTierFilter(value === "all" ? "" : value)}>
-                    <SelectTrigger data-testid="select-tier"><SelectValue placeholder="All Tiers" /></SelectTrigger>
+                  <label className="text-sm font-medium mb-2 block">Membership</label>
+                  <Select value={membershipFilter || "all"} onValueChange={(value) => setMembershipFilter(value === "all" ? "" : value as PublicMemberFilter)}>
+                    <SelectTrigger data-testid="select-membership"><SelectValue placeholder="All Memberships" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Tiers</SelectItem>
-                      {tiers.map((tier) => <SelectItem key={tier} value={tier}>{tierLabels[tier]}</SelectItem>)}
+                      <SelectItem value="all">All Memberships</SelectItem>
+                      {PUBLIC_MEMBER_FILTERS.map(({id,label}) => (
+                        <SelectItem key={id} value={id}>{label}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -412,7 +429,7 @@ export default function ToolsHub() {
                       setSearch("");
                       setCategoryFilter("");
                       setStageFilter("");
-                      setTierFilter("");
+                      setMembershipFilter("");
                     }}
                     data-testid="button-reset-filters"
                   >
@@ -439,7 +456,8 @@ export default function ToolsHub() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {filteredTools.map((tool) => {
-                  const effectiveTier = getEffectiveTier(tool);
+                  const entitlement = getToolAccess(tool.id);
+                  const effectiveTier = entitlement?.minimumPlanId;
                   const hasAccess = canAccessManagedTool(tool);
                   return (
                     <Card
@@ -481,8 +499,11 @@ export default function ToolsHub() {
                           <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-xs font-medium text-primary">
                             {stageLabels[tool.stage]}
                           </div>
-                          <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-muted text-xs font-medium" data-testid={`badge-tier-${tool.id}`}>
-                            {effectiveTier ? tierLabels[effectiveTier] : "Sign in to check"}
+                          <div className="inline-flex items-center gap-1 max-w-full px-2 py-1 rounded-lg bg-muted text-xs font-medium whitespace-normal leading-5" data-testid={`badge-tier-${tool.id}`}>
+                            {OPEN_ACCESS_TOOL_IDS.has(tool.id)
+                              ? "Free · Founder · Founder Pro · 90-Day Pass"
+                              : entitlement && entitlement.available !== false && entitlement.listed !== false
+                                ? toolMembershipAvailability(effectiveTier) : "Sign in to check access"}
                           </div>
                         </div>
                       </div>
