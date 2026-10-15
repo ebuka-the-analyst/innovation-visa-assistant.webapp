@@ -29,8 +29,9 @@ export function ToolAccessGuard({children,requiredTier,toolName,toolId}:ToolAcce
   const {data:verifiedAccess,getToolAccess,isLoading:isToolAccessLoading,
     isError:isToolAccessError,isFetching:isToolAccessFetching,
     refetch:refetchToolAccess}=useToolAccess(isAuthenticated);
-  const pathToolId=typeof window==="undefined"?undefined:
-    window.location.pathname.replace(/^\\/tools\\//,"").replace(/^\\//,"").split("/")[0];
+  const pathname=typeof window==="undefined"?"":window.location.pathname;
+  const pathToolId=pathname.startsWith("/tools/")
+    ? pathname.slice("/tools/".length).split("/")[0] : pathname.slice(1).split("/")[0];
   const resolvedToolId=toolId??TOOL_PATH_ALIASES[pathToolId||""]??pathToolId;
   const managedEntitlement=resolvedToolId?getToolAccess(resolvedToolId):undefined;
   const effectiveRequiredTier=managedEntitlement?.minimumPlanId??requiredTier;
