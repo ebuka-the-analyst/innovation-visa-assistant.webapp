@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 interface AdminSnapshot {
   packageId: string;
   legacy: boolean;
+  source?: "admin_grant" | "stripe" | "unverified";
   membership: null | {
     active: boolean;
     paidThrough: string | null;
@@ -43,8 +44,9 @@ export function AdminVerifiedMembershipStatus({ userId }: { userId: string | nul
   </p>;
   if (!data.membership?.active) return <Badge variant="destructive">No active verified membership entitlement</Badge>;
   return <div className="rounded-lg border p-3 text-sm" data-testid="verified-member-entitlement">
-    <Badge variant="secondary">Verified active entitlement</Badge>
-    <p className="mt-2">Paid through: {data.membership.paidThrough ? new Date(data.membership.paidThrough).toLocaleDateString("en-GB") : "Unavailable"}</p>
+    <Badge variant="secondary">{data.source==="admin_grant"?"Active administrator-granted access":data.source==="stripe"?"Verified paid membership":"Active entitlement"}</Badge>
+    <p className="mt-2">{data.source==="admin_grant"?"Manual access expires":"Access through"}: {data.membership.paidThrough ? new Date(data.membership.paidThrough).toLocaleDateString("en-GB") : "Unavailable"}</p>
+    {data.source==="admin_grant" && <p className="text-xs text-muted-foreground">This grant is not a customer payment and will not renew automatically.</p>}
     <p>Remaining generations: {data.membership.remainingGenerations} of {data.membership.generationLimit}</p>
     <p>Remaining revisions: {data.membership.remainingRevisions} of {data.membership.revisionLimit}</p>
     <p>Allowance period ends: {data.membership.periodEndsAt ? new Date(data.membership.periodEndsAt).toLocaleDateString("en-GB") : "Unavailable"}</p>

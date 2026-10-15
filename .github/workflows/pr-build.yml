@@ -213,5 +213,8 @@ jobs:
       - name: Verify unified current Founder packages and legacy migration safety
         run: node --import tsx --test tests/ifva-unified-founder-memberships-admin.test.ts
 
+      - name: Verify no-charge, audited manual Founder membership management
+        run: node --import tsx --test tests/ifva-admin-manual-membership-control.test.ts
+
       - name: Production build
         run: npm run build

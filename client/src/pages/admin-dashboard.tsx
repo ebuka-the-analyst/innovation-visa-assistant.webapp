@@ -31,6 +31,7 @@ import { PromoCodeGenerator } from "@/components/admin/PromoCodeGenerator";
 import { PricingAccessManagement } from "@/components/admin/PricingAccessManagement";
 import { FounderMembershipAdministration } from "@/components/admin/FounderMembershipAdministration";
 import { AdminVerifiedMembershipStatus } from "@/components/admin/AdminVerifiedMembershipStatus";
+import { AdminManualMembershipControls } from "@/components/admin/AdminManualMembershipControls";
 import { AdminRevisionQueue } from "@/components/admin/AdminRevisionQueue";
 import { LoginSecurityAudit } from "@/components/admin/LoginSecurityAudit";
 import { 
@@ -5580,7 +5581,7 @@ export default function AdminDashboard() {
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => setTierOverrideUser(user)}>
                                           <Crown className="h-3 w-3 mr-2 text-yellow-500" />
-                                          View Membership
+                                          Change Membership
                                         </DropdownMenuItem>
                                         {!['founder','founder_pro','founder_pass_90d'].includes(user.subscriptionTier) && (
                                           <DropdownMenuItem onClick={() => setCreditsUser(user)}>
@@ -16159,10 +16160,10 @@ export default function AdminDashboard() {
 
         {/* Read-only, verified Membership Review Modal. Billing updates must be provider-backed. */}
         <Dialog open={!!tierOverrideUser} onOpenChange={(open) => !open && setTierOverrideUser(null)}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Customer Membership</DialogTitle>
-              <DialogDescription>Review the package for {tierOverrideUser?.email}. No payment or access changes are made here.</DialogDescription>
+              <DialogTitle>Change Customer Membership</DialogTitle>
+              <DialogDescription>Review or manually assign a time-limited membership for {tierOverrideUser?.email}.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <p className="text-sm">Recorded package: <strong>{tierOverrideUser ? ({
@@ -16170,16 +16171,18 @@ export default function AdminDashboard() {
                 free:"No membership", basic:"Basic (Legacy)", premium:"Premium (Legacy)",
                 enterprise:"Enterprise (Legacy)", ultimate:"Ultimate (Legacy)"
               }[tierOverrideUser.subscriptionTier] || tierOverrideUser.subscriptionTier) : "None"}</strong></p>
-              <p className="text-sm text-muted-foreground">The current Founder membership catalogue and prices are shown below directly from the live server.</p>
-              <div className="max-h-80 overflow-y-auto">
-                <FounderMembershipAdministration />
-              </div>
-              <p className="rounded-lg border p-3 text-sm" role="status">
-                A new membership, upgrade or refund must be verified in Stripe and the membership ledger.
-                Manually changing a tier label or old coin total does not activate these benefits.
-                Existing legacy purchases remain on their original terms.
-              </p>
               <AdminVerifiedMembershipStatus userId={tierOverrideUser?.id ?? null}/>
+              {tierOverrideUser && (
+                <AdminManualMembershipControls
+                  userId={tierOverrideUser.id}
+                  userEmail={tierOverrideUser.email}
+                  onSuccess={() => setTierOverrideUser(null)}
+                />
+              )}
+              <p className="text-xs text-muted-foreground">
+                Existing Stripe subscriptions and paid legacy memberships must be reviewed
+                in their respective billing workflows before a manual replacement.
+              </p>
             </div>
             <DialogFooter>
               <Button onClick={() => setTierOverrideUser(null)} data-testid="button-close-membership-review">Close</Button>

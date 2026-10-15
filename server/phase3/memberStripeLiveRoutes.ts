@@ -138,6 +138,22 @@ export function registerMemberStripeLiveRoutes(
       user,sku,req.body,process.env.IFVA_MEMBER_LIVE_TERMS_VERSION,
     );
     if(eligibility)return res.status(eligibility.status).json({error:eligibility.error});
+    // An administrator can grant access without a charge. While that access
+    // exists, do not let Checkout create an overlapping paid subscription.
+    try {
+      const manual = await pool.query(
+        `SELECT id FROM member_ai_entitlements
+          WHERE user_id=$1 AND provider='admin' AND status='active'
+            AND starts_at<=NOW() AND ends_at>NOW() LIMIT 1`,
+        [user.id],
+      );
+      if(manual.rowCount)return res.status(409).json({
+        error:"Your administrator-granted membership is active. Contact support before purchasing another plan.",
+        code:"ADMIN_GRANTED_MEMBERSHIP_ACTIVE",
+      });
+    } catch {
+      return res.status(503).json({error:"Could not verify existing membership. Checkout has not started."});
+    }
     const email=String(user.email||"").trim();
     if(!/^\S+@\S+\.\S+$/.test(email))return res.status(400).json({error:"Verified email required"});
     try{
@@ -226,6 +242,21 @@ export function registerMemberStripeLiveRoutes(
     const user=req.user as any;
     if(!user?.id)return res.status(401).end();
     try{
+      // A manual access grant is deliberately NOT a paid Stripe order.
+      const manual=await pool.query<{
+        package_id:CandidateSku;ends_at:Date;
+      }>(`SELECT package_id,ends_at FROM member_ai_entitlements
+          WHERE user_id=$1 AND provider='admin' AND status='active'
+            AND starts_at<=NOW() AND ends_at>NOW()
+          ORDER BY starts_at DESC LIMIT 1`,[user.id]);
+      if(manual.rowCount===1){
+        res.setHeader("Cache-Control","no-store");
+        return res.json({membership:{
+          orderId:"",sku:manual.rows[0].package_id,active:true,
+          paidThrough:null,accessThrough:manual.rows[0].ends_at,
+          source:"admin_grant",cancellationPending:false,canCancel:false,
+        }});
+      }
       const result=await pool.query<{id:string;sku:CandidateSku;stripe_subscription_id:string|null;paid_through:Date|null;currently_active:boolean}>(`
         SELECT id,sku,stripe_subscription_id,paid_through,currently_active
         FROM member_stripe_live_orders WHERE user_id=$1
@@ -241,7 +272,7 @@ export function registerMemberStripeLiveRoutes(
       res.setHeader("Cache-Control","no-store");
       return res.json({membership:{
         orderId:order.id,sku:order.sku,active:order.currently_active,
-        paidThrough:order.paid_through,cancellationPending,
+        paidThrough:order.paid_through,source:"stripe",cancellationPending,
         canCancel:order.currently_active&&!!order.stripe_subscription_id&&!cancellationPending,
       }});
     }catch{return res.status(503).json({error:"Unable to retrieve verified membership status"});}

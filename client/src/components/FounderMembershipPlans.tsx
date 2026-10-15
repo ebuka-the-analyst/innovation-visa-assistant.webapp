@@ -95,9 +95,11 @@ export default function FounderMembershipPlans(){
      Your {FOUNDER_SKU_NAMES[activeMembership.sku as MembershipOffer["id"]]||"Founder"} membership is active.
     </p>
     <p className="mt-1 text-muted-foreground">
-     {activeMembership.paidThrough
-      ? `Access through ${new Date(activeMembership.paidThrough).toLocaleDateString("en-GB")}. `
-      : ""}
+     {activeMembership.source==="admin_grant"
+      ? `Administrator-granted access, no charge or automatic renewal${activeMembership.accessThrough ? ` until ${new Date(activeMembership.accessThrough).toLocaleDateString("en-GB")}` : ""}. `
+      : activeMembership.paidThrough
+        ? `Access through ${new Date(activeMembership.paidThrough).toLocaleDateString("en-GB")}. `
+        : ""}
      You do not need to purchase again. To change packages, contact support rather than opening a second checkout.
     </p>
     <a href="#your-founder-membership" className="mt-2 inline-block font-medium underline">Manage your membership</a>
@@ -134,7 +136,9 @@ export default function FounderMembershipPlans(){
        {action.text}
      </Button>
      {action.help==="current"&&<p className="mt-2 text-center text-xs text-muted-foreground">
-      Your paid membership is already active.
+      {activeMembership?.source==="admin_grant"
+        ?"Your administrator-granted access is active. It does not renew automatically."
+        :"Your paid membership is already active."}
      </p>}
      {action.help==="change"&&<p className="mt-2 text-center text-xs text-muted-foreground">
       Already subscribed. <Link href="/support" className="underline">Contact support</Link> to discuss changing packages.
