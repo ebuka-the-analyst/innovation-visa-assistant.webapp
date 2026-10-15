@@ -146,3 +146,57 @@ export async function transitionMemberAiReservation(
       AND status = 'reserved'
   `);
 }
+
+/**
+ * Read-only, server-authoritative balance for customer membership UI.
+ * Uses the same entitlement period and non-released reservation counts as
+ * reserveMemberAiQuota. A missing/revoked entitlement never becomes credits.
+ */
+export async function getMemberAiQuotaSnapshot(userId: string, packageId: MembershipSku) {
+  const { db } = await import("../db");
+  const now = new Date();
+  const inactive = {
+    packageId, active: false as const, generationLimit: 0,
+    generationsUsed: 0, remainingGenerations: 0, revisionLimit: 0,
+    revisionsUsed: 0, remainingRevisions: 0, periodEndsAt: null as string | null,
+    paidThrough: null as string | null,
+  };
+  const entitlement = rowsOf(await db.execute(sql`
+    SELECT id, package_id, billing_kind, status, starts_at, ends_at,
+           period_starts_at, period_ends_at
+    FROM member_ai_entitlements
+    WHERE user_id = ${userId} AND package_id = ${packageId}
+      AND status = 'active' AND starts_at <= ${now} AND ends_at > ${now}
+    ORDER BY starts_at DESC LIMIT 1
+  `))[0];
+  if (!entitlement) return inactive;
+  const window = currentQuotaWindow(entitlement, now);
+  if (!window) return inactive;
+  const rows = rowsOf(await db.execute(sql`
+    SELECT
+      COUNT(*) FILTER (WHERE operation = 'generation'
+        AND period_starts_at = ${window.periodStartsAt})::integer AS generations_used,
+      COUNT(*) FILTER (WHERE operation = 'revision'
+        AND period_starts_at = ${window.periodStartsAt})::integer AS revisions_used,
+      COUNT(*) FILTER (WHERE operation = 'generation')::integer AS lifetime_generations_used
+    FROM member_ai_quota_reservations
+    WHERE entitlement_id = ${entitlement.id} AND status <> 'released'
+  `));
+  const used = Number(rows[0]?.generations_used || 0);
+  const revised = Number(rows[0]?.revisions_used || 0);
+  const quota = MEMBERSHIP_QUOTAS[packageId];
+  const periodRemaining = Math.max(0, quota.generationsPerPeriod - used);
+  const lifetimeRemaining = quota.lifetimeGenerations === null ? periodRemaining :
+    Math.max(0, quota.lifetimeGenerations - Number(rows[0]?.lifetime_generations_used || 0));
+  return {
+    packageId, active: true as const,
+    generationLimit: quota.generationsPerPeriod,
+    generationsUsed: used,
+    remainingGenerations: Math.min(periodRemaining, lifetimeRemaining),
+    revisionLimit: quota.revisionsPerPeriod,
+    revisionsUsed: revised,
+    remainingRevisions: Math.max(0, quota.revisionsPerPeriod - revised),
+    periodEndsAt: window.periodEndsAt.toISOString(),
+    paidThrough: new Date(entitlement.ends_at).toISOString(),
+  };
+}

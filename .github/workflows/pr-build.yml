@@ -204,5 +204,8 @@ jobs:
       - name: Verify Google and email signup names in Admin Users
         run: node --import tsx --test tests/ifva-google-user-name-capture.test.ts
 
+      - name: Verify Founder generation quota and questionnaire access
+        run: node --import tsx --test tests/ifva-founder-generation-entitlements-ui.test.ts
+
       - name: Production build
         run: npm run build
