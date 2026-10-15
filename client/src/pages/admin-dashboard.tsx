@@ -15298,7 +15298,7 @@ export default function AdminDashboard() {
                   <div>
                     <Label className="text-muted-foreground">Name</Label>
                     <p className="font-medium">
-                      {[viewingUserDetails.firstName?.trim(), viewingUserDetails.lastName?.trim()].filter(Boolean).join(" ") || "Name not provided"
+                      {[viewingUserDetails.firstName?.trim(), viewingUserDetails.lastName?.trim()].filter(Boolean).join(" ") || "Name not provided"}
                     </p>
                   </div>
                   <div>
