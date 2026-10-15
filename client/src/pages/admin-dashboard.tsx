@@ -16170,11 +16170,10 @@ export default function AdminDashboard() {
                 free:"No membership", basic:"Basic (Legacy)", premium:"Premium (Legacy)",
                 enterprise:"Enterprise (Legacy)", ultimate:"Ultimate (Legacy)"
               }[tierOverrideUser.subscriptionTier] || tierOverrideUser.subscriptionTier) : "None"}</strong></p>
-              <p className="text-sm text-muted-foreground">
-                Current products: Founder (£69/month, 2 generations and 15 revisions);
-                Founder Pro (£119/month, 4 generations and 30 revisions);
-                90-Day Pass (£159 once, 2 generations and 15 revisions per 30-day window, maximum 6 generations).
-              </p>
+              <p className="text-sm text-muted-foreground">The current Founder membership catalogue and prices are shown below directly from the live server.</p>
+              <div className="max-h-80 overflow-y-auto">
+                <FounderMembershipAdministration />
+              </div>
               <p className="rounded-lg border p-3 text-sm" role="status">
                 A new membership, upgrade or refund must be verified in Stripe and the membership ledger.
                 Manually changing a tier label or old coin total does not activate these benefits.
