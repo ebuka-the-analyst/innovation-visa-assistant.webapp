@@ -12,7 +12,8 @@ import {
   ArrowRight, CheckCircle2, Lock, Sparkles, TrendingUp
 } from "lucide-react";
 import { Link } from "wouter";
-import { useTierAccess } from "@/hooks/useTierAccess";
+import { useTierAccess, type ToolTier } from "@/hooks/useTierAccess";
+import { memberUpgradeDescription } from "@shared/memberToolPlan";
 
 interface Achievement {
   id: string;
@@ -112,7 +113,16 @@ const FEATURE_CARDS = [
   }
 ];
 
-const TIER_ORDER = ['free', 'basic', 'premium', 'enterprise', 'ultimate'];
+// Historical internal permission levels remain, but must never be shown as
+// the current customer-facing packages.
+const MINIMUM_MEMBERSHIP = (tier: string): string =>
+  tier === "free" ? "Included" :
+  ["basic","premium","enterprise","ultimate"].includes(tier)
+    ? memberUpgradeDescription(tier as ToolTier)
+    : "Review memberships";
+const PACKAGE_NAMES: Record<string,string> = {
+  founder:"Founder",founder_pro:"Founder Pro",founder_pass_90d:"90-Day Pass",
+};
 
 function getTierBadge(tier: string) {
   const colors: Record<string, string> = {
@@ -136,7 +146,12 @@ function getIconComponent(iconName: string) {
 
 export default function PremiumFeatures() {
   const [activeTab, setActiveTab] = useState("overview");
-  const { userTier, hasAccessToTier: hasAccess } = useTierAccess();
+  const { user, userTier, hasAccessToTier: hasAccess } = useTierAccess();
+  const currentName = userTier === "free"
+    ? "No active membership"
+    : PACKAGE_NAMES[user?.subscriptionTier || ""] ||
+      (["basic","premium","enterprise","ultimate"].includes(userTier)
+        ? "Legacy membership" : "Membership");
 
   const { data: achievementsData } = useQuery<AchievementsData>({
     queryKey: ['/api/achievements'],
@@ -177,7 +192,7 @@ export default function PremiumFeatures() {
         </div>
         <div className="flex items-center gap-3">
           <Badge className={getTierBadge(userTier)} data-testid="badge-user-tier">
-            {userTier.charAt(0).toUpperCase() + userTier.slice(1)} Tier
+            {currentName}
           </Badge>
           <div className="flex items-center gap-1 bg-amber-100 dark:bg-amber-900/30 px-3 py-1.5 rounded-full">
             <Trophy className="h-4 w-4 text-amber-600" />
@@ -202,9 +217,7 @@ export default function PremiumFeatures() {
             {FEATURE_CARDS.map((feature) => {
               const Icon = feature.icon;
               const isUnlocked = hasAccess(feature.tier as "free" | "basic" | "premium" | "enterprise" | "ultimate");
-              const tierIndex = TIER_ORDER.indexOf(feature.tier);
-              const userTierIndex = TIER_ORDER.indexOf(userTier);
-
+ 
               return (
                 <Card 
                   key={feature.id} 
@@ -220,7 +233,7 @@ export default function PremiumFeatures() {
                       {!isUnlocked && (
                         <Badge variant="outline" className="text-xs">
                           <Lock className="h-3 w-3 mr-1" />
-                          {feature.tier}
+                          {MINIMUM_MEMBERSHIP(feature.tier)}
                         </Badge>
                       )}
                       {isUnlocked && (
@@ -351,7 +364,7 @@ export default function PremiumFeatures() {
                     <div className="flex items-start justify-between">
                       <FileText className="h-8 w-8 text-primary" />
                       <Badge className={getTierBadge(template.requiredTier)}>
-                        {template.requiredTier}
+                        {MINIMUM_MEMBERSHIP(String(template.requiredTier))}
                       </Badge>
                     </div>
                     <CardTitle className="text-base mt-2">{template.name}</CardTitle>
@@ -404,7 +417,7 @@ export default function PremiumFeatures() {
                         </div>
                       </div>
                       <Badge className={getTierBadge(story.requiredTier)}>
-                        {story.requiredTier} tier
+                        {MINIMUM_MEMBERSHIP(String(story.requiredTier))}
                       </Badge>
                     </div>
                     <CardDescription className="mt-2 text-base">

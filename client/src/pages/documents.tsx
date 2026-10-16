@@ -13,6 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { useAuth } from "@/hooks/useAuth";
+import { useTierAccess } from "@/hooks/useTierAccess";
+import { memberUpgradeDescription } from "@shared/memberToolPlan";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -213,9 +215,12 @@ export default function DocumentsPage() {
   // Filter completed plans with PDF URLs
   const completedPlans = businessPlans.filter(plan => plan.status === 'completed' && plan.pdfUrl);
 
-  const isUltimate = (user as any)?.subscriptionTier === 'ultimate';
+  // Use the verified server entitlement. An active Founder Pro / 90-Day Pass
+  // maps to the legacy Ultimate tool level, unlike a raw tier string.
+  const { hasAccessToTier } = useTierAccess();
+  const isUltimate = hasAccessToTier('ultimate');
 
-  // Mutation to update plan visual style (Ultimate tier)
+  // Mutation to update plan visual style (verified advanced membership)
   const updateStyleMutation = useMutation({
     mutationFn: async ({ planId, style }: { planId: string; style: number | null }) => {
       const res = await apiRequest('PATCH', `/api/business-plans/${planId}/style`, { tocStyle: style });
@@ -718,7 +723,7 @@ export default function DocumentsPage() {
                         </div>
                       </div>
 
-                      {/* Visual Style Picker — Ultimate tier only */}
+                      {/* Visual Style Picker — verified Founder Pro / Pass tool entitlement */}
                       {isUltimate ? (
                         <>
                           <Separator className="mt-3 mb-1" />
@@ -732,7 +737,7 @@ export default function DocumentsPage() {
                       ) : (
                         <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted-foreground">
                           <Lock className="h-3 w-3" />
-                          <span>Visual style customisation available on Ultimate plan</span>
+                          <span>Visual style customisation requires {memberUpgradeDescription('ultimate')}</span>
                         </div>
                       )}
                     </div>

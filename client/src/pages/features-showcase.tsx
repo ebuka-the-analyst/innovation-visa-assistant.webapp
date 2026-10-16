@@ -11,7 +11,8 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import logoLight from "@assets/official_logo.webp";
 import logoDark from "@assets/logo_dark.webp";
-import { useCommercialCatalog, type PlanId } from "@/hooks/useCommercialCatalog";
+import { useCommercialCatalog } from "@/hooks/useCommercialCatalog";
+import FounderMembershipPlans from "@/components/FounderMembershipPlans";
 import { innovatorFounderPath, isInnovatorFounderPath } from "@/lib/innovator-founder-routes";
 
 type IconName = keyof typeof Icons;
@@ -38,14 +39,6 @@ const MAIN_FEATURES = [
   { title: "Interview Preparation", description: "Prepare for visa officer interviews" },
   { title: "Settlement Planning", description: "Post-approval UK setup guidance" },
 ];
-
-const PRICING_PRESENTATION: Record<PlanId, { access: string; pages: string; colorClass: string }> = {
-  free: { access: "Essential", pages: "10-15", colorClass: "border-muted" },
-  basic: { access: "Extended", pages: "25-35", colorClass: "border-blue-500/30 dark:border-blue-400/30" },
-  premium: { access: "Comprehensive", pages: "40-60", colorClass: "border-purple-500 dark:border-purple-400 ring-2 ring-purple-500/20" },
-  enterprise: { access: "Full", pages: "56-80", colorClass: "border-orange-500/30 dark:border-orange-400/30" },
-  ultimate: { access: "Complete", pages: "80+", colorClass: "border-amber-500 dark:border-amber-400 ring-2 ring-amber-500/20" },
-};
 
 function AnimatedSidebarTrigger() {
   const { state, toggleSidebar } = useSidebar();
@@ -80,22 +73,13 @@ export default function FeaturesShowcase() {
   const routeFor = (path: string) => scoped ? innovatorFounderPath(path) : path;
   const { user } = useAuth();
   const isDemoMode = !user;
-  const { plans, toolCounts, formatPrice } = useCommercialCatalog();
+  const { toolCounts } = useCommercialCatalog();
   const maximumToolCount = Math.max(0, ...Object.values(toolCounts));
   const mainFeatures = MAIN_FEATURES.map((feature, index) => {
     if (index === 0) return { ...feature, title: `${maximumToolCount} AI-Powered Tools` };
-    if (index === 1) return { ...feature, title: `${plans.length} Pricing Plan${plans.length === 1 ? "" : "s"}` };
+    if (index === 1) return { ...feature, title: "3 Current Founder Memberships" };
     return feature;
   });
-  const pricingTiers = plans.map((plan) => ({
-    ...plan,
-    name: plan.displayName.replace(/\s+Plan$/i, ""),
-    price: formatPrice(plan.pricePence),
-    ...PRICING_PRESENTATION[plan.id],
-    popular: plan.id === "premium",
-    premium: plan.id === "ultimate",
-  }));
-
   const GetIconComponent = ({ name }: { name: string }) => {
     const Icon = Icons[name as IconName] as any;
     return Icon ? <Icon className="w-5 h-5" /> : <Icons.Zap className="w-5 h-5" />;
@@ -202,32 +186,9 @@ export default function FeaturesShowcase() {
                 </div>
               </section>
 
-              {/* Pricing Tiers Comparison */}
-              <section className="mb-12 md:mb-16 lg:mb-20">
-                <h2 className="text-xl sm:text-2xl md:text-xl font-bold mb-6 md:mb-8">Simple, Transparent Pricing</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
-                  {pricingTiers.map((tier, idx) => (
-                    <Card 
-                      key={idx} 
-                      className={`p-6 hover-elevate border-2 bg-card ${tier.colorClass}`} 
-                      data-testid={`card-tier-${idx}`}
-                    >
-                      {tier.popular && <div className="mb-3 text-xs font-bold text-purple-600 dark:text-purple-400">MOST POPULAR</div>}
-                      {tier.premium && <div className="mb-3 text-xs font-bold text-amber-600 dark:text-amber-400">EVERYTHING</div>}
-                      <h3 className="font-bold text-lg mb-1">{tier.name}</h3>
-                      <div className="text-lg font-bold mb-4">{tier.price}</div>
-                      <div className="space-y-2 text-sm mb-4">
-                        <div><span className="font-semibold">{tier.access}</span> access</div>
-                        <div><span className="font-semibold">{tier.pages}</span> plan</div>
-                      </div>
-                      <Link href={routeFor("/pricing")}>
-                        <Button size="sm" variant={tier.popular ? "default" : "outline"} className="w-full" data-testid={`button-pricing-${idx}`}>
-                          Choose Plan
-                        </Button>
-                      </Link>
-                    </Card>
-                  ))}
-                </div>
+              {/* Use the same server-priced Founder catalogue as /pricing. */}
+              <section className="mb-12 md:mb-16 lg:mb-20" data-testid="features-current-memberships">
+                <FounderMembershipPlans />
               </section>
 
               {/* Quick Links */}
