@@ -111,13 +111,20 @@ export function FieldEnhancer({
     }
   }
 
+  // Keep enhanced questionnaire answers in the applicant's own voice.
+  // This is sent as drafting context, not as evidence about the applicant.
+  const founderVoiceContext = {
+    ...context,
+    responsePerspective: "Write the complete answer in the applicant's natural first-person voice (I, my, we). Do not attribute achievements to a CV or describe the applicant as a third party. Preserve all unverified assumptions and evidence qualifications.",
+  };
+
   const handleEnhance = async () => {
     if (!value.trim()) {
       toast({ title: "Nothing to enhance", description: "Write something first, then click Enhance.", variant: "destructive" });
       return;
     }
     setIsEnhancing(true);
-    const { ok, result, errorMsg } = await callEnhanceAPI({ mode: "enhance", fieldLabel, fieldName, currentText: value, context });
+    const { ok, result, errorMsg } = await callEnhanceAPI({ mode: "enhance", fieldLabel, fieldName, currentText: value, context: founderVoiceContext });
     if (ok && result) {
       onChange(result);
       toast({ title: "Enhanced!", description: "Your response has been improved for the visa application." });
@@ -135,7 +142,7 @@ export function FieldEnhancer({
     }
     setWordCountOpen(false);
     setIsExpanding(true);
-    const { ok, result, errorMsg } = await callEnhanceAPI({ mode: "expand", fieldLabel, fieldName, currentText: value, wordCount: wc, context });
+    const { ok, result, errorMsg } = await callEnhanceAPI({ mode: "expand", fieldLabel, fieldName, currentText: value, wordCount: wc, context: founderVoiceContext });
     if (ok && result) {
       onChange(result);
       toast({ title: `~${wc} words added`, description: "Your response has been expanded." });
