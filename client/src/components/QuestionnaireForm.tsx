@@ -395,6 +395,7 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   const [isImportingEvidence, setIsImportingEvidence] = useState(false);
   const [ownerAutopopulateReview, setOwnerAutopopulateReview] = useState<string[]>([]);
   const [isAutoPopulating, setIsAutoPopulating] = useState(false);
+  const hasRefreshedOwnerDraft = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [promoValidation, setPromoValidation] = useState<PromoCodeValidation | null>(null);
@@ -464,7 +465,6 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
       if (change.added > 0 || change.refreshed > 0) {
         setFormData(change.merged);
         saveAllFields(change.merged);
-        setCurrentStep(0);
       }
       toast({
         title: change.added || change.refreshed ? "Questionnaire draft updated" : "Your answers are already up to date",
@@ -480,6 +480,15 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
       setIsAutoPopulating(false);
     }
   };
+
+  // A previous AutoPopulate draft may already be saved in the account. On
+  // authorised load, refresh only exact matches of earlier generated answers.
+  // User-written changes are always retained by mergeOwnerQuestionnaireDraft.
+  useEffect(() => {
+    if (!isOwner || !user?.id || hasRefreshedOwnerDraft.current) return;
+    hasRefreshedOwnerDraft.current = true;
+    void handleOwnerPrefill();
+  }, [isOwner, user?.id]);
 
   // Auto-fill from documents states
   const [showAutoFillDrawer, setShowAutoFillDrawer] = useState(false);
