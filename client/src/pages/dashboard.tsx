@@ -19,6 +19,7 @@ import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Responsi
 import { useState, useEffect } from "react";
 import { useVisualPdfExport } from "@/hooks/useVisualPdfExport";
 import { useToolAccess } from "@/hooks/useCommercialCatalog";
+import { useMemberAiQuota } from "@/hooks/useMemberAiQuota";
 
 // Local storage key for hidden demo plans
 const HIDDEN_DEMO_PLANS_KEY = "hiddenDemoPlans";
@@ -231,6 +232,21 @@ export default function Dashboard() {
   } = useToolAccess(Boolean(user));
   const allowedToolCount = Object.values(accessByTool).filter((entry) => entry.allowed).length;
 
+  const { isMembershipUser, quota: membershipQuota } = useMemberAiQuota();
+  const openNewPlanQuestionnaire = () => {
+    // New Founder memberships use verified period quotas, not the retired
+    // Basic/Premium/Enterprise/Ultimate credit checkout. Never send them to
+    // buy another paid package while existing generations are available.
+    if (isMembershipUser) {
+      setLocation(membershipQuota?.active && membershipQuota.remainingGenerations > 0
+        ? "/questionnaire" : "/pricing");
+      return;
+    }
+    const legacy = ["basic","premium","enterprise","ultimate"].includes(user?.subscriptionTier || "");
+    setLocation(legacy && user?.subscriptionStatus === "active"
+      ? "/questionnaire" : "/pricing");
+  };
+
   const { data: businessPlans, isLoading: plansLoading, isError: plansError, refetch: refetchPlans } = useQuery<BusinessPlan[]>({
     queryKey: ['/api/dashboard/plans'],
     enabled: !!user,
@@ -381,16 +397,7 @@ export default function Dashboard() {
             <Button 
               size="lg"
               className="bg-emerald-600 hover:bg-emerald-700 text-white"
-              onClick={() => {
-                // Users with unlocked tiers go directly to questionnaire
-                const tier = user?.subscriptionTier;
-                const paidTiers = ['basic', 'premium', 'enterprise', 'ultimate'];
-                if (tier && paidTiers.includes(tier)) {
-                  setLocation(`/questionnaire?tier=${tier}`);
-                } else {
-                  setLocation("/pricing");
-                }
-              }}
+              onClick={openNewPlanQuestionnaire}
               data-testid="button-create-plan"
             >
               <Plus className="h-5 w-5 mr-2" />
@@ -916,16 +923,7 @@ export default function Dashboard() {
             <Button 
               size="lg"
               className="bg-emerald-600 hover:bg-emerald-700 text-white"
-              onClick={() => {
-                // Users with unlocked tiers go directly to questionnaire
-                const tier = user?.subscriptionTier;
-                const paidTiers = ['basic', 'premium', 'enterprise', 'ultimate'];
-                if (tier && paidTiers.includes(tier)) {
-                  setLocation(`/questionnaire?tier=${tier}`);
-                } else {
-                  setLocation("/pricing");
-                }
-              }}
+              onClick={openNewPlanQuestionnaire}
               data-testid="button-create-first-plan"
             >
               <Plus className="h-5 w-5 mr-2" />
