@@ -219,5 +219,8 @@ jobs:
       - name: Validate customer-owned evidence questionnaire import
         run: node --import tsx --test tests/ifva-questionnaire-evidence-import.test.ts
 
+      - name: Verify all active customer pages use current Founder packages
+        run: node --import tsx --test tests/ifva-no-retired-tier-promotions.test.ts
+
       - name: Production build
         run: npm run build
