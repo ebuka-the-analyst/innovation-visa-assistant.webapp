@@ -33,7 +33,7 @@ test("AutoPopulate account restriction is server-side and does not expose founde
   const api=readFileSync(new URL("../server/routes.ts",import.meta.url),"utf8");
   assert.match(ui,/ownerDraftEligibility\?\.eligible === true/);
   assert.match(ui,/data-testid="button-owner-prefill"/);
-  assert.match(ui,/>\s*AutoPopulate\s*</);
+  assert.match(ui,/AutoPopulate\s*<\/Button>/);
   assert.ok(ui.indexOf("button-open-autofill") < ui.indexOf("button-owner-prefill"));
   assert.ok(ui.indexOf("button-owner-prefill") < ui.indexOf("button-clear-saved"));
   assert.doesNotMatch(ui,/founder@example.test|benedict9211@gmail.com|VISA_ASSISTANT_GLOBAL_DRAFT/);
