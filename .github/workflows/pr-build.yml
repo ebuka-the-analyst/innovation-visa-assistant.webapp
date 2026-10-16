@@ -216,5 +216,8 @@ jobs:
       - name: Verify no-charge, audited manual Founder membership management
         run: node --import tsx --test tests/ifva-admin-manual-membership-control.test.ts
 
+      - name: Validate customer-owned evidence questionnaire import
+        run: node --import tsx --test tests/ifva-questionnaire-evidence-import.test.ts
+
       - name: Production build
         run: npm run build
