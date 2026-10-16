@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { join, relative } from "node:path";
 import { memberUpgradeDescription, effectiveMemberToolPlan } from "../shared/memberToolPlan";
 import { safeDefaultMemberOffers } from "../server/services/memberOfferCatalogue";
 
@@ -72,4 +73,24 @@ test("dashboard Create Plan actions respect Founder membership generations",()=>
  assert.match(dash,/onClick=\{openNewPlanQuestionnaire\}/);
  assert.doesNotMatch(dash,/\/questionnaire\?tier=\$\{tier\}/);
  assert.equal((dash.match(/onClick=\{openNewPlanQuestionnaire\}/g)||[]).length,2);
+});
+
+test("no customer-visible TSX route can promote retired five-tier products",()=>{
+ const root=new URL("../client/src",import.meta.url);
+ const bad=/Ultimate Plan Required|Upgrade to Ultimate|View Ultimate Plan|Free to Ultimate access|5 Pricing Tiers|templates are available on the <strong>Ultimate|available on Ultimate plan|Premium \(3 coins\)|Ultimate \(12 coins\)|Choose (?:Basic|Premium|Enterprise|Ultimate) Plan/i;
+ const matches:string[]=[];
+ const visit=(dir:string)=>{
+   for(const entry of readdirSync(dir,{withFileTypes:true})){
+     if(["admin","examples","ui","country-catalogue-static"].includes(entry.name))continue;
+     const file=join(dir,entry.name);
+     if(entry.isDirectory()){visit(file);continue;}
+     if(!entry.isFile()||!file.endsWith(".tsx"))continue;
+     const lines=readFileSync(file,"utf8").split("\n");
+     for(let n=0;n<lines.length;n++) {
+       if(bad.test(lines[n]))matches.push(`${relative(root.pathname,file)}:${n+1}: ${lines[n].trim().slice(0,150)}`);
+     }
+   }
+ };
+ visit(root.pathname);
+ assert.deepEqual(matches,[],`Retired membership offer copy found in customer components:\n${matches.join("\n")}`);
 });
