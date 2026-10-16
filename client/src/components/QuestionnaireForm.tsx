@@ -346,6 +346,21 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
     queryKey: ['/api/auth/user'],
     retry: false,
   });
+  // Authorisation is computed by the server from a private Railway setting.
+  // The client never contains a hard-coded founder email or personal answers.
+  const { data: ownerDraftEligibility } = useQuery<{ eligible: boolean }>({
+    queryKey: ["/api/questionnaire/owner-autopopulate/eligibility", user?.id],
+    enabled: Boolean(user?.id),
+    retry: false,
+    queryFn: async () => {
+      const response = await fetch("/api/questionnaire/owner-autopopulate/eligibility", {
+        credentials: "include",
+        cache: "no-store",
+      });
+      if (!response.ok) return { eligible: false };
+      return await response.json() as { eligible: boolean };
+    },
+  });
   const isAdminUser = user?.isAdmin === true;
   // Maps active, verified Founder Pro / 90-Day Pass to the historical Ultimate
   // tool permission; a literal account tier string cannot authorise templates.
@@ -377,6 +392,8 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   const [formData, setFormData] = useState<Record<string, string>>(() => savedData);
   const draftFileInputRef = useRef<HTMLInputElement>(null);
   const [isImportingEvidence, setIsImportingEvidence] = useState(false);
+  const [ownerAutopopulateReview, setOwnerAutopopulateReview] = useState<string[]>([]);
+  const [isAutoPopulating, setIsAutoPopulating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [promoValidation, setPromoValidation] = useState<PromoCodeValidation | null>(null);
@@ -416,14 +433,57 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
       setShowUpgradePrompt(true);
     }
   };
-  const isOwner = false;
-  const handleOwnerPrefill = () => {
-    toast({
-      title: "Personal prefill is disabled",
-      description: "Use your saved profile or document auto-fill so application answers always come from your own evidence.",
-    });
+  // A trusted server endpoint checks the signed-in account against a private
+  // owner identity variable before returning its account-specific draft.
+  const isOwner = ownerDraftEligibility?.eligible === true;
+  const handleOwnerPrefill = async () => {
+    if (!isOwner || !user?.id || isAutoPopulating) return;
+    setIsAutoPopulating(true);
+    try {
+      const response = await fetch("/api/questionnaire/owner-autopopulate", {
+        method: "POST",
+        credentials: "include",
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error(response.status === 403
+        ? "This personal draft is not available for the signed-in account."
+        : "Personal draft could not be loaded. Please try again.");
+      const draft = await response.json() as {
+        fields: Record<string, unknown>; needsEvidence: string[];
+      };
+      const validFields = new Set(steps.flatMap(step => step.fields.map(field => field.name)));
+      const merged = { ...formData };
+      let added = 0, skippedExisting = 0;
+      for (const [field, value] of Object.entries(draft.fields ?? {})) {
+        if (field === "tier" || !validFields.has(field) || typeof value !== "string" || !value.trim()) continue;
+        if (typeof merged[field] === "string" && merged[field].trim()) {
+          skippedExisting++;
+          continue;
+        }
+        merged[field] = value.trim();
+        added++;
+      }
+      setOwnerAutopopulateReview(Array.isArray(draft.needsEvidence) ? draft.needsEvidence : []);
+      if (added > 0) {
+        setFormData(merged);
+        saveAllFields(merged);
+        setCurrentStep(0);
+      }
+      toast({
+        title: added ? `AutoPopulated ${added} questionnaire answers` : "No blank answers to populate",
+        description: `${skippedExisting} existing answers preserved. Your editable draft requires evidence review; no application has been submitted and no plan credit used.`,
+      });
+    } catch (error) {
+      toast({
+        title: "AutoPopulate unavailable",
+        description: error instanceof Error ? error.message : "Could not load your personal draft.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAutoPopulating(false);
+    }
   };
-  
+
   // Auto-fill from documents states
   const [showAutoFillDrawer, setShowAutoFillDrawer] = useState(false);
   const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
@@ -438,7 +498,7 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   const { data: userDocuments = [] } = useQuery<any[]>({
     queryKey: ['/api/documents'],
   });
-  const isFounderAccount = false;
+  const isFounderAccount = isOwner;
 
   // Sync formData with savedData when it changes (fixes auto-save on tab switch)
   useEffect(() => {
@@ -1511,6 +1571,44 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
           </Card>
         )}
 
+        {/* Personal founder draft: directly beneath document autofill.
+            The button is hidden for every other authenticated account. */}
+        {isOwner && (
+          <Card className="p-4 mb-6 border-violet-500/40 bg-violet-500/5" data-testid="card-owner-autopopulate">
+            <div className="flex gap-4 items-center justify-between flex-wrap">
+              <div className="space-y-1">
+                <h3 className="font-semibold text-sm">Visa Assistant Global · Your questionnaire draft</h3>
+                <p className="text-xs text-muted-foreground">
+                  Fill blank questions across all 11 sections using your prepared founder evidence
+                  and clearly labelled proposed strategies and financial scenarios.
+                </p>
+                <p className="text-xs text-amber-700 dark:text-amber-400">
+                  Preserves answers you have edited. Immigration status, expiry, secured funding
+                  and other unsupported facts still need your verification.
+                </p>
+              </div>
+              <Button
+                type="button"
+                onClick={handleOwnerPrefill}
+                disabled={isAutoPopulating}
+                variant="outline"
+                className="border-violet-500 text-violet-700 dark:text-violet-300 hover:bg-violet-500/10"
+                data-testid="button-owner-prefill"
+              >
+                {isAutoPopulating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                AutoPopulate
+              </Button>
+            </div>
+            {ownerAutopopulateReview.length > 0 && (
+              <p role="status" className="mt-3 text-xs text-amber-700 dark:text-amber-400" data-testid="owner-autopopulate-review">
+                Draft saved. {ownerAutopopulateReview.length} evidence or assumption areas need checking
+                before plan generation, including immigration status, verified capital, forecast assumptions
+                and external customer validation. Review each answer before using it in an application.
+              </p>
+            )}
+          </Card>
+        )}
+
         {/* Auto-save status indicator */}
         {hasUnsavedData && (
           <Card className="p-4 mb-6 border-green-500/50 bg-green-500/5">
@@ -1536,22 +1634,6 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
               </Button>
             </div>
           </Card>
-        )}
-
-        {/* Owner-only prefill button */}
-        {isOwner && (
-          <div className="mb-4">
-            <Button
-              onClick={handleOwnerPrefill}
-              variant="outline"
-              size="sm"
-              className="w-full border-violet-500/50 text-violet-700 dark:text-violet-400 hover:bg-violet-500/10"
-              data-testid="button-owner-prefill"
-            >
-              <Sparkles className="h-3.5 w-3.5 mr-2" />
-              Prefill Empty Fields with My Data
-            </Button>
-          </div>
         )}
 
         {/* Progress header */}

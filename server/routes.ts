@@ -58,6 +58,7 @@ import { getLatestNews, generateBreakingNews } from "./newsService";
 import chatRouter from "./chatRoutes";
 import crypto from "crypto";
 import { setupAuth, isAuthenticated, requireAdmin } from "./auth";
+import { isEligibleQuestionnaireDraftOwner, parseOwnerQuestionnaireDraft, OWNER_DRAFT_EMAIL_ENV, OWNER_DRAFT_DATA_ENV } from "./questionnaireOwnerAutopopulate";
 import { registerLoginSecurityAuditRoutes } from "./loginSecurityAuditRoutes";
 import {
   sendPaymentReceiptEmail,
@@ -1397,6 +1398,38 @@ Respond ONLY with valid JSON in this exact format:
       }
     },
   );
+
+  // The authorised account and private draft are configured in Railway, not
+  // embedded in public source. No LLM credits or application submission occurs.
+  app.get("/api/questionnaire/owner-autopopulate/eligibility", isAuthenticated, (req, res) => {
+    res.setHeader("Cache-Control", "private, no-store");
+    const email = (req.user as any)?.email;
+    const eligible = isEligibleQuestionnaireDraftOwner(
+      email, process.env[OWNER_DRAFT_EMAIL_ENV],
+    ) && Boolean(process.env[OWNER_DRAFT_DATA_ENV]);
+    res.json({ eligible });
+  });
+
+  app.post("/api/questionnaire/owner-autopopulate", isAuthenticated, (req, res) => {
+    res.setHeader("Cache-Control", "private, no-store");
+    const email = (req.user as any)?.email;
+    if (!isEligibleQuestionnaireDraftOwner(email, process.env[OWNER_DRAFT_EMAIL_ENV])) {
+      return res.status(403).json({ error: "Not authorised to load this personal draft." });
+    }
+    try {
+      const configured = process.env[OWNER_DRAFT_DATA_ENV];
+      const parsed = parseOwnerQuestionnaireDraft(configured);
+      // Prevent accidental assignment of a draft to a different account.
+      const metadata = JSON.parse(configured!) as { application_email?: unknown };
+      if (!isEligibleQuestionnaireDraftOwner(email, metadata.application_email)) {
+        return res.status(403).json({ error: "Draft owner does not match your account." });
+      }
+      return res.json(parsed);
+    } catch (error) {
+      console.error("[Questionnaire AutoPopulate] Private draft configuration invalid", error instanceof Error ? error.message : "unknown error");
+      return res.status(503).json({ error: "Personal draft is temporarily unavailable." });
+    }
+  });
 
   app.post("/api/questionnaire/submit", isAuthenticated, async (req, res) => {
     try {

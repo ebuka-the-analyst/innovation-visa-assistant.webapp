@@ -219,6 +219,9 @@ jobs:
       - name: Validate customer-owned evidence questionnaire import
         run: node --import tsx --test tests/ifva-questionnaire-evidence-import.test.ts
 
+      - name: Validate account-specific Visa Assistant Global questionnaire AutoPopulate
+        run: node --import tsx --test tests/ifva-owner-autopopulate.test.ts
+
       - name: Verify all active customer pages use current Founder packages
         run: node --import tsx --test tests/ifva-no-retired-tier-promotions.test.ts
 
