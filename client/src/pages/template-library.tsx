@@ -21,6 +21,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { SEOHead } from "@/components/SEOHead";
+import { memberUpgradeDescription } from "@shared/memberToolPlan";
+import type { ToolTier } from "@/hooks/useTierAccess";
 
 function renderMarkdown(text: string): JSX.Element[] {
   const lines = text.split('\n');
@@ -125,7 +127,9 @@ function TemplateCard({ template, onPreview, onDownload }: {
                 {!template.isAccessible && (
                   <Badge variant="outline" className={`text-xs ${tierColors[template.requiredTier]} text-white border-none`}>
                     <Lock className="w-3 h-3 mr-1" />
-                    {template.requiredTier}
+                    {["free","basic","premium","enterprise","ultimate"].includes(String(template.requiredTier))
+                      ? memberUpgradeDescription(template.requiredTier as ToolTier)
+                      : "Review memberships"}
                   </Badge>
                 )}
               </div>
@@ -545,7 +549,7 @@ export default function TemplateLibrary() {
           <Alert className="mb-6 bg-gradient-to-r from-purple-50 to-amber-50 dark:from-purple-950/30 dark:to-amber-950/30 border-purple-200 dark:border-purple-800">
             <Crown className="w-4 h-4 text-purple-600" />
             <AlertDescription className="flex items-center justify-between">
-              <span>Upgrade to access {lockedCount} more premium templates</span>
+              <span>Review memberships to access {lockedCount} additional templates</span>
               <Button size="sm" asChild>
                 <Link href="/pricing" data-testid="link-upgrade">
                   View Plans <ChevronRight className="w-4 h-4 ml-1" />
