@@ -43,8 +43,24 @@ export function parseOwnerQuestionnaireDraft(raw: string | undefined): OwnerQues
     }
     return fields;
   };
-  const fields = sanitiseFields(draft.fields);
-  const previousFields = sanitiseFields(draft.previousFields);
+  const previousFields = sanitiseFields(draft.fields);
+  const fields = { ...previousFields };
+  // Founder-voice phrasing is private configuration, never shipped to browsers.
+  for (const name of [
+    "QUESTIONNAIRE_FOUNDER_VOICE_1",
+    "QUESTIONNAIRE_FOUNDER_VOICE_2",
+    "QUESTIONNAIRE_FOUNDER_VOICE_3",
+    "QUESTIONNAIRE_FOUNDER_VOICE_4",
+    "QUESTIONNAIRE_FOUNDER_VOICE_5",
+  ]) {
+    const raw = process.env[name];
+    if (!raw) continue;
+    if (raw.length > 30_000) throw new Error("Private founder voice block too large");
+    const overrides = sanitiseFields(JSON.parse(raw));
+    for (const [key, answer] of Object.entries(overrides)) {
+      if (key in previousFields) fields[key] = answer;
+    }
+  }
   if (Object.keys(fields).length === 0) throw new Error("Owner questionnaire draft is empty");
   const needsEvidence = Array.isArray(draft.needsEvidence) ?
     draft.needsEvidence.filter((name): name is string => typeof name === "string" &&
