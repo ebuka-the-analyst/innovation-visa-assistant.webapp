@@ -52,6 +52,7 @@ export function parseOwnerQuestionnaireDraft(raw: string | undefined): OwnerQues
     "QUESTIONNAIRE_FOUNDER_VOICE_3",
     "QUESTIONNAIRE_FOUNDER_VOICE_4",
     "QUESTIONNAIRE_FOUNDER_VOICE_5",
+    "QUESTIONNAIRE_FOUNDER_VOICE_6",
   ]) {
     const raw = process.env[name];
     if (!raw) continue;
