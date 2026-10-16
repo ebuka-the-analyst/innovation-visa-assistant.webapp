@@ -31,6 +31,7 @@ import { useMemberAiQuota } from "@/hooks/useMemberAiQuota";
 import { useTierAccess } from "@/hooks/useTierAccess";
 import { memberUpgradeDescription } from "@shared/memberToolPlan";
 import { parseQuestionnaireEvidenceDraft } from "@/lib/questionnaireEvidenceImport";
+import { mergeOwnerQuestionnaireDraft } from "@/lib/mergeOwnerQuestionnaire";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -449,29 +450,25 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
         ? "This personal draft is not available for the signed-in account."
         : "Personal draft could not be loaded. Please try again.");
       const draft = await response.json() as {
-        fields: Record<string, unknown>; needsEvidence: string[];
+        fields: Record<string, unknown>;
+        previousFields?: Record<string, unknown>;
+        needsEvidence: string[];
       };
-      const validFields = new Set(steps.flatMap(step => step.fields.map(field => field.name)));
-      const merged = { ...formData };
-      let added = 0, skippedExisting = 0;
-      for (const [field, value] of Object.entries(draft.fields ?? {})) {
-        if (field === "tier" || !validFields.has(field) || typeof value !== "string" || !value.trim()) continue;
-        if (typeof merged[field] === "string" && merged[field].trim()) {
-          skippedExisting++;
-          continue;
-        }
-        merged[field] = value.trim();
-        added++;
-      }
+      const change = mergeOwnerQuestionnaireDraft(
+        formData,
+        draft.fields ?? {},
+        draft.previousFields ?? {},
+        steps.flatMap(step => step.fields.map(field => field.name)),
+      );
       setOwnerAutopopulateReview(Array.isArray(draft.needsEvidence) ? draft.needsEvidence : []);
-      if (added > 0) {
-        setFormData(merged);
-        saveAllFields(merged);
+      if (change.added > 0 || change.refreshed > 0) {
+        setFormData(change.merged);
+        saveAllFields(change.merged);
         setCurrentStep(0);
       }
       toast({
-        title: added ? `AutoPopulated ${added} questionnaire answers` : "No blank answers to populate",
-        description: `${skippedExisting} existing answers preserved. Your editable draft requires evidence review; no application has been submitted and no plan credit used.`,
+        title: change.added || change.refreshed ? "Questionnaire draft updated" : "Your answers are already up to date",
+        description: `Added ${change.added}, refreshed ${change.refreshed} unchanged AutoPopulate answers, preserved ${change.skippedExisting} other answers. Review all assumptions before using a plan credit.`,
       });
     } catch (error) {
       toast({
@@ -1579,11 +1576,11 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
               <div className="space-y-1">
                 <h3 className="font-semibold text-sm">Visa Assistant Global · Your questionnaire draft</h3>
                 <p className="text-xs text-muted-foreground">
-                  Fill blank questions across all 11 sections using your prepared founder evidence
-                  and clearly labelled proposed strategies and financial scenarios.
+                  Populate all 11 sections in your own voice, or refresh wording from
+                  an earlier AutoPopulate draft without replacing your manual edits.
                 </p>
                 <p className="text-xs text-amber-700 dark:text-amber-400">
-                  Preserves answers you have edited. Immigration status, expiry, secured funding
+                  Your edits are preserved. Immigration status, expiry, secured funding
                   and other unsupported facts still need your verification.
                 </p>
               </div>
