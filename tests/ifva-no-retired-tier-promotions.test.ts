@@ -64,3 +64,12 @@ test("live checkout and prices remain in one server-owned membership catalogue",
  // Internal legacy catalogues may still exist for grandfathered access.
  // The checks above only prohibit showing them as purchasable new packages.
 });
+
+test("dashboard Create Plan actions respect Founder membership generations",()=>{
+ const dash=read("client/src/pages/dashboard.tsx");
+ assert.match(dash,/useMemberAiQuota\(\)/);
+ assert.match(dash,/membershipQuota\?\.active && membershipQuota\.remainingGenerations > 0/);
+ assert.match(dash,/onClick=\{openNewPlanQuestionnaire\}/);
+ assert.doesNotMatch(dash,/\/questionnaire\?tier=\$\{tier\}/);
+ assert.equal((dash.match(/onClick=\{openNewPlanQuestionnaire\}/g)||[]).length,2);
+});
