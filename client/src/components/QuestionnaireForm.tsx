@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,7 @@ import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { useMemberAiQuota } from "@/hooks/useMemberAiQuota";
+import { parseQuestionnaireEvidenceDraft } from "@/lib/questionnaireEvidenceImport";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -369,6 +370,8 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
     return savedStep ? parseInt(savedStep) : 0;
   });
   const [formData, setFormData] = useState<Record<string, string>>(() => savedData);
+  const draftFileInputRef = useRef<HTMLInputElement>(null);
+  const [isImportingEvidence, setIsImportingEvidence] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [promoCode, setPromoCode] = useState('');
   const [promoValidation, setPromoValidation] = useState<PromoCodeValidation | null>(null);
@@ -490,6 +493,50 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
   const handleFieldChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
     saveField(name, value);
+  };
+
+  /** File contents remain in the signed-in customer's browser/account draft.
+   * They are not committed to GitHub or a public file on the website.
+   * Non-empty existing answers are never overwritten.
+   */
+  const importEvidenceDraft = async (file: File) => {
+    if (isImportingEvidence) return;
+    setIsImportingEvidence(true);
+    try {
+      if (file.size > 100_000 || !file.name.toLowerCase().endsWith(".json")) {
+        throw new Error("Please select a questionnaire .json file smaller than 100 KB.");
+      }
+      const draft = parseQuestionnaireEvidenceDraft(
+        await file.text(),
+        user?.email ?? "",
+        steps.flatMap(step => step.fields.map(field => field.name)),
+        formData,
+      );
+      if (draft.added < 1) {
+        toast({
+          title: "No new answers imported",
+          description: draft.skippedExisting
+            ? "The matching questions already have answers. Existing answers were preserved."
+            : "This file contains no new supported answers for this questionnaire.",
+        });
+        return;
+      }
+      setFormData(draft.merged);
+      saveAllFields(draft.merged);
+      setCurrentStep(0);
+      toast({
+        title: `Imported ${draft.added} draft answers`,
+        description: `Existing answers preserved (${draft.skippedExisting} skipped). Review every section and complete the missing evidence before generating a plan. The draft will sync to your account.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Could not import questionnaire",
+        description: error instanceof Error ? error.message : "The file could not be read.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsImportingEvidence(false);
+    }
   };
 
   const handleClearSavedData = () => {
@@ -1152,6 +1199,48 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
                   This questionnaire takes 45-60 minutes. Save your answers in a document first.
                 </p>
               </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Import source-grounded draft answers, without overriding earlier edits. */}
+        {currentStep === 0 && (
+          <Card className="mb-6 border-primary/40 p-5" data-testid="questionnaire-evidence-import">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div className="space-y-1">
+                <h3 className="font-semibold">Import your prepared questionnaire answers</h3>
+                <p className="text-sm text-muted-foreground">
+                  Use a personal evidence-based .json draft. Only blank answers are filled;
+                  your existing work is preserved and the draft auto-saves to your account.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Check identity, immigration details, financial assumptions and claims
+                  before generating a business plan. Importing does not use a plan credit.
+                </p>
+              </div>
+              <input
+                ref={draftFileInputRef}
+                type="file"
+                accept=".json,application/json"
+                className="hidden"
+                aria-label="Select prepared questionnaire JSON"
+                data-testid="input-evidence-draft"
+                onChange={async event => {
+                  const file = event.currentTarget.files?.[0];
+                  event.currentTarget.value = "";
+                  if (file) await importEvidenceDraft(file);
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="h-auto min-h-11 whitespace-normal"
+                disabled={isImportingEvidence}
+                onClick={() => draftFileInputRef.current?.click()}
+                data-testid="button-import-evidence-draft">
+                {isImportingEvidence ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4"/>}
+                {isImportingEvidence ? "Importing answers…" : "Import prepared answers (.json)"}
+              </Button>
             </div>
           </Card>
         )}
