@@ -20,6 +20,8 @@ export interface OwnerQuestionnaireDraft {
   fields: Record<string,string>;
   /** Previous server-provided answers, for safe migration of untouched drafts. */
   previousFields: Record<string,string>;
+  /** Exact matches from the previously deployed first-person draft, for safe upgrades. */
+  intermediateFields?: Record<string,string>;
   needsEvidence: string[];
 }
 export function parseOwnerQuestionnaireDraft(raw: string | undefined): OwnerQuestionnaireDraft {
@@ -62,9 +64,25 @@ export function parseOwnerQuestionnaireDraft(raw: string | undefined): OwnerQues
       if (key in previousFields) fields[key] = answer;
     }
   }
+  // Visa Assistant is the parent global product. The UK Innovator Founder
+  // workflow is one completed route. Preserve the preceding first-person version
+  // as a known generated value; founder-edited content must not be replaced.
+  const beforeBusinessFocus = { ...fields };
+  const businessFocusRaw = process.env.QUESTIONNAIRE_BUSINESS_FOCUS_V2;
+  let hasBusinessFocus = false;
+  if (businessFocusRaw) {
+    if (businessFocusRaw.length > 30_000) throw new Error("Private business focus draft too large");
+    const focus = sanitiseFields(JSON.parse(businessFocusRaw));
+    for (const [key, answer] of Object.entries(focus)) {
+      if (key in previousFields) {
+        fields[key] = answer;
+        hasBusinessFocus = true;
+      }
+    }
+  }
   if (Object.keys(fields).length === 0) throw new Error("Owner questionnaire draft is empty");
   const needsEvidence = Array.isArray(draft.needsEvidence) ?
     draft.needsEvidence.filter((name): name is string => typeof name === "string" &&
       /^[a-zA-Z][a-zA-Z0-9]{0,79}$/.test(name)).slice(0,60) : [];
-  return {fields,previousFields,needsEvidence};
+  return { fields, previousFields, needsEvidence, ...(hasBusinessFocus ? { intermediateFields: beforeBusinessFocus } : {}) };
 }
