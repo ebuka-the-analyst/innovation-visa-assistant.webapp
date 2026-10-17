@@ -14,6 +14,7 @@ export function mergeOwnerQuestionnaireDraft(
   fields: Record<string, unknown>,
   previousFields: Record<string, unknown>,
   allowedFields: readonly string[],
+  intermediateFields: Record<string, unknown> = {},
 ): QuestionnaireDraftMerge {
   const merged = { ...existing };
   const allowed = new Set(allowedFields);
@@ -30,7 +31,11 @@ export function mergeOwnerQuestionnaireDraft(
       continue;
     }
     const legacy = previousFields?.[field];
-    if (typeof legacy === "string" && legacy.trim() === current) {
+    const formerFirstPerson = intermediateFields?.[field];
+    if (
+      (typeof legacy === "string" && legacy.trim() === current) ||
+      (typeof formerFirstPerson === "string" && formerFirstPerson.trim() === current)
+    ) {
       if (current !== incoming.trim()) {
         merged[field] = incoming.trim();
         refreshed++;

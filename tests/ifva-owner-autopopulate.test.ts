@@ -95,3 +95,59 @@ test("Private founder voice overrides keep original draft available for exact-ma
     if(old===undefined) delete process.env[key]; else process.env[key]=old;
   }
 });
+
+
+test("Global Visa Assistant focus updates both first-person and earlier automated answers without overwriting founder edits", () => {
+  const sourceKey = "QUESTIONNAIRE_FOUNDER_VOICE_1";
+  const focusKey = "QUESTIONNAIRE_BUSINESS_FOCUS_V2";
+  const previousSource = process.env[sourceKey];
+  const previousFocus = process.env[focusKey];
+  try {
+    process.env[sourceKey] = JSON.stringify({
+      productStatus: "I launched the UK route and a global portal.",
+      businessName: "Visa Assistant Global",
+    });
+    process.env[focusKey] = JSON.stringify({
+      productStatus: "I launched Visa Assistant globally and completed its first UK route.",
+      businessName: "Visa Assistant Global",
+      foreign: "Should not be imported",
+    });
+    const original = JSON.stringify({
+      format: "ifva-owner-autopopulate-v1",
+      fields: {
+        productStatus: "The founder launched the UK route.",
+        businessName: "Visa Assistant Global",
+        tier: "ultimate",
+      },
+    });
+    const parsed = parseOwnerQuestionnaireDraft(original);
+    assert.equal(parsed.fields.productStatus, "I launched Visa Assistant globally and completed its first UK route.");
+    assert.equal(parsed.previousFields.productStatus, "The founder launched the UK route.");
+    assert.equal(parsed.intermediateFields?.productStatus, "I launched the UK route and a global portal.");
+    assert.ok(!("foreign" in parsed.fields));
+    const permitted = ["productStatus","businessName","tier"];
+    const mid = mergeOwnerQuestionnaireDraft(
+      {productStatus: "I launched the UK route and a global portal.",businessName: "Visa Assistant Global",tier: "founder"},
+      parsed.fields,parsed.previousFields,permitted,parsed.intermediateFields,
+    );
+    assert.equal(mid.refreshed,1);
+    assert.equal(mid.merged.productStatus, parsed.fields.productStatus);
+    assert.equal(mid.merged.tier, "founder");
+    const old = mergeOwnerQuestionnaireDraft(
+      {productStatus: "The founder launched the UK route."},
+      parsed.fields,parsed.previousFields,permitted,parsed.intermediateFields,
+    );
+    assert.equal(old.refreshed,1);
+    const edited = mergeOwnerQuestionnaireDraft(
+      {productStatus: "My edited explanation of the main platform."},
+      parsed.fields,parsed.previousFields,permitted,parsed.intermediateFields,
+    );
+    assert.equal(edited.refreshed,0);
+    assert.equal(edited.merged.productStatus,"My edited explanation of the main platform.");
+  } finally {
+    if (previousSource === undefined) delete process.env[sourceKey];
+    else process.env[sourceKey] = previousSource;
+    if (previousFocus === undefined) delete process.env[focusKey];
+    else process.env[focusKey] = previousFocus;
+  }
+});

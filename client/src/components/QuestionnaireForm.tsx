@@ -453,6 +453,7 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
       const draft = await response.json() as {
         fields: Record<string, unknown>;
         previousFields?: Record<string, unknown>;
+        intermediateFields?: Record<string, unknown>;
         needsEvidence: string[];
       };
       const change = mergeOwnerQuestionnaireDraft(
@@ -460,6 +461,7 @@ export default function QuestionnaireForm({ tier = 'premium' }: { tier?: string 
         draft.fields ?? {},
         draft.previousFields ?? {},
         steps.flatMap(step => step.fields.map(field => field.name)),
+        draft.intermediateFields ?? {},
       );
       setOwnerAutopopulateReview(Array.isArray(draft.needsEvidence) ? draft.needsEvidence : []);
       if (change.added > 0 || change.refreshed > 0) {
