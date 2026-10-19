@@ -70,7 +70,7 @@ function buildEditorPayload(selected:Template,brand:Brand,subjectText:string,mes
   const body=existing ? originalBody : ((messageText.trim()?safeIntro(messageText):"")+originalBody);
   const displaySubject=readableSubject(brand,selected.key,selected.defaultSubject);
   return {
-    subjectTemplate: subjectText.trim()===displaySubject ? "{{subject}}" : subjectText.trim(),
+    subjectTemplate: existing ? subjectText.trim() : (subjectText.trim()===displaySubject ? "{{subject}}" : subjectText.trim()),
     bodyTemplate:body,contentReplacements:newRules,expectedRevision:selected.revision,
   };
 }
@@ -192,7 +192,7 @@ export function EmailTemplateControlCentre(){
     {isError && <p className="text-sm text-destructive">Unable to load the template library. Please retry.</p>}
     {data && <>
       <div className="flex flex-wrap gap-2">
-        {(["ifva","global"] as const).map(b=><Button key={b} variant={brand===b?"default":"outline"} onClick={()=>setBrand(b)} size="sm">
+        {(["ifva","global"] as const).map(b=><Button key={b} variant={brand===b?"default":"outline"} onClick={()=>{if(dirty&&!window.confirm("Discard your unsaved email edits?"))return;setBrand(b);}} size="sm">
           {labelBrand(b)} {b===data.activeBrand?"(this service)":""}
         </Button>)}
       </div>
