@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle2, Clock, FileCode2, History, Mail, RefreshCw, Save, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,7 @@ export function EmailTemplateControlCentre(){
     staleTime:0,
   });
   const [brand,setBrand]=useState<Brand>("ifva");
+  const initialisedBrand=useRef(false);
   const [key,setKey]=useState("verification");
   const [search,setSearch]=useState("");
   const [subject,setSubject]=useState("{{subject}}");
@@ -50,7 +51,7 @@ export function EmailTemplateControlCentre(){
   const [logError,setLogError]=useState("");
   const selected=data?.items.find(x=>x.brand===brand && x.key===key);
   useEffect(()=>{
-    if(data?.activeBrand)setBrand(data.activeBrand);
+    if(data?.activeBrand && !initialisedBrand.current){setBrand(data.activeBrand);initialisedBrand.current=true;}
   },[data?.activeBrand]);
   useEffect(()=>{
     if(!selected)return;
