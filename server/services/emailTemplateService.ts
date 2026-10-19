@@ -202,7 +202,7 @@ export async function composeEmail(input:{subject:string;html:string;emailType?:
       // content, which retains system-generated links and event details.
       const readable=typeof edited.message_text==="string" && edited.message_text.trim()
         ? renderMessageDraft(edited.message_text,input.recipientName) : "";
-      const html=readable ? composed.html.replace(/<body\\b[^>]*>/i,(opening:string)=>opening+readable) : composed.html;
+      const html=readable ? composed.html.replace(/<body\b[^>]*>/i,(opening:string)=>opening+readable) : composed.html;
       return {...composed,html:readable && html===composed.html?readable+composed.html:html,brand,key};
     }
   } catch (err) {
