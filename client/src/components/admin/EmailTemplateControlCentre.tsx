@@ -9,17 +9,18 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
 type Brand = "global" | "ifva";
+type CopyEdit = {find:string;replace:string};
 interface Template {
   brand:Brand;key:string;label:string;group:string;description:string;
   trigger:string;defaultSubject:string;subjectTemplate:string;bodyTemplate:string;
-  revision:number;custom:boolean;updatedBy:string|null;updatedAt:string|null;
+  revision:number;custom:boolean;updatedBy:string|null;updatedAt:string|null;contentReplacements:CopyEdit[];
 }
 interface Catalogue{items:Template[];activeBrand:Brand;variables:string[]}
 interface Delivery {
   id:string;recipientEmail:string;subject:string;emailType:string;status:string;
   provider:string|null;messageId:string|null;errorMessage:string|null;sentAt:string;
 }
-interface Revision {revision:number;subjectTemplate:string;bodyTemplate:string;updatedBy:string|null;updatedAt:string}
+interface Revision {revision:number;subjectTemplate:string;bodyTemplate:string;contentReplacements:CopyEdit[];updatedBy:string|null;updatedAt:string}
 const fetchJson=async(path:string)=> {
   const response=await fetch(path,{credentials:"include",cache:"no-store"});
   if(!response.ok)throw new Error("Unable to load email administration data");
@@ -39,6 +40,7 @@ export function EmailTemplateControlCentre(){
   const [search,setSearch]=useState("");
   const [subject,setSubject]=useState("{{subject}}");
   const [body,setBody]=useState("{{body}}");
+  const [copyEdits,setCopyEdits]=useState<CopyEdit[]>([]);
   const [busy,setBusy]=useState(false);
   const [preview,setPreview]=useState<{subject:string;html:string}|null>(null);
   const [history,setHistory]=useState<Revision[]|null>(null);
@@ -52,14 +54,14 @@ export function EmailTemplateControlCentre(){
   },[data?.activeBrand]);
   useEffect(()=>{
     if(!selected)return;
-    setSubject(selected.subjectTemplate);setBody(selected.bodyTemplate);setPreview(null);setHistory(null);
+    setSubject(selected.subjectTemplate);setBody(selected.bodyTemplate);setCopyEdits(selected.contentReplacements||[]);setPreview(null);setHistory(null);
   },[brand,key,selected?.revision,selected?.subjectTemplate,selected?.bodyTemplate]);
   const list=useMemo(()=>data?.items.filter(t=>t.brand===brand && (
     t.label.toLowerCase().includes(search.toLowerCase()) ||
     t.group.toLowerCase().includes(search.toLowerCase()) ||
     t.key.toLowerCase().includes(search.toLowerCase())
   ))||[],[data,brand,search]);
-  const dirty=!!selected && (selected.subjectTemplate!==subject||selected.bodyTemplate!==body);
+  const dirty=!!selected && (selected.subjectTemplate!==subject||selected.bodyTemplate!==body||JSON.stringify(selected.contentReplacements||[])!==JSON.stringify(copyEdits));
 
   async function save(){
     if(!selected)return;
@@ -67,7 +69,7 @@ export function EmailTemplateControlCentre(){
     try{
       const response=await fetch(`/api/admin/email-templates/${brand}/${key}`,{
         method:"PUT",credentials:"include",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({subjectTemplate:subject,bodyTemplate:body,expectedRevision:selected.revision}),
+        body:JSON.stringify({subjectTemplate:subject,bodyTemplate:body,contentReplacements:copyEdits.filter(r=>r.find.trim()),expectedRevision:selected.revision}),
       });
       const payload=await response.json();
       if(!response.ok)throw new Error(payload.message || "Unable to save template");
@@ -81,7 +83,7 @@ export function EmailTemplateControlCentre(){
     try{
       const response=await fetch(`/api/admin/email-templates/${brand}/${key}/preview`,{
         method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({subjectTemplate:subject,bodyTemplate:body}),
+        body:JSON.stringify({subjectTemplate:subject,bodyTemplate:body,contentReplacements:copyEdits.filter(r=>r.find.trim())}),
       });
       const payload=await response.json();
       if(!response.ok)throw new Error(payload.message || "Preview unavailable");
@@ -157,11 +159,23 @@ export function EmailTemplateControlCentre(){
               <Textarea id="template-body" value={body} onChange={e=>setBody(e.target.value)} rows={12} spellCheck={false} className="font-mono text-xs" data-testid="template-editor-body"/>
               <p className="mt-1 text-xs text-muted-foreground">Add a greeting, an explanation or a branded wrapper around {"{{body}}"}. The underlying transactional message is always retained.</p>
             </div>
+            <div className="space-y-2 rounded-lg border p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div><p className="text-sm font-semibold">Edit text inside the original message</p>
+                  <p className="text-xs text-muted-foreground">Find existing plain text and replace it in future emails. This leaves secure HTML, payment amounts and private links intact. Exact phrases are case-sensitive.</p></div>
+                <Button size="sm" variant="outline" disabled={copyEdits.length>=12} onClick={()=>setCopyEdits(v=>[...v,{find:"",replace:""}])}>Add wording change</Button>
+              </div>
+              {copyEdits.map((rule,index)=><div key={index} className="grid gap-2 rounded border p-2 sm:grid-cols-[1fr_1fr_auto]">
+                <Input aria-label={`Existing phrase ${index+1}`} placeholder="Existing wording" value={rule.find} onChange={e=>setCopyEdits(v=>v.map((r,i)=>i===index?{...r,find:e.target.value}:r))} />
+                <Input aria-label={`Replacement phrase ${index+1}`} placeholder="Replacement wording" value={rule.replace} onChange={e=>setCopyEdits(v=>v.map((r,i)=>i===index?{...r,replace:e.target.value}:r))}/>
+                <Button size="sm" variant="outline" onClick={()=>setCopyEdits(v=>v.filter((_r,i)=>i!==index))}>Remove</Button>
+              </div>)}
+            </div>
             <div className="flex flex-wrap gap-2">
               <Button onClick={()=>void save()} disabled={busy||!dirty}><Save className="mr-2 h-4 w-4"/>Save changes</Button>
               <Button variant="outline" onClick={()=>void showPreview()} disabled={busy}>Preview (no send)</Button>
               <Button variant="outline" onClick={()=>void loadHistory()}><History className="mr-2 h-4 w-4"/>History</Button>
-              <Button variant="outline" onClick={()=>{setSubject("{{subject}}");setBody("{{body}}");setPreview(null);}}>Restore default draft</Button>
+              <Button variant="outline" onClick={()=>{setSubject("{{subject}}");setBody("{{body}}");setCopyEdits([]);setPreview(null);}}>Restore default draft</Button>
             </div>
             {preview&&<div className="space-y-2 rounded-md border p-3">
               <p className="text-sm font-semibold">Preview only · {preview.subject}</p>
@@ -172,7 +186,7 @@ export function EmailTemplateControlCentre(){
               {history.length===0&&<p className="text-xs text-muted-foreground">This template has not yet been edited.</p>}
               {history.map(h=><div key={h.revision} className="flex items-center justify-between gap-2 rounded border p-2 text-xs">
                 <span>Revision {h.revision} · {new Date(h.updatedAt).toLocaleString("en-GB")} · {h.updatedBy||"admin"}</span>
-                <Button size="sm" variant="outline" onClick={()=>{setSubject(h.subjectTemplate);setBody(h.bodyTemplate);setPreview(null);}}>Load as draft</Button>
+                <Button size="sm" variant="outline" onClick={()=>{setSubject(h.subjectTemplate);setBody(h.bodyTemplate);setCopyEdits(h.contentReplacements||[]);setPreview(null);}}>Load as draft</Button>
               </div>)}
             </div>}
           </CardContent>
