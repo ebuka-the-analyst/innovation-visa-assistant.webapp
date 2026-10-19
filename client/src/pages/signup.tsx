@@ -22,7 +22,7 @@ export default function Signup() {
   const loginHref=membershipReturn?"/login?next="+encodeURIComponent(membershipReturn):"/login";
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [registrationSuccess, setRegistrationSuccess] = useState<{ email: string } | null>(null);
+  const [registrationSuccess, setRegistrationSuccess] = useState<{ email: string; emailSent: boolean } | null>(null);
   const [isResendingVerification, setIsResendingVerification] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralDiscount, setReferralDiscount] = useState<number | null>(null);
@@ -128,7 +128,7 @@ export default function Signup() {
       trackFormSubmit('signup', true);
 
       // Show success screen with verification instructions
-      setRegistrationSuccess({ email: formData.email });
+      setRegistrationSuccess({ email: formData.email, emailSent: result.emailSent === true });
     } catch (error: any) {
       trackError('signup', 'Connection error');
       trackFormSubmit('signup', false);
@@ -156,7 +156,7 @@ export default function Signup() {
       const data = await response.json();
 
       toast({
-        title: data.success ? "Verification email sent" : "Unable to send",
+        title: data.success ? "Verification requested" : "Unable to send",
         description: data.message,
         variant: data.success ? "default" : "destructive",
       });
@@ -190,15 +190,17 @@ export default function Signup() {
               </div>
             </div>
             <CardHeader className="py-1 px-4">
-              <CardTitle className="text-sm font-bold text-center">Check your email</CardTitle>
+              <CardTitle className="text-sm font-bold text-center">{registrationSuccess.emailSent ? "Check your email" : "Account created: email delivery unavailable"}</CardTitle>
               <CardDescription className="text-center text-xs">
-                Verification link sent to:
+                {registrationSuccess.emailSent ? "Verification requested for:" : "We couldn't send a verification email to:"}
               </CardDescription>
               <p className="text-center font-medium text-primary text-xs">{registrationSuccess.email}</p>
             </CardHeader>
             <CardContent className="space-y-2 pt-0 px-4">
               <div className="bg-muted/50 rounded p-2 text-xs text-muted-foreground">
-                Click the link in email to verify. Check spam if not found.
+                {registrationSuccess.emailSent
+                  ? "The provider accepted the email request. Follow the link to verify your account, and check spam if it does not arrive."
+                  : "Your account is saved but not yet verified. Email delivery is temporarily unavailable. Please try Resend later or contact support@innovatorfoundervisaassistant.co.uk."}
               </div>
               
               <Button
