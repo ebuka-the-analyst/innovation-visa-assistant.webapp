@@ -1,4 +1,5 @@
 import { dbPool } from "../db";
+import { renderMessageDraft } from "./emailEditableCopy";
 
 export type EmailBrand = "global" | "ifva";
 export type EmailTemplateDefinition = {
@@ -190,12 +191,20 @@ export async function composeEmail(input:{subject:string;html:string;emailType?:
   const base=normaliseEmailBrand(input.subject,input.html,brand);
   try {
     const result=await dbPool.query(
-      "SELECT subject_template, body_template, content_replacements FROM email_template_overrides WHERE brand=$1 AND template_key=$2 LIMIT 1",
+      "SELECT subject_template, body_template, content_replacements, message_text FROM email_template_overrides WHERE brand=$1 AND template_key=$2 LIMIT 1",
       [brand,key],
     );
     const edited=result.rows[0];
-    if (edited) return {...renderEmailTemplate({...base,subjectTemplate:edited.subject_template,bodyTemplate:edited.body_template,recipientName:input.recipientName,
-      contentReplacements:Array.isArray(edited.content_replacements)?edited.content_replacements:[]}),brand,key};
+    if (edited) {
+      const composed=renderEmailTemplate({...base,subjectTemplate:edited.subject_template,bodyTemplate:edited.body_template,recipientName:input.recipientName,
+        contentReplacements:Array.isArray(edited.content_replacements)?edited.content_replacements:[]});
+      // Human-written message copy is displayed before the original transactional
+      // content, which retains system-generated links and event details.
+      const readable=typeof edited.message_text==="string" && edited.message_text.trim()
+        ? renderMessageDraft(edited.message_text,input.recipientName) : "";
+      const html=readable ? composed.html.replace(/<body\\b[^>]*>/i,(opening:string)=>opening+readable) : composed.html;
+      return {...composed,html:readable && html===composed.html?readable+composed.html:html,brand,key};
+    }
   } catch (err) {
     console.error("[Email templates] Override lookup unavailable; using safe built-in template",err instanceof Error?err.message:"unknown");
   }
