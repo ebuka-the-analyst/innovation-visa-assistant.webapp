@@ -524,7 +524,7 @@ export async function sendPaymentReceiptEmail(
               </tr>
               <tr>
                 <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Billing:</td>
-                <td style="padding: 12px 0; text-align: right; font-weight: 600; color: #333; border-bottom: 1px solid #eee;">One-time payment</td>
+                <td style="padding: 12px 0; text-align: right; font-weight: 600; color: #333; border-bottom: 1px solid #eee;">${purchasedPlanId === "founder" || purchasedPlanId === "founder_pro" ? "Monthly membership payment" : "One-time payment"}</td>
               </tr>
               <tr>
                 <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Payment Date:</td>
@@ -935,7 +935,7 @@ export async function sendUpgradeReminderEmail(
             ${recommendedFeatures}
           </ul>
           <p style="margin: 15px 0 0 0; font-size: 24px; font-weight: bold; color: #ffa536;">
-            ${formatPrice(recommendedPlan.pricePence)} one-time
+            ${formatPrice(recommendedPlan.pricePence)} · Review billing terms at checkout
           </p>
         </div>
         
@@ -955,7 +955,7 @@ export async function sendUpgradeReminderEmail(
         
         <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <p style="margin: 0; font-size: 14px; color: #2e7d32;">
-            <strong>30-Day Money Back Guarantee:</strong> Not satisfied? Get a full refund, no questions asked.
+            <strong>Billing and refund terms:</strong> Review the terms presented at checkout before making a purchase.
           </p>
         </div>
         
