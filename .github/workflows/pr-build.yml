@@ -64,6 +64,9 @@ jobs:
       - name: Test authentication and session security
         run: npm run test:auth-security
 
+      - name: Test branded email template administration and lifecycle outbox
+        run: node --import tsx --test tests/email-template-control.test.ts
+
       - name: Test strict Innovator Founder news relevance
         run: npx tsx scripts/test-news-relevance.ts
 
