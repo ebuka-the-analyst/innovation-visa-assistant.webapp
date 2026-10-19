@@ -267,6 +267,13 @@ export async function queueExpertBookingEvent(
   metadata: EventMetadata = {},
   queryable: Queryable = pool,
 ) {
+  const emailTypeByEvent: Record<ExpertBookingEvent,string> = {
+    pending_payment:"expert_booking_pending", confirmed:"expert_booking_confirmed",
+    meeting_updated:"expert_booking_updated", cancelled:"expert_booking_cancelled",
+    completed:"expert_booking_completed", no_show:"expert_booking_no_show",
+    payment_failed:"expert_booking_payment_failed",
+  };
+  const emailType=emailTypeByEvent[event];
   const detail = await loadBookingDetail(bookingId, queryable);
   if (!detail) return false;
   const copy = eventCopy(event, detail, metadata);
@@ -295,6 +302,7 @@ export async function queueExpertBookingEvent(
   await enqueueEmail(queryable, {
     bookingId,
     eventType: event,
+    emailType,
     recipientEmail: detail.userEmail,
     recipientName: detail.userFirstName,
     recipientUserId: detail.userId,
@@ -327,6 +335,7 @@ export async function queueExpertBookingEvent(
     await enqueueEmail(queryable, {
       bookingId,
       eventType: event,
+    emailType,
       recipientEmail: detail.expertEmail,
       recipientName: detail.expertFirstName,
       subject: expertSubject,
@@ -359,6 +368,7 @@ export async function queueExpertBookingEvent(
       await enqueueEmail(queryable, {
         bookingId,
         eventType: event,
+    emailType,
         recipientEmail: admin.email,
         recipientName: admin.firstName,
         recipientUserId: admin.id,
