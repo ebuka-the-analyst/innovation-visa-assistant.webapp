@@ -86,7 +86,16 @@ export function templateKey(emailType: string | undefined, subject: string): str
   const s = subject.toLowerCase();
   if (type === "expert_network_application") return s.includes("new expert application") ? "expert_admin_application" : s.includes("received") ? "expert_application_received" : "expert_application_reviewed";
   if (type === "expert_network") return s.includes("[expert network]") ? "expert_admin" : "expert_profile";
-  if (type === "expert_booking") return s.includes("new consultation booking") ? "expert_booking_other" : "expert_booking_confirmed";
+  if (type === "expert_booking") {
+    if (s.includes("awaiting payment") || s.includes("complete payment")) return "expert_booking_pending";
+    if (s.includes("payment failed") || s.includes("payment not completed")) return "expert_booking_payment_failed";
+    if (s.includes("cancelled")) return "expert_booking_cancelled";
+    if (s.includes("meeting details") || s.includes("meeting link")) return "expert_booking_updated";
+    if (s.includes("no-show")) return "expert_booking_no_show";
+    if (s.includes("consultation complete")) return "expert_booking_completed";
+    if (s.includes("confirmed")) return "expert_booking_confirmed";
+    return "expert_booking_other";
+  }
   if (type === "broadcast") return "broadcast";
   if (s.includes("verification") || s.includes("verify your email")) return "verification";
   if (s.includes("password reset")) return "password_reset";
