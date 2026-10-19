@@ -221,6 +221,7 @@ const menuGroups = [
     label: "Communications",
     items: [
       { id: "comms-emails", label: "Email Analytics", icon: Mail, badge: null },
+      { id: "comms-templates", label: "Email Templates", icon: Mail, badge: null },
       { id: "comms-notifications", label: "Notifications", icon: Bell, badge: null },
     ]
   },

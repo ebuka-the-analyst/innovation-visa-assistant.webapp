@@ -60,6 +60,8 @@ import crypto from "crypto";
 import { setupAuth, isAuthenticated, requireAdmin } from "./auth";
 import { isEligibleQuestionnaireDraftOwner, parseOwnerQuestionnaireDraft, OWNER_DRAFT_EMAIL_ENV, OWNER_DRAFT_DATA_ENV } from "./questionnaireOwnerAutopopulate";
 import { registerLoginSecurityAuditRoutes } from "./loginSecurityAuditRoutes";
+import { registerEmailTemplateAdminRoutes } from "./emailTemplateAdminRoutes";
+import { startMemberLifecycleEmailWorker } from "./services/memberLifecycleEmail";
 import {
   sendPaymentReceiptEmail,
   sendPasswordResetEmail,
@@ -331,6 +333,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google OAuth authentication (must be before routes)
   await setupAuth(app);
   registerLoginSecurityAuditRoutes(app);
+  registerEmailTemplateAdminRoutes(app, requireAdmin);
+  startMemberLifecycleEmailWorker();
   // This gateway explicitly returns HTTP 503 until every independent production release gate passes.
   registerMemberStripeLiveRoutes(app, isAuthenticated, dbPool as PgPool, requireAdmin);
 
@@ -7243,7 +7247,7 @@ EXAMPLES OF GOOD RESPONSES:
           week: `Week ${4 - i}`,
           sent: weekEmails.length,
           delivered: weekEmails.filter(
-            (e) => e.status === "sent" || e.status === "delivered",
+            (e) => e.status === "delivered",
           ).length,
         });
       }
@@ -7355,9 +7359,9 @@ EXAMPLES OF GOOD RESPONSES:
 
       for (const email of emails) {
         try {
-          await sendEmail({
+          const result = await sendEmail({
             to: email,
-            subject: "UK Innovator Visa Assistant - Email Test Successful",
+            subject: "Email delivery configuration test",
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 20px; border-radius: 10px 10px 0 0;">
@@ -7365,7 +7369,7 @@ EXAMPLES OF GOOD RESPONSES:
                 </div>
                 <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px;">
                   <p style="color: #374151; font-size: 16px; line-height: 1.6;">
-                    Congratulations! This email confirms that your DNS records are properly configured and emails are being delivered correctly.
+                    This request tests the configured sending provider. Receipt in your inbox confirms end-to-end delivery; submitting the request alone does not prove deliverability.
                   </p>
                   <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0;">
                     <p style="color: #065f46; margin: 0; font-weight: bold;">All Systems Working:</p>
@@ -7373,7 +7377,7 @@ EXAMPLES OF GOOD RESPONSES:
                       <li>SPF Record: Verified</li>
                       <li>DKIM Signing: Active</li>
                       <li>DMARC Policy: Configured</li>
-                      <li>AWS SES: Connected</li>
+                      <li>Provider accepted the test request; inbox receipt must be verified separately</li>
                     </ul>
                   </div>
                   <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
@@ -7389,8 +7393,9 @@ EXAMPLES OF GOOD RESPONSES:
             emailType: "test",
             recipientName: email.split("@")[0],
           });
+          if (!result.success) throw new Error(result.error || "Provider rejected the email");
           results.sent++;
-          console.log(`[Test Email] Sent to ${email}`);
+          console.log(`[Test Email] Accepted by provider for ${email}`);
         } catch (err: any) {
           results.failed++;
           results.errors.push(`${email}: ${err.message}`);

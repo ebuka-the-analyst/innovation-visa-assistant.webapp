@@ -93,11 +93,14 @@ export async function processPendingNotifications() {
       }
 
       if (shouldSend) {
-        await sendEmail({
+        const result = await sendEmail({
           to: user.email,
           subject: notification.title,
           html: generateEmailHtml(notification.type, notification.title, notification.content),
+          emailType: notification.type === "weekly_digest" ? "digest" : notification.type,
+          userId: notification.userId,
         });
+        if (!result.success) throw new Error(result.error || "Email provider declined the notification");
 
         await db.update(scheduledNotifications)
           .set({ status: 'sent', sentAt: new Date() })

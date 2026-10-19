@@ -5,6 +5,7 @@ import { db } from "./db";
 import { emailLogs } from "@shared/schema";
 import { PLAN_IDS, formatPrice, getToolCounts } from "@shared/commercialCatalog";
 import { getCommercialCatalog } from "./services/commercialCatalogService";
+import { composeEmail } from "./services/emailTemplateService";
 
 // Log email configuration status on startup - Resend is now primary (HTTP-based, works everywhere)
 const resendConfigured = !!process.env.RESEND_API_KEY;
@@ -160,7 +161,13 @@ export async function sendEmail({ to, subject, html, from, emailType = 'system',
     return { success: false, error: "Email service not configured" };
   }
 
-  const fromAddress = from || `Visa Assistant Global <${DEFAULT_FROM_EMAIL}>`;
+  // Apply an administrator-reviewed, brand-scoped template before the provider receives data.
+  // Templates keep the original secure {{body}} (links, amounts and event details).
+  const composed = await composeEmail({subject,html,emailType,recipientName});
+  subject = composed.subject;
+  html = composed.html;
+  const displayName = composed.brand === "global" ? "Visa Assistant Global" : "Innovator Founder Visa Assistant";
+  const fromAddress = from || `${displayName} <${DEFAULT_FROM_EMAIL}>`;
 
   try {
     let messageId: string = '';
@@ -517,7 +524,7 @@ export async function sendPaymentReceiptEmail(
               </tr>
               <tr>
                 <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Billing:</td>
-                <td style="padding: 12px 0; text-align: right; font-weight: 600; color: #333; border-bottom: 1px solid #eee;">One-time payment</td>
+                <td style="padding: 12px 0; text-align: right; font-weight: 600; color: #333; border-bottom: 1px solid #eee;">${purchasedPlanId === "founder" || purchasedPlanId === "founder_pro" ? "Monthly membership payment" : "One-time payment"}</td>
               </tr>
               <tr>
                 <td style="padding: 12px 0; color: #666; border-bottom: 1px solid #eee;">Payment Date:</td>
@@ -928,7 +935,7 @@ export async function sendUpgradeReminderEmail(
             ${recommendedFeatures}
           </ul>
           <p style="margin: 15px 0 0 0; font-size: 24px; font-weight: bold; color: #ffa536;">
-            ${formatPrice(recommendedPlan.pricePence)} one-time
+            ${formatPrice(recommendedPlan.pricePence)} · Review billing terms at checkout
           </p>
         </div>
         
@@ -948,7 +955,7 @@ export async function sendUpgradeReminderEmail(
         
         <div style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0; border-radius: 4px;">
           <p style="margin: 0; font-size: 14px; color: #2e7d32;">
-            <strong>30-Day Money Back Guarantee:</strong> Not satisfied? Get a full refund, no questions asked.
+            <strong>Billing and refund terms:</strong> Review the terms presented at checkout before making a purchase.
           </p>
         </div>
         
@@ -1147,6 +1154,7 @@ export async function sendDeadlineReminderEmail(
   `;
 
   return sendEmail({
+    emailType: 'deadline_reminder',
     to: email,
     subject: `${urgencyLevel}: ${deadline.name} - ${deadline.daysRemaining} day${deadline.daysRemaining === 1 ? '' : 's'} remaining`,
     html
@@ -1955,7 +1963,7 @@ export async function sendBulkWelcomeEmail(users: Array<{ id: string; email: str
         to: user.email,
         subject: 'Thank You for Joining UK Innovator Founder Visa Assistant',
         html,
-        emailType: 'welcome',
+        emailType: 'bulk_welcome',
         recipientName: firstName,
         userId: user.id,
       });
