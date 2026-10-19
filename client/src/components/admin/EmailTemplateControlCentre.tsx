@@ -28,6 +28,53 @@ const fetchJson=async(path:string)=> {
 };
 const labelBrand=(brand:Brand)=>brand==="ifva"?"Innovator Founder Visa Assistant":"Visa Assistant Global";
 
+
+/** Existing customer-facing paragraph, after server-side brand normalisation. */
+function editableParagraph(brand:Brand,key:string):string {
+  const product=labelBrand(brand);
+  const values:Record<string,string>={
+    verification: brand==="global"
+      ? "Thank you for signing up. Your global visa preparation journey starts here."
+      : "Thank you for signing up. Your UK Innovator Founder Visa preparation journey starts here.",
+    password_reset:"We received a request to reset your password for your "+product+" account.",
+    welcome:"Congratulations! Your email is now verified. You can access the features included in your current plan.",
+    admin_verified:"Great news! Your account has been verified by our team. You can now access the features included in your current plan.",
+    bulk_welcome:"We're honoured to have you as part of our growing community.",
+  };
+  return values[key]||"";
+}
+function readableSubject(brand:Brand,key:string,defaultSubject:string) {
+  if(key==="welcome")return "Welcome to "+labelBrand(brand);
+  if(key==="verification")return "Verify your email - "+labelBrand(brand);
+  if(key==="password_reset")return "Reset your password - "+labelBrand(brand);
+  return defaultSubject.replace(/UK Innovator Founder Visa Assistant|Visa Assistant Global/gi,labelBrand(brand));
+}
+const editorStart="<!-- EMAIL_EDITOR_MESSAGE -->";
+const editorEnd="<!-- END_EMAIL_EDITOR_MESSAGE -->";
+function decodeHtml(s:string) {return s.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,"&");}
+function htmlEscape(s:string) {return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]||c));}
+function safeIntro(value:string) {
+  return editorStart+'<div style="font:15px/1.65 Arial,sans-serif;margin:20px 0">'+
+    htmlEscape(value.trim()).replace(/\r?\n/g,"<br>")+'</div>'+editorEnd;
+}
+function extractIntro(value:string) {
+  const start=value.indexOf(editorStart),end=value.indexOf(editorEnd,start+editorStart.length);
+  if(start<0||end<0)return "";
+  return decodeHtml(value.slice(start+editorStart.length,end).replace(/^<div[^>]*>/,"").replace(/<\/div>$/,"").replace(/<br\s*\/?>/gi,"\n"));
+}
+function buildEditorPayload(selected:Template,brand:Brand,subjectText:string,messageText:string,advancedBody:string,rules:CopyEdit[]) {
+  const existing=editableParagraph(brand,selected.key);
+  const newRules=rules.filter(rule=>rule.find.trim()&&rule.find!==existing);
+  if(existing && messageText.trim()!==existing) newRules.push({find:existing,replace:messageText.trim()});
+  const originalBody=advancedBody.replace(/<!-- EMAIL_EDITOR_MESSAGE -->[\s\S]*?<!-- END_EMAIL_EDITOR_MESSAGE -->/g,"");
+  const body=existing ? originalBody : ((messageText.trim()?safeIntro(messageText):"")+originalBody);
+  const displaySubject=readableSubject(brand,selected.key,selected.defaultSubject);
+  return {
+    subjectTemplate: subjectText.trim()===displaySubject ? "{{subject}}" : subjectText.trim(),
+    bodyTemplate:body,contentReplacements:newRules,expectedRevision:selected.revision,
+  };
+}
+
 export function EmailTemplateControlCentre(){
   const {toast}=useToast();
   const {data,refetch,isLoading,isError}=useQuery<Catalogue>({
@@ -39,7 +86,8 @@ export function EmailTemplateControlCentre(){
   const initialisedBrand=useRef(false);
   const [key,setKey]=useState("verification");
   const [search,setSearch]=useState("");
-  const [subject,setSubject]=useState("{{subject}}");
+  const [subject,setSubject]=useState("");
+  const [message,setMessage]=useState("");
   const [body,setBody]=useState("{{body}}");
   const [copyEdits,setCopyEdits]=useState<CopyEdit[]>([]);
   const [busy,setBusy]=useState(false);
@@ -55,14 +103,23 @@ export function EmailTemplateControlCentre(){
   },[data?.activeBrand]);
   useEffect(()=>{
     if(!selected)return;
-    setSubject(selected.subjectTemplate);setBody(selected.bodyTemplate);setCopyEdits(selected.contentReplacements||[]);setPreview(null);setHistory(null);
+    const displaySubject=readableSubject(brand,key,selected.defaultSubject);
+    setSubject(selected.subjectTemplate==="{{subject}}"?displaySubject:selected.subjectTemplate);
+    setBody(selected.bodyTemplate);
+    const source=editableParagraph(brand,key);
+    const existingRule=(selected.contentReplacements||[]).find(r=>r.find===source);
+    setMessage(source ? (existingRule?.replace??source) : extractIntro(selected.bodyTemplate));
+    setCopyEdits((selected.contentReplacements||[]).filter(r=>r.find!==source));
+    setPreview(null);setHistory(null);
   },[brand,key,selected?.revision,selected?.subjectTemplate,selected?.bodyTemplate]);
   const list=useMemo(()=>data?.items.filter(t=>t.brand===brand && (
     t.label.toLowerCase().includes(search.toLowerCase()) ||
     t.group.toLowerCase().includes(search.toLowerCase()) ||
     t.key.toLowerCase().includes(search.toLowerCase())
   ))||[],[data,brand,search]);
-  const dirty=!!selected && (selected.subjectTemplate!==subject||selected.bodyTemplate!==body||JSON.stringify(selected.contentReplacements||[])!==JSON.stringify(copyEdits));
+  const draft=selected?buildEditorPayload(selected,brand,subject,message,body,copyEdits):null;
+  const dirty=!!selected && !!draft && (selected.subjectTemplate!==draft.subjectTemplate||
+    selected.bodyTemplate!==draft.bodyTemplate||JSON.stringify(selected.contentReplacements||[])!==JSON.stringify(draft.contentReplacements));
 
   async function save(){
     if(!selected)return;
@@ -70,7 +127,7 @@ export function EmailTemplateControlCentre(){
     try{
       const response=await fetch(`/api/admin/email-templates/${brand}/${key}`,{
         method:"PUT",credentials:"include",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({subjectTemplate:subject,bodyTemplate:body,contentReplacements:copyEdits.filter(r=>r.find.trim()),expectedRevision:selected.revision}),
+        body:JSON.stringify(draft),
       });
       const payload=await response.json();
       if(!response.ok)throw new Error(payload.message || "Unable to save template");
@@ -84,11 +141,20 @@ export function EmailTemplateControlCentre(){
     try{
       const response=await fetch(`/api/admin/email-templates/${brand}/${key}/preview`,{
         method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({subjectTemplate:subject,bodyTemplate:body,contentReplacements:copyEdits.filter(r=>r.find.trim())}),
+        body:JSON.stringify({...draft,expectedRevision:undefined}),
       });
       const payload=await response.json();
       if(!response.ok)throw new Error(payload.message || "Preview unavailable");
-      setPreview(payload);
+      // Show edited copy using dummy account data. Never reveal live tokens.
+      const explanation=editableParagraph(brand,key)
+        ? "Secure links and account-specific details are retained by the application."
+        : "Original account-specific content is appended automatically.";
+      const sample=(message.trim()||"Original message text is unchanged.");
+      const safe="<div style='font-family:Arial,sans-serif;padding:24px'><h2>"+
+        htmlEscape(labelBrand(brand))+"</h2><p>Hi Example Founder,</p><p>"+
+        htmlEscape(sample).replace(/\r?\n/g,"<br>")+
+        "</p><hr><p style='color:#64748b'>"+htmlEscape(explanation)+"</p></div>";
+      setPreview({subject:subject||payload.subject,html:safe});
     }catch(e){toast({title:"Preview failed",description:e instanceof Error?e.message:"Unavailable",variant:"destructive"});}
     finally{setBusy(false);}
   }
@@ -118,9 +184,9 @@ export function EmailTemplateControlCentre(){
       </div>
     </header>
     <div className="rounded-lg border bg-muted/30 p-3 text-xs">
-      <strong>Editing safeguards:</strong> <code>{"{{body}}"}</code> inserts the original message including its private verification links, paid amounts and booking details. Keep it in every template.
-      <code className="mx-1">{"{{subject}}"}</code> preserves a dynamic subject. <code>{"{{recipient_name}}"}</code> inserts an escaped name.
-      Previews use dummy information and never send an email.
+      <strong>How editing works:</strong> Open a template, write your subject and message, preview, then save.
+      The original verification buttons, payment references and personalised account details are kept by the system.
+      For other templates, your message appears above the preserved event information.
     </div>
     {isLoading && <p className="text-sm">Loading templates…</p>}
     {isError && <p className="text-sm text-destructive">Unable to load the template library. Please retry.</p>}
@@ -152,15 +218,25 @@ export function EmailTemplateControlCentre(){
             {selected.updatedAt&&<p className="text-xs text-muted-foreground">Last edited {new Date(selected.updatedAt).toLocaleString("en-GB")} by {selected.updatedBy||"administrator"}</p>}
           </CardHeader>
           <CardContent className="space-y-4">
-            <div><label className="mb-1 block text-sm font-medium" htmlFor="template-subject">Subject line template</label>
+            <div><label className="mb-1 block text-sm font-medium" htmlFor="template-subject">Email subject</label>
               <Input id="template-subject" value={subject} onChange={e=>setSubject(e.target.value)} maxLength={500} data-testid="template-editor-subject"/>
-              <p className="mt-1 text-xs text-muted-foreground">Original event subject: {selected.defaultSubject}</p>
             </div>
-            <div><label className="mb-1 block text-sm font-medium" htmlFor="template-body">Message HTML</label>
-              <Textarea id="template-body" value={body} onChange={e=>setBody(e.target.value)} rows={12} spellCheck={false} className="font-mono text-xs" data-testid="template-editor-body"/>
-              <p className="mt-1 text-xs text-muted-foreground">Add a greeting, an explanation or a branded wrapper around {"{{body}}"}. The underlying transactional message is always retained.</p>
+            <div><label className="mb-1 block text-sm font-medium" htmlFor="template-message">Email message</label>
+              <Textarea id="template-message" value={message} onChange={e=>setMessage(e.target.value)} rows={9} maxLength={2000}
+                placeholder="Write the message your customer should read..." data-testid="template-editor-message"/>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {editableParagraph(brand,key)
+                  ? "You can replace this message text directly. The secure action buttons and account details remain intact."
+                  : "Your message is added above the original event-specific details, which remain protected."}
+              </p>
             </div>
-            <div className="space-y-2 rounded-lg border p-3">
+            <details className="rounded-lg border p-3">
+              <summary className="cursor-pointer text-sm font-medium">Advanced HTML and wording rules (optional)</summary>
+              <p className="mt-2 text-xs text-muted-foreground">For technical adjustments only. Keep the original body placeholder to preserve transactional links.</p>
+              <Textarea aria-label="Advanced HTML template" value={body} onChange={e=>setBody(e.target.value)} rows={7} className="mt-3 font-mono text-xs" data-testid="template-editor-body"/>
+            </details>
+            <details className="space-y-2 rounded-lg border p-3">
+              <summary className="cursor-pointer text-sm font-medium">Advanced find-and-replace rules</summary>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div><p className="text-sm font-semibold">Edit text inside the original message</p>
                   <p className="text-xs text-muted-foreground">Find existing plain text and replace it in future emails. This leaves secure HTML, payment amounts and private links intact. Exact phrases are case-sensitive.</p></div>
@@ -171,12 +247,12 @@ export function EmailTemplateControlCentre(){
                 <Input aria-label={`Replacement phrase ${index+1}`} placeholder="Replacement wording" value={rule.replace} onChange={e=>setCopyEdits(v=>v.map((r,i)=>i===index?{...r,replace:e.target.value}:r))}/>
                 <Button size="sm" variant="outline" onClick={()=>setCopyEdits(v=>v.filter((_r,i)=>i!==index))}>Remove</Button>
               </div>)}
-            </div>
+            </details>
             <div className="flex flex-wrap gap-2">
               <Button onClick={()=>void save()} disabled={busy||!dirty}><Save className="mr-2 h-4 w-4"/>Save changes</Button>
               <Button variant="outline" onClick={()=>void showPreview()} disabled={busy}>Preview (no send)</Button>
               <Button variant="outline" onClick={()=>void loadHistory()}><History className="mr-2 h-4 w-4"/>History</Button>
-              <Button variant="outline" onClick={()=>{setSubject("{{subject}}");setBody("{{body}}");setCopyEdits([]);setPreview(null);}}>Restore default draft</Button>
+              <Button variant="outline" onClick={()=>{setSubject(readableSubject(brand,key,selected.defaultSubject));setMessage(editableParagraph(brand,key));setBody("{{body}}");setCopyEdits([]);setPreview(null);}}>Restore default draft</Button>
             </div>
             {preview&&<div className="space-y-2 rounded-md border p-3">
               <p className="text-sm font-semibold">Preview only · {preview.subject}</p>
@@ -187,7 +263,13 @@ export function EmailTemplateControlCentre(){
               {history.length===0&&<p className="text-xs text-muted-foreground">This template has not yet been edited.</p>}
               {history.map(h=><div key={h.revision} className="flex items-center justify-between gap-2 rounded border p-2 text-xs">
                 <span>Revision {h.revision} · {new Date(h.updatedAt).toLocaleString("en-GB")} · {h.updatedBy||"admin"}</span>
-                <Button size="sm" variant="outline" onClick={()=>{setSubject(h.subjectTemplate);setBody(h.bodyTemplate);setCopyEdits(h.contentReplacements||[]);setPreview(null);}}>Load as draft</Button>
+                <Button size="sm" variant="outline" onClick={()=>{setSubject(h.subjectTemplate==="{{subject}}"?readableSubject(brand,key,selected.defaultSubject):h.subjectTemplate);
+                  setBody(h.bodyTemplate);
+                  const phrase=editableParagraph(brand,key);
+                  const known=(h.contentReplacements||[]).find(r=>r.find===phrase);
+                  setMessage(phrase ? (known?.replace??phrase):extractIntro(h.bodyTemplate));
+                  setCopyEdits((h.contentReplacements||[]).filter(r=>r.find!==phrase));
+                  setPreview(null);}}>Load as draft</Button>
               </div>)}
             </div>}
           </CardContent>
