@@ -61,6 +61,7 @@ import { setupAuth, isAuthenticated, requireAdmin } from "./auth";
 import { isEligibleQuestionnaireDraftOwner, parseOwnerQuestionnaireDraft, OWNER_DRAFT_EMAIL_ENV, OWNER_DRAFT_DATA_ENV } from "./questionnaireOwnerAutopopulate";
 import { registerLoginSecurityAuditRoutes } from "./loginSecurityAuditRoutes";
 import { registerEmailTemplateAdminRoutes } from "./emailTemplateAdminRoutes";
+import { startMemberLifecycleEmailWorker } from "./services/memberLifecycleEmail";
 import {
   sendPaymentReceiptEmail,
   sendPasswordResetEmail,
@@ -333,6 +334,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
   registerLoginSecurityAuditRoutes(app);
   registerEmailTemplateAdminRoutes(app, requireAdmin);
+  startMemberLifecycleEmailWorker();
   // This gateway explicitly returns HTTP 503 until every independent production release gate passes.
   registerMemberStripeLiveRoutes(app, isAuthenticated, dbPool as PgPool, requireAdmin);
 
