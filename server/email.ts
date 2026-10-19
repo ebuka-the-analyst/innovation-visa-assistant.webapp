@@ -1962,7 +1962,7 @@ export async function sendBulkWelcomeEmail(users: Array<{ id: string; email: str
         to: user.email,
         subject: 'Thank You for Joining UK Innovator Founder Visa Assistant',
         html,
-        emailType: 'welcome',
+        emailType: 'bulk_welcome',
         recipientName: firstName,
         userId: user.id,
       });
