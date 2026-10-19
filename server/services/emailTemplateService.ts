@@ -143,7 +143,7 @@ export function normaliseEmailBrand(subject: string, html: string, brand: EmailB
     updatedHtml = updatedHtml
       .replace(/Powered by Visa Assistant Global/g, "Powered by " + parentMarker)
       .replace(/Visa Assistant Global/g, product)
-      .replace(/© (\\d{4}) Innovator Founder Visa Assistant/g,
+      .replace(/© (\d{4}) Innovator Founder Visa Assistant/g,
         "© $1 Innovator Founder Visa Assistant · Powered by Visa Assistant Global")
       .replaceAll(parentMarker, "Visa Assistant Global");
   }
