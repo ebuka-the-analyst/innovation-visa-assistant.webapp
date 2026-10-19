@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS email_template_overrides (
   template_key VARCHAR(96) NOT NULL,
   subject_template TEXT NOT NULL,
   body_template TEXT NOT NULL,
+  content_replacements JSONB NOT NULL DEFAULT '[]'::jsonb,
   revision INTEGER NOT NULL DEFAULT 1 CHECK (revision > 0),
   updated_by VARCHAR(255),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -17,6 +18,7 @@ CREATE TABLE IF NOT EXISTS email_template_revisions (
   revision INTEGER NOT NULL CHECK (revision > 0),
   subject_template TEXT NOT NULL,
   body_template TEXT NOT NULL,
+  content_replacements JSONB NOT NULL DEFAULT '[]'::jsonb,
   updated_by VARCHAR(255),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE (brand, template_key, revision)
