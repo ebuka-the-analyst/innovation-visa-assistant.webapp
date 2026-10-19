@@ -123,7 +123,8 @@ export function normaliseEmailBrand(subject: string, html: string, brand: EmailB
   const support = brand === "global" ? "support@visaassistant.global" : "support@innovatorfoundervisaassistant.co.uk";
   let updatedSubject = subject
     .replace(/UK Innovator Founder Visa Assistant/gi, product)
-    .replace(/Innovator Founder Visa Assistant/gi, product);
+    .replace(/Innovator Founder Visa Assistant/gi, product)
+    .replace(/Visa Assistant Global/gi, product);
   let updatedHtml = html
     .replace(/Thank you for signing up! You(?:'|&#39;)re one step closer to your UK Innovator Founder Visa journey\./gi,
       brand === "global"
@@ -136,7 +137,15 @@ export function normaliseEmailBrand(subject: string, html: string, brand: EmailB
       .replace(/UK Innovator Founder Visa Assistant/gi, product)
       .replace(/Innovator Founder Visa Assistant/gi, product);
   } else {
-    updatedHtml = updatedHtml.replace(/© (\$\{new Date\(\)\.getFullYear\(\)\}|\d{4}) Visa Assistant Global/g, "© $1 " + product + " · Powered by Visa Assistant Global");
+    // Keep an explicit parent attribution, but ensure the customer-facing
+    // message otherwise names the product on which the customer registered.
+    const parentMarker = "__VISA_ASSISTANT_PARENT_BRAND__";
+    updatedHtml = updatedHtml
+      .replace(/Powered by Visa Assistant Global/g, "Powered by " + parentMarker)
+      .replace(/Visa Assistant Global/g, product)
+      .replace(/© (\\d{4}) Innovator Founder Visa Assistant/g,
+        "© $1 Innovator Founder Visa Assistant · Powered by Visa Assistant Global")
+      .replaceAll(parentMarker, "Visa Assistant Global");
   }
   return {subject:updatedSubject,html:updatedHtml};
 }
