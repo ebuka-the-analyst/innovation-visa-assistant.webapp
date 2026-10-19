@@ -27,6 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/AdminSidebar";
+import { EmailTemplateControlCentre } from "@/components/admin/EmailTemplateControlCentre";
 import { PromoCodeGenerator } from "@/components/admin/PromoCodeGenerator";
 import { PricingAccessManagement } from "@/components/admin/PricingAccessManagement";
 import { FounderMembershipAdministration } from "@/components/admin/FounderMembershipAdministration";
@@ -3618,6 +3619,7 @@ export default function AdminDashboard() {
       'support-lookup': 'Customer Support — User Lookup',
       'support-disputes': 'Customer Support — Dispute Tracker',
       'comms-emails': 'Email Analytics',
+      'comms-templates': 'Email Template Control Centre',
       'comms-notifications': 'Notification Center',
       'feedback-overview': 'Feedback Analytics',
       'feedback-responses': 'All Feedback Responses',
@@ -9949,7 +9951,9 @@ export default function AdminDashboard() {
                       transition={{ duration: 0.5 }}
                       className="space-y-1.5"
                     >
-                      {/* 1. EMAIL ANALYTICS - Real Data from Database */}
+                      {activeSection === 'comms-templates' && <EmailTemplateControlCentre />}
+
+                {/* 1. EMAIL ANALYTICS - Real Data from Database */}
                       {activeSection === 'comms-emails' && (
                         <>
                           {emailAnalyticsLoading ? (
