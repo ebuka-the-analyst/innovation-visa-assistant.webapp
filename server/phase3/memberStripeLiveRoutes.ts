@@ -8,6 +8,7 @@
  */
 import type { Express, RequestHandler } from "express";
 import Stripe from "stripe";
+import { queueSignedMemberLifecycleEmail, queueScheduledMembershipCancellation } from "../services/memberLifecycleEmail";
 import { randomUUID } from "node:crypto";
 import type { Pool } from "pg";
 import {
@@ -299,6 +300,11 @@ export function registerMemberStripeLiveRoutes(
       const cancelled=await cfg.stripe.subscriptions.update(sub.id,{
         cancel_at_period_end:true,proration_behavior:"none"
       },{idempotencyKey:"ifva-member-end-of-term-cancel-"+order.id});
+      if(cancelled.cancel_at_period_end===true){
+        // Mail is advisory only, and cannot grant or revoke paid entitlements.
+        try { await queueScheduledMembershipCancellation(order.id,user.id); }
+        catch(e) { console.error("[Membership LIVE] cancellation notice queue failed",e instanceof Error?e.message:"unknown"); }
+      }
       res.setHeader("Cache-Control","no-store");
       return res.json({cancelAtPeriodEnd:cancelled.cancel_at_period_end===true,
         status:cancelled.status,cancelAt:cancelled.cancel_at,
@@ -487,6 +493,10 @@ export function registerMemberStripeLiveRoutes(
         pool,order.id,rawBody,signature,cfg.secret,
         applyVerifiedLiveMembershipEntitlement,verifiedInvoicePayment,
       );
+      // Insert the notification only after the signed event and entitlement ledger commit.
+      // A duplicate Stripe retry can recover a previously missed queued email.
+      // Outbox insertion must succeed before we acknowledge the provider event.
+      await queueSignedMemberLifecycleEmail(decision.eventId,order.id);
       // Reviewed decisions are transactionally audited and visible to the
       // authenticated QA admin inbox. Acknowledge to avoid endless retries
       // of identical provider events without changing customer entitlements.
