@@ -950,14 +950,14 @@ export async function setupAuth(app: Express) {
       if (!user) {
         return res.json({ 
           success: true, 
-          message: "If that email exists and is unverified, a verification email has been sent."
+          message: "If an unverified account exists, we will attempt to send a verification link. If it does not arrive, please contact support."
         });
       }
 
       if (user.isEmailVerified) {
         return res.json({ 
           success: true, 
-          message: "Email is already verified. You can log in now."
+          message: "If an unverified account exists, we will attempt to send a verification link. If it does not arrive, please contact support."
         });
       }
 
