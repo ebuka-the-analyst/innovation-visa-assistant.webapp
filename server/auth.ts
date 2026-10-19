@@ -546,7 +546,8 @@ export async function setupAuth(app: Express) {
         message: emailSent 
           ? "Account created! Please check your email to verify your account before logging in."
           : "Account created! However, we couldn't send the verification email. Please contact support@innovatorfoundervisaassistant.co.uk for assistance.",
-        requiresVerification: true
+        requiresVerification: true,
+        emailSent,
       });
     } catch (error: any) {
       console.error("Registration error:", error);
@@ -909,16 +910,23 @@ export async function setupAuth(app: Express) {
       // Update user with new token
       await storage.updateVerificationToken(fullUser.id, verificationToken, tokenExpiry);
 
-      // Send verification email
-      await sendVerificationEmail(
+      // A rejected provider request must not be reported as delivered.
+      const sendResult = await sendVerificationEmail(
         fullUser.email!,
         fullUser.firstName || "there",
         verificationToken
       );
+      if (!sendResult.success) {
+        console.error("[Email verification] Authenticated resend failed for account", fullUser.id);
+        return res.status(503).json({
+          success: false,
+          message: "Email delivery is temporarily unavailable. Please try again later or contact support.",
+        });
+      }
 
-      res.json({ 
-        success: true, 
-        message: "Verification email sent! Please check your inbox."
+      res.json({
+        success: true,
+        message: "Verification email accepted by the email provider. Please check your inbox.",
       });
     } catch (error: any) {
       console.error("Resend verification error:", error);
@@ -942,14 +950,14 @@ export async function setupAuth(app: Express) {
       if (!user) {
         return res.json({ 
           success: true, 
-          message: "If that email exists and is unverified, a verification email has been sent."
+          message: "If an unverified account exists, we will attempt to send a verification link. If it does not arrive, please contact support."
         });
       }
 
       if (user.isEmailVerified) {
         return res.json({ 
           success: true, 
-          message: "Email is already verified. You can log in now."
+          message: "If an unverified account exists, we will attempt to send a verification link. If it does not arrive, please contact support."
         });
       }
 
@@ -960,16 +968,20 @@ export async function setupAuth(app: Express) {
       // Update user with new token
       await storage.updateVerificationToken(user.id, verificationToken, tokenExpiry);
 
-      // Send verification email
-      await sendVerificationEmail(
+      // Keep public resend responses generic to avoid revealing account existence.
+      // Log provider failures for operators instead of claiming confirmed delivery.
+      const sendResult = await sendVerificationEmail(
         user.email!,
         user.firstName || "there",
         verificationToken
       );
+      if (!sendResult.success) {
+        console.error("[Email verification] Public resend delivery failed for account", user.id);
+      }
 
-      res.json({ 
-        success: true, 
-        message: "Verification email sent! Please check your inbox."
+      res.json({
+        success: true,
+        message: "If an unverified account exists, we will attempt to send a verification link. If it does not arrive, please contact support.",
       });
     } catch (error: any) {
       console.error("Resend verification (public) error:", error);

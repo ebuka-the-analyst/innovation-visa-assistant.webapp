@@ -58,3 +58,25 @@ test("successful password logins are recorded for subsequent incident review", (
   const source = readFileSync(new URL("../server/auth.ts", import.meta.url), "utf8");
   assert.match(source, /logSecurityEvent\(\s*["']successful_login["']/);
 });
+
+
+test("signup reports when the verification provider refuses the email", () => {
+  const auth = readFileSync(new URL("../server/auth.ts", import.meta.url), "utf8");
+  const signup = readFileSync(new URL("../client/src/pages/signup.tsx", import.meta.url), "utf8");
+  assert.match(auth, /const result = await sendVerificationEmail\(normalizedEmail/);
+  assert.match(auth, /emailSent = result\.success/);
+  assert.match(auth, /requiresVerification: true,\s*emailSent,/);
+  assert.match(signup, /emailSent: result\.emailSent === true/);
+  assert.match(signup, /Account created: email delivery unavailable/);
+  assert.match(signup, /Your account is saved but not yet verified/);
+});
+
+test("verification resend checks provider acceptance and cannot claim public delivery", () => {
+  const auth = readFileSync(new URL("../server/auth.ts", import.meta.url), "utf8");
+  const signup = readFileSync(new URL("../client/src/pages/signup.tsx", import.meta.url), "utf8");
+  assert.match(auth, /const sendResult = await sendVerificationEmail\([\s\S]*?if \(!sendResult\.success\)/);
+  assert.match(auth, /return res\.status\(503\)\.json/);
+  assert.doesNotMatch(auth, /message: "Verification email sent! Please check your inbox\."/);
+  assert.match(auth, /If an unverified account exists, we will attempt to send a verification link/);
+  assert.match(signup, /title: data\.success \? "Verification requested" : "Unable to send"/);
+});
