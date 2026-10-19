@@ -134,21 +134,33 @@ export function normaliseEmailBrand(subject: string, html: string, brand: EmailB
 
 // The original HTML remains the source of secure, event-specific links and order details.
 // Admins can wrap or replace its presentation without altering verification tokens.
+export type EmailTextReplacement = {find:string;replace:string};
 export const DEFAULT_SUBJECT_TEMPLATE = "{{subject}}";
 export const DEFAULT_BODY_TEMPLATE = "{{body}}";
 
-export function renderEmailTemplate(input: {subject:string;html:string;subjectTemplate:string;bodyTemplate:string;recipientName?:string}) {
+export function renderEmailTemplate(input: {subject:string;html:string;subjectTemplate:string;bodyTemplate:string;recipientName?:string;contentReplacements?:EmailTextReplacement[]}) {
+  const changedBody=(input.contentReplacements||[]).reduce((text,rule)=>text.split(rule.find).join(escapeHtml(rule.replace)),input.html);
   const vars: Record<string,string> = {
-    subject: input.subject, body: input.html,
+    subject: input.subject, body: changedBody,
     recipient_name: escapeHtml(input.recipientName || "there"),
   };
   const replace = (template:string) => template.replace(/{{(subject|body|recipient_name)}}/g, (_m,key:string) => vars[key]);
   return {subject:replace(input.subjectTemplate).replace(/[\r\n]/g," ").slice(0,350),html:replace(input.bodyTemplate)};
 }
 
-export function validateTemplateEdit(subjectTemplate: unknown,bodyTemplate: unknown) {
+export function validateTemplateEdit(subjectTemplate: unknown,bodyTemplate: unknown,contentReplacements:unknown=[]) {
+  if(!Array.isArray(contentReplacements)||contentReplacements.length>12)return "Maximum twelve text edits are allowed.";
+  for(const item of contentReplacements) {
+    if(!item||typeof item.find!=="string"||typeof item.replace!=="string"||!item.find.trim()||
+      item.find.length>300||item.replace.length>2000)return "Each text edit needs a search phrase (up to 300 characters) and replacement (up to 2,000 characters).";
+    if(/[<>]/.test(item.find)||/https?:|href|verify-email|reset-password|token=|stripe|{{|}}/i.test(item.find) ||
+       /[<>]/.test(item.replace)||/https?:|{{|}}/i.test(item.replace))
+      return "Text edits cannot change HTML, secure URLs, verification links, placeholders or payment-provider links.";
+  }
   if (typeof subjectTemplate !== "string" || !subjectTemplate.trim() || subjectTemplate.length > 500) return "Subject must contain 1–500 characters.";
   if (typeof bodyTemplate !== "string" || !bodyTemplate.includes("{{body}}") || bodyTemplate.length > 100000) return "HTML template must include {{body}} to preserve secure links, paid amounts and other event-specific details (maximum 100,000 characters).";
+  if (/{{body}}/.test(subjectTemplate)) return "Subjects cannot contain {{body}}.";
+  if (/[<>]/.test(subjectTemplate)) return "Subject must be plain text.";
   if (/<\s*(script|iframe|object|form|meta|base)\b/i.test(bodyTemplate) || /\son\w+\s*=/i.test(bodyTemplate) || /javascript\s*:/i.test(bodyTemplate)) return "Active HTML or JavaScript is not allowed.";
   if (/{{(?!body|subject|recipient_name)[^}]+}}/.test(subjectTemplate + bodyTemplate)) return "Unsupported variable. Use {{subject}}, {{body}} or {{recipient_name}}.";
   return null;
@@ -160,11 +172,12 @@ export async function composeEmail(input:{subject:string;html:string;emailType?:
   const base=normaliseEmailBrand(input.subject,input.html,brand);
   try {
     const result=await dbPool.query(
-      "SELECT subject_template, body_template FROM email_template_overrides WHERE brand=$1 AND template_key=$2 LIMIT 1",
+      "SELECT subject_template, body_template, content_replacements FROM email_template_overrides WHERE brand=$1 AND template_key=$2 LIMIT 1",
       [brand,key],
     );
     const edited=result.rows[0];
-    if (edited) return {...renderEmailTemplate({...base,subjectTemplate:edited.subject_template,bodyTemplate:edited.body_template,recipientName:input.recipientName}),brand,key};
+    if (edited) return {...renderEmailTemplate({...base,subjectTemplate:edited.subject_template,bodyTemplate:edited.body_template,recipientName:input.recipientName,
+      contentReplacements:Array.isArray(edited.content_replacements)?edited.content_replacements:[]}),brand,key};
   } catch (err) {
     console.error("[Email templates] Override lookup unavailable; using safe built-in template",err instanceof Error?err.message:"unknown");
   }
