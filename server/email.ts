@@ -1154,6 +1154,7 @@ export async function sendDeadlineReminderEmail(
   `;
 
   return sendEmail({
+    emailType: 'deadline_reminder',
     to: email,
     subject: `${urgencyLevel}: ${deadline.name} - ${deadline.daysRemaining} day${deadline.daysRemaining === 1 ? '' : 's'} remaining`,
     html
