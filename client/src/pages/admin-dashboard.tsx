@@ -9984,13 +9984,13 @@ export default function AdminDashboard() {
                                         <p className="text-[9px] font-bold">{emailAnalytics?.summary?.sentToday || 0}</p>
                                       </div>
                                       <div className="text-center">
-                                        <p className="text-[9px] text-muted-foreground">Delivery Rate</p>
+                                        <p className="text-[9px] text-muted-foreground">Provider Acceptance</p>
                                         <p className="text-xs font-bold text-green-500">{emailAnalytics?.summary?.deliveryRate || '0%'}</p>
                                       </div>
                                       <Button
                                         data-testid="button-send-bulk-welcome"
                                         onClick={async () => {
-                                          if (!confirm('Send welcome email to ALL users? This will email all 17 registered users.')) return;
+                                          if (!confirm('Send a welcome email to EVERY registered user? This will email every account with an address and cannot be undone.')) return;
                                           try {
                                             const response = await apiRequest('POST', '/api/admin/emails/send-bulk-welcome', {});
                                             const data = await response.json();
@@ -10024,9 +10024,9 @@ export default function AdminDashboard() {
                               {/* Email KPIs - Real Data */}
                               <div className="grid grid-cols-1 md:grid-cols-4 gap-1.5">
                                 {[
-                                  { label: 'Total Sent (30 days)', value: emailAnalytics?.summary?.totalSent30Days?.toLocaleString() || '0', icon: Send, color: 'blue', sub: 'Last 30 days' },
-                                  { label: 'Delivery Rate', value: emailAnalytics?.summary?.deliveryRate || '0%', icon: CheckCircle, color: 'green', sub: emailAnalytics?.summary?.deliveryRate === '100%' ? 'Perfect' : 'Good' },
-                                  { label: 'Sent Today', value: emailAnalytics?.summary?.sentToday?.toString() || '0', icon: Eye, color: 'purple', sub: 'Today' },
+                                  { label: 'Email Attempts (30 days)', value: emailAnalytics?.summary?.totalSent30Days?.toLocaleString() || '0', icon: Send, color: 'blue', sub: 'Last 30 days' },
+                                  { label: 'Provider Acceptance', value: emailAnalytics?.summary?.deliveryRate || '0%', icon: CheckCircle, color: 'green', sub: 'Provider accepted; inbox not confirmed' },
+                                  { label: 'Attempts Today', value: emailAnalytics?.summary?.sentToday?.toString() || '0', icon: Eye, color: 'purple', sub: 'Today' },
                                   { label: 'Total All Time', value: emailAnalytics?.summary?.totalAllTime?.toLocaleString() || '0', icon: MousePointer, color: 'amber', sub: 'Since launch' },
                                 ].map((kpi, index) => (
                                   <motion.div
@@ -10062,13 +10062,13 @@ export default function AdminDashboard() {
                                         <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} />
                                         <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} />
                                         <Area type="monotone" dataKey="sent" stroke="#3b82f6" fill="#3b82f620" strokeWidth={2} name="Sent" />
-                                        <Area type="monotone" dataKey="delivered" stroke="#22c55e" fill="#22c55e20" strokeWidth={2} name="Delivered" />
+                                        <Area type="monotone" dataKey="delivered" stroke="#22c55e" fill="#22c55e20" strokeWidth={2} name="Confirmed delivered" />
                                       </RechartsAreaChart>
                                     </ResponsiveContainer>
                                     <div className="flex justify-center gap-6 mt-1">
                                       {[
                                         { name: 'Sent', color: '#3b82f6' },
-                                        { name: 'Delivered', color: '#22c55e' },
+                                        { name: 'Confirmed delivered', color: '#22c55e' },
                                       ].map(item => (
                                         <div key={item.name} className="flex items-center gap-2">
                                           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
@@ -10129,7 +10129,7 @@ export default function AdminDashboard() {
                               <Card>
                                 <CardHeader className="p-2 pb-1">
                                   <CardTitle className="text-[10px] font-semibold">Recent Emails</CardTitle>
-                                  <CardDescription className="text-[9px]">Last 10 emails sent</CardDescription>
+                                  <CardDescription className="text-[9px]">Last 10 email attempts</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                   <ScrollArea className="h-[130px]">
