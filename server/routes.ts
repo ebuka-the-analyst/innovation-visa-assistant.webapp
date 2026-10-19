@@ -7247,7 +7247,7 @@ EXAMPLES OF GOOD RESPONSES:
           week: `Week ${4 - i}`,
           sent: weekEmails.length,
           delivered: weekEmails.filter(
-            (e) => e.status === "sent" || e.status === "delivered",
+            (e) => e.status === "delivered",
           ).length,
         });
       }
@@ -7369,7 +7369,7 @@ EXAMPLES OF GOOD RESPONSES:
                 </div>
                 <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px;">
                   <p style="color: #374151; font-size: 16px; line-height: 1.6;">
-                    Congratulations! This email confirms that your DNS records are properly configured and emails are being delivered correctly.
+                    This request tests the configured sending provider. Receipt in your inbox confirms end-to-end delivery; submitting the request alone does not prove deliverability.
                   </p>
                   <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0;">
                     <p style="color: #065f46; margin: 0; font-weight: bold;">All Systems Working:</p>
@@ -7377,7 +7377,7 @@ EXAMPLES OF GOOD RESPONSES:
                       <li>SPF Record: Verified</li>
                       <li>DKIM Signing: Active</li>
                       <li>DMARC Policy: Configured</li>
-                      <li>AWS SES: Connected</li>
+                      <li>Provider accepted the test request; inbox receipt must be verified separately</li>
                     </ul>
                   </div>
                   <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
