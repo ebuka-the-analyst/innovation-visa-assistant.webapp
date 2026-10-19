@@ -16,7 +16,7 @@ const pool=dbPool;
 export function registerEmailTemplateAdminRoutes(app:Express, requireAdmin:RequestHandler) {
   app.get("/api/admin/email-templates",requireAdmin,async(_req,res)=>{
     try {
-      const out=await pool.query("SELECT brand,template_key,subject_template,body_template,revision,updated_by,updated_at FROM email_template_overrides");
+      const out=await pool.query("SELECT brand,template_key,subject_template,body_template,content_replacements,revision,updated_by,updated_at FROM email_template_overrides");
       const overrides=new Map(out.rows.map(row=>[`${row.brand}:${row.template_key}`,row]));
       const items=brands.flatMap(brand=>EMAIL_TEMPLATES.map(item=>{
         const row=overrides.get(`${brand}:${item.key}`);
@@ -24,6 +24,7 @@ export function registerEmailTemplateAdminRoutes(app:Express, requireAdmin:Reque
           ...item,brand,editable:true,
           subjectTemplate:row?.subject_template||DEFAULT_SUBJECT_TEMPLATE,
           bodyTemplate:row?.body_template||DEFAULT_BODY_TEMPLATE,
+          contentReplacements:Array.isArray(row?.content_replacements)?row.content_replacements:[],
           custom:Boolean(row),revision:Number(row?.revision||0),
           updatedBy:row?.updated_by||null,updatedAt:row?.updated_at||null,
         };
@@ -58,7 +59,7 @@ export function registerEmailTemplateAdminRoutes(app:Express, requireAdmin:Reque
       return res.status(404).json({message:"Unknown template"});
     try {
       const r=await pool.query(`SELECT revision,subject_template AS "subjectTemplate",
-        body_template AS "bodyTemplate",updated_by AS "updatedBy",updated_at AS "updatedAt"
+        body_template AS "bodyTemplate",content_replacements AS "contentReplacements",updated_by AS "updatedBy",updated_at AS "updatedAt"
         FROM email_template_revisions WHERE brand=$1 AND template_key=$2
         ORDER BY revision DESC LIMIT 40`,[req.params.brand,req.params.key]);
       return res.set("Cache-Control","no-store").json({items:r.rows});
@@ -70,22 +71,22 @@ export function registerEmailTemplateAdminRoutes(app:Express, requireAdmin:Reque
 
   app.post("/api/admin/email-templates/:brand/:key/preview",requireAdmin,async(req,res)=>{
     if(!validBrand(req.params.brand)||!validTemplateKey(req.params.key))return res.status(404).json({message:"Unknown template"});
-    const {subjectTemplate,bodyTemplate}=req.body||{};
-    const problem=validateTemplateEdit(subjectTemplate,bodyTemplate);
+    const {subjectTemplate,bodyTemplate,contentReplacements=[]}=req.body||{};
+    const problem=validateTemplateEdit(subjectTemplate,bodyTemplate,contentReplacements);
     if(problem)return res.status(400).json({message:problem});
     const product=req.params.brand==="global"?"Visa Assistant Global":"Innovator Founder Visa Assistant";
     const raw=normaliseEmailBrand(definitions.get(req.params.key)!.defaultSubject,
       "<h2>Sample message</h2><p>Hello Example Founder, this is safe preview text only. Real verification links, payment information and private customer details are never shown in previews.</p>",
       req.params.brand);
-    const preview=renderEmailTemplate({...raw,subjectTemplate,bodyTemplate,recipientName:"Example Founder"});
+    const preview=renderEmailTemplate({...raw,subjectTemplate,bodyTemplate,contentReplacements,recipientName:"Example Founder"});
     return res.set("Cache-Control","no-store").json({...preview,brand:product,previewOnly:true});
   });
 
   app.put("/api/admin/email-templates/:brand/:key",requireAdmin,async(req,res)=>{
     const {brand,key}=req.params;
     if(!validBrand(brand)||!validTemplateKey(key))return res.status(404).json({message:"Unknown template"});
-    const {subjectTemplate,bodyTemplate,expectedRevision}=req.body||{};
-    const problem=validateTemplateEdit(subjectTemplate,bodyTemplate);
+    const {subjectTemplate,bodyTemplate,contentReplacements=[],expectedRevision}=req.body||{};
+    const problem=validateTemplateEdit(subjectTemplate,bodyTemplate,contentReplacements);
     if(problem)return res.status(400).json({message:problem});
     if(!Number.isInteger(expectedRevision)||expectedRevision<0)return res.status(400).json({message:"Expected revision required"});
     const actor=safeString((req.user as any)?.email || (req.user as any)?.id).slice(0,255);
@@ -101,15 +102,15 @@ export function registerEmailTemplateAdminRoutes(app:Express, requireAdmin:Reque
       }
       const revision=current+1;
       await client.query(`INSERT INTO email_template_overrides
-        (brand,template_key,subject_template,body_template,revision,updated_by,updated_at)
-        VALUES($1,$2,$3,$4,$5,$6,NOW())
+        (brand,template_key,subject_template,body_template,content_replacements,revision,updated_by,updated_at)
+        VALUES($1,$2,$3,$4,$5::jsonb,$6,$7,NOW())
         ON CONFLICT(brand,template_key) DO UPDATE SET subject_template=EXCLUDED.subject_template,
-        body_template=EXCLUDED.body_template,revision=EXCLUDED.revision,
-        updated_by=EXCLUDED.updated_by,updated_at=NOW()`,
-        [brand,key,subjectTemplate,bodyTemplate,revision,actor]);
+        body_template=EXCLUDED.body_template,content_replacements=EXCLUDED.content_replacements,
+        revision=EXCLUDED.revision,updated_by=EXCLUDED.updated_by,updated_at=NOW()`,
+        [brand,key,subjectTemplate,bodyTemplate,JSON.stringify(contentReplacements),revision,actor]);
       await client.query(`INSERT INTO email_template_revisions
-        (brand,template_key,revision,subject_template,body_template,updated_by)
-        VALUES($1,$2,$3,$4,$5,$6)`,[brand,key,revision,subjectTemplate,bodyTemplate,actor]);
+        (brand,template_key,revision,subject_template,body_template,content_replacements,updated_by)
+        VALUES($1,$2,$3,$4,$5,$6::jsonb,$7)`,[brand,key,revision,subjectTemplate,bodyTemplate,JSON.stringify(contentReplacements),actor]);
       await client.query("COMMIT");
       return res.set("Cache-Control","no-store").json({success:true,revision});
     }catch(e) {
