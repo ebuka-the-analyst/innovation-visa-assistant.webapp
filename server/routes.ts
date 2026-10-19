@@ -60,6 +60,7 @@ import crypto from "crypto";
 import { setupAuth, isAuthenticated, requireAdmin } from "./auth";
 import { isEligibleQuestionnaireDraftOwner, parseOwnerQuestionnaireDraft, OWNER_DRAFT_EMAIL_ENV, OWNER_DRAFT_DATA_ENV } from "./questionnaireOwnerAutopopulate";
 import { registerLoginSecurityAuditRoutes } from "./loginSecurityAuditRoutes";
+import { registerEmailTemplateAdminRoutes } from "./emailTemplateAdminRoutes";
 import {
   sendPaymentReceiptEmail,
   sendPasswordResetEmail,
@@ -331,6 +332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google OAuth authentication (must be before routes)
   await setupAuth(app);
   registerLoginSecurityAuditRoutes(app);
+  registerEmailTemplateAdminRoutes(app, requireAdmin);
   // This gateway explicitly returns HTTP 503 until every independent production release gate passes.
   registerMemberStripeLiveRoutes(app, isAuthenticated, dbPool as PgPool, requireAdmin);
 
@@ -7355,9 +7357,9 @@ EXAMPLES OF GOOD RESPONSES:
 
       for (const email of emails) {
         try {
-          await sendEmail({
+          const result = await sendEmail({
             to: email,
-            subject: "UK Innovator Visa Assistant - Email Test Successful",
+            subject: "Email delivery configuration test",
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <div style="background: linear-gradient(135deg, #ffa536 0%, #11b6e9 100%); padding: 20px; border-radius: 10px 10px 0 0;">
@@ -7389,8 +7391,9 @@ EXAMPLES OF GOOD RESPONSES:
             emailType: "test",
             recipientName: email.split("@")[0],
           });
+          if (!result.success) throw new Error(result.error || "Provider rejected the email");
           results.sent++;
-          console.log(`[Test Email] Sent to ${email}`);
+          console.log(`[Test Email] Accepted by provider for ${email}`);
         } catch (err: any) {
           results.failed++;
           results.errors.push(`${email}: ${err.message}`);
