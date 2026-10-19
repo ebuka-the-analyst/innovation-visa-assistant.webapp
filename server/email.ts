@@ -5,6 +5,7 @@ import { db } from "./db";
 import { emailLogs } from "@shared/schema";
 import { PLAN_IDS, formatPrice, getToolCounts } from "@shared/commercialCatalog";
 import { getCommercialCatalog } from "./services/commercialCatalogService";
+import { composeEmail } from "./services/emailTemplateService";
 
 // Log email configuration status on startup - Resend is now primary (HTTP-based, works everywhere)
 const resendConfigured = !!process.env.RESEND_API_KEY;
@@ -160,7 +161,13 @@ export async function sendEmail({ to, subject, html, from, emailType = 'system',
     return { success: false, error: "Email service not configured" };
   }
 
-  const fromAddress = from || `Visa Assistant Global <${DEFAULT_FROM_EMAIL}>`;
+  // Apply an administrator-reviewed, brand-scoped template before the provider receives data.
+  // Templates keep the original secure {{body}} (links, amounts and event details).
+  const composed = await composeEmail({subject,html,emailType,recipientName});
+  subject = composed.subject;
+  html = composed.html;
+  const displayName = composed.brand === "global" ? "Visa Assistant Global" : "Innovator Founder Visa Assistant";
+  const fromAddress = from || `${displayName} <${DEFAULT_FROM_EMAIL}>`;
 
   try {
     let messageId: string = '';
