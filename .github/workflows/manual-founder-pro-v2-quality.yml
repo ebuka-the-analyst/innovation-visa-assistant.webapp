@@ -1,0 +1,76 @@
+name: Manual Founder Pro Quality Benchmark V2
+run-name: Paid Founder Pro quality comparison (fictional case)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_second_paid_test:
+        description: "I authorise ONE fictional Founder Pro generation, with a $15 estimated USD software-side guard"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: founder-pro-v2-quality-benchmark
+  cancel-in-progress: false
+
+jobs:
+  founder-pro-v2:
+    if: ${{ inputs.confirm_second_paid_test == true && github.repository == 'ebuka-the-analyst/innovation-visa-assistant.webapp' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    environment: premium-ai-staging
+    steps:
+      - name: Check out tested Phase 2 content-quality commit
+        uses: actions/checkout@v4
+        with:
+          ref: 08795daddeb71dc1af0f7ccb37c08bc9056502e2
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install benchmark dependencies
+        run: npm install --no-audit --no-fund
+      - name: Verify one-case dry-run budget without accessing any secret
+        shell: bash
+        run: |
+          node --import tsx scripts/phase2-full-plan-benchmark.ts \
+            --case marketplace --tier founder_pro --max-usd 15 \
+            > "${RUNNER_TEMP}/bench-v2-preflight.json"
+          node -e '
+            const fs = require("node:fs");
+            const d = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/bench-v2-preflight.json","utf8"));
+            if(d.mode!=="dry-run" || d.sectionCount!==13 ||
+               !Number.isFinite(d.estimatedWorstCaseUsd) ||
+               d.estimatedWorstCaseUsd>15) {
+              throw new Error("Preflight failed: no paid API request should run");
+            }
+            console.log("Preflight passed:", d.sectionCount,
+              "sections; estimated worst-case USD", d.estimatedWorstCaseUsd,
+              "(not a provider billing ceiling)");
+          '
+      - name: Generate one fictional Founder Pro plan with revised prompts
+        shell: bash
+        env:
+          IFVA_ENABLE_FULL_PLAN_BENCHMARK: "yes"
+          IFVA_STAGING_OPENAI_API_KEY: ${{ secrets.IFVA_STAGING_OPENAI_API_KEY }}
+        run: |
+          if [ -z "$IFVA_STAGING_OPENAI_API_KEY" ]; then
+            echo "BLOCKED: staging API key missing; no paid request attempted"
+            exit 1
+          fi
+          node --import tsx scripts/phase2-full-plan-benchmark.ts \
+            --live --case marketplace --tier founder_pro \
+            --max-usd 15 --output-dir "${RUNNER_TEMP}/ifva-bench-v2"
+      - name: Upload fictional PDF, markdown and diagnostics for independent review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fictional-founder-pro-quality-v2
+          path: ${{ runner.temp }}/ifva-bench-v2/
+          if-no-files-found: warn
+          retention-days: 7
